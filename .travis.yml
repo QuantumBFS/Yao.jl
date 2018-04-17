@@ -33,3 +33,8 @@ after_success:
   - julia -e 'cd(Pkg.dir("QuCircuit")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
   # push coverage results to Codecov
   - julia -e 'cd(Pkg.dir("QuCircuit")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  # add Documenter
+  - julia -e 'using Compat.Pkg; Pkg.add("Documenter")'
+  # push documents to gh-pages
+  - julia -e 'using Compat.Pkg; cd(Pkg.dir("QuCircuit")); include(joinpath("docs", "make.jl"))'
+
