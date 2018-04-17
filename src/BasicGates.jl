@@ -1,4 +1,4 @@
-export Gate, X, Y, Z
+export Gate, X, Y, Z, H, CNOT
 
 """
     AbstractGateType{N}
