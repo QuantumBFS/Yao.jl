@@ -15,7 +15,7 @@ makedocs(
 )
 
 deploydocs(
-    repo = "github.com/QuCircuit.jl/QMTK.jl.git",
+    repo = "github.com/QuantumBFS/QuCircuit.jl.git",
     target = "build",
     julia = "0.6",
     deps = nothing,
