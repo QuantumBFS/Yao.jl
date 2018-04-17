@@ -1,5 +1,7 @@
 module QuCircuit
 
-# package code goes here
+include("Gates.jl")
+include("BasicGates.jl")
+include("Blocks.jl")
 
 end # module
