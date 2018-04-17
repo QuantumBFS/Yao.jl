@@ -2,6 +2,6 @@
 
 Welcome to QuCircuit
 
-## Manual
+## Introduction
 
-- [Introduction]()
+QuCircuit.jl is a quantum circuit simulator written in Julia.
