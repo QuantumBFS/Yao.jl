@@ -1,6 +1,6 @@
 import Base: size, sparse, full
 
-export apply, update!
+export apply!, update!
 
 """
     AbstractGate{N}
@@ -33,18 +33,28 @@ full(::Type{T}, gate::AbstractGate{N}) where {T, N} = eye(T, N)
 full(gate::AbstractGate) = full(Complex128, gate)
 
 """
-    apply(gate, state, pos) -> state
+    apply(gate, reg, pos) -> reg
 
-apply the `gate` to qubits start from `pos` on `state`, default is an identity
+apply the `gate` to qubits start from `pos` on register `reg`,
+by default it will use kronecker product to build an operator
+in the whole scope and apply it to the state.
+
+```math
+I^{pos-1}\\otimes OP\\otimes I^{N-M-pos+1}
+```
 """
-apply(gate::AbstractGate, state, pos) = state
+function apply!(gate::AbstractGate{M}, reg::AbstractRegister{T, N}, pos) where {T, M, N}
+    op = kron(kron(speye(2^(N-M-pos+1)), sparse(gate)), speye(2^(pos-1)))
+    reg.state = op * reg.state
+    return reg
+end
 
 """
-    apply(gate, state) -> state
+    apply(gate, reg) -> reg
 
-apply the `gate` to qubits from its begining on `state`, default is an identity
+apply the `gate` to qubits from its begining on register `reg`, default is an identity
 """
-apply(gate::AbstractGate, state) = apply(gate, state, 1)
+apply!(gate::AbstractGate, reg) = apply!(gate, reg, 1)
 
 """
     update!(gate, paras) -> gate

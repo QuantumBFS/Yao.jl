@@ -1,4 +1,4 @@
-import QuCircuit: AbstractGate, apply, update!
+import QuCircuit: AbstractGate, update!
 using Compat.Test
 
 
@@ -22,9 +22,6 @@ end
     @test eltype(sparse(Float32, gate)) <: Float32
     @test eltype(full(Float32, gate)) <: Float32
 
-    test_state = rand(Complex128, 2^4)
-    # do nothing and return the original state
-    @test apply(gate, test_state) === test_state
     # do nothing and return the original gate
     @test update!(gate, [1, 1, 1]) === gate
 end

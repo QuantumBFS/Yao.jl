@@ -1,4 +1,4 @@
-export Gate, X, Y, Z, H, CNOT
+export Gate, gate, X, Y, Z, H, CNOT
 
 """
     AbstractGateType{N}
@@ -36,3 +36,5 @@ function full(::Type{T}, gate::Gate{H}) where T
     elem = T(1 / sqrt(2))
     T[elem elem; elem -elem]
 end
+
+full(::Type{T}, gate::Gate{CNOT, 2}) where T = T[1 0 0 0;0 1 0 0;0 0 0 1;0 0 1 0]
