@@ -9,6 +9,7 @@ makedocs(
     analytics = "UA-89508993-1",
     pages = [
         "Home" => "index.md",
+        "Notes" => "notes.md",
     ],
     html_prettyurls = !("local" in ARGS),
     html_canonical = "https://quantumbfs.github.io/QuCircuit.jl/latest/",

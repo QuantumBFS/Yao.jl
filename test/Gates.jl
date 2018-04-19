@@ -13,7 +13,7 @@ end
     @test full(Float32, gate) == eye(Float32, 4)
     @test typeof(sparse(gate)) <: AbstractSparseMatrix
     @test typeof(full(gate)) <: AbstractMatrix
-    
+
     # default eltype should be Complex128
     @test eltype(sparse(gate)) <: Complex128
     @test eltype(full(gate)) <: Complex128
@@ -24,4 +24,5 @@ end
 
     # do nothing and return the original gate
     @test update!(gate, [1, 1, 1]) === gate
+
 end
