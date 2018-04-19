@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Notes · Quantum Circuit Simulation for Julia</title><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-89508993-1', 'auto');
+ga('send', 'pageview');
+</script><link rel="canonical" href="https://quantumbfs.github.io/QuCircuit.jl/latest/notes/index.html"/><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>Quantum Circuit Simulation for Julia</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Home</a></li><li class="current"><a class="toctext" href>Notes</a><ul class="internal"><li><a class="toctext" href="#Block-1">Block</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li><a href>Notes</a></li></ul><a class="edit-page" href="https://github.com/QuantumBFS/QuCircuit.jl/blob/master/docs/src/notes.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Notes</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Design-Notes-1" href="#Design-Notes-1">Design Notes</a></h1><h2><a class="nav-anchor" id="Block-1" href="#Block-1">Block</a></h2><p><strong>Block</strong>s are the basic component of an quantum oracle in <strong>QuCircuit.jl</strong>.</p><h3><a class="nav-anchor" id="Memory-Contiguous-1" href="#Memory-Contiguous-1">Memory Contiguous</a></h3><p>Block should be contiguous on quantum registers, which means a block for N-qubits starts from location k, should be contiguous on this quantum memory which will be contiguous on its classical simulated quantum register too.</p><pre><code class="language-none">-- [ ] -- [ ] --</code></pre><h3><a class="nav-anchor" id="Permutor-1" href="#Permutor-1">Permutor</a></h3><p>A <strong>Permutor</strong> is an special block that will permute the order of quantum memory address. This will make in-contiguous memory address become contiguous. But in simulation, this will cause an extra memory allocation.</p><pre><code class="language-none"> *****         *****         ****
+ *   * -- 1    *   * -- 1 -- ****
+ *   * -- 2    *   * -- 3 -- ****
+ *   * -- 3 =&gt; *   * -- 5 -- ****
+ *   * -- 4    *   * -- 2    ****
+ *   * -- 5    *   * -- 4
+ *****         *****</code></pre><p>However, by default, the block tree will not help in organizing the order of memory address.</p><h3><a class="nav-anchor" id="Default-Behaviour-of-Block-Evaluation-1" href="#Default-Behaviour-of-Block-Evaluation-1">Default Behaviour of Block Evaluation</a></h3><p>The default behaviour of the evaluation of a block tree will use kronecker product to assemble different gates, e.g, the following circuit will be evaluated by</p><pre><code class="language-none">
+-- [Z] ---------
+
+-- [X] -- [X] --
+
+---------- X ---
+           |
+--------- [ ] --
+</code></pre><p>By default, its evaluation is equivalent to</p><div>\[Z \otimes X \otimes CNOT \cdot I \otimes X \otimes I \otimes I\]</div><p>This is because the gates are stored by a tree inside a block with their memory address and the calculation order on each line, by default the order will be the insertion order.</p><pre><code class="language-none">       gates address  order
+---------------------------
+Block: Z     (1, )      1
+       X     (2, )      1
+       X     (2, )      2
+       CNOT  (3, 4)     1</code></pre><p>The <code>apply!</code> method will first run through the memory address <code>1:N</code> (N = 4 here) to calculate gates with same order on each line (if there is no gate, then use an identity) until it meets the maximum depth of the block, the maximum depth will be the maximum order.</p><p>User can specify the calculation order by input an integer, and when</p><pre><code class="language-none">        gates address order
+----------------------------
+Block:  Z     (1, )      1
+        X     (2, )      1
+        X     (2, )      2
+        CNOT  (3, 4)     2</code></pre><p>the calculation will be equivalent to</p><div>\[Z \otimes X \otimes I \otimes I \cdot I \otimes X \otimes CNOT\]</div><h3><a class="nav-anchor" id="More-efficient-controlled-gates-1" href="#More-efficient-controlled-gates-1">More efficient controlled gates</a></h3><p>controlled gates can be an arbitrary gate with an identity</p><div>\[COP = \begin{pmatrix}
+ I &amp; 0\\
+ 0 &amp; X\\
+\end{pmatrix} \]</div><div>\[\begin{aligned}
+COP |c\rangle|\Psi\rangle &amp;= (\alpha_1|0\rangle + \alpha_2|1\rangle) X|\Psi\rangle\\
+                          &amp;= \alpha_1|0\rangle|\Psi\rangle + \alpha_2|1\rangle X |\Psi\rangle
+\end{aligned}\]</div><p>Therefore, the functionality of a controlled gate will looks like</p><div>\[\begin{aligned}
+&amp; U_1(\eta_1)\cdot COP(c, \Psi) \cdot U_2(\eta_2) \cdot U_3(\eta_3)|\eta_1\rangle|c\rangle|\eta_2\rangle|\Psi\rangle|\eta_3\rangle\\
+&amp; \rightarrow U_1(\eta_1)\cdot COP(c, \Psi) \cdot U_2(\eta_2) \cdot U_3(\eta_3) |\eta_1\rangle (\alpha_1|0\rangle + \alpha_2|1\rangle) |\eta_2\rangle |\Psi\rangle |\eta_3\rangle\\
+&amp; \rightarrow \alpha_1 U_1\otimes I \otimes U_2 \otimes I \otimes U_3|\eta_1\rangle |0\rangle |\eta_2\rangle |\Psi\rangle |\eta_3\rangle + \alpha_2 U_1\otimes I \otimes U_2 \otimes X \otimes U_3 |\eta\rangle |1\rangle |\eta_2\rangle |\Psi\rangle |\eta_3\rangle\\
+&amp; \rightarrow U_1\otimes I \otimes U_2 \otimes I \otimes U_3 |\phi\rangle + \alpha_2 U_1\otimes I\otimes U_2 \otimes (X - I) \otimes U_3 |\eta_1\rangle |1\rangle |\eta_2\rangle |\Psi\rangle |\eta_3\rangle
+\end{aligned}\]</div><footer><hr/><a class="previous" href="../"><span class="direction">Previous</span><span class="title">Home</span></a></footer></article></body></html>
