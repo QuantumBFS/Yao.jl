@@ -1,20 +1,39 @@
 # Design Notes
 
+## Quantum Register
+
+Quantum Register is the abstraction of a quantum states being processed by a circuit.
+
+```julia
+mutable struct Register{T <: AbstractArray, N} <: AbstractRegister
+    data::T
+end
+```
+
+the register's data's shape can be permuted and reshaped, but it cannot be shrinked, the total size will be kept to
+
+```math
+2^N
+```
+
+
+
+
 ## Block
 
 **Block**s are the basic component of an quantum oracle in **QuCircuit.jl**.
 
 ### Memory Contiguous
 
-Block should be contiguous on quantum registers, which means a block for N-qubits starts from location k, should be contiguous on this quantum memory which will be contiguous on its classical simulated quantum register too.
+Block should be contiguous on quantum registers, which means a block for N-qubits starts from location k, should be contiguous on this quantum memory and thus will be contiguous on its classical simulated quantum register too.
 
 ```
 -- [ ] -- [ ] --
 ```
 
-### Permutor
+### Packer
 
-A **Permutor** is an special block that will permute the order of quantum memory address. This will make in-contiguous memory address become contiguous. But in simulation, this will cause an extra memory allocation.
+A **Packer** is an special block that will permute the order of quantum memory address. This will make in-contiguous memory address become contiguous and the quantum state will be reshape to a matrix that has the related shape to the operator. But in simulation, this will cause an extra memory allocation.
 
 ```
  *****         *****         ****
@@ -82,7 +101,7 @@ Z \otimes X \otimes I \otimes I \cdot I \otimes X \otimes CNOT
 
 ### More efficient controlled gates
 
-controlled gates can be an arbitrary gate with an identity
+By default, some commonly used controlled gates like CNOT will be converted to a matrix and evaluate with other gates together, however, controlled gates can be an arbitrary gate with an identity in a block matrix, and can be derived
 
 ```math
 COP = \begin{pmatrix}
