@@ -20,6 +20,9 @@ All operations must be applied on the first (focused) dimension of `psi`.
 Here, benchmark is needed to optimize the memory structure.
 
 ## Operations
+Illustration of block-focus scheme
+![block-focus illustration](images/blockfocus.png)
+
 * Gate
     * define: low dimensional building material of circuits.
 * Operation
