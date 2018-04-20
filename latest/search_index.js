@@ -41,6 +41,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "notes/#Quantum-Register-1",
+    "page": "Notes",
+    "title": "Quantum Register",
+    "category": "section",
+    "text": "Quantum Register is the abstraction of a quantum states being processed by a circuit.mutable struct Register{T <: AbstractArray, N} <: AbstractRegister\n    data::T\nendthe register\'s data\'s shape can be permuted and reshaped, but it cannot be shrinked, the total size will be kept to2^N"
+},
+
+{
     "location": "notes/#Block-1",
     "page": "Notes",
     "title": "Block",
@@ -53,15 +61,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Notes",
     "title": "Memory Contiguous",
     "category": "section",
-    "text": "Block should be contiguous on quantum registers, which means a block for N-qubits starts from location k, should be contiguous on this quantum memory which will be contiguous on its classical simulated quantum register too.-- [ ] -- [ ] --"
+    "text": "Block should be contiguous on quantum registers, which means a block for N-qubits starts from location k, should be contiguous on this quantum memory and thus will be contiguous on its classical simulated quantum register too.-- [ ] -- [ ] --"
 },
 
 {
-    "location": "notes/#Permutor-1",
+    "location": "notes/#Packer-1",
     "page": "Notes",
-    "title": "Permutor",
+    "title": "Packer",
     "category": "section",
-    "text": "A Permutor is an special block that will permute the order of quantum memory address. This will make in-contiguous memory address become contiguous. But in simulation, this will cause an extra memory allocation. *****         *****         ****\n *   * -- 1    *   * -- 1 -- ****\n *   * -- 2    *   * -- 3 -- ****\n *   * -- 3 => *   * -- 5 -- ****\n *   * -- 4    *   * -- 2    ****\n *   * -- 5    *   * -- 4\n *****         *****However, by default, the block tree will not help in organizing the order of memory address."
+    "text": "A Packer is an special block that will permute the order of quantum memory address. This will make in-contiguous memory address become contiguous and the quantum state will be reshape to a matrix that has the related shape to the operator. But in simulation, this will cause an extra memory allocation. *****         *****         ****\n *   * -- 1    *   * -- 1 -- ****\n *   * -- 2    *   * -- 3 -- ****\n *   * -- 3 => *   * -- 5 -- ****\n *   * -- 4    *   * -- 2    ****\n *   * -- 5    *   * -- 4\n *****         *****However, by default, the block tree will not help in organizing the order of memory address."
 },
 
 {
@@ -77,7 +85,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Notes",
     "title": "More efficient controlled gates",
     "category": "section",
-    "text": "controlled gates can be an arbitrary gate with an identityCOP = beginpmatrix\n I  0\n 0  X\nendpmatrix beginaligned\nCOP cranglePsirangle = (alpha_10rangle + alpha_21rangle) XPsirangle\n                          = alpha_10ranglePsirangle + alpha_21rangle X Psirangle\nendalignedTherefore, the functionality of a controlled gate will looks likebeginaligned\n U_1(eta_1)cdot COP(c Psi) cdot U_2(eta_2) cdot U_3(eta_3)eta_1ranglecrangleeta_2ranglePsirangleeta_3rangle\n rightarrow U_1(eta_1)cdot COP(c Psi) cdot U_2(eta_2) cdot U_3(eta_3) eta_1rangle (alpha_10rangle + alpha_21rangle) eta_2rangle Psirangle eta_3rangle\n rightarrow alpha_1 U_1otimes I otimes U_2 otimes I otimes U_3eta_1rangle 0rangle eta_2rangle Psirangle eta_3rangle + alpha_2 U_1otimes I otimes U_2 otimes X otimes U_3 etarangle 1rangle eta_2rangle Psirangle eta_3rangle\n rightarrow U_1otimes I otimes U_2 otimes I otimes U_3 phirangle + alpha_2 U_1otimes Iotimes U_2 otimes (X - I) otimes U_3 eta_1rangle 1rangle eta_2rangle Psirangle eta_3rangle\nendaligned"
+    "text": "By default, some commonly used controlled gates like CNOT will be converted to a matrix and evaluate with other gates together, however, controlled gates can be an arbitrary gate with an identity in a block matrix, and can be derivedCOP = beginpmatrix\n I  0\n 0  X\nendpmatrix beginaligned\nCOP cranglePsirangle = (alpha_10rangle + alpha_21rangle) XPsirangle\n                          = alpha_10ranglePsirangle + alpha_21rangle X Psirangle\nendalignedTherefore, the functionality of a controlled gate will looks likebeginaligned\n U_1(eta_1)cdot COP(c Psi) cdot U_2(eta_2) cdot U_3(eta_3)eta_1ranglecrangleeta_2ranglePsirangleeta_3rangle\n rightarrow U_1(eta_1)cdot COP(c Psi) cdot U_2(eta_2) cdot U_3(eta_3) eta_1rangle (alpha_10rangle + alpha_21rangle) eta_2rangle Psirangle eta_3rangle\n rightarrow alpha_1 U_1otimes I otimes U_2 otimes I otimes U_3eta_1rangle 0rangle eta_2rangle Psirangle eta_3rangle + alpha_2 U_1otimes I otimes U_2 otimes X otimes U_3 etarangle 1rangle eta_2rangle Psirangle eta_3rangle\n rightarrow U_1otimes I otimes U_2 otimes I otimes U_3 phirangle + alpha_2 U_1otimes Iotimes U_2 otimes (X - I) otimes U_3 eta_1rangle 1rangle eta_2rangle Psirangle eta_3rangle\nendaligned"
 },
 
 ]}
