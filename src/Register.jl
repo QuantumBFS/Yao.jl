@@ -14,8 +14,95 @@ abstract type AbstractRegister{M, B, T, N} <: AbstractArray{T, N} end
 # register properties
 nqubit(reg::AbstractRegister{M}) where M = M
 nbatch(reg::AbstractRegister{M, B}) where {M, B} = B
+# We assume each register has a member named data and ids
+# overload this if there is not
+qubits(reg::AbstractRegister{M}) where M = reg.ids
 data(reg::AbstractRegister) = reg.data
 
+# provide view method if data type supports
+export view_batch
+import Base: view
+view_batch(reg::AbstractRegister{M, B, T, N}, ibatch::Int) where {M, B, T, N} =
+    view(data(reg), ntuple(x->:, Val{N-1})..., ibatch)
+view_batch(reg::AbstractRegister{M, 1, T, N}, ibatch::Int) where {M, T, N} =
+    view(data(reg), ntuple(x->:, Val{N})...)
+view(reg::AbstractRegister, dims...) = view(data(reg), dims...)
+
+
+# use array interface
+# TODO: use @forward instead
+import Base: eltype, length, ndims, size, eachindex, 
+    getindex, setindex!, stride, strides, copy
+import Compat: axes
+
+eltype(x::AbstractRegister{M, B, T, N}) where {M, B, T, N} = T
+length(x::AbstractRegister) = length(data(x))
+ndims(x::AbstractRegister) = ndims(data(x))
+size(x::AbstractRegister) = size(data(x))
+size(x::AbstractRegister, n::Integer) = size(data(x), n)
+axes(x::AbstractRegister) = axes(data(x))
+axes(x::AbstractRegister, d::Integer) = axes(data(x), d)
+eachindex(x::AbstractRegister) = eachindex(data(x))
+stride(x::AbstractRegister, k::Integer) = stride(data(x), k)
+strides(x::AbstractRegister) = strides(data(x))
+getindex(x::AbstractRegister, index::Integer...) = getindex(data(x), index...)
+getindex(x::AbstractRegister, index::NTuple{N, T}) where {N, T <: Integer} = getindex(data(x), index...)
+setindex!(x::AbstractRegister, val, index::Integer...) = setindex!(data(x), val, index...)
+setindex!(x::AbstractRegister, val, index::NTuple{N, T}) where {N, T <: Integer} = setindex!(data(x), val, index...)
+copy(x::AbstractRegister{M, T, N}) where {M, T, N} = Register{M, T, N}(copy(data(x)))
+
+#################
+# Batch Iterator
+#################
+
+export batch
+
+# batch iterator
+struct BatchIter{R <: AbstractRegister}
+    reg::R
+end
+
+batch(x::AbstractRegister) = BatchIter(x)
+
+import Base: start, next, done, length, eltype
+
+start(x::BatchIter) = 1
+next(x::BatchIter, state) =
+    view_batch(x.reg, state), state+1
+done(x::BatchIter, state) = state > length(x)
+length(x::BatchIter{R}) where R = nbatch(x.reg)
+
+export pack!
+# permutation and concentration of qubits
+
+"""
+    pack!(dst, src, ids)
+
+pack `ids` together to the first k-dimensions.
+"""
+function pack!(dst, src, ids) end
+pack!(reg::AbstractRegister, ids::NTuple) = pack!(reg, reg, ids)
+pack!(reg::AbstractRegister, ids::Integer...) = pack!(reg, ids)
+
+
+export focus
+
+"""
+    focus(register, ids...)
+
+pack tensor legs with ids together and reshape the register to
+(exposed, remain, batch) or (exposed, remain) depending on register
+type (with or without batch).
+"""
+focus(reg::AbstractRegister, ids...) = focus(reg, ids)
+
+export Register
+"""
+    Register{M, B, T, N} <: AbstractRegister{M, B, T, N}
+
+default register type. This register use a builtin array
+to store the quantum state.
+"""
 struct Register{M, B, T, N} <: AbstractRegister{M, B, T, N}
     data::Array{T, N}
     ids::Vector{Int}
@@ -26,15 +113,18 @@ end
 # permutedims! rather than permutedims.
 
 # Type Inference
-Register(nqubit::Int, nbatch::Int, data::Array{T, N}, ids::Vector{Int}) where {M, T, N} =
+Register(nqubit::Int, nbatch::Int, data::Array{T, N}, ids::Vector{Int}) where {T, N} =
     Register{nqubit, nbatch, T, N}(data, ids)
+# type conversion
+Register(nqubit::Integer, nbatch::Integer, data::Array, ids) =
+    Register(Int(nqubit), Int(nbatch), data, Int[ids...])
 
-Register(nqubit::Int, nbatch::Int, data::Array) =
-    Register(nqubit, nbatch, data, Vector(1:nqubit))
+Register(nqubit::Integer, nbatch::Integer, data::Array) =
+    Register(nqubit, nbatch, data, 1:nqubit)
 
 # calculate number of qubits from data array
-function Register(nbatch::Int, data::Array)
-    len = length(data)
+function Register(nbatch::Integer, data::Array)
+    len = length(data) ÷ nbatch
     ispow2(len) || throw(Compat.InexactError(:Register, Register, data))
     Register(log2i(len), nbatch, data)
 end
@@ -49,112 +139,52 @@ Register(data::Array) = Register(1, data)
 # NOTE: we store a rank-n tensor for n qubits by default,
 # we can always optimize this by add other kind of
 # register for specific tasks
-Register(::Type{T}, nqubit::Integer, nbatch::Integer, ids::Vector) where T =
-    Register(nqubit, nbatch, zeros(T, ntuple(x->2, Val{nqubit})..., nbatch), ids)
-Register(::Type{T}, nqubit::Integer, ids::Vector) where T =
-    Register(nqubit, nbatch, zeros(T, ntuple(x->2, Val{nqubit})...), ids)
 Register(::Type{T}, nqubit::Integer, nbatch::Integer) where T =
-    Register(T, nqubit, nbatch, Tuple(1:nqubit))
+    Register(nqubit, nbatch, zeros(T, ntuple(x->2, Val{nqubit})..., nbatch), 1:nqubit)
 Register(::Type{T}, nqubit::Integer) where T =
-    Register(T, nqubit, Tuple(1:nqubit))
+    Register(nqubit, 1, zeros(T, ntuple(x->2, Val{nqubit})...), 1:nqubit)
 
 # We use Compelx128 by default
-Register(nqubit::Integer, nbatch::Integer, ids::Vector) =
-    Register(Complex128, nqubit, nbatch, ids)
-Register(nqubit::Integer, ids::Vector) =
-    Register(Complex128, nqubit, ids)
 Register(nqubit::Integer, nbatch::Integer) =
     Register(Complex128, nqubit, nbatch)
 Register(nqubit::Integer) =
     Register(Complex128, nqubit)
 
 
-# use array interface
-# TODO: use @forward instead
-import Base: eltype, length, ndims, size, eachindex, 
-    getindex, setindex!, stride, strides, copy
-import Compat: axes
-
-eltype(x::Register{M, B, T, N}) where {M, B, T, N} = T
-length(x::Register) = length(x.data)
-ndims(x::Register) = ndims(x.data)
-size(x::Register) = size(x.data)
-size(x::Register, n::Integer) = size(x.data, n)
-axes(x::Register) = axes(x.data)
-axes(x::Register, d::Integer) = axes(x.data, d)
-eachindex(x::Register) = eachindex(x.data)
-stride(x::Register, k::Integer) = stride(x.data, k)
-strides(x::Register) = strides(x.data)
-getindex(x::Register, index::Integer...) = getindex(x.data, index...)
-getindex(x::Register, index::NTuple{N, T}) where {N, T <: Integer} = getindex(x.data, index...)
-setindex!(x::Register, val, index::Integer...) = setindex!(x.data, val, index...)
-setindex!(x::Register, val, index::NTuple{N, T}) where {N, T <: Integer} = setindex!(x.data, val, index...)
-copy(x::Register{M, T, N}) where {M, T, N} = Register{M, T, N}(copy(x.data))
-
-
-#################
-# Batch Iterator
-#################
-
-export batch
-
-# batch iterator
-struct BatchIter{M, B, T, N}
-    reg::Register{M, B, T, N}
-end
-
-batch(x::Register) = BatchIter(x)
-
-import Base: start, next, done, length, eltype
-
-start(x::BatchIter) = 1
-next(x::BatchIter{M, B, T, N}, state) where {M, B, T, N} =
-    view(x.reg.data, ntuple(x->:, Val{N-1})..., state), state+1
-next(x::BatchIter{M, 1, T, N}, state) where {M, T, N} =
-    view(x.reg.data, ntuple(x->:, Val{N})...), state+1
-done(x::BatchIter{M, B, T, N}, state) where {M, B, T, N} = state > B
-length(x::BatchIter{M, B, T, N}) where {M, B, T, N} = B
-
-
 ## Dimension Permutation & Reshape
-import Base: reshape, permutedims, permutedims!
+import Base: reshape
 
 reshape(reg::Register{M, B, T, N}, dims::Dims) where {M, B, T, N} =
     Register(M, B, reshape(reg.data, dims), reg.ids)
-reshape(reg::Register, dims...) = reshape(reg, dims)
 
-"""
-    pack!(dst, src, ids)
+function pack!(dst::Register{M, B, T, N}, src::Register{M, B, T, N}, ids::NTuple{K, Int}) where {M, B, T, N, K}
+    @assert N == M+1 "register shape mismatch"
 
-pack `ids` together to the first k-dimensions.
-"""
-function pack!(dst::Register{M, B, T, M}, src::Register{M, B, T, M}, ids::NTuple{K, Int}) where {M, B, T, K}
-    ids = sort!(Vector(ids))
+    ids = sort!([ids...])
     inds = findin(src.ids, ids)
     perm = copy(src.ids)
     deleteat!(perm, inds)
     prepend!(perm, ids)
     dst.ids .= perm
-    B == 1 || append!(perm, M+1)
+    append!(perm, M+1)
     permutedims!(dst.data, src.data, perm)
     dst
 end
 
-pack!(reg::Register, ids) = pack!(reg, reg, ids)
-pack!(reg::Register, ids...) = pack!(reg, ids)
+function pack!(dst::Register{M, 1, T, M}, src::Register{M, 1, T, M}, ids::NTuple{K, Int}) where {M, T, K}
+    ids = sort!([ids...])
+    inds = findin(src.ids, ids)
+    perm = copy(src.ids)
+    deleteat!(perm, inds)
+    prepend!(perm, ids)
+    dst.ids .= perm
+    permutedims!(dst.data, src.data, perm)
+    dst
+end
 
-export focus
+function focus(src::Register{M, B, T, N}, ids::NTuple{K, Int}) where {M, N, B, T, K}
+    N == M+1 || (src = reshape(src, ntuple(x->2, Val{M})..., B))
 
-"""
-    focus(register, ids...)
-
-pack tensor legs with ids together and reshape the register to
-(exposed, remain, batch) or (exposed, remain) depending on register
-type (with or without batch).
-"""
-focus(reg::Register, ids...) = focus(reg, ids)
-
-function focus(src::Register{M, B, T, M}, ids::NTuple{K, Int}) where {M, B, T, K}
     pack!(src, ids)
     exposed_size = 2^K
     remained_size = 2^(M-K)
@@ -170,7 +200,7 @@ function focus(src::Register{M, 1, T, M}, ids::NTuple{K, Int}) where {M, T, K}
     Register(M, 1, data, src.ids)
 end
 
-focus(src::Register{M, B}, ids::NTuple) where {M, B} =
-    focus(reshape(src, ntuple(x->2, Val{M})..., B), ids)
+# focus(src::Register{M, B}, ids::NTuple) where {M, B} =
+#     focus(reshape(src, ntuple(x->2, Val{M})..., B), ids)
 focus(src::Register{M, 1}, ids::NTuple) where M =
     focus(reshape(src, ntuple(x->2, Val{M})), ids)
