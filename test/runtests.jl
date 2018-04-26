@@ -1,6 +1,7 @@
 using QuCircuit
 using Compat.Test
 
-include("Gates.jl")
-include("BasicGates.jl")
+include("MathUtils.jl")
 include("Register.jl")
+# include("Gates.jl")
+# include("BasicGates.jl")
