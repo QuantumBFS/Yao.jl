@@ -18,7 +18,7 @@ data(reg::AbstractRegister) = reg.data
 
 struct Register{M, B, T, N} <: AbstractRegister{M, B, T, N}
     data::Array{T, N}
-    ids::NTuple{M, Int}
+    ids::Vector{Int}
 end
 
 # We store the state with a M-dimentional tensor by default
@@ -26,11 +26,11 @@ end
 # permutedims! rather than permutedims.
 
 # Type Inference
-Register(nqubit::Int, nbatch::Int, data::Array{T, N}, ids::NTuple{M, Int}) where {M, T, N} =
+Register(nqubit::Int, nbatch::Int, data::Array{T, N}, ids::Vector{Int}) where {M, T, N} =
     Register{nqubit, nbatch, T, N}(data, ids)
 
 Register(nqubit::Int, nbatch::Int, data::Array) =
-    Register(nqubit, nbatch, data, Tuple(1:nqubit))
+    Register(nqubit, nbatch, data, Vector(1:nqubit))
 
 # calculate number of qubits from data array
 function Register(nbatch::Int, data::Array)
@@ -49,9 +49,9 @@ Register(data::Array) = Register(1, data)
 # NOTE: we store a rank-n tensor for n qubits by default,
 # we can always optimize this by add other kind of
 # register for specific tasks
-Register(::Type{T}, nqubit::Integer, nbatch::Integer, ids::NTuple) where T =
+Register(::Type{T}, nqubit::Integer, nbatch::Integer, ids::Vector) where T =
     Register(nqubit, nbatch, zeros(T, ntuple(x->2, Val{nqubit})..., nbatch), ids)
-Register(::Type{T}, nqubit::Integer, ids::NTuple) where T =
+Register(::Type{T}, nqubit::Integer, ids::Vector) where T =
     Register(nqubit, nbatch, zeros(T, ntuple(x->2, Val{nqubit})...), ids)
 Register(::Type{T}, nqubit::Integer, nbatch::Integer) where T =
     Register(T, nqubit, nbatch, Tuple(1:nqubit))
@@ -59,9 +59,9 @@ Register(::Type{T}, nqubit::Integer) where T =
     Register(T, nqubit, Tuple(1:nqubit))
 
 # We use Compelx128 by default
-Register(nqubit::Integer, nbatch::Integer, ids::NTuple) =
+Register(nqubit::Integer, nbatch::Integer, ids::Vector) =
     Register(Complex128, nqubit, nbatch, ids)
-Register(nqubit::Integer, ids::NTuple) =
+Register(nqubit::Integer, ids::Vector) =
     Register(Complex128, nqubit, ids)
 Register(nqubit::Integer, nbatch::Integer) =
     Register(Complex128, nqubit, nbatch)
@@ -116,3 +116,61 @@ done(x::BatchIter{M, B, T, N}, state) where {M, B, T, N} = state > B
 length(x::BatchIter{M, B, T, N}) where {M, B, T, N} = B
 
 
+## Dimension Permutation & Reshape
+import Base: reshape, permutedims, permutedims!
+
+reshape(reg::Register{M, B, T, N}, dims::Dims) where {M, B, T, N} =
+    Register(M, B, reshape(reg.data, dims), reg.ids)
+reshape(reg::Register, dims...) = reshape(reg, dims)
+
+"""
+    pack!(dst, src, ids)
+
+pack `ids` together to the first k-dimensions.
+"""
+function pack!(dst::Register{M, B, T, M}, src::Register{M, B, T, M}, ids::NTuple{K, Int}) where {M, B, T, K}
+    ids = sort!(Vector(ids))
+    inds = findin(src.ids, ids)
+    perm = copy(src.ids)
+    deleteat!(perm, inds)
+    prepend!(perm, ids)
+    dst.ids .= perm
+    B == 1 || append!(perm, M+1)
+    permutedims!(dst.data, src.data, perm)
+    dst
+end
+
+pack!(reg::Register, ids) = pack!(reg, reg, ids)
+pack!(reg::Register, ids...) = pack!(reg, ids)
+
+export focus
+
+"""
+    focus(register, ids...)
+
+pack tensor legs with ids together and reshape the register to
+(exposed, remain, batch) or (exposed, remain) depending on register
+type (with or without batch).
+"""
+focus(reg::Register, ids...) = focus(reg, ids)
+
+function focus(src::Register{M, B, T, M}, ids::NTuple{K, Int}) where {M, B, T, K}
+    pack!(src, ids)
+    exposed_size = 2^K
+    remained_size = 2^(M-K)
+    data = reshape(src.data, exposed_size, remained_size, B)
+    Register(M, B, data, src.ids)
+end
+
+function focus(src::Register{M, 1, T, M}, ids::NTuple{K, Int}) where {M, T, K}
+    pack!(src, ids)
+    exposed_size = 2^K
+    remained_size = 2^(M-K)
+    data = reshape(src.data, exposed_size, remained_size)
+    Register(M, 1, data, src.ids)
+end
+
+focus(src::Register{M, B}, ids::NTuple) where {M, B} =
+    focus(reshape(src, ntuple(x->2, Val{M})..., B), ids)
+focus(src::Register{M, 1}, ids::NTuple) where M =
+    focus(reshape(src, ntuple(x->2, Val{M})), ids)
