@@ -47,9 +47,9 @@ stride(x::AbstractRegister, k::Integer) = stride(data(x), k)
 strides(x::AbstractRegister) = strides(data(x))
 getindex(x::AbstractRegister, index::Integer...) = getindex(data(x), index...)
 getindex(x::AbstractRegister, index::NTuple{N, T}) where {N, T <: Integer} = getindex(data(x), index...)
-setindex!(x::AbstractRegister, val, index::Integer...) = setindex!(data(x), val, index...)
-setindex!(x::AbstractRegister, val, index::NTuple{N, T}) where {N, T <: Integer} = setindex!(data(x), val, index...)
-copy(x::AbstractRegister{M, T, N}) where {M, T, N} = Register{M, T, N}(copy(data(x)))
+setindex!(x::AbstractRegister, val, index::Integer...) = (setindex!(data(x), val, index...); x)
+setindex!(x::AbstractRegister, val, index::NTuple{N, T}) where {N, T <: Integer} = (setindex!(data(x), val, index...); x)
+copy(x::AbstractRegister{M, B, T, N}) where {M, B, T, N} = Register{M, B, T, N}(copy(data(x)), copy(qubits(x)))
 
 #################
 # Batch Iterator
