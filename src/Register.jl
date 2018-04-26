@@ -1,61 +1,118 @@
-export AbstractRegister, ClassicalRegister, register
+"""
+    AbstractRegister{M, B, T, N} <: AbstractArray{T, N}
 
-abstract type AbstractRegister{T, N} end
+Abstract type for quantum registers, all quantum registers supports
+the interface of julia arrays.
 
-state(reg::AbstractRegister) = reg.state
+## Parameters
+- `M` is the number of qubits
+- `B` is the batch size
+- `N` is the actual dimension (number of packed legs, batch dimension is the last dimension if batch size is not 0).
+"""
+abstract type AbstractRegister{M, B, T, N} <: AbstractArray{T, N} end
 
-mutable struct ClassicalRegister{T <: AbstractVecOrMat, N} <: AbstractRegister{T, N}
-    state::T
+# register properties
+nqubit(reg::AbstractRegister{M}) where M = M
+nbatch(reg::AbstractRegister{M, B}) where {M, B} = B
+data(reg::AbstractRegister) = reg.data
+
+struct Register{M, B, T, N} <: AbstractRegister{M, B, T, N}
+    data::Array{T, N}
+    ids::NTuple{M, Int}
 end
 
-ClassicalRegister(n, statevec::T) where {T <: AbstractVecOrMat} =
-    ClassicalRegister{T, n}(statevec)
-ClassicalRegister(statevec) =
-    ClassicalRegister(Int(log2(size(statevec, 1))), statevec)
+# We store the state with a M-dimentional tensor by default
+# This will reduce memory allocation by allowing us use
+# permutedims! rather than permutedims.
 
+# Type Inference
+Register(nqubit::Int, nbatch::Int, data::Array{T, N}, ids::NTuple{M, Int}) where {M, T, N} =
+    Register{nqubit, nbatch, T, N}(data, ids)
 
-import Base: eltype, length, size, getindex, setindex!, copy
-# TODO: overload Array interface
+Register(nqubit::Int, nbatch::Int, data::Array) =
+    Register(nqubit, nbatch, data, Tuple(1:nqubit))
 
-copy(reg::ClassicalRegister{T, N}) where {T, N} = ClassicalRegister(N, copy(reg.state))
-
-"""
-    register(type, state_type, nqubits) -> Register
-
-factory method for creating a register.
-"""
-register(::Type{T}, ::Type{S}, n::Integer) where {T, S} = ClassicalRegister(n, zeros(T, 2^n))
-register(::Type{S}, n::Integer) where S = register(Complex128, S, n)
-
-register(v::AbstractVecOrMat{T}) where T = ClassicalRegister(v)
-
-export Routine
-"""
-routines for perparing a state
-"""
-module Routine
-
-import QuCircuit: ClassicalRegister, register
-export GHZ, OOO, Rand
-
-abstract type QuState end
-abstract type GHZ <: QuState end
-abstract type OOO <: QuState end
-abstract type Rand <: QuState end
-
-@inline function register(::Type{T}, ::Type{GHZ}, n::Integer) where T
-    state = zeros(T, 2^n)
-    state[1] = 1
-    state[end] = 1
-    state ./= sqrt(2)
-    ClassicalRegister(n, state)
+# calculate number of qubits from data array
+function Register(nbatch::Int, data::Array)
+    len = length(data)
+    ispow2(len) || throw(Compat.InexactError(:Register, Register, data))
+    Register(log2i(len), nbatch, data)
 end
 
-@inline function register(::Type{T}, ::Type{OOO}, n::Integer) where T
-    state = zeros(T, 2^n)
-    state[1] = 1
-    ClassicalRegister(n, state)    
+# no batch
+Register(data::Array) = Register(1, data)
+
+#########################
+# Default Initialization
+#########################
+
+# NOTE: we store a rank-n tensor for n qubits by default,
+# we can always optimize this by add other kind of
+# register for specific tasks
+Register(::Type{T}, nqubit::Integer, nbatch::Integer, ids::NTuple) where T =
+    Register(nqubit, nbatch, zeros(T, ntuple(x->2, Val{nqubit})..., nbatch), ids)
+Register(::Type{T}, nqubit::Integer, ids::NTuple) where T =
+    Register(nqubit, nbatch, zeros(T, ntuple(x->2, Val{nqubit})...), ids)
+Register(::Type{T}, nqubit::Integer, nbatch::Integer) where T =
+    Register(T, nqubit, nbatch, Tuple(1:nqubit))
+Register(::Type{T}, nqubit::Integer) where T =
+    Register(T, nqubit, Tuple(1:nqubit))
+
+# We use Compelx128 by default
+Register(nqubit::Integer, nbatch::Integer, ids::NTuple) =
+    Register(Complex128, nqubit, nbatch, ids)
+Register(nqubit::Integer, ids::NTuple) =
+    Register(Complex128, nqubit, ids)
+Register(nqubit::Integer, nbatch::Integer) =
+    Register(Complex128, nqubit, nbatch)
+Register(nqubit::Integer) =
+    Register(Complex128, nqubit)
+
+
+# use array interface
+# TODO: use @forward instead
+import Base: eltype, length, ndims, size, eachindex, 
+    getindex, setindex!, stride, strides, copy
+import Compat: axes
+
+eltype(x::Register{M, B, T, N}) where {M, B, T, N} = T
+length(x::Register) = length(x.data)
+ndims(x::Register) = ndims(x.data)
+size(x::Register) = size(x.data)
+size(x::Register, n::Integer) = size(x.data, n)
+axes(x::Register) = axes(x.data)
+axes(x::Register, d::Integer) = axes(x.data, d)
+eachindex(x::Register) = eachindex(x.data)
+stride(x::Register, k::Integer) = stride(x.data, k)
+strides(x::Register) = strides(x.data)
+getindex(x::Register, index::Integer...) = getindex(x.data, index...)
+getindex(x::Register, index::NTuple{N, T}) where {N, T <: Integer} = getindex(x.data, index...)
+setindex!(x::Register, val, index::Integer...) = setindex!(x.data, val, index...)
+setindex!(x::Register, val, index::NTuple{N, T}) where {N, T <: Integer} = setindex!(x.data, val, index...)
+copy(x::Register{M, T, N}) where {M, T, N} = Register{M, T, N}(copy(x.data))
+
+
+#################
+# Batch Iterator
+#################
+
+export batch
+
+# batch iterator
+struct BatchIter{M, B, T, N}
+    reg::Register{M, B, T, N}
 end
 
-register(::Type{T}, ::Type{Rand}, n::Integer) where T = ClassicalRegister(n, rand(T, 2^n))
-end # routine
+batch(x::Register) = BatchIter(x)
+
+import Base: start, next, done, length, eltype
+
+start(x::BatchIter) = 1
+next(x::BatchIter{M, B, T, N}, state) where {M, B, T, N} =
+    view(x.reg.data, ntuple(x->:, Val{N-1})..., state), state+1
+next(x::BatchIter{M, 1, T, N}, state) where {M, T, N} =
+    view(x.reg.data, ntuple(x->:, Val{N})...), state+1
+done(x::BatchIter{M, B, T, N}, state) where {M, B, T, N} = state > B
+length(x::BatchIter{M, B, T, N}) where {M, B, T, N} = B
+
+
