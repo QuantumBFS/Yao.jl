@@ -17,16 +17,16 @@ nbatch(reg::AbstractRegister{M, B}) where {M, B} = B
 # We assume each register has a member named data and ids
 # overload this if there is not
 qubits(reg::AbstractRegister{M}) where M = reg.ids
-data(reg::AbstractRegister) = reg.data
+state(reg::AbstractRegister) = reg.state
 
 # provide view method if data type supports
 export view_batch
 import Base: view
 view_batch(reg::AbstractRegister{M, B, T, N}, ibatch::Int) where {M, B, T, N} =
-    view(data(reg), ntuple(x->:, Val{N-1})..., ibatch)
+    view(state(reg), ntuple(x->:, Val{N-1})..., ibatch)
 view_batch(reg::AbstractRegister{M, 1, T, N}, ibatch::Int) where {M, T, N} =
-    view(data(reg), ntuple(x->:, Val{N})...)
-view(reg::AbstractRegister, dims...) = view(data(reg), dims...)
+    view(state(reg), ntuple(x->:, Val{N})...)
+view(reg::AbstractRegister, dims...) = view(state(reg), dims...)
 
 
 # use array interface
@@ -36,20 +36,20 @@ import Base: eltype, length, ndims, size, eachindex,
 import Compat: axes
 
 eltype(x::AbstractRegister{M, B, T, N}) where {M, B, T, N} = T
-length(x::AbstractRegister) = length(data(x))
-ndims(x::AbstractRegister) = ndims(data(x))
-size(x::AbstractRegister) = size(data(x))
-size(x::AbstractRegister, n::Integer) = size(data(x), n)
-axes(x::AbstractRegister) = axes(data(x))
-axes(x::AbstractRegister, d::Integer) = axes(data(x), d)
-eachindex(x::AbstractRegister) = eachindex(data(x))
-stride(x::AbstractRegister, k::Integer) = stride(data(x), k)
-strides(x::AbstractRegister) = strides(data(x))
-getindex(x::AbstractRegister, index::Integer...) = getindex(data(x), index...)
-getindex(x::AbstractRegister, index::NTuple{N, T}) where {N, T <: Integer} = getindex(data(x), index...)
-setindex!(x::AbstractRegister, val, index::Integer...) = (setindex!(data(x), val, index...); x)
-setindex!(x::AbstractRegister, val, index::NTuple{N, T}) where {N, T <: Integer} = (setindex!(data(x), val, index...); x)
-copy(x::AbstractRegister{M, B, T, N}) where {M, B, T, N} = Register{M, B, T, N}(copy(data(x)), copy(qubits(x)))
+length(x::AbstractRegister) = length(state(x))
+ndims(x::AbstractRegister) = ndims(state(x))
+size(x::AbstractRegister) = size(state(x))
+size(x::AbstractRegister, n::Integer) = size(state(x), n)
+axes(x::AbstractRegister) = axes(state(x))
+axes(x::AbstractRegister, d::Integer) = axes(state(x), d)
+eachindex(x::AbstractRegister) = eachindex(state(x))
+stride(x::AbstractRegister, k::Integer) = stride(state(x), k)
+strides(x::AbstractRegister) = strides(state(x))
+getindex(x::AbstractRegister, index::Integer...) = getindex(state(x), index...)
+getindex(x::AbstractRegister, index::NTuple{N, T}) where {N, T <: Integer} = getindex(state(x), index...)
+setindex!(x::AbstractRegister, val, index::Integer...) = (setindex!(state(x), val, index...); x)
+setindex!(x::AbstractRegister, val, index::NTuple{N, T}) where {N, T <: Integer} = (setindex!(state(x), val, index...); x)
+copy(x::AbstractRegister{M, B, T, N}) where {M, B, T, N} = Register{M, B, T, N}(copy(state(x)), copy(qubits(x)))
 
 #################
 # Batch Iterator
@@ -103,8 +103,8 @@ export Register
 default register type. This register use a builtin array
 to store the quantum state.
 """
-struct Register{M, B, T, N} <: AbstractRegister{M, B, T, N}
-    data::Array{T, N}
+mutable struct Register{M, B, T, N} <: AbstractRegister{M, B, T, N}
+    state::Array{T, N}
     ids::Vector{Int}
 end
 
@@ -113,24 +113,24 @@ end
 # permutedims! rather than permutedims.
 
 # Type Inference
-Register(nqubit::Int, nbatch::Int, data::Array{T, N}, ids::Vector{Int}) where {T, N} =
-    Register{nqubit, nbatch, T, N}(data, ids)
+Register(nqubit::Int, nbatch::Int, state::Array{T, N}, ids::Vector{Int}) where {T, N} =
+    Register{nqubit, nbatch, T, N}(state, ids)
 # type conversion
-Register(nqubit::Integer, nbatch::Integer, data::Array, ids) =
-    Register(Int(nqubit), Int(nbatch), data, Int[ids...])
+Register(nqubit::Integer, nbatch::Integer, state::Array, ids) =
+    Register(Int(nqubit), Int(nbatch), state, Int[ids...])
 
-Register(nqubit::Integer, nbatch::Integer, data::Array) =
-    Register(nqubit, nbatch, data, 1:nqubit)
+Register(nqubit::Integer, nbatch::Integer, state::Array) =
+    Register(nqubit, nbatch, state, 1:nqubit)
 
 # calculate number of qubits from data array
-function Register(nbatch::Integer, data::Array)
-    len = length(data) ÷ nbatch
-    ispow2(len) || throw(Compat.InexactError(:Register, Register, data))
-    Register(log2i(len), nbatch, data)
+function Register(nbatch::Integer, state::Array)
+    len = length(state) ÷ nbatch
+    ispow2(len) || throw(Compat.InexactError(:Register, Register, state))
+    Register(log2i(len), nbatch, state)
 end
 
 # no batch
-Register(data::Array) = Register(1, data)
+Register(state::Array) = Register(1, state)
 
 #########################
 # Default Initialization
@@ -155,7 +155,8 @@ Register(nqubit::Integer) =
 import Base: reshape
 
 reshape(reg::Register{M, B, T, N}, dims::Dims) where {M, B, T, N} =
-    Register(M, B, reshape(reg.data, dims), reg.ids)
+    Register(M, B, reshape(state(reg), dims), reg.ids)
+reshape!(reg::Register, dims::Dims) = (reshape(reg.data, dims); reg)
 
 function pack!(dst::Register{M, B, T, N}, src::Register{M, B, T, N}, ids::NTuple{K, Int}) where {M, B, T, N, K}
     @assert N == M+1 "register shape mismatch"
@@ -167,7 +168,7 @@ function pack!(dst::Register{M, B, T, N}, src::Register{M, B, T, N}, ids::NTuple
     prepend!(perm, ids)
     dst.ids .= perm
     append!(perm, M+1)
-    permutedims!(dst.data, src.data, perm)
+    permutedims!(state(dst), state(src), perm)
     dst
 end
 
@@ -178,7 +179,7 @@ function pack!(dst::Register{M, 1, T, M}, src::Register{M, 1, T, M}, ids::NTuple
     deleteat!(perm, inds)
     prepend!(perm, ids)
     dst.ids .= perm
-    permutedims!(dst.data, src.data, perm)
+    permutedims!(state(dst), state(src), perm)
     dst
 end
 
@@ -188,7 +189,7 @@ function focus(src::Register{M, B, T, N}, ids::NTuple{K, Int}) where {M, N, B, T
     pack!(src, ids)
     exposed_size = 2^K
     remained_size = 2^(M-K)
-    data = reshape(src.data, exposed_size, remained_size, B)
+    data = reshape(state(src), exposed_size, remained_size, B)
     Register(M, B, data, src.ids)
 end
 
@@ -196,7 +197,7 @@ function focus(src::Register{M, 1, T, M}, ids::NTuple{K, Int}) where {M, T, K}
     pack!(src, ids)
     exposed_size = 2^K
     remained_size = 2^(M-K)
-    data = reshape(src.data, exposed_size, remained_size)
+    data = reshape(state(src), exposed_size, remained_size)
     Register(M, 1, data, src.ids)
 end
 

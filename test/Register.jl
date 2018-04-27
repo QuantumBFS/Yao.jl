@@ -1,5 +1,5 @@
 import QuCircuit: AbstractRegister, Register
-import QuCircuit: qubits, data, nqubit, nbatch, pack!, focus, view_batch
+import QuCircuit: qubits, state, nqubit, nbatch, pack!, focus, view_batch
 import Compat: axes
 using Compat.Test
 
@@ -10,9 +10,9 @@ using Compat.Test
     @test nqubit(Register(2, rand(Complex128, 2^5, 2))) == 5
     @test nbatch(Register(rand(Complex128, 2^5))) == 1
 
-    test_data = zeros(Complex64, 2, 2, 2, 2, 2, 3)
+    test_state = zeros(Complex64, 2, 2, 2, 2, 2, 3)
     @test Register(Complex64, 5, 2).ids == collect(1:5)
-    @test Register(Complex64, 5, 3).data == test_data
+    @test state(Register(Complex64, 5, 3)) == test_state
     @test nbatch(Register(Complex64, 5)) == 1
 
     # check default type
@@ -27,19 +27,19 @@ end
 
 @testset "AbstractArray Interface" begin
     reg = Register(5, 3)
-    @test eltype(reg) == eltype(data(reg))
-    @test length(reg) == length(data(reg))
-    @test ndims(reg) == ndims(data(reg))
-    @test size(reg) == size(data(reg))
-    @test size(reg, 2) == size(data(reg), 2)
-    @test axes(reg, 2) == axes(data(reg), 2)
-    @test axes(reg) == axes(data(reg))
-    @test stride(reg, 2) == stride(data(reg), 2)
-    @test strides(reg) == strides(data(reg))
-    @test getindex(reg, (1, 1, 1, 1, 1, 2)) == getindex(data(reg), 1, 1, 1, 1, 1, 2)
+    @test eltype(reg) == eltype(state(reg))
+    @test length(reg) == length(state(reg))
+    @test ndims(reg) == ndims(state(reg))
+    @test size(reg) == size(state(reg))
+    @test size(reg, 2) == size(state(reg), 2)
+    @test axes(reg, 2) == axes(state(reg), 2)
+    @test axes(reg) == axes(state(reg))
+    @test stride(reg, 2) == stride(state(reg), 2)
+    @test strides(reg) == strides(state(reg))
+    @test getindex(reg, (1, 1, 1, 1, 1, 2)) == getindex(state(reg), 1, 1, 1, 1, 1, 2)
     @test typeof(setindex!(reg, im, (1, 1, 1, 1, 1, 2))) == typeof(reg)
     @test typeof(setindex!(reg, im, 1, 1, 1, 1, 1, 2)) == typeof(reg)
-    @test copy(reg).data !== reg.data
+    @test copy(reg).state !== reg.state
 end
 
 @testset "Batch Iterator" begin
@@ -64,12 +64,12 @@ end
 
     out = focus(reg, (2, 3))
     @test out.ids == [2, 3, 1, 4, 5]
-    @test size(out.data) == (2^2, 2^3)
+    @test size(out.state) == (2^2, 2^3)
 
     reg = Register(5, 3)
     out = focus(reg, (2, 3))
     @test out.ids == [2, 3, 1, 4, 5]
-    @test size(out.data) == (2^2, 2^3, 3)
+    @test size(out.state) == (2^2, 2^3, 3)
 
     # other shape
     reg = Register(rand(Complex128, 2^5))
