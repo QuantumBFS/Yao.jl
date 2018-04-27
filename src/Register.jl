@@ -11,6 +11,7 @@ the interface of julia arrays.
 """
 abstract type AbstractRegister{M, B, T, N} <: AbstractArray{T, N} end
 
+export nqubit, nbatch, qubits, state, statevec
 # register properties
 nqubit(reg::AbstractRegister{M}) where M = M
 nbatch(reg::AbstractRegister{M, B}) where {M, B} = B
@@ -18,6 +19,11 @@ nbatch(reg::AbstractRegister{M, B}) where {M, B} = B
 # overload this if there is not
 qubits(reg::AbstractRegister{M}) where M = reg.ids
 state(reg::AbstractRegister) = reg.state
+statevec(reg::AbstractRegister{M, B, T, N}) where {M, B, T, N} = reshape(reg.state, 2^M, B)
+statevec(reg::AbstractRegister{M, B, T, 2}) where {M, B, T} = reg.state
+statevec(reg::AbstractRegister{M, 1, T, N}) where {M, T, N} = reshape(reg.state, 2^M)
+statevec(reg::AbstractRegister{M, 1, T, 1}) where {M, T} = reg.state
+
 
 # provide view method if data type supports
 export view_batch
@@ -95,6 +101,32 @@ pack tensor legs with ids together and reshape the register to
 type (with or without batch).
 """
 focus(reg::AbstractRegister, ids...) = focus(reg, ids)
+
+"""
+    focus(register, range)
+
+pack tensor legs inside `range` together and reshape the register
+to (exposed, remain, batch) or (exposed, remain). range should be
+an `UnitRange{Int}` type, which can be declared by colon, e.g
+
+    focus(reg, 2:4)
+
+it will do nothing and return the register directly if the range
+start from `1`, e.g
+
+    focus(reg, 1:4)
+"""
+function focus(src::AbstractRegister{M, B}, range::UnitRange{Int}) where {M, B}
+    N = length(range)
+    range.start == 1 || return reshape(src, (2^N, 2^(M-N), B))
+    focus(src, Tuple(range))
+end
+
+function focus(src::AbstractRegister{M, 1}, range::UnitRange{Int}) where M
+    N = length(range)
+    range.start == 1 || return reshape(src, (2^N, 2^(M-N), B))
+    focus(src, Tuple(range))
+end
 
 export Register
 """
@@ -201,7 +233,5 @@ function focus(src::Register{M, 1, T, M}, ids::NTuple{K, Int}) where {M, T, K}
     Register(M, 1, data, src.ids)
 end
 
-# focus(src::Register{M, B}, ids::NTuple) where {M, B} =
-#     focus(reshape(src, ntuple(x->2, Val{M})..., B), ids)
 focus(src::Register{M, 1}, ids::NTuple) where M =
     focus(reshape(src, ntuple(x->2, Val{M})), ids)
