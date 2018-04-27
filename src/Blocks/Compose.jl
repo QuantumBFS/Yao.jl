@@ -120,7 +120,7 @@ This will automatically generate a block list looks like
 kron(blocks...) = KronBlock(blocks...)
 
 full(::Type{T}, block::KronBlock) where T = full(sparse(T, block))
-function sparse(::Type{T}, block::KronBlock{N}) where {T, N}
+@inline function sparse(::Type{T}, block::KronBlock{N}) where {T, N}
     curr_head = 1
     first_head = first(block.heads)
     first_block = first(block.block_list)
@@ -151,10 +151,8 @@ function sparse(::Type{T}, block::KronBlock{N}) where {T, N}
     return op
 end
 
-function apply!(block::KronBlock{N}, reg::Register{N, 1, T}) where {N, T}
-    reg.state = reshape(full(T, block) * statevec(reg), size(reg))
-    reg
-end
+apply!(block::KronBlock{N}, reg::Register{N, 1, T}) where {N, T} =
+    apply!(full(T, block), reg)
 
 struct Concentrator{N, M, T <: AbstractBlock{M}} <: AbstractBlock{N}
     lines::NTuple{M, Int}
@@ -170,3 +168,8 @@ concentrate(nqubit::Int, block::AbstractBlock{M}, lines::NTuple{M, Int}) where M
     Concentrator(nqubit, block, lines)
 concentrate(nqubit::Integer, block::AbstractBlock, lines::Int...) =
     concentrate(nqubit, block, lines)
+
+function apply!(concentrator::Concentrator{N}, reg::Register{N, 1}) where N
+    concentrated = focus(reg, concentrator.lines)
+    apply!(concentrator.block, concentrated)
+end

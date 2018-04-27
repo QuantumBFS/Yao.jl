@@ -236,3 +236,13 @@ end
 
 focus(src::Register{M, 1}, ids::NTuple) where M =
     focus(reshape(src, ntuple(x->2, Val{M})), ids)
+
+function apply!(op::Array{T, 2}, reg::Register{M, 1, T, 1})
+    reg.state = op * reg.state
+    reg
+end
+
+function apply!(op::Array{T, 2}, reg::Register{M, 1, T, 2})
+    reg.state = op * reg.state
+    reg
+end
