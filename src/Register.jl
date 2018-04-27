@@ -19,16 +19,6 @@ nbatch(reg::AbstractRegister{M, B}) where {M, B} = B
 qubits(reg::AbstractRegister{M}) where M = reg.ids
 data(reg::AbstractRegister) = reg.data
 
-# provide view method if data type supports
-export view_batch
-import Base: view
-view_batch(reg::AbstractRegister{M, B, T, N}, ibatch::Int) where {M, B, T, N} =
-    view(data(reg), ntuple(x->:, Val{N-1})..., ibatch)
-view_batch(reg::AbstractRegister{M, 1, T, N}, ibatch::Int) where {M, T, N} =
-    view(data(reg), ntuple(x->:, Val{N})...)
-view(reg::AbstractRegister, dims...) = view(data(reg), dims...)
-
-
 # use array interface
 # TODO: use @forward instead
 import Base: eltype, length, ndims, size, eachindex, 
