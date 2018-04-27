@@ -1,5 +1,5 @@
 import QuCircuit: AbstractRegister, Register
-import QuCircuit: qubits, state, nqubit, nbatch, pack!, focus, view_batch
+import QuCircuit: qubits, state, statevec, nqubit, nbatch, pack!, focus, view_batch
 import Compat: axes
 using Compat.Test
 
@@ -23,6 +23,7 @@ end
 @testset "AbstractRegister Interface" begin
     reg = Register(5, 3)
     @test size(view_batch(reg, 1)) == (2, 2, 2, 2, 2)
+    @test size(statevec(reg)) == (2^5, 3)
 end
 
 @testset "AbstractArray Interface" begin
