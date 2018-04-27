@@ -28,6 +28,7 @@ statevec(reg::AbstractRegister{M, 1, T, 1}) where {M, T} = reg.state
 # provide view method if data type supports
 export view_batch
 import Base: view
+# TODO: add SubRegister as return type of view_batch
 view_batch(reg::AbstractRegister{M, B, T, N}, ibatch::Int) where {M, B, T, N} =
     view(state(reg), ntuple(x->:, Val{N-1})..., ibatch)
 view_batch(reg::AbstractRegister{M, 1, T, N}, ibatch::Int) where {M, T, N} =

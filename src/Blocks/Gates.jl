@@ -2,7 +2,7 @@ abstract type AbstractGate{N} <: LeafBlock{N} end
 
 function apply!(gate::AbstractGate{N}, reg::Register{M, 1}, head::Int=1) where {N, M}
     focused_reg = focus(reg, head:head+N)
-    reg.state = reshape(full(gate) * state(focused_reg), size(reg.state))
+    reg.state .= reshape(full(gate) * state(focused_reg), size(reg.state))
     reg
 end
 
