@@ -1,4 +1,4 @@
-import QuCircuit: log2i
+import QuCircuit: log2i, bit_length
 using Compat.Test
 
 @testset "log2i" begin
@@ -11,4 +11,5 @@ using Compat.Test
         @test typeof(log2i(itype(2^5))) == itype
     end
 
+    @test bit_length(8) == 4
 end
