@@ -1,107 +1,51 @@
 """
-    AbstractRegister{M, B, T, N} <: AbstractArray{T, N}
+    AbstractRegister{M, B, T}
 
-Abstract type for quantum registers, all quantum registers supports
-the interface of julia arrays.
+Abstract type for quantum registers, all quantum registers contains a
+subtype of `AbstractArray` as member `state`.
 
 ## Parameters
 - `M` is the number of qubits
 - `B` is the batch size
-- `N` is the actual dimension (number of packed legs, batch dimension is the last dimension if batch size is not 0).
+- `T` eltype
 """
-abstract type AbstractRegister{M, B, T, N} <: AbstractArray{T, N} end
+abstract type AbstractRegister{N, B, T} end
 
-export nqubit, nbatch, qubits, state, statevec
+export nqubit, nbatch, line_orders, state
 # register properties
-nqubit(reg::AbstractRegister{M}) where M = M
-nbatch(reg::AbstractRegister{M, B}) where {M, B} = B
-# We assume each register has a member named data and ids
+nqubit(reg::AbstractRegister{N}) where N = N
+nbatch(reg::AbstractRegister{N, B}) where {N, B} = B
+# We assume each register has a member named state and orders
 # overload this if there is not
-qubits(reg::AbstractRegister{M}) where M = reg.ids
+line_orders(reg::AbstractRegister{N}) where N = reg.line_orders
 state(reg::AbstractRegister) = reg.state
-statevec(reg::AbstractRegister{M, B, T, N}) where {M, B, T, N} = reshape(reg.state, 2^M, B)
-statevec(reg::AbstractRegister{M, B, T, 2}) where {M, B, T} = reg.state
-statevec(reg::AbstractRegister{M, 1, T, N}) where {M, T, N} = reshape(reg.state, 2^M)
-statevec(reg::AbstractRegister{M, 1, T, 1}) where {M, T} = reg.state
 
+import Base: eltype, copy
+eltype(::AbstractRegister{N, B, T}) where {N, B, T} = T
+function copy(reg::AbstractRegister) end
 
-# provide view method if data type supports
-export view_batch
-import Base: view
-# TODO: add SubRegister as return type of view_batch
-view_batch(reg::AbstractRegister{M, B, T, N}, ibatch::Int) where {M, B, T, N} =
-    view(state(reg), ntuple(x->:, Val{N-1})..., ibatch)
-view_batch(reg::AbstractRegister{M, 1, T, N}, ibatch::Int) where {M, T, N} =
-    view(state(reg), ntuple(x->:, Val{N})...)
-view(reg::AbstractRegister, dims...) = view(state(reg), dims...)
-
-
-# use array interface
-# TODO: use @forward instead
-import Base: eltype, length, ndims, size, eachindex, 
-    getindex, setindex!, stride, strides, copy
-import Compat: axes
-
-eltype(x::AbstractRegister{M, B, T, N}) where {M, B, T, N} = T
-length(x::AbstractRegister) = length(state(x))
-ndims(x::AbstractRegister) = ndims(state(x))
-size(x::AbstractRegister) = size(state(x))
-size(x::AbstractRegister, n::Integer) = size(state(x), n)
-axes(x::AbstractRegister) = axes(state(x))
-axes(x::AbstractRegister, d::Integer) = axes(state(x), d)
-eachindex(x::AbstractRegister) = eachindex(state(x))
-stride(x::AbstractRegister, k::Integer) = stride(state(x), k)
-strides(x::AbstractRegister) = strides(state(x))
-getindex(x::AbstractRegister, index::Integer...) = getindex(state(x), index...)
-getindex(x::AbstractRegister, index::NTuple{N, T}) where {N, T <: Integer} = getindex(state(x), index...)
-setindex!(x::AbstractRegister, val, index::Integer...) = (setindex!(state(x), val, index...); x)
-setindex!(x::AbstractRegister, val, index::NTuple{N, T}) where {N, T <: Integer} = (setindex!(state(x), val, index...); x)
-copy(x::AbstractRegister{M, B, T, N}) where {M, B, T, N} = Register{M, B, T, N}(copy(state(x)), copy(qubits(x)))
-
-#################
-# Batch Iterator
-#################
-
-export batch
-
-# batch iterator
-struct BatchIter{R <: AbstractRegister}
-    reg::R
-end
-
-batch(x::AbstractRegister) = BatchIter(x)
-
-import Base: start, next, done, length, eltype
-
-start(x::BatchIter) = 1
-next(x::BatchIter, state) =
-    view_batch(x.reg, state), state+1
-done(x::BatchIter, state) = state > length(x)
-length(x::BatchIter{R}) where R = nbatch(x.reg)
-
-export pack!
 # permutation and concentration of qubits
 
 """
-    pack!(dst, src, ids)
+    pack!(reg, orders)
 
-pack `ids` together to the first k-dimensions.
+pack `orders` together to the first k-dimensions.
 """
-function pack!(dst, src, ids) end
-pack!(reg::AbstractRegister, ids::NTuple) = pack!(reg, reg, ids)
-pack!(reg::AbstractRegister, ids::Integer...) = pack!(reg, ids)
+function pack! end
 
 
-export focus
+export focus!
 
 """
-    focus(register, ids...)
+    focus!(register, orders)
 
-pack tensor legs with ids together and reshape the register to
-(exposed, remain, batch) or (exposed, remain) depending on register
-type (with or without batch).
+pack tensor legs with given orders and reshape the register state to
+(exposed, remain * batch). `orders` can be a `Vector` or a `Tuple`. It
+should contain either a `UnitRange` or `Int`. `UnitRange` will be
+considered as a contiguous quantum memory and `Int` will be considered
+as an in-contiguous order.
 """
-focus(reg::AbstractRegister, ids...) = focus(reg, ids)
+function focus! end
 
 """
     focus(register, range)
@@ -131,118 +75,99 @@ end
 
 export Register
 """
-    Register{M, B, T, N} <: AbstractRegister{M, B, T, N}
+    Register{N, B, T} <: AbstractRegister{N, B, T}
 
 default register type. This register use a builtin array
-to store the quantum state.
+to store the quantum state. The elements inside an instance
+of `Register` will be related to a certain memory address,
+but since it is not immutable (we need to change its shape),
+be careful not to change its state, though the behaviour is
+the same, but allocation should be avoided. Therefore, no
+shallow copy method is provided.
 """
-mutable struct Register{M, B, T, N} <: AbstractRegister{M, B, T, N}
-    state::Array{T, N}
-    ids::Vector{Int}
+mutable struct Register{N, B, T} <: AbstractRegister{N, B, T}
+    state::Array{T, 2}
+    line_orders::Vector{Int}
 end
 
-# We store the state with a M-dimentional tensor by default
-# This will reduce memory allocation by allowing us use
-# permutedims! rather than permutedims.
-
-# Type Inference
-Register(nqubit::Int, nbatch::Int, state::Array{T, N}, ids::Vector{Int}) where {T, N} =
-    Register{nqubit, nbatch, T, N}(state, ids)
-# type conversion
-Register(nqubit::Integer, nbatch::Integer, state::Array, ids) =
-    Register(Int(nqubit), Int(nbatch), state, Int[ids...])
-
-Register(nqubit::Integer, nbatch::Integer, state::Array) =
-    Register(nqubit, nbatch, state, 1:nqubit)
-
-# calculate number of qubits from data array
-function Register(nbatch::Integer, state::Array)
-    len = length(state) ÷ nbatch
+function Register(state::Array{T, 2}) where T
+    len, nbatch = size(state)
     ispow2(len) || throw(Compat.InexactError(:Register, Register, state))
-    Register(log2i(len), nbatch, state)
+    N = log2i(len)
+    Register{N, nbatch, T}(state, collect(1:N))
 end
 
-# no batch
-Register(state::Array) = Register(1, state)
+Register(state::Array{T, 1}) where T = Register(reshape(state, length(state), 1))
 
-#########################
-# Default Initialization
-#########################
+export zero_state, rand_state
+zero_state(::Type{T}, nqubit::Int, nbatch::Int=1) where T =
+    (state = zeros(T, 2^nqubit, nbatch); state[1, :] = 1; Register(state))
+# TODO: support different RNG?, default is a MT19937
+rand_state(::Type{T}, nqubit::Int, nbatch::Int=1) where T = Register(rand(T, 2^nqubit, nbatch))
 
-# NOTE: we store a rank-n tensor for n qubits by default,
-# we can always optimize this by add other kind of
-# register for specific tasks
-Register(::Type{T}, nqubit::Integer, nbatch::Integer) where T =
-    Register(nqubit, nbatch, zeros(T, ntuple(x->2, Val{nqubit})..., nbatch), 1:nqubit)
-Register(::Type{T}, nqubit::Integer) where T =
-    Register(nqubit, 1, zeros(T, ntuple(x->2, Val{nqubit})...), 1:nqubit)
+# set default type
+zero_state(nqubit::Int, nbatch::Int=1) = zero_state(Complex128, nqubit, nbatch)
+rand_state(nqubit::Int, nbatch::Int=1) = rand_state(Complex128, nqubit, nbatch)
 
-# We use Compelx128 by default
-Register(nqubit::Integer, nbatch::Integer) =
-    Register(Complex128, nqubit, nbatch)
-Register(nqubit::Integer) =
-    Register(Complex128, nqubit)
+copy(reg::Register{N, B, T}) where {N, B, T} = Register{N, B, T}(copy(reg.state), copy(reg.line_orders))
 
-
-## Dimension Permutation & Reshape
-import Base: reshape
-
-reshape(reg::Register{M, B, T, N}, dims::Dims) where {M, B, T, N} =
-    Register(M, B, reshape(state(reg), dims), reg.ids)
-reshape!(reg::Register, dims::Dims) = (reshape(reg.data, dims); reg)
-
-function pack!(dst::Register{M, B, T, N}, src::Register{M, B, T, N}, ids::NTuple{K, Int}) where {M, B, T, N, K}
-    @assert N == M+1 "register shape mismatch"
-
-    ids = sort!([ids...])
-    inds = findin(src.ids, ids)
-    perm = copy(src.ids)
+## Dimension Permutation
+# in-contiguous orders
+function pack!(reg::Register{N, B}, orders::T) where {N, B, T <: Union{Int, Vector{Int}}}
+    tensor = reshape(state(reg), ntuple(x->2, Val{N})..., B)
+    inds = findin(reg.line_orders, orders)
+    perm = reg.line_orders
     deleteat!(perm, inds)
-    prepend!(perm, ids)
-    dst.ids .= perm
-    append!(perm, M+1)
-    permutedims!(state(dst), state(src), perm)
-    dst
-end
-
-function pack!(dst::Register{M, 1, T, M}, src::Register{M, 1, T, M}, ids::NTuple{K, Int}) where {M, T, K}
-    ids = sort!([ids...])
-    inds = findin(src.ids, ids)
-    perm = copy(src.ids)
-    deleteat!(perm, inds)
-    prepend!(perm, ids)
-    dst.ids .= perm
-    permutedims!(state(dst), state(src), perm)
-    dst
-end
-
-function focus(src::Register{M, B, T, N}, ids::NTuple{K, Int}) where {M, N, B, T, K}
-    N == M+1 || (src = reshape(src, ntuple(x->2, Val{M})..., B))
-
-    pack!(src, ids)
-    exposed_size = 2^K
-    remained_size = 2^(M-K)
-    data = reshape(state(src), exposed_size, remained_size, B)
-    Register(M, B, data, src.ids)
-end
-
-function focus(src::Register{M, 1, T, M}, ids::NTuple{K, Int}) where {M, T, K}
-    pack!(src, ids)
-    exposed_size = 2^K
-    remained_size = 2^(M-K)
-    data = reshape(state(src), exposed_size, remained_size)
-    Register(M, 1, data, src.ids)
-end
-
-focus(src::Register{M, 1}, ids::NTuple) where M =
-    focus(reshape(src, ntuple(x->2, Val{M})), ids)
-
-function apply!(op::Array{T, 2}, reg::Register{M, 1, T, 1})
-    reg.state = op * reg.state
+    prepend!(perm, orders)
+    permutedims!(tensor, tensor, (perm..., N+1))
     reg
 end
 
-function apply!(op::Array{T, 2}, reg::Register{M, 1, T, 2})
-    reg.state = op * reg.state
+# contiguous orders
+function pack!(reg::Register{N, B}, orders::UnitRange{Int}) where {N, B}
+    start_order = first(orders)
+    # return ASAP when target order at the beginning
+    start_order == first(line_orders(reg)) && return reg
+
+    pack_size = 2^length(orders)
+    start_ind, = findin(line_orders(reg), start_order)
+
+    if start_ind+length(orders)-1 == N
+        src = reshape(state(reg), :, pack_size)
+        dst = reshape(state(reg), pack_size, :)
+        transpose!(dst, src)
+    else
+        src = reshape(state(reg), 2^start_ind, pack_size, :)
+        dst = reshape(state(reg), pack_size, 2^start_ind, :)
+        permutedims!(dst, src, [2, 1, 3])
+    end
+    deleteat!(reg.line_orders, start_ind:(start_ind + length(orders) - 1))
+    prepend!(reg.line_orders, collect(orders))
+    reg
+end
+
+# mixed
+function pack!(reg::Register, orders)
+    for each in reverse(orders)
+        pack!(reg, each)
+    end
+    reg
+end
+
+exposed_size(orders::NTuple{K, Int}) where K = 2^K
+exposed_size(orders::Vector{Int}) = 2^length(orders)
+exposed_size(orders::UnitRange{Int}) = 2^length(orders)
+# mixed
+function exposed_size(orders)
+    total = 0
+    for each in orders
+        total += length(each)
+    end
+    2^total
+end
+
+function focus!(reg::Register{N, B}, orders) where {N, B}
+    pack!(reg, orders)
+    reg.state = reshape(state(reg), (exposed_size(orders), :))
     reg
 end
