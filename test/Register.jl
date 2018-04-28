@@ -1,6 +1,6 @@
 import QuCircuit: AbstractRegister, Register
 import QuCircuit: nqubit, line_orders, nbatch, state, zero_state, rand_state
-import QuCircuit: pack!, focus!
+import QuCircuit: pack_orders!, focus!
 import Compat: axes
 using Compat.Test
 
@@ -38,21 +38,21 @@ end
     reg = rand_state(5, 3)
 
     # contiguous
-    pack!(reg, 2:4)
+    pack_orders!(reg, 2:4)
     @test line_orders(reg) == [2, 3, 4, 1, 5]
     @test size(state(reg)) == (2^5, 3)
 
     # in-contiguous
-    pack!(reg, [4, 1])
+    pack_orders!(reg, [4, 1])
     @test line_orders(reg) == [4, 1, 2, 3, 5]
     @test size(state(reg)) == (2^5, 3)
 
-    pack!(reg, 5)
+    pack_orders!(reg, 5)
     @test line_orders(reg) == [5, 4, 1, 2, 3]
     @test size(state(reg)) == (2^5, 3)
 
     # mixed
-    pack!(reg, (5, 2:3))
+    pack_orders!(reg, (5, 2:3))
     @test line_orders(reg) == [5, 2, 3, 4, 1]
     @test size(state(reg)) == (2^5, 3)
 end

@@ -5,7 +5,7 @@ Abstract type for quantum registers, all quantum registers contains a
 subtype of `AbstractArray` as member `state`.
 
 ## Parameters
-- `M` is the number of qubits
+- `N` is the number of qubits
 - `B` is the batch size
 - `T` eltype
 """
@@ -27,11 +27,11 @@ function copy(reg::AbstractRegister) end
 # permutation and concentration of qubits
 
 """
-    pack!(reg, orders)
+    pack_orders!(reg, orders)
 
 pack `orders` together to the first k-dimensions.
 """
-function pack! end
+function pack_orders! end
 
 
 export focus!
@@ -75,9 +75,9 @@ Register(state::Array{T, 1}) where T = Register(reshape(state, length(state), 1)
 
 export zero_state, rand_state
 zero_state(::Type{T}, nqubit::Int, nbatch::Int=1) where T =
-    (state = zeros(T, 2^nqubit, nbatch); state[1, :] = 1; Register(state))
+    (state = zeros(T, 1<<nqubit, nbatch); state[1, :] = 1; Register(state))
 # TODO: support different RNG?, default is a MT19937
-rand_state(::Type{T}, nqubit::Int, nbatch::Int=1) where T = Register(rand(T, 2^nqubit, nbatch))
+rand_state(::Type{T}, nqubit::Int, nbatch::Int=1) where T = Register(rand(T, 1<<nqubit, nbatch))
 
 # set default type
 zero_state(nqubit::Int, nbatch::Int=1) = zero_state(Complex128, nqubit, nbatch)
@@ -87,7 +87,7 @@ copy(reg::Register{N, B, T}) where {N, B, T} = Register{N, B, T}(copy(reg.state)
 
 ## Dimension Permutation
 # in-contiguous orders
-function pack!(reg::Register{N, B}, orders::T) where {N, B, T <: Union{Int, Vector{Int}}}
+function pack_orders!(reg::Register{N, B}, orders::T) where {N, B, T <: Union{Int, Vector{Int}}}
     tensor = reshape(state(reg), ntuple(x->2, Val{N})..., B)
     inds = findin(reg.line_orders, orders)
     perm = reg.line_orders
@@ -98,12 +98,12 @@ function pack!(reg::Register{N, B}, orders::T) where {N, B, T <: Union{Int, Vect
 end
 
 # contiguous orders
-function pack!(reg::Register{N, B}, orders::UnitRange{Int}) where {N, B}
+function pack_orders!(reg::Register{N, B}, orders::UnitRange{Int}) where {N, B}
     start_order = first(orders)
     # return ASAP when target order at the beginning
     start_order == first(line_orders(reg)) && return reg
 
-    pack_size = 2^length(orders)
+    pack_size = 1<<length(orders)
     start_ind, = findin(line_orders(reg), start_order)
 
     if start_ind+length(orders)-1 == N
@@ -111,8 +111,8 @@ function pack!(reg::Register{N, B}, orders::UnitRange{Int}) where {N, B}
         dst = reshape(state(reg), pack_size, :)
         transpose!(dst, src)
     else
-        src = reshape(state(reg), 2^start_ind, pack_size, :)
-        dst = reshape(state(reg), pack_size, 2^start_ind, :)
+        src = reshape(state(reg), 1<<start_ind, pack_size, :)
+        dst = reshape(state(reg), pack_size, 1<<start_ind, :)
         permutedims!(dst, src, [2, 1, 3])
     end
     deleteat!(reg.line_orders, start_ind:(start_ind + length(orders) - 1))
@@ -121,27 +121,27 @@ function pack!(reg::Register{N, B}, orders::UnitRange{Int}) where {N, B}
 end
 
 # mixed
-function pack!(reg::Register, orders)
+function pack_orders!(reg::Register, orders)
     for each in reverse(orders)
-        pack!(reg, each)
+        pack_orders!(reg, each)
     end
     reg
 end
 
-exposed_size(orders::NTuple{K, Int}) where K = 2^K
-exposed_size(orders::Vector{Int}) = 2^length(orders)
-exposed_size(orders::UnitRange{Int}) = 2^length(orders)
+nexposed(orders::NTuple{K, Int}) where K = 1<<K
+nexposed(orders::Vector{Int}) = 1<<length(orders)
+nexposed(orders::UnitRange{Int}) = 1<<length(orders)
 # mixed
-function exposed_size(orders)
+function nexposed(orders)
     total = 0
     for each in orders
         total += length(each)
     end
-    2^total
+    1<<total
 end
 
 function focus!(reg::Register{N, B}, orders) where {N, B}
-    pack!(reg, orders)
-    reg.state = reshape(state(reg), (exposed_size(orders), :))
+    pack_orders!(reg, orders)
+    reg.state = reshape(state(reg), (nexposed(orders), :))
     reg
 end
