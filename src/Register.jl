@@ -11,10 +11,11 @@ subtype of `AbstractArray` as member `state`.
 """
 abstract type AbstractRegister{N, B, T} end
 
-export nqubit, nbatch, line_orders, state
+export nqubit, nbatch, line_orders, state, nactive
 # register properties
 nqubit(reg::AbstractRegister{N}) where N = N
 nbatch(reg::AbstractRegister{N, B}) where {N, B} = B
+nactive(reg::AbstractRegister) = log2i(size(state(reg), 1))
 # We assume each register has a member named state and orders
 # overload this if there is not
 line_orders(reg::AbstractRegister{N}) where N = reg.line_orders

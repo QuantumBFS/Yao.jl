@@ -1,5 +1,5 @@
 import QuCircuit: AbstractRegister, Register
-import QuCircuit: nqubit, line_orders, nbatch, state, zero_state, rand_state
+import QuCircuit: nqubit, nactive, line_orders, nbatch, state, zero_state, rand_state
 import QuCircuit: pack_orders!, focus!
 import Compat: axes
 using Compat.Test
@@ -65,9 +65,11 @@ end
     focus!(reg, 2:3)
     @test line_orders(reg) == [2, 3, 1, 4, 5]
     @test size(state(reg)) == (2^2, 2^3*3)
+    @test nactive(reg) == 2
 
     focus!(reg, (5, 2:3))
     @test line_orders(reg) == [5, 2, 3, 1, 4]
     @test size(state(reg)) == (2^3, 2^2*3)
+    @test nactive(reg) == 3
 
 end
