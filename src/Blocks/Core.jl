@@ -27,8 +27,9 @@ copy(x::AbstractBlock) = x
 
 ## Required Methods
 function apply! end
-function update! end
-function cache! end
+### do nothing by default
+update!(block, params...) = block
+cache!(block; level=1, force=false) = block
 
 """
     PureBlock{N, T} <: AbstractBlock{N}
@@ -92,6 +93,7 @@ line_orders(x::Concentrator) = x.line_orders
 
 export focus
 focus(nqubit, orders::Int...) = Concentrator(nqubit, orders)
+focus(nqubit, orders::NTuple) = Concentrator(nqubit, orders)
 
 apply!(reg::Register{N}, block::Concentrator{N}) where N = focus!(reg, line_orders(block))
 

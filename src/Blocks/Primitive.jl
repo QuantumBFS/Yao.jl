@@ -61,7 +61,7 @@ for (GTYPE, NAME, MAT) in [
             const $(Symbol(join(["CONST", "SPARSE", NAME, TYPE_NAME], "_"))) = sparse(Array{$DTYPE, 2}($MAT))
 
             full(gate::Gate{1, $GTYPE, $DTYPE}) = $(Symbol(join(["CONST", NAME, TYPE_NAME], "_")))
-            sparse(gate::Gate{1, $GTYPE, $DTYPE}) = $(Symbol(join(["CONST", "SPARSE", NAME, TYPE_NAME])))
+            sparse(gate::Gate{1, $GTYPE, $DTYPE}) = $(Symbol(join(["CONST", "SPARSE", NAME, TYPE_NAME], "_")))
         end
 
     end
@@ -78,8 +78,9 @@ mutable struct PhiGate{T} <: AbstractGate{1, T}
 end
 
 export phase
-phase(theta) = PhiGate(theta)
-full(gate::PhiGate{T}) where T = exp(im * gate.theta) * T[exp(-im * gate.theta) 0; 0  exp(im * gate.theta)]
+phase(::Type{T}, theta) where {T <: Real} = PhiGate{T}(theta)
+phase(theta) = phase(Float64, theta)
+full(gate::PhiGate{T}) where T = exp(im * gate.theta) * Complex{T}[exp(-im * gate.theta) 0; 0  exp(im * gate.theta)]
 
 copy(block::PhiGate) = PhiGate(block.theta)
 update!(block::PhiGate{T}, theta::T) where T = (block.theta = theta; block)

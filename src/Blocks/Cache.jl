@@ -21,8 +21,6 @@ function apply!(reg::Register, block::Cache)
     reg
 end
 
-cache!(block; level=1, force=false) = block
-
 function cache!(block::Cache{N, L}; level=1, force=false) where {N, L}
     if force || (!(block.block in block.cache) && level > L)
         block.cache[copy(reg)] = sparse(block.block)
