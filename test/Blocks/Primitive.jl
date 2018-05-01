@@ -3,7 +3,7 @@ using Compat.Test
 import QuCircuit: X, Y, Z, Hadmard, Gate, PhiGate, RotationGate
 import QuCircuit: Cache, rand_state, state, focus!
 # interface
-import QuCircuit: gate, phase
+import QuCircuit: gate, phase, rot
 # Block Trait
 import QuCircuit: line_orders, nqubit, ninput, noutput, isunitary,
                     iscacheable, cache_type, ispure, get_cache
@@ -79,4 +79,35 @@ end
     @test full(g) == exp(im * pi) * [exp(-im * pi) 0; 0  exp(im * pi)]
     @test copy(g) !== g # deep copy
     @test update!(g, 2.0).theta == 2.0
+end
+
+
+@testset "Rotation Gate" begin
+
+    @test rot(X, 2.0).theta == 2.0
+    @test typeof(rot(X, 2.0)) == RotationGate{X, Float64}
+
+    # properties
+    g = rot(X, 2.0)
+    @test nqubit(g) == 1
+    @test ninput(g) == 1
+    @test noutput(g) == 1
+    @test isunitary(g) == true
+    @test iscacheable(g) == true
+    @test cache_type(g) == Cache
+    @test ispure(g) == true
+    @test get_cache(g) == []
+
+
+    theta = 2.0
+    for (DIRECTION, MAT) in [
+        (X, [cos(theta/2) -im*sin(theta/2); -im*sin(theta/2) cos(theta/2)]),
+        (Y, [cos(theta/2) -sin(theta/2); sin(theta/2) cos(theta/2)]),
+        (Z, [exp(-im*theta/2) 0;0 exp(im*theta/2)])
+    ]
+        @test full(rot(DIRECTION, theta)) == MAT
+    end
+
+    @test copy(g) !== g # deep copy
+    @test update!(g, 1.0).theta == 1.0
 end

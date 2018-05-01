@@ -89,14 +89,18 @@ mutable struct RotationGate{GT, T} <: AbstractGate{1, T}
     theta::T
 end
 
+export rot
+rot(::Type{T}, ::Type{GT}, theta) where {T <: Real, GT} = RotationGate{GT, T}(theta)
+rot(::Type{GT}, theta) where GT = rot(Float64, GT, theta)
+
 full(gate::RotationGate{X, T}) where T =
-    T[cos(gate.theta/2) -im*sin(gate.theta/2);
+    Complex{T}[cos(gate.theta/2) -im*sin(gate.theta/2);
       -im*sin(gate.theta/2) cos(gate.theta/2)]
 full(gate::RotationGate{Y, T}) where T =
-    T[cos(gate.theta/2) -sin(gate.theta/2);
+    Complex{T}[cos(gate.theta/2) -sin(gate.theta/2);
       sin(gate.theta/2) cos(gate.theta/2)]
 full(gate::RotationGate{Z, T}) where T =
-    T[exp(-im*gate.theta/2) 0;0 exp(im*gate.theta/2)]
+    Complex{T}[exp(-im*gate.theta/2) 0;0 exp(im*gate.theta/2)]
 
 copy(block::RotationGate{GT, T}) where {GT, T} = RotationGate{GT, T}(block.theta)
 update!(block::RotationGate{GT, T}, theta::T) where {GT, T} = (block.theta = theta; block)
