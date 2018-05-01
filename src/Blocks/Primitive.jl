@@ -4,7 +4,7 @@ abstract type AbstractGate{N, T} <: PrimitiveBlock{N, T} end
 sparse(gate::AbstractGate) = sparse(full(gate))
 
 # TODO: optimize this method later (do not use focus)
-function apply!(reg::Register, gate::AbstractGate{N}) where N
+function apply!(reg::Register, gate::AbstractGate)
     reg.state .= full(gate) * state(reg)
     reg
 end
@@ -50,24 +50,26 @@ for (GTYPE, NAME, MAT) in [
 ]
 
     for (TYPE_NAME, DTYPE) in [
-        (:ComplexF16, Compat.ComplexF16),
-        (:ComplexF32, Compat.ComplexF32),
-        (:ComplexF64, Compat.ComplexF64),
+        ("ComplexF16", Compat.ComplexF16),
+        ("ComplexF32", Compat.ComplexF32),
+        ("ComplexF64", Compat.ComplexF64),
     ]
 
         @eval begin
+
             const $(Symbol(join(["CONST", NAME, TYPE_NAME], "_"))) = Array{$DTYPE, 2}($MAT)
-            const $(Symbol(join(["CONST", "SPARSE", NAME, TYPE_NAME]))) = sparse($DTYPE, $MAT)
+            const $(Symbol(join(["CONST", "SPARSE", NAME, TYPE_NAME], "_"))) = sparse(Array{$DTYPE, 2}($MAT))
 
-            full(gate::Gate{1, $GTYPE, $TYPE_NAME}) = $(Symbol(join(["CONST", NAME, TYPE_NAME], "_")))
-            sparse(gate::Gate{1, $GTYPE, $TYPE_NAME}) = $(Symbol(join(["CONST", "SPARSE", NAME, TYPE_NAME])))
-
+            full(gate::Gate{1, $GTYPE, $DTYPE}) = $(Symbol(join(["CONST", NAME, TYPE_NAME], "_")))
+            sparse(gate::Gate{1, $GTYPE, $DTYPE}) = $(Symbol(join(["CONST", "SPARSE", NAME, TYPE_NAME])))
         end
 
     end
 
-    # fallback method for other types
-    full(gate::Gate{1, GTYPE, T}) where T = Array{T, 2}(MAT)
+    @eval begin
+        # fallback method for other types
+        full(gate::Gate{1, $GTYPE, T}) where T = Array{T, 2}(MAT)
+    end
 
 end
 
@@ -86,13 +88,13 @@ mutable struct RotationGate{GT, T} <: AbstractGate{1, T}
     theta::T
 end
 
-full(gate::RGate{X, T}) where T =
+full(gate::RotationGate{X, T}) where T =
     T[cos(gate.theta/2) -im*sin(gate.theta/2);
       -im*sin(gate.theta/2) cos(gate.theta/2)]
-full(gate::RGate{Y, T}) where T =
+full(gate::RotationGate{Y, T}) where T =
     T[cos(gate.theta/2) -sin(gate.theta/2);
       sin(gate.theta/2) cos(gate.theta/2)]
-full(gate::RGate{Z, T}) where T =
+full(gate::RotationGate{Z, T}) where T =
     T[exp(-im*gate.theta/2) 0;0 exp(im*gate.theta/2)]
 
 copy(block::RotationGate{GT, T}) where {GT, T} = RotationGate{GT, T}(block.theta)
