@@ -10,6 +10,10 @@ using Compat.Test
         @test log2i(itype(2^5)) == 5
         @test typeof(log2i(itype(2^5))) == itype
     end
+end
+
+@testset "bit length" begin
 
     @test bit_length(8) == 4
+
 end
