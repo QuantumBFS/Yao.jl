@@ -11,13 +11,20 @@ abstract type AbstractBlock{N} end
 ## Trait
 export ninput, noutput, isunitary, iscacheable, cache_type, ispure, get_cache
 
-nqubit(block::AbstractBlock{N}) where N = N
-ninput(x::AbstractBlock{N}) where N = N
-noutput(x::AbstractBlock{N}) where N = N
-isunitary(x::AbstractBlock) = false
-iscacheable(x::AbstractBlock) = false
-cache_type(x::AbstractBlock) = Cache
-ispure(x::AbstractBlock) = false
+nqubit(::Type{T}) where {N, T <: AbstractBlock{N}} = N
+ninput(::Type{T}) where {N, T <: AbstractBlock{N}} = N
+noutput(::Type{T}) where {N, T <: AbstractBlock{N}} = N
+isunitary(::Type{T}) where {T <: AbstractBlock} = false
+iscacheable(::Type{T}) where {T <: AbstractBlock} = false
+cache_type(::Type{T}) where {T <: AbstractBlock} = Cache
+ispure(::Type{T}) where {T <: AbstractBlock} = false
+
+for NAME in [:nqubit, :ninput, :noutput, :isunitary, :iscacheable, :cache_type, :ispure]
+    @eval begin
+        $NAME(block::AbstractBlock) = $NAME(typeof(block))
+    end
+end
+
 get_cache(x::AbstractBlock) = []
 
 import Base: copy
@@ -26,10 +33,11 @@ import Base: copy
 copy(x::AbstractBlock) = x
 
 ## Required Methods
+export apply!, update!, cache!
 function apply! end
 ### do nothing by default
 update!(block, params...) = block
-cache!(block; level=1, force=false) = block
+cache!(block; level=1, force=false, method=sparse) = block
 
 """
     PureBlock{N, T} <: AbstractBlock{N}
@@ -39,6 +47,7 @@ abstract type that all block with a matrix form will subtype from.
 abstract type PureBlock{N, T} <: AbstractBlock{N} end
 
 ispure(block::PureBlock) = true
+iscacheable(block::PureBlock) = true
 
 import Base: full, sparse, eltype
 eltype(block::PureBlock{N, T}) where {N, T} = T
@@ -52,11 +61,13 @@ eltype(block::PureBlock{N, T}) where {N, T} = T
 abstract type that all primitive block will subtype from. A primitive block
 is a concrete block who can not be decomposed into other blocks. All composite
 block can be decomposed into several primitive blocks.
+
+NOTE: subtype for primitive block with parameter should implement `hash` and `==`
+method to enable key value cache.
 """
 abstract type PrimitiveBlock{N, T} <: PureBlock{N, T} end
 
-iscacheable(block::PrimitiveBlock) = true
-isunitary(block::PrimitiveBlock) = true
+isunitary(::Type{T}) where {T <: PrimitiveBlock} = true
 
 """
     CompositeBlock{N, T} <: PureBlock{N, T}
@@ -72,7 +83,12 @@ abstract supertype which cache blocks will inherit from.
 """
 abstract type AbstractCache{N, L, T} <: PureBlock{N, T} end
 
+export level
+level(::Type{T}) where {N, L, T<:AbstractCache{N, L}} = L
+level(block::AbstractCache) = level(typeof(block))
+
 function cache end
+function cache_method end
 
 """
     AbstractMeasure{N, M} <: AbstractBlock{N}

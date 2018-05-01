@@ -10,6 +10,7 @@ function apply!(reg::Register, gate::AbstractGate)
 end
 
 # Single-Qubit Gates
+export X, Y, Z, Hadmard
 abstract type GateType end
 abstract type X <: GateType end
 abstract type Y <: GateType end
@@ -73,7 +74,7 @@ for (GTYPE, NAME, MAT) in [
 
 end
 
-mutable struct PhiGate{T} <: AbstractGate{1, T}
+mutable struct PhiGate{T} <: AbstractGate{1, Complex{T}}
     theta::T
 end
 
@@ -85,7 +86,11 @@ full(gate::PhiGate{T}) where T = exp(im * gate.theta) * Complex{T}[exp(-im * gat
 copy(block::PhiGate) = PhiGate(block.theta)
 update!(block::PhiGate{T}, theta::T) where T = (block.theta = theta; block)
 
-mutable struct RotationGate{GT, T} <: AbstractGate{1, T}
+import Base: ==, hash
+==(lhs::PhiGate, rhs::PhiGate) = lhs.theta == rhs.theta
+hash(block::PhiGate) = hash(block.theta)
+
+mutable struct RotationGate{GT, T} <: AbstractGate{1, Complex{T}}
     theta::T
 end
 
@@ -104,3 +109,7 @@ full(gate::RotationGate{Z, T}) where T =
 
 copy(block::RotationGate{GT, T}) where {GT, T} = RotationGate{GT, T}(block.theta)
 update!(block::RotationGate{GT, T}, theta::T) where {GT, T} = (block.theta = theta; block)
+
+import Base: ==, hash
+==(lhs::RotationGate{GT}, rhs::RotationGate{GT}) where GT = lhs.theta == rhs.theta
+hash(block::RotationGate{GT}) where GT = hash((GT, block.theta))

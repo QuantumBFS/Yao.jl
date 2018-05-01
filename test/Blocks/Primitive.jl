@@ -55,6 +55,11 @@ import QuCircuit: apply!, update!, cache!
         end
     end
 
+    # check compare method
+    # TODO: traverse all possible value
+    @test (gate(X) == gate(X)) == true
+    @test (gate(X) == gate(Y)) == false
+    @test (gate(Z) == gate(X)) == false
 end
 
 @testset "Phase Gate" begin
@@ -79,6 +84,11 @@ end
     @test full(g) == exp(im * pi) * [exp(-im * pi) 0; 0  exp(im * pi)]
     @test copy(g) !== g # deep copy
     @test update!(g, 2.0).theta == 2.0
+
+    # compare methods
+
+    @test (phase(2.0) == phase(2.0)) == true
+    @test (phase(2.0) == phase(1.0)) == false
 end
 
 
@@ -110,4 +120,9 @@ end
 
     @test copy(g) !== g # deep copy
     @test update!(g, 1.0).theta == 1.0
+
+    # compare method
+    @test (rot(X, 2.0) == rot(X, 2.0)) == true
+    @test (rot(X, 2.0) == rot(Y, 2.0)) == false
+    @test (rot(X, 2.0) == rot(X, 1.0)) == false
 end
