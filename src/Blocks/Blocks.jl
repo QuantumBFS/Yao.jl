@@ -1,3 +1,5 @@
 include("Core.jl")
+include("Primitive.jl")
+include("Cache.jl")
 include("Compose.jl")
-include("Gates.jl")
+include("Measure.jl")
