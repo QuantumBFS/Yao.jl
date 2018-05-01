@@ -9,7 +9,7 @@ abstract type AbstractBlock{N} end
 # Interface
 
 ## Trait
-export ninput, noutput, isunitary, iscacheable, cache_type, ispure, get_cache
+export nqubit, ninput, noutput, isunitary, iscacheable, cache_type, ispure, get_cache
 
 nqubit(::Type{T}) where {N, T <: AbstractBlock{N}} = N
 ninput(::Type{T}) where {N, T <: AbstractBlock{N}} = N
@@ -27,7 +27,7 @@ end
 
 get_cache(x::AbstractBlock) = []
 
-import Base: copy
+import Base: copy, length
 # only shallow copy by default
 # overload this when block contains parameters
 copy(x::AbstractBlock) = x

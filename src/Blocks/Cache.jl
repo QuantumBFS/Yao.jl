@@ -13,12 +13,14 @@ Cache(block::PureBlock, level::Int) =
 export cache
 
 function cache(block::PureBlock; level::Int=0, method=SparseMatrixCSC{T, Int} where T)
-    Cache(method, block, level)
+    cache_type(block)(method, block, level)
 end
 
 get_cache(block::Cache) = block.cache
 
-isunitary(block::Cache{N, L, T, BT}) where {N, L, T, BT} = isunitary(BT)
+# cache inherit the same property from its content
+isunitary(::Type{C}) where {N, L, T, BT, C <: Cache{N, L, T, BT}} = isunitary(BT)
+isunitary(block::Cache) = isunitary(block.block)
 
 function apply!(reg::Register, block::Cache)
     if block.block in block.cache
@@ -30,7 +32,7 @@ function apply!(reg::Register, block::Cache)
     reg
 end
 
-cacheable(cache_block::Cache{N, L}, level, force) where {N, L} =
+cacheable(cache_block::Cache{N, L}, level, force=false) where {N, L} =
     force || (!(cache_block.block in keys(cache_block.cache)) && level > L)
 
 # force cache this cache block
@@ -54,3 +56,11 @@ function cache!(cache_block::Cache; level=1, force=false)
 end
 
 update!(block::Cache, params...) = update!(block.block, params...)
+
+import Base: empty!
+function empty!(cache_block::Cache; level=1, force=false)
+    if cacheable(cache_block, level, force)
+        empty!(cache_block.cache)
+    end
+    cache_block
+end

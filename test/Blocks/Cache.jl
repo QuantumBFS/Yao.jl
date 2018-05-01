@@ -19,6 +19,7 @@ import QuCircuit: apply!, update!, cache!
     @test level(cache(inner_g)) == 0
     @test level(cache_g) == 3
 
+    # TODO: check if cache inherit properties from non-unitary, im-cacheable blocks
     for trait in [nqubit, ninput, noutput, isunitary, iscacheable, cache_type, ispure]
         @eval begin
             @test $trait($cache_g) == $trait($inner_g)
