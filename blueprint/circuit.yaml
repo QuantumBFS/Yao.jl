@@ -1,0 +1,34 @@
+DISP_LEVEL: 2
+DISP_INITIAL: true
+DISP_PARAMS: true
+name: "Circuit"
+nline: 10
+blocks:
+    -
+        DISP: true
+        name: "Rotation"
+        nline: 7
+        blocks:
+            - "/X(0)"
+            - "/C(1)--/NC(2) -- /G(3:5, $\\sqrt{2}$, 0.3 & 0.4)"
+            - "/Measure(6);"
+            - "/NC(7)--/NOT(5);"
+            - "/Swap(4 & 7);"
+            - "/Focus(7 & 2 & 5 & 1);"
+            -
+                DISP: false
+                name: "R1"
+                nline: 4
+                blocks:
+                    - "/Rot(0, 0.2 & 0 & 0.5)"
+                    - "/G(1:4, Math,);"
+
+    -
+        DISP: true
+        name: "R1"
+        nline: 4
+        blocks:
+            - "/Rx(1, 0.4)"
+            - "/G(2:3, U2,);"
+    - "/Measure(0:10);"
+    - "/End(0:10)"
