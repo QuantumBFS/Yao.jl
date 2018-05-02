@@ -1,5 +1,5 @@
 """
-    AbstractRegister{M, B, T}
+    AbstractRegister{N, B, T}
 
 Abstract type for quantum registers, all quantum registers contains a
 subtype of `AbstractArray` as member `state`.
