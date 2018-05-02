@@ -7,7 +7,7 @@ A wave function is a tensor of order-3, psi(f, r, b).
 * b: batch dimension.
 
 ##### State manipulation
-* `psi = Psi(psi1, '0', psi2, '0x4', ...)`: merge disentangled spaces `psi1`, `0`, `psi2`, `0000` et. al. to create a new larger space.
+* `psi = Psi(psi1, '0', psi2, '0*4', ...)`: merge disentangled spaces `psi1`, `0`, `psi2`, `0000` et. al. to create a new larger space.
 * `psi = focus(psi, [1, 3, 2])`: change the operation space to [1, 3, 2], now psi is a tensor of shape (2^3, 2^(num_bit-3), b).
 this is achieved by index unraveling and permuting. `Focus()` is equivalent to making all qubits focused.
 * `rho = density_matrix(psi)`: get the reduced density matrix for currently focused space.
