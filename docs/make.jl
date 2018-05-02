@@ -9,7 +9,17 @@ makedocs(
     analytics = "UA-89508993-1",
     pages = [
         "Home" => "index.md",
-        "Notes" => "notes.md",
+        "Developer Documentation" => Any[
+            "dev/block.md",
+            "dev/register.md",
+            "dev/cache.md",
+            "dev/visualization.md",
+            "dev/unittest.md",
+        ],
+        "Theoretical Notes" => Any[
+            "theo/rotation.md",
+            "theo/grover.md",
+        ],
     ],
     html_prettyurls = !("local" in ARGS),
     html_canonical = "https://quantumbfs.github.io/QuCircuit.jl/latest/",

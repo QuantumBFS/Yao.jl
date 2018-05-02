@@ -16,9 +16,6 @@ the register's data's shape can be permuted and reshaped, but it cannot be shrin
 2^N
 ```
 
-
-
-
 ## Block
 
 **Block**s are the basic component of an quantum oracle in **QuCircuit.jl**.
