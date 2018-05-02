@@ -109,7 +109,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Block System",
     "title": "Concentrator",
     "category": "section",
-    "text": "QuCircuit.Concentrator"
+    "text": "QuCircuit.Concentrator(Image: concentrator)"
 },
 
 {
