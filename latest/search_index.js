@@ -25,67 +25,259 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "notes/#",
-    "page": "Notes",
-    "title": "Notes",
+    "location": "dev/block/#",
+    "page": "Block System",
+    "title": "Block System",
     "category": "page",
     "text": ""
 },
 
 {
-    "location": "notes/#Design-Notes-1",
-    "page": "Notes",
-    "title": "Design Notes",
+    "location": "dev/block/#Block-System-1",
+    "page": "Block System",
+    "title": "Block System",
+    "category": "section",
+    "text": "The whole framework is consist of a block system. The whole system characterize a quantum circuit into serveral kinds of blocks. The uppermost abstract type for the whole system is AbstractBlock"
+},
+
+{
+    "location": "dev/block/#QuCircuit.PureBlock",
+    "page": "Block System",
+    "title": "QuCircuit.PureBlock",
+    "category": "type",
+    "text": "PureBlock{N, T} <: AbstractBlock\n\nabstract type that all block with a matrix form will subtype from.\n\n\n\n"
+},
+
+{
+    "location": "dev/block/#PureBlock-1",
+    "page": "Block System",
+    "title": "PureBlock",
+    "category": "section",
+    "text": "QuCircuit.PureBlock"
+},
+
+{
+    "location": "dev/block/#QuCircuit.PrimitiveBlock",
+    "page": "Block System",
+    "title": "QuCircuit.PrimitiveBlock",
+    "category": "type",
+    "text": "PrimitiveBlock{N, T} <: PureBlock{N, T}\n\nabstract type that all primitive block will subtype from. A primitive block is a concrete block who can not be decomposed into other blocks. All composite block can be decomposed into several primitive blocks.\n\nNOTE: subtype for primitive block with parameter should implement hash and == method to enable key value cache.\n\n\n\n"
+},
+
+{
+    "location": "dev/block/#Primitive-Block-1",
+    "page": "Block System",
+    "title": "Primitive Block",
+    "category": "section",
+    "text": "QuCircuit.PrimitiveBlock"
+},
+
+{
+    "location": "dev/block/#QuCircuit.CompositeBlock",
+    "page": "Block System",
+    "title": "QuCircuit.CompositeBlock",
+    "category": "type",
+    "text": "CompositeBlock{N, T} <: PureBlock{N, T}\n\nabstract supertype which composite blocks will inherit from.\n\n\n\n"
+},
+
+{
+    "location": "dev/block/#Composite-Block-1",
+    "page": "Block System",
+    "title": "Composite Block",
+    "category": "section",
+    "text": "QuCircuit.CompositeBlock"
+},
+
+{
+    "location": "dev/block/#QuCircuit.AbstractMeasure",
+    "page": "Block System",
+    "title": "QuCircuit.AbstractMeasure",
+    "category": "type",
+    "text": "AbstractMeasure{N, M} <: AbstractBlock\n\nAbstract block supertype which measurement block will inherit from.\n\n\n\n"
+},
+
+{
+    "location": "dev/block/#MeasureBlock-1",
+    "page": "Block System",
+    "title": "MeasureBlock",
+    "category": "section",
+    "text": "QuCircuit.AbstractMeasure"
+},
+
+{
+    "location": "dev/block/#Concentrator-1",
+    "page": "Block System",
+    "title": "Concentrator",
+    "category": "section",
+    "text": "QuCircuit.Concentrator"
+},
+
+{
+    "location": "dev/block/#Sequence-1",
+    "page": "Block System",
+    "title": "Sequence",
+    "category": "section",
+    "text": "QuCircuit.Sequence"
+},
+
+{
+    "location": "dev/register/#",
+    "page": "Quantum Register",
+    "title": "Quantum Register",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "dev/register/#Quantum-Register-1",
+    "page": "Quantum Register",
+    "title": "Quantum Register",
+    "category": "section",
+    "text": "Quantum Register is the abstraction of a quantum state being processed by a quantum circuit."
+},
+
+{
+    "location": "dev/register/#QuCircuit.AbstractRegister",
+    "page": "Quantum Register",
+    "title": "QuCircuit.AbstractRegister",
+    "category": "type",
+    "text": "AbstractRegister{N, B, T}\n\nAbstract type for quantum registers, all quantum registers contains a subtype of AbstractArray as member state.\n\nParameters\n\nN is the number of qubits\nB is the batch size\nT eltype\n\n\n\n"
+},
+
+{
+    "location": "dev/register/#The-Interface-of-Register-1",
+    "page": "Quantum Register",
+    "title": "The Interface of Register",
+    "category": "section",
+    "text": "You can always define your own quantum register by subtyping this abstract type.QuCircuit.AbstractRegisterThe interface of a AbstractRegister looks like:"
+},
+
+{
+    "location": "dev/register/#Properties-1",
+    "page": "Quantum Register",
+    "title": "Properties",
+    "category": "section",
+    "text": "nqubit: number of qubits\nnbatch: number of batch\nnactive: number of active qubits\naddress: current list of line address\nstate: current state\neltype: eltype\ncopy: copy\nfocus!: pack several legs together"
+},
+
+{
+    "location": "dev/register/#QuCircuit.Register",
+    "page": "Quantum Register",
+    "title": "QuCircuit.Register",
+    "category": "type",
+    "text": "Register{N, B, T} <: AbstractRegister{N, B, T}\n\ndefault register type. This register use a builtin array to store the quantum state. The elements inside an instance of Register will be related to a certain memory address, but since it is not immutable (we need to change its shape), be careful not to change its state, though the behaviour is the same, but allocation should be avoided. Therefore, no shallow copy method is provided.\n\n\n\n"
+},
+
+{
+    "location": "dev/register/#Factory-Methods-1",
+    "page": "Quantum Register",
+    "title": "Factory Methods",
+    "category": "section",
+    "text": "QuCircuit.Registerreshaped_state: state"
+},
+
+{
+    "location": "dev/cache/#",
+    "page": "Cache",
+    "title": "Cache",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "dev/cache/#Cache-1",
+    "page": "Cache",
+    "title": "Cache",
     "category": "section",
     "text": ""
 },
 
 {
-    "location": "notes/#Quantum-Register-1",
-    "page": "Notes",
-    "title": "Quantum Register",
+    "location": "dev/cache/#Key-value-Storage-1",
+    "page": "Cache",
+    "title": "Key-value Storage",
     "category": "section",
-    "text": "Quantum Register is the abstraction of a quantum states being processed by a circuit.mutable struct Register{T <: AbstractArray, N} <: AbstractRegister\n    data::T\nendthe register\'s data\'s shape can be permuted and reshaped, but it cannot be shrinked, the total size will be kept to2^N"
+    "text": "Like PyTorch, MXNet, we use a key value storage (a cache pool) to store cached blocks. Cached blocks are frequently used blocks with specific matrix form. You can choose which type of matrix storage to store in a cache pool.The benefit of this solution includes:more contiguous memory address (compare to previous plans, e.g CacheBlock, block with a cache dict)\nmore convenient for traversing cached parameters"
 },
 
 {
-    "location": "notes/#Block-1",
-    "page": "Notes",
-    "title": "Block",
-    "category": "section",
-    "text": "Blocks are the basic component of an quantum oracle in QuCircuit.jl."
+    "location": "dev/visualization/#",
+    "page": "Visualization",
+    "title": "Visualization",
+    "category": "page",
+    "text": ""
 },
 
 {
-    "location": "notes/#Memory-Contiguous-1",
-    "page": "Notes",
-    "title": "Memory Contiguous",
+    "location": "dev/visualization/#Visualization-1",
+    "page": "Visualization",
+    "title": "Visualization",
     "category": "section",
-    "text": "Block should be contiguous on quantum registers, which means a block for N-qubits starts from location k, should be contiguous on this quantum memory and thus will be contiguous on its classical simulated quantum register too.-- [ ] -- [ ] --"
+    "text": ""
 },
 
 {
-    "location": "notes/#Packer-1",
-    "page": "Notes",
-    "title": "Packer",
-    "category": "section",
-    "text": "A Packer is an special block that will permute the order of quantum memory address. This will make in-contiguous memory address become contiguous and the quantum state will be reshape to a matrix that has the related shape to the operator. But in simulation, this will cause an extra memory allocation. *****         *****         ****\n *   * -- 1    *   * -- 1 -- ****\n *   * -- 2    *   * -- 3 -- ****\n *   * -- 3 => *   * -- 5 -- ****\n *   * -- 4    *   * -- 2    ****\n *   * -- 5    *   * -- 4\n *****         *****However, by default, the block tree will not help in organizing the order of memory address."
+    "location": "dev/unittest/#",
+    "page": "Unit Test",
+    "title": "Unit Test",
+    "category": "page",
+    "text": ""
 },
 
 {
-    "location": "notes/#Default-Behaviour-of-Block-Evaluation-1",
-    "page": "Notes",
-    "title": "Default Behaviour of Block Evaluation",
+    "location": "dev/unittest/#Unit-Test-1",
+    "page": "Unit Test",
+    "title": "Unit Test",
     "category": "section",
-    "text": "The default behaviour of the evaluation of a block tree will use kronecker product to assemble different gates, e.g, the following circuit will be evaluated by\n-- [Z] ---------\n\n-- [X] -- [X] --\n\n---------- X ---\n           |\n--------- [ ] --\nBy default, its evaluation is equivalent toZ otimes X otimes CNOT cdot I otimes X otimes I otimes IThis is because the gates are stored by a tree inside a block with their memory address and the calculation order on each line, by default the order will be the insertion order.       gates address  order\n---------------------------\nBlock: Z     (1, )      1\n       X     (2, )      1\n       X     (2, )      2\n       CNOT  (3, 4)     1The apply! method will first run through the memory address 1:N (N = 4 here) to calculate gates with same order on each line (if there is no gate, then use an identity) until it meets the maximum depth of the block, the maximum depth will be the maximum order.User can specify the calculation order by input an integer, and when        gates address order\n----------------------------\nBlock:  Z     (1, )      1\n        X     (2, )      1\n        X     (2, )      2\n        CNOT  (3, 4)     2the calculation will be equivalent toZ otimes X otimes I otimes I cdot I otimes X otimes CNOT"
+    "text": "We use Julia\'s stdlib Test for unit test. This document is about how to creat new test cases. And what should be test."
 },
 
 {
-    "location": "notes/#More-efficient-controlled-gates-1",
-    "page": "Notes",
-    "title": "More efficient controlled gates",
+    "location": "dev/unittest/#Create-new-test-case-1",
+    "page": "Unit Test",
+    "title": "Create new test case",
     "category": "section",
-    "text": "By default, some commonly used controlled gates like CNOT will be converted to a matrix and evaluate with other gates together, however, controlled gates can be an arbitrary gate with an identity in a block matrix, and can be derivedCOP = beginpmatrix\n I  0\n 0  X\nendpmatrix beginaligned\nCOP cranglePsirangle = (alpha_10rangle + alpha_21rangle) XPsirangle\n                          = alpha_10ranglePsirangle + alpha_21rangle X Psirangle\nendalignedTherefore, the functionality of a controlled gate will looks likebeginaligned\n U_1(eta_1)cdot COP(c Psi) cdot U_2(eta_2) cdot U_3(eta_3)eta_1ranglecrangleeta_2ranglePsirangleeta_3rangle\n rightarrow U_1(eta_1)cdot COP(c Psi) cdot U_2(eta_2) cdot U_3(eta_3) eta_1rangle (alpha_10rangle + alpha_21rangle) eta_2rangle Psirangle eta_3rangle\n rightarrow alpha_1 U_1otimes I otimes U_2 otimes I otimes U_3eta_1rangle 0rangle eta_2rangle Psirangle eta_3rangle + alpha_2 U_1otimes I otimes U_2 otimes X otimes U_3 etarangle 1rangle eta_2rangle Psirangle eta_3rangle\n rightarrow U_1otimes I otimes U_2 otimes I otimes U_3 phirangle + alpha_2 U_1otimes Iotimes U_2 otimes (X - I) otimes U_3 eta_1rangle 1rangle eta_2rangle Psirangle eta_3rangle\nendaligned"
+    "text": ""
+},
+
+{
+    "location": "dev/unittest/#How-to-check-test-coverage-1",
+    "page": "Unit Test",
+    "title": "How to check test coverage",
+    "category": "section",
+    "text": "Step 1:  Navigate to your test directory, and start julia like this:julia --code-coverage=userStep 2: Run your tests (e.g., include(\"runtests.jl\")) and quit Julia.Step 3: Navigate to the top-level directory of your package, restart Julia (with no special flags) and analyze your code coverage:using Coverage\n# defaults to src/; alternatively, supply the folder name as argument\ncoverage = process_folder()\n# Get total coverage for all Julia files\ncovered_lines, total_lines = get_summary(coverage)\n# Or process a single file\n@show get_summary(process_file(\"src/MyPkg.jl\"))check Coverage.jl for more information."
+},
+
+{
+    "location": "theo/rotation/#",
+    "page": "Rotation Block",
+    "title": "Rotation Block",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "theo/rotation/#Rotation-Block-1",
+    "page": "Rotation Block",
+    "title": "Rotation Block",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "theo/grover/#",
+    "page": "Grover Search",
+    "title": "Grover Search",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "theo/grover/#Grover-Search-1",
+    "page": "Grover Search",
+    "title": "Grover Search",
+    "category": "section",
+    "text": ""
 },
 
 ]}
