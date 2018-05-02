@@ -88,7 +88,7 @@ update!(block::PhiGate{T}, theta::T) where T = (block.theta = theta; block)
 
 import Base: ==, hash
 ==(lhs::PhiGate, rhs::PhiGate) = lhs.theta == rhs.theta
-hash(block::PhiGate) = hash(block.theta)
+hash(block::PhiGate, h::UInt) = hash(block.theta, h)
 
 mutable struct RotationGate{GT, T} <: AbstractGate{1, Complex{T}}
     theta::T
@@ -112,4 +112,4 @@ update!(block::RotationGate{GT, T}, theta::T) where {GT, T} = (block.theta = the
 
 import Base: ==, hash
 ==(lhs::RotationGate{GT}, rhs::RotationGate{GT}) where GT = lhs.theta == rhs.theta
-hash(block::RotationGate{GT}) where GT = hash((GT, block.theta))
+hash(block::RotationGate{GT}, h::UInt) where GT = hash((GT, block.theta), h)

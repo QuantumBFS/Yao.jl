@@ -1,19 +1,25 @@
 """
-    AbstractBlock{N}
+    AbstractBlock
 
 abstract type that all block will subtype from. `N` is the number of
 qubits.
 """
-abstract type AbstractBlock{N} end
+abstract type AbstractBlock end
 
 # Interface
+
+import Base: ==
+struct AnySize end
+==(lhs::AnySize, rhs::AnySize) = true
+==(lhs::AnySize, rhs) = true
+==(lhs, rhs::AnySize) = true
 
 ## Trait
 export nqubit, ninput, noutput, isunitary, iscacheable, cache_type, ispure, get_cache
 
-nqubit(::Type{T}) where {N, T <: AbstractBlock{N}} = N
-ninput(::Type{T}) where {N, T <: AbstractBlock{N}} = N
-noutput(::Type{T}) where {N, T <: AbstractBlock{N}} = N
+nqubit(::Type{T}) where {T <: AbstractBlock} = AnySize()
+ninput(::Type{T}) where {T <: AbstractBlock} = AnySize()
+noutput(::Type{T}) where {T <: AbstractBlock} = AnySize()
 isunitary(::Type{T}) where {T <: AbstractBlock} = false
 iscacheable(::Type{T}) where {T <: AbstractBlock} = false
 cache_type(::Type{T}) where {T <: AbstractBlock} = Cache
@@ -25,7 +31,7 @@ for NAME in [:nqubit, :ninput, :noutput, :isunitary, :iscacheable, :cache_type, 
     end
 end
 
-get_cache(x::AbstractBlock) = []
+get_cache(x::AbstractBlock) = nothing
 
 import Base: copy, length
 # only shallow copy by default
@@ -40,11 +46,15 @@ update!(block, params...) = block
 cache!(block; level=1, force=false, method=sparse) = block
 
 """
-    PureBlock{N, T} <: AbstractBlock{N}
+    PureBlock{N, T} <: AbstractBlock
 
 abstract type that all block with a matrix form will subtype from.
 """
-abstract type PureBlock{N, T} <: AbstractBlock{N} end
+abstract type PureBlock{N, T} <: AbstractBlock end
+
+nqubit(::Type{T}) where {N, T <: PureBlock{N}} = N
+ninput(::Type{T}) where {N, T <: PureBlock{N}} = N
+noutput(::Type{T}) where {N, T <: PureBlock{N}} = N
 
 ispure(block::PureBlock) = true
 iscacheable(block::PureBlock) = true
@@ -83,43 +93,50 @@ abstract supertype which cache blocks will inherit from.
 """
 abstract type AbstractCache{N, L, T} <: PureBlock{N, T} end
 
-export level
-level(::Type{T}) where {N, L, T<:AbstractCache{N, L}} = L
-level(block::AbstractCache) = level(typeof(block))
+export cache_level
+cache_level(::Type{T}) where {N, L, T<:AbstractCache{N, L}} = L
+cache_level(block::AbstractCache) = cache_level(typeof(block))
 
 function cache end
 function cache_method end
 
+# compare methods to enable key-value storage
+import Base: hash, ==
+
+
 """
-    AbstractMeasure{N, M} <: AbstractBlock{N}
+    AbstractMeasure{N, M} <: AbstractBlock
 
 Abstract block supertype which measurement block will inherit from.
 """
-abstract type AbstractMeasure{N, M} <: AbstractBlock{N} end
+abstract type AbstractMeasure{N, M} <: AbstractBlock end
 
+nqubit(::Type{T}) where {N, T <: AbstractMeasure{N}} = N
+ninput(::Type{T}) where {N, T <: AbstractMeasure{N}} = N
+noutput(::Type{T}) where {N, M, T <: AbstractMeasure{N, M}} = N - M
 
-struct Concentrator{N, M} <: AbstractBlock{N}
-    line_orders::NTuple{M, Int}
+struct Concentrator{T <: Union{Int, Tuple}} <: AbstractBlock
+    address::T
 end
 
-Concentrator(nqubit::Int, orders::NTuple{M, Int}) where M = Concentrator{nqubit, M}(orders)
+Concentrator(orders...) = Concentrator(orders)
 
-noutput(x::Concentrator{N, M}) where {N, M} = M
-line_orders(x::Concentrator) = x.line_orders
+eltype(::Concentrator) = Bool
+isunitary(x::Concentrator) = true
+noutput(x::Concentrator) = length(x.address)
+address(x::Concentrator) = x.address
 
 export focus
-focus(nqubit, orders::Int...) = Concentrator(nqubit, orders)
-focus(nqubit, orders::NTuple) = Concentrator(nqubit, orders)
+focus(orders...) = Concentrator(orders...)
+apply!(reg::Register, block::Concentrator) = focus!(reg, address(block)...)
 
-apply!(reg::Register{N}, block::Concentrator{N}) where N = focus!(reg, line_orders(block))
-
-struct Sequence{N} <: AbstractBlock{N}
-    list::Vector
+struct Sequence{T <: Tuple} <: AbstractBlock
+    list::T
 end
 
-sequence(blocks::AbstractBlock{N}...) where N = Sequence{N}([blocks...])
+sequence(blocks...) = Sequence(blocks)
 
-function apply!(reg::Register{N}, block::Sequence{N}) where N
+function apply!(reg::Register, block::Sequence)
     for each in block.list
         apply!(reg, each)
     end

@@ -11,14 +11,14 @@ subtype of `AbstractArray` as member `state`.
 """
 abstract type AbstractRegister{N, B, T} end
 
-export nqubit, nbatch, line_orders, state, nactive
+export nqubit, nbatch, address, state, nactive
 # register properties
 nqubit(reg::AbstractRegister{N}) where N = N
 nbatch(reg::AbstractRegister{N, B}) where {N, B} = B
 nactive(reg::AbstractRegister) = log2i(size(state(reg), 1))
 # We assume each register has a member named state and orders
 # overload this if there is not
-line_orders(reg::AbstractRegister{N}) where N = reg.line_orders
+address(reg::AbstractRegister{N}) where N = reg.address
 state(reg::AbstractRegister) = reg.state
 
 import Base: eltype, copy
@@ -88,7 +88,7 @@ shallow copy method is provided.
 """
 mutable struct Register{N, B, T} <: AbstractRegister{N, B, T}
     state::Array{T, 2}
-    line_orders::Vector{Int}
+    address::Vector{Int}
 end
 
 function Register(state::Array{T, 2}) where T
@@ -110,14 +110,18 @@ rand_state(::Type{T}, nqubit::Int, nbatch::Int=1) where T = Register(rand(T, 1<<
 zero_state(nqubit::Int, nbatch::Int=1) = zero_state(Complex128, nqubit, nbatch)
 rand_state(nqubit::Int, nbatch::Int=1) = rand_state(Complex128, nqubit, nbatch)
 
-copy(reg::Register{N, B, T}) where {N, B, T} = Register{N, B, T}(copy(reg.state), copy(reg.line_orders))
+copy(reg::Register{N, B, T}) where {N, B, T} = Register{N, B, T}(copy(reg.state), copy(reg.address))
 
 ## Dimension Permutation
 # in-contiguous orders
-function pack_orders!(reg::Register{N, B}, orders::T) where {N, B, T <: Union{Int, Vector{Int}}}
+pack_orders!(reg::Register, orders::Int...) = pack_orders!(reg, orders)
+pack_orders!(reg::Register, orders::Vector{Int}) = pack_orders!(reg, Tuple(orders))
+pack_orders!(reg::Register, orders::UnitRange{Int}) = pack_orders!(reg, Tuple(orders))
+
+@inline function pack_orders!(reg::Register{N, B}, orders::NTuple{K, Int}) where {N, B, K}
     tensor = reshape(state(reg), ntuple(x->2, Val{N})..., B)
-    inds = findin(reg.line_orders, orders)
-    perm = reg.line_orders
+    inds = findin(reg.address, orders)
+    perm = reg.address
     deleteat!(perm, inds)
     prepend!(perm, orders)
     permutedims!(tensor, tensor, (perm..., N+1))
@@ -125,30 +129,32 @@ function pack_orders!(reg::Register{N, B}, orders::T) where {N, B, T <: Union{In
 end
 
 # contiguous orders
-function pack_orders!(reg::Register{N, B}, orders::UnitRange{Int}) where {N, B}
-    start_order = first(orders)
-    # return ASAP when target order at the beginning
-    start_order == first(line_orders(reg)) && return reg
+# TODO: add exception when UnitRange is not actually contiguous
+# NOTE: remove this if merge legs together is not faster than original
+# @inline function pack_orders!(reg::Register{N, B}, orders::UnitRange{Int}) where {N, B}
+#     start_order = first(orders)
+#     # return ASAP when target order at the beginning
+#     start_order == first(address(reg)) && return reg
 
-    pack_size = 1<<length(orders)
-    start_ind, = findin(line_orders(reg), start_order)
+#     pack_size = 1<<length(orders)
+#     start_ind, = findin(address(reg), start_order)
 
-    if start_ind+length(orders)-1 == N
-        src = reshape(state(reg), :, pack_size)
-        dst = reshape(state(reg), pack_size, :)
-        transpose!(dst, src)
-    else
-        src = reshape(state(reg), 1<<start_ind, pack_size, :)
-        dst = reshape(state(reg), pack_size, 1<<start_ind, :)
-        permutedims!(dst, src, [2, 1, 3])
-    end
-    deleteat!(reg.line_orders, start_ind:(start_ind + length(orders) - 1))
-    prepend!(reg.line_orders, collect(orders))
-    reg
-end
+#     if start_ind+length(orders)-1 == N
+#         src = reshape(state(reg), :, pack_size)
+#         dst = reshape(state(reg), pack_size, :)
+#         transpose!(dst, src)
+#     else
+#         src = reshape(state(reg), 1<<start_ind, pack_size, :)
+#         dst = reshape(state(reg), pack_size, 1<<start_ind, :)
+#         permutedims!(dst, src, [2, 1, 3])
+#     end
+#     deleteat!(reg.address, start_ind:(start_ind + length(orders) - 1))
+#     prepend!(reg.address, collect(orders))
+#     reg
+# end
 
 # mixed
-function pack_orders!(reg::Register, orders)
+@inline function pack_orders!(reg::Register, orders)
     for each in reverse(orders)
         pack_orders!(reg, each)
     end
@@ -159,6 +165,7 @@ nexposed(orders::NTuple{K, Int}) where K = 1<<K
 nexposed(orders::Vector{Int}) = 1<<length(orders)
 nexposed(orders::UnitRange{Int}) = 1<<length(orders)
 # mixed
+nexposed(orders...) = nexposed(orders)
 function nexposed(orders)
     total = 0
     for each in orders
@@ -167,8 +174,8 @@ function nexposed(orders)
     1<<total
 end
 
-function focus!(reg::Register{N, B}, orders) where {N, B}
+function focus!(reg::Register{N, B}, orders...) where {N, B}
     pack_orders!(reg, orders)
-    reg.state = reshape(state(reg), (nexposed(orders), :))
+    reg.state = reshape(state(reg), (nexposed(orders...), :))
     reg
 end

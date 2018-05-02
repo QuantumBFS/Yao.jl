@@ -5,25 +5,48 @@
 # 1. ChainBlock, chain a list of blocks with same size together
 # 2. KronBlock, combine several blocks by kronecker product
 
+# TODO: use recursive method instead of vector
+# promote_block_eltype(a::Type{TB}) where {N, T, TB <: PureBlock{N, T}} = T
+# promote_block_eltype(a::Type{TBa}, b::Type{TBb}) where {N, M, TA, TB, TBa <: PureBlock{N, TA}, TBb <: PureBlock{M, TB}} = promote_type(TA, TB)
+# promote_block_eltype(a::Type{TB}, b::Type...) where {N, T, TB <: PureBlock{N, T}} = promote_type(T, promote_block_eltype(b...))
 promote_block_eltype(blocks) = promote_type([eltype(each) for each in blocks]...)
 
-struct ChainBlock{N, T} <: PureBlock{N, T}
-    list::Vector
+struct ChainBlock{N, T, TD <: Tuple} <: PureBlock{N, T}
+    list::TD
 end
 
-ChainBlock(nqubit, blocks::Vector) = ChainBlock{nqubit, promote_block_eltype(blocks)}(blocks)
-ChainBlock(nqubit, blocks) = ChainBlock(nqubit, [blocks...])
+ChainBlock(nqubit, blocks::TD) where TD =
+    ChainBlock{nqubit, promote_block_eltype(blocks), TD}(blocks)
 
+function copy(block::ChainBlock{N, T, TD}) where {N, T, TD}
+    list = ntuple(i->copy(block.list[i]), length(block.list))
+    ChainBlock{N, T, TD}(list)
+end
+
+# Interface
 export chain
 
-function chain(blocks...)
-    N = ninput(first(blocks))
+function chain(n::Int, blocks...)
+
     for (prev, next) in zip(blocks[1:end-1], blocks[2:end])
         @assert noutput(prev) == ninput(next) "shape mismatch"
     end
-    @assert N == noutput(blocks[end]) "Chain block requires the same input and output size"
-    ChainBlock(N, blocks)
+
+    # ! we will add a focus block, if size mismatch
+    # @assert n == noutput(blocks[end]) "Chain block requires the same input and output size"
+
+    if n != noutput(blocks[end])
+        blocks = (blocks..., focus(1:n))
+    end
+    ChainBlock(n, blocks)
 end
+
+isunitary(block::ChainBlock) = all(isunitary, block.list)
+
+# TODO: provide matrix form when there are Concentrators
+# TODO: use reverse! instead?
+full(block::ChainBlock) = prod(x->full(x), reverse(block.list))
+sparse(block::ChainBlock) = prod(x->sparse(x), reverse(block.list))
 
 function apply!(reg::Register{N}, block::ChainBlock{N}) where N
     for each in block.list
@@ -37,26 +60,63 @@ function update!(block::ChainBlock, params...)
         index, param = params
         update!(block.list[index], param...)
     end
+    block
 end
 
-function cache!(block::ChainBlock; level=1, force=false)
+####################
+# ChainBlock: cache
+####################
+
+function get_cache(block::ChainBlock)
+    caches = Dict()
+    for (i, val) in enumerate(block.list)
+        if cacheable(val)
+            caches[i] = get_cache(val)
+        end
+    end
+    caches
+end
+
+function get_cache(block::ChainBlock, level::Int)
+    caches = Dict()
+    for (i, val) in enumerate(block.list)
+        if cacheable(val) && level > cache_level(val)
+            caches[i] = get_cache(val)
+        end
+    end
+    caches
+end
+
+cache!(block::ChainBlock) = (for each in block.list cache!(each) end; block)
+
+function cache!(block::ChainBlock, level::Int)
     for each in block.list
-        cache!(each, level=level, force=force)
+        cache!(each, level)
     end
     block
 end
 
-# TODO: provide matrix form when there are Concentrators
-full(block::ChainBlock) = prod(x->full(x), block.list)
-sparse(block::ChainBlock) = prod(x->sparse, block.list)
-copy(block::ChainBlock{N, T}) where {N, T} = ChainBlock{N, T}([copy(each) for each in block.list])
+import Base: hash, ==
+function hash(block::ChainBlock{N, T}, h::UInt) where {N, T}
+    hashkey = hash(ChainBlock{N, T})
+    for each in block.list
+        hashkey = hash(each, hashkey)
+    end
+    hashkey
+end
 
+==(lhs::ChainBlock, rhs::ChainBlock) = false
+==(lhs::ChainBlock{N, T}, rhs::ChainBlock{N, T}) where {N, T} = all(lhs.list .== rhs.list)
+
+#############
+# KronBlock
+#############
 import DataStructures: SortedDict
 
 """
-    KronBlock
+    KronBlock{N, T} <: PureBlock{N, T}
 
-
+composite block that combine blocks by kronecker product.
 """
 struct KronBlock{N, T} <: PureBlock{N, T}
     kvstore::SortedDict{Int, PureBlock}
@@ -134,9 +194,9 @@ This will automatically generate a block list looks like
 4 -- [Y] --
 ```
 """
-kron(total, blocks::Union{PureBlock, Tuple}...) = KronBlock(total, blocks)
+kron(total, blocks::Union{PureBlock, Tuple, Pair}...) = KronBlock(total, blocks)
 kron(total, blocks) = KronBlock(total, blocks)
-kron(blocks::Union{PureBlock, Tuple}...) = KronBlock(blocks)
+kron(blocks::Union{PureBlock, Tuple, Pair}...) = KronBlock(blocks)
 kron(blocks) = KronBlock(blocks)
 
 # some useful sugar
@@ -151,13 +211,11 @@ getindex(block::KronBlock, key) = getindex(block.kvstore, key)
 # kronecker can take non-unitary operators
 # we check whether it is unitary by checking
 # each element.
-function isunitary(block::KronBlock)
-    flag = true
-    for each in values(block)
-        flag = flag && isunitary(each)
-    end
-    flag
-end
+isunitary(block::KronBlock) = all(isunitary, values(block))
+
+#########################
+# KronBlock: matrix form
+#########################
 
 full(block::KronBlock) = full(sparse(block))
 
@@ -185,13 +243,21 @@ full(block::KronBlock) = full(sparse(block))
         curr_addr += nqubit(next_block)
     end
 
-    if curr_addr < N
+    if curr_addr <= N
         op = kron(op, speye(T, 1<<(N - curr_addr + 1)))
     end
     return op
 end
 
+####################
+# KronBlock: apply!
+####################
+
 apply!(reg::Register, block::KronBlock) = (reg.state .= full(block) * state(reg); reg)
+
+####################
+# KronBlock: update!
+####################
 
 function update!(block::KronBlock, params...)
     for each in params
@@ -201,18 +267,70 @@ function update!(block::KronBlock, params...)
     block
 end
 
-@inline function _manipulate_cache_space(f::Function, block::KronBlock, level::Int, force::Bool)
-    for each in values(block)
-        f(each, level=level, force=force)
+##################
+# KronBlock: cache
+##################
+
+# NOTE: this could be replaced by an overloaded version of `map`
+@inline function _map_cache_values(f::Function, block::KronBlock, level::Int)
+    for each in values(block.kvstore)
+        f(each, level)
     end
     block
 end
 
-cache!(block::KronBlock; level::Int=1, force::Bool=false) =
-    _manipulate_cache_space(cache!, block, level, force)
+@inline function _map_cache_values(f::Function, block::KronBlock)
+    for each in values(block.kvstore)
+        f(each)
+    end
+    block
+end
+
+"""
+    get_cache(block::KronBlock) # force get all cache
+    get_cache(block::KronBlock, level::Int)
+
+get a dict of `address=>ref_of_cache` from blocks inside of this
+instance of `KronBlock`.
+"""
+function get_cache(block::KronBlock)
+    caches = Dict()
+    for (key, val) in block.kvstore
+        if cacheable(val)
+            caches[key] = get_cache(val)
+        end
+    end
+    caches
+end
+
+function get_cache(block::KronBlock, level::Int)
+    caches = Dict()
+    for (key, val) in block.kvstore
+        if cacheable(val) && level > cache_level(val)
+            caches[key] = get_cache(val)
+        end
+    end
+    caches
+end
+
+cache!(block::KronBlock) = _map_cache_values(cache!, block)
+cache!(block::KronBlock, level::Int) =
+    _map_cache_values(cache!, block, level)
 
 import Base: empty!
 
 # empty all cache by default
-empty!(block::KronBlock; level=1, force=true) =
-    _manipulate_cache_space(empty!, block, level, force)
+empty!(block::KronBlock) = _map_cache_values(empty!, block)
+empty!(block::KronBlock, level::Int) =
+    _map_cache_values(empty!, block, level)
+
+function hash(block::KronBlock{N, T}, h::UInt) where {N, T}
+    hashkey = hash(KronBlock{N, T})
+    for each in values(block)
+        hashkey = hash(each, hashkey)
+    end
+    return hashkey
+end
+
+==(lhs::KronBlock, rhs::KronBlock) = false
+==(lhs::KronBlock{N, T}, rhs::KronBlock{N, T}) where {N, T} = (lhs.kvstore == rhs.kvstore)

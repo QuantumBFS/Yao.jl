@@ -5,7 +5,7 @@ import QuCircuit: Cache, rand_state, state, focus!
 # interface
 import QuCircuit: gate, phase, rot
 # Block Trait
-import QuCircuit: line_orders, nqubit, ninput, noutput, isunitary,
+import QuCircuit: nqubit, ninput, noutput, isunitary,
                     iscacheable, cache_type, ispure, get_cache
 # Required Methods
 import QuCircuit: apply!, update!, cache!
@@ -29,7 +29,7 @@ import QuCircuit: apply!, update!, cache!
     @test iscacheable(g) == true
     @test cache_type(g) == Cache
     @test ispure(g) == true
-    @test get_cache(g) == []
+    @test get_cache(g) == nothing
 
     reg = rand_state(4)
     focus!(reg, 1)
@@ -79,7 +79,7 @@ end
     @test iscacheable(g) == true
     @test cache_type(g) == Cache
     @test ispure(g) == true
-    @test get_cache(g) == []
+    @test get_cache(g) == nothing
 
     @test full(g) == exp(im * pi) * [exp(-im * pi) 0; 0  exp(im * pi)]
     @test copy(g) !== g # deep copy
@@ -106,7 +106,7 @@ end
     @test iscacheable(g) == true
     @test cache_type(g) == Cache
     @test ispure(g) == true
-    @test get_cache(g) == []
+    @test get_cache(g) == nothing
 
 
     theta = 2.0

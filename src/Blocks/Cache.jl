@@ -12,7 +12,7 @@ Cache(block::PureBlock, level::Int) =
 
 export cache
 
-function cache(block::PureBlock; level::Int=0, method=SparseMatrixCSC{T, Int} where T)
+function cache(block::PureBlock, level::Int=0; method=SparseMatrixCSC{T, Int} where T)
     cache_type(block)(method, block, level)
 end
 
@@ -32,35 +32,31 @@ function apply!(reg::Register, block::Cache)
     reg
 end
 
-cacheable(cache_block::Cache{N, L}, level, force=false) where {N, L} =
-    force || (!(cache_block.block in keys(cache_block.cache)) && level > L)
+cacheable(block::AbstractBlock) = false
+cacheable(block::AbstractBlock, level) = false
+cacheable(block::Cache) = true
+cacheable(cache_block::Cache{N, L}, level) where {N, L} =
+    level > L && !(cache_block.block in keys(cache_block.cache))
 
 # force cache this cache block
-function force_cache!(cache_block::Cache)
+function cache!(cache_block::Cache)
     cache_block.cache[copy(cache_block.block)] =
         sparse(cache_block.block)
     cache_block
 end
 
-function force_cache!(cache_block::Cache{N, L, T, BT, TA}) where {N, L, T, BT <: PureBlock{N, T}, TA <: Matrix{T}}
+function cache!(cache_block::Cache{N, L, T, BT, TA}) where {N, L, T, BT <: PureBlock{N, T}, TA <: Matrix{T}}
     cache_block.cache[copy(cache_block.block)] =
         full(cache_block.block)
     cache_block
 end
 
-function cache!(cache_block::Cache; level=1, force=false)
-    if cacheable(cache_block, level, force)
-        force_cache!(cache_block)
-    end
-    cache_block
-end
+cache!(cache_block::Cache, level::Int) =
+    (cacheable(cache_block, level) && cache!(cache_block); cache_block)
 
 update!(block::Cache, params...) = update!(block.block, params...)
 
 import Base: empty!
-function empty!(cache_block::Cache; level=1, force=false)
-    if cacheable(cache_block, level, force)
-        empty!(cache_block.cache)
-    end
-    cache_block
-end
+empty!(cache_block::Cache) = empty!(cache_block.cache)
+empty!(cache_block::Cache, level::Int) =
+    (cacheable(cache_block, level) || empty!(cache_block); cache_block)
