@@ -49,29 +49,29 @@ as an in-contiguous order.
 function focus! end
 
 """
-    focus(register, range)
+    focus!(register, range)
 
 pack tensor legs inside `range` together and reshape the register
 to (exposed, remain, batch) or (exposed, remain). range should be
 an `UnitRange{Int}` type, which can be declared by colon, e.g
 
-    focus(reg, 2:4)
+    focus!(reg, 2:4)
 
 it will do nothing and return the register directly if the range
 start from `1`, e.g
 
-    focus(reg, 1:4)
+    focus!(reg, 1:4)
 """
-function focus(src::AbstractRegister{M, B}, range::UnitRange{Int}) where {M, B}
+function focus!(src::AbstractRegister{M, B}, range::UnitRange{Int}) where {M, B}
     N = length(range)
     range.start == 1 || return reshape(src, (2^N, 2^(M-N), B))
-    focus(src, Tuple(range))
+    focus!(src, Tuple(range))
 end
 
-function focus(src::AbstractRegister{M, 1}, range::UnitRange{Int}) where M
+function focus!(src::AbstractRegister{M, 1}, range::UnitRange{Int}) where M
     N = length(range)
     range.start == 1 || return reshape(src, (2^N, 2^(M-N), B))
-    focus(src, Tuple(range))
+    focus!(src, Tuple(range))
 end
 
 export Register
