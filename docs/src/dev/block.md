@@ -33,6 +33,8 @@ QuCircuit.AbstractMeasure
 QuCircuit.Concentrator
 ```
 
+![concentrator](../assets/figures/blockfocus.png)
+
 ## Sequence
 
 ```@docs
