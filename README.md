@@ -7,7 +7,7 @@
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://QuantumBFS.github.io/QuCircuit.jl/stable)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://QuantumBFS.github.io/QuCircuit.jl/latest)
 
-Flexible, Extensible framework for quantum circuit simulation.
+Flexible, Extensible,  Integratable Framework for Quantum Algorithm Design.
 
 ## Project Goals
 
