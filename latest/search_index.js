@@ -217,6 +217,46 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "dev/visualization/#Demo-1",
+    "page": "Visualization",
+    "title": "Demo",
+    "category": "section",
+    "text": "This is the circuit.yaml file,name: \"Circuit\"\nnline: 10\nblocks:\n    -\n        DISP: true\n        name: \"Rotation\"\n        nline: 7\n        blocks:\n            - \"/X(0)\"\n            - \"/C(1)--/NC(2) -- /G(3:4, $\\\\sqrt{2}$, 0.3 & 0.4)\"\n            - \"/NC(9)--/Measure(6);\"\n            - \"/NC(7)--/NOT(5);\"\n            - \"/C(2)--/Swap(4 & 7);\"\n            - \"/Focus(7 & 2 & 5 & 1);\"\n            -\n                DISP: false\n                name: \"R1\"\n                nline: 4\n                blocks:\n                    - \"/Rot(0, 0.2 & 0 & 0.5)\"\n                    - \"/G(1:3, Math,);\"\n                    - \"/Include(block-FFT)\"\n\n    -\n        DISP: true\n        name: \"R1\"\n        nline: 4\n        blocks:\n            - \"/Rx(1, 0.4)\"\n            - \"/G(2:2, U2,);\"\n    - \"/Measure(0:9);\"\n    - \"/End(0:9)\"\n\nblock-FFT:\n    DISP: true\n    name: \"FFT\"\n    nline: 4\n    blocks:\n        - \"/Rx(1, 0.4)\"\n        - \"/G(2:2, U2,);\"As a result, we can get (Image: )"
+},
+
+{
+    "location": "dev/visualization/#Gate-Representation-1",
+    "page": "Visualization",
+    "title": "Gate Representation",
+    "category": "section",
+    "text": "A gate or an operation start with /.Non-Parametric Single-Qubit Gates like G(line), where line is an integer\nC, NC  # Control and N-Control\nX, Y, Z, H\nNOT\nNon-Parametric Multi-Qubit Gates like G(lines), where lines can be an integer, slice or list, e.g. 2, 1&2&3, 1:4 (which is equivalent to 1&2&3).\nSwap  # number of line must be 2.\nFocus\nMeasure\nEnd\nParametric Gates like G(line(s), floats), floats here can be e.g. 0.2&0.3, 0.2.\nRx, Ry, Rz\nRot\nGeneral Gates with Names like G(line(s), text, float(s)), if no parameter, it is G(line(s), text,).\nG"
+},
+
+{
+    "location": "dev/visualization/#Block-Tree-1",
+    "page": "Visualization",
+    "title": "Block Tree",
+    "category": "section",
+    "text": "blocks contains a list of blocks, and for each block, it contains\nname: str\nnline: int\nblocks: list\nDISP_OFFSETX: float\nDISP: bool, whether this box is visible.Where DISP* variables are for display purpose, which is not related to circuit definition."
+},
+
+{
+    "location": "dev/visualization/#Notes-1",
+    "page": "Visualization",
+    "title": "Notes",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "dev/visualization/#Reserved-strings-for-naming-a-general-Gate-1",
+    "page": "Visualization",
+    "title": "Reserved strings for naming a general Gate",
+    "category": "section",
+    "text": "\"–\" used to split column wise connected gates.\n\";\" in the last line, used to change column."
+},
+
+{
     "location": "dev/unittest/#",
     "page": "Unit Test",
     "title": "Unit Test",
