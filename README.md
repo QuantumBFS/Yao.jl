@@ -7,26 +7,20 @@
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://QuantumBFS.github.io/QuCircuit.jl/stable)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://QuantumBFS.github.io/QuCircuit.jl/latest)
 
-Tools for definition and evaluation of quantum circuits.
+Flexible, Extensible,  Integratable Framework for Quantum Algorithm Design.
 
-## TODO List
+## Project Goals
 
-### Single Qubit
 
-- [ ] Pauli Gates: X, Y, Z
-- [ ] Phase Gates: S, T (pi/8 gate)
-- [ ] Rotation Gates: Rx, Ry, Rz
+## Installation
 
-### Two Qubits
-#### Control Gates
+The package is not registered yet.
 
-- [ ] Controlled NOT: CNOT
-- [ ] Controlled Gate
+```julia
+julia> Pkg.clone("https://github.com/QuantumBFS/QuCircuit.jl.git")
+```
 
-### Blocks
+## Documentation
 
-Blocks are conbination of multiple gates on multiple qubits.
-
-- [ ] QFT Block
-- [ ] Rotation Block
-- [ ] Time Evolution
+- [**STABLE**]()
+- [**LATEST**](https://quantumbfs.github.io/QuCircuit.jl/latest)
