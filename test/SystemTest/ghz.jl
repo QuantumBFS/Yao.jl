@@ -40,14 +40,11 @@ end
     psi = Register("0"^num_qubit)
     =#
 
-    local final_state
     for info in Iter()#psi >> circuit
         println("iblock = ", info["iblock"],
                 ", current block = ", info["current"],
                 ", next block = ", info["next"],
-                ", wave function is ", info["wavefunction"],
                )
-        final_state = info["wavefunction"]
     end
-    @test final_state == ghz_state
+    @test psi == ghz_state
 end
