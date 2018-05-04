@@ -93,7 +93,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Block System",
     "title": "QuCircuit.AbstractMeasure",
     "category": "type",
-    "text": "AbstractMeasure{N, M} <: AbstractBlock\n\nAbstract block supertype which measurement block will inherit from.\n\n\n\n"
+    "text": "AbstractMeasure{M} <: AbstractBlock\n\nAbstract block supertype which measurement block will inherit from.\n\n\n\n"
 },
 
 {
