@@ -179,3 +179,12 @@ function focus!(reg::Register{N, B}, orders...) where {N, B}
     reg.state = reshape(state(reg), (nexposed(orders...), :))
     reg
 end
+
+import Base: show
+
+function show(io::IO, ::MIME"text/plain", reg::Register{N, B, T}) where {N, B, T}
+    println(io, "Default Register (CPU, $T):")
+    println(io, "    total: ", N)
+    println(io, "    batch: ", B)
+    print(io, "    active: ", nactive(reg))
+end
