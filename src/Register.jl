@@ -182,7 +182,7 @@ end
 
 import Base: show
 
-function show(io::IO, ::MIME"text/plain", reg::Register{N, B, T}) where {N, B, T}
+function show(io::IO, reg::Register{N, B, T}) where {N, B, T}
     println(io, "Default Register (CPU, $T):")
     println(io, "    total: ", N)
     println(io, "    batch: ", B)

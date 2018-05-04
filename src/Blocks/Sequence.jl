@@ -4,6 +4,8 @@ struct Sequence <: AbstractBlock
     list::Vector{Any}
 end
 
+export sequence
+
 sequence(blocks...) = Sequence([blocks...])
 (block::Sequence)(reg::Register) = apply!(reg, block)
 
@@ -17,6 +19,18 @@ end
 import Base: push!
 
 push!(seq::Sequence, block::AbstractBlock) = push!(seq.list, block)
+
+function show(io::IO, block::Sequence)
+    println(io, "Sequence:")
+
+    for (i, each) in enumerate(block.list)
+        print(io, "    ", each)
+
+        if i != length(block.list)
+            print(io, "\n")
+        end
+    end
+end
 
 import Base: start, next, done, length, eltype
 
@@ -58,4 +72,19 @@ end
 function >>(plan::CircuitPlan, block::AbstractBlock)
     push!(plan.seq, block)
     plan
+end
+
+function show(io::IO, plan::CircuitPlan)
+    println(io, "Circuit Excution Plan:")
+
+    println(io, plan.reg)
+    println(io, "----")
+    for (i, each) in enumerate(plan.seq.list)
+        print(io, "    ", each)
+
+        if i != length(plan.seq.list)
+            print(io, "\n")
+            println(io, "----")
+        end
+    end
 end
