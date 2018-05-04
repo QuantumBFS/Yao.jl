@@ -197,7 +197,39 @@ var documenterSearchIndex = {"docs": [
     "page": "Cache",
     "title": "Key-value Storage",
     "category": "section",
-    "text": "Like PyTorch, MXNet, we use a key value storage (a cache pool) to store cached blocks. Cached blocks are frequently used blocks with specific matrix form. You can choose which type of matrix storage to store in a cache pool.The benefit of this solution includes:more contiguous memory address (compare to previous plans, e.g CacheBlock, block with a cache dict)\nmore convenient for traversing cached parameters"
+    "text": "Like PyTorch, MXNet, we use a key value storage (a cache pool, like dmlc/ps-lite) to store cached blocks. Cached blocks are frequently used blocks with specific matrix form. You can choose which type of matrix storage to store in a cache pool.The benefit of this solution includes:more contiguous memory address (compare to previous plans, e.g CacheBlock, block with a cache dict)\nmore convenient for traversing cached parameters\nthis solution offer us flexibility for future implementation on GPUs and large clusters."
+},
+
+{
+    "location": "dev/cache/#Julia\'s-Dict-1",
+    "page": "Cache",
+    "title": "Julia\'s Dict",
+    "category": "section",
+    "text": "Base.hashindex(key, sz)sz is the total length of the list of slots. This function is actually equivalent to "
+},
+
+{
+    "location": "dev/cache/#Implementation-1",
+    "page": "Cache",
+    "title": "Implementation",
+    "category": "section",
+    "text": "Unlike parameter servers in deep learning frameworks. Our cache server contains not only the cached (sparse) matrix, but also its related cache level, which defines its update priority during the evluation of a quantum circuit."
+},
+
+{
+    "location": "dev/cache/#Possible-Solutions-1",
+    "page": "Cache",
+    "title": "Possible Solutions",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "dev/cache/#Solution-1-1",
+    "page": "Cache",
+    "title": "Solution 1",
+    "category": "section",
+    "text": "mutable struct CacheElement{TM <: AbstractMatrix}\n    level::UInt\n    data::Dict{Any, TM}\nend\n\nstruct CacheServer{TM} <: AbstractCacheServer\n    kvstore::Dict{Any, CacheElement{TM}}\nendThis cannot characterize parameters with "
 },
 
 {
