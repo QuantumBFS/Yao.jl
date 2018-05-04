@@ -11,7 +11,7 @@
 # promote_block_eltype(a::Type{TB}, b::Type...) where {N, T, TB <: PureBlock{N, T}} = promote_type(T, promote_block_eltype(b...))
 promote_block_eltype(blocks) = promote_type([eltype(each) for each in blocks]...)
 
-struct ChainBlock{N, T, TD <: Tuple} <: PureBlock{N, T}
+struct ChainBlock{N, T, TD <: Tuple} <: CompositeBlock{N, T}
     list::TD
 end
 
@@ -85,11 +85,11 @@ end
 import DataStructures: SortedDict
 
 """
-    KronBlock{N, T} <: PureBlock{N, T}
+    KronBlock{N, T} <: CompositeBlock{N, T}
 
 composite block that combine blocks by kronecker product.
 """
-struct KronBlock{N, T} <: PureBlock{N, T}
+struct KronBlock{N, T} <: CompositeBlock{N, T}
     kvstore::SortedDict{Int, PureBlock}
 end
 

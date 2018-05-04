@@ -90,7 +90,7 @@ import Base: ==, hash
 ==(lhs::PhiGate, rhs::PhiGate) = lhs.theta == rhs.theta
 
 function hash(gate::PhiGate, h::UInt)
-    hash(hash(object_id(gate), gate.theta), h)
+    hash(hash(gate.theta, object_id(gate)), h)
 end
 
 ###########
@@ -120,6 +120,6 @@ dispatch!(block::RotationGate{GT, T}, theta::T) where {GT, T} = (block.theta = t
 import Base: ==, hash
 ==(lhs::RotationGate{GT}, rhs::RotationGate{GT}) where GT = lhs.theta == rhs.theta
 
-function hash(gate::RotationGate, h::UInt)   
-    hash(hash(object_id(gate), gate.theta), h)
+function hash(gate::RotationGate, h::UInt)
+    hash(hash(gate.theta, object_id(gate)), h)
 end
