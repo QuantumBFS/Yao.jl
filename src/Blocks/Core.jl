@@ -15,23 +15,19 @@ struct AnySize end
 ==(lhs, rhs::AnySize) = true
 
 ## Trait
-export nqubit, ninput, noutput, isunitary, iscacheable, cache_type, ispure, get_cache
+export nqubit, ninput, noutput, isunitary, ispure
 
 nqubit(::Type{T}) where {T <: AbstractBlock} = AnySize()
 ninput(::Type{T}) where {T <: AbstractBlock} = AnySize()
 noutput(::Type{T}) where {T <: AbstractBlock} = AnySize()
 isunitary(::Type{T}) where {T <: AbstractBlock} = false
-iscacheable(::Type{T}) where {T <: AbstractBlock} = false
-cache_type(::Type{T}) where {T <: AbstractBlock} = Cache
 ispure(::Type{T}) where {T <: AbstractBlock} = false
 
-for NAME in [:nqubit, :ninput, :noutput, :isunitary, :iscacheable, :cache_type, :ispure]
+for NAME in [:nqubit, :ninput, :noutput, :isunitary, :ispure]
     @eval begin
         $NAME(block::AbstractBlock) = $NAME(typeof(block))
     end
 end
-
-get_cache(x::AbstractBlock) = nothing
 
 import Base: copy, length
 # only shallow copy by default
@@ -39,11 +35,10 @@ import Base: copy, length
 copy(x::AbstractBlock) = x
 
 ## Required Methods
-export apply!, update!, cache!
+export apply!, dispatch!
 function apply! end
 ### do nothing by default
-update!(block, params...) = block
-cache!(block; level=1, force=false, method=sparse) = block
+dispatch!(block, params...) = block
 
 """
     PureBlock{N, T} <: AbstractBlock
@@ -57,13 +52,17 @@ ninput(::Type{T}) where {N, T <: PureBlock{N}} = N
 noutput(::Type{T}) where {N, T <: PureBlock{N}} = N
 
 ispure(block::PureBlock) = true
-iscacheable(block::PureBlock) = true
 
 import Base: full, sparse, eltype
 eltype(block::PureBlock{N, T}) where {N, T} = T
 # full(block)
 # sparse(block)
 # copy(block)
+
+# compare methods to enable key-value storage
+import Base: hash, ==
+
+### Subtype of PureBlock
 
 """
     PrimitiveBlock{N, T} <: PureBlock{N, T}
@@ -79,29 +78,13 @@ abstract type PrimitiveBlock{N, T} <: PureBlock{N, T} end
 
 isunitary(::Type{T}) where {T <: PrimitiveBlock} = true
 
+
 """
     CompositeBlock{N, T} <: PureBlock{N, T}
 
 abstract supertype which composite blocks will inherit from.
 """
 abstract type CompositeBlock{N, T} <: PureBlock{N, T} end
-
-"""
-    AbstractCache{N, L, T} <: PureBlock{N, T}
-
-abstract supertype which cache blocks will inherit from.
-"""
-abstract type AbstractCache{N, L, T} <: PureBlock{N, T} end
-
-export cache_level
-cache_level(::Type{T}) where {N, L, T<:AbstractCache{N, L}} = L
-cache_level(block::AbstractCache) = cache_level(typeof(block))
-
-function cache end
-function cache_method end
-
-# compare methods to enable key-value storage
-import Base: hash, ==
 
 
 """
@@ -114,6 +97,10 @@ abstract type AbstractMeasure{N, M} <: AbstractBlock end
 nqubit(::Type{T}) where {N, T <: AbstractMeasure{N}} = N
 ninput(::Type{T}) where {N, T <: AbstractMeasure{N}} = N
 noutput(::Type{T}) where {N, M, T <: AbstractMeasure{N, M}} = N - M
+
+#################
+# Other Blocks
+#################
 
 struct Concentrator{T <: Union{Int, Tuple}} <: AbstractBlock
     address::T

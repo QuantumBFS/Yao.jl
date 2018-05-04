@@ -1,14 +1,13 @@
 using Compat.Test
 
 import QuCircuit: X, Y, Z, Hadmard, Gate, PhiGate, RotationGate
-import QuCircuit: Cache, rand_state, state, focus!
+import QuCircuit: rand_state, state, focus!
 # interface
 import QuCircuit: gate, phase, rot
 # Block Trait
-import QuCircuit: nqubit, ninput, noutput, isunitary,
-                    iscacheable, cache_type, ispure, get_cache
+import QuCircuit: nqubit, ninput, noutput, isunitary, ispure
 # Required Methods
-import QuCircuit: apply!, update!, cache!
+import QuCircuit: apply!, dispatch!
 
 @testset "Constant Gates" begin
 
@@ -26,10 +25,7 @@ import QuCircuit: apply!, update!, cache!
     @test ninput(g) == 1
     @test noutput(g) == 1
     @test isunitary(g) == true
-    @test iscacheable(g) == true
-    @test cache_type(g) == Cache
     @test ispure(g) == true
-    @test get_cache(g) == nothing
 
     reg = rand_state(4)
     focus!(reg, 1)
@@ -76,14 +72,11 @@ end
     @test ninput(g) == 1
     @test noutput(g) == 1
     @test isunitary(g) == true
-    @test iscacheable(g) == true
-    @test cache_type(g) == Cache
     @test ispure(g) == true
-    @test get_cache(g) == nothing
 
     @test full(g) == exp(im * pi) * [exp(-im * pi) 0; 0  exp(im * pi)]
     @test copy(g) !== g # deep copy
-    @test update!(g, 2.0).theta == 2.0
+    @test dispatch!(g, 2.0).theta == 2.0
 
     # compare methods
 
@@ -103,10 +96,7 @@ end
     @test ninput(g) == 1
     @test noutput(g) == 1
     @test isunitary(g) == true
-    @test iscacheable(g) == true
-    @test cache_type(g) == Cache
     @test ispure(g) == true
-    @test get_cache(g) == nothing
 
 
     theta = 2.0
@@ -119,7 +109,7 @@ end
     end
 
     @test copy(g) !== g # deep copy
-    @test update!(g, 1.0).theta == 1.0
+    @test dispatch!(g, 1.0).theta == 1.0
 
     # compare method
     @test (rot(X, 2.0) == rot(X, 2.0)) == true

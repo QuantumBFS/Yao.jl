@@ -11,7 +11,7 @@
 # promote_block_eltype(a::Type{TB}, b::Type...) where {N, T, TB <: PureBlock{N, T}} = promote_type(T, promote_block_eltype(b...))
 promote_block_eltype(blocks) = promote_type([eltype(each) for each in blocks]...)
 
-struct ChainBlock{N, T, TD <: Tuple} <: PureBlock{N, T}
+struct ChainBlock{N, T, TD <: Tuple} <: CompositeBlock{N, T}
     list::TD
 end
 
@@ -55,10 +55,10 @@ function apply!(reg::Register{N}, block::ChainBlock{N}) where N
     reg
 end
 
-function update!(block::ChainBlock, params...)
+function dispatch!(block::ChainBlock, params...)
     for each in params
         index, param = params
-        update!(block.list[index], param...)
+        dispatch!(block.list[index], param...)
     end
     block
 end
@@ -67,38 +67,9 @@ end
 # ChainBlock: cache
 ####################
 
-function get_cache(block::ChainBlock)
-    caches = Dict()
-    for (i, val) in enumerate(block.list)
-        if cacheable(val)
-            caches[i] = get_cache(val)
-        end
-    end
-    caches
-end
-
-function get_cache(block::ChainBlock, level::Int)
-    caches = Dict()
-    for (i, val) in enumerate(block.list)
-        if cacheable(val) && level > cache_level(val)
-            caches[i] = get_cache(val)
-        end
-    end
-    caches
-end
-
-cache!(block::ChainBlock) = (for each in block.list cache!(each) end; block)
-
-function cache!(block::ChainBlock, level::Int)
-    for each in block.list
-        cache!(each, level)
-    end
-    block
-end
-
 import Base: hash, ==
 function hash(block::ChainBlock{N, T}, h::UInt) where {N, T}
-    hashkey = hash(ChainBlock{N, T})
+    hashkey = hash(object_id(block), h)
     for each in block.list
         hashkey = hash(each, hashkey)
     end
@@ -114,11 +85,11 @@ end
 import DataStructures: SortedDict
 
 """
-    KronBlock{N, T} <: PureBlock{N, T}
+    KronBlock{N, T} <: CompositeBlock{N, T}
 
 composite block that combine blocks by kronecker product.
 """
-struct KronBlock{N, T} <: PureBlock{N, T}
+struct KronBlock{N, T} <: CompositeBlock{N, T}
     kvstore::SortedDict{Int, PureBlock}
 end
 
@@ -259,10 +230,10 @@ apply!(reg::Register, block::KronBlock) = (reg.state .= full(block) * state(reg)
 # KronBlock: update!
 ####################
 
-function update!(block::KronBlock, params...)
+function dispatch!(block::KronBlock, params...)
     for each in params
         key, param = each
-        update!(block[key], param...)
+        dispatch!(block[key], param...)
     end
     block
 end
@@ -271,61 +242,8 @@ end
 # KronBlock: cache
 ##################
 
-# NOTE: this could be replaced by an overloaded version of `map`
-@inline function _map_cache_values(f::Function, block::KronBlock, level::Int)
-    for each in values(block.kvstore)
-        f(each, level)
-    end
-    block
-end
-
-@inline function _map_cache_values(f::Function, block::KronBlock)
-    for each in values(block.kvstore)
-        f(each)
-    end
-    block
-end
-
-"""
-    get_cache(block::KronBlock) # force get all cache
-    get_cache(block::KronBlock, level::Int)
-
-get a dict of `address=>ref_of_cache` from blocks inside of this
-instance of `KronBlock`.
-"""
-function get_cache(block::KronBlock)
-    caches = Dict()
-    for (key, val) in block.kvstore
-        if cacheable(val)
-            caches[key] = get_cache(val)
-        end
-    end
-    caches
-end
-
-function get_cache(block::KronBlock, level::Int)
-    caches = Dict()
-    for (key, val) in block.kvstore
-        if cacheable(val) && level > cache_level(val)
-            caches[key] = get_cache(val)
-        end
-    end
-    caches
-end
-
-cache!(block::KronBlock) = _map_cache_values(cache!, block)
-cache!(block::KronBlock, level::Int) =
-    _map_cache_values(cache!, block, level)
-
-import Base: empty!
-
-# empty all cache by default
-empty!(block::KronBlock) = _map_cache_values(empty!, block)
-empty!(block::KronBlock, level::Int) =
-    _map_cache_values(empty!, block, level)
-
 function hash(block::KronBlock{N, T}, h::UInt) where {N, T}
-    hashkey = hash(KronBlock{N, T})
+    hashkey = hash(object_id(block), h)
     for each in values(block)
         hashkey = hash(each, hashkey)
     end
