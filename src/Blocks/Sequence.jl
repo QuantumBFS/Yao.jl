@@ -1,7 +1,7 @@
 # TODO: nqubit inference
 
 struct Sequence <: AbstractBlock
-    list::Vector
+    list::Vector{Any}
 end
 
 sequence(blocks...) = Sequence([blocks...])
@@ -13,6 +13,8 @@ function apply!(reg::Register, block::Sequence)
     end
     reg
 end
+
+import Base: push!
 
 push!(seq::Sequence, block::AbstractBlock) = push!(seq.list, block)
 
@@ -31,7 +33,7 @@ eltype(itr::CircuitPlan) = eltype(itr.seq.list)
 function next(itr::CircuitPlan, state)
     i, info = state
     block = itr.seq.list[i]
-    info["iblock"] = state
+    info["iblock"] = i
     info["current"] = block
     if i < length(itr.seq.list)
         info["next"] = itr.seq.list[i+1]
