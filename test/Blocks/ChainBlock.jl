@@ -1,15 +1,14 @@
 using Compat.Test
 
 import QuCircuit: ChainBlock
-import QuCircuit: Cache, rand_state, state, focus!,
-    X, Y, Z, gate, phase, cache, focus, address
+import QuCircuit: rand_state, state, focus!,
+    X, Y, Z, gate, phase, focus, address
 # Interface
 import QuCircuit: chain
 # Block Trait
-import QuCircuit: nqubit, ninput, noutput, isunitary,
-                iscacheable, cache_type, ispure, get_cache
+import QuCircuit: nqubit, ninput, noutput, isunitary, ispure
 # Required Methods
-import QuCircuit: apply!, update!, cache!
+import QuCircuit: apply!, dispatch!
 
 
 @testset "chain pure" begin
@@ -24,10 +23,7 @@ import QuCircuit: apply!, update!, cache!
     @test ninput(g) == 2
     @test noutput(g) == 2
     @test isunitary(g) == true
-    @test iscacheable(g) == true
-    @test cache_type(g) == Cache
     @test ispure(g) == true
-    @test get_cache(g) == Dict()
 
     mat = kron(sparse(gate(Complex64, Z)), speye(2)) * kron(sparse(gate(X)), sparse(gate(Y)))
     @test sparse(g) == mat
@@ -51,10 +47,7 @@ end
     @test ninput(g) == 5
     @test noutput(g) == 5
     @test isunitary(g) == true
-    @test iscacheable(g) == true
-    @test cache_type(g) == Cache
     @test ispure(g) == true
-    @test get_cache(g) == Dict()
 
     # ! matrix format is not implemented
 
@@ -76,10 +69,7 @@ end
     @test ninput(g) == 5
     @test noutput(g) == 5
     @test isunitary(g) == true
-    @test iscacheable(g) == true
-    @test cache_type(g) == Cache
     @test ispure(g) == true
-    @test get_cache(g) == Dict()
 
     reg_a = rand_state(5)
     reg_b = copy(reg_a)
