@@ -27,3 +27,20 @@ apply!(reg, block::Print) = (block.stream = string(reg); reg)
     apply!(reg, program)
     @test test_print.stream == string(reg)
 end
+
+
+@testset "circuit plan" begin
+
+    reg = rand_state(4)
+    c = [
+        kron(gate(X), gate(Z), gate(Z), gate(X)),
+        focus(2, 3),
+        kron(gate(X), gate(Z)),
+    ]
+
+    for (i, info) in enumerate(reg >> c[1] >> c[2] >> c[3])
+        @test info["iblock"] == i
+        @test info["current"] == c[info["iblock"]]
+    end
+
+end

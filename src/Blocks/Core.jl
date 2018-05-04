@@ -1,3 +1,28 @@
+import Base: ismatch
+# Size Type
+abstract type SizeType end
+
+struct AnySize <: SizeType end
+struct FixSize{N} <: SizeType end
+struct GreaterThan{N} <: SizeType end
+struct LessThan{N} <: SizeType end
+struct EqualTo{N} <: SizeType end
+
+"""
+    ismatch(size, sz) -> Bool
+
+Check whether `sz` matches given `size`.
+"""
+is_size_match(::Type{T}, sz) where {T <: SizeType} = false
+is_size_match(sz, ::Type{T}) where {T <: SizeType} = is_size_match(T, sz)
+is_size_match(sza::Int, szb::Int) = sza == szb
+
+is_size_match(::Type{AnySize}, sz::Int) = true
+is_size_match(::Type{GreaterThan{N}}, sz::Int) where N = sz > N
+is_size_match(::Type{LessThan{N}}, sz::Int) where N = sz < N
+is_size_match(::Type{EqualTo{N}}, sz::Int) where N = sz == size.sz
+is_size_match(::Type{AnySize}, ::Type{T}) where {T <: SizeType} = true
+
 """
     AbstractBlock
 
@@ -6,20 +31,18 @@ qubits.
 """
 abstract type AbstractBlock end
 
+# This is something will be fixed in 1.x
+# see https://github.com/JuliaLang/julia/issues/14919
+# We will define a call for each concrete type
+# (block::T)(reg::Register) where {T <: AbstractBlock} = apply!(reg, block)
+
 # Interface
-
-import Base: ==
-struct AnySize end
-==(lhs::AnySize, rhs::AnySize) = true
-==(lhs::AnySize, rhs) = true
-==(lhs, rhs::AnySize) = true
-
 ## Trait
 export nqubit, ninput, noutput, isunitary, ispure
 
-nqubit(::Type{T}) where {T <: AbstractBlock} = AnySize()
-ninput(::Type{T}) where {T <: AbstractBlock} = AnySize()
-noutput(::Type{T}) where {T <: AbstractBlock} = AnySize()
+nqubit(::Type{T}) where {T <: AbstractBlock} = AnySize
+ninput(::Type{T}) where {T <: AbstractBlock} = AnySize
+noutput(::Type{T}) where {T <: AbstractBlock} = AnySize
 isunitary(::Type{T}) where {T <: AbstractBlock} = false
 ispure(::Type{T}) where {T <: AbstractBlock} = false
 
@@ -88,44 +111,12 @@ abstract type CompositeBlock{N, T} <: PureBlock{N, T} end
 
 
 """
-    AbstractMeasure{N, M} <: AbstractBlock
+    AbstractMeasure{M} <: AbstractBlock
 
 Abstract block supertype which measurement block will inherit from.
 """
-abstract type AbstractMeasure{N, M} <: AbstractBlock end
+abstract type AbstractMeasure{M} <: AbstractBlock end
 
-nqubit(::Type{T}) where {N, T <: AbstractMeasure{N}} = N
-ninput(::Type{T}) where {N, T <: AbstractMeasure{N}} = N
-noutput(::Type{T}) where {N, M, T <: AbstractMeasure{N, M}} = N - M
-
-#################
-# Other Blocks
-#################
-
-struct Concentrator{T <: Union{Int, Tuple}} <: AbstractBlock
-    address::T
-end
-
-Concentrator(orders...) = Concentrator(orders)
-
-eltype(::Concentrator) = Bool
-isunitary(x::Concentrator) = true
-noutput(x::Concentrator) = length(x.address)
-address(x::Concentrator) = x.address
-
-export focus
-focus(orders...) = Concentrator(orders...)
-apply!(reg::Register, block::Concentrator) = focus!(reg, address(block)...)
-
-struct Sequence{T <: Tuple} <: AbstractBlock
-    list::T
-end
-
-sequence(blocks...) = Sequence(blocks)
-
-function apply!(reg::Register, block::Sequence)
-    for each in block.list
-        apply!(reg, each)
-    end
-    reg
-end
+nqubit(::Type{T}) where {M, T <: AbstractMeasure{M}} = GreaterThan{M}
+ninput(::Type{T}) where {M, T <: AbstractMeasure{M}} = GreaterThan{M}
+noutput(::Type{T}) where {M, T <: AbstractMeasure{M}} = AnySize

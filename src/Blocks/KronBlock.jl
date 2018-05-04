@@ -1,88 +1,6 @@
-####################
-# Composite Blocks
-####################
-# There are two composite blocks:
-# 1. ChainBlock, chain a list of blocks with same size together
-# 2. KronBlock, combine several blocks by kronecker product
-
-# TODO: use recursive method instead of vector
-# promote_block_eltype(a::Type{TB}) where {N, T, TB <: PureBlock{N, T}} = T
-# promote_block_eltype(a::Type{TBa}, b::Type{TBb}) where {N, M, TA, TB, TBa <: PureBlock{N, TA}, TBb <: PureBlock{M, TB}} = promote_type(TA, TB)
-# promote_block_eltype(a::Type{TB}, b::Type...) where {N, T, TB <: PureBlock{N, T}} = promote_type(T, promote_block_eltype(b...))
-promote_block_eltype(blocks) = promote_type([eltype(each) for each in blocks]...)
-
-struct ChainBlock{N, T, TD <: Tuple} <: CompositeBlock{N, T}
-    list::TD
-end
-
-ChainBlock(nqubit, blocks::TD) where TD =
-    ChainBlock{nqubit, promote_block_eltype(blocks), TD}(blocks)
-
-function copy(block::ChainBlock{N, T, TD}) where {N, T, TD}
-    list = ntuple(i->copy(block.list[i]), length(block.list))
-    ChainBlock{N, T, TD}(list)
-end
-
-# Interface
-export chain
-
-function chain(n::Int, blocks...)
-
-    for (prev, next) in zip(blocks[1:end-1], blocks[2:end])
-        @assert noutput(prev) == ninput(next) "shape mismatch"
-    end
-
-    # ! we will add a focus block, if size mismatch
-    # @assert n == noutput(blocks[end]) "Chain block requires the same input and output size"
-
-    if n != noutput(blocks[end])
-        blocks = (blocks..., focus(1:n))
-    end
-    ChainBlock(n, blocks)
-end
-
-isunitary(block::ChainBlock) = all(isunitary, block.list)
-
-# TODO: provide matrix form when there are Concentrators
-# TODO: use reverse! instead?
-full(block::ChainBlock) = prod(x->full(x), reverse(block.list))
-sparse(block::ChainBlock) = prod(x->sparse(x), reverse(block.list))
-
-function apply!(reg::Register{N}, block::ChainBlock{N}) where N
-    for each in block.list
-        apply!(reg, each)
-    end
-    reg
-end
-
-function dispatch!(block::ChainBlock, params...)
-    for each in params
-        index, param = params
-        dispatch!(block.list[index], param...)
-    end
-    block
-end
-
-####################
-# ChainBlock: cache
-####################
-
-import Base: hash, ==
-function hash(block::ChainBlock{N, T}, h::UInt) where {N, T}
-    hashkey = hash(object_id(block), h)
-    for each in block.list
-        hashkey = hash(each, hashkey)
-    end
-    hashkey
-end
-
-==(lhs::ChainBlock, rhs::ChainBlock) = false
-==(lhs::ChainBlock{N, T}, rhs::ChainBlock{N, T}) where {N, T} = all(lhs.list .== rhs.list)
-
-#############
-# KronBlock
-#############
 import DataStructures: SortedDict
+
+promote_block_eltype(blocks) = promote_type([eltype(each) for each in blocks]...)
 
 """
     KronBlock{N, T} <: CompositeBlock{N, T}
@@ -183,6 +101,7 @@ getindex(block::KronBlock, key) = getindex(block.kvstore, key)
 # we check whether it is unitary by checking
 # each element.
 isunitary(block::KronBlock) = all(isunitary, values(block))
+iterate_blocks(c::KronBlock) = values(c)
 
 #########################
 # KronBlock: matrix form
@@ -224,6 +143,7 @@ end
 # KronBlock: apply!
 ####################
 
+(block::KronBlock)(reg::Register) = apply!(reg, block)
 apply!(reg::Register, block::KronBlock) = (reg.state .= full(block) * state(reg); reg)
 
 ####################
@@ -237,18 +157,3 @@ function dispatch!(block::KronBlock, params...)
     end
     block
 end
-
-##################
-# KronBlock: cache
-##################
-
-function hash(block::KronBlock{N, T}, h::UInt) where {N, T}
-    hashkey = hash(object_id(block), h)
-    for each in values(block)
-        hashkey = hash(each, hashkey)
-    end
-    return hashkey
-end
-
-==(lhs::KronBlock, rhs::KronBlock) = false
-==(lhs::KronBlock{N, T}, rhs::KronBlock{N, T}) where {N, T} = (lhs.kvstore == rhs.kvstore)
