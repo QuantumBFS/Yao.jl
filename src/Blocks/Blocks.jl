@@ -1,5 +1,10 @@
 include("Core.jl")
 
 include("Primitive.jl")
-include("Compose.jl")
-include("Measure.jl")
+
+# composite blocks
+include("ChainBlock.jl")
+include("KronBlock.jl")
+
+# include("Compose.jl")
+# include("Measure.jl")
