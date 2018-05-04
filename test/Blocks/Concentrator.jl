@@ -3,12 +3,11 @@ using Compat.Test
 import QuCircuit: Concentrator
 # exported API
 import QuCircuit: focus
-import QuCircuit: rand_state, nactive, AnySize
+import QuCircuit: rand_state, nactive, GreaterThan
 # Block Trait
-import QuCircuit: address, nqubit, ninput, noutput, isunitary,
-                    iscacheable, cache_type, ispure, get_cache
+import QuCircuit: address, nqubit, ninput, noutput, isunitary, ispure
 # Required Methods
-import QuCircuit: apply!, update!, cache!
+import QuCircuit: apply!, dispatch!
 
 
 @testset "concentrator" begin
@@ -16,13 +15,11 @@ import QuCircuit: apply!, update!, cache!
     concentrator = Concentrator(2, 3)
 
     @test address(concentrator) == (2, 3)
-    @test ninput(concentrator) == AnySize()
+    @test ninput(concentrator) == GreaterThan{2}
     @test noutput(concentrator) == 2
-    @test nqubit(concentrator) == AnySize()
+    @test nqubit(concentrator) == GreaterThan{2}
     @test isunitary(concentrator) == true
-    @test iscacheable(concentrator) == false
     @test ispure(concentrator) == false
-    @test get_cache(concentrator) == nothing
 
     reg = rand_state(4)
     apply!(reg, concentrator)
@@ -30,8 +27,7 @@ import QuCircuit: apply!, update!, cache!
     @test address(reg) == [2, 3, 1, 4]
 
     # do nothing
-    @test copy(concentrator) == update!(concentrator)
-    @test copy(concentrator) == cache!(concentrator, level=2, force=true)
+    @test copy(concentrator) == dispatch!(concentrator)
 
     reg = rand_state(8)
     apply!(reg, focus([2, 3, 5]))

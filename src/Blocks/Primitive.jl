@@ -26,6 +26,8 @@ struct Gate{N, GT <: GateType, T} <: AbstractGate{N, T} end
 Gate(::Type{T}, ::Type{GT}) where {T, GT} = Gate{1, GT, T}()
 Gate(::Type{GT}) where GT = Gate(Complex128, GT)
 
+(g::Gate)(reg::Register) = apply!(reg, g)
+
 export gate
 """
     gate(type, gate_type)
@@ -78,21 +80,32 @@ mutable struct PhiGate{T} <: AbstractGate{1, Complex{T}}
     theta::T
 end
 
+(g::PhiGate)(reg::Register) = apply!(reg, g)
+
 export phase
 phase(::Type{T}, theta) where {T <: Real} = PhiGate{T}(theta)
 phase(theta) = phase(Float64, theta)
 full(gate::PhiGate{T}) where T = exp(im * gate.theta) * Complex{T}[exp(-im * gate.theta) 0; 0  exp(im * gate.theta)]
 
 copy(block::PhiGate) = PhiGate(block.theta)
-update!(block::PhiGate{T}, theta::T) where T = (block.theta = theta; block)
+dispatch!(block::PhiGate{T}, theta::T) where T = (block.theta = theta; block)
 
 import Base: ==, hash
 ==(lhs::PhiGate, rhs::PhiGate) = lhs.theta == rhs.theta
-hash(block::PhiGate, h::UInt) = hash(block.theta, h)
+
+function hash(gate::PhiGate, h::UInt)
+    hash(hash(gate.theta, object_id(gate)), h)
+end
+
+###########
+# Rotation
+###########
 
 mutable struct RotationGate{GT, T} <: AbstractGate{1, Complex{T}}
     theta::T
 end
+
+(g::RotationGate)(reg::Register) = apply!(reg, g)
 
 export rot
 rot(::Type{T}, ::Type{GT}, theta) where {T <: Real, GT} = RotationGate{GT, T}(theta)
@@ -108,8 +121,48 @@ full(gate::RotationGate{Z, T}) where T =
     Complex{T}[exp(-im*gate.theta/2) 0;0 exp(im*gate.theta/2)]
 
 copy(block::RotationGate{GT, T}) where {GT, T} = RotationGate{GT, T}(block.theta)
-update!(block::RotationGate{GT, T}, theta::T) where {GT, T} = (block.theta = theta; block)
+dispatch!(block::RotationGate{GT, T}, theta::T) where {GT, T} = (block.theta = theta; block)
 
 import Base: ==, hash
 ==(lhs::RotationGate{GT}, rhs::RotationGate{GT}) where GT = lhs.theta == rhs.theta
-hash(block::RotationGate{GT}, h::UInt) where GT = hash((GT, block.theta), h)
+
+function hash(gate::RotationGate, h::UInt)
+    hash(hash(gate.theta, object_id(gate)), h)
+end
+
+##################
+# Pretty Printing
+##################
+
+for (GTYPE, NAME) in [
+    (X, "X"),
+    (Y, "Y"),
+    (Z, "Z"),
+    (Hadmard, "Hadmard")
+]
+
+@eval begin
+    function show(io::IO, block::Gate{1, $GTYPE, T}) where T
+        print(io, $(NAME), "{$T}")
+    end
+end
+
+end
+
+function show(io::IO, g::PhiGate{T}) where T
+    print(io, "Phase Gate{$T}:", g.theta)
+end
+
+for (GTYPE, NAME) in [
+    (X, "Rx"),
+    (Y, "Ry"),
+    (Z, "Rz"),
+]
+
+    @eval begin
+        function show(io::IO, g::RotationGate{$GTYPE, T}) where T
+            print(io, $NAME, "{", T, "}: ", g.theta)
+        end
+    end
+
+end

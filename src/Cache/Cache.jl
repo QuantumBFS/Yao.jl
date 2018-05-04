@@ -1,7 +1,2 @@
-abstract type AbstractCache end
-
-struct Cache{K, V}
-    kvstore::Dict{K, V}
-end
-
-
+include("Core.jl")
+include("Compose.jl")

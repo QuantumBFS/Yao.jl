@@ -1,6 +1,14 @@
 include("Core.jl")
 
 include("Primitive.jl")
-include("Cache.jl")
-include("Compose.jl")
-include("Measure.jl")
+
+# composite blocks
+include("ChainBlock.jl")
+include("KronBlock.jl")
+
+# others
+include("Concentrator.jl")
+include("Sequence.jl")
+
+# include("Compose.jl")
+# include("Measure.jl")
