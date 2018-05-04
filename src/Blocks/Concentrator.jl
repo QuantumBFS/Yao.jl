@@ -15,3 +15,7 @@ export focus
 focus(orders...) = Concentrator(orders...)
 (block::Concentrator)(reg::Register) = apply!(reg, block)
 apply!(reg::Register, block::Concentrator) = focus!(reg, address(block)...)
+
+function show(io::IO, block::Concentrator)
+    print(io, "Concentrator: ", block.address)
+end

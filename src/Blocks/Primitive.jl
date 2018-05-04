@@ -129,3 +129,40 @@ import Base: ==, hash
 function hash(gate::RotationGate, h::UInt)
     hash(hash(gate.theta, object_id(gate)), h)
 end
+
+##################
+# Pretty Printing
+##################
+
+for (GTYPE, NAME) in [
+    (X, "X"),
+    (Y, "Y"),
+    (Z, "Z"),
+    (Hadmard, "Hadmard")
+]
+
+@eval begin
+    function show(io::IO, block::Gate{1, $GTYPE, T}) where T
+        print(io, $(NAME), "{$T}")
+    end
+end
+
+end
+
+function show(io::IO, g::PhiGate{T}) where T
+    print(io, "Phase Gate{$T}:", g.theta)
+end
+
+for (GTYPE, NAME) in [
+    (X, "Rx"),
+    (Y, "Ry"),
+    (Z, "Rz"),
+]
+
+    @eval begin
+        function show(io::IO, g::RotationGate{$GTYPE, T}) where T
+            print(io, $NAME, "{", T, "}: ", g.theta)
+        end
+    end
+
+end

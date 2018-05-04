@@ -157,3 +157,8 @@ function dispatch!(block::KronBlock, params...)
     end
     block
 end
+
+function show(io::IO, block::KronBlock{N, T}) where {N, T}
+    println(io, "KronBlock{$N, $T}")
+    join(io, ["    " * "$key: $val" for (key, val) in block.kvstore], "\n")
+end
