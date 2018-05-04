@@ -3,7 +3,7 @@ using Compat.Test
 import QuCircuit: Concentrator
 # exported API
 import QuCircuit: focus
-import QuCircuit: rand_state, nactive, AnySize
+import QuCircuit: rand_state, nactive, GreaterThan
 # Block Trait
 import QuCircuit: address, nqubit, ninput, noutput, isunitary, ispure
 # Required Methods
@@ -15,9 +15,9 @@ import QuCircuit: apply!, dispatch!
     concentrator = Concentrator(2, 3)
 
     @test address(concentrator) == (2, 3)
-    @test ninput(concentrator) == AnySize()
+    @test ninput(concentrator) == GreaterThan{2}
     @test noutput(concentrator) == 2
-    @test nqubit(concentrator) == AnySize()
+    @test nqubit(concentrator) == GreaterThan{2}
     @test isunitary(concentrator) == true
     @test ispure(concentrator) == false
 

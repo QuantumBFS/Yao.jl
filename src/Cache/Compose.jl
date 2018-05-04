@@ -31,3 +31,31 @@ function update_cache(block::ChainBlock, level::UInt)
     block
 end
 
+
+########
+# Hash
+########
+
+function Hash(c::ChainBlock, h::UInt)
+    hashkey = hash(object_id(c), h)
+    for each in c.blocks
+        hashkey = hash(each, hashkey)
+    end
+    hashkey
+end
+
+==(lhs::ChainBlock, rhs::ChainBlock) = false
+==(lhs::ChainBlock{N, T}, rhs::ChainBlock{N, T}) where {N, T} = all(lhs.blocks .== rhs.blocks)
+
+
+function hash(block::KronBlock{N, T}, h::UInt) where {N, T}
+    hashkey = hash(object_id(block), h)
+    for each in values(block)
+        hashkey = hash(each, hashkey)
+    end
+    return hashkey
+end
+
+==(lhs::KronBlock, rhs::KronBlock) = false
+==(lhs::KronBlock{N, T}, rhs::KronBlock{N, T}) where {N, T} = (lhs.kvstore == rhs.kvstore)
+
