@@ -6,5 +6,9 @@ include("Primitive.jl")
 include("ChainBlock.jl")
 include("KronBlock.jl")
 
+# others
+include("Concentrator.jl")
+include("Sequence.jl")
+
 # include("Compose.jl")
 # include("Measure.jl")
