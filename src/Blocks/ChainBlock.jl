@@ -12,8 +12,6 @@ function ChainBlock(n, blocks::TD) where {TD <: Tuple}
     ChainBlock{n, _promote_chain_eltype(blocks...), TD}(blocks)
 end
 
-ChainBlock(n, blocks::PureBlock...) = ChainBlock(n, blocks)
-
 function ChainBlock(blocks::PureBlock{N}...) where N
     ChainBlock(N, blocks)
 end
@@ -47,7 +45,7 @@ end
 
 function dispatch!(c::ChainBlock, params...)
     for each in params
-        index, param = params
+        index, param = each
         dispatch!(c.blocks[index], param...)
     end
     c
