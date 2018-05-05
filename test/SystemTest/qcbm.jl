@@ -1,11 +1,31 @@
-using Compat.Test
-
 # Interface
 import QuCircuit: rotation_block
 import QuCircuit: sequence
 import mmd: kernel_expect, hilbert_rbf_kernel, mmd_loss
 
-psi2prob(psi::Array) = real(conj(psi).*psi)
+include("utils.jl")
+include("hackapi.jl")
+
+#= required APIS
+    zero_state(num_bit) => reg
+
+    X(num_bit, 1) |> c(cbit) => block: the function is used for constructing controled gates.
+    rotation_block(6) => sequence
+
+    block |> cache => block: cache a block.
+    block |> cache(level=1, recursive=False) => block
+    cache(block, level=1, recursive=False) => block
+
+    block |> mask(mask) => block: mask out some variable by setting false at specific position.
+
+    sequence() => sequence
+    append!(sequence, block) => sequence
+    sequence |> scatter_params(params) => sequence
+
+    reg >> sequence => iterator
+    iterator >> sequence => iterator
+    iterator |> cache_signal(2) => iterator
+=#
 
 #=
 cache_level (default=10)
@@ -17,17 +37,16 @@ if cache_signal (default=3) >= cache_level, then cache.
 
 if user set cache_level, check if it is cacheable and cache/error.
 =#
-@testset "qcbm" begin
-    num_layer = 5
-    num_bit = 4
-
+"""
+Differenciable circuit.
+"""
+function diff_circuit(num_qubit, num_layer)
     # the entangle block
-    entangle_block = chain(
-                           c(2)(X(num_qubit, 1)),
-                           c(4)(X(num_qubit, 3)),
-                           c(3)(X(num_qubit, 2)),
-                           c(4)(X(num_qubit, 1))
-                          ) |> cache   # here, we use default level: 1
+    entangle_block = sequence()
+    for cbit, xbit in [(2, 1), (4, 3), (6,5), (3, 2), (5, 4), (6, 1)]
+        append!(X(num_qubit, xbit) |> c(cbit))
+    end
+    sequence |> cache   # here, we use default level: 1
 
     # build the circuit
     circuit = sequence()
@@ -35,24 +54,19 @@ if user set cache_level, check if it is cacheable and cache/error.
         if i!=0
             append!(circuit, entangle_block)
         end
-        append!(circuit, rotation_block(num_bit, zxz_mask=[i!=0, true, i!=num_layer]) |> cache(recursive=true))
+        append!(circuit, rotation_block(num_bit) |> mask(repeat([i!=0, true, i!=num_layer], outer=num_bit)) |> cache(recursive=true))
     end
-
-    kernel = hilbert_rbf_kernel(2, [0.3, 3.0], false)
-
-    for info in optimize(mmd_gradient, args=(circuit, kernel, ptrain))
-        println(info)
-        println("loss is ", loss_function(kernel, prob, ptrain))
-        clear_cache(circuit)
-    end
+    return circuit
 end
 
+
 function run_circuit(params::Vector{Float64}, circuit::Sequence, signal::Int)
-    psi = Register("0"^num_qubit)
+    #psi = Psi("0"^num_qubit) # future
+    psi = zero_state(num_qubit)
 
     # >> returns iterator!
     # >> curry: cache_signal, scatter_params, mask_block
-    for info in psi >> (circuit |> scatter_params(params) |> cache_signal(signal))   # here, cache signal uses default cache threshhold and can be avoided
+    for info in psi >> (circuit |> scatter_params(params)) |> cache_signal(signal)   # here, cache signal uses default cache threshhold and can be avoided
         println("iblock = ", info["iblock"],
                 ", current block = ", info["current"],
                 ", next block = ", info["next"],
@@ -64,10 +78,6 @@ function run_circuit(params::Vector{Float64}, circuit::Sequence, signal::Int)
         elseif info["cache_info"] == 2
             println("did not cache/use cached value")
         end
-        if is_measure_block(info["current"])
-            println("the measurement result is ", info["measure_res"])
-        end
-
         #=  a possible way to hack the iteration
         if next_block == ...
             for psi >> info["next"]
@@ -75,6 +85,11 @@ function run_circuit(params::Vector{Float64}, circuit::Sequence, signal::Int)
             end
         end
         circuit |> mask_block(next_block)
+
+        #=  a way to get measure information
+        if "measure_res" in info
+            println("the measurement result is ", info["measure_res"])
+        end
         =#
     end
     return psi
