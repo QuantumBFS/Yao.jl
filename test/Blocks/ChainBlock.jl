@@ -17,6 +17,8 @@ import QuCircuit: _promote_chain_eltype
     @test _promote_chain_eltype(gate(Complex128, X), gate(Complex64, Y)) == Complex128
     @test _promote_chain_eltype(Complex128, gate(Complex128, X), gate(Complex64, Y)) == Complex128
     @test _promote_chain_eltype(gate(Complex32, X), gate(Complex128, Y), gate(Complex64, Z)) == Complex128
+
+    @test _promote_chain_eltype(Complex128, gate(X), gate(Y), gate(Complex64, Z), gate(Complex32, Z)) == Complex128
 end
 
 @testset "chain pure" begin
@@ -42,6 +44,14 @@ end
 
     # check call method
     @test mat * state(reg) == state(g(reg))
+
+    # check copy
+
+    cg = copy(g)
+    for (copied, original) in zip(cg.blocks, g.blocks)
+        @test copied !== original
+        @test copied == original
+    end
 end
 
 @testset "parameter chain" begin
