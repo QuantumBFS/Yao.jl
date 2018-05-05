@@ -4,7 +4,7 @@
 
 get the type that this block will use for cache.
 """
-cache_type(block::PureBlock) = SparseMatrixCSC{Complex{Float64}, Int}
+cache_type(block::PureBlock{N, T}) where {N, T} = SparseMatrixCSC{T, Int}
 
 """
     cache_matrix(block)
