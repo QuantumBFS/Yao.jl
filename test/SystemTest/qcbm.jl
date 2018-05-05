@@ -1,9 +1,9 @@
 # Interface
-import QuCircuit: rotation_block
-import QuCircuit: sequence
-import mmd: kernel_expect, hilbert_rbf_kernel, mmd_loss
+#import QuCircuit: rotation_block
+#import QuCircuit: sequence
 
 include("utils.jl")
+include("mmd.jl")
 include("hackapi.jl")
 
 #= required APIS
@@ -37,16 +37,17 @@ if cache_signal (default=3) >= cache_level, then cache.
 
 if user set cache_level, check if it is cacheable and cache/error.
 =#
+export diff_circuit, run_circuit, loss_function, mmd_gradient
 """
 Differenciable circuit.
 """
-function diff_circuit(num_qubit, num_layer)
+function diff_circuit(num_bit, num_layer)
     # the entangle block
     entangle_block = sequence()
-    for cbit, xbit in [(2, 1), (4, 3), (6,5), (3, 2), (5, 4), (6, 1)]
-        append!(X(num_qubit, xbit) |> c(cbit))
+    for tpl in [(2, 1), (4, 3), (6, 5), (3, 2), (5, 4), (6, 1)]
+        append!(entangle_block, X(num_bit, tpl[2]) |> c(tpl[1]))
     end
-    sequence |> cache   # here, we use default level: 1
+    entangle_block |> cache   # here, we use default level: 1
 
     # build the circuit
     circuit = sequence()
@@ -61,12 +62,13 @@ end
 
 
 function run_circuit(params::Vector{Float64}, circuit::Sequence, signal::Int)
-    #psi = Psi("0"^num_qubit) # future
-    psi = zero_state(num_qubit)
+    #psi = Psi("0"^num_bit) # future
+    psi = zero_state(nqubit(circuit))
 
     # >> returns iterator!
     # >> curry: cache_signal, scatter_params, mask_block
     for info in psi >> (circuit |> scatter_params(params)) |> cache_signal(signal)   # here, cache signal uses default cache threshhold and can be avoided
+        println(info)
         println("iblock = ", info["iblock"],
                 ", current block = ", info["current"],
                 ", next block = ", info["next"],
@@ -85,6 +87,7 @@ function run_circuit(params::Vector{Float64}, circuit::Sequence, signal::Int)
             end
         end
         circuit |> mask_block(next_block)
+        =#
 
         #=  a way to get measure information
         if "measure_res" in info
@@ -102,7 +105,11 @@ QCBM loss function.
         samples = measure(psi, num_sample=20000)
     to get samples, here, we simply use the exact wave function.
 """
-loss_function(params::Vector{Float64}, circuit::Sequence, kernel::Kernel, ptrain::Vector{Float64}) = run_circuit(params, circuit, 3) |> psi2prob |> mmd_loss(kernel, ptrain)
+function loss_function(params::Vector{Float64}, circuit::Sequence, kernel::Kernel, ptrain::Vector{Float64})
+    prob = run_circuit(params, circuit, 3) |> psi2prob
+    println(size(prob), size(ptrain), size(kernel.kernel_matrix))
+    prob |> mmd_loss(kernel, ptrain)
+end
 
 """
 QCBM gradient function.
@@ -110,7 +117,8 @@ QCBM gradient function.
 function mmd_gradient(params, circuit, kernel, ptrain)
     prob = run_circuit(params, circuit, 3) |> psi2prob
 
-    function get1(i)
+    grad = zeros(params)
+    for i=1:length(params)
         params_ = copy(params)
         # pi/2 phase
         params_[i] += pi/2.
@@ -120,9 +128,8 @@ function mmd_gradient(params, circuit, kernel, ptrain)
         prob_neg = run_circuit(params_, circuit, 0) |> psi2prob
 
         grad_pos = kernel_expect(kernel, prob, prob_pos) - kernel_expect(kernel, prob, prob_neg)
-        grad_neg = kernel_expect(kernel, p_data, prob_pos) - kernel_expect(kernel, p_data, prob_neg)
-        return grad_pos - grad_neg
+        grad_neg = kernel_expect(kernel, ptrain, prob_pos) - kernel_expect(kernel, ptrain, prob_neg)
+        grad[i] = grad_pos - grad_neg
     end
-    grad = mpido(get1, 1:length(theta_list))
     return grad
 end

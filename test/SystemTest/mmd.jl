@@ -64,6 +64,10 @@ function mmd_loss(px::Vector{Float64}, kernel::Kernel, py::Vector{Float64})
     return kernel_expect(kernel, pxy, pxy)
 end
 
+function mmd_loss(kernel::Kernel, py::Vector{Float64})
+    func(px::Vector{Float64}) = mmd_loss(px, kernel, py)
+end
+
 """
 witness function for kernel.
 """
