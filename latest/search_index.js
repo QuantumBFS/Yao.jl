@@ -321,6 +321,86 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "theo/register/#",
+    "page": "Register",
+    "title": "Register",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "theo/register/#Register-1",
+    "page": "Register",
+    "title": "Register",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "theo/register/#Storage-1",
+    "page": "Register",
+    "title": "Storage",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "theo/register/#LDT-format-1",
+    "page": "Register",
+    "title": "LDT format",
+    "category": "section",
+    "text": "Concepturely, a wave function psirangle can be represented in a low dimentional tensor (LDT) format of order-3, L(f, r, b).f: focused (i.e. operational) dimensions\nr: remaining dimensions\nb: batch dimension.For simplicity, let\'s ignore batch dimension for the momentum, we havepsirangle = sumlimits_xy L(x y ) jrangleirangleGiven a configuration x (in operational space), we want get the i-th bit using (x<<i) & 0x1, which means putting the small end the qubit with smaller index. In this representation L(x) will get return langle xpsirangle.note: Note\nWhy not the other convension: Using the convention of putting 1st bit on the big end will need to know the total number of qubits n in order to know such positional information."
+},
+
+{
+    "location": "theo/register/#HDT-format-1",
+    "page": "Register",
+    "title": "HDT format",
+    "category": "section",
+    "text": "Julia storage is column major, if we reshape the wave function to a shape of 2times2times  times2 and get the HDT (high dimensional tensor) format representation H, we can use H(x_1 x_2  x_3) to get langle xpsirangle."
+},
+
+{
+    "location": "theo/register/#Operations-1",
+    "page": "Register",
+    "title": "Operations",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "theo/register/#Kronecker-product-of-operators-1",
+    "page": "Register",
+    "title": "Kronecker product of operators",
+    "category": "section",
+    "text": "In order to put small bits on little end, the Kronecker product is O = o_n otimes ldots otimes o_2 otimes o_1 where the subscripts are qubit indices."
+},
+
+{
+    "location": "theo/register/#Measurements-1",
+    "page": "Register",
+    "title": "Measurements",
+    "category": "section",
+    "text": "Measure means sample and projection."
+},
+
+{
+    "location": "theo/register/#Sample-1",
+    "page": "Register",
+    "title": "Sample",
+    "category": "section",
+    "text": "Suppose we want to measure operational subspace, we can first getp(x) = langle xpsirangle^2 = sumlimits_y L(x y )^2Then we sample an asim p(x). If we just sample and don\'t really measure (change wave function), its over."
+},
+
+{
+    "location": "theo/register/#Projection-1",
+    "page": "Register",
+    "title": "Projection",
+    "category": "section",
+    "text": "psirangle = sum_y L(a y )sqrtp(a) arangle yrangleGood! then we can just remove the operational qubit space since x and y spaces are totally decoupled and x is known as in state a, then we getpsirangle_r = sum_y l(0 y ) yranglewhere l = L(a:a, :, :)/sqrt(p(a))."
+},
+
+{
     "location": "theo/rotation/#",
     "page": "Rotation Block",
     "title": "Rotation Block",
