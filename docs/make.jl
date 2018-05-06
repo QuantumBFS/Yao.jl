@@ -17,6 +17,7 @@ makedocs(
             "dev/unittest.md",
         ],
         "Theoretical Notes" => Any[
+            "theo/register.md",
             "theo/rotation.md",
             "theo/grover.md",
         ],
