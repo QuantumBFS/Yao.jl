@@ -41,4 +41,8 @@ import QuCircuit: apply!, dispatch!
     apply!(reg, focus(2:3, 7))
     @test nactive(reg) == length(2:3) + 1
     @test address(reg) == [2, 3, 7, 8, 5, 1, 4, 6]
+
+    reg |> focus(1:8)
+    @test nactive(reg) == 8
+    @test address(reg) == [1, 2, 3, 4, 5, 6, 7, 8]
 end

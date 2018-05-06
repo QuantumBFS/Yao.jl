@@ -32,6 +32,7 @@ import QuCircuit: apply!, dispatch!
     # gates will be applied to register (by matrix multiplication)
     # without any conversion by default
     @test [0 1;1 0] * state(reg) == state(apply!(reg, g))
+    @test [0 1;1 0] * state(reg) == state(g(reg))
     focus!(reg, 1:4) # back to vector
     @test_throws DimensionMismatch apply!(reg, g)
 
@@ -82,6 +83,20 @@ end
 
     @test (phase(2.0) == phase(2.0)) == true
     @test (phase(2.0) == phase(1.0)) == false
+
+    reg = rand_state(1)
+    @test full(g) * state(reg) == state(apply!(reg, g))
+    @test full(g) * state(reg) == state(g(reg))
+
+    @testset "test collision" begin
+        for i = 1:1000
+            hash1 = hash(g)
+            g.theta = rand()
+            hash2 = hash(g)
+            @test hash1 != hash2
+            @test hash2 == hash(g)
+        end
+    end
 end
 
 
@@ -111,6 +126,19 @@ end
     @test copy(g) !== g # deep copy
     @test dispatch!(g, 1.0).theta == 1.0
 
+    reg = rand_state(1)
+    @test full(g) * state(reg) == state(apply!(reg, g))
+    @test full(g) * state(reg) == state(g(reg))
+
+    # test collision
+    @testset "test collision" begin
+        for i=1:1000
+            hash1 = hash(g)
+            g.theta = rand()
+            hash2 = hash(g)
+            @test hash1 != hash2
+        end
+    end
     # compare method
     @test (rot(X, 2.0) == rot(X, 2.0)) == true
     @test (rot(X, 2.0) == rot(Y, 2.0)) == false
