@@ -153,3 +153,9 @@ end
 export control
 
 control(cbit, block::PureBlock, pos) = ControlBlock(cbit, block, pos)
+
+function show(io::IO, ctrl::ControlBlock)
+    println(io, "control (", ctrl.control, "):")
+    print(io, "    ", ctrl.pos, ": ", ctrl.block)
+end
+
