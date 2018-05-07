@@ -6,7 +6,11 @@ struct ControlBlock{BlockType, N, T} <: CompositeBlock{N, T}
 end
 
 function ControlBlock(total_num::Int, cbit::Int, block::BT, pos::Int) where {K, T, BT <: PureBlock{K, T}}
+<<<<<<< HEAD
+    new{BT, total_num, T}(qubits, block, pos)
+=======
     new{BT, total_num, T}(cbit, block, pos)
+>>>>>>> f9c6f28b9f3699452af8c9aebd9a1b68370496a5
 end
 
 function ControlBlock(cbit::Int, block::PureBlock{K, T}, pos::Int) where {K, T}
@@ -149,3 +153,9 @@ end
 export control
 
 control(cbit, block::PureBlock, pos) = ControlBlock(cbit, block, pos)
+
+function show(io::IO, ctrl::ControlBlock)
+    println(io, "control (", ctrl.control, "):")
+    print(io, "    ", ctrl.pos, ": ", ctrl.block)
+end
+
