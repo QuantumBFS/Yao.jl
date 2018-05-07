@@ -34,8 +34,6 @@ isunitary(block::ChainBlock) = all(isunitary, block.blocks)
 full(c::ChainBlock) = prod(x->full(x), reverse(c.blocks))
 sparse(c::ChainBlock) = prod(x->sparse(x), reverse(c.blocks))
 
-(c::ChainBlock)(reg::Register) = apply!(reg, c)
-
 function apply!(reg::Register, c::ChainBlock)
     for each in c.blocks
         apply!(reg, each)

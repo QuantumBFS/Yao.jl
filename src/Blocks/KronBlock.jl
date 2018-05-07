@@ -143,7 +143,6 @@ end
 # KronBlock: apply!
 ####################
 
-(block::KronBlock)(reg::Register) = apply!(reg, block)
 apply!(reg::Register, block::KronBlock) = (reg.state .= full(block) * state(reg); reg)
 
 ####################
