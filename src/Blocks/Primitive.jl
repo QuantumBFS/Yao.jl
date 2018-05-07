@@ -26,8 +26,6 @@ struct Gate{N, GT <: GateType, T} <: AbstractGate{N, T} end
 Gate(::Type{T}, ::Type{GT}) where {T, GT} = Gate{1, GT, T}()
 Gate(::Type{GT}) where GT = Gate(Complex128, GT)
 
-(g::Gate)(reg::Register) = apply!(reg, g)
-
 export gate
 """
     gate(type, gate_type)
@@ -80,7 +78,6 @@ mutable struct PhiGate{T} <: AbstractGate{1, Complex{T}}
     theta::T
 end
 
-(g::PhiGate)(reg::Register) = apply!(reg, g)
 
 export phase
 phase(::Type{T}, theta) where {T <: Real} = PhiGate{T}(theta)
@@ -105,11 +102,9 @@ mutable struct RotationGate{GT, T} <: AbstractGate{1, Complex{T}}
     theta::T
 end
 
-(g::RotationGate)(reg::Register) = apply!(reg, g)
-
 export rot
-rot(::Type{T}, ::Type{GT}, theta) where {T <: Real, GT} = RotationGate{GT, T}(theta)
-rot(::Type{GT}, theta) where GT = rot(Float64, GT, theta)
+rot(::Type{T}, ::Type{GT}, theta::T) where {T <: Real, GT} = RotationGate{GT, T}(theta)
+rot(::Type{GT}, theta::T) where {GT, T <: Real} = rot(Float64, GT, theta)
 
 full(gate::RotationGate{X, T}) where T =
     Complex{T}[cos(gate.theta/2) -im*sin(gate.theta/2);
@@ -166,3 +161,5 @@ for (GTYPE, NAME) in [
     end
 
 end
+
+

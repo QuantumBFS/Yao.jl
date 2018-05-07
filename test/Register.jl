@@ -1,5 +1,6 @@
 import QuCircuit: AbstractRegister, Register
-import QuCircuit: nqubit, nactive, address, nbatch, state, zero_state, rand_state
+import QuCircuit: nqubit, nactive, nremain, address, nbatch,
+    state, zero_state, rand_state
 import QuCircuit: pack_orders!, focus!
 import Compat: axes
 using Compat.Test
@@ -7,7 +8,7 @@ using Compat.Test
 @testset "Constructors" begin
 
     test_data = zeros(Complex64, 2^5, 3)
-    reg = Register(test_data)
+    reg = Register(test_data, 3)
     @test typeof(reg) == Register{5, 3, Complex64}
     @test address(reg) == collect(1:5)
     @test nqubit(reg) == 5
@@ -66,6 +67,7 @@ end
     @test address(reg) == [2, 3, 1, 4, 5]
     @test size(state(reg)) == (2^2, 2^3*3)
     @test nactive(reg) == 2
+    @test nremain(reg) == 3
 
     focus!(reg, (5, 2:3))
     @test address(reg) == [5, 2, 3, 1, 4]
