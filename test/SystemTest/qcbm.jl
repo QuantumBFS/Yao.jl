@@ -16,8 +16,6 @@ include("hackapi.jl")
     block |> cache(level=1, recursive=False) => block
     cache(block, level=1, recursive=False) => block
 
-    block |> mask(mask) => block: mask out some variable by setting false at specific position.
-
     sequence() => sequence
     append!(sequence, block) => sequence
     sequence |> scatter_params(params) => sequence
@@ -55,7 +53,7 @@ function diff_circuit(num_bit, num_layer)
         if i!=0
             append!(circuit, entangle_block)
         end
-        append!(circuit, rotation_block(num_bit) |> mask(repeat([i!=0, true, i!=num_layer], outer=num_bit)) |> cache(recursive=true))
+        append!(circuit, rotation_block(num_bit, mask=repeat([i!=0, true, i!=num_layer], outer=num_bit)) |> cache(recursive=true))
     end
     return circuit
 end

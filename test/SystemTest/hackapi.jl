@@ -54,7 +54,7 @@ end
 X(num_bit::Int, ibit::Int) = "X($(ibit)/$(num_bit))"
 H(num_bit::Int, ibit::Int) = "H($(ibit)/$(num_bit))"
 H(num_bit::Int, ibit::Range) = "H($(collect(ibit))/$(num_bit))"
-rotation_block(num_bit::Int) = "Rot($(num_bit))"
+rotation_block(num_bit::Int; mask::Vector{Bool}) = "Rot($(num_bit))"
 
 function c(pos::Int)
     controled_gate(gate::PrimitiveBlock) = "C($(pos))-"*gate

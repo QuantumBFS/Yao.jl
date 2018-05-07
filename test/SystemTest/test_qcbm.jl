@@ -19,7 +19,6 @@ ptrain = randn(1<<num_bit)
 #end
 for i in 1:maxiter
     loss_function(params, circuit, kernel, ptrain)
-    println("@@@")
     gradient = mmd_gradient(params, circuit, kernel, ptrain)
     loss = loss_function(params, circuit, kernel, ptrain)
     println("$i step, loss = ", loss)
@@ -27,4 +26,8 @@ for i in 1:maxiter
     circuit |> add_params(-learning_rate*gradient) |> clear_cache
 end
 
-
+# write final parameters to file.
+params = gather_params(circuit)
+open("params.dat", "w") do io
+    writedlm(io, params)
+end
