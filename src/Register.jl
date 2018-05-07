@@ -11,11 +11,12 @@ subtype of `AbstractArray` as member `state`.
 """
 abstract type AbstractRegister{N, B, T} end
 
-export nqubit, nbatch, address, state, nactive
+export nqubit, nbatch, address, state, nactive, nremain
 # register properties
 nqubit(reg::AbstractRegister{N}) where N = N
 nbatch(reg::AbstractRegister{N, B}) where {N, B} = B
 nactive(reg::AbstractRegister) = log2i(size(state(reg), 1))
+nremain(reg::AbstractRegister) = nqubit(reg) - nactive(reg)
 # We assume each register has a member named state and orders
 # overload this if there is not
 address(reg::AbstractRegister{N}) where N = reg.address
@@ -91,21 +92,36 @@ mutable struct Register{N, B, T} <: AbstractRegister{N, B, T}
     address::Vector{Int}
 end
 
-function Register(state::Array{T, 2}) where T
-    len, nbatch = size(state)
-    ispow2(len) || throw(Compat.InexactError(:Register, Register, state))
-    N = log2i(len)
+function Register(state::Array{T, 2}, nbatch::Int=1) where T
+    nactive_len, nbatch_and_remain = size(state)
+    nremain_len = Int(nbatch_and_remain / nbatch)
+
+    ispow2(nactive_len) || throw(Compat.InexactError(:Register, Register, state))
+    ispow2(nremain_len) || throw(Compat.InexactError(:Register, Register, state))
+
+    N = log2i(nactive_len * nremain_len)
     Register{N, nbatch, T}(state, collect(1:N))
 end
 
-Register(state::Array{T, 1}) where T = Register(reshape(state, length(state), 1))
+function Register(state::Array{T, 1}, nbatch) where T
+    Register(reshape(state, length(state), 1), nbatch)
+end
 
-export zero_state, rand_state
-zero_state(::Type{T}, nqubit::Int, nbatch::Int=1) where T =
-    (state = zeros(T, 1<<nqubit, nbatch); state[1, :] = 1; Register(state))
+export zero_state, rand_state, register
+
+register(state_vec::Vector) = Register(state_vec, 1)
+register(state_array, nbatch=1) = Register(state_array, nbatch)
+
+function zero_state(::Type{T}, nqubit::Int, nbatch::Int=1) where T
+    state = zeros(T, 1<<nqubit, nbatch)
+    state[1, :] = 1
+    register(state, nbatch)
+end
 # TODO: support different RNG?, default is a MT19937
-rand_state(::Type{T}, nqubit::Int, nbatch::Int=1) where T = Register(rand(T, 1<<nqubit, nbatch))
 
+function rand_state(::Type{T}, nqubit::Int, nbatch::Int=1) where T
+    register(batch_normalize!(rand(T, 1<<nqubit, nbatch)), nbatch)
+end
 # set default type
 zero_state(nqubit::Int, nbatch::Int=1) = zero_state(Complex128, nqubit, nbatch)
 rand_state(nqubit::Int, nbatch::Int=1) = rand_state(Complex128, nqubit, nbatch)

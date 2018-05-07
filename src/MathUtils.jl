@@ -24,3 +24,18 @@ function log2i(x::T)::T where T
     end
     return n
 end
+
+export batch_normalize!
+
+function batch_normalize!(s::AbstractMatrix)
+    B = size(s, 2)
+    for i = 1:B
+        normalize!(view(s, :, i))
+    end
+    s
+end
+
+function batch_normalize(s::AbstractMatrix)
+    ts = copy(s)
+    batch_normalize!(ts)
+end
