@@ -76,17 +76,3 @@ function control(x::ControlBlock, cbit)
 end
 
 control(cbit) = x->control(x, cbit)
-
-
-# 3. rotation block
-export rotation
-
-function rotation(::Type{T}, n::Int) where {T <: Real}
-    chain(
-        kron(rot(T, Z, rand(T)) for i = 1:n),
-        kron(rot(T, X, rand(T)) for i = 1:n),
-        kron(rot(T, Z, rand(T)) for i = 1:n),
-    )
-end
-
-rotation(n::Int) = rotation(Float64, n)
