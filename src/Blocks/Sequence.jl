@@ -7,7 +7,6 @@ end
 export sequence
 
 sequence(blocks...) = Sequence([blocks...])
-(block::Sequence)(reg::Register) = apply!(reg, block)
 
 function apply!(reg::Register, block::Sequence)
     for each in block.list

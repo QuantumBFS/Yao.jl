@@ -12,4 +12,5 @@ include("Concentrator.jl")
 include("Sequence.jl")
 
 include("Measure.jl")
-# include("Compose.jl")
+
+include("PrettyInterface.jl")

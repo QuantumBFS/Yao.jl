@@ -6,7 +6,7 @@ struct ControlBlock{BlockType, N, T} <: CompositeBlock{N, T}
 end
 
 function ControlBlock(total_num::Int, cbit::Int, block::BT, pos::Int) where {K, T, BT <: PureBlock{K, T}}
-    new{BT, total_num, T}(qubits, block, pos)
+    new{BT, total_num, T}(cbit, block, pos)
 end
 
 function ControlBlock(cbit::Int, block::PureBlock{K, T}, pos::Int) where {K, T}
@@ -121,8 +121,6 @@ function sparse(ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
 end
 
 full(ctrl::ControlBlock) = full(sparse(ctrl))
-
-(ctrl::ControlBlock)(reg::Register) = apply!(reg, ctrl)
 
 function apply!(reg::Register, ctrl::ControlBlock)
     reg.state .= full(ctrl) * reg
