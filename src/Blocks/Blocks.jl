@@ -11,5 +11,6 @@ include("Control.jl")
 include("Concentrator.jl")
 include("Sequence.jl")
 
-# include("Compose.jl")
-# include("Measure.jl")
+include("Measure.jl")
+
+include("PrettyInterface.jl")
