@@ -97,7 +97,7 @@ function sparse(ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
         mat = _kron_matAB(
             T, N,
             CONST_SPARSE_P0(T), ctrl.control, 1,
-            sparse(ctrl.block), ctrl.pos, N - 1,
+            speye(T, 1<<nqubit(ctrl.block)), ctrl.pos, N - 1,
         )
         mat += _kron_matAB(
             T, N,
@@ -107,7 +107,7 @@ function sparse(ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
     else
         mat = _kron_matAB(
             T, N,
-            sparse(ctrl.block), ctrl.pos, N - 1,
+            speye(T, 1<<nqubit(ctrl.block)), ctrl.pos, N - 1,
             CONST_SPARSE_P0(T), ctrl.control, 1,
         )
         mat += _kron_matAB(
@@ -123,7 +123,7 @@ end
 full(ctrl::ControlBlock) = full(sparse(ctrl))
 
 function apply!(reg::Register, ctrl::ControlBlock)
-    reg.state .= full(ctrl) * reg
+    reg.state .= full(ctrl) * state(reg)
     reg
 end
 
@@ -149,3 +149,8 @@ end
 export control
 
 control(cbit, block::PureBlock, pos) = ControlBlock(cbit, block, pos)
+
+function show(io::IO, ctrl::ControlBlock)
+    println(io, "control(", ctrl.control, "):")
+    print(io, "    ", ctrl.pos, ": ", ctrl.block)
+end
