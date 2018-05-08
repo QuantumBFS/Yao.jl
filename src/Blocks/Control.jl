@@ -132,17 +132,17 @@ function dispatch!(ctrl::ControlBlock, params...)
 end
 
 # TODO: use this type to optimize performance for multiple control qubits
-struct MultiControlBlock{M, BlockType, N, T} <: CompositeBlock{N, T}
-    control_qubits::NTuple{M, Int}
+# struct MultiControlBlock{M, BlockType, N, T} <: CompositeBlock{N, T}
+#     control_qubits::NTuple{M, Int}
 
-    block::BlockType
-    pos::Int
+#     block::BlockType
+#     pos::Int
 
-    function MultiControlBlock(control_qubits::NTuple{M, Int}, block::BT, pos::Int) where {M, K, T, BT <: PureBlock{K, T}}
-        warn("MultiControlBlock is not implemented")
-        new{M, BT, M+K, T}(control_qubits, block, pos)
-    end
-end
+#     function MultiControlBlock(control_qubits::NTuple{M, Int}, block::BT, pos::Int) where {M, K, T, BT <: PureBlock{K, T}}
+#         warn("MultiControlBlock is not implemented")
+#         new{M, BT, M+K, T}(control_qubits, block, pos)
+#     end
+# end
 
 
 # factory method
