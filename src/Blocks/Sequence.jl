@@ -64,6 +64,10 @@ end
 import Base: >>
 export >>
 
+function >>(reg::Register, block::Sequence)
+    CircuitPlan(reg, block)
+end
+
 function >>(reg::Register, block::AbstractBlock)
     CircuitPlan(reg, sequence(block))
 end

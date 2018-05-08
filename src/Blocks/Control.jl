@@ -1,126 +1,132 @@
 struct ControlBlock{BlockType, N, T} <: CompositeBlock{N, T}
-    control::Int
-
+    ctrl_qubits::Vector{Int}
     block::BlockType
-    pos::Int
-end
+    addr::Int
 
-function ControlBlock(total_num::Int, cbit::Int, block::BT, pos::Int) where {K, T, BT <: PureBlock{K, T}}
-    new{BT, total_num, T}(cbit, block, pos)
-end
-
-function ControlBlock(cbit::Int, block::PureBlock{K, T}, pos::Int) where {K, T}
-    total = max(pos + K - 1, cbit)
-    ControlBlock{typeof(block), total, T}(cbit, block, pos)
-end
-
-function ControlBlock(cbit::Int, block::ControlBlock{BT, N, T}, pos::Int) where {BT, N, T}
-
-    total = 0
-    if cbit < pos
-        total = pos + N - 1
-    elseif pos + N - 1 < cbit
-        total = cbit
-    else
-        total = N
-    end
-
-    ControlBlock{typeof(block), total, T}(cbit, block, pos)
-end
-
-
-for (NAME, MAT) in [
-    ("P0", [1 0;0 0]),
-    ("P1", [0 0;0 1]),
-]
-
-    for (TYPE_NAME, DTYPE) in [
-        ("ComplexF16", Compat.ComplexF16),
-        ("ComplexF32", Compat.ComplexF32),
-        ("ComplexF64", Compat.ComplexF64),
-    ]
-
-        DENSE_NAME = Symbol(join(["CONST", NAME], "_"))
-        DENSE_CONST = Symbol(join([DENSE_NAME, TYPE_NAME], "_"))
-
-        SPARSE_NAME = Symbol(join(["CONST", "SPARSE", NAME], "_"))
-        SPARSE_CONST = Symbol(join([SPARSE_NAME, TYPE_NAME], "_"))
-
-        @eval begin
-            const $(DENSE_CONST) = Array{$DTYPE, 2}($MAT)
-            const $(SPARSE_CONST) = sparse(Array{$DTYPE, 2}($MAT))
-
-            $(DENSE_NAME)(::Type{$DTYPE}) = $(DENSE_CONST)
-            $(SPARSE_NAME)(::Type{$DTYPE}) = $(SPARSE_CONST)
-        end
-    end
-
-end
-
-function _kron_p_with_block(N, addr_p, p, addr_b, block::PureBlock{K, T}) where {K, T}
-    local out
-    
-    if addr_p < addr_b
-        out = speye(T, 1 << addr_p - 1)
-        out = kron(out, p)
-        out = kron(out, speye(T, 1 << (addr_b - addr_p - 1)))
-        out = kron(out, sparse(block))
-        out = kron(out, speye(T, 1 << (N - addr_b - K + 1)))
-    else
+    function ControlBlock(total::Int, ctrl_qubits::Vector{Int}, block::BT, addr::Int) where {K, T, BT <: PureBlock{K, T}}
+        # NOTE: control qubits use sign to characterize
+        # inverse control qubits
+        # we sort it from lowest addr to highest first
+        # this will help we have an deterministic behaviour
+        ordered_control = sort(ctrl_qubits, by=x->abs(x))
+        M = length(ordered_control)
+        new{BT, total, T}(ordered_control, block, addr)
     end
 end
 
-# - 1
-# - 2 |
-# - 3 |
-# - 4
-# - 5 |
-# - 6 |
-# - 7
-# - 8
-
-# kron 2^Jx2^J A with 2^K x 2^K B on given position ia, ib, ia < ib
-function _kron_matAB(T, N, A, ia, J, B, ib, K)
-    out = speye(T, 1 << ia - 1)
-    out = kron(out, A)
-    out = kron(out, speye(T, 1 << (ib - (ia + J)) ))
-    out = kron(out, B)
-    out = kron(out, speye(T, 1 << (N - (ib + K - 1)) ))
-end
-
-# TODO: polish this
-function sparse(ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
-
-    local mat
-
-    if ctrl.control < ctrl.pos
-        mat = _kron_matAB(
-            T, N,
-            CONST_SPARSE_P0(T), ctrl.control, 1,
-            speye(T, 1<<nqubit(ctrl.block)), ctrl.pos, N - 1,
-        )
-        mat += _kron_matAB(
-            T, N,
-            CONST_SPARSE_P1(T), ctrl.control, 1,
-            sparse(ctrl.block), ctrl.pos, N - 1,
-        )
-    else
-        mat = _kron_matAB(
-            T, N,
-            speye(T, 1<<nqubit(ctrl.block)), ctrl.pos, N - 1,
-            CONST_SPARSE_P0(T), ctrl.control, 1,
-        )
-        mat += _kron_matAB(
-            T, N,
-            sparse(ctrl.block), ctrl.pos, N - 1,
-            CONST_SPARSE_P1(T), ctrl.control, 1,
-        )
-    end
-
-    return mat
+function ControlBlock(ctrl_qubits::Vector{Int}, block, addr::Int)
+    total = max(maximum(abs.(ctrl_qubits)), addr)
+    ControlBlock(total, ctrl_qubits, block, addr)
 end
 
 full(ctrl::ControlBlock) = full(sparse(ctrl))
+
+function sparse(ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
+    # NOTE: we sort the addr of control qubits by its relative addr to
+    # the block under control, this is useful when calculate its
+    # matrix form.
+    ctrl_addrs = sort(ctrl.ctrl_qubits, by=x->abs(abs(x)-ctrl.addr))
+
+    # start of the iteration
+    U = sparse(ctrl.block)
+    addr = ctrl.addr
+    U_nqubit = nqubit(ctrl.block)
+    for each_ctrl in ctrl_addrs
+        if each_ctrl > 0
+            U = _single_control_gate_sparse(abs(each_ctrl), U, addr, U_nqubit)
+        else
+            U = _single_inverse_control_gate_sparse(abs(each_ctrl), U, addr, U_nqubit)
+        end
+
+        head = addr # inner block head
+        tail = addr + U_nqubit - 1 # inner block tail
+        inc = min(abs(head - abs(each_ctrl)), abs(tail - abs(each_ctrl)))
+        U_nqubit = U_nqubit + inc
+        addr = min(abs(each_ctrl), addr)
+    end
+
+    # check blank lines at the beginning
+    lowest_addr = min(minimum(abs.(ctrl_addrs)), ctrl.addr)
+    if lowest_addr != 1 # lowest addr is not from the first
+        nblank = lowest_addr - 1
+        U = kron(speye(T, 1 << nblank), U)
+    end
+
+    # check blank lines in the end
+    highest_addr = max(maximum(abs.(ctrl_addrs)), ctrl.addr)
+    if highest_addr != N # highest addr is not the last
+        nblank = N - highest_addr
+        U = kron(U, speye(T, 1 << nblank))
+    end
+    U
+end
+
+function _single_inverse_control_gate_sparse(control::Int, U, addr, nqubit)
+    @assert control != addr "cannot control itself"
+
+    T = eltype(U)
+    if control < addr
+        op = A_kron_B(
+            CONST_SPARSE_P1(T), control, 1,
+            speye(U), addr
+        )
+        op += A_kron_B(
+            CONST_SPARSE_P0(T), control, 1,
+            U, addr
+        )
+    else
+        op = A_kron_B(
+            speye(U), addr, nqubit,
+            CONST_SPARSE_P1(T), control
+        )
+        op += A_kron_B(
+            U, addr, nqubit,
+            CONST_SPARSE_P0(T), control
+        )
+    end
+    op
+end
+
+function _single_control_gate_sparse(control::Int, U, addr, nqubit)
+    @assert control != addr "cannot control itself"
+
+    T = eltype(U)
+    if control < addr
+        op = A_kron_B(
+            CONST_SPARSE_P0(T), control, 1,
+            speye(U), addr
+        )
+        op += A_kron_B(
+            CONST_SPARSE_P1(T), control, 1,
+            U, addr
+        )
+    else
+        op = A_kron_B(
+            speye(U), addr, nqubit,
+            CONST_SPARSE_P0(T), control
+        )
+        op += A_kron_B(
+            U, addr, nqubit,
+            CONST_SPARSE_P1(T), control
+        )
+    end
+    op
+end
+
+# kronecker A and B relatively on position ia, ib
+# A has size 2^na x 2^na
+function A_kron_B(A, ia, na, B, ib)
+    T = eltype(A)
+    
+    out = A
+    if ia + na < ib
+        blank_size = ib - ia - na
+        out = kron(out, speye(T, 1 << blank_size))
+    end
+    kron(out, B)
+end
+
+# apply & update
 
 function apply!(reg::Register, ctrl::ControlBlock)
     reg.state .= full(ctrl) * state(reg)
@@ -131,26 +137,21 @@ function dispatch!(ctrl::ControlBlock, params...)
     dispatch!(ctrl.block, params...)
 end
 
-# TODO: use this type to optimize performance for multiple control qubits
-# struct MultiControlBlock{M, BlockType, N, T} <: CompositeBlock{N, T}
-#     control_qubits::NTuple{M, Int}
-
-#     block::BlockType
-#     pos::Int
-
-#     function MultiControlBlock(control_qubits::NTuple{M, Int}, block::BT, pos::Int) where {M, K, T, BT <: PureBlock{K, T}}
-#         warn("MultiControlBlock is not implemented")
-#         new{M, BT, M+K, T}(control_qubits, block, pos)
-#     end
-# end
-
-
-# factory method
 export control
 
-control(cbit, block::PureBlock, pos) = ControlBlock(cbit, block, pos)
+function control(total::Int, controls::Vector{Int}, block, addr)
+    ControlBlock(total, [controls...], block, addr)
+end
 
-function show(io::IO, ctrl::ControlBlock)
-    println(io, "control(", ctrl.control, "):")
-    print(io, "    ", ctrl.pos, ": ", ctrl.block)
+function control(controls::Vector{Int}, block, addr)
+    ControlBlock([controls...], block, addr)
+end
+
+# pretty printing
+
+function show(io::IO, ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
+    println(io, "control:")
+    println(io, "\ttotal: $N")
+    println(io, "\t$(ctrl.ctrl_qubits) control")
+    print(io, "\t$(ctrl.block) at $(ctrl.addr)")
 end

@@ -2,40 +2,71 @@ using Compat.Test
 
 import QuCircuit: zero_state, state, focus!,
     X, Y, Z, gate, phase, focus, address, rot
-import QuCircuit: control
+import QuCircuit: ControlBlock
 import QuCircuit: nqubit, ninput, noutput, isunitary, ispure
 import QuCircuit: apply!, dispatch!
+import QuCircuit: _single_control_gate_sparse,
+                  _single_inverse_control_gate_sparse,
+                  A_kron_B
+import QuCircuit: CONST_SPARSE_P0, CONST_SPARSE_P1
 
-@testset "test control" begin
+@testset "control matrix form" begin
 
-    # CNOT
-    CNOT = control(1, gate(X), 2)
-    @test full(CNOT) == Complex128[
-        1 0 0 0
-        0 1 0 0
-        0 0 0 1
-        0 0 1 0]
+⊗ = kron
+U = sparse(gate(X))
+Id = speye(Compat.ComplexF64, 2)
 
-    @test eltype(CNOT) <: Complex128
-    @test nqubit(CNOT) == 2
-    @test ninput(CNOT) == 2
-    @test noutput(CNOT) == 2
-    @test isunitary(CNOT) == true
-    @test ispure(CNOT) = true
-
-    CONTROL_PHASE = control(1, phase(0.1), 2)
-    @test norm(full(CONTROL_PHASE) - Complex128[
-        1.0 0.0 0.0 0.0
-        0.0 1.0 0.0 0.0
-        0.0 0.0 1.0 0.0
-        0.0 0.0 0.0 0.980067+0.198669im
-    ]) < 1e-6
-
-    # Inverse CNOT
-    iCNOT = control(2, gate(X), 1)
-    reg = zero_state(2)
-    reg.state[2] = 1
-    reg.state[1] = 0
-    iCNOT(reg)
-    @test reg.state[end] == 1
+@testset "single control" begin
+    g = ControlBlock([1, ], gate(X), 2)
+    @test nqubit(g) == 2
+    mat = CONST_SPARSE_P0() ⊗ eye(U) + CONST_SPARSE_P1() ⊗ U
+    @test sparse(g) == mat
 end
+
+@testset "single control with inferred size" begin
+    g = ControlBlock([2, ], gate(X), 3)
+    @test nqubit(g) == 3
+    mat = Id ⊗ (CONST_SPARSE_P0() ⊗ eye(U) + CONST_SPARSE_P1() ⊗ U)
+    @test sparse(g) == mat
+end
+
+@testset "control with fixed size" begin
+    g = ControlBlock(4, [2, ], gate(X), 3)
+    @test nqubit(g) == 4
+    mat = Id ⊗ (CONST_SPARSE_P0() ⊗ eye(U) + CONST_SPARSE_P1() ⊗ U) ⊗ Id
+    @test sparse(g) == mat
+end
+
+@testset "control with blank" begin
+    g = ControlBlock(4, [3, ], gate(X), 2)
+    @test nqubit(g) == 4
+
+    mat = Id ⊗ (eye(U) ⊗ CONST_SPARSE_P0() + U ⊗ CONST_SPARSE_P1()) ⊗ Id
+    @test sparse(g) == mat
+end
+
+@testset "multi control" begin
+    g = ControlBlock([2, 3], gate(X), 4)
+    @test nqubit(g) == 4
+
+    op = CONST_SPARSE_P0() ⊗ eye(U) + CONST_SPARSE_P1() ⊗ U
+    op = CONST_SPARSE_P0() ⊗ eye(op) + CONST_SPARSE_P1() ⊗ op
+    op = Id ⊗ op
+    @test sparse(g) == op
+end
+
+@testset "multi control with blank" begin
+    g = ControlBlock(7, [6, 4, 2], gate(X), 3) # -> [2, 4, 6]
+    @test nqubit(g) == 7
+
+    op = CONST_SPARSE_P0() ⊗ eye(U) + CONST_SPARSE_P1() ⊗ U # 2, 3
+    op = eye(op) ⊗ CONST_SPARSE_P0() + op ⊗ CONST_SPARSE_P1() # 2, 3, 4
+    op = eye(op) ⊗ Id ⊗ CONST_SPARSE_P0() + op ⊗ Id ⊗ CONST_SPARSE_P1() # 2, 3, 4, blank, 6
+    op = Id ⊗ op # blank, 2, 3, blank, 4, 6
+    op = op ⊗ Id # blnak, 2, 3, blank, 4, 6, blank
+
+    @test sparse(g) == op
+end
+
+
+end # control matrix form

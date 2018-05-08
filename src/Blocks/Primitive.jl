@@ -41,38 +41,23 @@ gate = Gate
 
 # NOTE: we define some type related constants here to avoid multiple allocation
 
-import Compat
-
-for (GTYPE, NAME, MAT) in [
-    (X, "PAULI_X", [0 1;1 0]),
-    (Y, "PAULI_Y", [0 -im; im 0]),
-    (Z, "PAULI_Z", [1 0;0 -1]),
-    (Hadmard, "HADMARD", (elem = 1 / sqrt(2); [elem elem; elem -elem]))
+for (GTYPE, NAME) in [
+    (X, "PAULI_X"),
+    (Y, "PAULI_Y"),
+    (Z, "PAULI_Z"),
+    (Hadmard, "HADMARD")
 ]
 
-    for (TYPE_NAME, DTYPE) in [
-        ("ComplexF16", Compat.ComplexF16),
-        ("ComplexF32", Compat.ComplexF32),
-        ("ComplexF64", Compat.ComplexF64),
-    ]
-
-        @eval begin
-
-            const $(Symbol(join(["CONST", NAME, TYPE_NAME], "_"))) = Array{$DTYPE, 2}($MAT)
-            const $(Symbol(join(["CONST", "SPARSE", NAME, TYPE_NAME], "_"))) = sparse(Array{$DTYPE, 2}($MAT))
-
-            full(gate::Gate{1, $GTYPE, $DTYPE}) = $(Symbol(join(["CONST", NAME, TYPE_NAME], "_")))
-            sparse(gate::Gate{1, $GTYPE, $DTYPE}) = $(Symbol(join(["CONST", "SPARSE", NAME, TYPE_NAME], "_")))
-        end
-
-    end
+    DENSE_NAME = Symbol(join(["CONST", NAME], "_"))
+    SPARSE_NAME = Symbol(join(["CONST", "SPARSE", NAME], "_"))
 
     @eval begin
-        # fallback method for other types
-        full(gate::Gate{1, $GTYPE, T}) where T = Array{T, 2}(MAT)
+        full(gate::Gate{1, $GTYPE, T}) where T = $(DENSE_NAME)(T)
+        sparse(gate::Gate{1, $GTYPE, T}) where T = $(SPARSE_NAME)(T)
     end
 
 end
+
 
 mutable struct PhiGate{T} <: AbstractGate{1, Complex{T}}
     theta::T
@@ -162,4 +147,7 @@ for (GTYPE, NAME) in [
 
 end
 
+
+struct CNOT{T} <: AbstractGate{2, T}
+end
 
