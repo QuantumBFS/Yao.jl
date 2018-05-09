@@ -7,6 +7,8 @@ using QuCircuit
 ```
 
 Then let's define the oracle, it is a function of the number of qubits.
+The whole oracle looks like this:
+
 
 ```@example GHZ
 circuit(num_bits) = sequence(
