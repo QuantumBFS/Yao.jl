@@ -432,4 +432,28 @@ var documenterSearchIndex = {"docs": [
     "text": ""
 },
 
+{
+    "location": "theo/blocks/#",
+    "page": "Block Operations",
+    "title": "Block Operations",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "theo/blocks/#Block-Operations-1",
+    "page": "Block Operations",
+    "title": "Block Operations",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "theo/blocks/#Direct-Construction-of-sparse-gates-1",
+    "page": "Block Operations",
+    "title": "Direct Construction of sparse gates",
+    "category": "section",
+    "text": "For example, constructing X(2, 4), we can change bases likeold basis (0, 1, ..., 15),\nold bitstring basis (0000, 0001, ..., 1111),\nnew bitstring basis (0100, 0101, ..., 1011),\nnew basis (4, 5, ..., 11).Progamming way in julia to obtain new basis isbasis = collect(0:1<<4-1)\nbasis $= 1 << 2  # for newer julia, $ will be deprecated, no-ascii \\xor can be used.Which is equivalent to a Permutation matrix or a more general PermutationMultiply matrix."
+},
+
 ]}
