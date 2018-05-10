@@ -68,5 +68,11 @@ end
     @test sparse(g) == op
 end
 
+@testset "inverse control" begin
+    g = ControlBlock(2, [-1, ], gate(X), 2)
+
+    op = CONST_SPARSE_P0() ⊗ U + CONST_SPARSE_P1() ⊗ eye(U)
+    @test sparse(g) == op
+end
 
 end # control matrix form
