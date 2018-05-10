@@ -146,8 +146,3 @@ for (GTYPE, NAME) in [
     end
 
 end
-
-
-struct CNOT{T} <: AbstractGate{2, T}
-end
-
