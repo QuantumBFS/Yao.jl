@@ -20,6 +20,7 @@ makedocs(
             "theo/register.md",
             "theo/rotation.md",
             "theo/grover.md",
+            "theo/blocks.md",
         ],
     ],
     html_prettyurls = !("local" in ARGS),
