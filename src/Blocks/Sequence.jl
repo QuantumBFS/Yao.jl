@@ -52,11 +52,6 @@ function next(itr::CircuitPlan, state)
         info["next"] = itr.seq.list[i+1]
     end
 
-    if "callback" in keys(info)
-        info["callback"](itr.reg)
-        delete!(info, "callback")
-    end
-
     apply!(itr.reg, block)
     return info, (i+1, info)
 end
