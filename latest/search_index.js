@@ -25,6 +25,102 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "tutorial/GHZ/#",
+    "page": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
+    "title": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "tutorial/GHZ/#Prepare-Greenberger–Horne–Zeilinger-state-with-Quantum-Circuit-1",
+    "page": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
+    "title": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
+    "category": "section",
+    "text": "First, you have to use this package in Julia.using QuCircuitThen let\'s define the oracle, it is a function of the number of qubits. The whole oracle looks like this:circuit(num_bits) = sequence(\n    X(num_bits, 1),\n    H(num_bits, 2:num_bits),\n    X(1) |> C(num_bits, 2),\n    X(3) |> C(num_bits, 4),\n    X(1) |> C(num_bits, 3),\n    X(3) |> C(num_bits, 4),\n    H(num_bits, 1:num_bits),\n)After we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.reg = zero_state(4)\n\nreg |> circuit(4)\nregLet\'s check the output:state(reg)We have a GHZ state here, try to measure the first qubitreg |> measure(1)\nstate(reg)GHZ state will collapse to 0000rangle or 1111rangle due to entanglement!"
+},
+
+{
+    "location": "tutorial/QFT/#",
+    "page": "Quantum Fourier Transform",
+    "title": "Quantum Fourier Transform",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "tutorial/QFT/#Quantum-Fourier-Transform-1",
+    "page": "Quantum Fourier Transform",
+    "title": "Quantum Fourier Transform",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "tutorial/QCBM/#",
+    "page": "Quantum Circuit Born Machine",
+    "title": "Quantum Circuit Born Machine",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "tutorial/QCBM/#Quantum-Circuit-Born-Machine-1",
+    "page": "Quantum Circuit Born Machine",
+    "title": "Quantum Circuit Born Machine",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "man/blocks/#",
+    "page": "Blocks as the basic component of a circuit",
+    "title": "Blocks as the basic component of a circuit",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "man/blocks/#Blocks-as-the-basic-component-of-a-circuit-1",
+    "page": "Blocks as the basic component of a circuit",
+    "title": "Blocks as the basic component of a circuit",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "man/cache/#",
+    "page": "Cache System",
+    "title": "Cache System",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "man/cache/#Cache-System-1",
+    "page": "Cache System",
+    "title": "Cache System",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "man/functional/#",
+    "page": "Functional Programming",
+    "title": "Functional Programming",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "man/functional/#Functional-Programming-1",
+    "page": "Functional Programming",
+    "title": "Functional Programming",
+    "category": "section",
+    "text": ""
+},
+
+{
     "location": "dev/block/#",
     "page": "Block System",
     "title": "Block System",
