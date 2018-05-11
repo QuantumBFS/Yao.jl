@@ -4,9 +4,6 @@ struct Sequence <: AbstractBlock
     list::Vector{Any}
 end
 
-export sequence
-
-sequence(blocks...) = Sequence([blocks...])
 
 function apply!(reg::Register, block::Sequence)
     for each in block.list

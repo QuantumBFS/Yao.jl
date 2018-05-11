@@ -21,11 +21,6 @@ function copy(c::ChainBlock{N, T, TD}) where {N, T, TD}
     ChainBlock{N, T, TD}(blocks)
 end
 
-export chain
-
-function chain(blocks::PureBlock{N}...) where N
-    ChainBlock(blocks...)
-end
 
 isunitary(block::ChainBlock) = all(isunitary, block.blocks)
 
@@ -36,7 +31,7 @@ sparse(c::ChainBlock) = prod(x->sparse(x), reverse(c.blocks))
 
 function apply!(reg::Register, c::ChainBlock)
     for each in c.blocks
-        apply!(reg, each, signal)
+        apply!(reg, each)
     end
     reg
 end

@@ -58,35 +58,6 @@ function copy(block::KronBlock{N, T}) where {N, T}
     KronBlock{N, T}(kvstore)
 end
 
-import Base: kron
-
-"""
-    kron(blocks...) -> KronBlock
-    kron(iterator) -> KronBlock
-    kron(total, blocks...) -> KronBlock
-    kron(total, iterator) -> KronBlock
-
-create a `KronBlock` with a list of blocks or tuple of heads and blocks.
-
-## Example
-```julia
-block1 = Gate(X)
-block2 = Gate(Z)
-block3 = Gate(Y)
-KronBlock(block1, (3, block2), block3)
-```
-This will automatically generate a block list looks like
-```
-1 -- [X] --
-2 ---------
-3 -- [Z] --
-4 -- [Y] --
-```
-"""
-kron(total, blocks::Union{PureBlock, Tuple, Pair}...) = KronBlock(total, blocks)
-kron(total, blocks) = KronBlock(total, blocks)
-kron(blocks::Union{PureBlock, Tuple, Pair}...) = KronBlock(blocks)
-kron(blocks) = KronBlock(blocks)
 
 # some useful sugar
 import Base: getindex, setindex!, keys, values

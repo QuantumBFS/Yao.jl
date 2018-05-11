@@ -26,19 +26,6 @@ struct Gate{N, GT <: GateType, T} <: AbstractGate{N, T} end
 Gate(::Type{T}, ::Type{GT}) where {T, GT} = Gate{1, GT, T}()
 Gate(::Type{GT}) where GT = Gate(Complex128, GT)
 
-export gate
-"""
-    gate(type, gate_type)
-    gate(gate_type)
-
-Create an instance of `gate_type`.
-
-### Example
-
-create a Pauli X gate: `gate(X)`
-"""
-gate = Gate
-
 # NOTE: we define some type related constants here to avoid multiple allocation
 
 for (GTYPE, NAME) in [
@@ -58,15 +45,10 @@ for (GTYPE, NAME) in [
 
 end
 
-
 mutable struct PhiGate{T} <: AbstractGate{1, Complex{T}}
     theta::T
 end
 
-
-export phase
-phase(::Type{T}, theta) where {T <: Real} = PhiGate{T}(theta)
-phase(theta) = phase(Float64, theta)
 full(gate::PhiGate{T}) where T = exp(im * gate.theta) * Complex{T}[exp(-im * gate.theta) 0; 0  exp(im * gate.theta)]
 
 copy(block::PhiGate) = PhiGate(block.theta)
@@ -86,10 +68,6 @@ end
 mutable struct RotationGate{GT, T} <: AbstractGate{1, Complex{T}}
     theta::T
 end
-
-export rot
-rot(::Type{T}, ::Type{GT}, theta::T) where {T <: Real, GT} = RotationGate{GT, T}(theta)
-rot(::Type{GT}, theta::T) where {GT, T <: Real} = rot(Float64, GT, theta)
 
 full(gate::RotationGate{X, T}) where T =
     Complex{T}[cos(gate.theta/2) -im*sin(gate.theta/2);

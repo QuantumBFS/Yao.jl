@@ -9,4 +9,6 @@ include("Cache/Cache.jl")
 
 include("PrettyInterface.jl")
 
+include("Composer.jl")
+
 end # module

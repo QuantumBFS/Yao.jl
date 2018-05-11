@@ -110,8 +110,6 @@ function apply!(reg::Register, block::Measure{M}) where M
     reg
 end
 
-measure(m::Int) = Measure{m}()
-
 mutable struct MeasureAndRemove{M} <: AbstractMeasure{M}
     result::Vector{Int}
 
@@ -123,5 +121,3 @@ function apply!(reg::Register, block::MeasureAndRemove{M}) where M
     block.result = samples
     new_reg
 end
-
-measure_remove(m::Int) = MeasureAndRemove{m}()

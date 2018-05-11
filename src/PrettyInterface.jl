@@ -1,3 +1,101 @@
+# blocks can only be constructed through factory methods
+
+# 1. primitive blocks
+# 1.1 constant gate
+
+export gate
+"""
+    gate(type, gate_type)
+    gate(gate_type)
+
+Create an instance of `gate_type`.
+
+### Example
+
+create a Pauli X gate: `gate(X)`
+"""
+gate = Gate
+
+# 1.2 phase gate
+export phase
+phase(::Type{T}, theta) where {T <: Real} = PhiGate{T}(theta)
+phase(theta) = phase(Float64, theta)
+
+# 1.3 rotation gate
+export rot
+rot(::Type{T}, ::Type{GT}, theta::T) where {T <: Real, GT} = RotationGate{GT, T}(theta)
+rot(::Type{GT}, theta::T) where {GT, T <: Real} = rot(Float64, GT, theta)
+
+# 2. composite blocks
+
+# 2.1 chain block
+export chain
+
+function chain(blocks::PureBlock{N}...) where N
+    ChainBlock(blocks...)
+end
+
+# 2.2 kron block
+import Base: kron
+
+"""
+    kron(blocks...) -> KronBlock
+    kron(iterator) -> KronBlock
+    kron(total, blocks...) -> KronBlock
+    kron(total, iterator) -> KronBlock
+
+create a `KronBlock` with a list of blocks or tuple of heads and blocks.
+
+## Example
+```julia
+block1 = Gate(X)
+block2 = Gate(Z)
+block3 = Gate(Y)
+KronBlock(block1, (3, block2), block3)
+```
+This will automatically generate a block list looks like
+```
+1 -- [X] --
+2 ---------
+3 -- [Z] --
+4 -- [Y] --
+```
+"""
+kron(total, blocks::Union{PureBlock, Tuple, Pair}...) = KronBlock(total, blocks)
+kron(total, blocks) = KronBlock(total, blocks)
+kron(blocks::Union{PureBlock, Tuple, Pair}...) = KronBlock(blocks)
+kron(blocks) = KronBlock(blocks)
+
+# 2.3 control block
+
+export C
+
+function C(controls::Int...)
+    function _C(block_and_addr)
+        total->ControlBlock(total, [controls...], block_and_addr...)
+    end
+end
+
+
+# 3. measurement
+export measure
+measure(m::Int) = Measure{m}()
+
+export measure_remove
+measure_remove(m::Int) = MeasureAndRemove{m}()
+
+# 4. others
+
+# NOTE: use compose instead, this will only be a low level type
+# 4.1 sequence
+# export sequence
+# sequence(blocks...) = Sequence([blocks...])
+
+# 4.2 concentrator
+export focus
+focus(orders...) = Concentrator(orders...)
+
+
 # all blocks are callable
 
 # NOTE: this is a workaround in v0.6, multiple dispatch for call
@@ -52,6 +150,10 @@ for (NAME, GTYPE) in [
         (gate($GTYPE), addr)
     end
 
+    function $NAME(r::UnitRange)
+        (gate($GTYPE), r)
+    end
+
     function $NAME(num_qubit::Int, addr::Int)
         kron(num_qubit, (1, gate(X)))
     end
@@ -63,22 +165,3 @@ for (NAME, GTYPE) in [
 end
 
 end
-
-# 2. control block
-export C
-
-function C(total, controls::Int...)
-    block_and_addr->ControlBlock(total, [controls...], block_and_addr...)
-end
-
-# export CNOT
-
-# function CNOT(a, b)
-#     control(a, gate(X), b)
-# end
-
-# function CNOT(n, a, b)
-#     ca = a - min(a, b) + 1
-#     cb = b - min(a, b) + 1
-#     kron(n, (min(a, b), control(ca, gate(X), cb)))
-# end
