@@ -1,3 +1,5 @@
+import Base: empty!, push!
+
 # default method for cache matrix
 """
     cache_type(block) -> type
@@ -62,6 +64,8 @@ function setlevel!(cache::CacheElement, level::UInt)
     cache.level = level
     cache
 end
+
+empty!(cache::CacheElement) = empty!(cache.data)
 
 ###################
 # Cache Servers

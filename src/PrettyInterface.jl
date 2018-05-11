@@ -37,7 +37,7 @@ end
 # 1.Pauli Gates & Hadmard
 export X, Y, Z, H
 
-for (NAME, TYPE) in [
+for (NAME, GTYPE) in [
     (:X, X),
     (:Y, Y),
     (:Z, Z),
@@ -46,19 +46,18 @@ for (NAME, TYPE) in [
 
 @eval begin
 
+    $NAME() = gate($GTYPE)
+
     function $NAME(addr::Int)
-        (gate($TYPE), addr)
+        (gate($GTYPE), addr)
     end
 
     function $NAME(num_qubit::Int, addr::Int)
-        BlockWithAddr(
-            kron(gate($TYPE) for i in 1:num_qubit),
-            addr,
-        )
+        kron(num_qubit, (1, gate(X)))
     end
 
     function $NAME(num_qubit::Int, r)
-        kron(num_qubit, (i, gate($TYPE)) for i in r)
+        kron(num_qubit, (i, gate($GTYPE)) for i in r)
     end
 
 end
@@ -66,14 +65,20 @@ end
 end
 
 # 2. control block
-export control
+export C
 
-function control(x::Tuple{<:AbstractBlock, <:Integer}, cbit)
-    control(cbit, x[1], x[2])
+function C(total, controls::Int...)
+    block_and_addr->ControlBlock(total, [controls...], block_and_addr...)
 end
 
-function control(x::ControlBlock, cbit)
-    control(cbit, x, max(x.control, x.pos))
-end
+# export CNOT
 
-control(cbit) = x->control(x, cbit)
+# function CNOT(a, b)
+#     control(a, gate(X), b)
+# end
+
+# function CNOT(n, a, b)
+#     ca = a - min(a, b) + 1
+#     cb = b - min(a, b) + 1
+#     kron(n, (min(a, b), control(ca, gate(X), cb)))
+# end

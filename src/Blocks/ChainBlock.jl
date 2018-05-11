@@ -51,5 +51,5 @@ end
 
 function show(io::IO, c::ChainBlock{N, T}) where {N, T}
     println(io, "ChainBlock{$N, $T}")
-    join(io, ["    " * string(each) for each in c.blocks], "\n")
+    join(io, ["\t" * string(each) for each in c.blocks], "\n----")
 end

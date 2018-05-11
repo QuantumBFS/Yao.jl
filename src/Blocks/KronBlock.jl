@@ -159,5 +159,5 @@ end
 
 function show(io::IO, block::KronBlock{N, T}) where {N, T}
     println(io, "KronBlock{$N, $T}")
-    join(io, ["    " * "$key: $val" for (key, val) in block.kvstore], "\n")
+    join(io, ["\t" * "$key: $val" for (key, val) in block.kvstore], "\n")
 end
