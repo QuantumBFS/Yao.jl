@@ -3,13 +3,17 @@ struct ControlBlock{BlockType, N, T} <: CompositeBlock{N, T}
     block::BlockType
     addr::Int
 
+    # TODO: input a control block
+    # function ControlBlock(total::Int, ctrl_qubits::Vector{Int}, ctrl::ControlBlock, addr::Int) where {K, T}
+    # end
+
     function ControlBlock(total::Int, ctrl_qubits::Vector{Int}, block::BT, addr::Int) where {K, T, BT <: PureBlock{K, T}}
         # NOTE: control qubits use sign to characterize
         # inverse control qubits
         # we sort it from lowest addr to highest first
         # this will help we have an deterministic behaviour
+        # TODO: remove repeated, add error
         ordered_control = sort(ctrl_qubits, by=x->abs(x))
-        M = length(ordered_control)
         new{BT, total, T}(ordered_control, block, addr)
     end
 end
@@ -18,8 +22,6 @@ function ControlBlock(ctrl_qubits::Vector{Int}, block, addr::Int)
     total = max(maximum(abs.(ctrl_qubits)), addr)
     ControlBlock(total, ctrl_qubits, block, addr)
 end
-
-full(ctrl::ControlBlock) = full(sparse(ctrl))
 
 function sparse(ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
     # NOTE: we sort the addr of control qubits by its relative addr to
@@ -117,7 +119,7 @@ end
 # A has size 2^na x 2^na
 function A_kron_B(A, ia, na, B, ib)
     T = eltype(A)
-    
+
     out = A
     if ia + na < ib
         blank_size = ib - ia - na
@@ -126,10 +128,10 @@ function A_kron_B(A, ia, na, B, ib)
     kron(out, B)
 end
 
-# apply & update
+# apply & dispatch
 
 function apply!(reg::Register, ctrl::ControlBlock)
-    reg.state .= full(ctrl) * state(reg)
+    reg.state .= sparse(ctrl) * state(reg)
     reg
 end
 

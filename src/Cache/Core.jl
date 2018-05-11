@@ -196,7 +196,7 @@ end
 # Interface #################################
 #############################################
 
-iscacheable(block::PureBlock, signal::Int=2) = iscacheable(block, cache_type(block), UInt(signal))
+iscacheable(block::PureBlock, signal::Int=1) = iscacheable(block, cache_type(block), UInt(signal))
 iscacheable(block::PureBlock, ::Type{CT}, signal::UInt) where CT = iscacheable(global_cache(CT), block, signal)
 
 

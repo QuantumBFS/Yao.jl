@@ -3,10 +3,7 @@ import Base: ismatch
 abstract type SizeType end
 
 struct AnySize <: SizeType end
-struct FixSize{N} <: SizeType end
 struct GreaterThan{N} <: SizeType end
-struct LessThan{N} <: SizeType end
-struct EqualTo{N} <: SizeType end
 
 """
     ismatch(size, sz) -> Bool
@@ -19,8 +16,6 @@ is_size_match(sza::Int, szb::Int) = sza == szb
 
 is_size_match(::Type{AnySize}, sz::Int) = true
 is_size_match(::Type{GreaterThan{N}}, sz::Int) where N = sz > N
-is_size_match(::Type{LessThan{N}}, sz::Int) where N = sz < N
-is_size_match(::Type{EqualTo{N}}, sz::Int) where N = sz == size.sz
 is_size_match(::Type{AnySize}, ::Type{T}) where {T <: SizeType} = true
 
 """
@@ -45,8 +40,13 @@ ninput(::Type{T}) where {T <: AbstractBlock} = AnySize
 noutput(::Type{T}) where {T <: AbstractBlock} = AnySize
 isunitary(::Type{T}) where {T <: AbstractBlock} = false
 ispure(::Type{T}) where {T <: AbstractBlock} = false
+isreflexive(::Type{T}) where {T <: AbstractBlock} = false
+isunitary_hermitian(::Type{T}) where {T <: AbstractBlock} = false
 
-for NAME in [:nqubit, :ninput, :noutput, :isunitary, :ispure]
+import Base: ishermitian
+ishermitian(::Type{T}) where {T <: AbstractBlock} = false
+
+for NAME in [:nqubit, :ninput, :noutput, :isunitary, :ispure, :isreflexive, :ishermitian]
     @eval begin
         $NAME(block::AbstractBlock) = $NAME(typeof(block))
     end
@@ -63,6 +63,8 @@ function apply! end
 ### do nothing by default
 dispatch!(block, params...) = block
 
+
+# TODO: rename -> MatrixBlock
 """
     PureBlock{N, T} <: AbstractBlock
 
@@ -78,7 +80,7 @@ ispure(block::PureBlock) = true
 
 import Base: full, sparse, eltype
 eltype(block::PureBlock{N, T}) where {N, T} = T
-# full(block)
+full(block::PureBlock) = full(sparse(block))
 # sparse(block)
 # copy(block)
 
@@ -109,6 +111,8 @@ abstract supertype which composite blocks will inherit from.
 """
 abstract type CompositeBlock{N, T} <: PureBlock{N, T} end
 
+# TODO:
+# new interface: iterate_blocks
 
 """
     AbstractMeasure{M} <: AbstractBlock

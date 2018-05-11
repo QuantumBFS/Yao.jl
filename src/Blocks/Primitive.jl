@@ -54,6 +54,11 @@ full(gate::PhiGate{T}) where T = exp(im * gate.theta) * Complex{T}[exp(-im * gat
 copy(block::PhiGate) = PhiGate(block.theta)
 dispatch!(block::PhiGate{T}, theta::T) where T = (block.theta = theta; block)
 
+function dispatch!(block::PhiGate, params::Vector)
+    block.theta = pop!(params)
+    block
+end
+
 import Base: ==, hash
 ==(lhs::PhiGate, rhs::PhiGate) = lhs.theta == rhs.theta
 
@@ -69,6 +74,8 @@ mutable struct RotationGate{GT, T} <: AbstractGate{1, Complex{T}}
     theta::T
 end
 
+# TODO: implement arbitrary rotation: cos(theta/2) - im * sin(theta/2) * U
+
 full(gate::RotationGate{X, T}) where T =
     Complex{T}[cos(gate.theta/2) -im*sin(gate.theta/2);
       -im*sin(gate.theta/2) cos(gate.theta/2)]
@@ -79,7 +86,14 @@ full(gate::RotationGate{Z, T}) where T =
     Complex{T}[exp(-im*gate.theta/2) 0;0 exp(im*gate.theta/2)]
 
 copy(block::RotationGate{GT, T}) where {GT, T} = RotationGate{GT, T}(block.theta)
+
+# TODO: dispatch a vector
 dispatch!(block::RotationGate{GT, T}, theta::T) where {GT, T} = (block.theta = theta; block)
+
+function dispatch!(block::RotationGate, theta::Vector)
+    block.theta = pop!(theta)
+    block
+end
 
 import Base: ==, hash
 ==(lhs::RotationGate{GT}, rhs::RotationGate{GT}) where GT = lhs.theta == rhs.theta
@@ -87,6 +101,10 @@ import Base: ==, hash
 function hash(gate::RotationGate, h::UInt)
     hash(hash(gate.theta, object_id(gate)), h)
 end
+
+# TODO:
+# 1. new Primitive: SWAP gate
+
 
 ##################
 # Pretty Printing

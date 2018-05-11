@@ -78,7 +78,7 @@ iterate_blocks(c::KronBlock) = values(c)
 # KronBlock: matrix form
 #########################
 
-full(block::KronBlock) = full(sparse(block))
+# full(block::KronBlock) = full(sparse(block))
 
 @inline function sparse(block::KronBlock{N, T}) where {N, T}
     curr_addr = 1
@@ -114,16 +114,15 @@ end
 # KronBlock: apply!
 ####################
 
-apply!(reg::Register, block::KronBlock) = (reg.state .= full(block) * state(reg); reg)
+apply!(reg::Register, block::KronBlock) = (reg.state .= sparse(block) * state(reg); reg)
 
 ####################
 # KronBlock: update!
 ####################
 
-function dispatch!(block::KronBlock, params...)
-    for each in params
-        key, param = each
-        dispatch!(block[key], param...)
+function dispatch!(block::KronBlock, param::Vector)
+    for each in values(block.kvstore)
+        dispatch!(each, param)
     end
     block
 end

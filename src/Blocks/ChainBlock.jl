@@ -36,10 +36,9 @@ function apply!(reg::Register, c::ChainBlock)
     reg
 end
 
-function dispatch!(c::ChainBlock, params...)
-    for each in params
-        index, param = each
-        dispatch!(c.blocks[index], param...)
+function dispatch!(c::ChainBlock, params::Vector)
+    for each in c.blocks
+        dispatch!(each, params)
     end
     c
 end
