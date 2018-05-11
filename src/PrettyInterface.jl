@@ -15,6 +15,7 @@ for BLOCK in [
     # others
     Concentrator,
     Sequence,
+    Measure,
 ] 
     @eval begin
         # 1. when input is register, call apply!

@@ -36,7 +36,7 @@ sparse(c::ChainBlock) = prod(x->sparse(x), reverse(c.blocks))
 
 function apply!(reg::Register, c::ChainBlock)
     for each in c.blocks
-        apply!(reg, each)
+        apply!(reg, each, signal)
     end
     reg
 end

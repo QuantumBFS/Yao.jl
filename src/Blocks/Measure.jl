@@ -104,9 +104,6 @@ mutable struct Measure{M} <: AbstractMeasure{M}
     Measure{M}() where M = new{M}()
 end
 
-# NOTE: this is just a workaround (cannot dispatch calls in v0.6)
-(block::Measure)(reg::Register) = apply!(reg, block)
-
 function apply!(reg::Register, block::Measure{M}) where M
     _, samples = measure!(reg, M)
     block.result = samples

@@ -192,60 +192,154 @@ end
 # Interface #################################
 #############################################
 
-# TODO: enable each server by env var
-# NOTE: dense cache and sparse cache is seperated to make type more
-#       stable
-const GLOBAL_SCP = CacheServer(SparseMatrixCSC{Complex{Float64}, Int})
-const GLOBAL_DCP = CacheServer(Matrix{Complex{Float64}})
+iscacheable(block::PureBlock, signal::Int=2) = iscacheable(block, cache_type(block), UInt(signal))
+iscacheable(block::PureBlock, ::Type{CT}, signal::UInt) where CT = iscacheable(global_cache(CT), block, signal)
 
-global_cache(::Type{SparseMatrixCSC{Complex{Float64}, Int}}) = GLOBAL_SCP
-global_cache(::Type{Matrix{Complex{Float64}}}) = GLOBAL_DCP
 
-export cache
-# method for initialization
-# NOTE: this will cause an error if level is not actually unsigned
-cache(block::PureBlock, level::Int=1) = cache(block, UInt(level))
-cache(block::PureBlock, level::UInt) = cache(block, cache_type(block), level)
+const GLOBAL_CACHE_POOL = Dict{DataType, CacheServer}()
 
-export pull
-# method for getting cache
-pull(block::PureBlock) = pull(block, cache_type(block))
-
-export update_cache
-# method for updating cache
-update_cache(block::PureBlock, level::Int) = update_cache(block, UInt(level))
-
-function update_cache(block::PureBlock, level::UInt)
-    update_cache(block, cache_type(block), cache_matrix(block), level)
+function global_cache(::Type{T}) where T
+    if T in keys(GLOBAL_CACHE_POOL)
+        return GLOBAL_CACHE_POOL[T]
+    else
+        server = CacheServer(T)
+        GLOBAL_CACHE_POOL[T] = server
+        return server
+    end
 end
 
-function update_cache(block::PureBlock, val, level::UInt)
-    update_cache(block, cache_type(block), val, level)
+
+struct Cached{BT, N, T} <: PureBlock{N, T}
+    block::BT
+end
+
+Cached(block::BT) where {N, T, BT <: PureBlock{N, T}} = Cached{BT, N, T}(block)
+
+sparse(c::Cached) = sparse(c.block)
+full(c::Cached) = full(c.block)
+dispatch!(c::Cached) = dispatch!(c.block)
+
+# for block which is not cached this is equal
+apply!(reg::Register, c, signal)= apply!(reg, c)
+
+function apply!(reg::Register, c::Cached, signal::UInt)
+    if !iscacheable(c, signal)
+        update_cache(c, signal)
+    end
+
+    mat = pull(c.block)
+    reg.state .= mat * state(reg)
+    reg
+end
+
+
+export cache
+
+"""
+    cache(block, level; recursive=false) -> Cached
+
+initialize cache for this block with cache level
+"""
+function cache end
+
+# method for initialization
+# NOTE: this will cause an error if level is not actually unsigned
+cache(block::PureBlock, level::Int=1; recursive::Bool=false) = cache(block, UInt(level), recursive=recursive)
+cache(block::PureBlock, level::UInt; recursive::Bool=false) = cache(block, cache_type(block), level, recursive=recursive)
+
+# only composite block can cache recursively
+function cache(block::PureBlock, ::Type{CT}, level::UInt; recursive::Bool=false) where CT
+    cache!(global_cache(CT), block, level)
+    Cached(block)
+end
+
+function cache(chain::ChainBlock{N, T}, ::Type{CT}, level::UInt; recursive::Bool=false) where {N, T, CT}
+    block = chain
+
+    if recursive
+        block = ChainBlock(N, ntuple(x->cache(x, level, recursive=recursive), chain.blocks))
+    end
+
+    cache!(global_cache(CT), block, level)
+    Cached(block)
+end
+
+function cache(block::KronBlock, ::Type{CT}, level::UInt; recursive::Bool=false) where CT
+
+    if recursive
+        for (line, subblock) in block.kvstore
+            block.kvstore[line] = cache(subblock, level, recursive=recursive)
+        end
+    end
+
+    cache!(global_cache(CT), block, level)
+    Cached(block)
+end
+
+function cache(ctrl::ControlBlock{BT, N, T}, ::Type{CT}, level::UInt; recursive::Bool=false) where {BT, N, T, CT}
+
+    block = ctrl
+    if recursive
+        ctrl_block = cache(ctrl.block, level, recursive=recursive)
+        block = ControlBlock{BT, N, T}(ctrl.control, ctrl_block, ctrl.pos)
+    end
+
+    cache!(global_cache(CT), block, level)
+    Cached(block)
+end
+
+
+export pull
+
+pull(c::Cached) = pull(cache_type(c.block), c.block)
+function pull(::Type{CT}, c::Cached) where CT
+    pull(global_cache(CT), c.block)
+end
+
+
+export update_cache
+
+function update_cache(c::Cached, signal::Int; recursive=false)
+    update_cache(c, cache_type(c), cache_matrix(c), signal, recursive)
+end
+
+function update_cache(c::Cached, ::Type{CT}, val, signal, recursive::Bool) where CT
+    push!(global_cache(CT), c.block, val, signal)
+    c
+end
+
+# update composite blocks recursively
+# NOTE: add an iterator interface for composite blocks to polish this part
+
+function update_cache(c::Cached{BT}, ::Type{CT}, val, signal, recursive::Bool) where {BT <: ChainBlock, CT}
+    push!(global_cache(CT), c.block, val, signal)
+    for each in c.block.blocks
+        update_cache(each, signal, recursive=recursive)
+    end
+    c
+end
+
+function update_cache(c::Cached{BT}, ::Type{CT}, val, signal, recursive::Bool) where {BT <: KronBlock, CT}
+    push!(global_cache(CT), c.block, val, signal)
+
+    for (line, each) in c.block.kvstore
+        update_cache(each, signal, recursive=recursive)
+    end
+    c
+end
+
+function update_cache(c::Cached{BT}, ::Type{CT}, val, signal, recursive::Bool) where {BT <: ControlBlock, CT}
+    push!(global_cache(CT), c.block, val, signal)
+    update_cache(c.block, signal, recursive=recursive)
+    c
 end
 
 export setlevel
-# method for set cache level
-function setlevel(block::PureBlock, level::UInt)
-    setlevel(block, cache_type(block), level)
+
+function setlevel(c::Cached, level)
+    setlevel(c.block, cache_type(c.block), level)
 end
 
-# Implementation
-
-function cache(block::PureBlock, ::Type{T}, level::UInt) where T
-    cache!(global_cache(T), block, level)
-    block
-end
-
-function pull(block::PureBlock, ::Type{T}) where T
-    pull(global_cache(T), block)
-end
-
-function update_cache(block::PureBlock, ::Type{T}, val::T, level::UInt) where T
-    push!(global_cache(T), block, val, level)
-    block
-end
-
-function setlevel(block::PureBlock, ::Type{T}, level::UInt) where T
-    setlevel!(global_cache(T), block, level)
-    block
+function setlevel(c::Cached, ::Type{CT}, level) where CT
+    setlevel!(global_cache(CT), c.block, level)
 end

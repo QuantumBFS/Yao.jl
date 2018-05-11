@@ -7,4 +7,6 @@ include("Blocks/Blocks.jl")
 
 include("Cache/Cache.jl")
 
+include("PrettyInterface.jl")
+
 end # module
