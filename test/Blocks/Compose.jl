@@ -7,3 +7,7 @@ end
 @testset "chain block" begin
     include("ChainBlock.jl")
 end
+
+@testset "control block" begin
+    include("Control.jl")
+end

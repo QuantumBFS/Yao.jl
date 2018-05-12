@@ -1,8 +1,8 @@
 using Compat.Test
 
 import QuCircuit: Sequence, sequence, AbstractBlock
-import QuCircuit: rand_state, state, focus!,
-    X, Y, Z, gate, phase, focus, address, chain
+import QuCircuit: rand_state, zero_state, state, focus!,
+    X, Y, Z, H, C, gate, phase, focus, address, chain
 # Block Trait
 import QuCircuit: nqubit, ninput, noutput, isunitary, ispure
 # Required Methods
@@ -22,7 +22,7 @@ apply!(reg, block::Print) = (block.stream = string(reg); reg)
         kron(5, gate(X), 4=>gate(Y)),
         test_print,
     )
-    
+
     reg = rand_state(5)
     apply!(reg, program)
     @test test_print.stream == string(reg)
@@ -43,4 +43,27 @@ end
         @test info["current"] == c[info["iblock"]]
     end
 
+end
+
+@testset "check example: ghz" begin
+    num_bits = 4
+    ghz_state = zeros(Complex128, 1<<num_bits)
+    ghz_state[1] = 1 / sqrt(2)
+    ghz_state[end] = -1 / sqrt(2)
+
+    psi = zero_state(4)
+
+    circuit = sequence(
+        X(num_bits, 1),
+        H(num_bits, 2:num_bits),
+        X(1) |> C(num_bits, 2),
+        X(3) |> C(num_bits, 4),
+        X(1) |> C(num_bits, 3),
+        X(3) |> C(num_bits, 4),
+        H(num_bits, 1:num_bits),
+    )
+
+    for info in psi >> circuit
+    end
+    @test state(psi) ≈ ghz_state
 end
