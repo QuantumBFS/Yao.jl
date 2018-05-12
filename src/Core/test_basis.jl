@@ -36,3 +36,10 @@ include("basis.jl")
     #@test flipbits!(bitarray([12, 2]), 2) == [14, 0]
     #@test flipbits!(bitarray([12, 2]), [2, 1]) == [15, 1]
 end
+
+@testset "state" begin
+    q = ghz(3)
+    p = onehot(0, 3)
+    @test isapprox(p, vcat([1],zeros(7)))
+    @test isapprox(q, vcat([1/sqrt(2)],zeros(6), [1/sqrt(2)]))
+end
