@@ -237,106 +237,16 @@ function apply!(reg::Register, c::Cached, signal::UInt)
 end
 
 
-export cache
-
-"""
-    cache(block, level; recursive=false) -> Cached
-
-initialize cache for this block with cache level
-"""
-function cache end
-
-# method for initialization
-# NOTE: this will cause an error if level is not actually unsigned
-cache(block::PureBlock, level::Int=1; recursive::Bool=false) = cache(block, UInt(level), recursive=recursive)
-cache(block::PureBlock, level::UInt; recursive::Bool=false) = cache(block, cache_type(block), level, recursive=recursive)
-
-# only composite block can cache recursively
-function cache(block::PureBlock, ::Type{CT}, level::UInt; recursive::Bool=false) where CT
-    cache!(global_cache(CT), block, level)
-    Cached(block)
-end
-
-function cache(chain::ChainBlock{N, T}, ::Type{CT}, level::UInt; recursive::Bool=false) where {N, T, CT}
-    block = chain
-
-    if recursive
-        block = ChainBlock(N, ntuple(x->cache(x, level, recursive=recursive), chain.blocks))
-    end
-
-    cache!(global_cache(CT), block, level)
-    Cached(block)
-end
-
-function cache(block::KronBlock, ::Type{CT}, level::UInt; recursive::Bool=false) where CT
-
-    if recursive
-        for (line, subblock) in block.kvstore
-            block.kvstore[line] = cache(subblock, level, recursive=recursive)
-        end
-    end
-
-    cache!(global_cache(CT), block, level)
-    Cached(block)
-end
-
-function cache(ctrl::ControlBlock{BT, N, T}, ::Type{CT}, level::UInt; recursive::Bool=false) where {BT, N, T, CT}
-
-    block = ctrl
-    if recursive
-        ctrl_block = cache(ctrl.block, level, recursive=recursive)
-        block = ControlBlock{BT, N, T}(ctrl.control, ctrl_block, ctrl.pos)
-    end
-
-    cache!(global_cache(CT), block, level)
-    Cached(block)
-end
-
+include("CacheRules.jl")
+include("UpdateRules.jl")
 
 export pull
 
-pull(c::Cached) = pull(cache_type(c.block), c.block)
+pull(c::Cached) = pull(cache_type(c.block), c)
 function pull(::Type{CT}, c::Cached) where CT
     pull(global_cache(CT), c.block)
 end
 
-
-export update_cache
-
-function update_cache(c::Cached, signal::Int; recursive=false)
-    update_cache(c, cache_type(c), cache_matrix(c), signal, recursive)
-end
-
-function update_cache(c::Cached, ::Type{CT}, val, signal, recursive::Bool) where CT
-    push!(global_cache(CT), c.block, val, signal)
-    c
-end
-
-# update composite blocks recursively
-# NOTE: add an iterator interface for composite blocks to polish this part
-
-function update_cache(c::Cached{BT}, ::Type{CT}, val, signal, recursive::Bool) where {BT <: ChainBlock, CT}
-    push!(global_cache(CT), c.block, val, signal)
-    for each in c.block.blocks
-        update_cache(each, signal, recursive=recursive)
-    end
-    c
-end
-
-function update_cache(c::Cached{BT}, ::Type{CT}, val, signal, recursive::Bool) where {BT <: KronBlock, CT}
-    push!(global_cache(CT), c.block, val, signal)
-
-    for (line, each) in c.block.kvstore
-        update_cache(each, signal, recursive=recursive)
-    end
-    c
-end
-
-function update_cache(c::Cached{BT}, ::Type{CT}, val, signal, recursive::Bool) where {BT <: ControlBlock, CT}
-    push!(global_cache(CT), c.block, val, signal)
-    update_cache(c.block, signal, recursive=recursive)
-    c
-end
 
 export setlevel
 
