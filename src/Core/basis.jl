@@ -84,13 +84,13 @@ end
 
 # state utilities
 function onehot(x::Int, num_bit::Int)
-    v = zeros(ComplexF64, 1<<num_bit)
+    v = zeros(Complex128, 1<<num_bit)
     v[x+1] = 1
     return v
 end
 
 function ghz(num_bit::Int; x::Int=0)
-    v = zeros(ComplexF64, 1<<num_bit)
+    v = zeros(Complex128, 1<<num_bit)
     v[x+1] = 1/sqrt(2)
     v[flip(x, collect(1:num_bit))+1] = 1/sqrt(2)
     return v

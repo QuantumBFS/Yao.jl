@@ -4,3 +4,7 @@
 
 docs/build/
 docs/site/
+
+_local/
+.ipynb_checkpoints/
+.vscode/

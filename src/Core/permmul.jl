@@ -1,7 +1,8 @@
 """
 Multiply and permute sparse matrix
 """
-struct PermuteMultiply{Tv, Ti<:Integer} <: AbstractMatrix{Tv, Ti}
+
+struct PermuteMultiply{Tv, Ti<:Integer} <: AbstractMatrix{Tv}
     perm::Vector{Ti}   # new orders
     vals::Vector{Tv}  # multiplied values.
 
@@ -19,7 +20,9 @@ function PermuteMultiply(perm::Vector, vals::Vector)
     PermuteMultiply{Tv,Ti}(perm, vals)
 end
 
-import Base: size, show
+################# Matrix Inherence ##################
+# size, getindex 
+import Base: size, getindex, sparse, full
 size(M::PermuteMultiply) = (length(M.perm), length(M.perm))
 function size(A::PermuteMultiply, d::Integer)
     if d < 1
@@ -30,21 +33,41 @@ function size(A::PermuteMultiply, d::Integer)
         return 1
     end
 end
+getindex(M::PermuteMultiply, i::Integer, j::Integer) = M.perm[i] == j ? M.vals[i] : 0
 
+################ speed up conversion to: matrix/array/sparse/show  ############
 function Matrix{T}(M::PermuteMultiply) where T
     n = size(M, 1)
     Mf = zeros(T, n, n)
-    Mf[i, M.perm] = M.vals
+    @inbounds for i=1:n
+        Mf[i, M.perm[i]] = M.vals[i]
+    end
     return Mf
 end
 Matrix(M::PermuteMultiply{T}) where {T} = Matrix{T}(M)
 Array(M::PermuteMultiply) = Matrix(M)
+full(M::PermuteMultiply) = Matrix(M)
 
-#Elementary operations
+function sparse(M::PermuteMultiply{T}) where {T}
+    n = size(M, 1)
+    sparse(collect(1:n), M.perm, M.vals, n, n)
+end
+
+function show(io::IO, M::PermuteMultiply)
+    println("PermuteMultiply")
+    for item in zip(M.perm, M.vals)
+        i, p = item
+        println("- ($i) * $p")
+    end
+end
+
+
+######## Elementary operations ########
+import Base: copy, transpose, conj, real, imag
 for func in (:conj, :real, :imag)
     @eval ($func)(M::PermuteMultiply) = PermuteMultiply(M.perm, ($func)(M.vals))
 end
-copy(M::PermuteMultiply) = PermuteMultiply(copy(M.perm), ($func)(M.vals))
+copy(M::PermuteMultiply) = PermuteMultiply(copy(M.perm), copy(M.vals))
 
 function transpose(M::PermuteMultiply)
     new_perm = sortperm(M.perm)
@@ -52,10 +75,11 @@ function transpose(M::PermuteMultiply)
 end
 
 adjoint(S::PermuteMultiply{<:Real}) = transpose(S)
-adjoint(S::PermuteMultiply) = Adjoint(S)
-Base.copy(S::Adjoint{<:Any,<:PermuteMultiply}) = PermuteMultiply(map(x -> copy.(adjoint.(x)), (S.parent.perm, S.parent.vals))...)
-Base.copy(S::Transpose{<:Any,<:PermuteMultiply}) = PermuteMultiply(map(x -> copy.(transpose.(x)), (S.parent.perm, S.parent.vals))...)
+adjoint(S::PermuteMultiply{<:Complex}) = conj(transpose(S))
 
+
+import Base: *, /, ==
+######### Mathematical ###############
 *(A::PermuteMultiply, B::Number) = PermuteMultiply(A.perm, A.vals*B)
 *(B::Number, A::PermuteMultiply) = A*B
 /(A::PermuteMultiply, B::Number) = PermuteMultiply(A.perm, A.vals/B)
@@ -64,63 +88,48 @@ Base.copy(S::Transpose{<:Any,<:PermuteMultiply}) = PermuteMultiply(map(x -> copy
 #+(A::PermuteMultiply, B::PermuteMultiply) = PermuteMultiply(A.dv+B.dv, A.ev+B.ev)
 #-(A::PermuteMultiply, B::PermuteMultiply) = PermuteMultiply(A.dv-B.dv, A.ev-B.ev)
 
-#nnz(M::PermuteMultiply) = length()
-#nonzeros(pred) = M.vals
+######### sparse array interfaces  #########
+import Base: nnz, nonzeros, inv
+nnz(M::PermuteMultiply) = length(M.vals)
+nonzeros(M::PermuteMultiply) = M.vals
 
-function show(io::IOContext, M::PermuteMultiply)
-    println("PermuteMultiply")
-    for item in zip(M.perm, M.vals)
-        i, p = item
-        print("* $p -> $i")
-    end
-end
-
-getindex(M::PermuteMultiply, i::Integer, j::Integer) = M.perm[i] == j ? M.vals[i] : 0
 function inv(M::PermuteMultiply)
     new_perm = sortperm(M.perm)
-    return PermuteMultiply(new_perm, 1.0/M.vals[new_perm])
+    return PermuteMultiply(new_perm, 1.0./M.vals[new_perm])
 end
 
-function mul!(C::StridedVecOrMat, S::PermuteMultiply, B::StridedVecOrMat)
-    m, n = size(B, 1), size(B, 2)
-    if !(m == size(S, 1) == size(C, 1))
-        throw(DimensionMismatch("A has first dimension $(size(S,1)), B has $(size(B,1)), C has $(size(C,1)) but all must match"))
-    end
-    if n != size(C, 2)
-        throw(DimensionMismatch("second dimension of B, $n, doesn't match second dimension of C, $(size(C,2))"))
-    end
-
-    perm = S.perm
-    vals = S.vals
-    @inbounds begin
-        for j = 1:n
-            x₀, x₊ = B[1, j], B[2, j]
-            β₀ = vals[1]
-            C[1, j] = perm[1]*x₀ + x₊*β₀
-            for i = 2:m - 1
-                x₋, x₀, x₊ = x₀, x₊, B[i + 1, j]
-                β₋, β₀ = β₀, vals[i]
-                C[i, j] = vals₋*x₋ + perm[i]*x₀ + β₀*x₊
-            end
-            C[m, j] = β₀*x₀ + perm[m]*x₊
-        end
-    end
-
-    return C
+########## Multiplication ############# making them dry?
+function (*)(A::PermuteMultiply, X::AbstractVector)
+    length(X) == size(A, 2) || throw(DimensionMismatch())
+    return A.vals .* X[A.perm]
 end
 
-############################ Tests ##########################
-using Compat.Test
+function (*)(A::PermuteMultiply, B::PermuteMultiply)
+    size(A, 1) == size(B, 1) || throw(DimensionMismatch())
+    PermuteMultiply(B.perm[A.perm], A.vals.*B.vals[A.perm])
+end
 
-@testset "Basic" begin
-    mp = PermuteMultiply(4, [2, 1, 4, 3], [0.1, 0.3, 0.2, 0.3im])
-    #println(mp)
 
-    vec = [1, 2, 3, 4]
-    target_vec = [0.2, 0.3, 0.8, 0.9im]
-    @test mp * vec == target_vec
+function (*)(X::AbstractVector, A::PermuteMultiply)
+    length(X) == size(A, 1) || throw(DimensionMismatch())
+    return (A.vals .* X)[sortperm(A.perm)]
+end
 
-    # test inv
-    invmp = inv(mp)
-    @test isapprox(invmp * target_vec, vec)
+function (*)(A::PermuteMultiply, X::AbstractMatrix)
+    size(X, 1) == size(A, 2) || throw(DimensionMismatch())
+    return A.vals .* X[A.perm, :]   # this may be inefficient for sparse CSC matrix.
+end
+
+function (*)(X::AbstractMatrix, A::PermuteMultiply)
+    size(X, 2) == size(A, 1) || throw(DimensionMismatch())
+    return (A.vals' .* X)[:, sortperm(A.perm)] # how can we lazy evaluate and cache this sort order?
+end
+function (*)(D::Diagonal, A::PermuteMultiply)
+    vals = A.vals.*D.diag
+    return PermuteMultiply(A.perm, vals)
+end
+
+function (*)(A::PermuteMultiply, D::Diagonal)
+    vals = A.vals.*D.diag[A.perm]
+    return PermuteMultiply(A.perm, vals)
 end
