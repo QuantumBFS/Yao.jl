@@ -198,7 +198,7 @@ function register(::Type{T}, n::Int, nbatch::Int, method::Symbol=:rand) where T
 end
 
 # config default eltype
-register(n::Int, nbatch::Int, method::Symbol=:rand) = register(Compat.ComplexF64, n, nbatch, method)
+register(n::Int, nbatch::Int; method::Symbol=:rand) = register(Compat.ComplexF64, n, nbatch, method)
 
 # shortcuts
 zero_state(n::Int, nbatch::Int) = register(n, nbatch, :zero)
