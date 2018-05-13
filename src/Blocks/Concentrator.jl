@@ -4,9 +4,6 @@ end
 
 Concentrator(orders...) = Concentrator(orders)
 
-# TODO:
-# use relative address instead
-
 eltype(::Concentrator) = Bool
 isunitary(x::Concentrator) = true
 nqubit(x::Concentrator) = ninput(x)

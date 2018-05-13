@@ -1,5 +1,6 @@
 include("Core.jl")
 
-# specific settings
-include("Primitive.jl")
-include("Compose.jl")
+include("CacheFlag.jl")
+include("HashRules.jl")
+include("CacheRules.jl")
+include("UpdateRules.jl")

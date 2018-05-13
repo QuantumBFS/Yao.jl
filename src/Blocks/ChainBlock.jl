@@ -1,46 +1,62 @@
-struct ChainBlock{N, T, TD <: Tuple} <: CompositeBlock{N, T}
-    blocks::TD
+"""
+    ChainBlock
+
+`ChainBlock` is a basic construct tool to create
+user defined blocks horizontically.
+"""
+struct ChainBlock{N, T} <: CompositeBlock{N, T}
+    blocks::Vector{Any}
 end
 
-_promote_chain_eltype(a) = eltype(a)
-_promote_chain_eltype(a, b) = promote_type(eltype(a), eltype(b))
-_promote_chain_eltype(t::Type, a, b) = promote_type(t, _promote_chain_eltype(a, b))
-_promote_chain_eltype(t::Type, a, b, c...) = _promote_chain_eltype(_promote_chain_eltype(t, a, b), c...)
-_promote_chain_eltype(a, b, c...) = _promote_chain_eltype(_promote_chain_eltype(a, b), c...)
-
-function ChainBlock(n, blocks::TD) where {TD <: Tuple}
-    ChainBlock{n, _promote_chain_eltype(blocks...), TD}(blocks)
+# Enable type promotion
+function ChainBlock(n, blocks::Vector)
+    T = promote_type(collect(eltype(each) for each in blocks)...)
+    ChainBlock{n, T}(blocks)
 end
 
-function ChainBlock(blocks::PureBlock{N}...) where N
-    ChainBlock(N, blocks)
+function ChainBlock(blocks::MatrixBlock{N}...) where N
+    ChainBlock(N, collect(blocks))
 end
 
-function copy(c::ChainBlock{N, T, TD}) where {N, T, TD}
-    blocks = ntuple(i->copy(c.blocks[i]), length(c.blocks))
-    ChainBlock{N, T, TD}(blocks)
+function copy(c::ChainBlock{N, T}) where {N, T}
+    ChainBlock{N, T}(copy(c.blocks))
 end
 
+# Block Properties
+isunitary(c::ChainBlock) = all(isunitary, c.blocks)
+isreflexive(c::ChainBlock) = all(isreflexive, c.blocks)
+isunitary_hermitian(c::ChainBlock) = all(isunitary_hermitian, c.blocks)
+ishermitian(c::ChainBlock) = all(ishermitian, c.blocks)
 
-isunitary(block::ChainBlock) = all(isunitary, block.blocks)
-
-# TODO: provide matrix form when there are Concentrators
-# TODO: use reverse! instead?
 full(c::ChainBlock) = prod(x->full(x), reverse(c.blocks))
 sparse(c::ChainBlock) = prod(x->sparse(x), reverse(c.blocks))
 
-function apply!(reg::Register, c::ChainBlock)
-    for each in c.blocks
-        apply!(reg, each)
-    end
-    reg
+# Additional Methods for Composite Blocks
+getindex(c::ChainBlock, index) = getindex(c.blocks, index)
+setindex!(c::ChainBlock, val, index) = setindex!(c.blocks, val, index)
+## Iterate contained blocks
+start(c::ChainBlock) = start(c.blocks)
+next(c::ChainBlock, st) = next(c.blocks, st)
+done(c::ChainBlock, st) = done(c.blocks, st)
+length(c::ChainBlock) = length(c.blocks)
+eltype(c::ChainBlock) = eltype(c.blocks)
+
+function map!(f::Function, dest::ChainBlock, src::ChainBlock...)
+    map!(f, dest.blocks, [each.blocks for each in src]...)
+    dest
 end
 
-function dispatch!(c::ChainBlock, params::Vector)
-    for each in c.blocks
-        dispatch!(each, params)
+# Additional Methods for Chain
+import Base: push!, append!, prepend!
+push!(c::ChainBlock, val::MatrixBlock) = (push!(c.blocks, val); c)
+append!(c::ChainBlock, list) = (append!(c.blocks, list); c)
+prepend!(c::ChainBlock, list) = (prepend!(c.blocks, list); c)
+
+function apply!(r::Register, c::ChainBlock)
+    for each in c
+        apply!(r, each)
     end
-    c
+    r
 end
 
 function show(io::IO, c::ChainBlock{N, T}) where {N, T}

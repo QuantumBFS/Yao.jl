@@ -1,3 +1,15 @@
+"""
+    AbstractMeasure{M} <: AbstractBlock
+
+Abstract block supertype which measurement block will inherit from.
+"""
+abstract type AbstractMeasure{M} <: AbstractBlock end
+
+nqubit(::Type{T}) where {M, T <: AbstractMeasure{M}} = GreaterThan{M}
+ninput(::Type{T}) where {M, T <: AbstractMeasure{M}} = GreaterThan{M}
+noutput(::Type{T}) where {M, T <: AbstractMeasure{M}} = AnySize
+
+
 export measure, measure!, measure_remove
 
 #########################################
@@ -37,11 +49,11 @@ end
 # preprocess register
 ######################
 
-function _reshape_to_active_remain_batch(reg::AbstractRegister{N, B}, m::Int) where {N, B}
+function _reshape_to_active_remain_batch(reg::AbstractRegister{B}, m::Int) where B
     reshape(state(reg), (1<<m, :, B))
 end
 
-function _get_reduced_probability_distribution(reg::Register{N, B}, m::Int) where {N, B}
+function _get_reduced_probability_distribution(reg::Register{B}, m::Int) where B
     @assert m <= nactive(reg) "number of active qubits is less than measure qubits"
 
     s = _reshape_to_active_remain_batch(reg, m)
@@ -63,7 +75,8 @@ function measure(reg::Register, m::Int, ntimes::Int=1)
     pmap(x->direct_sample(x, ntimes), p)
 end
 
-function measure!(reg::Register{N, B, T}, m::Int) where {N, B, T}
+function measure!(reg::Register{B, T}, m::Int) where {B, T}
+    N = nqubit(reg)
     p = _get_reduced_probability_distribution(reg, m)
     plans = map(_generate_sample_plan_from, p)
     samples = map(direct_sample_step, plans)
@@ -80,7 +93,8 @@ function measure!(reg::Register{N, B, T}, m::Int) where {N, B, T}
     reg, samples
 end
 
-function measure_remove(reg::Register{N, B, T}, m::Int) where {N, B, T}
+function measure_remove!(reg::Register{B, T}, m::Int) where {B, T}
+    N = nqubit(reg)
     p = _get_reduced_probability_distribution(reg, m)
     plans = map(_generate_sample_plan_from, p)
     samples = map(direct_sample_step, plans)
@@ -90,7 +104,11 @@ function measure_remove(reg::Register{N, B, T}, m::Int) where {N, B, T}
     for (i, sample) in enumerate(samples)
         reduced_state[:, i] = full_state_array[sample+1, :, i]
     end
-    register(reduced_state, B), samples
+
+    reg.state = reduced_state
+    reg.nactive = (N - m)
+    deleteat!(reg.address, 1:m)
+    reg, samples
 end
 
 #####################
@@ -117,7 +135,7 @@ mutable struct MeasureAndRemove{M} <: AbstractMeasure{M}
 end
 
 function apply!(reg::Register, block::MeasureAndRemove{M}) where M
-    new_reg, samples = measure_remove(reg, M)
+    reg, samples = measure_remove!(reg, M)
     block.result = samples
-    new_reg
+    reg
 end

@@ -6,16 +6,16 @@ import Base: empty!, push!
 
 get the type that this block will use for cache.
 """
-cache_type(block::PureBlock{N, T}) where {N, T} = SparseMatrixCSC{T, Int}
+cache_type(block::MatrixBlock{N, T}) where {N, T} = SparseMatrixCSC{T, Int}
 
 """
     cache_matrix(block)
 """
-cache_matrix(block::PureBlock) = sparse(block)
+cache_matrix(block::MatrixBlock) = sparse(block)
 
 # hash methods
-@inline object_hash(block::PureBlock) = object_id(block)
-@inline param_hash(block::PureBlock) = hash(block)
+@inline object_hash(block::MatrixBlock) = object_id(block)
+@inline param_hash(block::MatrixBlock) = hash(block)
 
 
 """
@@ -48,15 +48,15 @@ end
 pull(cache::CacheElement, key::UInt) = cache.data[key]
 
 # shortcuts
-function iscacheable(cache::CacheElement, block::PureBlock, level::UInt)
+function iscacheable(cache::CacheElement, block::MatrixBlock, level::UInt)
     iscacheable(cache, param_hash(block), level)
 end
 
-function push!(cache::CacheElement{TM}, block::PureBlock, val::TM, level::UInt) where TM
+function push!(cache::CacheElement{TM}, block::MatrixBlock, val::TM, level::UInt) where TM
     push!(cache, param_hash(block), val, level)
 end
 
-function pull(cache::CacheElement, block::PureBlock)
+function pull(cache::CacheElement, block::MatrixBlock)
     pull(cache, param_hash(block))
 end
 
@@ -151,7 +151,7 @@ end
 
 whether this block is cacheable with current cache level.
 """
-@inline function iscacheable(server::CacheServer, block::PureBlock, level::UInt)
+@inline function iscacheable(server::CacheServer, block::MatrixBlock, level::UInt)
     iscacheable(server, object_hash(block), level)
 end
 
@@ -160,7 +160,7 @@ end
 
 set block's cache level
 """
-@inline function setlevel!(server::CacheServer, block::PureBlock, level::UInt)
+@inline function setlevel!(server::CacheServer, block::MatrixBlock, level::UInt)
     setlevel!(server, object_hash(block), level)
 end
 
@@ -169,7 +169,7 @@ end
 
 add a new cacheable block with cache level `level` to the server.
 """
-@inline function cache!(server::CacheServer{TM}, block::PureBlock, level::UInt) where TM
+@inline function cache!(server::CacheServer{TM}, block::MatrixBlock, level::UInt) where TM
     cache!(server, object_hash(block), level)
 end
 
@@ -179,7 +179,7 @@ end
 push `val` to cache server, it will be cached if `level` is greater
 than stored level. Or it will do nothing.
 """
-@inline function push!(server::CacheServer{TM}, block::PureBlock, val::TM, level::UInt) where TM
+@inline function push!(server::CacheServer{TM}, block::MatrixBlock, val::TM, level::UInt) where TM
     push!(server, object_hash(block), param_hash(block), val, level)
 end
 
@@ -188,7 +188,7 @@ end
 
 pull current block's cache from server
 """
-@inline function pull(server::CacheServer, block::PureBlock)
+@inline function pull(server::CacheServer, block::MatrixBlock)
     pull(server, object_hash(block), param_hash(block))
 end
 
@@ -196,8 +196,8 @@ end
 # Interface #################################
 #############################################
 
-iscacheable(block::PureBlock, signal::Int=1) = iscacheable(block, cache_type(block), UInt(signal))
-iscacheable(block::PureBlock, ::Type{CT}, signal::UInt) where CT = iscacheable(global_cache(CT), block, signal)
+iscacheable(block::MatrixBlock, signal::Int=1) = iscacheable(block, cache_type(block), UInt(signal))
+iscacheable(block::MatrixBlock, ::Type{CT}, signal::UInt) where CT = iscacheable(global_cache(CT), block, signal)
 
 
 const GLOBAL_CACHE_POOL = Dict{DataType, CacheServer}()
@@ -213,47 +213,3 @@ function global_cache(::Type{T}) where T
 end
 
 
-struct Cached{BT, N, T} <: PureBlock{N, T}
-    block::BT
-end
-
-Cached(block::BT) where {N, T, BT <: PureBlock{N, T}} = Cached{BT, N, T}(block)
-
-sparse(c::Cached) = sparse(c.block)
-full(c::Cached) = full(c.block)
-dispatch!(c::Cached) = dispatch!(c.block)
-
-# for block which is not cached this is equal
-apply!(reg::Register, c, signal)= apply!(reg, c)
-
-function apply!(reg::Register, c::Cached, signal::UInt)
-    if !iscacheable(c, signal)
-        update_cache(c, signal)
-    end
-
-    mat = pull(c.block)
-    reg.state .= mat * state(reg)
-    reg
-end
-
-
-include("CacheRules.jl")
-include("UpdateRules.jl")
-
-export pull
-
-pull(c::Cached) = pull(cache_type(c.block), c)
-function pull(::Type{CT}, c::Cached) where CT
-    pull(global_cache(CT), c.block)
-end
-
-
-export setlevel
-
-function setlevel(c::Cached, level)
-    setlevel(c.block, cache_type(c.block), level)
-end
-
-function setlevel(c::Cached, ::Type{CT}, level) where CT
-    setlevel!(global_cache(CT), c.block, level)
-end

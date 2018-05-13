@@ -1,4 +1,4 @@
-struct ControlBlock{BlockType, N, T} <: CompositeBlock{N, T}
+mutable struct ControlBlock{BlockType, N, T} <: CompositeBlock{N, T}
     ctrl_qubits::Vector{Int}
     block::BlockType
     addr::Int
@@ -7,7 +7,7 @@ struct ControlBlock{BlockType, N, T} <: CompositeBlock{N, T}
     # function ControlBlock(total::Int, ctrl_qubits::Vector{Int}, ctrl::ControlBlock, addr::Int) where {K, T}
     # end
 
-    function ControlBlock(total::Int, ctrl_qubits::Vector{Int}, block::BT, addr::Int) where {K, T, BT <: PureBlock{K, T}}
+    function ControlBlock(total::Int, ctrl_qubits::Vector{Int}, block::BT, addr::Int) where {K, T, BT <: MatrixBlock{K, T}}
         # NOTE: control qubits use sign to characterize
         # inverse control qubits
         # we sort it from lowest addr to highest first
@@ -128,12 +128,33 @@ function A_kron_B(A, ia, na, B, ib)
     kron(out, B)
 end
 
-# apply & dispatch
-
-function apply!(reg::Register, ctrl::ControlBlock)
-    reg.state .= sparse(ctrl) * state(reg)
-    reg
+# Required Methods as Composite Block
+function getindex(c::ControlBlock, index)
+    index == c.addr ? c.block : nothing
 end
+
+function setindex!(c::ControlBlock, val::MatrixBlock, index)
+    if index == c.addr
+        c.block = val
+    else
+        throw(KeyError(index))
+    end
+    c
+end
+
+start(c::ControlBlock) = 1
+next(c::ControlBlock, st) = c.block, st + 1
+done(c::ControlBlock, st) = st == 2
+
+function map!(f::Function, dst::ControlBlock, src::ControlBlock)
+    dst.block = f(src.block)
+    dst
+end
+
+# apply & dispatch
+# TODO: overload this with direct apply method
+# function apply!(reg::Register, ctrl::ControlBlock)
+# end
 
 function dispatch!(ctrl::ControlBlock, params...)
     dispatch!(ctrl.block, params...)

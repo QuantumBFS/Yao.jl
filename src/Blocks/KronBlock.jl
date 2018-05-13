@@ -8,7 +8,7 @@ promote_block_eltype(blocks) = promote_type([eltype(each) for each in blocks]...
 composite block that combine blocks by kronecker product.
 """
 struct KronBlock{N, T} <: CompositeBlock{N, T}
-    kvstore::SortedDict{Int, PureBlock}
+    kvstore::SortedDict{Int, MatrixBlock}
 end
 
 function KronBlock(total_bit_num::Int, kv::SortedDict)
@@ -21,9 +21,9 @@ _get_total_qubit_num(kv::SortedDict) = (key = maximum(keys(kv)); key + nqubit(kv
 
 @inline function _parse_arg_for_kron_block(blocks)
     curr_head = 1
-    kv = SortedDict{Int, PureBlock}()
+    kv = SortedDict{Int, MatrixBlock}()
     for each in blocks
-        if isa(each, PureBlock)
+        if isa(each, MatrixBlock)
             kv[curr_head] = each
             curr_head += nqubit(each)
         elseif isa(each, Union{Tuple, Pair}) # 2=>block/(2, block)
@@ -31,7 +31,7 @@ _get_total_qubit_num(kv::SortedDict) = (key = maximum(keys(kv)); key + nqubit(kv
             kv[curr_head] = block
             curr_head += nqubit(block)
         else
-            throw(ErrorException("KronBlock only takes PureBlock, TODO: custom error"))
+            throw(ErrorException("KronBlock only takes MatrixBlock, TODO: custom error"))
         end
     end
     return kv
@@ -64,15 +64,30 @@ import Base: getindex, setindex!, keys, values
 
 keys(blocks::KronBlock) = keys(blocks.kvstore)
 values(blocks::KronBlock) = values(blocks.kvstore)
+
+# Required Methods as Composite Block
 getindex(block::KronBlock, key) = getindex(block.kvstore, key)
-# NOTE: we do not allow insertion into KronBlock besides `kron`
-# setindex!(block::KronBlock, v::PureBlock, key) = setindex!(block.kvstore, v, key)
+setindex!(block::KronBlock, v::MatrixBlock, key) = setindex!(block.kvstore, v, key)
+
+start(block::KronBlock) = start(block.kvstore)
+next(block::KronBlock, st) = next(block.kvstore, st)
+done(block::KronBlock, st) = done(block.kvstore, st)
+eltype(block::KronBlock) = eltype(block.kvstore)
+length(block::KronBlock) = length(block.kvstore)
+
+function map!(f::Function, dest::KronBlock, src::KronBlock...)
+    for each_kron in src
+        for (addr, block) in each_kron
+            dest[addr] = f(block)
+        end
+    end
+    dest
+end
 
 # kronecker can take non-unitary operators
 # we check whether it is unitary by checking
 # each element.
 isunitary(block::KronBlock) = all(isunitary, values(block))
-iterate_blocks(c::KronBlock) = values(c)
 
 #########################
 # KronBlock: matrix form
@@ -109,12 +124,6 @@ iterate_blocks(c::KronBlock) = values(c)
     end
     return op
 end
-
-####################
-# KronBlock: apply!
-####################
-
-apply!(reg::Register, block::KronBlock) = (reg.state .= sparse(block) * state(reg); reg)
 
 ####################
 # KronBlock: update!

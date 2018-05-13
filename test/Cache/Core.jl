@@ -66,3 +66,15 @@ import QuCircuit: CacheServer, cache!
         @test pull(server, glist[i]) == sparse(glist[i])
     end
 end
+
+# check interface
+import QuCircuit: cache, update_cache, pull
+
+@testset "cache block" begin
+
+    cached = cache(phase(0.1), 2)
+    update_cache(cached, 2) # do nothing
+    update_cache(cached, 3) # update
+    pull(cached) # get the matrix
+
+end

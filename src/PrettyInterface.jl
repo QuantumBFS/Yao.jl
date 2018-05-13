@@ -31,7 +31,7 @@ rot(::Type{GT}, theta::T) where {GT, T <: Real} = rot(Float64, GT, theta)
 # 2.1 chain block
 export chain
 
-function chain(blocks::PureBlock{N}...) where N
+function chain(blocks::MatrixBlock{N}...) where N
     ChainBlock(blocks...)
 end
 
@@ -61,9 +61,9 @@ This will automatically generate a block list looks like
 4 -- [Y] --
 ```
 """
-kron(total, blocks::Union{PureBlock, Tuple, Pair}...) = KronBlock(total, blocks)
+kron(total, blocks::Union{MatrixBlock, Tuple, Pair}...) = KronBlock(total, blocks)
 kron(total, blocks) = KronBlock(total, blocks)
-kron(blocks::Union{PureBlock, Tuple, Pair}...) = KronBlock(blocks)
+kron(blocks::Union{MatrixBlock, Tuple, Pair}...) = KronBlock(blocks)
 kron(blocks) = KronBlock(blocks)
 
 # 2.3 control block
@@ -127,42 +127,39 @@ end
 # 1.Pauli Gates & Hadmard
 export X, Y, Z, H
 
-for (NAME, GTYPE) in [
-    (:X, X),
-    (:Y, Y),
-    (:Z, Z),
-    (:H, Hadmard)
-]
+for NAME in [:X, :Y, :Z, :H]
 
-@eval begin
+    GT = GateType{NAME}
 
-    $NAME() = gate($GTYPE)
+    @eval begin
 
-    function $NAME(addr::Int)
-        (gate($GTYPE), addr)
+        $NAME() = gate($GT)
+
+        function $NAME(addr::Int)
+            (gate($GT), addr)
+        end
+
+        function $NAME(r::UnitRange)
+            (gate($GT), r)
+        end
+
+        function $NAME(num_qubit::Int, addr::Int)
+            kron(num_qubit, (1, gate($GT)))
+        end
+
+        function $NAME(num_qubit::Int, r)
+            kron(num_qubit, (i, gate($GT)) for i in r)
+        end
+
     end
-
-    function $NAME(r::UnitRange)
-        (gate($GTYPE), r)
-    end
-
-    function $NAME(num_qubit::Int, addr::Int)
-        kron(num_qubit, (1, gate(X)))
-    end
-
-    function $NAME(num_qubit::Int, r)
-        kron(num_qubit, (i, gate($GTYPE)) for i in r)
-    end
-
-end
 
 end
 
 
 import Base: start, next, done, length, eltype
 
-struct CircuitPlan{N, B, T}
-    reg::Register{N, B, T}
+struct CircuitPlan{B, T}
+    reg::Register{B, T}
     seq::Sequence
 end
 

@@ -1,5 +1,3 @@
-# TODO: nqubit inference
-
 struct Sequence <: AbstractBlock
     list::Vector{Any}
 end
