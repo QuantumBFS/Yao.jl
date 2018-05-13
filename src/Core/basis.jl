@@ -14,6 +14,8 @@ bit counting: Int
 BInt = Int64
 DInt = Int64
 
+basis(num_bit::Int) = collect(0:1<<num_bit-1)
+
 ########## BitArray views ###################
 import Base: BitArray
 function bitarray(v::Vector{T}) where T<:Number
