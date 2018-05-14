@@ -19,3 +19,14 @@ function zgate(bits::Ints, basis::Vector{DInt})
     vals = mapreduce(bit->1.-2.*takebit(basis, bit), .*, bits)
     PermuteMultiply(basis+1, vals)
 end
+
+# arbituary off-diagonal single qubit gate
+function ndgate(bits::Ints, basis::Vector{DInt}, phi::Float64)
+    norder = flip(basis, bits)
+    vals = mapreduce(bit->exp.(im*phi*(2.*takebit(basis, bit).-1)), .*, bits)
+    PermuteMultiply(norder+1, vals)
+end
+
+#TODO
+# arbituary diagonal single qubit gate
+# arbituary dense single qubit gate: SparseMatrixCSC

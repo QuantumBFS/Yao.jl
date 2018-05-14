@@ -13,3 +13,5 @@ include("gates.jl")
         @test full(gate(1, basis(1))) == MAT
     end
 end
+
+# comparative test with respect to known kron results for n>1.

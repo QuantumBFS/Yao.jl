@@ -133,3 +133,16 @@ function (*)(A::PermuteMultiply, D::Diagonal)
     vals = A.vals.*D.diag[A.perm]
     return PermuteMultiply(A.perm, vals)
 end
+
+############### kron ######################
+import Base: kron
+function kron(A::PermuteMultiply, B::PermuteMultiply)
+end
+function kron(A::PermuteMultiply, B::Diagonal)
+end
+function kron(A::Diagonal, B::PermuteMultiply)
+end
+function kron(A::PermuteMultiply, B::SparseMatrixCSC)
+end
+function kron(A::SparseMatrixCSC, B::PermuteMultiply)
+end
