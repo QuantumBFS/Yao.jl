@@ -71,48 +71,69 @@ function register(::Type{InitMethod{:randn}}, ::Type{Register}, ::Type{T}, n::In
     Register(batch_normalize!(raw), nbatch)
 end
 
-function swap_first!(addr::Vector, index)
-    temp = addr[1]
-    addr[1] = addr[index]
-    addr[index] = temp
-    addr
-end
-
 # NOTE: we use relative address here
 # the input are desired orders of current
 # address, not the desired address.
 # orders here can be any iterable
-function pack_address!(tensor::Array{T, N}, address, orders) where {T, N}
-    curr_orders = collect(1:(N-1))
 
-    for each in reverse(orders)
-        swap_first!(curr_orders, each)
-        swap_first!(address, each)
+function get_configs(total, range...)
+    r = collect(range)
+    p = sortperm(r, by=x->first(x))
+    ip = sortperm(p)
+    sorted = r[p]
+
+    src_shape, dst_shape = Int[], Int[]
+    perm_head, perm_tail = Int[], Int[]
+    prev = 1; count = 1; nactive = 0;
+    for each in sorted
+        if first(each) - prev != 0
+            push!(src_shape, first(each) - prev)
+            push!(dst_shape, first(each) - prev)
+            push!(perm_tail, count)
+            count += 1
+        end
+
+        nactive += length(each)
+        push!(src_shape, length(each))
+        prepend!(dst_shape, length(each))
+        push!(perm_head, count)
+        count += 1
+        prev = last(each) + 1
+    end
+    perm = append!(perm_head[ip], perm_tail)
+
+    last_interval = total - last(last(sorted))
+    if last_interval != 0
+        push!(src_shape, last_interval)
+        push!(dst_shape, last_interval)
+        push!(perm, count)
     end
 
-    # we preserve last dim
-    permutedims!(tensor, tensor, (curr_orders..., N))
-end
-
-function focus!(r::Register, range)
-end
-
-nexposed(orders) = 1 << length(orders)
-function total_exposed(orders...)
-    total = 0
-    for each in orders
-        total = length(each)
-    end
-    1 << total
+    src_shape, dst_shape, perm, nactive
 end
 
 function focus!(r::Register{B}, range...) where B
-    tensor = reshape(state(r), ntuple(x->2, nqubit(r))..., B)
-    for each in reverse(range)
-        pack_address!(tensor, r.address, each)
-    end
+    total = nqubit(r)
+    src_shape, dst_shape, perm, r.nactive = get_configs(total, range...)
 
-    r.state = reshape(r.state, (nexposed(range...), :))
+    map!(x->(1<<x), src_shape, src_shape)
+    map!(x->(1<<x), dst_shape, dst_shape)
+    push!(src_shape, B)
+    push!(dst_shape, B)
+
+    src = reshape(r.state, src_shape...)
+    dst = reshape(r.state, dst_shape...)
+
+    index = 1
+    expand_range = [i for each in range for i in each]
+    inds = findin(r.address, expand_range)
+    deleteat!(r.address, inds)
+    prepend!(r.address, expand_range)
+
+    push!(perm, length(perm) + 1)
+    permutedims!(dst, src, perm)
+
+    r.state = reshape(r.state, 1 << r.nactive, (1 << (total - r.nactive)) * Int(B))
     r
 end
 
