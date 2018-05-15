@@ -78,8 +78,8 @@ adjoint(S::PermuteMultiply{<:Real}) = transpose(S)
 adjoint(S::PermuteMultiply{<:Complex}) = conj(transpose(S))
 
 
-import Base: *, /, ==
 ######### Mathematical ###############
+import Base: *, /, ==
 *(A::PermuteMultiply, B::Number) = PermuteMultiply(A.perm, A.vals*B)
 *(B::Number, A::PermuteMultiply) = A*B
 /(A::PermuteMultiply, B::Number) = PermuteMultiply(A.perm, A.vals/B)
