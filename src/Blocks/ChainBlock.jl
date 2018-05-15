@@ -19,7 +19,7 @@ function ChainBlock(blocks::MatrixBlock{N}...) where N
 end
 
 function copy(c::ChainBlock{N, T}) where {N, T}
-    ChainBlock{N, T}(copy(c.blocks))
+    ChainBlock{N, T}(deepcopy(c.blocks))
 end
 
 # Block Properties

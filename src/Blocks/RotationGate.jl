@@ -4,6 +4,8 @@ end
 
 # TODO: implement arbitrary rotation: cos(theta/2) - im * sin(theta/2) * U
 
+sparse(gate::RotationGate) = sparse(full(gate))
+
 full(gate::RotationGate{GateType{:X}, T}) where T =
     Complex{T}[cos(gate.theta/2) -im*sin(gate.theta/2);
       -im*sin(gate.theta/2) cos(gate.theta/2)]

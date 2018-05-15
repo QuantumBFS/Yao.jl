@@ -7,6 +7,7 @@ struct Gate{N, GT <: GateType, T} <: PrimitiveBlock{N, T} end
 
 # N is 1 by default
 Gate(::Type{T}, ::Type{GT}) where {T, GT} = Gate{1, GT, T}()
+Gate(::Type{T}, x::Symbol) where T = Gate(T, GateType{x})
 
 # we use Complex128 by default
 Gate(::Type{GT}) where GT = Gate(Compat.ComplexF64, GT)

@@ -45,24 +45,24 @@ end
     @test nremain(reg) == 3
 
     focus!(reg, 5, 2:3)
-    @test address(reg) == UInt[5, 1, 2, 4, 3]
+    @test address(reg) == UInt[5, 3, 1, 2, 4]
     @test size(state(reg)) == (2^3, 2^2*3)
     @test nactive(reg) == 3
 
     reg = rand_state(8)
-    focus!(reg, [2, 3, 5])
+    focus!(reg, 2, 3, 5)
     @test nactive(reg) == 3
     @test address(reg) == UInt[2, 3, 5, 1, 4, 6, 7, 8]
 
     focus!(reg, 8, 2)
     @test nactive(reg) == 2
-    @test address(reg) == UInt[8, 2, 3, 5, 1, 4, 6, 7]
+    @test address(reg) == UInt[8, 3, 2, 5, 1, 4, 6, 7]
 
     focus!(reg, 7)
     @test nactive(reg) == 1
-    @test address(reg) == UInt[7, 8, 2, 3, 5, 1, 4, 6]
+    @test address(reg) == UInt[6, 8, 3, 2, 5, 1, 4, 7]
 
     focus!(reg, 1:8)
     @test nactive(reg) == 8
-    @test address(reg) == UInt[1, 2, 3, 4, 5, 6, 7, 8]
+    @test address(reg) == UInt[6, 8, 3, 2, 5, 1, 4, 7]
 end

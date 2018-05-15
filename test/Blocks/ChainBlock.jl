@@ -10,32 +10,20 @@ import QuCircuit: nqubit, ninput, noutput, isunitary, ispure
 # Required Methods
 import QuCircuit: apply!, dispatch!
 
-import QuCircuit: _promote_chain_eltype
-
-@testset "check type inference" begin
-    @test _promote_chain_eltype(gate(X)) == Complex128
-    @test _promote_chain_eltype(gate(Complex128, X), gate(Complex64, Y)) == Complex128
-    @test _promote_chain_eltype(Complex128, gate(Complex128, X), gate(Complex64, Y)) == Complex128
-    @test _promote_chain_eltype(gate(Complex32, X), gate(Complex128, Y), gate(Complex64, Z)) == Complex128
-
-    @test _promote_chain_eltype(Complex128, gate(X), gate(Y), gate(Complex64, Z), gate(Complex32, Z)) == Complex128
-end
-
 @testset "chain pure" begin
 
     g = chain(
-        kron(gate(X), gate(Y)),
-        kron(2, gate(Complex64, Z))
+        kron(X(), Y()),
+        kron(2, gate(Complex64, :Z))
     )
 
-    @test eltype(g) <: Complex128
     @test nqubit(g) == 2
     @test ninput(g) == 2
     @test noutput(g) == 2
     @test isunitary(g) == true
     @test ispure(g) == true
 
-    mat = kron(sparse(gate(Complex64, Z)), speye(2)) * kron(sparse(gate(X)), sparse(gate(Y)))
+    mat = kron(sparse(gate(Complex64, :Z)), speye(2)) * kron(sparse(X()), sparse(Y()))
     @test sparse(g) == mat
     @test full(g) == full(mat)
 
@@ -58,10 +46,10 @@ end
 
     g = chain(
         phase(0.2),
-        rot(X, 0.1),
+        rot(:X, 0.1),
     )
 
-    dispatch!(g, (1, 0.3), (2, 0.5))
+    dispatch!(g, [0.3, 0.5])
     @test g.blocks[1].theta == 0.3
     @test g.blocks[2].theta == 0.5
 end

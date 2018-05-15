@@ -23,8 +23,8 @@ phase(theta) = phase(Float64, theta)
 
 # 1.3 rotation gate
 export rot
-rot(::Type{T}, ::Type{GT}, theta::T) where {T <: Real, GT} = RotationGate{GT, T}(theta)
-rot(::Type{GT}, theta::T) where {GT, T <: Real} = rot(Float64, GT, theta)
+rot(::Type{T}, gt::Symbol, theta::T) where {T <: Real} = RotationGate{GateType{gt}, T}(theta)
+rot(gt::Symbol, theta::T) where {T <: Real} = rot(Float64, gt, theta)
 
 # 2. composite blocks
 
@@ -189,7 +189,7 @@ function >>(reg::Register, block::Sequence)
 end
 
 function >>(reg::Register, block::AbstractBlock)
-    CircuitPlan(reg, sequence(block))
+    CircuitPlan(reg, Sequence(block))
 end
 
 function >>(plan::CircuitPlan, block::AbstractBlock)

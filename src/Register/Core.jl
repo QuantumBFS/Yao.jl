@@ -169,12 +169,12 @@ eltype(r::AbstractRegister{B, T}) where {B, T} = T
 # Factory Methods
 
 # set unsigned conversion rules for nbatch
-function register(::Type{RT}, raw::AbstractArray, nbatch::Int) where RT
+function register(::Type{RT}, raw::AbstractArray, nbatch::Int=1) where RT
     register(RT, raw, unsigned(nbatch))
 end
 
 # set default register
-function register(raw::AbstractArray, nbatch::Int)
+function register(raw::AbstractArray, nbatch::Int=1)
     register(Register, raw, nbatch)
 end
 
@@ -198,9 +198,9 @@ function register(::Type{T}, n::Int, nbatch::Int, method::Symbol=:rand) where T
 end
 
 # config default eltype
-register(n::Int, nbatch::Int; method::Symbol=:rand) = register(Compat.ComplexF64, n, nbatch, method)
+register(n::Int, nbatch::Int=1; method::Symbol=:rand) = register(Compat.ComplexF64, n, nbatch, method)
 
 # shortcuts
-zero_state(n::Int, nbatch::Int) = register(n, nbatch, method=:zero)
-rand_state(n::Int, nbatch::Int) = register(n, nbatch, method=:rand)
-randn_state(n::Int, nbatch::Int) = register(n, nbatch, method=:randn)
+zero_state(n::Int, nbatch::Int=1) = register(n, nbatch, method=:zero)
+rand_state(n::Int, nbatch::Int=1) = register(n, nbatch, method=:rand)
+randn_state(n::Int, nbatch::Int=1) = register(n, nbatch, method=:randn)

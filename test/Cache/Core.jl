@@ -12,29 +12,29 @@ import QuCircuit: kron, control, chain # composite
     @test iscacheable(cache, unsigned(3)) == false
     @test iscacheable(cache, unsigned(4)) == true
 
-    push!(cache, gate(X), full(gate(X)), unsigned(3)) # cache nothing
-    @test (hash(gate(X)) in keys(cache.data)) == false
+    push!(cache, X(), full(X()), unsigned(3)) # cache nothing
+    @test (hash(X()) in keys(cache.data)) == false
 
-    push!(cache, gate(X), full(gate(X)), unsigned(4))
-    @test pull(cache, gate(X)) == full(gate(X))
+    push!(cache, X(), full(X()), unsigned(4))
+    @test pull(cache, X()) == full(X())
 
     setlevel!(cache, unsigned(2))
     empty!(cache)
-    push!(cache, gate(X), full(gate(X)), unsigned(3))
-    @test pull(cache, gate(X)) == full(gate(X))
+    push!(cache, X(), full(X()), unsigned(3))
+    @test pull(cache, X()) == full(X())
 end
 
-import QuCircuit: CacheServer, cache!
+import QuCircuit: DefaultServer, cache!
 
 
-@testset "cache server" begin
-    server = CacheServer(SparseMatrixCSC{Complex128, Int})
+@testset "default cache" begin
+    server = DefaultServer(SparseMatrixCSC{Complex128, Int})
 
     glist = [
-        gate(X),
+        X(),
         phase(0.1),
-        kron(phase(0.1), gate(X)),
-        chain(phase(0.1), gate(X)),
+        kron(phase(0.1), X()),
+        chain(phase(0.1), X()),
     ]
 
     # constant gates

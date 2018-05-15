@@ -15,7 +15,7 @@ import QuCircuit: apply!, dispatch!
     # -- [X] --
     # -- [Y] --
     # -- [Z] --
-    g = kron(gate(X), gate(Y), gate(Z))
+    g = kron(X(), Y(), Z())
 
     @test nqubit(g) == 3
     @test ninput(g) == 3
@@ -24,7 +24,7 @@ import QuCircuit: apply!, dispatch!
     @test ispure(g) == true
 
     # check matrix form
-    mat = sparse(gate(X)) ⊗ sparse(gate(Y)) ⊗ sparse(gate(Z))
+    mat = sparse(X()) ⊗ sparse(Y()) ⊗ sparse(Z())
     @test sparse(g) == mat
     @test full(g) == full(mat)
 
@@ -36,7 +36,7 @@ import QuCircuit: apply!, dispatch!
 end
 
 @testset "mixin parameter" begin
-    g = kron(phase(1.0), gate(X), phase(2.0))
+    g = kron(phase(1.0), X(), phase(2.0))
 
     @test nqubit(g) == 3
     @test ninput(g) == 3
@@ -44,7 +44,7 @@ end
     @test isunitary(g) == true
     @test ispure(g) == true
 
-    mat = sparse(phase(1.0)) ⊗ sparse(gate(X)) ⊗ sparse(phase(2.0))
+    mat = sparse(phase(1.0)) ⊗ sparse(X()) ⊗ sparse(phase(2.0))
     @test sparse(g) == mat
     @test full(g) == full(mat)
 
@@ -52,16 +52,14 @@ end
     @test dispatch!(g) == g
 
     # update parameter
-    dispatch!(g, (1, 5.0))
+    dispatch!(g, [5.0, 5.0])
     @test g[1].theta == 5.0
-    dispatch!(g, (1, -1.0), (3, 0.0))
-    @test g[1].theta == -1.0
-    @test g[3].theta == 0.0
+    @test g[3].theta == 5.0
 end
 
 @testset "in-contiguous" begin
 
-    g = kron(gate(X), (3, gate(Z)), gate(X))
+    g = kron(X(), (3, Z()), X())
 
     @test nqubit(g) == 4
     @test ninput(g) == 4
@@ -69,7 +67,7 @@ end
     @test isunitary(g) == true
     @test ispure(g) == true
 
-    mat = sparse(gate(X)) ⊗ speye(2) ⊗ sparse(gate(Z)) ⊗ sparse(gate(X))
+    mat = sparse(X()) ⊗ speye(2) ⊗ sparse(Z()) ⊗ sparse(X())
     @test sparse(g) == mat
     @test full(g) == full(mat)
 
@@ -114,12 +112,12 @@ end
 
 @testset "manual total qubits" begin
 
-    g = kron(2, gate(X))
+    g = kron(2, X())
     @test nqubit(g) == 2
-    mat = sparse(gate(X)) ⊗ speye(2)
+    mat = sparse(X()) ⊗ speye(2)
     @test sparse(g) == mat
 
-    g = kron(5, gate(X), gate(Y))
+    g = kron(5, X(), Y())
 
     @test nqubit(g) == 5
     @test ninput(g) == 5
@@ -127,16 +125,16 @@ end
     @test isunitary(g) == true
     @test ispure(g) == true
 
-    mat = sparse(gate(X)) ⊗ sparse(gate(Y)) ⊗ speye(8)
+    mat = sparse(X()) ⊗ sparse(Y()) ⊗ speye(8)
     @test sparse(g) == mat
     @test full(g) == full(mat)
 
     # check in-contiguous address from beginning
-    g = kron(5, (2, gate(X)), gate(Y))
+    g = kron(5, (2, X()), Y())
 
     @test nqubit(g) == 5
 
-    mat = speye(2) ⊗ sparse(gate(X)) ⊗ sparse(gate(Y)) ⊗ speye(4)
+    mat = speye(2) ⊗ sparse(X()) ⊗ sparse(Y()) ⊗ speye(4)
     @test sparse(g) == mat
     @test full(g) == full(mat)
 end

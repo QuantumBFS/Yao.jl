@@ -12,6 +12,7 @@ import Base: start, next, done, eltype, length
 import Base: getindex, setindex!, map!
 
 function dispatch!(c::CompositeBlock, params::Vector)
+    reverse!(params)
     for each in c
         dispatch!(each, params)
     end

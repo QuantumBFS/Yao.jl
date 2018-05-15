@@ -82,20 +82,18 @@ function get_configs(total, range...)
     ip = sortperm(p)
     sorted = r[p]
 
-    src_shape, dst_shape = Int[], Int[]
+    src_shape = Int[]
     perm_head, perm_tail = Int[], Int[]
     prev = 1; count = 1; nactive = 0;
     for each in sorted
         if first(each) - prev != 0
             push!(src_shape, first(each) - prev)
-            push!(dst_shape, first(each) - prev)
             push!(perm_tail, count)
             count += 1
         end
 
         nactive += length(each)
         push!(src_shape, length(each))
-        prepend!(dst_shape, length(each))
         push!(perm_head, count)
         count += 1
         prev = last(each) + 1
@@ -105,14 +103,16 @@ function get_configs(total, range...)
     last_interval = total - last(last(sorted))
     if last_interval != 0
         push!(src_shape, last_interval)
-        push!(dst_shape, last_interval)
         push!(perm, count)
     end
 
+    dst_shape = src_shape[perm]
     src_shape, dst_shape, perm, nactive
 end
 
-function focus!(r::Register{B}, range...) where B
+const RangeType = Union{Int, UnitRange}
+
+function focus!(r::Register{B}, range::RangeType...) where B
     total = nqubit(r)
     src_shape, dst_shape, perm, r.nactive = get_configs(total, range...)
 
@@ -124,14 +124,17 @@ function focus!(r::Register{B}, range...) where B
     src = reshape(r.state, src_shape...)
     dst = reshape(r.state, dst_shape...)
 
-    index = 1
-    expand_range = [i for each in range for i in each]
-    inds = findin(r.address, expand_range)
-    deleteat!(r.address, inds)
-    prepend!(r.address, expand_range)
-
+    # permute state
     push!(perm, length(perm) + 1)
     permutedims!(dst, src, perm)
+
+    # permute address
+    expand_range = [i for each in range for i in each]
+    perm = collect(1:total)
+    inds = findin(perm, expand_range)
+    deleteat!(perm, inds)
+    prepend!(perm, expand_range)
+    permute!(r.address, perm)
 
     r.state = reshape(r.state, 1 << r.nactive, (1 << (total - r.nactive)) * Int(B))
     r

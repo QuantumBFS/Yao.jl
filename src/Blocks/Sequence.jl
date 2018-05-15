@@ -2,6 +2,7 @@ struct Sequence <: AbstractBlock
     list::Vector{Any}
 end
 
+Sequence(blocks::AbstractBlock...) = Sequence([blocks...])
 
 function apply!(reg::Register, block::Sequence)
     for each in block.list

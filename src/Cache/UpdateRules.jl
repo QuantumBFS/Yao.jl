@@ -9,7 +9,7 @@ function update_cache(c::Cached, signal::Int; recursive=false)
 end
 
 function update_cache(c::Cached, ::Type{CT}, val, signal, recursive::Bool) where CT
-    push!(global_cache(CT), c.block, val, signal)
+    push!(global_cache(CT), c.block, val, UInt(signal))
     c
 end
 

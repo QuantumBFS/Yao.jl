@@ -6,7 +6,7 @@ Cached(block::BT) where {N, T, BT <: MatrixBlock{N, T}} = Cached{BT, N, T}(block
 
 sparse(c::Cached) = sparse(c.block)
 full(c::Cached) = full(c.block)
-dispatch!(c::Cached) = dispatch!(c.block)
+dispatch!(c::Cached, params...) = (dispatch!(c.block, params...); c)
 
 # for block which is not cached this is equal
 apply!(reg::Register, c, signal)= apply!(reg, c)
