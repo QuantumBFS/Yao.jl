@@ -70,11 +70,11 @@ end
 # check interface
 import QuCircuit: cache, update_cache, pull
 
-@testset "cache block" begin
+# @testset "cache block" begin
 
-    cached = cache(phase(0.1), 2)
-    update_cache(cached, 2) # do nothing
-    update_cache(cached, 3) # update
-    pull(cached) # get the matrix
+#     cached = cache(phase(0.1), 2)
+#     update_cache(cached, 2) # do nothing
+#     update_cache(cached, 3) # update
+#     pull(cached) # get the matrix
 
-end
+# end

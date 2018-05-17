@@ -14,6 +14,10 @@ function ChainBlock(n, blocks::Vector)
     ChainBlock{n, T}(blocks)
 end
 
+function ChainBlock(blocks::Vector{MatrixBlock{N}}) where N
+    ChainBlock(N, blocks)
+end
+
 function ChainBlock(blocks::MatrixBlock{N}...) where N
     ChainBlock(N, collect(blocks))
 end
@@ -40,6 +44,8 @@ next(c::ChainBlock, st) = next(c.blocks, st)
 done(c::ChainBlock, st) = done(c.blocks, st)
 length(c::ChainBlock) = length(c.blocks)
 eltype(c::ChainBlock) = eltype(c.blocks)
+
+iterate_blocks(c::ChainBlock) = c
 
 function map!(f::Function, dest::ChainBlock, src::ChainBlock...)
     map!(f, dest.blocks, [each.blocks for each in src]...)

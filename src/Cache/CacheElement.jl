@@ -6,6 +6,7 @@ mutable struct CacheElement{TM <: AbstractMatrix}
 end
 
 iscacheable(c::CacheElement, level::UInt) = c.level < level
+iscached(c::CacheElement, block::MatrixBlock) = block in keys(c.data)
 
 function push!(c::CacheElement{TM}, k::MatrixBlock, v::TM) where TM
     c.data[k] = v
@@ -25,3 +26,8 @@ function setlevel!(c::CacheElement, level::UInt)
 end
 
 empty!(c::CacheElement) = empty!(c.data)
+
+function show(io::IO, c::CacheElement)
+    println(io, "CacheElement(level: ", c.level, ")")
+    println(io, c.data)
+end

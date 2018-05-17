@@ -23,13 +23,18 @@ phase(theta) = phase(Float64, theta)
 
 # 1.3 rotation gate
 export rot
-rot(::Type{T}, gt::Symbol, theta::T) where {T <: Real} = RotationGate{GateType{gt}, T}(theta)
+rot(::Type{T}, gt::Symbol, theta::T = zero(T)) where {T <: Real} = RotationGate{GateType{gt}, T}(theta)
 rot(gt::Symbol, theta::T) where {T <: Real} = rot(Float64, gt, theta)
+rot(gt::Symbol) = rot(Float64, gt)
 
 # 2. composite blocks
 
 # 2.1 chain block
 export chain
+
+function chain(blocks::Vector)
+    ChainBlock(blocks)
+end
 
 function chain(blocks::MatrixBlock{N}...) where N
     ChainBlock(blocks...)
@@ -61,8 +66,8 @@ This will automatically generate a block list looks like
 4 -- [Y] --
 ```
 """
-kron(total, blocks::Union{MatrixBlock, Tuple, Pair}...) = KronBlock(total, blocks)
-kron(total, blocks) = KronBlock(total, blocks)
+kron(total::Int, blocks::Union{MatrixBlock, Tuple, Pair}...) = KronBlock(total, blocks)
+kron(total::Int, blocks) = KronBlock(total, blocks)
 kron(blocks::Union{MatrixBlock, Tuple, Pair}...) = KronBlock(blocks)
 kron(blocks) = KronBlock(blocks)
 
@@ -75,6 +80,12 @@ function C(controls::Int...)
         total->ControlBlock(total, [controls...], block_and_addr...)
     end
 end
+
+# 2.4 roller
+
+export roll
+roll(n::Int, block::MatrixBlock) = Roller(n, block)
+roll(block::MatrixBlock) = n->roll(n, block)
 
 # 3. measurement
 export measure
@@ -94,7 +105,6 @@ measure_remove(m::Int) = MeasureAndRemove{m}()
 export focus
 focus(orders...) = Concentrator(orders...)
 
-
 # all blocks are callable
 
 # NOTE: this is a workaround in v0.6, multiple dispatch for call
@@ -109,11 +119,13 @@ for BLOCK in [
     ChainBlock,
     KronBlock,
     ControlBlock,
+    Roller,
     # others
     Concentrator,
     Sequence,
     Measure,
-] 
+    Cached,
+]
     @eval begin
         # 1. when input is register, call apply!
         (x::$BLOCK)(reg::Register) = apply!(reg, x)

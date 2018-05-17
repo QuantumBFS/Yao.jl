@@ -13,6 +13,16 @@ function iscacheable(server::DefaultServer, k::UInt, level::UInt)
     iscacheable(server.storage[k], level)
 end
 
+function iscacheable(server::DefaultServer, k::UInt)
+    k in keys(server.storage)
+end
+
+function iscached(server::DefaultServer, block::MatrixBlock)
+    k = object_id(block)
+    k in keys(server.storage) || return false
+    iscached(server.storage[k], block)
+end
+
 function setlevel!(server::DefaultServer{TM}, k::UInt, level::UInt) where TM
     if !(k in keys(server.storage))
         setlevel!(server.storage[k], level)
@@ -34,7 +44,7 @@ function cache!(server::DefaultServer{TM}, key::UInt, level::UInt) where TM
 end
 
 """
-    push!(server, key, pkey, val, level) -> server
+    push!(server, key, pkey, val[, level]) -> server
 
 push (block, level) in hash key form to the server. update original
 cache with `val`. if input level is greater than stored level (input > stored).
@@ -42,6 +52,14 @@ cache with `val`. if input level is greater than stored level (input > stored).
 function push!(server::DefaultServer{TM}, key::UInt, pkey::MatrixBlock, val::TM, level::UInt) where TM
     if key in keys(server.storage)
         push!(server.storage[key], pkey, val, level)
+    end
+    server
+end
+
+# force push
+function push!(server::DefaultServer{TM}, key::UInt, pkey::MatrixBlock, val::TM) where TM
+    if key in keys(server.storage)
+        push!(server.storage[key], pkey, val)
     end
     server
 end
@@ -55,6 +73,15 @@ get block's cache by (key, pkey)
     pull(server.storage[key], pkey)
 end
 
+"""
+    empty!(server, key)
+
+empty key's cache.
+"""
+function empty!(server::DefaultServer, key::UInt)
+    empty!(server.storage[key])
+end
+
 ##########################
 # Wrap to call object_id
 ##########################
@@ -66,6 +93,10 @@ whether this block is cacheable with current cache level.
 """
 @inline function iscacheable(server::DefaultServer, block::MatrixBlock, level::UInt)
     iscacheable(server, object_id(block), level)
+end
+
+@inline function iscacheable(server::DefaultServer, block::MatrixBlock)
+    iscacheable(server, object_id(block))
 end
 
 """
@@ -96,6 +127,11 @@ than stored level. Or it will do nothing.
     push!(server, object_id(block), block, val, level)
 end
 
+# force push
+@inline function push!(server::DefaultServer{TM}, block::MatrixBlock, val::TM) where TM
+    push!(server, object_id(block), block, val)
+end
+
 """
     pull(server, block)
 
@@ -103,4 +139,17 @@ pull current block's cache from server
 """
 @inline function pull(server::DefaultServer, block::MatrixBlock)
     pull(server, object_id(block), block)
+end
+
+@inline function empty!(server::DefaultServer, block::MatrixBlock)
+    empty!(server, object_id(block))
+end
+
+function empty!(server::DefaultServer)
+    empty!(server.storage)
+end
+
+function show(io::IO, c::DefaultServer{TM}) where TM
+    println(io, "Default Server {$TM}")
+    print(io, "entries: ", length(values(c.storage)))
 end

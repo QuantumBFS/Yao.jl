@@ -19,13 +19,18 @@ function (c::Composer)(n::Int) # -> circuit{n}
     for each in c.fs
         push!(seq, parse_block(each, n)) # each is a block factory function
     end
-    Sequence(seq)
+    chain(seq...)
 end
 
 function (c::Composer)(reg::Register)
     c(nqubit(reg))(reg)
 end
 
+function show(io::IO, c::Composer)
+    for each in c.fs
+        println(io, each)
+    end
+end
 
 function parse_block(b::Tuple{BT, Int}, n::Int) where BT
     block, pos = b
@@ -43,6 +48,24 @@ function parse_block(b::AbstractBlock, n::Int)
     b
 end
 
-function parse_block(b::Function, n::Int)
+# default fallback method
+function parse_block(b, n::Int)
     b(n)
 end
+
+## Interface Overloads
+
+# chain
+
+chain(fs...) = x->chain([each(x) for each in fs])
+
+# cached
+cache(f, level::Int=1;recursive::Bool=false) = x->cache(f(x), level; recursive=recursive)
+
+import Base: map
+"""
+    map(block)
+
+map this block to all lines
+"""
+map(b::MatrixBlock) = n->kron(b for i=1:n)

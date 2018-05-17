@@ -21,12 +21,15 @@ end
 #############
 # Interface
 #############
+export iscacheable
 
 # This will cause signal when signal is not actually unsigned
 iscacheable(block::MatrixBlock, signal::Int=1) = iscacheable(block, UInt(signal))
+iscacheable(block::MatrixBlock, signal::UInt) = iscacheable(block, cache_type(block), signal)
 iscacheable(block::MatrixBlock, ::Type{CT}, signal::UInt) where CT = iscacheable(global_cache(CT), block, signal)
 
 include("CacheFlag.jl")
 include("HashRules.jl")
 include("CacheRules.jl")
 include("UpdateRules.jl")
+include("EmptyRules.jl")

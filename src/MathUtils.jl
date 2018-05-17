@@ -101,3 +101,31 @@ for (NAME, MAT) in [
     end
 
 end
+
+# N: number of qubits
+# st: state vector with batch
+function rolldims2!(::Type{Val{N}}, ::Type{Val{B}}, st::AbstractMatrix) where {N, B}
+    n = 1 << N
+    halfn = 1 << (N - 1)
+    temp = st[2:2:n, :]
+    st[1:halfn, :] = st[1:2:n, :]
+    st[halfn+1:end, :] = temp
+    st
+end
+
+function rolldims2!(::Type{Val{N}}, ::Type{Val{1}}, st::AbstractVector) where {N}
+    n = 1 << N
+    halfn = 1 << (N - 1)
+    temp = st[2:2:n]
+    st[1:halfn] = st[1:2:n]
+    st[halfn+1:end] = temp
+    st
+end
+
+@generated function rolldims!(::Type{Val{K}}, ::Type{Val{N}}, ::Type{Val{B}}, st::AbstractMatrix) where {K, N, B}
+    ex = :(rolldims2!(Val{$N}, Val{$B}, st))
+    for i = 2:K
+        ex = :(rolldims2!(Val{$N}, Val{$B}, st); $ex)
+    end
+    ex
+end

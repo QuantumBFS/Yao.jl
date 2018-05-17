@@ -8,6 +8,8 @@ abstract type CompositeBlock{N, T} <: MatrixBlock{N, T} end
 # composite blocks are iterables
 import Base: start, next, done, eltype, length
 
+# iterate_blocks
+
 # composite blocks are indexable
 import Base: getindex, setindex!, map!
 
@@ -22,3 +24,4 @@ end
 include("ChainBlock.jl")
 include("KronBlock.jl")
 include("Control.jl")
+include("Roller.jl")

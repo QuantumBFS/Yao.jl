@@ -6,7 +6,7 @@ include("utils.jl")
 include("mmd.jl")
 include("hackapi.jl")
 
-#= required APIS
+#= required APIs
     zero_state(num_bit) => reg
 
     X(num_bit, 1) |> c(cbit) => block: the function is used for constructing controled gates.
