@@ -8,8 +8,13 @@ struct Roller{N, M, T, BT} <: CompositeBlock{N, T}
     blocks::NTuple{M, BT}
 end
 
-function Roller(n, block::MatrixBlock{N, T}) where {N, T}
-    M = Int(n / N) # this will cause inexact error
+function Roller(blocks::NTuple{M, BT}) where {M, K, T, BT <: MatrixBlock{K, T}}
+    N = M * K
+    Roller{N, M, T, BT}(blocks)
+end
+
+function Roller(n, block::MatrixBlock{K, T}) where {K, T}
+    M = Int(n / K) # this will cause inexact error
     Roller{n, M, T, typeof(block)}(ntuple(x->copy(block), Val{M}))
 end
 
@@ -17,7 +22,7 @@ function copy(m::Roller{N, M, T, BT}) where {N, M, T, BT}
     Roller{N, M, T, BT}(ntuple(x->copy(m.blocks[x]), Val{M}))
 end
 
-getindex(m::Roller, i) = getindex(m.blocks. i)
+getindex(m::Roller, i) = getindex(m.blocks, i)
 start(m::Roller) = start(m.blocks)
 next(m::Roller, st) = next(m.blocks, st)
 done(m::Roller, st) = done(m.blocks, st)
@@ -65,6 +70,18 @@ function apply!(reg::Register{B}, m::Roller{N, M}) where {B, N, M}
     reg
 end
 
-function show(io::IO, m::Roller{N, M, BT, T}) where {N, M, BT, T}
-    print(io, "map $BT to $N lines ($M blocks in total)")
+function show(io::IO, m::Roller{N, M, T, BT}) where {N, M, T, BT}
+    print(io, "Roller on $N lines ($M blocks in total)")
+
+    if !isempty(m.blocks)
+        print(io, "\n")
+    end
+
+    for i in eachindex(m.blocks)
+        print(io, "\t", i, ": ", m.blocks[i])
+
+        if i != endof(m.blocks)
+            print(io, "\n")
+        end
+    end
 end

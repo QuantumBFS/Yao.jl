@@ -61,6 +61,7 @@ chain(fs...) = x->chain([each(x) for each in fs])
 
 # cached
 cache(f, level::Int=1;recursive::Bool=false) = x->cache(f(x), level; recursive=recursive)
+cache(level::Int=1;recursive::Bool=false) = x->cache(x, level; recursive=recursive)
 
 import Base: map
 """

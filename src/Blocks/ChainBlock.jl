@@ -26,6 +26,10 @@ function copy(c::ChainBlock{N, T}) where {N, T}
     ChainBlock{N, T}(deepcopy(c.blocks))
 end
 
+function similar(c::ChainBlock{N, T}) where {N, T}
+    ChainBlock{N, T}(similar(c.blocks))
+end
+
 # Block Properties
 isunitary(c::ChainBlock) = all(isunitary, c.blocks)
 isreflexive(c::ChainBlock) = all(isreflexive, c.blocks)
@@ -67,5 +71,15 @@ end
 
 function show(io::IO, c::ChainBlock{N, T}) where {N, T}
     println(io, "ChainBlock{$N, $T}")
-    join(io, ["\t" * string(each) for each in c.blocks], "\n----")
+    for i in eachindex(c.blocks)
+        if isassigned(c.blocks, i)
+            print(io, "\t", c.blocks[i])
+        else
+            print(io, "\t", "#undef")
+        end
+
+        if i != endof(c.blocks)
+            print(io, "\n")
+        end
+    end
 end

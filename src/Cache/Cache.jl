@@ -8,7 +8,7 @@ include("DefaultServer.jl")
 
 const GLOBAL_CACHE_POOL = Dict{DataType, DefaultServer}()
 
-function global_cache(::Type{T}) where T
+@inline function global_cache(::Type{T}) where T
     if T in keys(GLOBAL_CACHE_POOL)
         return GLOBAL_CACHE_POOL[T]
     else

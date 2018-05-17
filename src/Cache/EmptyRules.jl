@@ -4,14 +4,36 @@ function empty!(x::Symbol)
     x == :all && empty!(GLOBAL_CACHE_POOL)
 end
 
+"""
+    empty!(type)
+
+clear all cache in this `type`.
+"""
 empty!(::Type{CT}) where CT = empty!(global_cache(CT))
+
+"""
+    empty!(::MatrixBlock, signal; recursive=false)
+
+do nothing if this is a matrix block.
+"""
 empty!(c::MatrixBlock, signal; recursive=false) = c
 
+"""
+    empty!(object, signal; recursive=false)
+
+clear this object's cache with signal, if signal < level, then
+do nothing.
+"""
 function empty!(c::Cached, signal::Int; recursive=false)
     empty!(c, cache_type(c), unsigned(signal), recursive)
 end
 
 # force empty
+"""
+    empty!(object; recursive=false)
+
+force clear this object's cache
+"""
 function empty!(c::Cached; recursive=false)
     empty!(c, cache_type(c), recursive)
 end
@@ -21,7 +43,8 @@ end
 #################
 
 function empty!(c::Cached, ::Type{CT}, recursive::Bool) where CT
-    if iscacheable(global_cache(CT), c)
+    if iscached(global_cache(CT), c)
+        info("find cache, empty it!")
         empty!(global_cache(CT), c.block)
     end
     c

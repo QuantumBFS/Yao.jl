@@ -58,6 +58,9 @@ function copy(block::KronBlock{N, T}) where {N, T}
     KronBlock{N, T}(kvstore)
 end
 
+function similar(block::KronBlock{N, T}) where {N, T}
+    KronBlock{N, T}(similar(block.kvstore))
+end
 
 # some useful sugar
 import Base: getindex, setindex!, keys, values
@@ -95,6 +98,7 @@ isunitary(block::KronBlock) = all(isunitary, values(block))
 
 # full(block::KronBlock) = full(sparse(block))
 
+# TODO: handle empty kron block
 @inline function sparse(block::KronBlock{N, T}) where {N, T}
     curr_addr = 1
     first_head_addr, first_block = first(block.kvstore)
@@ -138,5 +142,16 @@ end
 
 function show(io::IO, block::KronBlock{N, T}) where {N, T}
     println(io, "KronBlock{$N, $T}")
-    join(io, ["\t" * "$key: $val" for (key, val) in block.kvstore], "\n")
+
+    if length(block) == 0
+        print(io, "\twith 0 blocks")
+    end
+
+    it = enumerate(block.kvstore)
+    for (i, (key, val)) in it
+        print(io, "\t", key, ": ", val)
+        if i != length(block)
+            print(io, "\n")
+        end
+    end
 end

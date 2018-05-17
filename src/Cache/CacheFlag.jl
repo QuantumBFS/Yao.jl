@@ -12,14 +12,17 @@ cache_type(c::Cached) = cache_type(c.block)
 iscacheable(c::Cached, signal) = iscacheable(c.block, signal)
 
 export iscached
-iscached(c::Cached) = iscached(global_cache(cache_type(c.block)), c.block)
+iscached(c::Cached) = iscached(cache_type(c), c)
+iscached(::Type{CT}, c::Cached) where CT = iscached(global_cache(CT), c)
+iscached(server::DefaultServer, c::Cached) = iscached(server, c.block)
+
 
 # for block which is not cached this is equal
 apply!(reg::Register, c, signal)= apply!(reg, c)
 
 function sparse(c::Cached)
     if !iscached(c)
-        mat = sparse(c)
+        mat = sparse(c.block)
         update_cache(c, mat)
         return mat
     end
@@ -28,7 +31,7 @@ end
 
 function full(c::Cached)
     if !iscached(c)
-        mat = full(c)
+        mat = full(c.block)
         update_cache(c, mat)
         return mat
     end
@@ -53,8 +56,6 @@ function apply!(reg::Register, c::Cached, signal::UInt)
     reg
 end
 
-dispatch!(c::Cached, params...) = (dispatch!(c.block, params...); c)
-
 export pull
 
 pull(c::Cached) = pull(cache_type(c.block), c)
@@ -76,3 +77,19 @@ function show(io::IO, c::Cached)
     print(io, "(Cached) ")
     print(io, c.block)
 end
+
+#############################
+# Direct Inherited Methods
+#############################
+
+apply!(reg::Register, c::Cached) = apply!(reg, c.block)
+dispatch!(c::Cached, params...) = (dispatch!(c.block, params...); c)
+
+getindex(c::Cached, index...) = getindex(c.block, index...)
+setindex!(c::Cached, val, index...) = setindex!(c.block, val, index...)
+
+start(c::Cached) = start(c.block)
+next(c::Cached, st) = next(c.block, st)
+done(c::Cached, st) = done(c.block, st)
+length(c::Cached) = length(c.block)
+eltype(c::Cached) = eltype(c.block)
