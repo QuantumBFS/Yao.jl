@@ -34,7 +34,6 @@ import QuCircuit: apply!, dispatch!
     @test mat * state(reg) == state(g(reg))
 
     # check copy
-
     cg = copy(g)
     for (copied, original) in zip(cg.blocks, g.blocks)
         @test copied !== original

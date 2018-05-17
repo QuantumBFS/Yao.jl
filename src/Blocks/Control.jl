@@ -160,6 +160,9 @@ function dispatch!(ctrl::ControlBlock, params...)
     dispatch!(ctrl.block, params...)
 end
 
+# This is a fix, do not delete
+dispatch!(ctrl::ControlBlock, params::Vector) = dispatch!(ctrl.block, params)
+
 export control
 
 function control(total::Int, controls::Vector{Int}, block, addr)

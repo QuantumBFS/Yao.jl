@@ -1,6 +1,6 @@
 import DataStructures: SortedDict
 
-promote_block_eltype(blocks) = promote_type([eltype(each) for each in blocks]...)
+promote_block_eltype(blocks) = promote_type([datatype(each) for each in blocks]...)
 
 """
     KronBlock{N, T} <: CompositeBlock{N, T}

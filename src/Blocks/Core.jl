@@ -1,3 +1,5 @@
+export AbstractBlock
+
 """
     AbstractBlock
 

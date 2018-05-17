@@ -10,7 +10,7 @@ end
 
 # Enable type promotion
 function ChainBlock(n, blocks::Vector)
-    T = promote_type(collect(eltype(each) for each in blocks)...)
+    T = promote_type(collect(datatype(each) for each in blocks)...)
     ChainBlock{n, T}(blocks)
 end
 
@@ -42,6 +42,10 @@ sparse(c::ChainBlock) = prod(x->sparse(x), reverse(c.blocks))
 # Additional Methods for Composite Blocks
 getindex(c::ChainBlock, index) = getindex(c.blocks, index)
 setindex!(c::ChainBlock, val, index) = setindex!(c.blocks, val, index)
+
+import Base: endof
+endof(c::ChainBlock) = endof(c.blocks)
+
 ## Iterate contained blocks
 start(c::ChainBlock) = start(c.blocks)
 next(c::ChainBlock, st) = next(c.blocks, st)

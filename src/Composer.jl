@@ -22,6 +22,11 @@ function (c::Composer)(n::Int) # -> circuit{n}
     chain(seq...)
 end
 
+function dispatch!(c::Composer, params)
+    for each in fs
+    end
+end
+
 function (c::Composer)(reg::Register)
     c(nqubit(reg))(reg)
 end

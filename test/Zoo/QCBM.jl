@@ -18,5 +18,13 @@ function circuit(n, nlayer)
         push!(seq, cache(entangler(n)))
         push!(seq, layer(n))
     end
-    compose(seq)
+    chain(seq...)
+end
+
+import Base: run
+
+function run(circuit::AbstractBlock, params::Vector, signal::Int=3)
+    psi = zero_state(nqubit(circuit))
+    dispatch!(psi, params)
+    circuit(psi)
 end

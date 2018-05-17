@@ -110,6 +110,13 @@ focus(orders...) = Concentrator(orders...)
 # NOTE: this is a workaround in v0.6, multiple dispatch for call
 #       is disabled in v0.6
 
+struct Signal
+    sig::UInt
+end
+
+export signal
+signal(x::Int) = Signal(UInt(x))
+
 for BLOCK in [
     # primitive
     Gate,
@@ -131,6 +138,8 @@ for BLOCK in [
         (x::$BLOCK)(reg::Register) = apply!(reg, x)
         # 2. when input is a block, compose as function call
         (x::$BLOCK)(b::AbstractBlock) = reg->apply!(apply!(reg, b), x)
+        # 3. when input is a signal, compose as function call
+        (x::$BLOCK)(s::Signal) = reg->apply!(reg, x, s)
     end
 end
 

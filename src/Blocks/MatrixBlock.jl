@@ -13,7 +13,7 @@ ispure(block::MatrixBlock) = true
 isunitary(block::MatrixBlock) = true
 
 import Base: full, sparse, eltype
-eltype(block::MatrixBlock{N, T}) where {N, T} = T
+datatype(block::MatrixBlock{N, T}) where {N, T} = T
 full(block::MatrixBlock) = full(sparse(block))
 
 function apply!(reg::Register, b::MatrixBlock)
