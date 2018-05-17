@@ -15,7 +15,7 @@ end
 
 function Roller(n, block::MatrixBlock{K, T}) where {K, T}
     M = Int(n / K) # this will cause inexact error
-    Roller{n, M, T, typeof(block)}(ntuple(x->copy(block), Val{M}))
+    Roller{n, M, T, typeof(block)}(ntuple(x->deepcopy(block), Val{M}))
 end
 
 function copy(m::Roller{N, M, T, BT}) where {N, M, T, BT}
@@ -49,6 +49,7 @@ end
 
 function dispatch!(m::Roller, params::Vector)
     for each in m.blocks
+        @show params
         dispatch!(each, params)
     end
     m
