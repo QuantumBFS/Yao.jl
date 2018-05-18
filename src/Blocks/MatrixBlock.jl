@@ -1,3 +1,5 @@
+export MatrixBlock
+
 """
     MatrixBlock{N, T} <: AbstractBlock
 

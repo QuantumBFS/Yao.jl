@@ -20,6 +20,12 @@ function dispatch!(c::CompositeBlock, params::Vector)
     c
 end
 
+function add_params!(c::CompositeBlock, params::Vector)
+    for each in c
+        add_params!(each, params)
+    end
+end
+
 include("ChainBlock.jl")
 include("KronBlock.jl")
 include("Control.jl")

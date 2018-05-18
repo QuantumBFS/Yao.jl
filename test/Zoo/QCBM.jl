@@ -1,6 +1,6 @@
 using QuCircuit
 
-include("mmd.jl")
+include("kernel.jl")
 
 function entangler(n)
     seq = []
@@ -10,7 +10,7 @@ function entangler(n)
     compose(seq)(n)
 end
 
-function circuit(n, nlayer)
+function make_circuit(n, nlayer)
     first_layer = chain(rot(:X), rot(:Z)) |> cache(2, recursive=true) |> roll
     layer = chain(rot(:Z), rot(:X), rot(:Z)) |> cache(2, recursive=true) |> roll
 
@@ -23,12 +23,10 @@ function circuit(n, nlayer)
     chain(seq...)
 end
 
-import Base: run
-
 function run_circuit(circuit::AbstractBlock, params::Vector, signal::Int=3)
     psi = zero_state(nqubit(circuit))
     dispatch!(psi, params)
-    state(circuit(psi))
+    vec(state(circuit(psi)))
 end
 
 
@@ -39,29 +37,29 @@ QCBM loss function.
     to get samples, here, we simply use the exact wave function.
 """
 function loss_function(params::Vector{Float64}, circuit, kernel::Kernel, ptrain::Vector{Float64})
-    prob = abs2.(run_circuit(params, circuit, 3))
-    println(size(prob), size(ptrain), size(kernel.kernel_matrix))
-    prob |> mmd_loss(kernel, ptrain)
+    prob = abs2.(run_circuit(circuit, params, 3))
+    println(size(prob), size(ptrain), size(kernel.matrix))
+    mmd_loss(prob, kernel, ptrain)
 end
 
 """
 QCBM gradient function.
 """
 function mmd_gradient(params, circuit, kernel, ptrain)
-    prob = run_circuit(params, circuit, 3) |> psi2prob
+    prob = abs2.(run_circuit(circuit, params, 3))
 
     grad = zeros(params)
     for i=1:length(params)
         params_ = copy(params)
         # pi/2 phase
         params_[i] += pi/2.
-        prob_pos = abs2.(run_circuit(params_, circuit, 0))
+        prob_pos = abs2.(run_circuit(circuit, params_, 0))
         # -pi/2 phase
         params_[i] -= pi
-        prob_neg = abs2.(run_circuit(params_, circuit, 0))
+        prob_neg = abs2.(run_circuit(circuit, params_, 0))
 
-        grad_pos = kernel_expect(kernel, prob, prob_pos) - kernel_expect(kernel, prob, prob_neg)
-        grad_neg = kernel_expect(kernel, ptrain, prob_pos) - kernel_expect(kernel, ptrain, prob_neg)
+        grad_pos = expect(kernel, prob, prob_pos) - expect(kernel, prob, prob_neg)
+        grad_neg = expect(kernel, ptrain, prob_pos) - expect(kernel, ptrain, prob_neg)
         grad[i] = grad_pos - grad_neg
     end
     return grad

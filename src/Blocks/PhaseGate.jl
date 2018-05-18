@@ -7,9 +7,15 @@ full(gate::PhiGate{T}) where T = exp(im * gate.theta) * Complex{T}[exp(-im * gat
 
 copy(block::PhiGate) = PhiGate(block.theta)
 dispatch!(block::PhiGate{T}, theta::T) where T = (block.theta = theta; block)
+add_params!(block::PhiGate{T}, theta::T) where T = (block.theta += theta; block)
 
 function dispatch!(block::PhiGate, params::Vector)
     block.theta = pop!(params)
+    block
+end
+
+function add_params!(block::PhiGate, params::Vector)
+    block.theta += pop!(params)
     block
 end
 

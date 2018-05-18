@@ -40,7 +40,7 @@ import Base: copy
 copy(x::AbstractBlock) = x
 
 ## Required Methods
-export apply!, dispatch!
+export apply!, dispatch!, add_params!
 
 """
     apply!(reg, block, [signal])
@@ -51,3 +51,4 @@ function apply! end
 
 ### do nothing by default
 dispatch!(block, params...) = block
+add_params!(block, params...) = block

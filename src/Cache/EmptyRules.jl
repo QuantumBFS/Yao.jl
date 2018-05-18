@@ -16,7 +16,7 @@ empty!(::Type{CT}) where CT = empty!(global_cache(CT))
 
 do nothing if this is a matrix block.
 """
-empty!(c::MatrixBlock, signal; recursive=false) = c
+empty!(c::MatrixBlock, signal::Int=1; recursive=false) = c
 
 """
     empty!(object, signal; recursive=false)

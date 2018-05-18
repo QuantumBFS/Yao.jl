@@ -19,9 +19,15 @@ copy(block::RotationGate{GT, T}) where {GT, T} = RotationGate{GT, T}(block.theta
 
 # TODO: dispatch a vector
 dispatch!(block::RotationGate{GT, T}, theta::T) where {GT, T} = (block.theta = theta; block)
+add_params!(block::RotationGate{GT, T}, theta::T) where {GT, T} = (block.theta += theta; block)
 
 function dispatch!(block::RotationGate, theta::Vector)
     block.theta = pop!(theta)
+    block
+end
+
+function add_params!(block::RotationGate, theta::Vector)
+    block.theta += pop!(theta)
     block
 end
 

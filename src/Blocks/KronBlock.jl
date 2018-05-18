@@ -140,6 +140,13 @@ function dispatch!(block::KronBlock, param::Vector)
     block
 end
 
+function add_params!(block::KronBlock, params::Vector)
+    for each in values(block.kvstore)
+        add_params!(each, params)
+    end
+    block
+end
+
 function show(io::IO, block::KronBlock{N, T}) where {N, T}
     println(io, "KronBlock{$N, $T}")
 
