@@ -33,7 +33,7 @@ function Register(raw::Matrix, nbatch::UInt)
 end
 
 function Register(raw::Vector, nbatch::UInt)
-    Register(reshape(raw, length(raw), 1), nbatch)
+    Register(repeat(raw, inner=(1, nbatch)), nbatch)
 end
 
 # Required Properties

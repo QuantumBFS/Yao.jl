@@ -24,6 +24,7 @@ isunitary(::Type{T}) where {T <: AbstractBlock} = false
 ispure(::Type{T}) where {T <: AbstractBlock} = false
 isreflexive(::Type{T}) where {T <: AbstractBlock} = false
 isunitary_hermitian(::Type{T}) where {T <: AbstractBlock} = false
+hasparameter(::Type{T}) where {T <: AbstractBlock} = false
 
 import Base: ishermitian
 ishermitian(::Type{T}) where {T <: AbstractBlock} = false
@@ -40,7 +41,7 @@ import Base: copy
 copy(x::AbstractBlock) = x
 
 ## Required Methods
-export apply!, dispatch!, add_params!
+export apply!, dispatch!
 
 """
     apply!(reg, block, [signal])
@@ -50,5 +51,5 @@ apply a `block` to a register `reg` with or without a cache signal.
 function apply! end
 
 ### do nothing by default
-dispatch!(block, params...) = block
-add_params!(block, params...) = block
+dispatch!(block::AbstractBlock, params...) = block
+dispatch!(f::Function, block::AbstractBlock, params...) = block

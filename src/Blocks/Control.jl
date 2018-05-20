@@ -7,20 +7,28 @@ mutable struct ControlBlock{BlockType, N, T} <: CompositeBlock{N, T}
     # function ControlBlock(total::Int, ctrl_qubits::Vector{Int}, ctrl::ControlBlock, addr::Int) where {K, T}
     # end
 
-    function ControlBlock(total::Int, ctrl_qubits::Vector{Int}, block::BT, addr::Int) where {K, T, BT <: MatrixBlock{K, T}}
+    function ControlBlock{BT, N, T}(ctrl_qubits::Vector{Int}, block::BT, addr::Int) where {BT, N, T}
+        new{BT, N, T}(ctrl_qubits, block, addr)
+    end
+
+    function ControlBlock{N}(ctrl_qubits::Vector{Int}, block::BT, addr::Int) where {N, K, T, BT <: MatrixBlock{K, T}}
         # NOTE: control qubits use sign to characterize
         # inverse control qubits
         # we sort it from lowest addr to highest first
         # this will help we have an deterministic behaviour
         # TODO: remove repeated, add error
         ordered_control = sort(ctrl_qubits, by=x->abs(x))
-        new{BT, total, T}(ordered_control, block, addr)
+        new{BT, N, T}(ordered_control, block, addr)
     end
 end
 
 function ControlBlock(ctrl_qubits::Vector{Int}, block, addr::Int)
-    total = max(maximum(abs.(ctrl_qubits)), addr)
-    ControlBlock(total, ctrl_qubits, block, addr)
+    N = max(maximum(abs.(ctrl_qubits)), addr)
+    ControlBlock{N}(ctrl_qubits, block, addr)
+end
+
+function copy(ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
+    ControlBlock{BT, N, T}(copy(ctrl.ctrl_qubits), copy(ctrl.block), copy(ctrl.addr))
 end
 
 function sparse(ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
@@ -51,14 +59,14 @@ function sparse(ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
     lowest_addr = min(minimum(abs.(ctrl_addrs)), ctrl.addr)
     if lowest_addr != 1 # lowest addr is not from the first
         nblank = lowest_addr - 1
-        U = kron(speye(T, 1 << nblank), U)
+        U = kron(U, speye(T, 1 << nblank))
     end
 
     # check blank lines in the end
     highest_addr = max(maximum(abs.(ctrl_addrs)), ctrl.addr)
     if highest_addr != N # highest addr is not the last
         nblank = N - highest_addr
-        U = kron(U, speye(T, 1 << nblank))
+        U = kron(speye(T, 1 << nblank), U)
     end
     U
 end
@@ -123,14 +131,24 @@ function A_kron_B(A, ia, na, B, ib)
     out = A
     if ia + na < ib
         blank_size = ib - ia - na
-        out = kron(out, speye(T, 1 << blank_size))
+        out = kron(speye(T, 1 << blank_size), out)
     end
-    kron(out, B)
+    kron(B, out)
+end
+
+struct ControlQuBit
+    addr::Int
 end
 
 # Required Methods as Composite Block
 function getindex(c::ControlBlock, index)
-    index == c.addr ? c.block : nothing
+    if index == c.addr
+        return c.block
+    elseif index in c.ctrl_qubits
+        return ControlQuBit(index)
+    end
+
+    throw(KeyError(index))
 end
 
 function setindex!(c::ControlBlock, val::MatrixBlock, index)
@@ -145,38 +163,13 @@ end
 start(c::ControlBlock) = 1
 next(c::ControlBlock, st) = c.block, st + 1
 done(c::ControlBlock, st) = st == 2
-
-function map!(f::Function, dst::ControlBlock, src::ControlBlock)
-    dst.block = f(src.block)
-    dst
-end
+eachindex(c::ControlBlock) = c.addr
+blocks(c::ControlBlock) = [c.block]
 
 # apply & dispatch
 # TODO: overload this with direct apply method
 # function apply!(reg::Register, ctrl::ControlBlock)
 # end
-
-function dispatch!(ctrl::ControlBlock, params...)
-    dispatch!(ctrl.block, params...)
-end
-
-function add_params!(ctrl::ControlBlock, params...)
-    add_params!(ctrl.block, params...)
-end
-
-# This is a fix, do not delete
-dispatch!(ctrl::ControlBlock, params::Vector) = dispatch!(ctrl.block, params)
-add_params!(ctrl::ControlBlock, params::Vector) = add_params!(ctrl.block, params)
-
-export control
-
-function control(total::Int, controls::Vector{Int}, block, addr)
-    ControlBlock(total, [controls...], block, addr)
-end
-
-function control(controls::Vector{Int}, block, addr)
-    ControlBlock([controls...], block, addr)
-end
 
 # pretty printing
 

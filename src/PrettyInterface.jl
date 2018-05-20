@@ -66,18 +66,34 @@ This will automatically generate a block list looks like
 4 -- [Y] --
 ```
 """
-kron(total::Int, blocks::Union{MatrixBlock, Tuple, Pair}...) = KronBlock(total, blocks)
-kron(total::Int, blocks) = KronBlock(total, blocks)
-kron(blocks::Union{MatrixBlock, Tuple, Pair}...) = KronBlock(blocks)
-kron(blocks) = KronBlock(blocks)
+kron(total::Int, blocks::Union{MatrixBlock, Tuple, Pair}...) = KronBlock{total}(blocks...)
+kron(total::Int, blocks) = KronBlock{total}(blocks...)
+kron(blocks::Union{MatrixBlock, Tuple, Pair}...) = N->KronBlock{N}(blocks...)
+kron(blocks) = N->KronBlock{N}(blocks)
 
 # 2.3 control block
 
-export C
+export C, control
+
+function control(total::Int, controls, block, addr)
+    ControlBlock{total}([controls...], block, addr)
+end
+
+function control(controls, block, addr)
+    ControlBlock([controls...], block, addr)
+end
+
+function control(total::Int, controls)
+    block_and_addr->ControlBlock{total}([controls...], block_and_addr...)
+end
+
+function control(controls)
+    block_and_addr->ControlBlock([controls...], block_and_addr...)
+end
 
 function C(controls::Int...)
     function _C(block_and_addr)
-        total->ControlBlock(total, [controls...], block_and_addr...)
+        total->ControlBlock{total}([controls...], block_and_addr...)
     end
 end
 

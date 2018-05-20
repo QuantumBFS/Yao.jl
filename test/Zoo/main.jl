@@ -1,27 +1,47 @@
 using Compat.Test
 include("QCBM.jl")
 
-const nlayers = 5
-const nbit = 6
+const nlayers = 10
+const nbit = 9
 const maxiter = 10
 const learning_rate = 0.1
 
-function entangler(n)
+const kernel = RBFKernel(nbit, [2.0], false)
+const params = vec(readdlm("theta-cl-bs.dat"))
+const target = readdlm("wave_complex.dat")[:, 1] + im * readdlm("wave_complex.dat")[:, 2]
+const ptrain = randn(1<<nbit)
+
+cnot_pair = [
+    (1, 7),
+    (2, 8),
+    (4, 7),
+    (5, 3),
+    (6, 0),
+    (6, 3),
+    (6, 7),
+    (8, 5),
+]
+
+cnot_pair = map(x->(x[1]+1, x[2]+1), cnot_pair)
+
+function entangler(n, pairs)
     seq = []
-    for i = 1:n
-        push!(seq, X(i) |> C(i % n + 1))
+    for (c, uc) in pairs
+        push!(seq, X(uc) |> C(c))
     end
     compose(seq)(n)
 end
 
 # circuit = make_circuit(nbit, nlayers)
 
-const layer = chain(rot(:X), rot(:Z)) |> cache(2, recursive=true) |> roll
+const layer1 = chain(rot(:X), rot(:Z)) |> cache(2, recursive=true) |> roll
 const layers = MatrixBlock[]
-push!(layers, layer(nbit))
+push!(layers, layer1(nbit))
+
+layer = chain(rot(:Z), rot(:X), rot(:Z)) |> cache(2, recursive=true) |> roll
 
 for i = 1:nlayers
-    push!(layers, cache(entangler(nbit)))
+    push!(layers, cache(entangler(nbit, cnot_pair)))
     push!(layers, layer(nbit))
 end
 
@@ -34,10 +54,6 @@ function empty!(layers::Vector{MatrixBlock})
     end
     seq
 end
-
-kernel = RBFKernel(nbit, [2.0], false)
-params = zeros((3 * nbit) * (nlayers - 1) + (2 * nbit))
-ptrain = randn(1<<nbit)
 
 # #for info in optimize(params->mmd_gradient(params,circuit, kernel, ptrain), )
 # #    println(info)

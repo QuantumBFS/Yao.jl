@@ -49,7 +49,6 @@ end
 
 function dispatch!(m::Roller, params::Vector)
     for each in m.blocks
-        @show params
         dispatch!(each, params)
     end
     m

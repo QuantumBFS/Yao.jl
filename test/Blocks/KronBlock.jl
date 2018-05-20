@@ -1,140 +1,80 @@
 using Compat.Test
-
+using QuCircuit
 import QuCircuit: KronBlock
-import QuCircuit: rand_state, state, focus!, X, Y, Z, gate, phase
 # Block Trait
 import QuCircuit: nqubit, ninput, noutput, isunitary, ispure
 # Required Methods
 import QuCircuit: apply!, dispatch!
 
+@testset "check sparse" begin
+
+GateSet = [
+    X(), Y(), Z(),
+    phase(0.1), phase(0.2), phase(0.3),
+    rot(:X, 0.1), rot(:Y, 0.4), rot(:Z, 0.2)
+]
+
 ⊗ = kron
+U = sparse(X())
+id = speye(2)
 
-@testset "contiguous" begin
-    # default should organize this as
-    # contiguous gates on address
-    # -- [X] --
-    # -- [Y] --
-    # -- [Z] --
-    g = kron(X(), Y(), Z())
+@testset "case 1" begin
+    mat = id ⊗ U
+    g = KronBlock{2}(1=>X())
+    @test mat == sparse(g)
 
-    @test nqubit(g) == 3
-    @test ninput(g) == 3
-    @test noutput(g) == 3
-    @test isunitary(g) == true
-    @test ispure(g) == true
+    mat = U ⊗ id
+    g = KronBlock{2}(2=>X())
+    @test mat == sparse(g)
+end
 
-    # check matrix form
+@testset "case 2" begin
     mat = sparse(X()) ⊗ sparse(Y()) ⊗ sparse(Z())
-    @test sparse(g) == mat
-    @test full(g) == full(mat)
+    g = KronBlock{3}(1=>Z(), 2=>Y(), 3=>X())
+    @test mat == sparse(g)
 
-    reg = rand_state(3)
-    @test full(g) * state(reg) == state(apply!(reg, g))
-
-    # do nothing
-    @test dispatch!(g) == g
+    mat = id ⊗ mat
+    g = KronBlock{4}(1=>Z(), 2=>Y(), 3=>X())
+    @test mat == sparse(g)
 end
 
-@testset "mixin parameter" begin
-    g = kron(phase(1.0), X(), phase(2.0))
+@testset "random dense sequence" begin
 
-    @test nqubit(g) == 3
-    @test ninput(g) == 3
-    @test noutput(g) == 3
-    @test isunitary(g) == true
-    @test ispure(g) == true
-
-    mat = sparse(phase(1.0)) ⊗ sparse(X()) ⊗ sparse(phase(2.0))
-    @test sparse(g) == mat
-    @test full(g) == full(mat)
-
-    # do nothing
-    @test dispatch!(g) == g
-
-    # update parameter
-    dispatch!(g, [5.0, 5.0])
-    @test g[1].theta == 5.0
-    @test g[3].theta == 5.0
+function random_dense_kron(n)
+    addrs = randperm(n)
+    blocks = [(i, rand(GateSet)) for i in addrs]
+    g = KronBlock{n}(blocks...)
+    sorted_blocks = sort(blocks, by=x->x[1])
+    t = mapreduce(x->sparse(x[2]), kron, speye(1), reverse(sorted_blocks))
+    sparse(g) ≈ t || info(g)
 end
 
-@testset "in-contiguous" begin
-
-    g = kron(X(), (3, Z()), X())
-
-    @test nqubit(g) == 4
-    @test ninput(g) == 4
-    @test noutput(g) == 4
-    @test isunitary(g) == true
-    @test ispure(g) == true
-
-    mat = sparse(X()) ⊗ speye(2) ⊗ sparse(Z()) ⊗ sparse(X())
-    @test sparse(g) == mat
-    @test full(g) == full(mat)
-
-end
-
-@testset "contiguous iterator" begin
-    space = linspace(-pi, pi, 5)
-    g = kron(phase(theta) for theta in space)
-
-    @test nqubit(g) == length(space)
-    @test ninput(g) == length(space)
-    @test noutput(g) == length(space)
-    @test isunitary(g) == true
-    @test ispure(g) == true
-
-    blocks = collect(values(g))
-    mat = sparse(first(blocks))
-    for i = 2:length(space)
-        mat = kron(mat, sparse(blocks[i]))
+    for i = 2:8
+        @test random_dense_kron(i)
     end
-
-    @test sparse(g) == mat
-    @test full(g) == full(mat)
 end
 
-@testset "in-contiguous iterator" begin
-    range = 1:2:5
-    space = linspace(-pi, pi, length(range))
-    g = kron((k, phase(theta)) for (k, theta) in zip(range, space)) # address 1, 3, 5
+@testset "random sparse sequence" begin
 
-    @test nqubit(g) == 5
-    @test ninput(g) == 5
-    @test noutput(g) == 5
-    @test isunitary(g) == true
-    @test ispure(g) == true
+function rand_kron_test(n)
+    firstn = rand(1:n)
+    addrs = randperm(n)
+    blocks = [rand(GateSet) for i = 1:firstn]
+    seq = [(i, each) for (i, each) in zip(addrs[1:firstn], blocks)]
+    mats = [(i, sparse(each)) for (i, each) in zip(addrs[1:firstn], blocks)]
+    append!(mats, [(i, speye(2)) for i in addrs[firstn+1:end]])
+    sorted = sort(mats, by=x->x[1])
+    mats = map(x->x[2], reverse(sorted))
 
-    blocks = collect(values(g))
-    mat = sparse(blocks[1]) ⊗ speye(2) ⊗ sparse(blocks[2]) ⊗ speye(2) ⊗ sparse(blocks[3])
-    @test sparse(g) == mat
-    @test full(g) == full(mat)
+    g = KronBlock{n}(seq...)
+    t = reduce(kron, speye(1), mats)
+    sparse(g) ≈ t || info(g)
 end
 
-@testset "manual total qubits" begin
+for i = 4:8
+    @test rand_kron_test(i)
+end
 
-    g = kron(2, X())
-    @test nqubit(g) == 2
-    mat = sparse(X()) ⊗ speye(2)
-    @test sparse(g) == mat
+end
 
-    g = kron(5, X(), Y())
-
-    @test nqubit(g) == 5
-    @test ninput(g) == 5
-    @test noutput(g) == 5
-    @test isunitary(g) == true
-    @test ispure(g) == true
-
-    mat = sparse(X()) ⊗ sparse(Y()) ⊗ speye(8)
-    @test sparse(g) == mat
-    @test full(g) == full(mat)
-
-    # check in-contiguous address from beginning
-    g = kron(5, (2, X()), Y())
-
-    @test nqubit(g) == 5
-
-    mat = speye(2) ⊗ sparse(X()) ⊗ sparse(Y()) ⊗ speye(4)
-    @test sparse(g) == mat
-    @test full(g) == full(mat)
 end

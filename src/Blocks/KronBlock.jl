@@ -1,163 +1,160 @@
-import DataStructures: SortedDict
-
-promote_block_eltype(blocks) = promote_type([datatype(each) for each in blocks]...)
-
 """
-    KronBlock{N, T} <: CompositeBlock{N, T}
+    KronBlock{N, T} <: CompositeBlock
 
-composite block that combine blocks by kronecker product.
+    composite block that combine blocks by kronecker product.
 """
 struct KronBlock{N, T} <: CompositeBlock{N, T}
-    kvstore::SortedDict{Int, MatrixBlock}
-end
+    slots::Vector{Int}
+    addrs::Vector{Int}
+    blocks::Vector{MatrixBlock}
 
-function KronBlock(total_bit_num::Int, kv::SortedDict)
-    N = total_bit_num
-    T = promote_block_eltype(values(kv))
-    KronBlock{N, T}(kv)
-end
+    function KronBlock{N, T}(slots::Vector{Int}, addrs::Vector{Int}, blocks::Vector) where {N, T}
+        new{N, T}(slots, addrs, blocks)
+    end
 
-_get_total_qubit_num(kv::SortedDict) = (key = maximum(keys(kv)); key + nqubit(kv[key]) - 1)
+    function KronBlock{N, T}(addrs::Vector, blocks::Vector) where {N, T}
+        perm = sortperm(addrs)
+        permute!(addrs, perm)
+        permute!(blocks, perm)
 
-@inline function _parse_arg_for_kron_block(blocks)
-    curr_head = 1
-    kv = SortedDict{Int, MatrixBlock}()
-    for each in blocks
-        if isa(each, MatrixBlock)
-            kv[curr_head] = each
-            curr_head += nqubit(each)
-        elseif isa(each, Union{Tuple, Pair}) # 2=>block/(2, block)
-            curr_head, block = each
-            kv[curr_head] = block
-            curr_head += nqubit(block)
-        else
-            throw(ErrorException("KronBlock only takes MatrixBlock, TODO: custom error"))
+        slots = zeros(Int, N)
+        for (i, each) in enumerate(addrs)
+            slots[each] = i
         end
+        new{N, T}(slots, addrs, blocks)
     end
-    return kv
-end
 
-function KronBlock(total_bit_num, blocks)
-    kv = _parse_arg_for_kron_block(blocks)
-    KronBlock(total_bit_num, kv)
-end
-
-function KronBlock(blocks)
-    kv = _parse_arg_for_kron_block(blocks)
-    n = _get_total_qubit_num(kv)
-    KronBlock(n, kv)
-end
-
-function copy(block::KronBlock{N, T}) where {N, T}
-    kvstore = similar(block.kvstore)
-    for (key, val) in block.kvstore
-        # copy each, default `copy(::AbstractDict)`
-        # won't copy its values.
-        kvstore[key] = copy(val)
+    function KronBlock{N}(addrs::Vector, blocks::Vector) where N
+        T = promote_type([datatype(each) for each in blocks]...)
+        KronBlock{N, T}(addrs, blocks)
     end
-    KronBlock{N, T}(kvstore)
-end
 
-function similar(block::KronBlock{N, T}) where {N, T}
-    KronBlock{N, T}(similar(block.kvstore))
-end
+    function KronBlock{N}(args...) where N
+        curr_head = 1
+        blocks = MatrixBlock[]
+        addrs = Int[]
 
-# some useful sugar
-import Base: getindex, setindex!, keys, values
-
-keys(blocks::KronBlock) = keys(blocks.kvstore)
-values(blocks::KronBlock) = values(blocks.kvstore)
-
-# Required Methods as Composite Block
-getindex(block::KronBlock, key) = getindex(block.kvstore, key)
-setindex!(block::KronBlock, v::MatrixBlock, key) = setindex!(block.kvstore, v, key)
-
-start(block::KronBlock) = start(block.kvstore)
-next(block::KronBlock, st) = next(block.kvstore, st)
-done(block::KronBlock, st) = done(block.kvstore, st)
-eltype(block::KronBlock) = eltype(block.kvstore)
-length(block::KronBlock) = length(block.kvstore)
-
-function map!(f::Function, dest::KronBlock, src::KronBlock...)
-    for each_kron in src
-        for (addr, block) in each_kron
-            dest[addr] = f(block)
+        for each in args
+            if isa(each, MatrixBlock)
+                push!(blocks, each)
+                push!(addrs, curr_head)
+                curr_head += nqubit(each)
+            elseif isa(each, Union{Tuple, Pair})
+                curr_head, block = each
+                push!(addrs, curr_head)
+                push!(blocks, block)
+                curr_head += nqubit(block)
+            else
+                throw(ErrorException("KronBlock only takes MatrixBlock"))
+            end
         end
+
+        KronBlock{N}(addrs, blocks)
     end
-    dest
 end
 
-# kronecker can take non-unitary operators
-# we check whether it is unitary by checking
-# each element.
-isunitary(block::KronBlock) = all(isunitary, values(block))
+function copy(k::KronBlock{N, T}) where {N, T}
+    addrs = copy(k.addrs)
+    blocks = copy(k.blocks)
+    KronBlock{N, T}(addrs, blocks)
+end
 
-#########################
-# KronBlock: matrix form
-#########################
+function similar(k::KronBlock{N, T}) where {N, T}
+    slots = zeros(N, Int)
+    addrs = similar(k.addrs)
+    blocks = similar(k.blocks)
+    KronBlock{N, T}(slots, addrs, blocks)
+end
 
-# full(block::KronBlock) = full(sparse(block))
+# some useful interface
 
-# TODO: handle empty kron block
-@inline function sparse(block::KronBlock{N, T}) where {N, T}
+addrs(k::KronBlock) = k.addrs
+blocks(k::KronBlock) = k.blocks
+
+function getindex(k::KronBlock, addr)
+    index = k.slots[addr]
+    index == 0 && throw(KeyError(addr))
+    k.blocks[index]
+end
+
+function setindex!(k::KronBlock, val, addr)
+    index = k.slots[addr]
+    index == 0 && throw(KeyError(addr))
+    k.blocks[index] = val
+end
+
+# Iterator Protocol
+
+start(k::KronBlock) = 1
+function next(k::KronBlock, st)
+    (k.addrs[st], k.blocks[st]), st + 1
+end
+
+done(k::KronBlock, st) = st > length(k)
+eltype(k::KronBlock) = Tuple{Int, MatrixBlock}
+length(k::KronBlock) = length(k.blocks)
+
+###############
+eachindex(k::KronBlock) = k.addrs
+
+function sparse(k::KronBlock{N, T}) where {N, T}
     curr_addr = 1
-    first_head_addr, first_block = first(block.kvstore)
-    if curr_addr == first_head_addr
+    first_block = first(k.blocks)
+    first_addr = first(k.addrs)
+
+    if curr_addr == first_addr
         curr_addr += nqubit(first_block)
         op = sparse(first_block)
     else
-        op = kron(speye(T, 1<<(first_head_addr - curr_addr)), sparse(first_block))
-        curr_addr = first_head_addr + nqubit(first_block)
+        op = kron(sparse(first_block), speye(T, 1 << (first_addr - curr_addr)))
+        curr_addr = first_addr + nqubit(first_block)
     end
 
-    heads = collect(keys(block.kvstore))
-    blocks = collect(values(block.kvstore))
-    for count = 2:length(heads)
-        next_head = heads[count]
-        next_block = blocks[count]
-        if curr_addr != next_head
-            op = kron(op, speye(T, 1<<(next_head - curr_addr)))
-            curr_addr = next_head
+    for count = 2:length(k.addrs)
+        next_addr = k.addrs[count]
+        next_block = k.blocks[count]
+        if curr_addr != next_addr
+            op = kron(speye(T, 1 << (next_addr - curr_addr)), op)
+            curr_addr = next_addr
         end
-        op = kron(op, sparse(next_block))
+
+        op = kron(sparse(next_block), op)
         curr_addr += nqubit(next_block)
     end
 
     if curr_addr <= N
-        op = kron(op, speye(T, 1<<(N - curr_addr + 1)))
+        op = kron(speye(T, 1 << (N - curr_addr + 1)), op)
     end
-    return op
+    op
 end
 
-####################
-# KronBlock: update!
-####################
+# Traits
+# inherits its children
 
-function dispatch!(block::KronBlock, param::Vector)
-    for each in values(block.kvstore)
-        dispatch!(each, param)
-    end
-    block
+for NAME in [
+    :isunitary,
+    :ispure,
+    :isreflexive,
+    :isunitary_hermitian,
+    :hasparameter,
+    :ishermitian,
+]
+
+@eval begin
+    $NAME(k::KronBlock) = all($NAME, k.blocks)
+end
 end
 
-function add_params!(block::KronBlock, params::Vector)
-    for each in values(block.kvstore)
-        add_params!(each, params)
-    end
-    block
-end
+function show(io::IO, k::KronBlock{N, T}) where {N, T}
+    println(io, "KronBlock{", N, ", ", T, "}")
 
-function show(io::IO, block::KronBlock{N, T}) where {N, T}
-    println(io, "KronBlock{$N, $T}")
-
-    if length(block) == 0
-        print(io, "\twith 0 blocks")
+    if length(k) == 0
+        print(io, "  with 0 blocks")
     end
 
-    it = enumerate(block.kvstore)
-    for (i, (key, val)) in it
-        print(io, "\t", key, ": ", val)
-        if i != length(block)
+    for i in eachindex(k.addrs)
+        print(io, "  ", k.addrs[i], ": ", k.blocks[i])
+        if i != endof(k.addrs)
             print(io, "\n")
         end
     end

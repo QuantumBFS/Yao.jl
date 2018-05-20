@@ -52,13 +52,8 @@ next(c::ChainBlock, st) = next(c.blocks, st)
 done(c::ChainBlock, st) = done(c.blocks, st)
 length(c::ChainBlock) = length(c.blocks)
 eltype(c::ChainBlock) = eltype(c.blocks)
-
-iterate_blocks(c::ChainBlock) = c
-
-function map!(f::Function, dest::ChainBlock, src::ChainBlock...)
-    map!(f, dest.blocks, [each.blocks for each in src]...)
-    dest
-end
+eachindex(c::ChainBlock) = eachindex(c.blocks)
+blocks(c::ChainBlock) = c.blocks
 
 # Additional Methods for Chain
 import Base: push!, append!, prepend!
