@@ -136,13 +136,44 @@ end
 
 ############### kron ######################
 import Base: kron
-function kron(A::PermuteMultiply, B::PermuteMultiply)
+function kron(A::PermuteMultiply{Ta}, B::PermuteMultiply{Tb}) where {Ta, Tb}
+     nA = size(A, 1)
+     nB = size(B, 1)
+     Tc = promote_type(Ta, Tb)
+     vals = Vector{Tc}(nB*nA)
+     perm = Vector{Int}(nB*nA)
+     for i = 1:nA
+        perm[(i-1)*nB+1:i*nB] = (A.perm[i]-1)*nB +B.perm
+        vals[(i-1)*nB+1:i*nB] = A.vals[i]*B.vals
+     end
+     PermuteMultiply(perm, vals)
 end
-function kron(A::PermuteMultiply, B::Diagonal)
+
+function kron(A::PermuteMultiply{Ta}, B::Diagonal{Tb}) where {Ta, Tb}
+    nB = size(B, 1)
+    nA = size(A, 1)
+    Tc = promote_type(Ta, Tb)
+    vals = Vector{Tc}(nB*nA)
+    perm = Vector{Int}(nB*nA)
+    for i = 1:nA
+        perm[(i-1)*nB+1:i*nB] = (A.perm[i]-1)*nB + collect(1:nB)
+        vals[(i-1)*nB+1:i*nB] = A.vals[i]*B.diag
+    end
+    PermuteMultiply(perm, vals)
 end
-function kron(A::Diagonal, B::PermuteMultiply)
+
+function kron(A::Diagonal{Ta}, B::PermuteMultiply{Tb}) where {Ta, Tb}
+     nA = size(A, 1)
+     nB = size(B, 1)
+     Tc = promote_type(Ta, Tb)
+     vals = Vector{Tc}(nB*nA)
+     perm = Vector{Int}(nB*nA)
+     for i = 1:nA
+        perm[(i-1)*nB+1:i*nB] = (i-1)*nB+B.perm
+        vals[(i-1)*nB+1:i*nB] = A.diag[i]*B.vals
+     end
+     PermuteMultiply(perm, vals)
 end
-function kron(A::PermuteMultiply, B::SparseMatrixCSC)
-end
-function kron(A::SparseMatrixCSC, B::PermuteMultiply)
-end
+
+kron(A::PermuteMultiply, B::SparseMatrixCSC) = kron(sparse(A), B)
+kron(A::SparseMatrixCSC, B::PermuteMultiply) = kron(A, sparse(B))
