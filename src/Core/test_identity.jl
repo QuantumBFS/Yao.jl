@@ -1,6 +1,7 @@
 ############################ Tests ##########################
 using Compat.Test
 include("identity.jl")
+include("permmul.jl")
 srand(2)
 
 p1 = Identity(4)

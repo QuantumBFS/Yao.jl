@@ -5,6 +5,7 @@ include("permmul.jl")
 p1 = PermuteMultiply([1,4,2,3],[0.1, 0.2, 0.4im, 0.5])
 p2 = PermuteMultiply([2,1,4,3],[0.1, 0.2, 0.4, 0.5])
 p3 = PermuteMultiply([4,1,2,3],[0.5, 0.4im, 0.3, 0.2])
+sp = sprand(4, 4, 0.3)
 v = [0.5, 0.3im, 0.2, 1.0]
 
 @testset "basic" begin
@@ -68,4 +69,7 @@ end
     Dv = Diagonal(v)
     @test kron(p1, Dv) == kron(full(p1), full(Dv))
     @test kron(Dv, p1) == kron(full(Dv), full(p1))
+
+    @test kron(p1, sp) == kron(full(p1), full(sp))
+    @test kron(sp, p1) == kron(full(sp), full(p1))
 end
