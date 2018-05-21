@@ -55,6 +55,7 @@ function sparse(M::PermuteMultiply{T}) where {T}
     sparse(collect(1:n), M.perm, M.vals, n, n)
 end
 
+import Base: show
 function show(io::IO, M::PermuteMultiply)
     println("PermuteMultiply")
     for item in zip(M.perm, M.vals)
@@ -141,26 +142,49 @@ import Base: kron
 function kron(A::StridedMatrix{Tv}, B::PermuteMultiply{Tb}) where {Tv, Tb}
     mA, nA = size(A)
     nB = size(B, 1)
-    C = zeros(promote_type(Tv, Tb), mA*nB, nA*nB)
+    perm = sortperm(B.perm)
+    nzval = Vector{promote_type(Tv, Tb)}(mA*nA*nB)
+    rowval = Vector{Int}(mA*nA*nB)
+    colptr = collect(1:mA:nA*nB*mA+1)
+    z = 1
     @inbounds for j = 1:nA
-        for i = 1:mA
-            val = A[i,j]
-            @simd for k = 1:nB
-                C[(i-1)*nB+k, (j-1)*nB+k] = val*B.diag[k]  # merge
+        @inbounds for j2 = 1:nB
+            p2 = perm[j2]
+            val2 = B.vals[p2]
+            ir = p2
+            @inbounds @simd for i = 1:mA
+                nzval[z] = A[i, j]*val2  # merge
+                rowval[z] = ir
+                z += 1
+                ir += nB
             end
         end
     end
-    C
+    SparseMatrixCSC(mA*nB, nA*nB, colptr, rowval, nzval)
 end
 
-function kron(A::PermuteMultiply{Ta}, B::StridedMatrix{Tv}) where {Tv, Ta}
+function kron(A::PermuteMultiply{Ta}, B::StridedMatrix{Tb}) where {Tb, Ta}
     mB, nB = size(B)
     nA = size(A, 1)
-    C = zeros(promote_type(Tv, Ta), mB*nA, nB*nA)
-    @simd for i = 1:nA
-        @inbounds C[(i-1)*mB+1:i*mB, (i-1)*nB+1:i*nB] = B*A.diag[i]  #!!!!!!
+    perm = sortperm(A.perm)
+    nzval = Vector{promote_type(Ta, Tb)}(mB*nA*nB)
+    rowval = Vector{Int}(mB*nA*nB)
+    colptr = collect(1:mB:nA*nB*mB+1)
+    z = 1
+    @inbounds for j = 1:nA
+        colbase = (j-1)*nB
+        p1 = perm[j]
+        val2 = A.vals[p1]
+        ir = (p1-1)*mB
+        @inbounds for j2 = 1:nB
+            @inbounds @simd for i2 = 1:mB
+                nzval[z] = B[i2, j2]*val2  # merge
+                rowval[z] = ir+i2
+                z += 1
+            end
+        end
     end
-    C
+    SparseMatrixCSC(nA*mB, nA*nB, colptr, rowval, nzval)
 end
 
 function kron(A::PermuteMultiply{Ta}, B::PermuteMultiply{Tb}) where {Ta, Tb}
@@ -170,7 +194,11 @@ function kron(A::PermuteMultiply{Ta}, B::PermuteMultiply{Tb}) where {Ta, Tb}
     vals = kron(A.vals, B.vals)
     perm = Vector{Int}(nB*nA)
     @inbounds for i = 1:nA
-        perm[(i-1)*nB+1:i*nB] = (A.perm[i]-1)*nB +B.perm
+        start = (i-1)*nB
+        permAi = (A.perm[i]-1)*nB
+        @inbounds @simd for j = 1:nB
+            perm[start+j] = permAi +B.perm[j]
+        end
     end
     PermuteMultiply(perm, vals)
 end
@@ -187,17 +215,17 @@ function kron(A::PermuteMultiply{Ta}, B::SparseMatrixCSC{Tb}) where {Ta, Tb}
     rowval = Vector{Int}(nA*nV)
     colptr = Vector{Int}(nA*nB+1)
     colptr[1] = 1
-    @inbounds for i in 1:nA
+    @inbounds @simd for i in 1:nA
         start_row = (i-1)*nV
         start_ri = (perm[i]-1)*mB
         v0 = A.vals[perm[i]]
-        @simd for j = 1:nV
+        @inbounds @simd for j = 1:nV
             nzval[start_row+j] = B.nzval[j]*v0
             rowval[start_row+j] = B.rowval[j] + start_ri
         end
         start_col = (i-1)*nB+1
         start_ci = (i-1)*nV
-        @simd for j = 1:nB
+        @inbounds @simd for j = 1:nB
             colptr[start_col+j] = B.colptr[j+1] + start_ci
         end
     end
@@ -217,11 +245,13 @@ function kron(A::SparseMatrixCSC{T}, B::PermuteMultiply{Tb}) where {T, Tb}
     @inbounds for i in 1:nA
         rstart = A.colptr[i]
         rend = A.colptr[i+1]-1
-        @simd for k in 1:nB
+        @inbounds for k in 1:nB
             irow = perm[k]
-            for r in rstart:rend
-                rowval[z] = (A.rowval[r]-1)*nB+irow
-                nzval[z] = A.nzval[r]*B.vals[irow]
+            bval = B.vals[irow]
+            irow_nB = irow - nB
+            @inbounds @simd for r in rstart:rend
+                rowval[z] = A.rowval[r]*nB+irow_nB
+                nzval[z] = A.nzval[r]*bval
                 z+=1
             end
             colptr[(i-1)*nB+k+1] = z
@@ -232,31 +262,7 @@ end
 
 ####### diagonal kron ########
 kron(A::Diagonal, B::Diagonal) = Diagonal(kron(A.diag, B.diag))
-
-function kron(A::StridedMatrix{Tv}, B::Diagonal{Tb}) where {Tv, Tb}
-    mA, nA = size(A)
-    nB = size(B, 1)
-    C = zeros(promote_type(Tv, Tb), mA*nB, nA*nB)
-    @inbounds for j = 1:nA
-        for i = 1:mA
-            val = A[i,j]
-            @simd for k = 1:nB
-                C[(i-1)*nB+k, (j-1)*nB+k] = val*B.diag[k]  # merge
-            end
-        end
-    end
-    C
-end
-
-function kron(A::Diagonal{Ta}, B::StridedMatrix{Tv}) where {Tv, Ta}
-    mB, nB = size(B)
-    nA = size(A, 1)
-    C = zeros(promote_type(Tv, Ta), mB*nA, nB*nA)
-    @simd for i = 1:nA
-        @inbounds C[(i-1)*mB+1:i*mB, (i-1)*nB+1:i*nB] = B*A.diag[i]  #!!!!!!
-    end
-    C
-end
-
+kron(A::StridedMatrix, B::Diagonal) = kron(A, PermuteMultiply(B))
+kron(A::Diagonal, B::StridedMatrix) = kron(PermuteMultiply(A), B)
 kron(A::Diagonal, B::SparseMatrixCSC) = kron(PermuteMultiply(A), B)
 kron(A::SparseMatrixCSC, B::Diagonal) = kron(A, PermuteMultiply(B))

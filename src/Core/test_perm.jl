@@ -61,15 +61,3 @@ end
     @test p3 == PermuteMultiply([4,1,2,3],[0.5, 0.4im, 0.3, 0.2])
     @test v == [0.5, 0.3im, 0.2, 1.0]
 end
-
-@testset "kron" begin
-    @test kron(p1, p2) == kron(full(p1), full(p2))
-
-    # Diagonal matrices
-    Dv = Diagonal(v)
-    @test kron(p1, Dv) == kron(full(p1), full(Dv))
-    @test kron(Dv, p1) == kron(full(Dv), full(p1))
-
-    @test kron(p1, sp) == kron(full(p1), full(sp))
-    @test kron(sp, p1) == kron(full(sp), full(p1))
-end

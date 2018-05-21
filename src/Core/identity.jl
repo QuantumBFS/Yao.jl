@@ -1,3 +1,4 @@
+include("permmul.jl")
 import Base: getindex, size, println
 struct Identity{Tv} <: AbstractMatrix{Tv}
     n::Int
@@ -68,7 +69,6 @@ for func in (:At_mul_B, :At_mul_Bt, :A_mul_Bt, :Ac_mul_B, :A_mul_Bc, :Ac_mul_Bc)
     @eval begin
         import Base: $func
         @generated ($func)(args...) = (:*)(args...)
-        #($func)(args...) = (*)(args...)
     end
 end
 
@@ -79,41 +79,93 @@ end
 import Base: kron
 
 kron(A::Identity{Ta}, B::Identity{Tb}) where {Ta, Tb}= Identity{promote_type(Ta, Tb)}(A.n*B.n)
-kron(A::Identity, B::Diagonal{Tb}) where Tb = Diagonal{Tb}(repeat(B.diag, outer=A.n))
-kron(B::Diagonal{Tb}, A::Identity) where Tb = Diagonal{Tb}(repeat(B.diag, inner=A.n))
+function irepv(v::AbstractArray{Tv}, n::Int) where Tv
+    nV = length(v)
+    res = Vector{Tv}(nV*n)
+    @inbounds for j = 1:nV
+        vj = v[j]
+        base = (j-1)*n
+        @inbounds @simd for i = 1:n
+            res[base+i] = vj
+        end
+    end
+    res
+end
+function orepv(v::AbstractArray{Tv}, n::Int) where Tv
+    nV = length(v)
+    res = Vector{Tv}(nV*n)
+    @inbounds for i = 1:n
+        base = (i-1)*nV
+        @inbounds @simd for j = 1:nV
+            res[base+j] = v[j]
+        end
+    end
+    res
+end
+kron(A::Identity, B::Diagonal) = Diagonal(orepv(B.diag, A.n))
+kron(B::Diagonal, A::Identity) = Diagonal(irepv(B.diag, A.n))
 
-function kron(A::StridedMatrix{Tv}, B::Identity) where Tv
+function kron(A::AbstractMatrix{Tv}, B::Identity) where Tv
     mA, nA = size(A)
     nB = B.n
-    C = zeros(Tv, mA*nB, nA*nB)
+    nzval = Vector{Tv}(nB*mA*nA)
+    rowval = Vector{Int}(nB*mA*nA)
+    colptr = collect(1:mA:nB*mA*nA+1)
     @inbounds for j = 1:nA
-        for i = 1:mA
-            val = A[i,j]
-            @inbounds @simd for k = 1:nB
-                C[(i-1)*nB+k, (j-1)*nB+k] = val
+        source = A[:,j]
+        startbase = (j-1)*nB*mA - mA
+        @inbounds for j2 = 1:nB
+            start = startbase + j2*mA
+            row = j2-nB
+            @inbounds @simd for i = 1:mA
+                nzval[start+i] = source[i]
+                rowval[start+i] = row+nB*i
             end
         end
     end
-    C
+    SparseMatrixCSC(mA*nB, nA*nB, colptr, rowval, nzval)
 end
 
-function kron(A::Identity, B::StridedMatrix{Tv}) where Tv
-    mB, nB = size(B)
+function kron(A::Identity, B::AbstractMatrix{Tv}) where Tv
     nA = A.n
-    C = zeros(Tv, mB*nA, nB*nA)
-    @inbounds @simd for i = 1:nA
-        C[(i-1)*mB+1:i*mB, (i-1)*nB+1:i*nB] = B
+    mB, nB = size(B)
+    rowval = Vector{Int}(nB*mB*nA)
+    nzval = Vector{Tv}(nB*mB*nA)
+    @inbounds for j in 1:nA
+        r0 = (j-1)*mB
+        @inbounds for j2 in 1:nB
+            start = ((j-1)*nB+j2-1)*mB
+            @inbounds @simd for i in 1:mB
+                rowval[start+i] = r0+i
+                nzval[start+i] = B[i,j2]
+            end
+        end
     end
-    C
+    colptr = collect(1:mB:nB*mB*nA+1)
+    SparseMatrixCSC(mB*nA, nA*nB, colptr, rowval, nzval)
 end
 
-function kron(A::Identity, B::SparseMatrixCSC)
+function kron(A::Identity, B::SparseMatrixCSC{T}) where T
     nA = A.n
     mB, nB = size(B)
     nV = nnz(B)
-    nzval = repeat(B.nzval, outer=nA)
-    rowval = vcat([B.rowval+(i-1)*mB for i in 1:nA]...)
-    colptr = vcat([B.colptr[(i==1?1:2):end]+(i-1)*nV for i in 1:nA]...)
+    nzval = Vector{T}(nA*nV)
+    rowval = Vector{Int}(nA*nV)
+    colptr = Vector{Int}(nB*nA+1)
+    nzval = Vector{T}(nA*nV)
+    colptr[1] = 1
+    @inbounds for i = 1:nA
+        r0 = (i-1)*mB
+        start = nV*(i-1)
+        @inbounds @simd for k = 1:nV
+            rowval[start+k] = B.rowval[k]+r0
+            nzval[start+k] = B.nzval[k]
+        end
+        colbase = (i-1)*nB
+        @inbounds @simd for j=2:nB+1
+            colptr[colbase+j] = B.colptr[j]+start
+        end
+    end
     SparseMatrixCSC(mB*nA, nB*nA, colptr, rowval, nzval)
 end
 
@@ -122,28 +174,61 @@ function kron(A::SparseMatrixCSC{T}, B::Identity) where T
     mA, nA = size(A)
     nV = nnz(A)
     rowval = Vector{Int}(nB*nV)
+    colptr = Vector{Int}(nA*nB+1)
     nzval = Vector{T}(nB*nV)
-    z=0
+    z=1
+    colptr[1] = 1
     @inbounds for i in 1:nA
         rstart = A.colptr[i]
         rend = A.colptr[i+1]-1
-        row = A.rowval[rstart:rend]
-        nzv = A.nzval[rstart:rend]
-        nrow = length(row)
-        @inbounds @simd for k in 1:nB
-            rowval[z+1:z+nrow] = (row-1)*nB+k
-            nzval[z+1:z+nrow] = nzv
-            z+=nrow
+        colbase = (i-1)*nB+1
+        @inbounds for k in 1:nB
+            irow_nB = k - nB
+            @inbounds @simd for r in rstart:rend
+                rowval[z] = A.rowval[r]*nB+irow_nB
+                nzval[z] = A.nzval[r]
+                z+=1
+            end
+            colptr[colbase+k] = z
         end
     end
-    nl = diff(A.colptr)
-    colptr = prepend!(cumsum(repeat(nl, inner=nB))+1, 1)
     SparseMatrixCSC(mA*nB, nA*nB, colptr, rowval, nzval)
 end
 
+function kron(A::PermuteMultiply{T}, B::Identity) where T
+    nA = size(A, 1)
+    nB = size(B, 1)
+    vals = Vector{T}(nB*nA)
+    perm = Vector{Int}(nB*nA)
+    @inbounds for i = 1:nA
+        start = (i-1)*nB
+        permAi = (A.perm[i]-1)*nB
+        val = A.vals[i]
+        @inbounds @simd for j = 1:nB
+            perm[start+j] = permAi + j
+            vals[start+j] = val
+        end
+    end
+    PermuteMultiply(perm, vals)
+end
+
+function kron(A::Identity, B::PermuteMultiply{T}) where T
+    nA = size(A, 1)
+    nB = size(B, 1)
+    perm = Vector{Int}(nB*nA)
+    vals = Vector{T}(nB*nA)
+    @inbounds for i = 1:nA
+        start = (i-1)*nB
+        @inbounds @simd for j = 1:nB
+            perm[start+j] = start +B.perm[j]
+            vals[start+j] = B.vals[j]
+        end
+    end
+    PermuteMultiply(perm, vals)
+end
 ######## plus minus diagonal matrix ########
 
 ####### tags #########
 import Base: ishermitian
 ishermitian(D::Identity) = true
-
+II(n::Int) = Identity(n)

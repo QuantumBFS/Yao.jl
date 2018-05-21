@@ -5,30 +5,28 @@ include("permmul.jl")
 srand(2)
 
 p1 = Identity(4)
-p2 = sprand(Complex128, 4,4, 0.5)
-p3 = rand(Complex128, 4,4)
+sp = sprand(Complex128, 4,4, 0.5)
+ds = rand(Complex128, 4,4)
+pm = PermuteMultiply([2,3,4,1], randn(4))
 v = [0.5, 0.3im, 0.2, 1.0]
 Dv = Diagonal(v)
 
 @testset "kron" begin
-    for target in [p1, p2, p3, Dv]
-        lres = kron(p1, target)
-        rres = kron(target, p1)
-        @test lres == kron(full(p1), target)
-        @test rres == kron(target, full(p1))
-        @test typeof(lres) == typeof(target)
-        @test typeof(rres) == typeof(target)
-    end
-end
-
-@testset "kron-id" begin
-    for target in [p2, p3, Dv]
-        lres = kron(Dv, target)
-        rres = kron(target, Dv)
-        @test lres == kron(full(Dv), target)
-        @test rres == kron(target, full(Dv))
-        @test typeof(lres) == typeof(target)
-        @test typeof(rres) == typeof(target)
+    for source in [p1, sp, ds, Dv, pm]
+        for target in [p1, sp, ds, Dv, pm]
+            lres = kron(source, target)
+            rres = kron(target, source)
+            flres = kron(full(source), full(target))
+            frres = kron(full(target), full(source))
+            @test lres == flres
+            @test rres == frres
+            @test eltype(lres) == eltype(flres)
+            @test eltype(rres) == eltype(frres)
+            if !(target === ds && target === ds)
+                @test !issubtype(typeof(lres), StridedMatrix)
+                @test !issubtype(typeof(rres), StridedMatrix)
+            end
+        end
     end
 end
 
@@ -68,9 +66,9 @@ end
 end
 
 @testset "mul" begin
-    @test p2*p1 == full(p2)*p1
+    @test sp*p1 == full(sp)*p1
 
-    for target in [p1, p2, p3, v, Dv]
+    for target in [p1, sp, ds, v, Dv]
         lres = p1*target
         @test lres == target
         @test typeof(lres) == typeof(target)
@@ -83,3 +81,4 @@ end
     end
 end
 
+include("permmul.jl")
