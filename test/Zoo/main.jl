@@ -66,7 +66,7 @@ for i in 1:maxiter
     loss = loss_function(params, circuit, kernel, ptrain)
     println("$i step, loss = ", loss)
 
-    add_params!(circuit, -learning_rate*gradient)
+    dispatch!(+, circuit, -learning_rate*gradient)
     empty!(circuit)
 end
 

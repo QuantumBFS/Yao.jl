@@ -12,13 +12,13 @@ const target = readdlm("wave_complex.dat")[:, 1] + im * readdlm("wave_complex.da
 
 cnot_pair = [
     (2, 8),
-    # (3, 9),
-    # (5, 8),
-    # (6, 4),
-    # (7, 1),
-    # (7, 4),
-    # (7, 8),
-    # (9, 6),
+    (3, 9),
+    (5, 8),
+    (6, 4),
+    (7, 1),
+    (7, 4),
+    (7, 8),
+    (9, 6),
 ]
 
 function entangler(n, pairs)
@@ -40,10 +40,10 @@ for i = 1:9
     push!(layers, layer(nbit))
 end
 
+push!(layers, cache(entangler(nbit, cnot_pair)))
+
 push!(layers, roll(nbit, chain(rot(:Z), rot(:X))))
 circuit = chain(layers...)
+
 dispatch!(circuit, params)
 display(vec(state(circuit(zero_state(nbit))))[1:20])
-
-# dispatch!(layer(9)(zero_state(nbit)), params)
-# display(state(layer1(zero_state(nbit))))
