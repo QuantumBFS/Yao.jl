@@ -39,38 +39,22 @@ nonzeros(M::Identity{T}) where T = ones(T, M.n)
 ####### linear algebra  ######
 inv(M::Identity) = M
 det(M::Identity) = 1
+diag(M::Identity{T}) where T = ones{T}(M.n)
 logdet(M::Identity) = 0
 
 ####### multiply ###########
-Mats = Union{SparseMatrixCSC, StridedVecOrMat}
-function (*)(A::Identity, B::Mats)
-    size(A, 2) == size(B, 1) || throw(DimensionMismatch())
-    B
+for T in [:AbstractVecOrMat, :SparseMatrixCSC, :PermuteMultiply, :Diagonal, :StridedMatrix]
+    @eval (*)(A::Identity, B::$T) = size(A, 2) == size(B, 1)?B:throw(DimensionMismatch())
+    @eval (*)(A::$T, B::Identity) = size(A, ndims(A)) == size(B, 1)?A:throw(DimensionMismatch())
 end
-function (*)(A::Mats, B::Identity)
-    size(A, ndims(A)) == size(B, 1) || throw(DimensionMismatch())
-    A
-end
-function (*)(A::Identity, B::Identity)
-    size(A, 2) == size(B, 1) || throw(DimensionMismatch())
-    B
-end
+(*)(A::Identity, B::Identity) = size(A, 2) == size(B, 1)?A:throw(DimensionMismatch())
 
-function (*)(A::Identity, B::Diagonal)
-    size(A, 2) == size(B, 1) || throw(DimensionMismatch())
-    B
-end
-function (*)(A::Diagonal, B::Identity)
-    size(A, ndims(A)) == size(B, 1) || throw(DimensionMismatch())
-    A
-end
-
-for func in (:At_mul_B, :At_mul_Bt, :A_mul_Bt, :Ac_mul_B, :A_mul_Bc, :Ac_mul_Bc)
-    @eval begin
-        import Base: $func
-        @generated ($func)(args...) = (:*)(args...)
-    end
-end
+#for func in (:At_mul_B, :At_mul_Bt, :A_mul_Bt, :Ac_mul_B, :A_mul_Bc, :Ac_mul_Bc)
+#    @eval begin
+#        import Base: $func
+#        @generated ($func)(args...) = (:*)(args...)
+#    end
+#end
 
 #TODO
 # since 0.7 transpose is different, we don't take transpose serious here.
@@ -79,31 +63,8 @@ end
 import Base: kron
 
 kron(A::Identity{Ta}, B::Identity{Tb}) where {Ta, Tb}= Identity{promote_type(Ta, Tb)}(A.n*B.n)
-function irepv(v::AbstractArray{Tv}, n::Int) where Tv
-    nV = length(v)
-    res = Vector{Tv}(nV*n)
-    @inbounds for j = 1:nV
-        vj = v[j]
-        base = (j-1)*n
-        @inbounds @simd for i = 1:n
-            res[base+i] = vj
-        end
-    end
-    res
-end
-function orepv(v::AbstractArray{Tv}, n::Int) where Tv
-    nV = length(v)
-    res = Vector{Tv}(nV*n)
-    @inbounds for i = 1:n
-        base = (i-1)*nV
-        @inbounds @simd for j = 1:nV
-            res[base+j] = v[j]
-        end
-    end
-    res
-end
-kron(A::Identity, B::Diagonal) = Diagonal(orepv(B.diag, A.n))
-kron(B::Diagonal, A::Identity) = Diagonal(irepv(B.diag, A.n))
+kron(A::Identity, B::Diagonal) = Diagonal(orepeat(B.diag, A.n))
+kron(B::Diagonal, A::Identity) = Diagonal(irepeat(B.diag, A.n))
 
 function kron(A::AbstractMatrix{Tv}, B::Identity) where Tv
     mA, nA = size(A)

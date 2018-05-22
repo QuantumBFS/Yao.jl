@@ -16,7 +16,6 @@ for A in mats
     bg = BenchmarkGroup()
     for B in mats
         if !(A===B===ds)
-            #bg["$(typeof(A))-$(typeof(B))"] = @benchmarkable kron($A, $B)
             println("=================== $(typeof(A))-$(typeof(B)) ====================")
             display(@benchmark kron($A, $B))
             println()
@@ -24,7 +23,3 @@ for A in mats
     end
     display(run(bg, verbose=true))
 end
-
-# TODO
-# 1. I - PM
-# 2. A - I/PM/D
