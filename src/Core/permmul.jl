@@ -23,6 +23,16 @@ end
 
 PermuteMultiply(dmat::Diagonal) = PermuteMultiply(collect(1:size(dmat, 1)), dmat.diag)
 
+function PermuteMultiply(ds::AbstractMatrix)
+    i,j,v = findnz(ds)
+    j == collect(1:size(ds, 2)) || throw(ArgumentError())
+    order = invperm(i)
+    PermuteMultiply(order, v[order])
+end
+
+import Base: convert
+convert(::Type{PermuteMultiply{T}}, B::PermuteMultiply) where T = PermuteMultiply(B.perm, T.(B.vals))
+
 ################# Matrix Inherence ##################
 # size, getindex 
 import Base: size, getindex, sparse, full
@@ -55,7 +65,7 @@ pmrand(n::Int) = PermuteMultiply(randperm(n), randn(n))
 
 function sparse(M::PermuteMultiply{T}) where {T}
     n = size(M, 1)
-    sparse(collect(1:n), M.perm, M.vals, n, n)
+    dropzeros(sparse(collect(1:n), M.perm, M.vals, n, n))
 end
 
 import Base: show

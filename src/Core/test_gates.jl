@@ -1,7 +1,7 @@
 using Compat.Test
 include("gates.jl")
 
-@testset "basicgate" begin
+@testset "basic gate" begin
     # check matrixes
     for (gate, MAT) in [
         (xgate, [0 1;1 0]),

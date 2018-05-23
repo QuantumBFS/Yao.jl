@@ -1,4 +1,3 @@
-include("permmul.jl")
 import Base: getindex, size, println
 struct Identity{Tv} <: AbstractMatrix{Tv}
     n::Int
@@ -19,7 +18,7 @@ import Base: convert
 convert(::Type{Identity{T}}, B::Identity) where T = Identity{T}(B.n)
 
 ####### basic operations #######
-import Base: transpose, conj, copy, real, ctranspose, imag, transpose!, transpose, ctranspose!
+import Base: transpose, conj, copy, real, ctranspose, imag, transpose!, transpose
 for func in (:conj, :real, :ctranspose, :transpose, :copy)
     @eval ($func)(M::Identity{T}) where T = Identity{T}(M.n)
 end
@@ -29,20 +28,14 @@ end
 imag(M::Identity{T}) where T = Diagonal(zeros(T,M.n))
 
 ####### basic mathematic operations ######
-import Base: *, /, ==, +, -
+import Base: *, /, ==
 *(A::Identity{T}, B::Number) where T = Diagonal(fill(promote_type(T, eltype(B))(B), A.n))
 *(B::Number, A::Identity{T}) where T = Diagonal(fill(promote_type(T, eltype(B))(B), A.n))
 /(A::Identity{T}, B::Number) where T = Diagonal(fill(promote_type(T, eltype(B))(1/B), A.n))
 ==(A::Identity, B::Identity) = A.n == B.n
-IDP = Union{Diagonal, PermuteMultiply, Identity}
-for op in [:+, :-]
-    @eval ($op)(A::IDP, B::SparseMatrixCSC) = ($op)(sparse(A), B)
-    @eval ($op)(B::SparseMatrixCSC, A::IDP) = ($op)(B, sparse(A))
-    @eval ($op)(A::IDP, B::IDP) = ($op)(sparse(A), sparse(B))
-end
 
 ####### sparse matrix ######
-import Base: nnz, nonzeros, inv, det, diag, logdet
+import Base: nnz, nonzeros, inv
 nnz(M::Identity) = M.n
 nonzeros(M::Identity{T}) where T = ones(T, M.n)
 
@@ -58,16 +51,6 @@ for T in [:AbstractVecOrMat, :SparseMatrixCSC, :PermuteMultiply, :Diagonal, :Str
     @eval (*)(A::$T, B::Identity) = size(A, ndims(A)) == size(B, 1)?A:throw(DimensionMismatch())
 end
 (*)(A::Identity, B::Identity) = size(A, 2) == size(B, 1)?A:throw(DimensionMismatch())
-
-#for func in (:At_mul_B, :At_mul_Bt, :A_mul_Bt, :Ac_mul_B, :A_mul_Bc, :Ac_mul_Bc)
-#    @eval begin
-#        import Base: $func
-#        @generated ($func)(args...) = (:*)(args...)
-#    end
-#end
-
-#TODO
-# since 0.7 transpose is different, we don't take transpose serious here.
 
 ####### kronecker product ###########
 import Base: kron
