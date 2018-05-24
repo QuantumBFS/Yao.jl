@@ -1,4 +1,9 @@
 using Compat.Test
 
-@testset "primitives" include("Primitive.jl")
-@testset "composites" include("Composite.jl")
+@testset "primitives" begin
+include("Primitive.jl")
+end
+
+@testset "composites" begin
+include("Composite.jl")
+end

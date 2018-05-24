@@ -36,9 +36,9 @@ abstract type AbstractBlock end
 export nqubit, ninput, noutput, isunitary, ispure, nparameters
 import Base: ishermitian
 
-nqubit(::AbstractBlock) = AnySize
-ninput(::AbstractBlock) = AnySize
-noutput(::AbstractBlock) = AnySize
+# nqubit(::AbstractBlock) = AnySize
+# ninput(::AbstractBlock) = AnySize
+# noutput(::AbstractBlock) = AnySize
 isunitary(::AbstractBlock) = false
 ispure(::AbstractBlock) = false
 isreflexive(::AbstractBlock) = false
@@ -60,6 +60,6 @@ apply a `block` to a register `reg` with or without a cache signal.
 """
 function apply! end
 
+dispatch!(block::AbstractBlock, params...) = dispatch!((θ, x)->x, block, params...)
 ### do nothing by default
-dispatch!(block::AbstractBlock, params...) = block
 dispatch!(f::Function, block::AbstractBlock, params...) = block

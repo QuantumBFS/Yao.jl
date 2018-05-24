@@ -47,27 +47,14 @@ end
 # TODO: optimize for blocks full of parameters
 
 
-"""
-    dispatch!(block, vector)
-
-dispatch a vector of parameters to this composite block according to
-each sub-block's number of parameters.
-
-to update parameters with certain rules, see `dispatch!(f, block, params)`
-"""
-dispatch!(c::CompositeBlock, params::Vector) = dispatch!((o, n)->n, c, params...)
-
-"""
-    dispatch!(block, params...)
-
-dispatch parameters according to parameterized blocks' order.
-"""
-dispatch!(c::CompositeBlock, params...) = dispatch!((o, n)->n, c, params...)
 
 """
     dispatch!(f, c, params) -> c
 
 dispatch parameters and tweak it according to callback function `f(original, parameter)->new`
+
+dispatch a vector of parameters to this composite block according to
+each sub-block's number of parameters.
 """
 function dispatch!(f::Function, c::CompositeBlock, params::Vector)
     count = 0

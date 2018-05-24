@@ -1,6 +1,17 @@
 using Compat.Test
 
-@testset "chain block" include("ChainBlock.jl")
-@testset "kron block" include("KronBlock.jl")
-@testset "control block" include("Control.jl")
-@testset "roller block" include("Roller.jl")
+@testset "chain block" begin
+    include("ChainBlock.jl")
+end
+
+@testset "kron block" begin
+    include("KronBlock.jl")
+end
+
+@testset "control block" begin
+    include("Control.jl")
+end
+
+@testset "roller block" begin
+    include("Roller.jl")
+end

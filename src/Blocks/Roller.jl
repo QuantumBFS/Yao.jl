@@ -7,8 +7,9 @@ method to evaluate them.
 struct Roller{N, M, T, BT <: Tuple} <: CompositeBlock{N, T}
     blocks::BT
 
-    function Roller{N, T}(blocks::NTuple{M, BT}) where {N, T, M, BT <: MatrixBlock}
-        new{N, M, T, NTuple{M, BT}}(blocks)
+    function Roller{N, T}(blocks::Tuple) where {N, T}
+        M = length(blocks)
+        new{N, M, T, typeof(blocks)}(blocks)
     end
 
     function Roller{N}(block::MatrixBlock{K, T}) where {N, K, T}

@@ -13,9 +13,9 @@ abstract type that all block with a matrix form will subtype from.
 """
 abstract type MatrixBlock{N, T} <: AbstractBlock end
 
-nqubit(::Type{T}) where {N, T <: MatrixBlock{N}} = N
-ninput(::Type{T}) where {N, T <: MatrixBlock{N}} = N
-noutput(::Type{T}) where {N, T <: MatrixBlock{N}} = N
+nqubit(::MatrixBlock{N}) where N = N
+ninput(::MatrixBlock{N}) where N = N
+noutput(::MatrixBlock{N}) where N = N
 
 ispure(block::MatrixBlock) = true
 isunitary(block::MatrixBlock) = true
