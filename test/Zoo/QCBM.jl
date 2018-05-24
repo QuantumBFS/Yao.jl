@@ -25,7 +25,7 @@ end
 
 function run_circuit(circuit::AbstractBlock, params::Vector, signal::Int=3)
     psi = zero_state(nqubit(circuit))
-    dispatch!(psi, params)
+    dispatch!(circuit, params)
     vec(state(circuit(psi)))
 end
 

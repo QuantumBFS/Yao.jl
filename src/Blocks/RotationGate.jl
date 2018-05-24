@@ -17,19 +17,13 @@ full(gate::RotationGate{GateType{:Z}, T}) where T =
 
 copy(block::RotationGate{GT, T}) where {GT, T} = RotationGate{GT, T}(block.theta)
 
-# TODO: dispatch a vector
-dispatch!(block::RotationGate{GT, T}, theta::T) where {GT, T} = (block.theta = theta; block)
-dispatch!(f::Function, block::RotationGate{GT, T}, theta::T) where {GT, T} = (block.theta = f(block.theta, theta); block)
-
-function dispatch!(block::RotationGate, theta::Vector)
-    block.theta = pop!(theta)
+function dispatch!(f::Function, block::RotationGate{GT, T}, theta::T) where {GT, T}
+    block.theta = f(block.theta, theta)
     block
 end
 
-function dispatch!(f::Function, block::RotationGate, theta::Vector)
-    block.theta = f(block.theta, pop!(theta))
-    block
-end
+# Properties
+nparameters(::RotationGate) = 1
 
 ##################
 # Pretty Printing

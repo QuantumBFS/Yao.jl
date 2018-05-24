@@ -1,4 +1,6 @@
-include("Core.jl")
-include("Primitive.jl")
-include("Compose.jl")
-include("Measure.jl")
+using Compat.Test
+
+@testset "matrix block" include("MatrixBlock.jl")
+@testset "concentrator" include("Concentrator.jl")
+@testset "sequence" include("Sequence.jl")
+@testset "measure" include("Measure.jl")

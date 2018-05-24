@@ -1,7 +1,7 @@
 """
     KronBlock{N, T} <: CompositeBlock
 
-    composite block that combine blocks by kronecker product.
+composite block that combine blocks by kronecker product.
 """
 struct KronBlock{N, T} <: CompositeBlock{N, T}
     slots::Vector{Int}

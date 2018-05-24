@@ -4,22 +4,21 @@
 map a block type to all lines and use a rolling
 method to evaluate them.
 """
-struct Roller{N, M, T, BT} <: CompositeBlock{N, T}
-    blocks::NTuple{M, BT}
-end
+struct Roller{N, M, T, BT <: Tuple} <: CompositeBlock{N, T}
+    blocks::BT
 
-function Roller(blocks::NTuple{M, BT}) where {M, K, T, BT <: MatrixBlock{K, T}}
-    N = M * K
-    Roller{N, M, T, BT}(blocks)
-end
+    function Roller{N, T}(blocks::NTuple{M, BT}) where {N, T, M, BT <: MatrixBlock}
+        new{N, M, T, NTuple{M, BT}}(blocks)
+    end
 
-function Roller(n, block::MatrixBlock{K, T}) where {K, T}
-    M = Int(n / K) # this will cause inexact error
-    Roller{n, M, T, typeof(block)}(ntuple(x->deepcopy(block), Val{M}))
+    function Roller{N}(block::MatrixBlock{K, T}) where {N, K, T}
+        M = Int(N / K)
+        new{N, M, T, NTuple{M, typeof(block)}}(ntuple(x->deepcopy(block), Val{M}))
+    end
 end
 
 function copy(m::Roller{N, M, T, BT}) where {N, M, T, BT}
-    Roller{N, M, T, BT}(ntuple(x->copy(m.blocks[x]), Val{M}))
+    Roller{N, T}(ntuple(x->copy(m.blocks[x]), Val{M}))
 end
 
 getindex(m::Roller, i) = getindex(m.blocks, i)
@@ -28,6 +27,7 @@ next(m::Roller, st) = next(m.blocks, st)
 done(m::Roller, st) = done(m.blocks, st)
 eltype(m::Roller) = eltype(m.blocks)
 length(m::Roller) = length(m.blocks)
+blocks(m::Roller) = m.blocks
 
 isunitary(m::Roller) = all(isunitary, m.blocks)
 
@@ -38,20 +38,6 @@ function sparse(m::Roller{N, M}) where {N, M}
     end
 
     return op
-end
-
-function dispatch!(m::Roller{N, M}, params::NTuple{M, T}) where {N, M, T}
-    for (block, param) in zip(m.blocks, params)
-        dispatch!(block, param)
-    end
-    m
-end
-
-function dispatch!(m::Roller, params::Vector)
-    for each in m.blocks
-        dispatch!(each, params)
-    end
-    m
 end
 
 function apply!(reg::Register{B}, m::Roller{N, M}) where {B, N, M}

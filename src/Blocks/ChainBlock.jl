@@ -1,25 +1,30 @@
 """
-    ChainBlock
+    ChainBlock{N, T} <: CompositeBlock{N, T}
 
 `ChainBlock` is a basic construct tool to create
-user defined blocks horizontically.
+user defined blocks horizontically. It is a `Vector`
+like composite type.
 """
 struct ChainBlock{N, T} <: CompositeBlock{N, T}
-    blocks::Vector{Any}
-end
+    blocks::Vector{MatrixBlock}
 
-# Enable type promotion
-function ChainBlock(n, blocks::Vector)
-    T = promote_type(collect(datatype(each) for each in blocks)...)
-    ChainBlock{n, T}(blocks)
+    function ChainBlock{N, T}(blocks::Vector) where {N, T}
+        new{N, T}(blocks)
+    end
+
+    # type promotion
+    function ChainBlock{N}(blocks::Vector) where N
+        T = promote_type(collect(datatype(each) for each in blocks)...)
+        new{N, T}(blocks)
+    end
 end
 
 function ChainBlock(blocks::Vector{MatrixBlock{N}}) where N
-    ChainBlock(N, blocks)
+    ChainBlock{N}(blocks)
 end
 
 function ChainBlock(blocks::MatrixBlock{N}...) where N
-    ChainBlock(N, collect(blocks))
+    ChainBlock{N}(collect(blocks))
 end
 
 function copy(c::ChainBlock{N, T}) where {N, T}
@@ -33,7 +38,6 @@ end
 # Block Properties
 isunitary(c::ChainBlock) = all(isunitary, c.blocks)
 isreflexive(c::ChainBlock) = all(isreflexive, c.blocks)
-isunitary_hermitian(c::ChainBlock) = all(isunitary_hermitian, c.blocks)
 ishermitian(c::ChainBlock) = all(ishermitian, c.blocks)
 
 full(c::ChainBlock) = prod(x->full(x), reverse(c.blocks))

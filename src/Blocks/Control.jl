@@ -3,8 +3,8 @@ mutable struct ControlBlock{BlockType, N, T} <: CompositeBlock{N, T}
     block::BlockType
     addr::Int
 
-    # TODO: input a control block
-    # function ControlBlock(total::Int, ctrl_qubits::Vector{Int}, ctrl::ControlBlock, addr::Int) where {K, T}
+    # TODO: input a control block, we need to expand this control block to its upper parent block
+    # function ControlBlock{N}(ctrl_qubits::Vector{Int}, ctrl::ControlBlock, addr::Int) where {N, K, T}
     # end
 
     function ControlBlock{BT, N, T}(ctrl_qubits::Vector{Int}, block::BT, addr::Int) where {BT, N, T}
@@ -170,6 +170,19 @@ blocks(c::ControlBlock) = [c.block]
 # TODO: overload this with direct apply method
 # function apply!(reg::Register, ctrl::ControlBlock)
 # end
+
+#################
+# Dispatch Rules
+#################
+
+# NOTE: ControlBlock will forward parameters directly without loop
+function dispatch!(f::Function, ctrl::ControlBlock, params::Vector)
+    dispatch!(f, ctrl.block, params)
+end
+
+function dispatch!(f::Function, ctrl::ControlBlock, params...)
+    dispatch!(f, ctrl.block, params...)
+end
 
 # pretty printing
 

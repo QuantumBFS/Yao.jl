@@ -29,21 +29,21 @@ apply!(reg, block::Print) = (block.stream = string(reg); reg)
 end
 
 
-@testset "circuit plan" begin
+# @testset "circuit plan" begin
 
-    reg = rand_state(4)
-    c = [
-        kron(gate(:X), gate(:Z), gate(:Z), gate(:X)),
-        focus(2, 3),
-        kron(gate(:X), gate(:Z)),
-    ]
+#     reg = rand_state(4)
+#     c = [
+#         kron(gate(:X), gate(:Z), gate(:Z), gate(:X)),
+#         focus(2, 3),
+#         kron(gate(:X), gate(:Z)),
+#     ]
 
-    for (i, info) in enumerate(reg >> c[1] >> c[2] >> c[3])
-        @test info["iblock"] == i
-        @test info["current"] == c[info["iblock"]]
-    end
+#     for (i, info) in enumerate(reg >> c[1] >> c[2] >> c[3])
+#         @test info["iblock"] == i
+#         @test info["current"] == c[info["iblock"]]
+#     end
 
-end
+# end
 
 # @testset "check example: ghz" begin
 #     num_bits = 4

@@ -5,6 +5,24 @@ export AbstractBlock
 
 abstract type that all block will subtype from. `N` is the number of
 qubits.
+
+# APIs
+
+### Traits
+
+`nqubit`
+`ninput`
+`noutput`
+`isunitary`
+`ispure`
+`isreflexive`
+`ishermitian`
+
+### Methods
+
+`apply!`
+`copy`
+`dispatch!`
 """
 abstract type AbstractBlock end
 
@@ -15,25 +33,17 @@ abstract type AbstractBlock end
 
 # Interface
 ## Trait
-export nqubit, ninput, noutput, isunitary, ispure
-
-nqubit(::Type{T}) where {T <: AbstractBlock} = AnySize
-ninput(::Type{T}) where {T <: AbstractBlock} = AnySize
-noutput(::Type{T}) where {T <: AbstractBlock} = AnySize
-isunitary(::Type{T}) where {T <: AbstractBlock} = false
-ispure(::Type{T}) where {T <: AbstractBlock} = false
-isreflexive(::Type{T}) where {T <: AbstractBlock} = false
-isunitary_hermitian(::Type{T}) where {T <: AbstractBlock} = false
-hasparameter(::Type{T}) where {T <: AbstractBlock} = false
-
+export nqubit, ninput, noutput, isunitary, ispure, nparameters
 import Base: ishermitian
-ishermitian(::Type{T}) where {T <: AbstractBlock} = false
 
-for NAME in [:nqubit, :ninput, :noutput, :isunitary, :ispure, :isreflexive, :ishermitian]
-    @eval begin
-        $NAME(block::AbstractBlock) = $NAME(typeof(block))
-    end
-end
+nqubit(::AbstractBlock) = AnySize
+ninput(::AbstractBlock) = AnySize
+noutput(::AbstractBlock) = AnySize
+isunitary(::AbstractBlock) = false
+ispure(::AbstractBlock) = false
+isreflexive(::AbstractBlock) = false
+ishermitian(::AbstractBlock) = false
+# isunitary_hermitian = isunitary ishermitian
 
 import Base: copy
 # only shallow copy by default

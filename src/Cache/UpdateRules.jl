@@ -39,18 +39,8 @@ end
 function update_cache(c::Cached{BT}, ::Type{CT}, val, signal::UInt, recursive::Bool) where {BT <: CompositeBlock, CT}
     push!(global_cache(CT), c.block, val, signal)
     if recursive
-        info("update composite block recursively")
-        map(x->update_cache(x, signal, recursive=recursive), c.block)
-    end
-    c
-end
-
-function update_cache(c::Cached{BT}, ::Type{CT}, val, signal::UInt, recursive::Bool) where {BT <: KronBlock, CT}
-    push!(global_cache(CT), c.block, val, signal)
-    if recursive
-        info("update recursively")
-        for each in values(c.block)
-            update_cache(each, cache_type(each), cache_matrix(each), unsigned(signal), recursive)
+        for i in eachindex(c.block)
+            update_cache(c.block[i], signal, recursive=true)
         end
     end
     c
@@ -60,18 +50,8 @@ end
 function update_cache(c::Cached{BT}, ::Type{CT}, val, recursive::Bool) where {BT <: CompositeBlock, CT}
     push!(global_cache(CT), c.block, val)
     if recursive
-        info("update composite block recursively")
-        map(x->update_cache(x, recursive=recursive), c.block)
-    end
-    c
-end
-
-function update_cache(c::Cached{BT}, ::Type{CT}, val, recursive::Bool) where {BT <: KronBlock, CT}
-    push!(global_cache(CT), c.block, val)
-    if recursive
-        info("update recursively")
-        for each in values(c.block)
-            update_cache(each, cache_type(each), cache_matrix(each), recursive)
+        for each in blocks(c.block)
+            update_cache(each, recursive=true)
         end
     end
     c

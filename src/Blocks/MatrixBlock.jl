@@ -4,6 +4,12 @@ export MatrixBlock
     MatrixBlock{N, T} <: AbstractBlock
 
 abstract type that all block with a matrix form will subtype from.
+
+# extended APIs
+
+`sparse`
+`full`
+`datatype`
 """
 abstract type MatrixBlock{N, T} <: AbstractBlock end
 

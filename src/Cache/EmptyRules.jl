@@ -50,14 +50,17 @@ function empty!(c::Cached, ::Type{CT}, recursive::Bool) where CT
     c
 end
 
-function empty!(c::Cached, ::Type{CT}, recursive::Bool) where {CT <: CompositeBlock}
+function empty!(c::Cached{BT}, ::Type{CT}, recursive::Bool) where {CT, BT <: CompositeBlock}
     if iscacheable(global_cache(CT), c)
         empty!(global_cache(CT), c.block)
 
         if recursive
-            map(x->empty!(x, recursive=recursive), c.block)
+            for i in eachindex(c.block)
+                empty!(c.block[i], recursive=true)
+            end
         end
     end
+    c
 end
 
 function empty!(c::Cached, ::Type{CT}, signal::UInt, recursive::Bool) where CT
@@ -67,12 +70,14 @@ function empty!(c::Cached, ::Type{CT}, signal::UInt, recursive::Bool) where CT
     c
 end
 
-function empty!(c::Cached, ::Type{CT}, signal::UInt, recursive::Bool) where {CT <: CompositeBlock}
+function empty!(c::Cached{BT}, ::Type{CT}, signal::UInt, recursive::Bool) where {CT, BT <: CompositeBlock}
     if iscacheable(global_cache(CT), c, signal)
         empty!(global_cache(CT), c.block)
 
         if recursive
-            map(x->empty!(x, signal, recursive=recursive), c.block)
+            for i in eachindex(c.block)
+                empty!(c.block[i], recursive=true)
+            end
         end
     end
     c

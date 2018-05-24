@@ -6,18 +6,10 @@ sparse(gate::PhiGate) = sparse(full(gate))
 full(gate::PhiGate{T}) where T = exp(im * gate.theta) * Complex{T}[exp(-im * gate.theta) 0; 0  exp(im * gate.theta)]
 
 copy(block::PhiGate) = PhiGate(block.theta)
-dispatch!(block::PhiGate{T}, theta::T) where T = (block.theta = theta; block)
 dispatch!(f::Function, block::PhiGate{T}, theta::T) where T = (block.theta = f(block.theta, theta); block)
 
-function dispatch!(block::PhiGate, params::Vector)
-    block.theta = pop!(params)
-    block
-end
-
-function dispatch!(f::Function, block::PhiGate, params::Vector)
-    block.theta = f(block.theta, pop!(params))
-    block
-end
+# Properties
+nparameters(::PhiGate) = 1
 
 # Pretty Printing
 function show(io::IO, g::PhiGate{T}) where T
