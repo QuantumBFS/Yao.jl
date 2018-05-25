@@ -52,7 +52,7 @@ end
 
 function apply!(reg::Register{B}, m::Roller{N, M}) where {B, N, M}
     K = N ÷ M
-    st = reshape(reg.state, 1<<K, (1<<(N - 1)) * Int(B))
+    st = reshape(reg.state, 1<<K, (1<<(N - 1)) * B)
 
     for i = 1:M
         st .= sparse(m.blocks[i]) * st
