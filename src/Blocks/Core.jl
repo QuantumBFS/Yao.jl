@@ -36,13 +36,64 @@ abstract type AbstractBlock end
 export nqubit, ninput, noutput, isunitary, ispure, isreflexive, nparameters
 import Base: ishermitian
 
+"""
+    nqubit(x) -> Integer
+
+Returns the number of qubits.
+"""
+function nqubit(x::AbstractBlock) end
+
+"""
+    ninput(x) -> Integer
+
+Returns the number of input qubits.
+"""
+function ninput end
+
+"""
+    noutput(x) -> Integer
+
+Returns the number of output qubits.
+"""
+function noutput end
+
 # nqubit(::AbstractBlock) = AnySize
 # ninput(::AbstractBlock) = AnySize
 # noutput(::AbstractBlock) = AnySize
+
+"""
+    isunitary(x) -> Bool
+
+Test whether this operator is unitary.
+"""
 isunitary(::AbstractBlock) = false
+
+"""
+    ispure(x) -> Bool
+
+Test whether this operator is pure.
+"""
 ispure(::AbstractBlock) = false
+
+"""
+    isreflexive(x) -> Bool
+
+Test whether this operator is reflexive.
+"""
 isreflexive(::AbstractBlock) = false
+
+"""
+    ishermitian(x) -> Bool
+
+Test whether this operator is hermitian.
+"""
 ishermitian(::AbstractBlock) = false
+
+"""
+    nparameters(x) -> Integer
+
+Returns the number of parameters of `x`.
+"""
 nparameters(::AbstractBlock) = 0
 # isunitary_hermitian = isunitary ishermitian
 

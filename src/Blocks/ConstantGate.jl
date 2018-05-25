@@ -6,6 +6,7 @@
 struct Gate{N, GT <: GateType, T} <: PrimitiveBlock{N, T}
 end
 
+Gate(::Type{T}, ::Type{GT}) where {T, GT} = Gate{nqubits(GT), GT, T}()
 Gate(::Type{T}, s::Symbol) where T = Gate(T, GateType{s})
 
 # NOTE: we bind some type related constants here to avoid multiple allocation
@@ -22,7 +23,7 @@ for (GTYPE, NAME) in [
     GT = GateType{GTYPE}
 
     @eval begin
-        Gate(::Type{T}, x::Type{$GT}) where T = Gate{1, $GT, T}()
+        nqubits(::Type{$GT}) = 1
 
         full(gate::Gate{1, $GT, T}) where T = $(DENSE_NAME)(T)
         sparse(gate::Gate{1, $GT, T}) where T = $(SPARSE_NAME)(T)
