@@ -2,6 +2,11 @@ using Compat.Test
 using QuCircuit
 import QuCircuit: KronBlock
 
+@testset "constructor" begin
+info("TODO: custom error exception")
+@test_throws ErrorException KronBlock{2}(1=>X(), [2, Y()])
+end
+
 @testset "check sparse" begin
 
 GateSet = [
@@ -112,4 +117,12 @@ end
 
 @testset "check traits" begin
     info("TODO: define traits for primitive blocks")
+    g = KronBlock{5}(X(), (3, Y()), rot(:X), rot(:Y))
+    addrs(g) === g.addrs
+    blocks(g) === g.blocks
+    eltype(g) == Tuple{Int, MatrixBlock}
+
+    @test isunitary(g) == true
+    @test ispure(g) == true
+    @test isreflexive(g) == false
 end
