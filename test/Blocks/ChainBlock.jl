@@ -1,67 +1,83 @@
 using Compat.Test
-
+using QuCircuit
 import QuCircuit: ChainBlock
-import QuCircuit: rand_state, state, focus!,
-    X, Y, Z, gate, phase, focus, address, rot
-# Interface
-import QuCircuit: chain, kron
-# Block Trait
-import QuCircuit: nqubit, ninput, noutput, isunitary, ispure
-# Required Methods
-import QuCircuit: apply!, dispatch!
 
-import QuCircuit: _promote_chain_eltype
+@testset "constructor" begin
 
-@testset "check type inference" begin
-    @test _promote_chain_eltype(gate(X)) == Complex128
-    @test _promote_chain_eltype(gate(Complex128, X), gate(Complex64, Y)) == Complex128
-    @test _promote_chain_eltype(Complex128, gate(Complex128, X), gate(Complex64, Y)) == Complex128
-    @test _promote_chain_eltype(gate(Complex32, X), gate(Complex128, Y), gate(Complex64, Z)) == Complex128
-
-    @test _promote_chain_eltype(Complex128, gate(X), gate(Y), gate(Complex64, Z), gate(Complex32, Z)) == Complex128
-end
-
-@testset "chain pure" begin
-
-    g = chain(
-        kron(gate(X), gate(Y)),
-        kron(2, gate(Complex64, Z))
+    g = ChainBlock(
+        kron(2, X(), Y()),
+        kron(2, phase(0.1)),
     )
 
-    @test eltype(g) <: Complex128
-    @test nqubit(g) == 2
-    @test ninput(g) == 2
-    @test noutput(g) == 2
-    @test isunitary(g) == true
-    @test ispure(g) == true
+    @test g.blocks == [kron(2, X(), Y()), kron(2, phase(0.1))]
+end
 
-    mat = kron(sparse(gate(Complex64, Z)), speye(2)) * kron(sparse(gate(X)), sparse(gate(Y)))
+@testset "functionality" begin
+    g = ChainBlock(
+        kron(2, X(), Y()),
+        kron(2, phase(0.1))
+    )
+
+    mat = sparse(kron(2, phase(0.1))) * sparse(kron(2, X(), Y()))
     @test sparse(g) == mat
     @test full(g) == full(mat)
 
     reg = rand_state(2)
     @test mat * state(reg) == state(apply!(reg, g))
 
-    # check call method
-    @test mat * state(reg) == state(g(reg))
+end
 
-    # check copy
+@testset "allocation" begin
+    g = ChainBlock(X(), phase(0.1))
 
     cg = copy(g)
-    for (copied, original) in zip(cg.blocks, g.blocks)
-        @test copied !== original
-        @test copied == original
+    cg[2].theta = 0.2
+    @test g[2].theta == 0.1
+
+    sg = similar(g)
+    @test_throws BoundsError sg[2]
+
+    sg[1] = X()
+    @test sg[1] == X()
+    g[1] = Y()
+    @test g[1] == Y()
+end
+
+@testset "iteration" begin
+    test_list = [X(), Y(), phase(0.1), rot(:X)]
+    g = ChainBlock(test_list)
+
+    for (src, tg) in zip(g, test_list)
+        @test src == tg
+    end
+
+    for (src, tg) in zip(eachindex(g), 1:length(test_list))
+        @test src == tg
     end
 end
 
-@testset "parameter chain" begin
+@testset "additional" begin
+    g = ChainBlock(X(), Y())
+    push!(g, Z())
+    @test g[3] == Z()
 
-    g = chain(
-        phase(0.2),
-        rot(X, 0.1),
-    )
+    append!(g, [rot(:X), rot(:Y)])
+    @test g[4] == rot(:X)
+    @test g[5] == rot(:Y)
 
-    dispatch!(g, (1, 0.3), (2, 0.5))
-    @test g.blocks[1].theta == 0.3
-    @test g.blocks[2].theta == 0.5
+    prepend!(g, [phase(0.1)])
+    @test g[1] == phase(0.1)
+    @test g[2] == X()
+    @test g[end] == rot(:Y)
+end
+
+@testset "traits" begin
+    info("TODO: check traits when primitive blocks' traits are all defined")
+
+    g = ChainBlock(X(), Y())
+    @test isunitary(g) == true
+    @test isreflexive(g) == true
+    @test ishermitian(g) == true
+    @test length(g) == 2
+    @test eltype(g) == eltype(g.blocks)
 end

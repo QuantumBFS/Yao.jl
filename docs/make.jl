@@ -25,6 +25,7 @@ makedocs(
             "dev/cache.md",
             "dev/visualization.md",
             "dev/unittest.md",
+            "dev/APIs.md",
         ],
         "Theoretical Notes" => Any[
             "theo/register.md",

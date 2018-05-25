@@ -9,3 +9,6 @@ docs/site/
 _local/
 .ipynb_checkpoints/
 .vscode/
+*.ipynb_checkpoints
+**/*.ipynb_checkpoints
+**/**/*.ipynb_checkpoints

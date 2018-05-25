@@ -11,14 +11,14 @@ The whole oracle looks like this:
 
 
 ```@example GHZ
-circuit(num_bits) = sequence(
-    X(num_bits, 1),
-    H(num_bits, 2:num_bits),
-    X(1) |> C(num_bits, 2),
-    X(3) |> C(num_bits, 4),
-    X(1) |> C(num_bits, 3),
-    X(3) |> C(num_bits, 4),
-    H(num_bits, 1:num_bits),
+circuit(n) = compose(
+    X(1),
+    H(2:n),
+    X(1) |> C(2),
+    X(3) |> C(4),
+    X(1) |> C(3),
+    X(3) |> C(4),
+    H(1:n),
 )
 ```
 
@@ -27,8 +27,7 @@ input it into the oracle. You will then receive this register after
 processing it.
 
 ```@example GHZ
-reg = zero_state(4)
-
+reg = register(bit"0000")
 reg |> circuit(4)
 reg
 ```

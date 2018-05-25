@@ -71,7 +71,7 @@ end
 
 ####### kronecker product ###########
 import Base: kron
-
+#TODO if Identity(1), do nothing
 kron(A::Identity{Ta}, B::Identity{Tb}) where {Ta, Tb}= Identity{promote_type(Ta, Tb)}(A.n*B.n)
 kron(A::Identity, B::Diagonal) = Diagonal(orepeat(B.diag, A.n))
 kron(B::Diagonal, A::Identity) = Diagonal(irepeat(B.diag, A.n))
