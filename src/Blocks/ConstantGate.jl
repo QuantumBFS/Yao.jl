@@ -4,14 +4,9 @@
 `N` qubits gate whose matrix form is a constant.
 """
 struct Gate{N, GT <: GateType, T} <: PrimitiveBlock{N, T}
-
-    function Gate{N}(::Type{T}, x::Symbol) where N where T
-        new{N, GateType{x}, T}()
-    end
 end
 
-# N is 1 by default
-Gate(::Type{T}, x::Symbol) where T = Gate{1}(T, x)
+Gate(::Type{T}, s::Symbol) where T = Gate(T, GateType{s})
 
 # NOTE: we bind some type related constants here to avoid multiple allocation
 
@@ -27,10 +22,13 @@ for (GTYPE, NAME) in [
     GT = GateType{GTYPE}
 
     @eval begin
+        Gate(::Type{T}, x::Type{$GT}) where T = Gate{1, $GT, T}()
+
         full(gate::Gate{1, $GT, T}) where T = $(DENSE_NAME)(T)
         sparse(gate::Gate{1, $GT, T}) where T = $(SPARSE_NAME)(T)
         # traits
         isreflexive(gate::Gate{1, $GT, T}) where T = true
+        ishermitian(gate::Gate{1, $GT, T}) where T = true
     end
 end
 

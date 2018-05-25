@@ -3,10 +3,31 @@ using QuCircuit
 import QuCircuit: ControlBlock
 import QuCircuit: _single_control_gate_sparse,
                   _single_inverse_control_gate_sparse,
-                  A_kron_B
+                  A_kron_B, ControlQuBit, PhiGate
 import QuCircuit: CONST_SPARSE_P0, CONST_SPARSE_P1
 
-@testset "control matrix form" begin
+@testset "getindex & setindex" begin
+g = ControlBlock{4}([1, 2], phase(0.1), 4)
+@test isa(g[1], ControlQuBit)
+@test isa(g[4], PhiGate)
+@test_throws KeyError g[3]
+@test_throws BoundsError g[5]
+end
+
+@testset "iteration" begin
+    g = ControlBlock{4}([1, 2], phase(0.1), 4)
+    @test collect(g) == [g.block]
+    @test blocks(g) == [g.block]
+end
+
+@testset "copy" begin
+    g = ControlBlock{4}([1, 2], phase(0.1), 4)
+    cg = copy(g)
+    cg[4].theta = 0.2
+    @test g[4].theta == 0.1
+end
+
+@testset "matrix" begin
 
 ⊗ = kron
 U = sparse(X())

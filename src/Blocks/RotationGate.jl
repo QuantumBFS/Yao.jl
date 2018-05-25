@@ -25,7 +25,7 @@ full(gate::RotationGate{GateType{:Z}, T}) where T =
 
 copy(block::RotationGate{GT}) where GT = RotationGate{GT}(block.theta)
 
-function dispatch!(f::Function, block::RotationGate{GT, T}, theta::T) where {GT, T}
+function dispatch!(f::Function, block::RotationGate{GT}, theta) where {GT}
     block.theta = f(block.theta, theta)
     block
 end

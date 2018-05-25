@@ -43,6 +43,7 @@ isunitary(::AbstractBlock) = false
 ispure(::AbstractBlock) = false
 isreflexive(::AbstractBlock) = false
 ishermitian(::AbstractBlock) = false
+nparameters(::AbstractBlock) = 0
 # isunitary_hermitian = isunitary ishermitian
 
 import Base: copy

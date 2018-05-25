@@ -68,7 +68,7 @@ function similar(k::KronBlock{N, T}) where {N, T}
 end
 
 # some useful interface
-
+export addrs
 addrs(k::KronBlock) = k.addrs
 blocks(k::KronBlock) = k.blocks
 
@@ -143,8 +143,6 @@ for NAME in [
     :isunitary,
     :ispure,
     :isreflexive,
-    :isunitary_hermitian,
-    :hasparameter,
     :ishermitian,
 ]
 
