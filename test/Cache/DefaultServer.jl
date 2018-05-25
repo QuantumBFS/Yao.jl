@@ -1,9 +1,10 @@
 using Compat.Test
-import QuCircuit: DefaultServer, X, phase, rot, cache!, pull
+using QuCircuit
+import QuCircuit: DefaultServer, cache!, pull
 
 @testset "default server" begin
     ds = DefaultServer(SparseMatrixCSC{Complex128, Int})
-    g = kron(X(), phase(0.1), rot(:X, 0.1))
+    g = kron(3, X(), phase(0.1), rot(:X, 0.1))
 
     # cache recursively
     cache!(ds, g, unsigned(2))

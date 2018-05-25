@@ -77,4 +77,43 @@ end
 
 end
 
+end # check sparse
+
+@testset "allocation" begin
+    g = KronBlock{4}(X(), phase(0.1))
+    cg = copy(g)
+    cg[2].theta = 0.2
+
+    @test g[2].theta == 0.1
+
+    sg = similar(g)
+    @test_throws KeyError sg[2]
+    @test_throws KeyError sg[1]
+end
+
+@testset "insertion" begin
+
+    g = KronBlock{4}(X(), phase(0.1))
+    g[4] = rot(:X, 0.2)
+    @test g[4].theta == 0.2
+
+    g[2] = Y()
+    @test sparse(g[2]) == sparse(Y())
+
+end
+
+@testset "iteration" begin
+    g = KronBlock{5}(X(), (3, Y()), rot(:X), rot(:Y))
+    for (src, tg) in zip(g, [(1, X()), (3, Y()), (4, rot(:X)), (5, rot(:Y))])
+        @test src[1] == tg[1]
+        @test src[2] == tg[2]
+    end
+
+    for (src, tg) in zip(eachindex(g), [1, 3, 4, 5])
+        @test src == tg
+    end
+end
+
+@testset "check traits" begin
+    info("TODO: define traits for primitive blocks")
 end

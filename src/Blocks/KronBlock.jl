@@ -54,15 +54,16 @@ struct KronBlock{N, T} <: CompositeBlock{N, T}
 end
 
 function copy(k::KronBlock{N, T}) where {N, T}
+    slots = copy(k.slots)
     addrs = copy(k.addrs)
-    blocks = copy(k.blocks)
-    KronBlock{N, T}(addrs, blocks)
+    blocks = [copy(each) for each in k.blocks]
+    KronBlock{N, T}(slots, addrs, blocks)
 end
 
 function similar(k::KronBlock{N, T}) where {N, T}
-    slots = zeros(N, Int)
-    addrs = similar(k.addrs)
-    blocks = similar(k.blocks)
+    slots = zeros(Int, N)
+    addrs = empty!(similar(k.addrs))
+    blocks = empty!(similar(k.blocks))
     KronBlock{N, T}(slots, addrs, blocks)
 end
 
@@ -79,8 +80,15 @@ end
 
 function setindex!(k::KronBlock, val, addr)
     index = k.slots[addr]
-    index == 0 && throw(KeyError(addr))
+    index == 0 && return _insert_new!(k, val, addr)
     k.blocks[index] = val
+end
+
+function _insert_new!(k::KronBlock, val, addr)
+    push!(k.addrs, addr)
+    push!(k.blocks, val)
+    k.slots[addr] = endof(k.addrs)
+    k
 end
 
 # Iterator Protocol
@@ -150,6 +158,7 @@ function show(io::IO, k::KronBlock{N, T}) where {N, T}
 
     if length(k) == 0
         print(io, "  with 0 blocks")
+        return
     end
 
     for i in eachindex(k.addrs)

@@ -14,6 +14,7 @@ using QuCircuit
 
 @testset "check recursive" begin
     g = kron(
+        4,
         X(), phase(0.1), rot(:X, 0.1)
     )
 
