@@ -1,63 +1,72 @@
 using Compat.Test
 using QuCircuit
-
 import QuCircuit: ChainBlock
-import QuCircuit: rand_state, state, focus!,
-    X, Y, Z, gate, phase, focus, address, rot
-# Block Trait
-import QuCircuit: nqubit, ninput, noutput, isunitary, ispure
-# Required Methods
-import QuCircuit: apply!, dispatch!
 
-@testset "chain" begin
+@testset "constructor" begin
+
     g = ChainBlock(
         kron(2, X(), Y()),
         kron(2, phase(0.1)),
     )
 
-    mat = sparse(kron(2, phase(0.1))) * sparse(kron(2, X(), Y()))
-    @test sparse(g) == mat
+    @test g.blocks == [kron(2, X(), Y()), kron(2, phase(0.1))]
 end
 
-# @testset "chain pure" begin
+@testset "functionality" begin
+    g = ChainBlock(
+        kron(2, X(), Y()),
+        kron(2, phase(0.1))
+    )
 
-#     g = chain(
-#         kron(X(), Y()),
-#         kron(2, gate(Complex64, :Z))
-#     )
+    mat = sparse(kron(2, phase(0.1))) * sparse(kron(2, X(), Y()))
+    @test sparse(g) == mat
+    @test full(g) == full(mat)
 
-#     @test nqubit(g) == 2
-#     @test ninput(g) == 2
-#     @test noutput(g) == 2
-#     @test isunitary(g) == true
-#     @test ispure(g) == true
+    reg = rand_state(2)
+    @test mat * state(reg) == state(apply!(reg, g))
 
-#     mat = kron(sparse(gate(Complex64, :Z)), speye(2)) * kron(sparse(X()), sparse(Y()))
-#     @test sparse(g) == mat
-#     @test full(g) == full(mat)
+end
 
-#     reg = rand_state(2)
-#     @test mat * state(reg) == state(apply!(reg, g))
+@testset "allocation" begin
+    g = ChainBlock(X(), phase(0.1))
 
-#     # check call method
-#     @test mat * state(reg) == state(g(reg))
+    cg = copy(g)
+    cg[2].theta = 0.2
+    @test g[2].theta == 0.1
 
-#     # check copy
-#     cg = copy(g)
-#     for (copied, original) in zip(cg.blocks, g.blocks)
-#         @test copied !== original
-#         @test copied == original
-#     end
-# end
+    sg = similar(g)
+    @test_throws BoundsError sg[2]
 
-# @testset "parameter chain" begin
+    sg[1] = X()
+    @test sg[1] == X()
+    g[1] = Y()
+    @test g[1] == Y()
+end
 
-#     g = chain(
-#         phase(0.2),
-#         rot(:X, 0.1),
-#     )
+@testset "iteration" begin
+    test_list = [X(), Y(), phase(0.1), rot(:X)]
+    g = ChainBlock(test_list)
 
-#     dispatch!(g, [0.3, 0.5])
-#     @test g.blocks[1].theta == 0.3
-#     @test g.blocks[2].theta == 0.5
-# end
+    for (src, tg) in zip(g, test_list)
+        @test src == tg
+    end
+end
+
+@testset "additional" begin
+    g = ChainBlock(X(), Y())
+    push!(g, Z())
+    @test g[3] == Z()
+
+    append!(g, [rot(:X), rot(:Y)])
+    @test g[4] == rot(:X)
+    @test g[5] == rot(:Y)
+
+    prepend!(g, [phase(0.1)])
+    @test g[1] == phase(0.1)
+    @test g[2] == X()
+    @test g[end] == rot(:Y)
+end
+
+@testset "traits" begin
+    info("TODO: check traits when primitive blocks' traits are all defined")
+end

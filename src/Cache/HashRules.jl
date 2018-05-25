@@ -4,6 +4,8 @@ import Base: hash, ==
 # Composite Blocks
 ###################
 
+==(lhs::CompositeBlock, rhs::CompositeBlock) = false
+
 function hash(c::ChainBlock, h::UInt)
     hashkey = hash(object_id(c), h)
     for each in c.blocks
@@ -12,21 +14,22 @@ function hash(c::ChainBlock, h::UInt)
     hashkey
 end
 
-==(lhs::ChainBlock, rhs::ChainBlock) = false
 ==(lhs::ChainBlock{N, T}, rhs::ChainBlock{N, T}) where {N, T} = all(lhs.blocks .== rhs.blocks)
 
-
+# NOTE: kronecker blocks are equivalent if its addrs and blocks is the same
 function hash(block::KronBlock{N, T}, h::UInt) where {N, T}
     hashkey = hash(object_id(block), h)
-    for each in values(block)
-        hashkey = hash(each, hashkey)
+
+    for (addr, block) in block
+        hashkey = hash(addr, hashkey)
+        hashkey = hash(block, hashkey)
     end
     hashkey
 end
 
-==(lhs::KronBlock, rhs::KronBlock) = false
-==(lhs::KronBlock{N, T}, rhs::KronBlock{N, T}) where {N, T} = (lhs.kvstore == rhs.kvstore)
-
+function ==(lhs::KronBlock{N, T}, rhs::KronBlock{N, T}) where {N, T}
+    all(lhs.addrs .== rhs.addrs) && all(lhs.blocks .== rhs.blocks)
+end
 
 function hash(ctrl::ControlBlock, h::UInt)
     hashkey = hash(object_id(ctrl), h)

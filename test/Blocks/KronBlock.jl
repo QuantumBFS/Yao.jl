@@ -1,10 +1,6 @@
 using Compat.Test
 using QuCircuit
 import QuCircuit: KronBlock
-# Block Trait
-import QuCircuit: nqubit, ninput, noutput, isunitary, ispure
-# Required Methods
-import QuCircuit: apply!, dispatch!
 
 @testset "check sparse" begin
 

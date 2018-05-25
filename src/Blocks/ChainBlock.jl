@@ -13,26 +13,22 @@ struct ChainBlock{N, T} <: CompositeBlock{N, T}
     end
 
     # type promotion
-    function ChainBlock{N}(blocks::Vector) where N
+    function ChainBlock(blocks::Vector{<:MatrixBlock{N}}) where N
         T = promote_type(collect(datatype(each) for each in blocks)...)
         new{N, T}(blocks)
     end
 end
 
-function ChainBlock(blocks::Vector{MatrixBlock{N}}) where N
-    ChainBlock{N}(blocks)
-end
-
 function ChainBlock(blocks::MatrixBlock{N}...) where N
-    ChainBlock{N}(collect(blocks))
+    ChainBlock(collect(blocks))
 end
 
 function copy(c::ChainBlock{N, T}) where {N, T}
-    ChainBlock{N, T}(deepcopy(c.blocks))
+    ChainBlock{N, T}([copy(each) for each in c.blocks])
 end
 
 function similar(c::ChainBlock{N, T}) where {N, T}
-    ChainBlock{N, T}(similar(c.blocks))
+    ChainBlock{N, T}(empty!(similar(c.blocks)))
 end
 
 # Block Properties
@@ -45,7 +41,16 @@ sparse(c::ChainBlock) = prod(x->sparse(x), reverse(c.blocks))
 
 # Additional Methods for Composite Blocks
 getindex(c::ChainBlock, index) = getindex(c.blocks, index)
-setindex!(c::ChainBlock, val, index) = setindex!(c.blocks, val, index)
+
+function setindex!(c::ChainBlock, val, index)
+    0 < index || throw(BoundsError(c, index))
+
+    @inbounds if index > endof(c.blocks)
+        push!(c.blocks, val)
+    else
+        setindex!(c.blocks, val, index)
+    end
+end
 
 import Base: endof
 endof(c::ChainBlock) = endof(c.blocks)
