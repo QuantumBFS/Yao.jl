@@ -1,6 +1,9 @@
 using Compat.Test
 import QuCircuit: CacheElement, X, phase, rot, pull
 
+@testset "constructor" begin
+end
+
 @testset "check cache element" begin
     ce = CacheElement(SparseMatrixCSC{Complex128, Int}, unsigned(2))
     g = kron(3, X(), phase(0.1), rot(:X, 0.1))
