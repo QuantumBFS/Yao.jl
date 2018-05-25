@@ -73,9 +73,10 @@ This will automatically generate a block list looks like
 ```
 """
 kron(total::Int, blocks::Union{MatrixBlock, Tuple, Pair}...) = KronBlock{total}(blocks...)
-kron(total::Int, blocks) = KronBlock{total}(blocks...)
-kron(blocks::Union{MatrixBlock, Tuple, Pair}...) = N->KronBlock{N}(blocks...)
-kron(blocks) = N->KronBlock{N}(blocks)
+# NOTE: this is ambiguous
+# kron(total::Int, blocks) = KronBlock{total}(blocks)
+kron(blocks::Union{MatrixBlock, Tuple{Int, <:MatrixBlock}, Pair{Int, <:MatrixBlock}}...) = N->KronBlock{N}(blocks...)
+kron(blocks) = N->KronBlock{N}(blocks...)
 
 # 2.3 control block
 
@@ -106,7 +107,15 @@ end
 # 2.4 roller
 
 export roll
-roll(n::Int, block::MatrixBlock) = Roller(n, block)
+
+roll(n::Int, block::MatrixBlock) = Roller{n}(block)
+
+function roll(blocks::MatrixBlock...)
+    T = promote_type(datatype(each) for each in blocks)
+    N = sum(x->nqubit(x), blocks)
+    Roller{N, T}(blocks)
+end
+
 roll(block::MatrixBlock) = n->roll(n, block)
 
 # 3. measurement
@@ -186,11 +195,11 @@ for NAME in [:X, :Y, :Z, :H]
         end
 
         function $NAME(num_qubit::Int, addr::Int)
-            kron(num_qubit, (1, gate($GT)))
+            KronBlock{num_qubit}(1=>gate($GT))
         end
 
         function $NAME(num_qubit::Int, r)
-            kron(num_qubit, (i, gate($GT)) for i in r)
+            KronBlock{num_qubit}(collect(r), collect(gate($GT) for i in r))
         end
 
     end

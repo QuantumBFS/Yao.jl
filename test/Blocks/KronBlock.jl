@@ -4,7 +4,7 @@ import QuCircuit: KronBlock
 
 @testset "constructor" begin
 info("TODO: custom error exception")
-@test_throws ErrorException KronBlock{2}(1=>X(), [2, Y()])
+@test_throws MethodError KronBlock{2}(1=>X(), [2, Y()])
 end
 
 @testset "check sparse" begin

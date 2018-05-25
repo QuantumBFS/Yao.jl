@@ -3,6 +3,10 @@
 
 map a block type to all lines and use a rolling
 method to evaluate them.
+
+## TODO
+
+fill identity like `KronBlock`
 """
 struct Roller{N, M, T, BT <: Tuple} <: CompositeBlock{N, T}
     blocks::BT
@@ -12,7 +16,7 @@ struct Roller{N, M, T, BT <: Tuple} <: CompositeBlock{N, T}
         new{N, M, T, typeof(blocks)}(blocks)
     end
 
-    function Roller{N, T}(blocks...) where {N, T}
+    function Roller{N, T}(blocks::MatrixBlock...) where {N, T}
         Roller{N, T}(blocks)
     end
 
@@ -57,7 +61,7 @@ function apply!(reg::Register{B}, m::Roller{N, M}) where {B, N, M}
         # to finish exactly M times, or the
         # address of each qubit will not match
         # the value of state
-        rolldims!(Val{K}, Val{N}, Val{B}, reg.state)
+        rolldims!(Val{K}, Val{N}, Val{B}, statevec(reg))
     end
     reg
 end

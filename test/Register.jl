@@ -30,7 +30,7 @@ using Compat.Test
     @test state(creg) == state(reg)
     @test address(creg) == address(reg)
     @test state(creg) !== state(reg)
-    @test address(creg) !== address(reg) 
+    @test address(creg) !== address(reg)
 end
 
 @testset "Focus" begin

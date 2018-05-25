@@ -55,17 +55,17 @@ function log2i(x::T)::T where T
     return n
 end
 
-export batch_normalize!
+export batch_normalize!, batch_normalize
 
 """
     batch_normalize!(matrix)
 
 normalize a batch of vector.
 """
-function batch_normalize!(s::AbstractMatrix)
+function batch_normalize!(s::AbstractMatrix, p::Real=2)
     B = size(s, 2)
     for i = 1:B
-        normalize!(view(s, :, i))
+        normalize!(view(s, :, i), p)
     end
     s
 end
@@ -75,11 +75,18 @@ end
 
 normalize a batch of vector.
 """
-function batch_normalize(s::AbstractMatrix)
+function batch_normalize(s::AbstractMatrix, p::Real=2)
     ts = copy(s)
-    batch_normalize!(ts)
+    batch_normalize!(ts, p)
 end
 
+export kronprod
+
+"""
+    kronprod(itr)
+
+kronecker product all operators in the iterator.
+"""
 kronprod(itr) = reduce(kron, speye(1), itr)
 
 ############

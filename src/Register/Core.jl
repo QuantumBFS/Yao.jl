@@ -120,6 +120,14 @@ the matrix stored inside.
 function state end
 
 """
+    statevec(reg)
+
+get the state vector of this register. It will always return
+the vector form (a matrix for batched register).
+"""
+function statevec end
+
+"""
     register(::Type{RT}, raw, nbatch)
 
 an general initializer for input raw state array.

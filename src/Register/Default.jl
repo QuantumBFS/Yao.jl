@@ -42,6 +42,8 @@ nqubit(r::Register) = length(r.address)
 nactive(r::Register) = r.nactive
 address(r::Register) = r.address
 state(r::Register) = r.state
+statevec(r::Register{B}) where B = reshape(r.state, 1 << nqubit(r), Int(B))
+statevec(r::Register{1}) = vec(r.state)
 copy(r::Register) = Register(r)
 
 function similar(r::Register{B, T}) where {B, T}

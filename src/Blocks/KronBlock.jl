@@ -45,7 +45,7 @@ struct KronBlock{N, T} <: CompositeBlock{N, T}
                 push!(blocks, block)
                 curr_head += nqubit(block)
             else
-                throw(ErrorException("KronBlock only takes MatrixBlock"))
+                throw(MethodError(KronBlock, args))
             end
         end
 
