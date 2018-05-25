@@ -9,6 +9,8 @@ copy(block::PhiGate) = PhiGate(block.theta)
 dispatch!(f::Function, block::PhiGate{T}, theta::T) where T = (block.theta = f(block.theta, theta); block)
 
 # Properties
+isreflexive(::PhiGate) = false
+ishermitian(::PhiGate) = false
 nparameters(::PhiGate) = 1
 
 # Pretty Printing

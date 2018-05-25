@@ -3,17 +3,17 @@
 
 `N` qubits gate whose matrix form is a constant.
 """
-struct Gate{N, GT <: GateType, T} <: PrimitiveBlock{N, T} end
+struct Gate{N, GT <: GateType, T} <: PrimitiveBlock{N, T}
+
+    function Gate{N}(::Type{T}, x::Symbol) where N where T
+        new{N, GateType{x}, T}()
+    end
+end
 
 # N is 1 by default
-Gate(::Type{T}, ::Type{GT}) where {T, GT} = Gate{1, GT, T}()
-Gate(::Type{T}, x::Symbol) where T = Gate(T, GateType{x})
+Gate(::Type{T}, x::Symbol) where T = Gate{1}(T, x)
 
-# we use Complex128 by default
-Gate(::Type{GT}) where GT = Gate(Compat.ComplexF64, GT)
-Gate(x::Symbol) = Gate(GateType{x})
-
-# NOTE: we define some type related constants here to avoid multiple allocation
+# NOTE: we bind some type related constants here to avoid multiple allocation
 
 for (GTYPE, NAME) in [
     (:X, "PAULI_X"),
@@ -29,8 +29,9 @@ for (GTYPE, NAME) in [
     @eval begin
         full(gate::Gate{1, $GT, T}) where T = $(DENSE_NAME)(T)
         sparse(gate::Gate{1, $GT, T}) where T = $(SPARSE_NAME)(T)
+        # traits
+        isreflexive(gate::Gate{1, $GT, T}) where T = true
     end
-
 end
 
 # Pretty Printing
