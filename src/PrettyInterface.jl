@@ -14,7 +14,7 @@ Create an instance of `gate_type`.
 
 create a Pauli X gate: `gate(X)`
 """
-gate(::Type{T}, ::Type{GT}) where {T, GT <: GateType} = Gate(T, GT)
+gate(::Type{Complex{T}}, ::Type{GT}) where {T, GT <: GateType} = Gate(Complex{T}, GT)
 gate(::Type{T}, s::Symbol, params...) where T = gate(T, GateType{s}, promote(params...)...)
 
 # config default type
@@ -22,7 +22,7 @@ gate(s::Symbol, params...) = gate(ComplexF64, s, params...)
 gate(::Type{GT}, params...) where {GT <: GateType} = gate(ComplexF64, GT, params...)
 
 # define default promotion rule
-gate(::Type{Complex{T}}, ::Type{GT}, params...) where {T, GT} = gate(Complex{T}, GT, promote(T(first(params)), Base.tail(params)...)...)
+gate(::Type{Complex{T}}, ::Type{GT}, params...) where {T, GT <: GateType} = gate(Complex{T}, GT, promote(T(first(params)), Base.tail(params)...)...)
 
 # define dispatch rules
 gate(::Type{Complex{T}}, ::Type{GateType{:Ra}}, α::T, β::T, γ::T) where T = chain(rot(:X, α), rot(:Z, β), rot(:X, γ))
