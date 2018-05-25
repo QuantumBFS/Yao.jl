@@ -37,7 +37,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
     "title": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
     "category": "section",
-    "text": "First, you have to use this package in Julia.using QuCircuitThen let\'s define the oracle, it is a function of the number of qubits. The whole oracle looks like this:circuit(num_bits) = sequence(\n    X(num_bits, 1),\n    H(num_bits, 2:num_bits),\n    X(1) |> C(num_bits, 2),\n    X(3) |> C(num_bits, 4),\n    X(1) |> C(num_bits, 3),\n    X(3) |> C(num_bits, 4),\n    H(num_bits, 1:num_bits),\n)After we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.reg = zero_state(4)\n\nreg |> circuit(4)\nregLet\'s check the output:state(reg)We have a GHZ state here, try to measure the first qubitreg |> measure(1)\nstate(reg)GHZ state will collapse to 0000rangle or 1111rangle due to entanglement!"
+    "text": "First, you have to use this package in Julia.using QuCircuitThen let\'s define the oracle, it is a function of the number of qubits. The whole oracle looks like this:circuit(n) = compose(\n    X(1),\n    H(2:n),\n    X(1) |> C(2),\n    X(3) |> C(4),\n    X(1) |> C(3),\n    X(3) |> C(4),\n    H(1:n),\n)After we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.reg = register(bit\"0000\")\nreg |> circuit(4)\nregLet\'s check the output:state(reg)We have a GHZ state here, try to measure the first qubitreg |> measure(1)\nstate(reg)GHZ state will collapse to 0000rangle or 1111rangle due to entanglement!"
 },
 
 {
@@ -137,11 +137,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "dev/block/#QuCircuit.MatrixBlock",
+    "page": "Block System",
+    "title": "QuCircuit.MatrixBlock",
+    "category": "type",
+    "text": "MatrixBlock{N, T} <: AbstractBlock\n\nabstract type that all block with a matrix form will subtype from.\n\nextended APIs\n\nsparse full datatype\n\n\n\n"
+},
+
+{
     "location": "dev/block/#PureBlock-1",
     "page": "Block System",
     "title": "PureBlock",
     "category": "section",
-    "text": "QuCircuit.PureBlock"
+    "text": "QuCircuit.MatrixBlock"
 },
 
 {
@@ -209,6 +217,30 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "dev/block/#User-Defined-Block-1",
+    "page": "Block System",
+    "title": "User Defined Block",
+    "category": "section",
+    "text": "You can extending the block system by overloading existing APIs."
+},
+
+{
+    "location": "dev/block/#Extending-Constant-Gates-1",
+    "page": "Block System",
+    "title": "Extending Constant Gates",
+    "category": "section",
+    "text": "Extending constant gate is very simple:using QuCircuit\nimport QuCircuit: Gate, GateType, sparse, nqubits\n# define the number of qubits\nnqubits(::Type{GateType{:CNOT}}) = 2\n# define its matrix form\nsparse(::Gate{2, GateType{:CNOT}, T}) where T = T[1 0 0 0;0 1 0 0;0 0 0 1;0 0 1 0]Then you get a constant CNOT gateg = gate(:CNOT)\nsparse(g)"
+},
+
+{
+    "location": "dev/block/#Extending-a-Primitive-Block-1",
+    "page": "Block System",
+    "title": "Extending a Primitive Block",
+    "category": "section",
+    "text": "Primitive blocks are very useful when you want to accelerate a specific oracle. For example, we can accelerate a Grover search oracle by define a custom subtype of PrimitiveBlock.using QuCircuit\nimport QuCircuit: PrimitiveBlock, apply!, Register\n\nstruct GroverSearch{N, T} <: PrimitiveBlock{N, T}\nend\n\n# define how you want to simulate this oracle\nfunction apply!(reg::Register, oracle::GroverSearch)\n    # a fast implementation of Grover search\nend\n\n# define its matrix form\nsparse(oracle::GroverSearch{N, T}) where {N, T} = grover_search_matrix_form(T, N)"
+},
+
+{
     "location": "dev/register/#",
     "page": "Quantum Register",
     "title": "Quantum Register",
@@ -222,14 +254,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Quantum Register",
     "category": "section",
     "text": "Quantum Register is the abstraction of a quantum state being processed by a quantum circuit."
-},
-
-{
-    "location": "dev/register/#QuCircuit.AbstractRegister",
-    "page": "Quantum Register",
-    "title": "QuCircuit.AbstractRegister",
-    "category": "type",
-    "text": "AbstractRegister{B, T}\n\nabstract type that registers will subtype from. B is the batch size, T is the data type.\n\nRequired Properties\n\nProperty Description default\nnqubit(reg) get the total number of qubits. \nnactive(reg) get the number of active qubits. \nnremain(reg) get the number of remained qubits. nqubit - nactive\nnbatch(reg) get the number of batch. B\naddress(reg) get the address of this register. \nstate(reg) get the state of this register. It always return the matrix stored inside. \neltype(reg) get the element type stored by this register on classical memory. (the type Julia should use to represent amplitude) T\ncopy(reg) copy this register. \nsimilar(reg) construct a new register with similar configuration. \n\nRequired Methods\n\nMultiply\n\n*(op, reg)\n\ndefine how operator op act on this register. This is quite useful when there is a special approach to apply an operator on this register. (e.g a register with no batch, or a register with a MPS state, etc.)\n\nnote: Note\nbe careful, generally, operators can only be applied to a register, thus we should only overload this operation and do not overload *(reg, op).\n\nPack Address\n\npack_address!(reg, addrs)\n\npack addrs together to the first k-dimensions.\n\nExample\n\nGiven a register with dimension [2, 3, 1, 5, 4], we pack [5, 4] to the first 2 dimensions. We will get [5, 4, 2, 3, 1].\n\nFocus Address\n\nfocus!(reg, range)\n\nmerge address in range together as one dimension (the active space).\n\nExample\n\nGiven a register with dimension (2^4)x3 and address [1, 2, 3, 4], we focus address [3, 4], will pack [3, 4] together and merge them as the active space. Then we will have a register with size 2^2x(2^2x3), and address [3, 4, 1, 2].\n\nInitializers\n\nInitializers are functions that provide specific quantum states, e.g zero states, random states, GHZ states and etc.\n\nregister(::Type{RT}, raw, nbatch)\n\nan general initializer for input raw state array.\n\nregister(::Type{InitMethod}, ::Type{RT}, ::Type{T}, n, nbatch)\n\ninit register type RT with InitMethod type (e.g InitMethod{:zero}) with element type T and total number qubits n with nbatch. This will be auto-binded to some shortcuts like zero_state, rand_state, randn_state.\n\n\n\n"
 },
 
 {
@@ -285,7 +309,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Cache",
     "title": "Julia\'s Dict",
     "category": "section",
-    "text": "Base.hashindex(key, sz)sz is the total length of the list of slots. This function is actually equivalent to "
+    "text": "Base.hashindex(key, sz)sz is the total length of the list of slots.TO BE DONE..."
 },
 
 {
@@ -293,23 +317,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Cache",
     "title": "Implementation",
     "category": "section",
-    "text": "Unlike parameter servers in deep learning frameworks. Our cache server contains not only the cached (sparse) matrix, but also its related cache level, which defines its update priority during the evluation of a quantum circuit."
+    "text": "Unlike parameter servers in deep learning frameworks. Our cache server contains not only the cached (sparse) matrix, but also its related cache level, which defines its update priority during the evluation of a quantum circuit. Or it can be viewed as a parameter server that stores a CacheElement)."
 },
 
 {
-    "location": "dev/cache/#Possible-Solutions-1",
+    "location": "dev/cache/#Solutions-1",
     "page": "Cache",
-    "title": "Possible Solutions",
+    "title": "Solutions",
     "category": "section",
-    "text": ""
-},
-
-{
-    "location": "dev/cache/#Solution-1-1",
-    "page": "Cache",
-    "title": "Solution 1",
-    "category": "section",
-    "text": "mutable struct CacheElement{TM <: AbstractMatrix}\n    level::UInt\n    data::Dict{Any, TM}\nend\n\nstruct CacheServer{TM} <: AbstractCacheServer\n    kvstore::Dict{Any, CacheElement{TM}}\nendThis cannot characterize parameters with "
+    "text": "TO BE DONE..."
 },
 
 {
@@ -398,6 +414,430 @@ var documenterSearchIndex = {"docs": [
     "title": "How to check test coverage",
     "category": "section",
     "text": "Step 1:  Navigate to your test directory, and start julia like this:julia --code-coverage=userStep 2: Run your tests (e.g., include(\"runtests.jl\")) and quit Julia.Step 3: Navigate to the top-level directory of your package, restart Julia (with no special flags) and analyze your code coverage:using Coverage\n# defaults to src/; alternatively, supply the folder name as argument\ncoverage = process_folder()\n# Get total coverage for all Julia files\ncovered_lines, total_lines = get_summary(coverage)\n# Or process a single file\n@show get_summary(process_file(\"src/MyPkg.jl\"))check Coverage.jl for more information."
+},
+
+{
+    "location": "dev/APIs/#",
+    "page": "APIs",
+    "title": "APIs",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.AbstractBlock",
+    "page": "APIs",
+    "title": "QuCircuit.AbstractBlock",
+    "category": "type",
+    "text": "AbstractBlock\n\nabstract type that all block will subtype from. N is the number of qubits.\n\nAPIs\n\nTraits\n\nnqubit ninput noutput isunitary ispure isreflexive ishermitian\n\nMethods\n\napply! copy dispatch!\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.AbstractRegister",
+    "page": "APIs",
+    "title": "QuCircuit.AbstractRegister",
+    "category": "type",
+    "text": "AbstractRegister{B, T}\n\nabstract type that registers will subtype from. B is the batch size, T is the data type.\n\nRequired Properties\n\nProperty Description default\nnqubit(reg) get the total number of qubits. \nnactive(reg) get the number of active qubits. \nnremain(reg) get the number of remained qubits. nqubit - nactive\nnbatch(reg) get the number of batch. B\naddress(reg) get the address of this register. \nstate(reg) get the state of this register. It always return the matrix stored inside. \neltype(reg) get the element type stored by this register on classical memory. (the type Julia should use to represent amplitude) T\ncopy(reg) copy this register. \nsimilar(reg) construct a new register with similar configuration. \n\nRequired Methods\n\nMultiply\n\n*(op, reg)\n\ndefine how operator op act on this register. This is quite useful when there is a special approach to apply an operator on this register. (e.g a register with no batch, or a register with a MPS state, etc.)\n\nnote: Note\nbe careful, generally, operators can only be applied to a register, thus we should only overload this operation and do not overload *(reg, op).\n\nPack Address\n\npack_address!(reg, addrs)\n\npack addrs together to the first k-dimensions.\n\nExample\n\nGiven a register with dimension [2, 3, 1, 5, 4], we pack [5, 4] to the first 2 dimensions. We will get [5, 4, 2, 3, 1].\n\nFocus Address\n\nfocus!(reg, range)\n\nmerge address in range together as one dimension (the active space).\n\nExample\n\nGiven a register with dimension (2^4)x3 and address [1, 2, 3, 4], we focus address [3, 4], will pack [3, 4] together and merge them as the active space. Then we will have a register with size 2^2x(2^2x3), and address [3, 4, 1, 2].\n\nInitializers\n\nInitializers are functions that provide specific quantum states, e.g zero states, random states, GHZ states and etc.\n\nregister(::Type{RT}, raw, nbatch)\n\nan general initializer for input raw state array.\n\nregister(::Type{InitMethod}, ::Type{RT}, ::Type{T}, n, nbatch)\n\ninit register type RT with InitMethod type (e.g InitMethod{:zero}) with element type T and total number qubits n with nbatch. This will be auto-binded to some shortcuts like zero_state, rand_state, randn_state.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.address",
+    "page": "APIs",
+    "title": "QuCircuit.address",
+    "category": "function",
+    "text": "address(reg)->Int\n\nget the address of this register.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.apply!",
+    "page": "APIs",
+    "title": "QuCircuit.apply!",
+    "category": "function",
+    "text": "apply!(reg, block, [signal])\n\napply a block to a register reg with or without a cache signal.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.batch_normalize",
+    "page": "APIs",
+    "title": "QuCircuit.batch_normalize",
+    "category": "function",
+    "text": "batch_normalize\n\nnormalize a batch of vector.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.batch_normalize!",
+    "page": "APIs",
+    "title": "QuCircuit.batch_normalize!",
+    "category": "function",
+    "text": "batch_normalize!(matrix)\n\nnormalize a batch of vector.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.blocks",
+    "page": "APIs",
+    "title": "QuCircuit.blocks",
+    "category": "function",
+    "text": "blocks(composite_block)\n\nget an iterator that iterate through all sub-blocks.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.dispatch!-Tuple{Function,QuCircuit.CompositeBlock,Array{T,1} where T}",
+    "page": "APIs",
+    "title": "QuCircuit.dispatch!",
+    "category": "method",
+    "text": "dispatch!(f, c, params) -> c\n\ndispatch parameters and tweak it according to callback function f(original, parameter)->new\n\ndispatch a vector of parameters to this composite block according to each sub-block\'s number of parameters.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.gate-Union{Tuple{GT}, Tuple{Type{Complex{T}},Type{GT}}, Tuple{T}} where GT<:QuCircuit.GateType where T",
+    "page": "APIs",
+    "title": "QuCircuit.gate",
+    "category": "method",
+    "text": "gate(type, gate_type)\ngate(gate_type)\n\nCreate an instance of gate_type.\n\nExample\n\ncreate a Pauli X gate: gate(X)\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.iscacheable-Tuple{QuCircuit.DefaultServer,QuCircuit.MatrixBlock,UInt64}",
+    "page": "APIs",
+    "title": "QuCircuit.iscacheable",
+    "category": "method",
+    "text": "iscaheable(server, block, level) -> Bool\n\nwhether this block is cacheable with current cache level.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.ispure-Tuple{QuCircuit.AbstractBlock}",
+    "page": "APIs",
+    "title": "QuCircuit.ispure",
+    "category": "method",
+    "text": "ispure(x) -> Bool\n\nTest whether this operator is pure.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.isreflexive-Tuple{QuCircuit.AbstractBlock}",
+    "page": "APIs",
+    "title": "QuCircuit.isreflexive",
+    "category": "method",
+    "text": "isreflexive(x) -> Bool\n\nTest whether this operator is reflexive.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.isunitary-Tuple{QuCircuit.AbstractBlock}",
+    "page": "APIs",
+    "title": "QuCircuit.isunitary",
+    "category": "method",
+    "text": "isunitary(x) -> Bool\n\nTest whether this operator is unitary.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.kronprod-Tuple{Any}",
+    "page": "APIs",
+    "title": "QuCircuit.kronprod",
+    "category": "method",
+    "text": "kronprod(itr)\n\nkronecker product all operators in the iterator.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.log2i-Union{Tuple{T}, Tuple{T}} where T",
+    "page": "APIs",
+    "title": "QuCircuit.log2i",
+    "category": "method",
+    "text": "log2i(x)\n\nlogrithm for integer pow of 2\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.nactive",
+    "page": "APIs",
+    "title": "QuCircuit.nactive",
+    "category": "function",
+    "text": "nactive(reg)->Int\n\nget the number of active qubits.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.nbatch",
+    "page": "APIs",
+    "title": "QuCircuit.nbatch",
+    "category": "function",
+    "text": "nbatch(reg)->Int\n\nget the number of batch.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.ninput",
+    "page": "APIs",
+    "title": "QuCircuit.ninput",
+    "category": "function",
+    "text": "ninput(x) -> Integer\n\nReturns the number of input qubits.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.noutput",
+    "page": "APIs",
+    "title": "QuCircuit.noutput",
+    "category": "function",
+    "text": "noutput(x) -> Integer\n\nReturns the number of output qubits.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.nparameters-Tuple{QuCircuit.AbstractBlock}",
+    "page": "APIs",
+    "title": "QuCircuit.nparameters",
+    "category": "method",
+    "text": "nparameters(x) -> Integer\n\nReturns the number of parameters of x.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.nqubit",
+    "page": "APIs",
+    "title": "QuCircuit.nqubit",
+    "category": "function",
+    "text": "nqubit(reg)->Int\n\nget the total number of qubits.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.nqubit-Tuple{QuCircuit.AbstractBlock}",
+    "page": "APIs",
+    "title": "QuCircuit.nqubit",
+    "category": "method",
+    "text": "nqubit(x) -> Integer\n\nReturns the number of qubits.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.nremain",
+    "page": "APIs",
+    "title": "QuCircuit.nremain",
+    "category": "function",
+    "text": "nremain(reg)->Int\n\nget the number of remained qubits.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.pull-Tuple{QuCircuit.DefaultServer,QuCircuit.MatrixBlock}",
+    "page": "APIs",
+    "title": "QuCircuit.pull",
+    "category": "method",
+    "text": "pull(server, block)\n\npull current block\'s cache from server\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.pull-Tuple{QuCircuit.DefaultServer,UInt64,QuCircuit.MatrixBlock}",
+    "page": "APIs",
+    "title": "QuCircuit.pull",
+    "category": "method",
+    "text": "pull(server, key, pkey) -> valtype\n\nget block\'s cache by (key, pkey)\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.rand_state",
+    "page": "APIs",
+    "title": "QuCircuit.rand_state",
+    "category": "function",
+    "text": "rand_state(n, nbatch)\n\nconstruct a normalized random state with uniform distributed theta and r with amplitude rcdot e^itheta.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.randn_state",
+    "page": "APIs",
+    "title": "QuCircuit.randn_state",
+    "category": "function",
+    "text": "randn_state(n, nbatch)\n\nconstruct normalized a random state with normal distributed theta and r with amplitude rcdot e^itheta.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.register",
+    "page": "APIs",
+    "title": "QuCircuit.register",
+    "category": "function",
+    "text": "register(::Type{RT}, raw, nbatch)\n\nan general initializer for input raw state array.\n\nregister(::Type{InitMethod}, ::Type{RT}, ::Type{T}, n, nbatch)\n\ninit register type RT with InitMethod type (e.g InitMethod{:zero}) with element type T and total number qubits n with nbatch. This will be auto-binded to some shortcuts like zero_state, rand_state, randn_state.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.state",
+    "page": "APIs",
+    "title": "QuCircuit.state",
+    "category": "function",
+    "text": "state(reg)\n\nget the state of this register. It always return the matrix stored inside.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.statevec",
+    "page": "APIs",
+    "title": "QuCircuit.statevec",
+    "category": "function",
+    "text": "statevec(reg)\n\nget the state vector of this register. It will always return the vector form (a matrix for batched register).\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.zero_state",
+    "page": "APIs",
+    "title": "QuCircuit.zero_state",
+    "category": "function",
+    "text": "zero_state(n, nbatch)\n\nconstruct a zero state 00cdots 00rangle.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.ChainBlock",
+    "page": "APIs",
+    "title": "QuCircuit.ChainBlock",
+    "category": "type",
+    "text": "ChainBlock{N, T} <: CompositeBlock{N, T}\n\nChainBlock is a basic construct tool to create user defined blocks horizontically. It is a Vector like composite type.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.Gate",
+    "page": "APIs",
+    "title": "QuCircuit.Gate",
+    "category": "type",
+    "text": "Gate{N, GT, T} <: PrimitiveBlock{N, T}\n\nN qubits gate whose matrix form is a constant.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.KronBlock",
+    "page": "APIs",
+    "title": "QuCircuit.KronBlock",
+    "category": "type",
+    "text": "KronBlock{N, T} <: CompositeBlock\n\ncomposite block that combine blocks by kronecker product.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.Roller",
+    "page": "APIs",
+    "title": "QuCircuit.Roller",
+    "category": "type",
+    "text": "Roller{N, M, T, BT} <: CompositeBlock{N, T}\n\nmap a block type to all lines and use a rolling method to evaluate them.\n\nTODO\n\nfill identity like KronBlock\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#Base.LinAlg.ishermitian-Tuple{QuCircuit.AbstractBlock}",
+    "page": "APIs",
+    "title": "Base.LinAlg.ishermitian",
+    "category": "method",
+    "text": "ishermitian(x) -> Bool\n\nTest whether this operator is hermitian.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#Base.empty!",
+    "page": "APIs",
+    "title": "Base.empty!",
+    "category": "function",
+    "text": "empty!(::MatrixBlock, signal; recursive=false)\n\ndo nothing if this is a matrix block.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#Base.empty!-Tuple{QuCircuit.Cached,Int64}",
+    "page": "APIs",
+    "title": "Base.empty!",
+    "category": "method",
+    "text": "empty!(object, signal; recursive=false)\n\nclear this object\'s cache with signal, if signal < level, then do nothing.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#Base.empty!-Tuple{QuCircuit.Cached}",
+    "page": "APIs",
+    "title": "Base.empty!",
+    "category": "method",
+    "text": "empty!(object; recursive=false)\n\nforce clear this object\'s cache\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#Base.empty!-Tuple{QuCircuit.DefaultServer,UInt64}",
+    "page": "APIs",
+    "title": "Base.empty!",
+    "category": "method",
+    "text": "empty!(server, key)\n\nempty key\'s cache.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#Base.empty!-Union{Tuple{CT}, Tuple{Type{CT}}} where CT",
+    "page": "APIs",
+    "title": "Base.empty!",
+    "category": "method",
+    "text": "empty!(type)\n\nclear all cache in this type.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#Base.kron-Tuple{Int64,Vararg{Union{Pair, QuCircuit.MatrixBlock, Tuple},N} where N}",
+    "page": "APIs",
+    "title": "Base.kron",
+    "category": "method",
+    "text": "kron(blocks...) -> KronBlock\nkron(iterator) -> KronBlock\nkron(total, blocks...) -> KronBlock\nkron(total, iterator) -> KronBlock\n\ncreate a KronBlock with a list of blocks or tuple of heads and blocks.\n\nExample\n\nblock1 = Gate(X)\nblock2 = Gate(Z)\nblock3 = Gate(Y)\nKronBlock(block1, (3, block2), block3)\n\nThis will automatically generate a block list looks like\n\n1 -- [X] --\n2 ---------\n3 -- [Z] --\n4 -- [Y] --\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#Base.map-Tuple{QuCircuit.MatrixBlock}",
+    "page": "APIs",
+    "title": "Base.map",
+    "category": "method",
+    "text": "map(block)\n\nmap this block to all lines\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#Base.push!-Union{Tuple{QuCircuit.DefaultServer{TM},QuCircuit.MatrixBlock,TM,UInt64}, Tuple{TM}} where TM",
+    "page": "APIs",
+    "title": "Base.push!",
+    "category": "method",
+    "text": "push!(server, block, val, level) -> server\n\npush val to cache server, it will be cached if level is greater than stored level. Or it will do nothing.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#Base.push!-Union{Tuple{QuCircuit.DefaultServer{TM},UInt64,QuCircuit.MatrixBlock,TM,UInt64}, Tuple{TM}} where TM",
+    "page": "APIs",
+    "title": "Base.push!",
+    "category": "method",
+    "text": "push!(server, key, pkey, val[, level]) -> server\n\npush (block, level) in hash key form to the server. update original cache with val. if input level is greater than stored level (input > stored).\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.cache!-Union{Tuple{QuCircuit.DefaultServer{TM},QuCircuit.MatrixBlock,UInt64}, Tuple{TM}} where TM",
+    "page": "APIs",
+    "title": "QuCircuit.cache!",
+    "category": "method",
+    "text": "cache!(server, block, level) -> server\n\nadd a new cacheable block with cache level level to the server.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.cache!-Union{Tuple{QuCircuit.DefaultServer{TM},UInt64,UInt64}, Tuple{TM}} where TM",
+    "page": "APIs",
+    "title": "QuCircuit.cache!",
+    "category": "method",
+    "text": "cache!(server, key, level) -> server\n\nadd a new cacheable block with cache level level by upload its key to the server.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.cache_matrix-Tuple{QuCircuit.MatrixBlock}",
+    "page": "APIs",
+    "title": "QuCircuit.cache_matrix",
+    "category": "method",
+    "text": "cache_matrix(block)\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.cache_type-Union{Tuple{N}, Tuple{QuCircuit.MatrixBlock{N,T}}, Tuple{T}} where T where N",
+    "page": "APIs",
+    "title": "QuCircuit.cache_type",
+    "category": "method",
+    "text": "cache_type(block) -> type\n\nget the type that this block will use for cache.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.parse_block",
+    "page": "APIs",
+    "title": "QuCircuit.parse_block",
+    "category": "function",
+    "text": "parse_block\n\nplugable argument transformer, overload this for different interface.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.setlevel!-Tuple{QuCircuit.DefaultServer,QuCircuit.MatrixBlock,UInt64}",
+    "page": "APIs",
+    "title": "QuCircuit.setlevel!",
+    "category": "method",
+    "text": "setlevel!(server, block, level)\n\nset block\'s cache level\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#APIs-1",
+    "page": "APIs",
+    "title": "APIs",
+    "category": "section",
+    "text": "Modules = [QuCircuit]\nOrder   = [:constant, :type, :function]"
 },
 
 {
