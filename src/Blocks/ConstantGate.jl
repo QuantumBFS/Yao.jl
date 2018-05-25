@@ -11,40 +11,22 @@ Gate(::Type{T}, s::Symbol) where T = Gate(T, GateType{s})
 
 # NOTE: we bind some type related constants here to avoid multiple allocation
 
-for (GTYPE, NAME) in [
-    (:X, "PAULI_X"),
-    (:Y, "PAULI_Y"),
-    (:Z, "PAULI_Z"),
-    (:H, "HADMARD")
-]
+for NAME in [:X, :Y, :Z, :H]
 
-    DENSE_NAME = Symbol(join(["CONST", NAME], "_"))
-    SPARSE_NAME = Symbol(join(["CONST", "SPARSE", NAME], "_"))
-    GT = GateType{GTYPE}
+    GT = GateType{NAME}
 
     @eval begin
         nqubits(::Type{$GT}) = 1
 
-        full(gate::Gate{1, $GT, T}) where T = $(DENSE_NAME)(T)
-        sparse(gate::Gate{1, $GT, T}) where T = $(SPARSE_NAME)(T)
+        full(gate::Gate{1, $GT, T}) where T = Const.Dense.$NAME(T)
+        sparse(gate::Gate{1, $GT, T}) where T = Const.Sparse.$NAME(T)
         # traits
         isreflexive(gate::Gate{1, $GT, T}) where T = true
         ishermitian(gate::Gate{1, $GT, T}) where T = true
+
+        # Pretty Printing
+        function show(io::IO, block::Gate{1, $GT, T}) where T
+            print(io, $(NAME), "{$T}")
+        end
     end
-end
-
-# Pretty Printing
-
-for NAME in [
-    :X, :Y, :Z, :H,
-]
-
-    GT = GateType{NAME}
-
-@eval begin
-    function show(io::IO, block::Gate{1, $GT, T}) where T
-        print(io, $(NAME), "{$T}")
-    end
-end
-
 end

@@ -77,21 +77,21 @@ function _single_inverse_control_gate_sparse(control::Int, U, addr, nqubit)
     T = eltype(U)
     if control < addr
         op = A_kron_B(
-            CONST_SPARSE_P1(T), control, 1,
+            Const.Sparse.P1(T), control, 1,
             speye(U), addr
         )
         op += A_kron_B(
-            CONST_SPARSE_P0(T), control, 1,
+            Const.Sparse.P0(T), control, 1,
             U, addr
         )
     else
         op = A_kron_B(
             speye(U), addr, nqubit,
-            CONST_SPARSE_P1(T), control
+            Const.Sparse.P1(T), control
         )
         op += A_kron_B(
             U, addr, nqubit,
-            CONST_SPARSE_P0(T), control
+            Const.Sparse.P0(T), control
         )
     end
     op
@@ -103,21 +103,21 @@ function _single_control_gate_sparse(control::Int, U, addr, nqubit)
     T = eltype(U)
     if control < addr
         op = A_kron_B(
-            CONST_SPARSE_P0(T), control, 1,
+            Const.Sparse.P0(T), control, 1,
             speye(U), addr
         )
         op += A_kron_B(
-            CONST_SPARSE_P1(T), control, 1,
+            Const.Sparse.P1(T), control, 1,
             U, addr
         )
     else
         op = A_kron_B(
             speye(U), addr, nqubit,
-            CONST_SPARSE_P0(T), control
+            Const.Sparse.P0(T), control
         )
         op += A_kron_B(
             U, addr, nqubit,
-            CONST_SPARSE_P1(T), control
+            Const.Sparse.P1(T), control
         )
     end
     op

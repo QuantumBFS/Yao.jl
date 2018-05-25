@@ -15,9 +15,14 @@ Create an instance of `gate_type`.
 create a Pauli X gate: `gate(X)`
 """
 gate(::Type{T}, ::Type{GT}) where {T, GT <: GateType} = Gate(T, GT)
-gate(::Type{GT}) where {GT <: GateType} = gate(ComplexF64, GT)
-gate(::Type{T}, s::Symbol) where T = Gate(T, s)
-gate(s::Symbol) = gate(ComplexF64, s)
+gate(::Type{T}, s::Symbol, params...) where T = gate(T, GateType{s}, params...)
+
+# config default type
+gate(s::Symbol, params...) = gate(ComplexF64, s, params...)
+gate(::Type{GT}, params...) where {GT <: GateType} = gate(ComplexF64, GT, params...)
+
+gate(::Type{T}, ::Type{Val{:Ra}}, α::Complex{T}, β::Complex{T}, γ::Complex{T}) where T = chain(rot(:X, α), rot(:Z, β), rot(:X, γ))
+
 
 # 1.2 phase gate
 export phase

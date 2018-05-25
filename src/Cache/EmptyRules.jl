@@ -44,7 +44,6 @@ end
 
 function empty!(c::Cached, ::Type{CT}, recursive::Bool) where CT
     if iscached(global_cache(CT), c)
-        info("find cache, empty it!")
         empty!(global_cache(CT), c.block)
     end
     c

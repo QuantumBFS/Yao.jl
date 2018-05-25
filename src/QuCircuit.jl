@@ -2,6 +2,7 @@ module QuCircuit
 
 using Compat
 
+include("Consts/Consts.jl")
 include("MathUtils.jl")
 
 # include("Register.jl")

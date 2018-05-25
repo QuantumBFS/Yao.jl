@@ -18,7 +18,7 @@ for (DIRECTION, MAT) in [
     (:Y, [cos(theta/2) -sin(theta/2); sin(theta/2) cos(theta/2)]),
     (:Z, [exp(-im*theta/2) 0;0 exp(im*theta/2)])
 ]
-    @test full(RotationGate(DIRECTION, theta)) == MAT
+    @test full(RotationGate(DIRECTION, theta)) ≈ MAT
 end
 
 end

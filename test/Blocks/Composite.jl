@@ -47,4 +47,18 @@ end
     @test g[1].theta == 2
     @test g[2].theta == 3
     @test g[3].theta == 4
+
+    # block with different size
+    g = KronBlock{3}(1=>phase(0.1), 3=>ChainBlock(phase(0.2), phase(0.3)))
+    dispatch!(g, [1, 2, 3])
+    @test g[1].theta == 1
+    @test g[3][1].theta == 2
+    @test g[3][2].theta == 3
+
+    # direct dispatch
+    g = KronBlock{5}(1=>phase(0.1), 3=>X(), 5=>ChainBlock(phase(0.2), phase(0.3)))
+    dispatch!(g, 1, [2, 3])
+    @test g[1].theta == 1
+    @test g[5][1].theta == 2
+    @test g[5][2].theta == 3
 end
