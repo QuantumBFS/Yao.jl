@@ -50,6 +50,10 @@ end
     for (src, tg) in zip(g, test_list)
         @test src == tg
     end
+
+    for (src, tg) in zip(eachindex(g), 1:length(test_list))
+        @test src == tg
+    end
 end
 
 @testset "additional" begin
@@ -69,4 +73,11 @@ end
 
 @testset "traits" begin
     info("TODO: check traits when primitive blocks' traits are all defined")
+
+    g = ChainBlock(X(), Y())
+    @test isunitary(g) == true
+    @test isreflexive(g) == true
+    @test ishermitian(g) == true
+    @test length(g) == 2
+    @test eltype(g) == eltype(g.blocks)
 end

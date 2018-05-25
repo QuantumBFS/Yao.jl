@@ -16,26 +16,18 @@ The benefit of this solution includes:
 Base.hashindex(key, sz)
 ```
 
-`sz` is the total length of the list of slots. This function is actually equivalent
-to 
+`sz` is the total length of the list of slots.
+
+*TO BE DONE...*
 
 ## Implementation
 
-Unlike parameter servers in deep learning frameworks. Our cache server contains not only the cached (sparse) matrix, but also its related cache level, which defines its update priority during the evluation of a quantum circuit.
+Unlike parameter servers in deep learning frameworks.
+Our cache server contains not only the cached (sparse) matrix,
+but also its related cache level,
+which defines its update priority during the evluation of a quantum circuit.
+Or it can be viewed as a parameter server that stores a `CacheElement`).
 
-### Possible Solutions
+### Solutions
 
-#### Solution 1
-
-```julia
-mutable struct CacheElement{TM <: AbstractMatrix}
-    level::UInt
-    data::Dict{Any, TM}
-end
-
-struct CacheServer{TM} <: AbstractCacheServer
-    kvstore::Dict{Any, CacheElement{TM}}
-end
-```
-
-This cannot characterize parameters with 
+*TO BE DONE...*

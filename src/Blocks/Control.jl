@@ -77,21 +77,21 @@ function _single_inverse_control_gate_sparse(control::Int, U, addr, nqubit)
     T = eltype(U)
     if control < addr
         op = A_kron_B(
-            CONST_SPARSE_P1(T), control, 1,
+            Const.Sparse.P1(T), control, 1,
             speye(U), addr
         )
         op += A_kron_B(
-            CONST_SPARSE_P0(T), control, 1,
+            Const.Sparse.P0(T), control, 1,
             U, addr
         )
     else
         op = A_kron_B(
             speye(U), addr, nqubit,
-            CONST_SPARSE_P1(T), control
+            Const.Sparse.P1(T), control
         )
         op += A_kron_B(
             U, addr, nqubit,
-            CONST_SPARSE_P0(T), control
+            Const.Sparse.P0(T), control
         )
     end
     op
@@ -103,21 +103,21 @@ function _single_control_gate_sparse(control::Int, U, addr, nqubit)
     T = eltype(U)
     if control < addr
         op = A_kron_B(
-            CONST_SPARSE_P0(T), control, 1,
+            Const.Sparse.P0(T), control, 1,
             speye(U), addr
         )
         op += A_kron_B(
-            CONST_SPARSE_P1(T), control, 1,
+            Const.Sparse.P1(T), control, 1,
             U, addr
         )
     else
         op = A_kron_B(
             speye(U), addr, nqubit,
-            CONST_SPARSE_P0(T), control
+            Const.Sparse.P0(T), control
         )
         op += A_kron_B(
             U, addr, nqubit,
-            CONST_SPARSE_P1(T), control
+            Const.Sparse.P1(T), control
         )
     end
     op
@@ -141,7 +141,9 @@ struct ControlQuBit
 end
 
 # Required Methods as Composite Block
-function getindex(c::ControlBlock, index)
+function getindex(c::ControlBlock{BT, N}, index) where {BT, N}
+    0 < index <= N || throw(BoundsError(c, index))
+
     if index == c.addr
         return c.block
     elseif index in c.ctrl_qubits
@@ -151,7 +153,9 @@ function getindex(c::ControlBlock, index)
     throw(KeyError(index))
 end
 
-function setindex!(c::ControlBlock, val::MatrixBlock, index)
+function setindex!(c::ControlBlock{BT, N}, val::MatrixBlock, index) where {BT, N}
+    0 < index <= N || throw(BoundsError(c, index))
+
     if index == c.addr
         c.block = val
     else
@@ -163,6 +167,7 @@ end
 start(c::ControlBlock) = 1
 next(c::ControlBlock, st) = c.block, st + 1
 done(c::ControlBlock, st) = st == 2
+length(c::ControlBlock) = 1
 eachindex(c::ControlBlock) = c.addr
 blocks(c::ControlBlock) = [c.block]
 

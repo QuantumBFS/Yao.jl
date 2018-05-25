@@ -13,6 +13,7 @@ abstract type CompositeBlock{N, T} <: MatrixBlock{N, T} end
 # composite blocks are iterables
 import Base: start, next, done, eltype, length
 
+export blocks
 """
     blocks(composite_block)
 

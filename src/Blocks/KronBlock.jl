@@ -45,7 +45,7 @@ struct KronBlock{N, T} <: CompositeBlock{N, T}
                 push!(blocks, block)
                 curr_head += nqubit(block)
             else
-                throw(ErrorException("KronBlock only takes MatrixBlock"))
+                throw(MethodError(KronBlock, args))
             end
         end
 
@@ -68,7 +68,7 @@ function similar(k::KronBlock{N, T}) where {N, T}
 end
 
 # some useful interface
-
+export addrs
 addrs(k::KronBlock) = k.addrs
 blocks(k::KronBlock) = k.blocks
 
@@ -143,8 +143,6 @@ for NAME in [
     :isunitary,
     :ispure,
     :isreflexive,
-    :isunitary_hermitian,
-    :hasparameter,
     :ishermitian,
 ]
 

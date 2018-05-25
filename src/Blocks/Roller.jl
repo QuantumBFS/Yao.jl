@@ -3,6 +3,10 @@
 
 map a block type to all lines and use a rolling
 method to evaluate them.
+
+## TODO
+
+fill identity like `KronBlock`
 """
 struct Roller{N, M, T, BT <: Tuple} <: CompositeBlock{N, T}
     blocks::BT
@@ -10,6 +14,10 @@ struct Roller{N, M, T, BT <: Tuple} <: CompositeBlock{N, T}
     function Roller{N, T}(blocks::Tuple) where {N, T}
         M = length(blocks)
         new{N, M, T, typeof(blocks)}(blocks)
+    end
+
+    function Roller{N, T}(blocks::MatrixBlock...) where {N, T}
+        Roller{N, T}(blocks)
     end
 
     function Roller{N}(block::MatrixBlock{K, T}) where {N, K, T}
@@ -28,6 +36,7 @@ next(m::Roller, st) = next(m.blocks, st)
 done(m::Roller, st) = done(m.blocks, st)
 eltype(m::Roller) = eltype(m.blocks)
 length(m::Roller) = length(m.blocks)
+eachindex(m::Roller) = eachindex(m.blocks)
 blocks(m::Roller) = m.blocks
 
 isunitary(m::Roller) = all(isunitary, m.blocks)
@@ -35,7 +44,7 @@ isunitary(m::Roller) = all(isunitary, m.blocks)
 function sparse(m::Roller{N, M}) where {N, M}
     op = sparse(first(m.blocks))
     for i=2:M
-        op = kron(op, m.blocks[i])
+        op = kron(sparse(m.blocks[i]), op)
     end
 
     return op
@@ -43,7 +52,7 @@ end
 
 function apply!(reg::Register{B}, m::Roller{N, M}) where {B, N, M}
     K = N ÷ M
-    st = reshape(reg.state, 1<<K, (1<<(N - 1)) * Int(B))
+    st = reshape(reg.state, 1<<K, (1<<(N - 1)) * B)
 
     for i = 1:M
         st .= sparse(m.blocks[i]) * st
@@ -52,7 +61,7 @@ function apply!(reg::Register{B}, m::Roller{N, M}) where {B, N, M}
         # to finish exactly M times, or the
         # address of each qubit will not match
         # the value of state
-        rolldims!(Val{K}, Val{N}, Val{B}, reg.state)
+        rolldims!(Val{K}, Val{N}, Val{B}, statevec(reg))
     end
     reg
 end

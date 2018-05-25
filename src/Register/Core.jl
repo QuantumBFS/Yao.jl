@@ -120,6 +120,14 @@ the matrix stored inside.
 function state end
 
 """
+    statevec(reg)
+
+get the state vector of this register. It will always return
+the vector form (a matrix for batched register).
+"""
+function statevec end
+
+"""
     register(::Type{RT}, raw, nbatch)
 
 an general initializer for input raw state array.
@@ -163,7 +171,7 @@ function randn_state end
 # nqubit
 # nactive
 nremain(r::AbstractRegister) = nqubit(r) - nactive(r)
-nbatch(r::AbstractRegister{B}) where B = Int(B)
+nbatch(r::AbstractRegister{B}) where B = B
 eltype(r::AbstractRegister{B, T}) where {B, T} = T
 
 # Factory Methods
@@ -191,11 +199,6 @@ end
 ## Config Initializers
 
 abstract type InitMethod{T} end
-
-# define type conversion
-function register(::Type{InitMethod{IM}}, ::Type{RT}, ::Type{T}, n::Int, nbatch::Int) where {IM, RT, T}
-    register(InitMethod{IM}, RT, T, n, unsigned(nbatch))
-end
 
 # enable multiple dispatch for different initializers
 function register(::Type{RT}, ::Type{T}, n::Int, nbatch::Int, method::Symbol) where {RT, T}
