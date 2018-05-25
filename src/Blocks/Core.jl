@@ -33,7 +33,7 @@ abstract type AbstractBlock end
 
 # Interface
 ## Trait
-export nqubit, ninput, noutput, isunitary, ispure, nparameters
+export nqubit, ninput, noutput, isunitary, ispure, isreflexive, nparameters
 import Base: ishermitian
 
 # nqubit(::AbstractBlock) = AnySize
@@ -43,6 +43,7 @@ isunitary(::AbstractBlock) = false
 ispure(::AbstractBlock) = false
 isreflexive(::AbstractBlock) = false
 ishermitian(::AbstractBlock) = false
+nparameters(::AbstractBlock) = 0
 # isunitary_hermitian = isunitary ishermitian
 
 import Base: copy

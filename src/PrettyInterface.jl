@@ -14,18 +14,22 @@ Create an instance of `gate_type`.
 
 create a Pauli X gate: `gate(X)`
 """
-gate = Gate
+gate(::Type{T}, ::Type{GT}) where {T, GT <: GateType} = Gate(T, GT)
+gate(::Type{GT}) where {GT <: GateType} = gate(ComplexF64, GT)
+gate(::Type{T}, s::Symbol) where T = Gate(T, s)
+gate(s::Symbol) = gate(ComplexF64, s)
 
 # 1.2 phase gate
 export phase
 phase(::Type{T}, theta) where {T <: Real} = PhiGate{T}(theta)
 phase(theta) = phase(Float64, theta)
+phase() = phase(0.0)
 
 # 1.3 rotation gate
 export rot
-rot(::Type{T}, gt::Symbol, theta::T = zero(T)) where {T <: Real} = RotationGate{GateType{gt}, T}(theta)
-rot(gt::Symbol, theta::T) where {T <: Real} = rot(Float64, gt, theta)
-rot(gt::Symbol) = rot(Float64, gt)
+rot(::Type{GT}, theta) where {GT} = RotationGate{GT}(theta)
+rot(s::Symbol, theta) = RotationGate(s, theta)
+rot(s::Symbol) = rot(s, 0.0)
 
 # 2. composite blocks
 
@@ -169,7 +173,6 @@ export X, Y, Z, H
 for NAME in [:X, :Y, :Z, :H]
 
     GT = GateType{NAME}
-
     @eval begin
 
         $NAME() = gate($GT)
