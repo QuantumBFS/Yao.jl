@@ -8,15 +8,17 @@ ghz_state[end] = -1 / sqrt(2)
 
 psi = zero_state(4)
 
-circuit = sequence(
-    X(num_bits, 1),
-    H(num_bits, 2:num_bits),
-    X(1) |> C(num_bits, 2),
-    X(3) |> C(num_bits, 4),
-    X(1) |> C(num_bits, 3),
-    X(3) |> C(num_bits, 4),
-    H(num_bits, 1:num_bits),
+circuit = compose(
+    X(1),
+    H(2:4),
+    X(1) |> C(2),
+    X(3) |> C(4),
+    X(1) |> C(3),
+    X(3) |> C(4),
+    H(1:4),
 )
+
+c = circuit(4)
 
 for info in psi >> circuit
     println("iblock=", info["iblock"])

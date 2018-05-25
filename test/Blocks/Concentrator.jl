@@ -30,19 +30,19 @@ import QuCircuit: apply!, dispatch!
     @test copy(concentrator) == dispatch!(concentrator)
 
     reg = rand_state(8)
-    apply!(reg, focus([2, 3, 5]))
+    apply!(reg, focus(2, 3, 5))
     @test nactive(reg) == 3
-    @test address(reg) == [2, 3, 5, 1, 4, 6, 7, 8]
+    @test address(reg) == UInt[2, 3, 5, 1, 4, 6, 7, 8]
 
     apply!(reg, focus(8, 2))
     @test nactive(reg) == 2
-    @test address(reg) == [8, 2, 3, 5, 1, 4, 6, 7]
+    @test address(reg) == UInt[8, 3, 2, 5, 1, 4, 6, 7]
 
     apply!(reg, focus(2:3, 7))
     @test nactive(reg) == length(2:3) + 1
-    @test address(reg) == [2, 3, 7, 8, 5, 1, 4, 6]
+    @test address(reg) == UInt[3, 2, 6, 8, 5, 1, 4, 7]
 
     reg |> focus(1:8)
     @test nactive(reg) == 8
-    @test address(reg) == [1, 2, 3, 4, 5, 6, 7, 8]
+    @test address(reg) == UInt[3, 2, 6, 8, 5, 1, 4, 7]
 end

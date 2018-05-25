@@ -58,14 +58,6 @@ function diff_circuit(num_bit, num_layer)
     return circuit
 end
 
-function rotation_block(num_bit, mask::Vector{Bool})
-    RL = [Rz, Rx, Rz]
-    for i in 1:num_bit
-        for j in 1:3
-            copy(sequence(RL[mask]))
-        end
-    end
-end
 
 function run_circuit(params::Vector{Float64}, circuit::Sequence, signal::Int)
     #psi = Psi("0"^num_bit) # future
