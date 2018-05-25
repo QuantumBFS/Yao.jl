@@ -137,14 +137,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "dev/block/#QuCircuit.PureBlock",
-    "page": "Block System",
-    "title": "QuCircuit.PureBlock",
-    "category": "type",
-    "text": "PureBlock{N, T} <: AbstractBlock\n\nabstract type that all block with a matrix form will subtype from.\n\n\n\n"
-},
-
-{
     "location": "dev/block/#PureBlock-1",
     "page": "Block System",
     "title": "PureBlock",
@@ -157,7 +149,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Block System",
     "title": "QuCircuit.PrimitiveBlock",
     "category": "type",
-    "text": "PrimitiveBlock{N, T} <: PureBlock{N, T}\n\nabstract type that all primitive block will subtype from. A primitive block is a concrete block who can not be decomposed into other blocks. All composite block can be decomposed into several primitive blocks.\n\nNOTE: subtype for primitive block with parameter should implement hash and == method to enable key value cache.\n\n\n\n"
+    "text": "PrimitiveBlock{N, T} <: MatrixBlock{N, T}\n\nabstract type that all primitive block will subtype from. A primitive block is a concrete block who can not be decomposed into other blocks. All composite block can be decomposed into several primitive blocks.\n\nNOTE: subtype for primitive block with parameter should implement hash and == method to enable key value cache.\n\n\n\n"
 },
 
 {
@@ -173,7 +165,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Block System",
     "title": "QuCircuit.CompositeBlock",
     "category": "type",
-    "text": "CompositeBlock{N, T} <: PureBlock{N, T}\n\nabstract supertype which composite blocks will inherit from.\n\n\n\n"
+    "text": "CompositeBlock{N, T} <: MatrixBlock{N, T}\n\nabstract supertype which composite blocks will inherit from.\n\nextended APIs\n\nblocks: get an iteratable of all blocks contained by this CompositeBlock\n\n\n\n"
 },
 
 {
@@ -237,7 +229,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Register",
     "title": "QuCircuit.AbstractRegister",
     "category": "type",
-    "text": "AbstractRegister{N, B, T}\n\nAbstract type for quantum registers, all quantum registers contains a subtype of AbstractArray as member state.\n\nParameters\n\nN is the number of qubits\nB is the batch size\nT eltype\n\n\n\n"
+    "text": "AbstractRegister{B, T}\n\nabstract type that registers will subtype from. B is the batch size, T is the data type.\n\nRequired Properties\n\nProperty Description default\nnqubit(reg) get the total number of qubits. \nnactive(reg) get the number of active qubits. \nnremain(reg) get the number of remained qubits. nqubit - nactive\nnbatch(reg) get the number of batch. B\naddress(reg) get the address of this register. \nstate(reg) get the state of this register. It always return the matrix stored inside. \neltype(reg) get the element type stored by this register on classical memory. (the type Julia should use to represent amplitude) T\ncopy(reg) copy this register. \nsimilar(reg) construct a new register with similar configuration. \n\nRequired Methods\n\nMultiply\n\n*(op, reg)\n\ndefine how operator op act on this register. This is quite useful when there is a special approach to apply an operator on this register. (e.g a register with no batch, or a register with a MPS state, etc.)\n\nnote: Note\nbe careful, generally, operators can only be applied to a register, thus we should only overload this operation and do not overload *(reg, op).\n\nPack Address\n\npack_address!(reg, addrs)\n\npack addrs together to the first k-dimensions.\n\nExample\n\nGiven a register with dimension [2, 3, 1, 5, 4], we pack [5, 4] to the first 2 dimensions. We will get [5, 4, 2, 3, 1].\n\nFocus Address\n\nfocus!(reg, range)\n\nmerge address in range together as one dimension (the active space).\n\nExample\n\nGiven a register with dimension (2^4)x3 and address [1, 2, 3, 4], we focus address [3, 4], will pack [3, 4] together and merge them as the active space. Then we will have a register with size 2^2x(2^2x3), and address [3, 4, 1, 2].\n\nInitializers\n\nInitializers are functions that provide specific quantum states, e.g zero states, random states, GHZ states and etc.\n\nregister(::Type{RT}, raw, nbatch)\n\nan general initializer for input raw state array.\n\nregister(::Type{InitMethod}, ::Type{RT}, ::Type{T}, n, nbatch)\n\ninit register type RT with InitMethod type (e.g InitMethod{:zero}) with element type T and total number qubits n with nbatch. This will be auto-binded to some shortcuts like zero_state, rand_state, randn_state.\n\n\n\n"
 },
 
 {
@@ -254,14 +246,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Properties",
     "category": "section",
     "text": "nqubit: number of qubits\nnbatch: number of batch\nnactive: number of active qubits\naddress: current list of line address\nstate: current state\neltype: eltype\ncopy: copy\nfocus!: pack several legs together"
-},
-
-{
-    "location": "dev/register/#QuCircuit.Register",
-    "page": "Quantum Register",
-    "title": "QuCircuit.Register",
-    "category": "type",
-    "text": "Register{N, B, T} <: AbstractRegister{N, B, T}\n\ndefault register type. This register use a builtin array to store the quantum state. The elements inside an instance of Register will be related to a certain memory address, but since it is not immutable (we need to change its shape), be careful not to change its state, though the behaviour is the same, but allocation should be avoided. Therefore, no shallow copy method is provided.\n\n\n\n"
 },
 
 {
