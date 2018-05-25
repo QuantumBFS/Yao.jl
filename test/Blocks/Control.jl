@@ -1,10 +1,6 @@
 using Compat.Test
-
-import QuCircuit: zero_state, state, focus!,
-    X, Y, Z, gate, phase, focus, address, rot
+using QuCircuit
 import QuCircuit: ControlBlock
-import QuCircuit: nqubit, ninput, noutput, isunitary, ispure
-import QuCircuit: apply!, dispatch!
 import QuCircuit: _single_control_gate_sparse,
                   _single_inverse_control_gate_sparse,
                   A_kron_B
