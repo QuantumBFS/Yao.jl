@@ -9,6 +9,16 @@ makedocs(
     analytics = "UA-89508993-1",
     pages = [
         "Home" => "index.md",
+        "Tutorial" => Any[
+            "tutorial/GHZ.md",
+            "tutorial/QFT.md",
+            "tutorial/QCBM.md",
+        ],
+        "Manual" => Any[
+            "man/blocks.md",
+            "man/cache.md",
+            "man/functional.md",
+        ],
         "Developer Documentation" => Any[
             "dev/block.md",
             "dev/register.md",
@@ -20,6 +30,7 @@ makedocs(
             "theo/register.md",
             "theo/rotation.md",
             "theo/grover.md",
+            "theo/blocks.md",
         ],
     ],
     html_prettyurls = !("local" in ARGS),

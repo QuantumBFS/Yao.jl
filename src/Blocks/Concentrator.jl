@@ -6,13 +6,11 @@ Concentrator(orders...) = Concentrator(orders)
 
 eltype(::Concentrator) = Bool
 isunitary(x::Concentrator) = true
-nqubit(x::Concentrator) = GreaterThan{length(x.address)}
+nqubit(x::Concentrator) = ninput(x)
 ninput(x::Concentrator) = GreaterThan{length(x.address)}
 noutput(x::Concentrator) = length(x.address)
 address(x::Concentrator) = x.address
 
-export focus
-focus(orders...) = Concentrator(orders...)
 apply!(reg::Register, block::Concentrator) = focus!(reg, address(block)...)
 
 function show(io::IO, block::Concentrator)

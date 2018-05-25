@@ -24,3 +24,8 @@ julia> Pkg.clone("https://github.com/QuantumBFS/QuCircuit.jl.git")
 
 - [**STABLE**]()
 - [**LATEST**](https://quantumbfs.github.io/QuCircuit.jl/latest)
+
+
+## TODO
+
+- [] `apply!`: `full` -> `sparse`

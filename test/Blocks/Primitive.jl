@@ -1,6 +1,6 @@
 using Compat.Test
 
-import QuCircuit: X, Y, Z, Hadmard, Gate, PhiGate, RotationGate
+import QuCircuit: X, Y, Z, GateType, Gate, PhiGate, RotationGate
 import QuCircuit: rand_state, state, focus!
 # interface
 import QuCircuit: gate, phase, rot
@@ -12,15 +12,15 @@ import QuCircuit: apply!, dispatch!
 @testset "Constant Gates" begin
 
     # default dtype is Complex128/ComplexF64
-    @test gate(X) == Gate{1, X, Complex128}()
-    @test gate(Y) == Gate{1, Y, Complex128}()
-    @test gate(Z) == Gate{1, Z, Complex128}()
-    @test gate(Hadmard) == Gate{1, Hadmard, Complex128}()
+    @test gate(:X) == Gate{1, GateType{:X}, Complex128}()
+    @test gate(:Y) == Gate{1, GateType{:Y}, Complex128}()
+    @test gate(:Z) == Gate{1, GateType{:Z}, Complex128}()
+    @test gate(:H) == Gate{1, GateType{:H}, Complex128}()
 
-    @test gate(Complex64, X) == Gate{1, X, Complex64}()
+    @test gate(Complex64, :X) == Gate{1, GateType{:X}, Complex64}()
 
     # properties
-    g = gate(X)
+    g = gate(:X)
     @test nqubit(g) == 1
     @test ninput(g) == 1
     @test noutput(g) == 1
@@ -38,10 +38,10 @@ import QuCircuit: apply!, dispatch!
 
     # check matrixes
     for (NAME, MAT) in [
-        (X, [0 1;1 0]),
-        (Y, [0 -im; im 0]),
-        (Z, [1 0;0 -1]),
-        (Hadmard, (elem = 1 / sqrt(2); [elem elem; elem -elem])),
+        (:X, [0 1;1 0]),
+        (:Y, [0 -im; im 0]),
+        (:Z, [1 0;0 -1]),
+        (:H, (elem = 1 / sqrt(2); [elem elem; elem -elem])),
     ]
         for DTYPE in [Compat.ComplexF16, Compat.ComplexF32, Compat.ComplexF64]
             @test full(gate(DTYPE, NAME)) == Array{DTYPE, 2}(MAT)
@@ -54,9 +54,9 @@ import QuCircuit: apply!, dispatch!
 
     # check compare method
     # TODO: traverse all possible value
-    @test (gate(X) == gate(X)) == true
-    @test (gate(X) == gate(Y)) == false
-    @test (gate(Z) == gate(X)) == false
+    @test (gate(:X) == gate(:X)) == true
+    @test (gate(:X) == gate(:Y)) == false
+    @test (gate(:Z) == gate(:X)) == false
 end
 
 @testset "Phase Gate" begin
@@ -85,8 +85,8 @@ end
     @test (phase(2.0) == phase(1.0)) == false
 
     reg = rand_state(1)
-    @test full(g) * state(reg) == state(apply!(reg, g))
-    @test full(g) * state(reg) == state(g(reg))
+    @test full(g) * state(reg) ≈ state(apply!(reg, g))
+    @test full(g) * state(reg) ≈ state(g(reg))
 
     @testset "test collision" begin
         for i = 1:1000
@@ -102,11 +102,11 @@ end
 
 @testset "Rotation Gate" begin
 
-    @test rot(X, 2.0).theta == 2.0
-    @test typeof(rot(X, 2.0)) == RotationGate{X, Float64}
+    @test rot(:X, 2.0).theta == 2.0
+    @test typeof(rot(:X, 2.0)) == RotationGate{GateType{:X}, Float64}
 
     # properties
-    g = rot(X, 2.0)
+    g = rot(:X, 2.0)
     @test nqubit(g) == 1
     @test ninput(g) == 1
     @test noutput(g) == 1
@@ -116,9 +116,9 @@ end
 
     theta = 2.0
     for (DIRECTION, MAT) in [
-        (X, [cos(theta/2) -im*sin(theta/2); -im*sin(theta/2) cos(theta/2)]),
-        (Y, [cos(theta/2) -sin(theta/2); sin(theta/2) cos(theta/2)]),
-        (Z, [exp(-im*theta/2) 0;0 exp(im*theta/2)])
+        (:X, [cos(theta/2) -im*sin(theta/2); -im*sin(theta/2) cos(theta/2)]),
+        (:Y, [cos(theta/2) -sin(theta/2); sin(theta/2) cos(theta/2)]),
+        (:Z, [exp(-im*theta/2) 0;0 exp(im*theta/2)])
     ]
         @test full(rot(DIRECTION, theta)) == MAT
     end
@@ -140,7 +140,7 @@ end
         end
     end
     # compare method
-    @test (rot(X, 2.0) == rot(X, 2.0)) == true
-    @test (rot(X, 2.0) == rot(Y, 2.0)) == false
-    @test (rot(X, 2.0) == rot(X, 1.0)) == false
+    @test (rot(:X, 2.0) == rot(:X, 2.0)) == true
+    @test (rot(:X, 2.0) == rot(:Y, 2.0)) == false
+    @test (rot(:X, 2.0) == rot(:X, 1.0)) == false
 end
