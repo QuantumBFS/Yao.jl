@@ -4,14 +4,14 @@ using Compat.Test
 include("MatrixBlock.jl")
 end
 
-# @testset "concentrator" begin
-# include("Concentrator.jl")
-# end
+@testset "concentrator" begin
+include("Concentrator.jl")
+end
 
-# @testset "sequence" begin
-# include("Sequence.jl")
-# end
+@testset "sequence" begin
+include("Sequence.jl")
+end
 
-# @testset "measure" begin
-# include("Measure.jl")
-# end
+@testset "measure" begin
+include("Measure.jl")
+end
