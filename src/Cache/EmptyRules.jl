@@ -1,6 +1,7 @@
 import Base: empty!
 
 function empty!(x::Symbol)
+    # TODO: empty cache pool recursively
     x == :all && empty!(GLOBAL_CACHE_POOL)
 end
 
@@ -50,7 +51,7 @@ function empty!(c::Cached, ::Type{CT}, recursive::Bool) where CT
 end
 
 function empty!(c::Cached{BT}, ::Type{CT}, recursive::Bool) where {CT, BT <: CompositeBlock}
-    if iscacheable(global_cache(CT), c)
+    if iscacheable(global_cache(CT), c.block)
         empty!(global_cache(CT), c.block)
 
         if recursive
