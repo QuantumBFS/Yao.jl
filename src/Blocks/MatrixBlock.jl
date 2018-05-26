@@ -7,6 +7,7 @@ abstract type that all block with a matrix form will subtype from.
 
 # extended APIs
 
+`mat`
 `sparse`
 `full`
 `datatype`
@@ -22,7 +23,8 @@ isunitary(block::MatrixBlock) = true
 
 import Base: full, sparse, eltype
 datatype(block::MatrixBlock{N, T}) where {N, T} = T
-full(block::MatrixBlock) = full(sparse(block))
+full(block::MatrixBlock) = full(mat(block))
+sparse(block::MatrixBlock) = sparse(mat(block))
 
 function apply!(reg::Register, b::MatrixBlock)
     reg.state .= sparse(b) * reg

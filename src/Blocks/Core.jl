@@ -102,6 +102,11 @@ import Base: copy
 # overload this when block contains parameters
 copy(x::AbstractBlock) = x
 
+"""
+    mat(block) -> Matrix
+"""
+function mat end
+
 ## Required Methods
 export apply!, dispatch!
 

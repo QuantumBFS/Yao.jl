@@ -105,16 +105,16 @@ length(k::KronBlock) = length(k.blocks)
 ###############
 eachindex(k::KronBlock) = k.addrs
 
-function sparse(k::KronBlock{N, T}) where {N, T}
+function mat(k::KronBlock{N, T}) where {N, T}
     curr_addr = 1
     first_block = first(k.blocks)
     first_addr = first(k.addrs)
 
     if curr_addr == first_addr
         curr_addr += nqubit(first_block)
-        op = sparse(first_block)
+        op = mat(first_block)
     else
-        op = kron(sparse(first_block), speye(T, 1 << (first_addr - curr_addr)))
+        op = kron(mat(first_block), speye(T, 1 << (first_addr - curr_addr)))
         curr_addr = first_addr + nqubit(first_block)
     end
 
@@ -126,7 +126,7 @@ function sparse(k::KronBlock{N, T}) where {N, T}
             curr_addr = next_addr
         end
 
-        op = kron(sparse(next_block), op)
+        op = kron(mat(next_block), op)
         curr_addr += nqubit(next_block)
     end
 

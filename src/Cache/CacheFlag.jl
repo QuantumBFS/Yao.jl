@@ -20,23 +20,13 @@ iscached(server::DefaultServer, c::Cached) = iscached(server, c.block)
 # for block which is not cached this is equal
 apply!(reg::Register, c, signal)= apply!(reg, c)
 
-function sparse(c::Cached)
+function mat(c::Cached)
     if !iscached(c)
-        mat = dropzeros!(sparse(c.block))
-        update_cache(c, mat)
-        return mat
+        m = dropzeros!(sparse(c.block))
+        update_cache(c, m)
+        return m
     end
     pull(c)
-end
-
-function full(c::Cached)
-    if !iscached(c)
-        mat = full(c.block)
-        update_cache(c, mat)
-        return mat
-    end
-
-    full(pull(c))
 end
 
 function apply!(reg::Register, c::Cached, signal::UInt)

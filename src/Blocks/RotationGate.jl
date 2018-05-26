@@ -11,8 +11,7 @@ mutable struct RotationGate{GT, T} <: PrimitiveBlock{1, Complex{T}}
 end
 
 _make_rot_mat(I, U, theta) = I * cos(theta / 2) - im * sin(theta / 2) * U
-sparse(R::RotationGate{GT, T}) where {GT, T} = _make_rot_mat(Const.Sparse.I2(Complex{T}), sparse(gate(Complex{T}, GT)), R.theta)
-full(R::RotationGate{GT, T}) where {GT, T} = _make_rot_mat(Const.Dense.I2(Complex{T}), full(gate(Complex{T}, GT)), R.theta)
+mat(R::RotationGate{GT, T}) where {GT, T} = _make_rot_mat(Const.Dense.I2(Complex{T}), full(gate(Complex{T}, GT)), R.theta)
 
 copy(block::RotationGate{GT}) where GT = RotationGate{GT}(block.theta)
 

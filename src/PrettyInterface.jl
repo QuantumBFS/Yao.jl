@@ -14,7 +14,7 @@ Create an instance of `gate_type`.
 
 create a Pauli X gate: `gate(X)`
 """
-gate(::Type{Complex{T}}, ::Type{GT}) where {T, GT <: Val} = Gate(Complex{T}, GT)
+gate(::Type{Complex{T}}, ::Type{GT}) where {T, GT <: Val} = ConstGate(Complex{T}, GT)
 gate(::Type{T}, s::Symbol, params...) where T = gate(T, Val{s}, promote(params...)...)
 
 # config default type
@@ -161,7 +161,7 @@ signal(x::Int) = Signal(UInt(x))
 
 for BLOCK in [
     # primitive
-    Gate,
+    ConstGate,
     PhiGate,
     RotationGate,
     # composite blocks

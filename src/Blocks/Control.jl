@@ -31,14 +31,14 @@ function copy(ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
     ControlBlock{BT, N, T}(copy(ctrl.ctrl_qubits), copy(ctrl.block), copy(ctrl.addr))
 end
 
-function sparse(ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
+function mat(ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
     # NOTE: we sort the addr of control qubits by its relative addr to
     # the block under control, this is useful when calculate its
     # matrix form.
     ctrl_addrs = sort(ctrl.ctrl_qubits, by=x->abs(abs(x)-ctrl.addr))
 
     # start of the iteration
-    U = sparse(ctrl.block)
+    U = mat(ctrl.block)
     addr = ctrl.addr
     U_nqubit = nqubit(ctrl.block)
     for each_ctrl in ctrl_addrs
