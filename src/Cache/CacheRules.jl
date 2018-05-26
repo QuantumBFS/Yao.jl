@@ -11,16 +11,6 @@ function cache(block::MatrixBlock, ::Type{CT}, level::UInt; recursive::Bool=fals
     Cached(block)
 end
 
-# FIXME:
-# function cache(block::CompositeBlock, ::Type{CT}, level::UInt; recursive::Bool=false) where CT
-#     if recursive
-#         map!(x->cache(x, level, recursive=recursive), block, block)
-#     end
-
-#     cache!(global_cache(CT), block, level)
-#     Cached(block)
-# end
-
 function cache(block::ChainBlock, ::Type{CT}, level::UInt; recursive::Bool=false) where CT
     if recursive
         chain = similar(block)
@@ -49,9 +39,9 @@ function cache(block::KronBlock, ::Type{CT}, level::UInt; recursive::Bool=false)
     Cached(x)
 end
 
-function cache(block::Roller{N, M, T, BT}, ::Type{CT}, level::UInt; recursive::Bool=false) where {N, M, T, BT, CT}
+function cache(block::Roller{N, M, T}, ::Type{CT}, level::UInt; recursive::Bool=false) where {N, M, T, CT}
     if recursive
-        roller = Roller(ntuple(x->cache(block.blocks[x], level, recursive=true), Val{M}))
+        roller = Roller{N, T}(ntuple(x->cache(block[x], level, recursive=true), Val{M})...)
     else
         roller = block
     end
