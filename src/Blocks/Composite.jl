@@ -24,11 +24,11 @@ function blocks end
 # composite blocks are indexable
 import Base: getindex, setindex!, map!, eachindex
 
-function map!(f::Function, dst::CompositeBlock, src::CompositeBlock)
-    @assert length(dst) == length(src) "composite block should have the same size"
+function map!(f::Function, dst::CompositeBlock, itr)
+    @assert length(dst) >= length(itr) "composite block should have the same size"
 
-    for (di, si) in zip(eachindex(dst), eachindex(src))
-        dst[di] = f(src[si])
+    for (di, each) in zip(eachindex(dst), itr)
+        dst[di] = f(each)
     end
     dst
 end
