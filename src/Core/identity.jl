@@ -29,16 +29,16 @@ end
 imag(M::Identity{T}) where T = Diagonal(zeros(T,M.n))
 
 ####### basic mathematic operations ######
-import Base: *, /, ==, +, -
+import Base: *, /, ==, +, -, ≈
 *(A::Identity{T}, B::Number) where T = Diagonal(fill(promote_type(T, eltype(B))(B), A.n))
 *(B::Number, A::Identity{T}) where T = Diagonal(fill(promote_type(T, eltype(B))(B), A.n))
 /(A::Identity{T}, B::Number) where T = Diagonal(fill(promote_type(T, eltype(B))(1/B), A.n))
 ==(A::Identity, B::Identity) = A.n == B.n
 IDP = Union{Diagonal, PermuteMultiply, Identity}
-for op in [:+, :-]
-    @eval ($op)(A::IDP, B::SparseMatrixCSC) = ($op)(sparse(A), B)
-    @eval ($op)(B::SparseMatrixCSC, A::IDP) = ($op)(B, sparse(A))
-    @eval ($op)(A::IDP, B::IDP) = ($op)(sparse(A), sparse(B))
+for op in [:+, :-, :(==), :≈]
+    @eval $op(A::IDP, B::SparseMatrixCSC) = $op(sparse(A), B)
+    @eval $op(B::SparseMatrixCSC, A::IDP) = $op(B, sparse(A))
+    @eval $op(A::IDP, B::IDP) = $op(sparse(A), sparse(B))
 end
 
 ####### sparse matrix ######

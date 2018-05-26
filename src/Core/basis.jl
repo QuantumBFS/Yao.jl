@@ -57,6 +57,16 @@ function bit_length(x::DInt)
     return n
 end
 
+function log2i(x::T)::T where T
+    local n::T = 0
+    while x&0x1!=1
+        n += 1
+        x >>= 1
+    end
+    return n
+end
+
+
 # take a bit/bits
 takebit(indices::DInts, ibit::Int) = @. (indices >> (ibit-1)) & 1
 takebit(indices::DInt, ibit::Vector{Int}) = @. (indices .>> (ibit-1)) & 1
