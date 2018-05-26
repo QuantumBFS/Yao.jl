@@ -11,7 +11,7 @@ mutable struct Register{B, T} <: AbstractRegister{B, T}
     # NOTE: we should replace this with a static mutable vector in the future
     address::Vector{UInt} # this indicates the absolute address of each qubit
 
-    function Register(raw::Matrix{T}, address::Vector{UInt}, nactive::UInt, nbatch::UInt) where T
+    function Register(raw::Matrix{T}, address::Vector{UInt}, nactive::UInt, nbatch::Int) where T
         active_len, remain_len = _len_active_remain(raw, nbatch)
 
         ispow2(active_len) && ispow2(remain_len) ||
@@ -26,13 +26,13 @@ mutable struct Register{B, T} <: AbstractRegister{B, T}
     end
 end
 
-function Register(raw::Matrix, nbatch::UInt)
+function Register(raw::Matrix, nbatch::Int)
     active_len, remain_len = _len_active_remain(raw, nbatch)
     N = unsigned(log2i(active_len * remain_len))
     Register(raw, collect(0x1:N), N, nbatch)
 end
 
-function Register(raw::Vector, nbatch::UInt)
+function Register(raw::Vector, nbatch::Int)
     Register(repeat(raw, inner=(1, nbatch)), nbatch)
 end
 
@@ -42,6 +42,8 @@ nqubit(r::Register) = length(r.address)
 nactive(r::Register) = r.nactive
 address(r::Register) = r.address
 state(r::Register) = r.state
+statevec(r::Register{B}) where B = reshape(r.state, 1 << nqubit(r), B)
+statevec(r::Register{1}) = reshape(r.state, 1 << nqubit(r))
 copy(r::Register) = Register(r)
 
 function similar(r::Register{B, T}) where {B, T}
@@ -49,22 +51,22 @@ function similar(r::Register{B, T}) where {B, T}
 end
 
 # factory methods
-register(::Type{Register}, raw, nbatch::UInt) = Register(raw, nbatch)
+register(::Type{Register}, raw, nbatch::Int) = Register(raw, nbatch)
 
-function register(::Type{InitMethod{:zero}}, ::Type{Register}, ::Type{T}, n::Int, nbatch::UInt) where T
+function register(::Type{InitMethod{:zero}}, ::Type{Register}, ::Type{T}, n::Int, nbatch::Int) where T
     raw = zeros(T, 1 << n, nbatch)
     raw[1, :] = 1
     Register(raw, nbatch)
 end
 
-function register(::Type{InitMethod{:rand}}, ::Type{Register}, ::Type{T}, n::Int, nbatch::UInt) where T
+function register(::Type{InitMethod{:rand}}, ::Type{Register}, ::Type{T}, n::Int, nbatch::Int) where T
     theta = rand(real(T), 1 << n, nbatch)
     radius = rand(real(T), 1 << n, nbatch)
     raw = @. radius * exp(im * theta)
     Register(batch_normalize!(raw), nbatch)
 end
 
-function register(::Type{InitMethod{:randn}}, ::Type{Register}, ::Type{T}, n::Int, nbatch::UInt) where T
+function register(::Type{InitMethod{:randn}}, ::Type{Register}, ::Type{T}, n::Int, nbatch::Int) where T
     theta = randn(real(T), 1 << n, nbatch)
     radius = randn(real(T), 1 << n, nbatch)
     raw = @. radius * exp(im * theta)
@@ -136,7 +138,7 @@ function focus!(r::Register{B}, range::RangeType...) where B
     prepend!(perm, expand_range)
     permute!(r.address, perm)
 
-    r.state = reshape(r.state, 1 << r.nactive, (1 << (total - r.nactive)) * Int(B))
+    r.state = reshape(r.state, 1 << r.nactive, (1 << (total - r.nactive)) * B)
     r
 end
 

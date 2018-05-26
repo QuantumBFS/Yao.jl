@@ -1,23 +1,22 @@
 mutable struct RotationGate{GT, T} <: PrimitiveBlock{1, Complex{T}}
     theta::T
+
+    function RotationGate{GT}(theta::T) where {GT, T}
+        new{GT, T}(theta)
+    end
+
+    function RotationGate(x::Symbol, theta::T) where T
+        new{GateType{x}, T}(theta)
+    end
 end
 
-# TODO: implement arbitrary rotation: cos(theta/2) - im * sin(theta/2) * U
+_make_rot_mat(I, U, theta) = I * cos(theta / 2) - im * sin(theta / 2) * U
+sparse(R::RotationGate{GT, T}) where {GT, T} = _make_rot_mat(Const.Sparse.I2(Complex{T}), sparse(gate(Complex{T}, GT)), R.theta)
+full(R::RotationGate{GT, T}) where {GT, T} = _make_rot_mat(Const.Dense.I2(Complex{T}), full(gate(Complex{T}, GT)), R.theta)
 
-sparse(gate::RotationGate) = sparse(full(gate))
+copy(block::RotationGate{GT}) where GT = RotationGate{GT}(block.theta)
 
-full(gate::RotationGate{GateType{:X}, T}) where T =
-    Complex{T}[cos(gate.theta/2) -im*sin(gate.theta/2);
-      -im*sin(gate.theta/2) cos(gate.theta/2)]
-full(gate::RotationGate{GateType{:Y}, T}) where T =
-    Complex{T}[cos(gate.theta/2) -sin(gate.theta/2);
-      sin(gate.theta/2) cos(gate.theta/2)]
-full(gate::RotationGate{GateType{:Z}, T}) where T =
-    Complex{T}[exp(-im*gate.theta/2) 0;0 exp(im*gate.theta/2)]
-
-copy(block::RotationGate{GT, T}) where {GT, T} = RotationGate{GT, T}(block.theta)
-
-function dispatch!(f::Function, block::RotationGate{GT, T}, theta::T) where {GT, T}
+function dispatch!(f::Function, block::RotationGate{GT}, theta) where {GT}
     block.theta = f(block.theta, theta)
     block
 end

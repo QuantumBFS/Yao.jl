@@ -22,7 +22,7 @@ apply!(reg::Register, c, signal)= apply!(reg, c)
 
 function sparse(c::Cached)
     if !iscached(c)
-        mat = sparse(c.block)
+        mat = dropzeros!(sparse(c.block))
         update_cache(c, mat)
         return mat
     end

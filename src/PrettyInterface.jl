@@ -14,18 +14,33 @@ Create an instance of `gate_type`.
 
 create a Pauli X gate: `gate(X)`
 """
-gate = Gate
+gate(::Type{Complex{T}}, ::Type{GT}) where {T, GT <: GateType} = Gate(Complex{T}, GT)
+gate(::Type{T}, s::Symbol, params...) where T = gate(T, GateType{s}, promote(params...)...)
+
+# config default type
+gate(s::Symbol, params...) = gate(ComplexF64, s, params...)
+gate(::Type{GT}, params...) where {GT <: GateType} = gate(ComplexF64, GT, params...)
+
+# define default promotion rule
+gate(::Type{Complex{T}}, ::Type{GT}, params...) where {T, GT <: GateType} = gate(Complex{T}, GT, promote(T(first(params)), Base.tail(params)...)...)
+
+# define dispatch rules
+gate(::Type{Complex{T}}, ::Type{GateType{:Ra}}, α::T, β::T, γ::T) where T = chain(rot(:X, α), rot(:Z, β), rot(:X, γ))
+gate(::Type{Complex{T}}, ::Type{GateType{:Rx}}, theta::T) where T = rot(:X, theta)
+gate(::Type{Complex{T}}, ::Type{GateType{:Ry}}, theta::T) where T = rot(:Y, theta)
+gate(::Type{Complex{T}}, ::Type{GateType{:Rz}}, theta::T) where T = rot(:Z, theta)
 
 # 1.2 phase gate
 export phase
 phase(::Type{T}, theta) where {T <: Real} = PhiGate{T}(theta)
 phase(theta) = phase(Float64, theta)
+phase() = phase(0.0)
 
 # 1.3 rotation gate
 export rot
-rot(::Type{T}, gt::Symbol, theta::T = zero(T)) where {T <: Real} = RotationGate{GateType{gt}, T}(theta)
-rot(gt::Symbol, theta::T) where {T <: Real} = rot(Float64, gt, theta)
-rot(gt::Symbol) = rot(Float64, gt)
+rot(::Type{GT}, theta) where {GT} = RotationGate{GT}(theta)
+rot(s::Symbol, theta) = RotationGate(s, theta)
+rot(s::Symbol) = rot(s, 0.0)
 
 # 2. composite blocks
 
@@ -69,9 +84,10 @@ This will automatically generate a block list looks like
 ```
 """
 kron(total::Int, blocks::Union{MatrixBlock, Tuple, Pair}...) = KronBlock{total}(blocks...)
-kron(total::Int, blocks) = KronBlock{total}(blocks...)
-kron(blocks::Union{MatrixBlock, Tuple, Pair}...) = N->KronBlock{N}(blocks...)
-kron(blocks) = N->KronBlock{N}(blocks)
+# NOTE: this is ambiguous
+# kron(total::Int, blocks) = KronBlock{total}(blocks)
+kron(blocks::Union{MatrixBlock, Tuple{Int, <:MatrixBlock}, Pair{Int, <:MatrixBlock}}...) = N->KronBlock{N}(blocks...)
+kron(blocks) = N->KronBlock{N}(blocks...)
 
 # 2.3 control block
 
@@ -102,7 +118,15 @@ end
 # 2.4 roller
 
 export roll
-roll(n::Int, block::MatrixBlock) = Roller(n, block)
+
+roll(n::Int, block::MatrixBlock) = Roller{n}(block)
+
+function roll(blocks::MatrixBlock...)
+    T = promote_type(datatype(each) for each in blocks)
+    N = sum(x->nqubit(x), blocks)
+    Roller{N, T}(blocks)
+end
+
 roll(block::MatrixBlock) = n->roll(n, block)
 
 # 3. measurement
@@ -169,7 +193,6 @@ export X, Y, Z, H
 for NAME in [:X, :Y, :Z, :H]
 
     GT = GateType{NAME}
-
     @eval begin
 
         $NAME() = gate($GT)
@@ -183,11 +206,11 @@ for NAME in [:X, :Y, :Z, :H]
         end
 
         function $NAME(num_qubit::Int, addr::Int)
-            kron(num_qubit, (1, gate($GT)))
+            KronBlock{num_qubit}(1=>gate($GT))
         end
 
         function $NAME(num_qubit::Int, r)
-            kron(num_qubit, (i, gate($GT)) for i in r)
+            KronBlock{num_qubit}(collect(r), collect(gate($GT) for i in r))
         end
 
     end
