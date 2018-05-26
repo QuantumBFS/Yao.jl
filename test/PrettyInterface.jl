@@ -1,7 +1,7 @@
 using Compat
 using Compat.Test
 using QuCircuit
-import QuCircuit: Gate, GateType, ChainBlock, KronBlock, ControlBlock, Roller,
+import QuCircuit: Gate, ChainBlock, KronBlock, ControlBlock, Roller,
     Measure, MeasureAndRemove, Concentrator, Signal, RotationGate
 import QuCircuit: PhiGate
 
@@ -56,7 +56,7 @@ end
 end
 
 @testset "pauli gates binding" begin
-    @test isa(X(), Gate{1, GateType{:X}, ComplexF64})
+    @test isa(X(), Gate{1, Val{:X}, ComplexF64})
     @test isa(X(2), Tuple)
     @test isa(X(1:3), Tuple)
     @test isa(X(4, 2), KronBlock)
@@ -64,8 +64,8 @@ end
 end
 
 @testset "gate" begin
-    @test isa(gate(:X), Gate{1, GateType{:X}, ComplexF64})
-    @test isa(gate(ComplexF32, :X), Gate{1, GateType{:X}, ComplexF32})
+    @test isa(gate(:X), Gate{1, Val{:X}, ComplexF64})
+    @test isa(gate(ComplexF32, :X), Gate{1, Val{:X}, ComplexF32})
     @test isa(gate(ComplexF64, :Rx, 1), RotationGate)
     @test isa(gate(ComplexF64, :Ry, 1), RotationGate)
     @test isa(gate(ComplexF64, :Rz, 1), RotationGate)

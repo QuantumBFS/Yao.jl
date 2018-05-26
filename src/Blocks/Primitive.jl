@@ -12,10 +12,6 @@ abstract type PrimitiveBlock{N, T} <: MatrixBlock{N, T} end
 
 isunitary(::Type{T}) where {T <: PrimitiveBlock} = true
 
-# Gate Type
-struct GateType{T}
-end
-
 include("ConstantGate.jl")
 include("PhaseGate.jl")
 include("RotationGate.jl")

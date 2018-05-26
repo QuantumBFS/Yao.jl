@@ -3,17 +3,17 @@
 
 `N` qubits gate whose matrix form is a constant.
 """
-struct Gate{N, GT <: GateType, T} <: PrimitiveBlock{N, T}
+struct Gate{N, GT <: Val, T} <: PrimitiveBlock{N, T}
 end
 
 Gate(::Type{T}, ::Type{GT}) where {T, GT} = Gate{nqubits(GT), GT, T}()
-Gate(::Type{T}, s::Symbol) where T = Gate(T, GateType{s})
+Gate(::Type{T}, s::Symbol) where T = Gate(T, Val{s})
 
 # NOTE: we bind some type related constants here to avoid multiple allocation
 
 for NAME in [:X, :Y, :Z, :H]
 
-    GT = GateType{NAME}
+    GT = Val{NAME}
 
     @eval begin
         nqubits(::Type{$GT}) = 1

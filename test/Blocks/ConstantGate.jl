@@ -2,15 +2,15 @@ using Compat.Test
 using Compat
 using QuCircuit
 
-import QuCircuit: Gate, GateType
+import QuCircuit: Gate, Val
 
 @testset "constructor" begin
 # we config default types in interface part
 @test_throws MethodError Gate(:X)
 for NAME in [:X, :Y, :Z, :H]
-    @test isa(Gate(ComplexF64, NAME), Gate{1, GateType{NAME}, ComplexF64})
+    @test isa(Gate(ComplexF64, NAME), Gate{1, Val{NAME}, ComplexF64})
 end
-@test isa(Gate(ComplexF32, :X), Gate{1, GateType{:X}, ComplexF32})
+@test isa(Gate(ComplexF32, :X), Gate{1, Val{:X}, ComplexF32})
 end
 
 @testset "traits" begin

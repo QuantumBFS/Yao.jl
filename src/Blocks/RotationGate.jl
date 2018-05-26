@@ -6,7 +6,7 @@ mutable struct RotationGate{GT, T} <: PrimitiveBlock{1, Complex{T}}
     end
 
     function RotationGate(x::Symbol, theta::T) where T
-        new{GateType{x}, T}(theta)
+        new{Val{x}, T}(theta)
     end
 end
 
@@ -34,7 +34,7 @@ for (GTYPE, NAME) in [
     (:Z, "Rz"),
 ]
 
-    GT = GateType{GTYPE}
+    GT = Val{GTYPE}
 
     @eval begin
         function show(io::IO, g::RotationGate{$GT, T}) where T

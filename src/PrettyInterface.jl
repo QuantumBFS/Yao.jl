@@ -14,21 +14,21 @@ Create an instance of `gate_type`.
 
 create a Pauli X gate: `gate(X)`
 """
-gate(::Type{Complex{T}}, ::Type{GT}) where {T, GT <: GateType} = Gate(Complex{T}, GT)
-gate(::Type{T}, s::Symbol, params...) where T = gate(T, GateType{s}, promote(params...)...)
+gate(::Type{Complex{T}}, ::Type{GT}) where {T, GT <: Val} = Gate(Complex{T}, GT)
+gate(::Type{T}, s::Symbol, params...) where T = gate(T, Val{s}, promote(params...)...)
 
 # config default type
 gate(s::Symbol, params...) = gate(ComplexF64, s, params...)
-gate(::Type{GT}, params...) where {GT <: GateType} = gate(ComplexF64, GT, params...)
+gate(::Type{GT}, params...) where {GT <: Val} = gate(ComplexF64, GT, params...)
 
 # define default promotion rule
-gate(::Type{Complex{T}}, ::Type{GT}, params...) where {T, GT <: GateType} = gate(Complex{T}, GT, promote(T(first(params)), Base.tail(params)...)...)
+gate(::Type{Complex{T}}, ::Type{GT}, params...) where {T, GT <: Val} = gate(Complex{T}, GT, promote(T(first(params)), Base.tail(params)...)...)
 
 # define dispatch rules
-gate(::Type{Complex{T}}, ::Type{GateType{:Ra}}, α::T, β::T, γ::T) where T = chain(rot(:X, α), rot(:Z, β), rot(:X, γ))
-gate(::Type{Complex{T}}, ::Type{GateType{:Rx}}, theta::T) where T = rot(:X, theta)
-gate(::Type{Complex{T}}, ::Type{GateType{:Ry}}, theta::T) where T = rot(:Y, theta)
-gate(::Type{Complex{T}}, ::Type{GateType{:Rz}}, theta::T) where T = rot(:Z, theta)
+gate(::Type{Complex{T}}, ::Type{Val{:Ra}}, α::T, β::T, γ::T) where T = chain(rot(:X, α), rot(:Z, β), rot(:X, γ))
+gate(::Type{Complex{T}}, ::Type{Val{:Rx}}, theta::T) where T = rot(:X, theta)
+gate(::Type{Complex{T}}, ::Type{Val{:Ry}}, theta::T) where T = rot(:Y, theta)
+gate(::Type{Complex{T}}, ::Type{Val{:Rz}}, theta::T) where T = rot(:Z, theta)
 
 # 1.2 phase gate
 export phase
@@ -192,7 +192,7 @@ export X, Y, Z, H
 
 for NAME in [:X, :Y, :Z, :H]
 
-    GT = GateType{NAME}
+    GT = Val{NAME}
     @eval begin
 
         $NAME() = gate($GT)

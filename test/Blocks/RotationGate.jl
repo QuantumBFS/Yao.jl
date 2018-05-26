@@ -2,13 +2,13 @@ using Compat.Test
 using Compat
 using QuCircuit
 
-import QuCircuit: RotationGate, PrimitiveBlock, GateType
+import QuCircuit: RotationGate, PrimitiveBlock, Val
 
 @testset "constructor" begin
 @test isa(RotationGate(:X, 0.1), PrimitiveBlock{1, ComplexF64})
 @test isa(RotationGate(:X, 0.1f0), PrimitiveBlock{1, ComplexF32})
-@test isa(RotationGate(:X, 0.1), RotationGate{GateType{:X}, Float64})
-@test_throws TypeError RotationGate{GateType{:X}, ComplexF32} # will not accept non-real type
+@test isa(RotationGate(:X, 0.1), RotationGate{Val{:X}, Float64})
+@test_throws TypeError RotationGate{Val{:X}, ComplexF32} # will not accept non-real type
 end
 
 @testset "matrix" begin
