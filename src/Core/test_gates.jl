@@ -9,8 +9,8 @@ include("gates.jl")
         (zgate, [1 0; 0 -1]),
         #(hgate, (elem = 1 / sqrt(2); [elem elem; elem -elem])),
     ]
-        println(gate(1, basis(1)))
-        @test full(gate(1, basis(1))) == MAT
+        println(gate(1, 1))
+        @test full(gate(1, 1)) == MAT
     end
 end
 
@@ -21,18 +21,17 @@ end
 psi = loadldm("psi-test.jl")
 psi = psi[:, 1:2:end] + im * psi[:, 2:2:end]
 psi0 = psi[1,:]
-basis = collect(1:1<<num_bit)
 num_bit = 8
 # make following test pass
 gates = [xgate, ygate, zgate, rxgate(pi/6), rygate(pi/6), rzgate(pi/6), zxzrot(pi/6, pi/3, pi/6)]
 for gate, psii in zip(gates, psi[2:8])
-    @test $gate(6, basis)*psi0 == psii
+    @test $gate(num_bit, 6)*psi0 == psii
 end
 cgates = [g|>c for g in gates]
 for gate, psii in zip(cgates, psi[9:15])
-    @test $gate(6, 4, basis)*psi0 == psii
+    @test $gate(num_bit, 6, 4)*psi0 == psii
 end
 cnccgates = [g|>c|>nc|>c for g in gates]
 for gate, psii in zip(cnccgates, psi[16:22])
-    @test $gate(6, 2,4,5, basis)*psi0 == psii
+    @test $gate(num_bit, 6, 2,4,5)*psi0 == psii
 end

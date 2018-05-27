@@ -22,8 +22,10 @@ for (T, TSTR) in zip(ELEM_TYPES, ELEM_TYPE_TOKENS)
 end
 
 # pretty interface
-basic_gate(::Type{T}, S::Symbol, params::Number...) where T = basic_gate(T, Val{S}, params...)
-basic_gate(S::Symbol, params::Number...) = basic_gate(Complex128, S, params...)
+for GATE_TYPE in [:basic_gate, :rot_gate]
+    @eval $GATE_TYPE(::Type{T}, S::Symbol, params::Number...) where T = $GATE_TYPE(T, Val{S}, params...)
+    @eval $GATE_TYPE(S::Symbol, params::Number...) = $GATE_TYPE(Complex128, S, params...)
+end
 
 basic_gate(::Type{T}, ::Type{Val{:Rx}}, θ::Real) where T = T[cos(θ/2) -im*sin(θ/2); -im*sin(θ/2) cos(θ/2)]
 basic_gate(::Type{T}, ::Type{Val{:Ry}}, θ::Real) where T = T[cos(θ/2) -sin(θ/2); sin(θ/2) cos(θ/2)]
