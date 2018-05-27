@@ -256,10 +256,9 @@ function kron(A::PermuteMultiply{Ta}, B::StridedMatrix{Tb}) where {Tb, Ta}
     SparseMatrixCSC(nA*mB, nA*nB, colptr, rowval, nzval)
 end
 
-function kron(A::PermuteMultiply{Ta}, B::PermuteMultiply{Tb}) where {Ta, Tb}
+function kron(A::PermuteMultiply, B::PermuteMultiply) 
     nA = size(A, 1)
     nB = size(B, 1)
-    Tc = promote_type(Ta, Tb)
     vals = kron(A.vals, B.vals)
     perm = Vector{Int}(nB*nA)
     @inbounds for i = 1:nA
