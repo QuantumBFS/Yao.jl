@@ -1,40 +1,50 @@
+# include("Macros.jl")
+
+
 # blocks can only be constructed through factory methods
 
 # 1. primitive blocks
 # 1.1 constant gate
 
-export gate
-"""
-    gate(type, gate_type)
-    gate(gate_type)
+# export gate
+# """
+#     gate(type, gate_type)
+#     gate(gate_type)
 
-Create an instance of `gate_type`.
+# Create an instance of `gate_type`.
 
-### Example
+# ### Example
 
-create a Pauli X gate: `gate(X)`
-"""
-gate(::Type{Complex{T}}, ::Type{GT}) where {T, GT <: Val} = ConstGate(Complex{T}, GT)
-gate(::Type{T}, s::Symbol, params...) where T = gate(T, Val{s}, promote(params...)...)
+# create a Pauli X gate: `gate(X)`
+# """
+# gate(::Type{Complex{T}}, ::Type{GT}) where {T, GT <: Val} = ConstGate(Complex{T}, GT)
+# gate(::Type{T}, s::Symbol, params...) where T = gate(T, Val{s}, promote(params...)...)
 
-# config default type
-gate(s::Symbol, params...) = gate(ComplexF64, s, params...)
-gate(::Type{GT}, params...) where {GT <: Val} = gate(ComplexF64, GT, params...)
+# # config default type
+# gate(s::Symbol, params...) = gate(ComplexF64, s, params...)
+# gate(::Type{GT}, params...) where {GT <: Val} = gate(ComplexF64, GT, params...)
 
-# define default promotion rule
-gate(::Type{Complex{T}}, ::Type{GT}, params...) where {T, GT <: Val} = gate(Complex{T}, GT, promote(T(first(params)), Base.tail(params)...)...)
+# # define default promotion rule
+# gate(::Type{Complex{T}}, ::Type{GT}, params...) where {T, GT <: Val} = gate(Complex{T}, GT, promote(T(first(params)), Base.tail(params)...)...)
 
-# define dispatch rules
-gate(::Type{Complex{T}}, ::Type{Val{:Ra}}, α::T, β::T, γ::T) where T = chain(rot(:X, α), rot(:Z, β), rot(:X, γ))
-gate(::Type{Complex{T}}, ::Type{Val{:Rx}}, theta::T) where T = rot(:X, theta)
-gate(::Type{Complex{T}}, ::Type{Val{:Ry}}, theta::T) where T = rot(:Y, theta)
-gate(::Type{Complex{T}}, ::Type{Val{:Rz}}, theta::T) where T = rot(:Z, theta)
+# # define dispatch rules
+# gate(::Type{Complex{T}}, ::Type{Val{:Ra}}, α::T, β::T, γ::T) where T = chain(rot(:X, α), rot(:Z, β), rot(:X, γ))
+# gate(::Type{Complex{T}}, ::Type{Val{:Rx}}, theta::T) where T = rot(:X, theta)
+# gate(::Type{Complex{T}}, ::Type{Val{:Ry}}, theta::T) where T = rot(:Y, theta)
+# gate(::Type{Complex{T}}, ::Type{Val{:Rz}}, theta::T) where T = rot(:Z, theta)
 
 # 1.2 phase gate
+# 1.2.1 global phase
 export phase
-phase(::Type{T}, theta) where {T <: Real} = PhiGate{T}(theta)
+phase(::Type{T}, theta) where {T <: Real} = PhaseGate{:global, T}(theta)
 phase(theta) = phase(Float64, theta)
 phase() = phase(0.0)
+
+# 1.2.2 phase shift
+export shift
+shift(::Type{T}, theta) where {T <: Real} = PhaseGate{:shift, T}(theta)
+shift(theta) = phase(Float64, theta)
+shift() = shift(0.0)
 
 # 1.3 rotation gate
 export rot
@@ -123,7 +133,7 @@ roll(n::Int, block::MatrixBlock) = Roller{n}(block)
 
 function roll(blocks::MatrixBlock...)
     T = promote_type(datatype(each) for each in blocks)
-    N = sum(x->nqubit(x), blocks)
+    N = sum(x->nqubits(x), blocks)
     Roller{N, T}(blocks)
 end
 
@@ -161,8 +171,8 @@ signal(x::Int) = Signal(UInt(x))
 
 for BLOCK in [
     # primitive
-    ConstGate,
-    PhiGate,
+    # ConstGate,
+    PhaseGate,
     RotationGate,
     # composite blocks
     ChainBlock,
@@ -187,35 +197,35 @@ end
 
 # Abbreviations
 
-# 1.Pauli Gates & Hadmard
-export X, Y, Z, H
+# # 1.Pauli Gates & Hadmard
+# export X, Y, Z, H
 
-for NAME in [:X, :Y, :Z, :H]
+# for NAME in [:X, :Y, :Z, :H]
 
-    GT = Val{NAME}
-    @eval begin
+#     GT = Val{NAME}
+#     @eval begin
 
-        $NAME() = gate($GT)
+#         $NAME() = gate($GT)
 
-        function $NAME(addr::Int)
-            (gate($GT), addr)
-        end
+#         function $NAME(addr::Int)
+#             (gate($GT), addr)
+#         end
 
-        function $NAME(r::UnitRange)
-            (gate($GT), r)
-        end
+#         function $NAME(r::UnitRange)
+#             (gate($GT), r)
+#         end
 
-        function $NAME(num_qubit::Int, addr::Int)
-            KronBlock{num_qubit}(1=>gate($GT))
-        end
+#         function $NAME(num_qubit::Int, addr::Int)
+#             KronBlock{num_qubit}(1=>gate($GT))
+#         end
 
-        function $NAME(num_qubit::Int, r)
-            KronBlock{num_qubit}(collect(r), collect(gate($GT) for i in r))
-        end
+#         function $NAME(num_qubit::Int, r)
+#             KronBlock{num_qubit}(collect(r), collect(gate($GT) for i in r))
+#         end
 
-    end
+#     end
 
-end
+# end
 
 
 # import Base: start, next, done, length, eltype
@@ -273,3 +283,4 @@ end
 #         end
 #     end
 # end
+

@@ -14,7 +14,7 @@ abstract type that all block with a matrix form will subtype from.
 """
 abstract type MatrixBlock{N, T} <: AbstractBlock end
 
-nqubit(::MatrixBlock{N}) where N = N
+nqubits(::MatrixBlock{N}) where N = N
 ninput(::MatrixBlock{N}) where N = N
 noutput(::MatrixBlock{N}) where N = N
 

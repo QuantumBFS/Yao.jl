@@ -40,7 +40,7 @@ function mat(ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
     # start of the iteration
     U = mat(ctrl.block)
     addr = ctrl.addr
-    U_nqubit = nqubit(ctrl.block)
+    U_nqubit = nqubits(ctrl.block)
     for each_ctrl in ctrl_addrs
         if each_ctrl > 0
             U = _single_control_gate_sparse(abs(each_ctrl), U, addr, U_nqubit)

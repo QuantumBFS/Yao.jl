@@ -35,7 +35,7 @@ end
 
 @testset "traits" begin
 g = PhiGate(0.1)
-@test nqubit(g) == 1
+@test nqubits(g) == 1
 @test ninput(g) == 1
 @test noutput(g) == 1
 @test isreflexive(g) == false

@@ -1,18 +1,28 @@
-mutable struct PhiGate{T} <: PrimitiveBlock{1, Complex{T}}
+"""
+    PhiGate
+
+Global phase gate.
+"""
+mutable struct PhaseGate{PhaseType, T} <: PrimitiveBlock{1, Complex{T}}
     theta::T
 end
 
-mat(gate::PhiGate{T}) where T = exp(im * gate.theta) * Complex{T}[exp(-im * gate.theta) 0; 0  exp(im * gate.theta)]
+mat(gate::PhaseGate{:global, T}) where T = exp(im * gate.theta) * Const.Sparse.I2(T)
+mat(gate::PhaseGate{:shift, T}) where T = Complex{T}[1.0 0.0;0.0 exp(im * gate.theta)]
 
-copy(block::PhiGate) = PhiGate(block.theta)
-dispatch!(f::Function, block::PhiGate, theta) = (block.theta = f(block.theta, theta); block)
+copy(block::PhaseGate{PhaseType, T}) where {PhaseType, T} = PhaseGate{PhaseType, T}(block.theta)
+dispatch!(f::Function, block::PhaseGate, theta) = (block.theta = f(block.theta, theta); block)
 
 # Properties
-isreflexive(::PhiGate) = false
-ishermitian(::PhiGate) = false
-nparameters(::PhiGate) = 1
+isreflexive(::PhaseGate) = false
+ishermitian(::PhaseGate) = false
+nparameters(::PhaseGate) = 1
 
 # Pretty Printing
-function show(io::IO, g::PhiGate{T}) where T
-    print(io, "Phase Gate{$T}:", g.theta)
+function show(io::IO, g::PhaseGate{:global})
+    print(io, "Global Phase Gate:", g.theta)
+end
+
+function show(io::IO, g::PhaseGate{:shift})
+    print(io, "Phase Shift Gate:", g.theta)
 end

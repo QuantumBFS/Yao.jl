@@ -28,7 +28,7 @@ function dispatch!(c::Composer, params)
 end
 
 function (c::Composer)(reg::Register)
-    c(nqubit(reg))(reg)
+    c(nqubits(reg))(reg)
 end
 
 function show(io::IO, c::Composer)

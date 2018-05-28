@@ -1,6 +1,8 @@
 module QuCircuit
 
-using Compat
+using Compat, MacroTools
+
+const CircuitDefaultType = ComplexF64
 
 include("Consts/Consts.jl")
 include("MathUtils.jl")
@@ -11,7 +13,7 @@ include("Blocks/Blocks.jl")
 
 include("Cache/Cache.jl")
 
-include("PrettyInterface.jl")
+include("Interfaces/Interfaces.jl")
 
 include("Composer.jl")
 

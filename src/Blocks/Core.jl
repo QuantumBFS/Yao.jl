@@ -10,7 +10,7 @@ qubits.
 
 ### Traits
 
-`nqubit`
+`nqubits`
 `ninput`
 `noutput`
 `isunitary`
@@ -33,15 +33,15 @@ abstract type AbstractBlock end
 
 # Interface
 ## Trait
-export nqubit, ninput, noutput, isunitary, ispure, isreflexive, nparameters
+export nqubits, ninput, noutput, isunitary, ispure, isreflexive, nparameters, mat
 import Base: ishermitian
 
 """
-    nqubit(x) -> Integer
+    nqubits(x) -> Integer
 
 Returns the number of qubits.
 """
-function nqubit(x::AbstractBlock) end
+function nqubits(x::AbstractBlock) end
 
 """
     ninput(x) -> Integer
@@ -57,7 +57,7 @@ Returns the number of output qubits.
 """
 function noutput end
 
-# nqubit(::AbstractBlock) = AnySize
+# nqubits(::AbstractBlock) = AnySize
 # ninput(::AbstractBlock) = AnySize
 # noutput(::AbstractBlock) = AnySize
 

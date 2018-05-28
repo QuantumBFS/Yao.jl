@@ -35,28 +35,28 @@ Id = speye(Compat.ComplexF64, 2)
 
 @testset "single control" begin
     g = ControlBlock([1, ], X(), 2)
-    @test nqubit(g) == 2
+    @test nqubits(g) == 2
     mat = eye(U) ⊗ Const.Sparse.P0() + U ⊗ Const.Sparse.P1()
     @test sparse(g) == mat
 end
 
 @testset "single control with inferred size" begin
     g = ControlBlock([2, ], X(), 3)
-    @test nqubit(g) == 3
+    @test nqubits(g) == 3
     mat =  (eye(U) ⊗ Const.Sparse.P0() + U ⊗ Const.Sparse.P1()) ⊗ Id
     @test sparse(g) == mat
 end
 
 @testset "control with fixed size" begin
     g = ControlBlock{4}([2, ], X(), 3)
-    @test nqubit(g) == 4
+    @test nqubits(g) == 4
     mat = Id ⊗ (eye(U) ⊗ Const.Sparse.P0() + U ⊗ Const.Sparse.P1()) ⊗ Id
     @test sparse(g) == mat
 end
 
 @testset "control with blank" begin
     g = ControlBlock{4}([3, ], X(), 2)
-    @test nqubit(g) == 4
+    @test nqubits(g) == 4
 
     mat = Id ⊗ (Const.Sparse.P0() ⊗ eye(U) + Const.Sparse.P1() ⊗ U) ⊗ Id
     @test sparse(g) == mat
@@ -64,7 +64,7 @@ end
 
 @testset "multi control" begin
     g = ControlBlock([2, 3], X(), 4)
-    @test nqubit(g) == 4
+    @test nqubits(g) == 4
 
     op = eye(U) ⊗ Const.Sparse.P0() +  U ⊗ Const.Sparse.P1()
     op = eye(op) ⊗ Const.Sparse.P0() + op ⊗ Const.Sparse.P1()
@@ -74,7 +74,7 @@ end
 
 @testset "multi control with blank" begin
     g = ControlBlock{7}([6, 4, 2], X(), 3) # -> [2, 4, 6]
-    @test nqubit(g) == 7
+    @test nqubits(g) == 7
 
     op = eye(U) ⊗ Const.Sparse.P0() + U ⊗ Const.Sparse.P1() # 2, 3
     op = Const.Sparse.P0() ⊗ eye(op) + Const.Sparse.P1() ⊗ op # 2, 3, 4

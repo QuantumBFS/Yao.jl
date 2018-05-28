@@ -51,9 +51,9 @@ end
 # Primitive Blocks
 ###################
 
-==(lhs::PhiGate, rhs::PhiGate) = lhs.theta == rhs.theta
+==(lhs::PhaseGate, rhs::PhaseGate) = lhs.theta == rhs.theta
 
-function hash(gate::PhiGate, h::UInt)
+function hash(gate::PhaseGate, h::UInt)
     hash(hash(gate.theta, object_id(gate)), h)
 end
 

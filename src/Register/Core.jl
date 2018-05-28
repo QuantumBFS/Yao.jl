@@ -10,9 +10,9 @@ data type.
 
 |    Property    |                                                     Description                                                      |     default      |
 |:--------------:|:--------------------------------------------------------------------------------------------------------------------:|:----------------:|
-| `nqubit(reg)`  | get the total number of qubits.                                                                                      |                  |
+| `nqubits(reg)`  | get the total number of qubits.                                                                                      |                  |
 | `nactive(reg)` | get the number of active qubits.                                                                                     |                  |
-| `nremain(reg)` | get the number of remained qubits.                                                                                   | nqubit - nactive |
+| `nremain(reg)` | get the number of remained qubits.                                                                                   | nqubits - nactive |
 | `nbatch(reg)`  | get the number of batch.                                                                                             | `B`              |
 | `address(reg)` | get the address of this register.                                                                                    |                  |
 | `state(reg)`   | get the state of this register. It always return the matrix stored inside.                                           |                  |
@@ -77,11 +77,11 @@ auto-binded to some shortcuts like `zero_state`, `rand_state`, `randn_state`.
 abstract type AbstractRegister{B, T} end
 
 """
-    nqubit(reg)->Int
+    nqubits(reg)->Int
 
 get the total number of qubits.
 """
-function nqubit end
+function nqubits end
 
 """
     nactive(reg)->Int
@@ -168,9 +168,9 @@ function randn_state end
 ## Interfaces
 ##############
 
-# nqubit
+# nqubits
 # nactive
-nremain(r::AbstractRegister) = nqubit(r) - nactive(r)
+nremain(r::AbstractRegister) = nqubits(r) - nactive(r)
 nbatch(r::AbstractRegister{B}) where B = B
 eltype(r::AbstractRegister{B, T}) where {B, T} = T
 

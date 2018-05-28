@@ -1,7 +1,5 @@
 import QuCircuit: AbstractRegister, Register
-import QuCircuit: nqubit, nactive, nremain, address, nbatch,
-    state, zero_state, rand_state, register
-import QuCircuit: focus!
+using QuCircuit
 import Compat: axes
 using Compat.Test
 
@@ -11,7 +9,7 @@ using Compat.Test
     reg = register(test_data, 3)
     @test typeof(reg) == Register{3, Complex64}
     @test address(reg) == collect(1:5)
-    @test nqubit(reg) == 5
+    @test nqubits(reg) == 5
     @test nbatch(reg) == 3
     @test state(reg) === test_data
 

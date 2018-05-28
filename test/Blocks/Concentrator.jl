@@ -1,14 +1,7 @@
 using Compat.Test
+using QuCircuit
 # type
-import QuCircuit: Concentrator
-# exported API
-import QuCircuit: focus
-import QuCircuit: rand_state, nactive, GreaterThan
-# Block Trait
-import QuCircuit: address, nqubit, ninput, noutput, isunitary, ispure
-# Required Methods
-import QuCircuit: apply!, dispatch!
-
+import QuCircuit: Concentrator, GreaterThan
 
 @testset "concentrator" begin
 
@@ -17,7 +10,7 @@ import QuCircuit: apply!, dispatch!
     @test address(concentrator) == (2, 3)
     @test ninput(concentrator) == GreaterThan{2}
     @test noutput(concentrator) == 2
-    @test nqubit(concentrator) == GreaterThan{2}
+    @test nqubits(concentrator) == GreaterThan{2}
     @test isunitary(concentrator) == true
     @test ispure(concentrator) == false
 

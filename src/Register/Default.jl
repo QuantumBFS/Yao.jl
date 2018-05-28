@@ -38,12 +38,12 @@ end
 
 # Required Properties
 
-nqubit(r::Register) = length(r.address)
+nqubits(r::Register) = length(r.address)
 nactive(r::Register) = r.nactive
 address(r::Register) = r.address
 state(r::Register) = r.state
-statevec(r::Register{B}) where B = reshape(r.state, 1 << nqubit(r), B)
-statevec(r::Register{1}) = reshape(r.state, 1 << nqubit(r))
+statevec(r::Register{B}) where B = reshape(r.state, 1 << nqubits(r), B)
+statevec(r::Register{1}) = reshape(r.state, 1 << nqubits(r))
 copy(r::Register) = Register(r)
 
 function similar(r::Register{B, T}) where {B, T}
@@ -115,7 +115,7 @@ end
 const RangeType = Union{Int, UnitRange}
 
 function focus!(r::Register{B}, range::RangeType...) where B
-    total = nqubit(r)
+    total = nqubits(r)
     src_shape, dst_shape, perm, r.nactive = get_configs(total, range...)
 
     map!(x->(1<<x), src_shape, src_shape)
@@ -158,7 +158,7 @@ end
 
 function show(io::IO, r::Register{B, T}) where {B, T}
     println(io, "Default Register (CPU, $T):")
-    println(io, "    total: ", nqubit(r))
+    println(io, "    total: ", nqubits(r))
     println(io, "    batch: ", B)
     print(io, "    active: ", nactive(r))
 end

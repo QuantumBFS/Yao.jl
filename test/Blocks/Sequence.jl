@@ -1,13 +1,7 @@
 using Compat.Test
+using QuCircuit
 
 import QuCircuit: Sequence, AbstractBlock
-import QuCircuit: rand_state, zero_state, state, focus!,
-    X, Y, Z, H, C, gate, phase, focus, address, chain
-# Block Trait
-import QuCircuit: nqubit, ninput, noutput, isunitary, ispure
-# Required Methods
-import QuCircuit: apply!, dispatch!
-
 
 mutable struct Print <: AbstractBlock
     stream::String

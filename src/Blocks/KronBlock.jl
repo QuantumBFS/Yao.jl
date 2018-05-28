@@ -38,12 +38,12 @@ struct KronBlock{N, T} <: CompositeBlock{N, T}
             if isa(each, MatrixBlock)
                 push!(blocks, each)
                 push!(addrs, curr_head)
-                curr_head += nqubit(each)
+                curr_head += nqubits(each)
             elseif isa(each, Union{Tuple, Pair})
                 curr_head, block = each
                 push!(addrs, curr_head)
                 push!(blocks, block)
-                curr_head += nqubit(block)
+                curr_head += nqubits(block)
             else
                 throw(MethodError(KronBlock, args))
             end
@@ -111,11 +111,11 @@ function mat(k::KronBlock{N, T}) where {N, T}
     first_addr = first(k.addrs)
 
     if curr_addr == first_addr
-        curr_addr += nqubit(first_block)
+        curr_addr += nqubits(first_block)
         op = mat(first_block)
     else
         op = kron(mat(first_block), speye(T, 1 << (first_addr - curr_addr)))
-        curr_addr = first_addr + nqubit(first_block)
+        curr_addr = first_addr + nqubits(first_block)
     end
 
     for count = 2:length(k.addrs)
@@ -127,7 +127,7 @@ function mat(k::KronBlock{N, T}) where {N, T}
         end
 
         op = kron(mat(next_block), op)
-        curr_addr += nqubit(next_block)
+        curr_addr += nqubits(next_block)
     end
 
     if curr_addr <= N
