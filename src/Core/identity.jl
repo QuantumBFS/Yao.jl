@@ -34,12 +34,25 @@ import Base: *, /, ==, +, -, ≈
 *(B::Number, A::Identity{T}) where T = Diagonal(fill(promote_type(T, eltype(B))(B), A.n))
 /(A::Identity{T}, B::Number) where T = Diagonal(fill(promote_type(T, eltype(B))(1/B), A.n))
 ==(A::Identity, B::Identity) = A.n == B.n
-IDP = Union{Diagonal, PermuteMultiply, Identity}
+
+const IDP = Union{Diagonal, PermuteMultiply, Identity}
+const ID = Union{Diagonal, Identity}
 for op in [:+, :-, :(==), :≈]
     @eval $op(A::IDP, B::SparseMatrixCSC) = $op(sparse(A), B)
     @eval $op(B::SparseMatrixCSC, A::IDP) = $op(B, sparse(A))
     @eval $op(A::IDP, B::IDP) = $op(sparse(A), sparse(B))
+
+    if op in [:+, :-]
+        @eval $op(d1::Diagonal, d2::ID) = Diagonal($op(d1.diag, d2.diag))
+        @eval $op(d1::ID, d2::Diagonal) = Diagonal($op(d1.diag, d2.diag))
+    else
+        @eval $op(d1::ID, d2::Diagonal) = $op(d1.diag, d2.diag)
+        @eval $op(d1::Diagonal, d2::ID) = $op(d1.diag, d2.diag)
+        @eval $op(d1::Identity, d2::Identity) = $op(d1.n, d2.n)
+    end
 end
++(d1::Identity{Ta}, d2::Identity{Tb}) where {Ta, Tb} = d1==d2?Diagonal(fill(promote_types(Ta, Tb)(2), d1.n)):throw(DimensionMismatch())
+-(d1::Identity{Ta}, d2::Identity{Tb}) where {Ta, Tb} = d1==d2?spzeros(promote_types(Ta, Tb), d1.n, d1.n):throw(DimensionMismatch())
 
 ####### sparse matrix ######
 import Base: nnz, nonzeros, inv, det, diag, logdet

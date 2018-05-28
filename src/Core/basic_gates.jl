@@ -1,10 +1,13 @@
-
-include("permmul.jl")
+include("identity.jl")
 
 # Constant gates: pauli_x, pauli_y, pauli_z, hardmard, p0, p1, p↑, p↓
+const P0 = sparse(Complex128[1 0; 0 0])
+const P1 = sparse(Complex128[0 0; 0 1])
 const PAULI_X = PermuteMultiply([2,1], [1+0im, 1])
 const PAULI_Y = PermuteMultiply([2,1], [-im, im])
 const PAULI_Z = Diagonal([1+0im, -1])
+const CNOT = PermuteMultiply(Complex128[1 0 0 0; 0 1 0 0; 0 0 0 1; 0 0 1 0])
+const TOFFOLI = kron(P0, II(4)) + kron(P1, CNOT)
 
 # generate constants and basic_gate interface for different types
 ELEM_TYPES = [Complex128, Complex64]
@@ -40,8 +43,6 @@ basic_gate(::Type{T}, ::Type{Val{:RotZXZ}}, θ1::AbstractFloat, θ2::AbstractFlo
 basic_gate(Complex128, :RotZXZ, pi/2, pi/2, 0.0)
 
 # fill other gates
-const P0 = sparse(Complex128[1 0; 0 0])
-const P1 = sparse(Complex128[0 0; 0 1])
 const Pu = nothing
 const Pd = nothing
 const H = nothing  #dense

@@ -30,7 +30,7 @@ function orepeat(v::AbstractVector, n::Int)
     res
 end
 
-import Base: randn
+import Base: randn, invperm
 randn(T::Type{Complex{F}}, n::Int...) where F = randn(F, n...) + im*randn(F, n...)
 
 function invperm(order)

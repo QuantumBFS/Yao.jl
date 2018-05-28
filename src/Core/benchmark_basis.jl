@@ -9,3 +9,13 @@
 #
 # TODO
 # benchmark construction and taking in `indices_with` function.
+
+using BenchmarkTools
+include("basis.jl")
+
+bench = BenchmarkGroup()
+bg = bench["Basis"] = BenchmarkGroup()
+bg["takebit-Int"] = @benchmarkable takebit.($(basis(16)), 3)
+#bg["takebit-UInt"] = @benchmarkable takebit.($(basis(16)), 3)
+
+showall(run(bench, verbose=true))

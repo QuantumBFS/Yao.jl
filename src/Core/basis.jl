@@ -11,8 +11,8 @@ binary basis: Bool
 digital basis: UInt64
 bit counting: Int
 """
-const BInt = Int64
-const DInt = Int64
+const BInt = Int
+const DInt = Int
 
 basis(num_bit::Int) = UnitRange{DInt}(0, 1<<num_bit-1)
 
@@ -22,15 +22,15 @@ function bitarray(v::Vector{T}) where T<:Number
     xdim = sizeof(eltype(v))*8
     #ba = BitArray{2}(0, 0)
     ba = BitArray(0, 0)
-    ba.chunks = reinterpret(UInt64, v)
+    ba.chunks = reinterpret(DInt, v)
     ba.dims = (xdim, length(v))
     ba.len = xdim*length(v)
     return ba
 end
 
-function bitarray(v::Vector{UInt64})
-    #ba = BitArray{2}(0, 0)
-    ba = BitArray(undef, (0, 0))
+function bitarray(v::Vector{DInt})
+    ba = BitArray{2}(0, 0)
+    #ba = BitArray(undef, (0, 0))
     ba.chunks = v
     ba.dims = (64, length(v))
     ba.len = 64*length(v)
@@ -41,7 +41,7 @@ bitarray(v::Number) = bitarray([v])
 ########## Bit-Wise Operations ##############
 const Ints = Union{Vector{Int}, Int, UnitRange{Int}}
 const DInts = Union{Vector{DInt}, DInt, UnitRange{DInt}}
-bmask(ibit::Int...) = reduce(+, [one(DInt) << b for b in (ibit.-1)])
+bmask(ibit::Int...) = reduce(+, [one(DInt) << b for b in ibit.-1])
 bmask(bits::UnitRange{Int}) = ((one(DInt) << (bits.stop - bits.start + 1)) - one(DInt)) << (bits.start-1)
 
 # bit size
@@ -66,17 +66,18 @@ end
 
 
 # take a bit/bits
-takebit(index::DInt, ibit::Int) = (index >> (ibit-1)) & 1
+takebit(index::DInt, ibit::Int) = (index >> (ibit-1)) & one(DInt)
 # a position is 1?
-testbit(index::DInt, mask::Int) = (index & mask) != 0
+testany(index::DInt, mask::DInt) = (index & mask) != zero(DInt)
+testall(index::DInt, mask::DInt) = (index & mask) == mask
 
 # set a bit
-setbit(index::DInt, mask::Int) = indices | mask
-setbit!(indices::DInts, mask::Int) = indices[:] |= mask
+setbit(index::DInt, mask::DInt) = indices | mask
+setbit!(indices::DInts, mask::DInt) = indices[:] |= mask
 
 # flip a bit/bits
-flip(index::DInt, mask::Int) = index ⊻ mask
-flip!(indices::DInt, mask::Int) = indices[:] = indices .⊻ mask
+flip(index::DInt, mask::DInt) = index ⊻ mask
+flip!(indices::DInt, mask::DInt) = indices[:] = indices .⊻ mask
 # flip all bits
 neg(index::DInt, num_bit::Int) = bmask(1:num_bit) ⊻ index
 
@@ -87,7 +88,7 @@ function swapbits(num::DInt, i::Int, j::Int)
     k = (num >> j) & 1 - (num >> i) & 1
     num + k*(1<<i) - k*(1<<j)
 end
-swapbits(bss::Vector{DInt}, i::Int, j::Int) = bss[:] = swapbits.(bss, i, j)
+swapbits!(bss::Vector{DInt}, i::Int, j::Int) = bss[:] = swapbits.(bss, i, j)
 
 # utils used in controled bits
 """
@@ -144,13 +145,13 @@ function rollaxis2!(v::AbstractArray, k::Int)
 end
 
 ###################### State Utilities ########################
-function onehot(x::Int, num_bit::Int)
+function onehot(num_bit::Int, x::DInt)
     v = zeros(Complex128, 1<<num_bit)
     v[x+1] = 1
     return v
 end
 
-function ghz(num_bit::Int; x::Int=0)
+function ghz(num_bit::Int; x::DInt=DInt(0))
     v = zeros(Complex128, 1<<num_bit)
     v[x+1] = 1/sqrt(2)
     v[flip(x, bmask(1:num_bit))+1] = 1/sqrt(2)
