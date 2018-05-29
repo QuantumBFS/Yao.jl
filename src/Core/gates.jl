@@ -45,28 +45,12 @@ end
 general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{Tg}, locs::Vector{Int}) where {Tg<:AbstractMatrix, Tp<:AbstractMatrix} = II(1<<num_bit) - superkron(num_bit, projectors, cbits) + superkron(num_bit, vcat(projectors, gates), vcat(cbits, locs))
 
 #### C-X/Y/Z Gates
-function cxgate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) where MT<:Number
+function cxgate(::Type{MT}, num_bit::Int, b1::Ints, b2::Ints) where MT<:Number
     mask = bmask(b1)
-    db = b2-b1
-    #order = map(i->i ⊻ ((i & mask) << db) + 1, basis(num_bit))
-    order = map(i->testall(i, b1) ? flip(i, b2)+1 : i+1, basis(num_bit))
-    PermuteMultiply(order, ones(MT, 1<<num_bit))
-end
-
-function cjgate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) where MT<:Number
     mask2 = bmask(b2)
-    db = b2-b1
-    order = collect(1:1<<num_bit)
-    step = 1<<(b1-1)
-    step_2 = 1<<b1
-    for j = step:step_2:1<<num_bit-1
-        @simd for i = j+1:j+step
-            @inbounds order[i] = testall(i-1, mask2) ? 1 : -1 #1-2*takebit(i-1, b2)
-        end
-    end
+    order = map(i->testall(i, mask) ? flip(i, mask2)+1 : i+1, basis(num_bit))
     PermuteMultiply(order, ones(MT, 1<<num_bit))
 end
- 
 
 function cygate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) where MT<:Complex
     mask2 = bmask(b2)

@@ -28,4 +28,11 @@ end
 function czgate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) where MT<:Number
     Diagonal(map(i->MT(1)-2*(takebit(i, b1) & takebit(i, b2)), basis(num_bit)))
 end
+function cxgate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) where MT<:Number
+    mask = bmask(b1)
+    db = b2-b1
+    order = map(i->i ⊻ ((i & mask) << db) + 1, basis(num_bit))
+    PermuteMultiply(order, ones(MT, 1<<num_bit))
+end
+
 
