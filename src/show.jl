@@ -74,6 +74,7 @@ end
 print_tree(tree, args...; kwargs...) = print_tree(STDOUT::IO, tree, args...; kwargs...)
 
 print_subblocks(io::IO, tree, depth, charset, active_levels) = nothing
+print_subblocks(io::IO, tree::Cached, depth, charset, active_levels) = print_subblocks(io, tree.block, depth, charset, active_levels)
 
 function print_subblocks(io::IO, tree::CompositeBlock, depth, charset, active_levels)
     c = blocks(tree)

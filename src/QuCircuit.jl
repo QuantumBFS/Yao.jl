@@ -29,6 +29,7 @@ include("Cache/Cache.jl")
 
 include("Interfaces/Interfaces.jl")
 
+include("show.jl")
 include("docs.jl")
 
 end # module

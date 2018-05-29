@@ -9,7 +9,7 @@ cache_matrix(c::Cached) = cache_matrix(c.block)
 cache_type(c::Cached) = cache_type(c.block)
 
 # overload cache trait
-iscacheable(c::Cached, signal) = iscacheable(c.block, signal)
+iscacheable(c::Cached, signal::UInt) = iscacheable(c.block, signal)
 
 export iscached
 iscached(c::Cached) = iscached(cache_type(c), c)

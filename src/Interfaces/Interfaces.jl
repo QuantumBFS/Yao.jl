@@ -40,7 +40,7 @@ for BLOCK in [
     Roller,
     # others
     Concentrator,
-    Sequence,
+    # Sequence,
     Measure,
     Cached,
 ]
