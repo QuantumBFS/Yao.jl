@@ -141,7 +141,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Block System",
     "title": "QuCircuit.MatrixBlock",
     "category": "type",
-    "text": "MatrixBlock{N, T} <: AbstractBlock\n\nabstract type that all block with a matrix form will subtype from.\n\nextended APIs\n\nsparse full datatype\n\n\n\n"
+    "text": "MatrixBlock{N, T} <: AbstractBlock\n\nabstract type that all block with a matrix form will subtype from.\n\nextended APIs\n\nmat sparse full datatype\n\n\n\n"
 },
 
 {
@@ -429,7 +429,7 @@ var documenterSearchIndex = {"docs": [
     "page": "APIs",
     "title": "QuCircuit.AbstractBlock",
     "category": "type",
-    "text": "AbstractBlock\n\nabstract type that all block will subtype from. N is the number of qubits.\n\nAPIs\n\nTraits\n\nnqubit ninput noutput isunitary ispure isreflexive ishermitian\n\nMethods\n\napply! copy dispatch!\n\n\n\n"
+    "text": "AbstractBlock\n\nabstract type that all block will subtype from. N is the number of qubits.\n\nAPIs\n\nTraits\n\nnqubits ninput noutput isunitary ispure isreflexive ishermitian\n\nMethods\n\napply! copy dispatch!\n\n\n\n"
 },
 
 {
@@ -437,7 +437,7 @@ var documenterSearchIndex = {"docs": [
     "page": "APIs",
     "title": "QuCircuit.AbstractRegister",
     "category": "type",
-    "text": "AbstractRegister{B, T}\n\nabstract type that registers will subtype from. B is the batch size, T is the data type.\n\nRequired Properties\n\nProperty Description default\nnqubit(reg) get the total number of qubits. \nnactive(reg) get the number of active qubits. \nnremain(reg) get the number of remained qubits. nqubit - nactive\nnbatch(reg) get the number of batch. B\naddress(reg) get the address of this register. \nstate(reg) get the state of this register. It always return the matrix stored inside. \neltype(reg) get the element type stored by this register on classical memory. (the type Julia should use to represent amplitude) T\ncopy(reg) copy this register. \nsimilar(reg) construct a new register with similar configuration. \n\nRequired Methods\n\nMultiply\n\n*(op, reg)\n\ndefine how operator op act on this register. This is quite useful when there is a special approach to apply an operator on this register. (e.g a register with no batch, or a register with a MPS state, etc.)\n\nnote: Note\nbe careful, generally, operators can only be applied to a register, thus we should only overload this operation and do not overload *(reg, op).\n\nPack Address\n\npack_address!(reg, addrs)\n\npack addrs together to the first k-dimensions.\n\nExample\n\nGiven a register with dimension [2, 3, 1, 5, 4], we pack [5, 4] to the first 2 dimensions. We will get [5, 4, 2, 3, 1].\n\nFocus Address\n\nfocus!(reg, range)\n\nmerge address in range together as one dimension (the active space).\n\nExample\n\nGiven a register with dimension (2^4)x3 and address [1, 2, 3, 4], we focus address [3, 4], will pack [3, 4] together and merge them as the active space. Then we will have a register with size 2^2x(2^2x3), and address [3, 4, 1, 2].\n\nInitializers\n\nInitializers are functions that provide specific quantum states, e.g zero states, random states, GHZ states and etc.\n\nregister(::Type{RT}, raw, nbatch)\n\nan general initializer for input raw state array.\n\nregister(::Type{InitMethod}, ::Type{RT}, ::Type{T}, n, nbatch)\n\ninit register type RT with InitMethod type (e.g InitMethod{:zero}) with element type T and total number qubits n with nbatch. This will be auto-binded to some shortcuts like zero_state, rand_state, randn_state.\n\n\n\n"
+    "text": "AbstractRegister{B, T}\n\nabstract type that registers will subtype from. B is the batch size, T is the data type.\n\nRequired Properties\n\nProperty Description default\nnqubits(reg) get the total number of qubits. \nnactive(reg) get the number of active qubits. \nnremain(reg) get the number of remained qubits. nqubits - nactive\nnbatch(reg) get the number of batch. B\naddress(reg) get the address of this register. \nstate(reg) get the state of this register. It always return the matrix stored inside. \neltype(reg) get the element type stored by this register on classical memory. (the type Julia should use to represent amplitude) T\ncopy(reg) copy this register. \nsimilar(reg) construct a new register with similar configuration. \n\nRequired Methods\n\nMultiply\n\n*(op, reg)\n\ndefine how operator op act on this register. This is quite useful when there is a special approach to apply an operator on this register. (e.g a register with no batch, or a register with a MPS state, etc.)\n\nnote: Note\nbe careful, generally, operators can only be applied to a register, thus we should only overload this operation and do not overload *(reg, op).\n\nPack Address\n\npack_address!(reg, addrs)\n\npack addrs together to the first k-dimensions.\n\nExample\n\nGiven a register with dimension [2, 3, 1, 5, 4], we pack [5, 4] to the first 2 dimensions. We will get [5, 4, 2, 3, 1].\n\nFocus Address\n\nfocus!(reg, range)\n\nmerge address in range together as one dimension (the active space).\n\nExample\n\nGiven a register with dimension (2^4)x3 and address [1, 2, 3, 4], we focus address [3, 4], will pack [3, 4] together and merge them as the active space. Then we will have a register with size 2^2x(2^2x3), and address [3, 4, 1, 2].\n\nInitializers\n\nInitializers are functions that provide specific quantum states, e.g zero states, random states, GHZ states and etc.\n\nregister(::Type{RT}, raw, nbatch)\n\nan general initializer for input raw state array.\n\nregister(::Type{InitMethod}, ::Type{RT}, ::Type{T}, n, nbatch)\n\ninit register type RT with InitMethod type (e.g InitMethod{:zero}) with element type T and total number qubits n with nbatch. This will be auto-binded to some shortcuts like zero_state, rand_state, randn_state.\n\n\n\n"
 },
 
 {
@@ -489,14 +489,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "dev/APIs/#QuCircuit.gate-Union{Tuple{GT}, Tuple{Type{Complex{T}},Type{GT}}, Tuple{T}} where GT<:QuCircuit.GateType where T",
-    "page": "APIs",
-    "title": "QuCircuit.gate",
-    "category": "method",
-    "text": "gate(type, gate_type)\ngate(gate_type)\n\nCreate an instance of gate_type.\n\nExample\n\ncreate a Pauli X gate: gate(X)\n\n\n\n"
-},
-
-{
     "location": "dev/APIs/#QuCircuit.iscacheable-Tuple{QuCircuit.DefaultServer,QuCircuit.MatrixBlock,UInt64}",
     "page": "APIs",
     "title": "QuCircuit.iscacheable",
@@ -505,7 +497,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "dev/APIs/#QuCircuit.ispure-Tuple{QuCircuit.AbstractBlock}",
+    "location": "dev/APIs/#QuCircuit.ispure-Tuple{QuCircuit.MatrixBlock}",
     "page": "APIs",
     "title": "QuCircuit.ispure",
     "category": "method",
@@ -513,7 +505,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "dev/APIs/#QuCircuit.isreflexive-Tuple{QuCircuit.AbstractBlock}",
+    "location": "dev/APIs/#QuCircuit.isreflexive-Tuple{Any}",
     "page": "APIs",
     "title": "QuCircuit.isreflexive",
     "category": "method",
@@ -521,7 +513,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "dev/APIs/#QuCircuit.isunitary-Tuple{QuCircuit.AbstractBlock}",
+    "location": "dev/APIs/#QuCircuit.isunitary-Tuple{Any}",
     "page": "APIs",
     "title": "QuCircuit.isunitary",
     "category": "method",
@@ -542,6 +534,14 @@ var documenterSearchIndex = {"docs": [
     "title": "QuCircuit.log2i",
     "category": "method",
     "text": "log2i(x)\n\nlogrithm for integer pow of 2\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.mat",
+    "page": "APIs",
+    "title": "QuCircuit.mat",
+    "category": "function",
+    "text": "mat(block) -> Matrix\n\n\n\n"
 },
 
 {
@@ -577,7 +577,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "dev/APIs/#QuCircuit.nparameters-Tuple{QuCircuit.AbstractBlock}",
+    "location": "dev/APIs/#QuCircuit.nparameters-Tuple{QuCircuit.MatrixBlock}",
     "page": "APIs",
     "title": "QuCircuit.nparameters",
     "category": "method",
@@ -585,19 +585,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "dev/APIs/#QuCircuit.nqubit",
+    "location": "dev/APIs/#QuCircuit.nqubits",
     "page": "APIs",
-    "title": "QuCircuit.nqubit",
+    "title": "QuCircuit.nqubits",
     "category": "function",
-    "text": "nqubit(reg)->Int\n\nget the total number of qubits.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#QuCircuit.nqubit-Tuple{QuCircuit.AbstractBlock}",
-    "page": "APIs",
-    "title": "QuCircuit.nqubit",
-    "category": "method",
-    "text": "nqubit(x) -> Integer\n\nReturns the number of qubits.\n\n\n\n"
+    "text": "nqubits(x) -> Integer\n\nReturns the total number of qubits.\n\n\n\n"
 },
 
 {
@@ -681,19 +673,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "dev/APIs/#QuCircuit.Gate",
-    "page": "APIs",
-    "title": "QuCircuit.Gate",
-    "category": "type",
-    "text": "Gate{N, GT, T} <: PrimitiveBlock{N, T}\n\nN qubits gate whose matrix form is a constant.\n\n\n\n"
-},
-
-{
     "location": "dev/APIs/#QuCircuit.KronBlock",
     "page": "APIs",
     "title": "QuCircuit.KronBlock",
     "category": "type",
     "text": "KronBlock{N, T} <: CompositeBlock\n\ncomposite block that combine blocks by kronecker product.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.PhaseGate",
+    "page": "APIs",
+    "title": "QuCircuit.PhaseGate",
+    "category": "type",
+    "text": "PhiGate\n\nGlobal phase gate.\n\n\n\n"
 },
 
 {
@@ -705,19 +697,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "dev/APIs/#Base.LinAlg.ishermitian-Tuple{QuCircuit.AbstractBlock}",
+    "location": "dev/APIs/#Base.LinAlg.ishermitian-Tuple{QuCircuit.MatrixBlock}",
     "page": "APIs",
     "title": "Base.LinAlg.ishermitian",
     "category": "method",
     "text": "ishermitian(x) -> Bool\n\nTest whether this operator is hermitian.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Base.empty!",
-    "page": "APIs",
-    "title": "Base.empty!",
-    "category": "function",
-    "text": "empty!(::MatrixBlock, signal; recursive=false)\n\ndo nothing if this is a matrix block.\n\n\n\n"
 },
 
 {
@@ -758,14 +742,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Base.kron",
     "category": "method",
     "text": "kron(blocks...) -> KronBlock\nkron(iterator) -> KronBlock\nkron(total, blocks...) -> KronBlock\nkron(total, iterator) -> KronBlock\n\ncreate a KronBlock with a list of blocks or tuple of heads and blocks.\n\nExample\n\nblock1 = Gate(X)\nblock2 = Gate(Z)\nblock3 = Gate(Y)\nKronBlock(block1, (3, block2), block3)\n\nThis will automatically generate a block list looks like\n\n1 -- [X] --\n2 ---------\n3 -- [Z] --\n4 -- [Y] --\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Base.map-Tuple{QuCircuit.MatrixBlock}",
-    "page": "APIs",
-    "title": "Base.map",
-    "category": "method",
-    "text": "map(block)\n\nmap this block to all lines\n\n\n\n"
 },
 
 {
@@ -814,6 +790,46 @@ var documenterSearchIndex = {"docs": [
     "title": "QuCircuit.cache_type",
     "category": "method",
     "text": "cache_type(block) -> type\n\nget the type that this block will use for cache.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.define_const_gate-Tuple{Any,Any}",
+    "page": "APIs",
+    "title": "QuCircuit.define_const_gate",
+    "category": "method",
+    "text": "define_const_gate(name, ex)\n\ndefine type, peroperties, matrix, etc. for this constant gate.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.define_const_gate_new_type-Tuple{Any,Any}",
+    "page": "APIs",
+    "title": "QuCircuit.define_const_gate_new_type",
+    "category": "method",
+    "text": "define_const_gate_new_type(name, type)\n\ndefine new constant matrix binding with type for this const gate. it throws UndefVarError if this constant gate is not defined.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.define_const_gate_property-NTuple{4,Any}",
+    "page": "APIs",
+    "title": "QuCircuit.define_const_gate_property",
+    "category": "method",
+    "text": "define_const_gate_property(f, property, gate, mat_ex) -> ex\n\ndefine property calculated by an expression generated by function f with mat_ex for gate.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.define_const_gate_struct-Tuple{Any,Any}",
+    "page": "APIs",
+    "title": "QuCircuit.define_const_gate_struct",
+    "category": "method",
+    "text": "define_const_gate_struct(n, name)\n\ndefine a immutable concrete type the constant gate. n is the number of qubits. name is the desired type name it will also be used as tag name, etc. It returns false if this constant gate is already defined (or this name is already used in current scope). or it returns true.\n\n\n\n"
+},
+
+{
+    "location": "dev/APIs/#QuCircuit.define_typed_const_gate-Tuple{Any,Any,Any}",
+    "page": "APIs",
+    "title": "QuCircuit.define_typed_const_gate",
+    "category": "method",
+    "text": "define_typed_const_gate(name, type, ex)\n\nlike define_const_gate, but this binds ex to a type specific by the user.\n\n\n\n"
 },
 
 {
