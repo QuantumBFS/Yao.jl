@@ -63,9 +63,9 @@ function setlevel(c::Cached, ::Type{CT}, level) where CT
     setlevel!(global_cache(CT), c.block, level)
 end
 
-function show(io::IO, c::Cached)
-    print(io, "(Cached) ")
-    print(io, c.block)
+function print_block(io::IO, c::Cached)
+    print(io, "(Cached)")
+    print_block(io, c.block)
 end
 
 #############################

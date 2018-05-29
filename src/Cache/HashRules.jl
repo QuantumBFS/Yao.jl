@@ -14,7 +14,9 @@ function hash(c::ChainBlock, h::UInt)
     hashkey
 end
 
-==(lhs::ChainBlock{N, T}, rhs::ChainBlock{N, T}) where {N, T} = all(lhs.blocks .== rhs.blocks)
+function ==(lhs::ChainBlock{N, T}, rhs::ChainBlock{N, T}) where {N, T}
+    (length(lhs.blocks) == length(rhs.blocks)) && all(lhs.blocks .== rhs.blocks)
+end
 
 # NOTE: kronecker blocks are equivalent if its addrs and blocks is the same
 function hash(block::KronBlock{N, T}, h::UInt) where {N, T}

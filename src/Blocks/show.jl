@@ -1,105 +1,163 @@
 # Pretty Printing
-function show(io::IO, g::PhaseGate{:global})
-    print(io, "Global Phase Gate:", g.theta)
+
+function show(io::IO, c::AbstractBlock)
+    print_tree(io, c)
 end
-
-function show(io::IO, g::PhaseGate{:shift})
-    print(io, "Phase Shift Gate:", g.theta)
-end
-
-function show(io::IO, R::RotationGate{T, GT}) where {T, GT}
-    print(io, "Rot ", R.U, ": ", R.theta)
-end
-
-function show(io::IO, c::ChainBlock{N, T}) where {N, T}
-    println(io, "ChainBlock{$N, $T}")
-    for i in eachindex(c.blocks)
-        if isassigned(c.blocks, i)
-            print(io, "\t", c.blocks[i])
-        else
-            print(io, "\t", "#undef")
-        end
-
-        if i != endof(c.blocks)
-            print(io, "\n")
-        end
-    end
-end
-
-function show(io::IO, k::KronBlock{N, T}) where {N, T}
-    println(io, "KronBlock{", N, ", ", T, "}")
-
-    if length(k) == 0
-        print(io, "  with 0 blocks")
-        return
-    end
-
-    for i in eachindex(k.addrs)
-        print(io, "  ", k.addrs[i], ": ", k.blocks[i])
-        if i != endof(k.addrs)
-            print(io, "\n")
-        end
-    end
-end
-
-function show(io::IO, m::Roller{N, M, T, BT}) where {N, M, T, BT}
-    print(io, "Roller on $N lines ($M blocks in total)")
-
-    if !isempty(m.blocks)
-        print(io, "\n")
-    end
-
-    for i in eachindex(m.blocks)
-        print(io, "\t", i, ": ", m.blocks[i])
-
-        if i != endof(m.blocks)
-            print(io, "\n")
-        end
-    end
-end
-
-# pretty printing
-
-function show(io::IO, ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
-    println(io, "control:")
-    println(io, "\ttotal: $N")
-    println(io, "\t$(ctrl.ctrl_qubits) control")
-    print(io, "\t$(ctrl.block) at $(ctrl.addr)")
-end
-
 
 # This part is copied and tweaked from Keno/AbstractTrees.jl
 
-# struct BlockTreeCharSet
-#     mid
-#     terminator
-#     skip
-#     dash
-# end
+struct BlockTreeCharSet
+    mid
+    terminator
+    skip
+    dash
+end
 
-# # Default Charset
-# BlockTreeCharSet() = BlockTreeCharSet('├','└','│','─')
+# Color Traits
+color(::Type{T}) where {T <: Roller} = :cyan
+color(::Type{T}) where {T <: KronBlock} = :cyan
+color(::Type{T}) where {T <: ChainBlock} = :blue
+color(::Type{T}) where {T <: ControlBlock} = :red
 
-# function print_children(io::IO, c::ChainBlock, index)
-#     if isassigned(c.blocks, i)
-#         print(io, c.blocks[index])
-#     else
-#         print(io, "#undef")
-#     end
-# end
+# Default Charset
+BlockTreeCharSet() = BlockTreeCharSet('├','└','│','─')
 
-# function print_node(io::IO, c::ChainBlock{N, T}) where N where T
-#     print(io, "ChainBlock{", N, ", ", T, "}")
-# end
+_charwidth(c::Char) = charwidth(c)
+_charwidth(s) = sum(map(charwidth, collect(s)))
 
-# isparent(c::CompositeBlock) = true
-# isparent(c::AbstractBlock) = false
+function print_prefix(io, depth, charset, active_levels)
+    for current_depth in 0:(depth-1)
+        if current_depth in active_levels
+            print(io, charset.skip, " "^(_charwidth(charset.dash) + 1))
+        else
+            print(io, " "^(_charwidth(charset.skip) + _charwidth(charset.dash) + 1))
+        end
+    end
+end
 
-# function print_tree(io::IO, entry::ChainBlock, charset, depth)
-#     print_node(io, entry)
+blocks(x::PrimitiveBlock) = ()
 
-#     for each in entry.blocks
-#         print_prefix(io, charset, depth)
-#         print_tree(io, each)
-#     end
-# end
+function print_tree(
+    io::IO, tree, maxdepth = 5;
+    line=nothing,
+    depth=0,
+    active_levels=Int[],
+    charset=BlockTreeCharSet()
+)
+    nodebuf = IOBuffer()
+    isa(io, IOContext) && (nodebuf = IOContext(nodebuf, io))
+
+    if line !== nothing
+        print_with_color(:white, io, line; bold=true)
+        print(io, "=>")
+    end
+    print_block(nodebuf, tree)
+
+    str = String(take!(isa(nodebuf, IOContext) ? nodebuf.io : nodebuf))
+
+    lines = split(str, '\n')
+    for (i, line) in enumerate(lines)
+        i != 1 && print_prefix(io, depth, charset, active_levels)
+        println(io, line)
+    end
+
+    print_subblocks(io, tree, depth, charset, active_levels)
+end
+
+print_tree(tree, args...; kwargs...) = print_tree(STDOUT::IO, tree, args...; kwargs...)
+
+print_subblocks(io::IO, tree, depth, charset, active_levels) = nothing
+
+function print_subblocks(io::IO, tree::CompositeBlock, depth, charset, active_levels)
+    c = blocks(tree)
+    st = start(c)
+    while !done(c, st)
+        child, st = next(c, st)
+        child_active_levels = active_levels
+        print_prefix(io, depth, charset, active_levels)
+        if done(c, st)
+            print(io, charset.terminator)
+        else
+            print(io, charset.mid)
+            child_active_levels = push!(copy(active_levels), depth)
+        end
+
+        print(io, charset.dash, ' ')
+        print_tree(
+            io, child;
+            depth=depth+1,
+            active_levels=child_active_levels,
+            charset=charset,
+        )
+    end
+end
+
+function print_subblocks(io::IO, tree::KronBlock, depth, charset, active_levels)
+    st = start(tree)
+    while !done(tree, st)
+        (line, child), st = next(tree, st)
+        child_active_levels = active_levels
+        print_prefix(io, depth, charset, active_levels)
+        if done(tree, st)
+            print(io, charset.terminator)
+        else
+            print(io, charset.mid)
+            child_active_levels = push!(copy(active_levels), depth)
+        end
+
+        print(io, charset.dash, ' ')
+        print_tree(
+            io, child;
+            line=line,
+            depth=depth+1,
+            active_levels=child_active_levels,
+            charset=charset,
+        )
+    end
+end
+
+function print_block(io::IO, x::PrimitiveBlock)
+    print(io, x)
+end
+
+# FIXME: make this works in v0.7
+function print_block(io::IO, x::CompositeBlock)
+    print(io, summary(x))
+end
+
+function print_block(io::IO, x::ChainBlock)
+    print_with_color(color(ChainBlock), io, "chain"; bold=true)
+end
+
+function print_block(io::IO, x::KronBlock)
+    print_with_color(color(KronBlock), io, "kron"; bold=true)
+end
+
+function print_block(io::IO, x::Roller)
+    print_with_color(color(Roller), io, "roller"; bold=true)
+end
+
+function print_block(io::IO, x::ControlBlock)
+    print_with_color(color(ControlBlock), io, "control("; bold=true)
+
+    for i in eachindex(x.ctrl_qubits)
+        print_with_color(color(ControlBlock), io, x.ctrl_qubits[i]; bold=true)
+
+        if i != endof(x.ctrl_qubits)
+            print_with_color(color(ControlBlock), io, ", "; bold=true)
+        end
+    end
+    print_with_color(color(ControlBlock), io, ")"; bold=true)
+end
+
+function print_block(io::IO, g::PhaseGate{:global})
+    print(io, "Global Phase Gate:", g.theta)
+end
+
+function print_block(io::IO, g::PhaseGate{:shift})
+    print(io, "Phase Shift Gate:", g.theta)
+end
+
+function print_block(io::IO, R::RotationGate)
+    print(io, "Rot ", R.U, ": ", R.theta)
+end
