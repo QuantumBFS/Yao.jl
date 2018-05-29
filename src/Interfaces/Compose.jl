@@ -37,16 +37,16 @@ function show(io::IO, c::Composer)
     end
 end
 
-function parse_block(b::Tuple{BT, Int}, n::Int) where BT
-    block, pos = b
+function parse_block(b::RangedBlock{BT, Int}, n::Int) where BT
+    block, pos = b.block, b.range
     @assert n >= pos "input size is too small"
-    kron(n, (pos, block))
+    kron(n, pos=>block)
 end
 
-function parse_block(b::Tuple{BT, I}, n::Int) where {BT, I <: UnitRange}
-    block, itr = b
+function parse_block(b::RangedBlock{BT, I}, n::Int) where {BT, I}
+    block, itr = b.block, b.range
     @assert n >= maximum(itr) "input size is too small"
-    kron(n, (i, block) for i in itr)
+    kron(n, i=>block for i in itr)
 end
 
 function parse_block(b::AbstractBlock, n::Int)

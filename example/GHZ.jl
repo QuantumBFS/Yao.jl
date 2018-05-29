@@ -1,9 +1,6 @@
-module GHZ
-
-export circuit
 using QuCircuit
 
-circuit(n) = compose(
+circuit(n) = n |> compose(
     X(1),
     H(2:n),
     X(1) |> C(2),
@@ -13,4 +10,4 @@ circuit(n) = compose(
     H(1:n),
 )
 
-end
+rand_state(4)

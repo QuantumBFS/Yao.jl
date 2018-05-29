@@ -1,3 +1,5 @@
+__precompile__()
+
 """
 Flexible, Extensible Framework for Quantum Algorithm Design.
 
@@ -8,7 +10,7 @@ Flexible, Extensible Framework for Quantum Algorithm Design.
 """
 module QuCircuit
 
-using Compat, MacroTools
+using Compat, MacroTools, Lazy
 
 PKGNAME = "QuCircuit"
 ENVNAME = join([PKGNAME, "DefaultType"])
