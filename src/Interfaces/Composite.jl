@@ -42,8 +42,8 @@ kron(total::Int, blocks::Union{MatrixBlock, Tuple, Pair}...) = KronBlock{total}(
 kron(total::Int, g::Base.Generator) = KronBlock{total}(g)
 # NOTE: this is ambiguous
 # kron(total::Int, blocks) = KronBlock{total}(blocks)
-# kron(blocks::Union{MatrixBlock, Tuple{Int, <:MatrixBlock}, Pair{Int, <:MatrixBlock}}...) = N->KronBlock{N}(blocks)
-# kron(blocks) = N->KronBlock{N}(blocks)
+kron(blocks::Union{MatrixBlock, Tuple{Int, <:MatrixBlock}, Pair{Int, <:MatrixBlock}}...) = N->KronBlock{N}(blocks)
+kron(blocks) = N->KronBlock{N}(blocks)
 
 # 2.3 control block
 
@@ -58,16 +58,16 @@ function control(controls, block, addr)
 end
 
 function control(total::Int, controls)
-    block_and_addr->ControlBlock{total}([controls...], block_and_addr...)
+    x::RangedBlock->ControlBlock{total}([controls...], x.block, x.range)
 end
 
 function control(controls)
-    block_and_addr->ControlBlock([controls...], block_and_addr...)
+    x::RangedBlock->ControlBlock([controls...], x.block, x.range)
 end
 
 function C(controls::Int...)
-    function _C(block_and_addr)
-        total->ControlBlock{total}([controls...], block_and_addr...)
+    function _C(x::RangedBlock{BT, Int}) where BT
+        total->ControlBlock{total}([controls...], x.block, x.range)
     end
 end
 

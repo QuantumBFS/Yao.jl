@@ -142,7 +142,7 @@ function define_const_gate_methods(name, t, cname)
         (gate::$(esc(typename)))(r::AbstractRegister, params...) = apply!(r, gate, params...)
 
         # define shortcuts
-        (gate::$(esc(typename)))(pos) = BlockWithPosition(gate, pos)
+        (gate::$(esc(typename)))(itr) = RangedBlock(gate, itr)
         # TODO: use Repeated instead
         (gate::$(esc(typename)))(n::Int, pos) = KronBlock{n}(i=>$(esc(name)) for i in pos)
 

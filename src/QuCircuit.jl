@@ -29,6 +29,4 @@ include("Cache/Cache.jl")
 
 include("Interfaces/Interfaces.jl")
 
-# include("Composer.jl")
-
 end # module

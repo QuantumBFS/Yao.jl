@@ -1,14 +1,12 @@
-struct BlockWithPosition{BT <: AbstractBlock, PT}
+struct RangedBlock{BT, RT}
     block::BT
-    range::PT
+    range::RT
 end
 
-import Base: range
-range(x::BlockWithPosition) = x.range
-
-
-struct DynamicSized{T}
-    arg::T
+function show(io::IO, x::RangedBlock{BT, Int}) where BT
+    print(io, x.block, " at line ", x.range)
 end
 
-(x::DynamicSized{BlockWithPosition{BT}})(n) where {BT <: ConstantGate} = kron(n, i=>x.arg.block for i in range(x.arg))
+function show(io::IO, x::RangedBlock)
+    print(io, x.block, " in line range ", x.range)
+end

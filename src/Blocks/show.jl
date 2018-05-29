@@ -125,6 +125,20 @@ function print_subblocks(io::IO, tree::KronBlock, depth, charset, active_levels)
     end
 end
 
+function print_subblocks(io::IO, tree::ControlBlock, depth, charset, active_levels)
+    print_prefix(io, depth, charset, active_levels)
+    print(io, charset.terminator)
+    print(io, charset.dash, ' ')
+    print_tree(
+        io, tree.block;
+        line=tree.addr,
+        depth=depth+1,
+        active_levels=active_levels,
+        charset=charset,
+        roottree=tree,
+    )
+end
+
 function print_block(io::IO, x::PrimitiveBlock)
     print(io, x)
 end

@@ -3,7 +3,7 @@ using Compat.Test
 using QuCircuit
 import QuCircuit: ChainBlock, KronBlock, ControlBlock, Roller,
     Measure, MeasureAndRemove, Concentrator, Signal, RotationGate
-import QuCircuit: PhaseGate
+import QuCircuit: PhaseGate, RangedBlock
 
 @testset "phase gate" begin
     @test isa(phase(), PhaseGate{:global, Float64})
@@ -58,8 +58,8 @@ end
 
 @testset "pauli gates binding" begin
     @test isa(X(), XGate{ComplexF64})
-    @test isa(X(2), Tuple)
-    @test isa(X(1:3), Tuple)
+    @test isa(X(2), RangedBlock)
+    @test isa(X(1:3), RangedBlock)
     @test isa(X(4, 2), KronBlock)
     @test isa(X(4, 1:3), KronBlock)
 end
