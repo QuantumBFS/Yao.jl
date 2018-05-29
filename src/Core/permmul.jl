@@ -1,4 +1,6 @@
 include("utils.jl")
+using Compat.LinearAlgebra
+using Compat.SparseArrays
 
 """
 Multiply and permute sparse matrix
@@ -15,9 +17,7 @@ struct PermuteMultiply{Tv, Ti<:Integer} <: AbstractMatrix{Tv}
     end
 end
 
-function PermuteMultiply(perm::Vector, vals::Vector)
-    Tv = eltype(vals)
-    Ti = eltype(perm)
+function PermuteMultiply(perm::Vector{Ti}, vals::Vector{Tv}) where {Tv, Ti}
     PermuteMultiply{Tv,Ti}(perm, vals)
 end
 

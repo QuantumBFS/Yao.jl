@@ -13,7 +13,7 @@ getindex(A::Identity{T}, i::Integer, j::Integer) where T = T(i==j)
 import Base: sparse, full
 sparse(A::Identity{T}) where T = speye(T, A.n)
 full(A::Identity{T}) where T = eye(T, A.n)
-Identity(A::AbstractMatrix{T}) where T = Identity{T}(size(A, 1) == size(A,2)?size(A, 2):throw(DimensionMismatch()))
+Identity(A::AbstractMatrix{T}) where T = Identity{T}(size(A, 1) == size(A,2) ? size(A, 2) : throw(DimensionMismatch()))
 
 import Base: convert
 convert(::Type{Identity{T}}, B::Identity) where T = Identity{T}(B.n)
@@ -51,8 +51,8 @@ for op in [:+, :-, :(==), :≈]
         @eval $op(d1::Identity, d2::Identity) = $op(d1.n, d2.n)
     end
 end
-+(d1::Identity{Ta}, d2::Identity{Tb}) where {Ta, Tb} = d1==d2?Diagonal(fill(promote_types(Ta, Tb)(2), d1.n)):throw(DimensionMismatch())
--(d1::Identity{Ta}, d2::Identity{Tb}) where {Ta, Tb} = d1==d2?spzeros(promote_types(Ta, Tb), d1.n, d1.n):throw(DimensionMismatch())
++(d1::Identity{Ta}, d2::Identity{Tb}) where {Ta, Tb} = d1==d2 ? Diagonal(fill(promote_types(Ta, Tb)(2), d1.n)) : throw(DimensionMismatch())
+-(d1::Identity{Ta}, d2::Identity{Tb}) where {Ta, Tb} = d1==d2 ? spzeros(promote_types(Ta, Tb), d1.n, d1.n) : throw(DimensionMismatch())
 
 ####### sparse matrix ######
 import Base: nnz, nonzeros, inv, det, diag, logdet
@@ -67,10 +67,10 @@ logdet(M::Identity) = 0
 
 ####### multiply ###########
 for T in [:AbstractVecOrMat, :SparseMatrixCSC, :PermuteMultiply, :Diagonal, :StridedMatrix]
-    @eval (*)(A::Identity, B::$T) = size(A, 2) == size(B, 1)?B:throw(DimensionMismatch())
-    @eval (*)(A::$T, B::Identity) = size(A, ndims(A)) == size(B, 1)?A:throw(DimensionMismatch())
+    @eval (*)(A::Identity, B::$T) = size(A, 2) == size(B, 1) ? B : throw(DimensionMismatch())
+    @eval (*)(A::$T, B::Identity) = size(A, ndims(A)) == size(B, 1) ? A : throw(DimensionMismatch())
 end
-(*)(A::Identity, B::Identity) = size(A, 2) == size(B, 1)?A:throw(DimensionMismatch())
+(*)(A::Identity, B::Identity) = size(A, 2) == size(B, 1) ? A : throw(DimensionMismatch())
 
 #for func in (:At_mul_B, :At_mul_Bt, :A_mul_Bt, :Ac_mul_B, :A_mul_Bc, :Ac_mul_Bc)
 #    @eval begin

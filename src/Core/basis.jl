@@ -1,4 +1,4 @@
-"""
+#=
 DEFINE
 ---------------------
 binary basis is 0000 - 1111
@@ -10,7 +10,8 @@ FORMAT (should be)
 binary basis: Bool
 digital basis: UInt64
 bit counting: Int
-"""
+=#
+using Compat: ComplexF64
 const BInt = Int
 const DInt = Int
 
@@ -41,8 +42,8 @@ bitarray(v::Number) = bitarray([v])
 ########## Bit-Wise Operations ##############
 const Ints = Union{Vector{Int}, Int, UnitRange{Int}}
 const DInts = Union{Vector{DInt}, DInt, UnitRange{DInt}}
-bmask(ibit::Int...) = reduce(+, [one(DInt) << b for b in ibit.-1])
-bmask(bits::UnitRange{Int}) = ((one(DInt) << (bits.stop - bits.start + 1)) - one(DInt)) << (bits.start-1)
+bmask(ibit::Int...)::Int = sum([one(DInt) << (b-1) for b in ibit])
+bmask(bits::UnitRange{Int})::Int = ((one(DInt) << (bits.stop - bits.start + 1)) - one(DInt)) << (bits.start-1)
 
 # bit size
 bsizeof(x) = sizeof(x) << 3
@@ -66,23 +67,24 @@ end
 
 
 # take a bit/bits
-takebit(index::DInt, ibit::Int) = (index >> (ibit-1)) & one(DInt)
+takebit(index::DInt, ibit::Int)::DInt = (index >> (ibit-1)) & one(DInt)
 # a position is 1?
-testany(index::DInt, mask::DInt) = (index & mask) != zero(DInt)
-testall(index::DInt, mask::DInt) = (index & mask) == mask
+testany(index::DInt, mask::DInt)::Bool = (index & mask) != zero(DInt)
+testall(index::DInt, mask::DInt)::Bool = (index & mask) == mask
+testval(index::DInt, mask::DInt, onemask::DInt)::Bool = index&mask==onemask
 
 # set a bit
-setbit(index::DInt, mask::DInt) = indices | mask
+setbit(index::DInt, mask::DInt)::DInt = indices | mask
 setbit!(indices::DInts, mask::DInt) = indices[:] |= mask
 
 # flip a bit/bits
-flip(index::DInt, mask::DInt) = index ⊻ mask
+flip(index::DInt, mask::DInt)::DInt = index ⊻ mask
 flip!(indices::DInt, mask::DInt) = indices[:] = indices .⊻ mask
 # flip all bits
-neg(index::DInt, num_bit::Int) = bmask(1:num_bit) ⊻ index
+neg(index::DInt, num_bit::Int)::DInt = bmask(1:num_bit) ⊻ index
 
 # swap two bits
-function swapbits(num::DInt, i::Int, j::Int)
+function swapbits(num::DInt, i::Int, j::Int)::DInt
     i = i-1
     j = j-1
     k = (num >> j) & 1 - (num >> i) & 1
@@ -90,24 +92,10 @@ function swapbits(num::DInt, i::Int, j::Int)
 end
 swapbits!(bss::Vector{DInt}, i::Int, j::Int) = bss[:] = swapbits.(bss, i, j)
 
-# utils used in controled bits
-"""
-subspace spanned by bits placed on given positions.
-"""
-function _subspace(num_bit::Int, poss::Vector{Int}, base::DInt)
-    if length(poss) == 0
-        return [base]
-    else
-        rest, pos = poss[1:end-1], poss[end]
-        # efficiency of vcat?
-        return vcat(_subspace(num_bit, rest, base), _subspace(num_bit, rest, flip(base, pos)))
-    end
-end
-
-function indices_with(num_bit::Int, poss::Vector{Int}, vals::Vector{BInt})
+function indices_with(num_bit::Int, poss::Vector{Int}, vals::Vector{BInt})::Vector{DInt}
     mask = bmask(poss...)
-    valmask = bmask(poss[vals.!=0]...)
-    filter(i->i.&mask.==valmask, basis(num_bit))
+    onemask = bmask(poss[vals.!=0]...)
+    filter(testval(mask, onemask), basis(num_bit))
 end
 
 #################### Array Operation: Roll Axis #######################
@@ -146,13 +134,13 @@ end
 
 ###################### State Utilities ########################
 function onehot(num_bit::Int, x::DInt)
-    v = zeros(Complex128, 1<<num_bit)
+    v = zeros(ComplexF64, 1<<num_bit)
     v[x+1] = 1
     return v
 end
 
 function ghz(num_bit::Int; x::DInt=DInt(0))
-    v = zeros(Complex128, 1<<num_bit)
+    v = zeros(ComplexF64, 1<<num_bit)
     v[x+1] = 1/sqrt(2)
     v[flip(x, bmask(1:num_bit))+1] = 1/sqrt(2)
     return v

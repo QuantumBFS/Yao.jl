@@ -3,20 +3,21 @@ include("gates.jl")
 
 @testset "gate utils" begin
     @test superkron(4, [PAULI_X, PAULI_Y], [3,2]) == II(2) ⊗ PAULI_X ⊗ PAULI_Y ⊗ II(2)
-    @test general_controlled_gates(2, [P1], [2], [PAULI_X], [1]) == CNOT
+    @test general_controlled_gates(2, [P1], [2], [PAULI_X], [1]) == CNOT_MAT
 end
 
 @testset "controlled gates" begin
-    @test general_controlled_gates(2, [P1], [2], [PAULI_X], [1]) == CNOT
-    @test controlled_U1(3, PAULI_Z, [3], 2) == czgate(3, 3, 2) 
-    @test czgate(2, 1, 2) == [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 -1]
-    @test general_controlled_gates(12, [P1], [7], [PAULI_Z], [3]) == czgate(12, 7, 3)
-    @test cnotgate(2, 2, 1) == [1 0 0 0; 0 1 0 0; 0 0 0 1; 0 0 1 0]
-    @test general_controlled_gates(12, [P1], [7], [PAULI_X], [3]) == cnotgate(12, 7, 3)
+    @test general_controlled_gates(2, [P1], [2], [PAULI_X], [1]) == CNOT_MAT
+    @test controlled_U1(3, PAULI_Z, [3], 2) == czgate(Complex128, 3, 3, 2) 
+    @test czgate(Complex128, 2, 1, 2) == [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 -1]
+    @test general_controlled_gates(12, [P1], [7], [PAULI_Z], [3]) == czgate(Complex128, 12, 7, 3)
+    @test cxgate(Complex128, 2, 2, 1) == [1 0 0 0; 0 1 0 0; 0 0 0 1; 0 0 1 0]
+    @test general_controlled_gates(12, [P1], [7], [PAULI_X], [3]) == cxgate(Complex128, 12, 7, 3)
+    @test general_controlled_gates(3, [P1], [3], [PAULI_Y], [2]) == controlled_U1(3, PAULI_Y, [3], 2) == cygate(Complex128, 3, 3, 2)
 end
 
 @testset "single gate" begin
-    @test zgate(4, [1,2,3]) == superkron(4, [PAULI_Z, PAULI_Z, PAULI_Z], [1,2,3])
+    @test zgate(Complex128, 4, [1,2,3]) == superkron(4, [PAULI_Z, PAULI_Z, PAULI_Z], [1,2,3])
 end
 
 @testset "basic gate" begin
@@ -27,9 +28,10 @@ end
         (zgate, PAULI_Z),
         #(hgate, (elem = 1 / sqrt(2); [elem elem; elem -elem])),
     ]
-        @test full(gate(1, 1)) == MAT
+        @test full(gate(Complex128, 1, 1)) == MAT
+        @test superkron(4, [MAT, MAT, MAT], [3,2,1]) == gate(Complex128, 4, 1:3)
     end
-    @test toffoligate(3, 2, 3, 1) == TOFFOLI
+    @test toffoligate(3, 2, 3, 1) == TOFFOLI_MAT
 end
 
 #=

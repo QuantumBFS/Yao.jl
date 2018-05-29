@@ -16,27 +16,28 @@ function _wrap_identity(data_list::Vector{T}, num_bit_list::Vector{Int}) where T
 end
 
 ###################### X, Y, Z Gates ######################
-function xgate(num_bit::Int, bits::Ints)
+function xgate(::Type{MT}, num_bit::Int, bits::Ints) where MT<:Number
     mask = bmask(bits...)
-    norder = map(b->flip(b, mask) + 1, basis(num_bit))
-    PermuteMultiply(norder, ones(1<<num_bit))
+    order = map(b->flip(b, mask) + 1, basis(num_bit))
+    PermuteMultiply(order, ones(MT, 1<<num_bit))
 end
 
-function ygate(num_bit::Int, bits::Ints)
+function ygate(::Type{MT}, num_bit::Int, bits::Ints) where MT<:Complex
     mask = bmask(bits...)
-    norder = map(b->flip(b, mask) + 1, basis(num_bit))
-    #vals = [-im*(-1)^reduce(+,takebit(b, bits)) for b in basis]
-    #vals = mapreduce(bit->map(x->x==0?-im:im, takebit(basis, bit)), .*, bits)
-    bss = basis(num_bit)
-    vals = mapreduce(bit->map(b->im*(2*takebit(b, bit)-1.0), bss), .*, bits)
-    PermuteMultiply(norder, vals)
+    order = Vector{Int}(1<<num_bit)
+    vals = Vector{MT}(1<<num_bit)
+    factor = MT(im)^length(bits)
+    for b = basis(num_bit)
+        i = b+1
+        order[i] = flip(b, mask) + 1
+        vals[i] = count_ones(b&mask)%2 == 1 ? factor : -factor
+    end
+    PermuteMultiply(order, vals)
 end
 
-function zgate(num_bit::Int, bits::Ints)
-    #vals = [(-1)^reduce(+,takebit(b, bits)) for b in basis]
-    bss = basis(num_bit)
-    #vals = mapreduce(bit->1.-2.0.*takebit.(bss, bit), (x,y)->broadcast(*,x,y), bits)
-    vals = mapreduce(bit->map(b->1-2.0*takebit(b, bit), bss), (x,y)->broadcast(*,x,y), bits)
+function zgate(::Type{MT}, num_bit::Int, bits::Ints) where MT<:Number
+    mask = bmask(bits...)
+    vals = map(b->count_ones(b&mask)%2==0 ? MT(1) : MT(-1), basis(num_bit))
     Diagonal(vals)
 end
 
@@ -44,16 +45,58 @@ end
 general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{Tg}, locs::Vector{Int}) where {Tg<:AbstractMatrix, Tp<:AbstractMatrix} = II(1<<num_bit) - superkron(num_bit, projectors, cbits) + superkron(num_bit, vcat(projectors, gates), vcat(cbits, locs))
 
 #### C-X/Y/Z Gates
-function cnotgate(num_bit::Int, b1::Int, b2::Int)
+function cxgate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) where MT<:Number
     mask = bmask(b1)
     db = b2-b1
-    order = map(i->i ⊻ ((i & mask) << db) + 1, basis(num_bit))
-    PermuteMultiply(order, ones(Int, 1<<num_bit))
+    #order = map(i->i ⊻ ((i & mask) << db) + 1, basis(num_bit))
+    order = map(i->testall(i, b1) ? flip(i, b2)+1 : i+1, basis(num_bit))
+    PermuteMultiply(order, ones(MT, 1<<num_bit))
 end
-# CNOT/CZ may be further accelerated.
-function czgate(num_bit::Int, b1::Int, b2::Int)
-    Diagonal(map(i->1-2.0*(takebit(i, b1) & takebit(i, b2)), basis(num_bit)))
+
+function cjgate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) where MT<:Number
+    mask2 = bmask(b2)
+    db = b2-b1
+    order = collect(1:1<<num_bit)
+    step = 1<<(b1-1)
+    step_2 = 1<<b1
+    for j = step:step_2:1<<num_bit-1
+        @simd for i = j+1:j+step
+            @inbounds order[i] = testall(i-1, mask2) ? 1 : -1 #1-2*takebit(i-1, b2)
+        end
+    end
+    PermuteMultiply(order, ones(MT, 1<<num_bit))
 end
+ 
+
+function cygate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) where MT<:Complex
+    mask2 = bmask(b2)
+    order = collect(1:1<<num_bit)
+    vals = ones(MT, 1<<num_bit)
+    step = 1<<(b1-1)
+    step_2 = 1<<b1
+    for j = step:step_2:1<<num_bit-1
+        @simd for i = j+1:j+step
+            b = i-1
+            @inbounds order[i] = flip(b, mask2) + 1
+            @inbounds vals[i] = (2*takebit(b, b2)-1)*MT(im)
+        end
+    end
+    PermuteMultiply(order, vals)
+end
+
+function czgate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) where MT<:Number
+    mask2 = bmask(b2)
+    vals = ones(MT, 1<<num_bit)
+    step = 1<<(b1-1)
+    step_2 = 1<<b1
+    for j = step:step_2:1<<num_bit-1
+        @simd for i = j+1:j+step
+            @inbounds vals[i] = 1-2*takebit(i-1, b2)
+        end
+    end
+    Diagonal(vals)
+end
+ 
 
 # general multi-control single-gate
 function controlled_U1(num_bit::Int, gate::PermuteMultiply{T}, cbits::Vector{Int}, b2::Int) where {T}
@@ -61,40 +104,37 @@ function controlled_U1(num_bit::Int, gate::PermuteMultiply{T}, cbits::Vector{Int
     order = collect(1:1<<num_bit)
     mask = bmask(cbits...)
     mask2 = bmask(b2)
-    for b in basis(num_bit)
-        #if testall(b, mask)
-        #    @inbounds vals[b+1] = gate.vals[gate.perm[1+takebit(b, b2)]]
-        #    @inbounds order[b+1] = (gate.perm[1] == 1) ? b+1: flip(b, mask2)+1
-        #end
+    @simd for b in basis(num_bit)
         if testall(b, mask)
-            @inbounds vals[b+1] = gate.vals[gate.perm[1+takebit(b, b2)]]
-            @inbounds order[b+1] = (gate.perm[1] == 1) ? b+1: flip(b, mask2)+1
+            bind = b+1
+            @inbounds vals[bind] = gate.vals[gate.perm[2-takebit(b, b2)]]
+            @inbounds order[bind] = (gate.perm[1] == 1) ? bind : flip(b, mask2)+1
         end
     end
     PermuteMultiply(order, vals)
 end
 
 function controlled_U1(num_bit::Int, gate::SparseMatrixCSC, b1::Vector{Int}, b2::Int)
-    general_controlled_gates(2, [P1], [b1], [gate], [b2])
+    general_controlled_gates(2, [P1], b1, [gate], [b2])
 end
 
 function controlled_U1(num_bit::Int, gate::Diagonal{T}, cbits::Vector{Int}, b2::Int) where {T}
-    vals = ones(T, 1<<num_bit)
     mask = bmask(cbits...)
-    a, b = gate.diag
-    b_a = b-a
-    disp = b2-1
-    for i in basis(num_bit)
-        #if testall(i, mask)
-        #    @inbounds vals[i+1] = gate.diag[1+takebit(i, b2)]
-        #end
-        vals[i+1] = (b_a*takebit(i, b2))*testall(i, mask)
+    ######### LW's version ###########
+    vals = ones(T, 1<<num_bit)
+    @simd for i in basis(num_bit)
+        if testall(i, mask)
+            @inbounds vals[i+1] = gate.diag[1+takebit(i, b2)]
+        end
     end
-    #vals = map(i->testall(i, mask)?a+b_a*takebit(i, b2):1, basis(num_bit))
+    ######### simple version ###########
+    #a, b = gate.diag
+    #vals = map(i->(testall(i, mask) ? (testany(i, b2) ? b : a) : T(1))::T, basis(num_bit))
     Diagonal(vals)
 end
+
 function controlled_U1(num_bit::Int, gate::StridedMatrix, b1::Vector{Int}, b2::Int)
-    general_controlled_gates(2, [P1], [b1], [gate], [b2])
+    general_controlled_gates(2, [P1], b1, [gate], [b2])
 end
 
 ############################ Single Qubit Gates ################################
