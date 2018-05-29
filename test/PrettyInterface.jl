@@ -1,12 +1,13 @@
 using Compat
 using Compat.Test
 using QuCircuit
-import QuCircuit: ConstGate, ChainBlock, KronBlock, ControlBlock, Roller,
+import QuCircuit: ChainBlock, KronBlock, ControlBlock, Roller,
     Measure, MeasureAndRemove, Concentrator, Signal, RotationGate
-import QuCircuit: PhiGate
+import QuCircuit: PhaseGate
 
 @testset "phase gate" begin
-    @test isa(phase(), PhiGate)
+    @test isa(phase(), PhaseGate{:global, Float64})
+    @test isa(shift(), PhaseGate{:shift, Float64})
     @test phase().theta == 0.0
 end
 
@@ -56,7 +57,7 @@ end
 end
 
 @testset "pauli gates binding" begin
-    @test isa(X(), ConstGate{1, Val{:X}, ComplexF64})
+    @test isa(X(), XGate{ComplexF64})
     @test isa(X(2), Tuple)
     @test isa(X(1:3), Tuple)
     @test isa(X(4, 2), KronBlock)
@@ -64,10 +65,9 @@ end
 end
 
 @testset "gate" begin
-    @test isa(gate(:X), ConstGate{1, Val{:X}, ComplexF64})
-    @test isa(gate(ComplexF32, :X), ConstGate{1, Val{:X}, ComplexF32})
-    @test isa(gate(ComplexF64, :Rx, 1), RotationGate)
-    @test isa(gate(ComplexF64, :Ry, 1), RotationGate)
-    @test isa(gate(ComplexF64, :Rz, 1), RotationGate)
-    @test isa(gate(ComplexF64, :Ra, 1, 2, 3), ChainBlock)
+    @test isa(X, XGate{ComplexF64})
+    @test isa(X(ComplexF32), XGate{ComplexF32})
+    @test isa(Rx(1), RotationGate)
+    @test isa(Ry(1), RotationGate)
+    @test isa(Rz(1), RotationGate)
 end

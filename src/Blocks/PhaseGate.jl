@@ -14,15 +14,11 @@ copy(block::PhaseGate{PhaseType, T}) where {PhaseType, T} = PhaseGate{PhaseType,
 dispatch!(f::Function, block::PhaseGate, theta) = (block.theta = f(block.theta, theta); block)
 
 # Properties
-isreflexive(::PhaseGate) = false
-ishermitian(::PhaseGate) = false
 nparameters(::PhaseGate) = 1
 
-# Pretty Printing
-function show(io::IO, g::PhaseGate{:global})
-    print(io, "Global Phase Gate:", g.theta)
-end
+==(lhs::PhaseGate, rhs::PhaseGate) = false
+==(lhs::PhaseGate{PT}, rhs::PhaseGate{PT}) where PT = lhs.theta == rhs.theta
 
-function show(io::IO, g::PhaseGate{:shift})
-    print(io, "Phase Shift Gate:", g.theta)
+function hash(gate::PhaseGate, h::UInt)
+    hash(hash(gate.theta, object_id(gate)), h)
 end

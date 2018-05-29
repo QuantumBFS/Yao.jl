@@ -30,11 +30,19 @@ struct KronBlock{N, T} <: CompositeBlock{N, T}
     end
 
     function KronBlock{N}(args...) where N
+        KronBlock{N}(args)
+    end
+
+    function KronBlock{N}(arg::T) where {N, MT <: MatrixBlock, T <: Union{Pair{Int, MT}, MT}}
+        KronBlock{N}([arg])
+    end
+
+    function KronBlock{N}(itr) where N
         curr_head = 1
         blocks = MatrixBlock[]
         addrs = Int[]
 
-        for each in args
+        for each in itr
             if isa(each, MatrixBlock)
                 push!(blocks, each)
                 push!(addrs, curr_head)
@@ -45,7 +53,7 @@ struct KronBlock{N, T} <: CompositeBlock{N, T}
                 push!(blocks, block)
                 curr_head += nqubits(block)
             else
-                throw(MethodError(KronBlock, args))
+                throw(MethodError(KronBlock, itr))
             end
         end
 
@@ -134,35 +142,4 @@ function mat(k::KronBlock{N, T}) where {N, T}
         op = kron(speye(T, 1 << (N - curr_addr + 1)), op)
     end
     op
-end
-
-# Traits
-# inherits its children
-
-for NAME in [
-    :isunitary,
-    :ispure,
-    :isreflexive,
-    :ishermitian,
-]
-
-@eval begin
-    $NAME(k::KronBlock) = all($NAME, k.blocks)
-end
-end
-
-function show(io::IO, k::KronBlock{N, T}) where {N, T}
-    println(io, "KronBlock{", N, ", ", T, "}")
-
-    if length(k) == 0
-        print(io, "  with 0 blocks")
-        return
-    end
-
-    for i in eachindex(k.addrs)
-        print(io, "  ", k.addrs[i], ": ", k.blocks[i])
-        if i != endof(k.addrs)
-            print(io, "\n")
-        end
-    end
 end

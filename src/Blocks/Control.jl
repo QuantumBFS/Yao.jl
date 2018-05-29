@@ -188,12 +188,3 @@ end
 function dispatch!(f::Function, ctrl::ControlBlock, params...)
     dispatch!(f, ctrl.block, params...)
 end
-
-# pretty printing
-
-function show(io::IO, ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
-    println(io, "control:")
-    println(io, "\ttotal: $N")
-    println(io, "\t$(ctrl.ctrl_qubits) control")
-    print(io, "\t$(ctrl.block) at $(ctrl.addr)")
-end

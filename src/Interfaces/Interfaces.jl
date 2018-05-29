@@ -4,53 +4,38 @@
 # blocks can only be constructed through factory methods
 
 # 1. primitive blocks
-# 1.1 constant gate
-
-# export gate
-# """
-#     gate(type, gate_type)
-#     gate(gate_type)
-
-# Create an instance of `gate_type`.
-
-# ### Example
-
-# create a Pauli X gate: `gate(X)`
-# """
-# gate(::Type{Complex{T}}, ::Type{GT}) where {T, GT <: Val} = ConstGate(Complex{T}, GT)
-# gate(::Type{T}, s::Symbol, params...) where T = gate(T, Val{s}, promote(params...)...)
-
-# # config default type
-# gate(s::Symbol, params...) = gate(ComplexF64, s, params...)
-# gate(::Type{GT}, params...) where {GT <: Val} = gate(ComplexF64, GT, params...)
-
-# # define default promotion rule
-# gate(::Type{Complex{T}}, ::Type{GT}, params...) where {T, GT <: Val} = gate(Complex{T}, GT, promote(T(first(params)), Base.tail(params)...)...)
-
-# # define dispatch rules
-# gate(::Type{Complex{T}}, ::Type{Val{:Ra}}, α::T, β::T, γ::T) where T = chain(rot(:X, α), rot(:Z, β), rot(:X, γ))
-# gate(::Type{Complex{T}}, ::Type{Val{:Rx}}, theta::T) where T = rot(:X, theta)
-# gate(::Type{Complex{T}}, ::Type{Val{:Ry}}, theta::T) where T = rot(:Y, theta)
-# gate(::Type{Complex{T}}, ::Type{Val{:Rz}}, theta::T) where T = rot(:Z, theta)
 
 # 1.2 phase gate
 # 1.2.1 global phase
 export phase
-phase(::Type{T}, theta) where {T <: Real} = PhaseGate{:global, T}(theta)
-phase(theta) = phase(Float64, theta)
-phase() = phase(0.0)
+phase(::Type{T}, theta) where {T <: Complex} = PhaseGate{:global, real(T)}(theta)
+phase(theta=0.0) = phase(CircuitDefaultType, theta)
 
 # 1.2.2 phase shift
 export shift
-shift(::Type{T}, theta) where {T <: Real} = PhaseGate{:shift, T}(theta)
-shift(theta) = phase(Float64, theta)
-shift() = shift(0.0)
+shift(::Type{T}, theta) where {T <: Complex} = PhaseGate{:shift, real(T)}(theta)
+shift(theta=0.0) = shift(CircuitDefaultType, theta)
 
 # 1.3 rotation gate
-export rot
-rot(::Type{GT}, theta) where {GT} = RotationGate{GT}(theta)
-rot(s::Symbol, theta) = RotationGate(s, theta)
-rot(s::Symbol) = rot(s, 0.0)
+export Rx, Ry, Rz, rot
+
+for (FNAME, NAME) in [
+    (:Rx, :X),
+    (:Ry, :Y),
+    (:Rz, :Z),
+]
+
+    GT = Symbol(join([NAME, "Gate"]))
+    @eval begin
+        $FNAME(::Type{T}, theta=0.0) where {T <: Complex} = RotationGate{real(T), $GT{T}}($NAME(T), theta)
+        $FNAME(theta=0.0) = $FNAME(CircuitDefaultType, theta)
+    end
+
+end
+
+rot(::Type{T}, U::GT, theta=0.0) where {T, GT} = RotationGate{real(T), GT}(U, theta)
+rot(U::MatrixBlock, theta=0.0) = rot(CircuitDefaultType, U, theta)
+
 
 # 2. composite blocks
 
@@ -93,11 +78,12 @@ This will automatically generate a block list looks like
 4 -- [Y] --
 ```
 """
-kron(total::Int, blocks::Union{MatrixBlock, Tuple, Pair}...) = KronBlock{total}(blocks...)
+kron(total::Int, blocks::Union{MatrixBlock, Tuple, Pair}...) = KronBlock{total}(blocks)
+kron(total::Int, g::Base.Generator) = KronBlock{total}(g)
 # NOTE: this is ambiguous
 # kron(total::Int, blocks) = KronBlock{total}(blocks)
-kron(blocks::Union{MatrixBlock, Tuple{Int, <:MatrixBlock}, Pair{Int, <:MatrixBlock}}...) = N->KronBlock{N}(blocks...)
-kron(blocks) = N->KronBlock{N}(blocks...)
+kron(blocks::Union{MatrixBlock, Tuple{Int, <:MatrixBlock}, Pair{Int, <:MatrixBlock}}...) = N->KronBlock{N}(blocks)
+kron(blocks) = N->KronBlock{N}(blocks)
 
 # 2.3 control block
 

@@ -1,7 +1,7 @@
 using Compat.Test
 using QuCircuit
 
-import QuCircuit: ChainBlock, KronBlock, Cached, ConstGate, Roller
+import QuCircuit: ChainBlock, KronBlock, Cached, Roller, PrimitiveBlock
 
 @testset "chain" begin
     g = chain(X(), Y(), Z())
@@ -11,12 +11,12 @@ import QuCircuit: ChainBlock, KronBlock, Cached, ConstGate, Roller
     @test isa(g, ChainBlock)
 
     for each in g
-        @test isa(each, ConstGate)
+        @test isa(each, PrimitiveBlock)
     end
 
     for each in cg
         @test isa(each, Cached)
-        @test isa(each.block, ConstGate)
+        @test isa(each.block, PrimitiveBlock)
     end
 
     cg = cache(g)
@@ -24,11 +24,11 @@ import QuCircuit: ChainBlock, KronBlock, Cached, ConstGate, Roller
     @test isa(g, ChainBlock)
 
     for each in g
-        @test isa(each, ConstGate)
+        @test isa(each, PrimitiveBlock)
     end
 
     for each in cg
-        @test isa(each, ConstGate)
+        @test isa(each, PrimitiveBlock)
     end
 end
 
@@ -40,22 +40,22 @@ end
     @test isa(g, KronBlock)
 
     for each in blocks(g)
-        @test isa(each, ConstGate)
+        @test isa(each, PrimitiveBlock)
     end
 
     for each in blocks(cg)
         @test isa(each, Cached)
-        @test isa(each.block, ConstGate)
+        @test isa(each.block, PrimitiveBlock)
     end
 
     cg = cache(g)
 
     for each in blocks(g)
-        @test isa(each, ConstGate)
+        @test isa(each, PrimitiveBlock)
     end
 
     for each in blocks(g)
-        @test isa(each, ConstGate)
+        @test isa(each, PrimitiveBlock)
     end
 end
 
@@ -66,7 +66,7 @@ end
     @test isa(g, Roller)
 
     for each in blocks(g)
-        @test isa(each, ConstGate)
+        @test isa(each, PrimitiveBlock)
     end
 
     for each in blocks(cg)
@@ -78,10 +78,10 @@ end
     @test isa(g, Roller)
 
     for each in blocks(g)
-        @test isa(each, ConstGate)
+        @test isa(each, PrimitiveBlock)
     end
 
     for each in blocks(cg)
-        @test isa(each, ConstGate)
+        @test isa(each, PrimitiveBlock)
     end
 end

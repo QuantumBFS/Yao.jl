@@ -3,13 +3,13 @@ using QuCircuit
 import QuCircuit: ControlBlock
 import QuCircuit: _single_control_gate_sparse,
                   _single_inverse_control_gate_sparse,
-                  A_kron_B, ControlQuBit, PhiGate
+                  A_kron_B, ControlQuBit, PhaseGate
 # import QuCircuit: Const.Sparse.P0, Const.Sparse.P1
 
 @testset "getindex & setindex" begin
 g = ControlBlock{4}([1, 2], phase(0.1), 4)
 @test isa(g[1], ControlQuBit)
-@test isa(g[4], PhiGate)
+@test isa(g[4], PhaseGate)
 @test_throws KeyError g[3]
 @test_throws BoundsError g[5]
 end

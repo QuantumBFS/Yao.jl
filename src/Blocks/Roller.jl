@@ -65,19 +65,3 @@ function apply!(reg::Register{B}, m::Roller{N, M}) where {B, N, M}
     end
     reg
 end
-
-function show(io::IO, m::Roller{N, M, T, BT}) where {N, M, T, BT}
-    print(io, "Roller on $N lines ($M blocks in total)")
-
-    if !isempty(m.blocks)
-        print(io, "\n")
-    end
-
-    for i in eachindex(m.blocks)
-        print(io, "\t", i, ": ", m.blocks[i])
-
-        if i != endof(m.blocks)
-            print(io, "\n")
-        end
-    end
-end

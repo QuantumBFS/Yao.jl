@@ -75,18 +75,3 @@ function apply!(r::Register, c::ChainBlock)
     end
     r
 end
-
-function show(io::IO, c::ChainBlock{N, T}) where {N, T}
-    println(io, "ChainBlock{$N, $T}")
-    for i in eachindex(c.blocks)
-        if isassigned(c.blocks, i)
-            print(io, "\t", c.blocks[i])
-        else
-            print(io, "\t", "#undef")
-        end
-
-        if i != endof(c.blocks)
-            print(io, "\n")
-        end
-    end
-end

@@ -4,7 +4,7 @@ import QuCircuit: DefaultServer, cache!, pull
 
 @testset "default server" begin
     ds = DefaultServer(SparseMatrixCSC{Complex128, Int})
-    g = kron(3, X(), phase(0.1), rot(:X, 0.1))
+    g = kron(3, X(), phase(0.1), Rx(0.1))
 
     # cache recursively
     cache!(ds, g, unsigned(2))

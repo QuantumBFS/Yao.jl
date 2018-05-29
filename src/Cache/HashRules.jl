@@ -51,17 +51,4 @@ end
 # Primitive Blocks
 ###################
 
-==(lhs::PhaseGate, rhs::PhaseGate) = lhs.theta == rhs.theta
-
-function hash(gate::PhaseGate, h::UInt)
-    hash(hash(gate.theta, object_id(gate)), h)
-end
-
-==(lhs::RotationGate, rhs::RotationGate) = false
-==(lhs::RotationGate{GT}, rhs::RotationGate{GT}) where GT = lhs.theta == rhs.theta
-
-function hash(gate::RotationGate, h::UInt)
-    hash(hash(gate.theta, object_id(gate)), h)
-end
-
 ==(lhs::Swap, rhs::Swap) = (lhs.addr1 == rhs.addr1) && (lhs.addr2 == rhs.addr2)

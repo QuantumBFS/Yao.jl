@@ -61,42 +61,6 @@ function noutput end
 # ninput(::AbstractBlock) = AnySize
 # noutput(::AbstractBlock) = AnySize
 
-"""
-    isunitary(x) -> Bool
-
-Test whether this operator is unitary.
-"""
-isunitary(::AbstractBlock) = false
-
-"""
-    ispure(x) -> Bool
-
-Test whether this operator is pure.
-"""
-ispure(::AbstractBlock) = false
-
-"""
-    isreflexive(x) -> Bool
-
-Test whether this operator is reflexive.
-"""
-isreflexive(::AbstractBlock) = false
-
-"""
-    ishermitian(x) -> Bool
-
-Test whether this operator is hermitian.
-"""
-ishermitian(::AbstractBlock) = false
-
-"""
-    nparameters(x) -> Integer
-
-Returns the number of parameters of `x`.
-"""
-nparameters(::AbstractBlock) = 0
-# isunitary_hermitian = isunitary ishermitian
-
 import Base: copy
 # only shallow copy by default
 # overload this when block contains parameters
@@ -119,4 +83,4 @@ function apply! end
 
 dispatch!(block::AbstractBlock, params...) = dispatch!((θ, x)->x, block, params...)
 ### do nothing by default
-dispatch!(f::Function, block::AbstractBlock, params...) = block
+# dispatch!(f::Function, block::AbstractBlock, params...) = block
