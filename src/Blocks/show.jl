@@ -42,10 +42,17 @@ function print_tree(
     line=nothing,
     depth=0,
     active_levels=Int[],
-    charset=BlockTreeCharSet()
+    charset=BlockTreeCharSet(),
+    roottree=tree,
+    title=true,
 )
     nodebuf = IOBuffer()
     isa(io, IOContext) && (nodebuf = IOContext(nodebuf, io))
+
+    # print circuit summary
+    if (tree == roottree) && title
+        println(io, "Total: ", nqubits(tree), ", DataType: ", datatype(tree))
+    end
 
     if line !== nothing
         print_with_color(:white, io, line; bold=true)
@@ -88,6 +95,7 @@ function print_subblocks(io::IO, tree::CompositeBlock, depth, charset, active_le
             depth=depth+1,
             active_levels=child_active_levels,
             charset=charset,
+            roottree=tree,
         )
     end
 end
@@ -112,6 +120,7 @@ function print_subblocks(io::IO, tree::KronBlock, depth, charset, active_levels)
             depth=depth+1,
             active_levels=child_active_levels,
             charset=charset,
+            roottree=tree,
         )
     end
 end

@@ -1,136 +1,9 @@
 # include("Macros.jl")
+# include("PositionBlock.jl")
 
-
-# blocks can only be constructed through factory methods
-
-# 1. primitive blocks
-
-# 1.2 phase gate
-# 1.2.1 global phase
-export phase
-phase(::Type{T}, theta) where {T <: Complex} = PhaseGate{:global, real(T)}(theta)
-phase(theta=0.0) = phase(CircuitDefaultType, theta)
-
-# 1.2.2 phase shift
-export shift
-shift(::Type{T}, theta) where {T <: Complex} = PhaseGate{:shift, real(T)}(theta)
-shift(theta=0.0) = shift(CircuitDefaultType, theta)
-
-# 1.3 rotation gate
-export Rx, Ry, Rz, rot
-
-for (FNAME, NAME) in [
-    (:Rx, :X),
-    (:Ry, :Y),
-    (:Rz, :Z),
-]
-
-    GT = Symbol(join([NAME, "Gate"]))
-    @eval begin
-        $FNAME(::Type{T}, theta=0.0) where {T <: Complex} = RotationGate{real(T), $GT{T}}($NAME(T), theta)
-        $FNAME(theta=0.0) = $FNAME(CircuitDefaultType, theta)
-    end
-
-end
-
-rot(::Type{T}, U::GT, theta=0.0) where {T, GT} = RotationGate{real(T), GT}(U, theta)
-rot(U::MatrixBlock, theta=0.0) = rot(CircuitDefaultType, U, theta)
-
-
-# 2. composite blocks
-
-# 2.1 chain block
-export chain
-
-function chain(blocks::Vector)
-    ChainBlock(blocks)
-end
-
-function chain(blocks::MatrixBlock{N}...) where N
-    ChainBlock(blocks...)
-end
-
-Base.getindex(::typeof(chain), xs...) = ChainBlock(xs...)
-
-# 2.2 kron block
-import Base: kron
-
-"""
-    kron(blocks...) -> KronBlock
-    kron(iterator) -> KronBlock
-    kron(total, blocks...) -> KronBlock
-    kron(total, iterator) -> KronBlock
-
-create a `KronBlock` with a list of blocks or tuple of heads and blocks.
-
-## Example
-```julia
-block1 = Gate(X)
-block2 = Gate(Z)
-block3 = Gate(Y)
-KronBlock(block1, (3, block2), block3)
-```
-This will automatically generate a block list looks like
-```
-1 -- [X] --
-2 ---------
-3 -- [Z] --
-4 -- [Y] --
-```
-"""
-kron(total::Int, blocks::Union{MatrixBlock, Tuple, Pair}...) = KronBlock{total}(blocks)
-kron(total::Int, g::Base.Generator) = KronBlock{total}(g)
-# NOTE: this is ambiguous
-# kron(total::Int, blocks) = KronBlock{total}(blocks)
-kron(blocks::Union{MatrixBlock, Tuple{Int, <:MatrixBlock}, Pair{Int, <:MatrixBlock}}...) = N->KronBlock{N}(blocks)
-kron(blocks) = N->KronBlock{N}(blocks)
-
-# 2.3 control block
-
-export C, control
-
-function control(total::Int, controls, block, addr)
-    ControlBlock{total}([controls...], block, addr)
-end
-
-function control(controls, block, addr)
-    ControlBlock([controls...], block, addr)
-end
-
-function control(total::Int, controls)
-    block_and_addr->ControlBlock{total}([controls...], block_and_addr...)
-end
-
-function control(controls)
-    block_and_addr->ControlBlock([controls...], block_and_addr...)
-end
-
-function C(controls::Int...)
-    function _C(block_and_addr)
-        total->ControlBlock{total}([controls...], block_and_addr...)
-    end
-end
-
-# 2.4 roller
-
-export roll
-
-roll(n::Int, block::MatrixBlock) = Roller{n}(block)
-
-function roll(blocks::MatrixBlock...)
-    T = promote_type(datatype(each) for each in blocks)
-    N = sum(x->nqubits(x), blocks)
-    Roller{N, T}(blocks)
-end
-
-roll(block::MatrixBlock) = n->roll(n, block)
-
-# 3. measurement
-export measure
-measure(m::Int) = Measure{m}()
-
-export measure_remove
-measure_remove(m::Int) = MeasureAndRemove{m}()
+include("Primitives.jl")
+include("Composite.jl")
+include("Measure.jl")
 
 # 4. others
 
@@ -173,7 +46,7 @@ for BLOCK in [
 ]
     @eval begin
         # 1. when input is register, call apply!
-        (x::$BLOCK)(reg::Register) = apply!(reg, x)
+        (x::$BLOCK)(reg::Register, params...) = apply!(reg, x, params...)
         # 2. when input is a block, compose as function call
         (x::$BLOCK)(b::AbstractBlock) = reg->apply!(apply!(reg, b), x)
         # 3. when input is a signal, compose as function call

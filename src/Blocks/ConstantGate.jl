@@ -1,5 +1,7 @@
 export @const_gate
 
+abstract type ConstantGate{N, T} <: PrimitiveBlock{N, T} end
+
 # TODO: better exception for X::Complex64 without import XGate
 
 """
@@ -69,7 +71,7 @@ function define_const_gate_struct(n, name)
 
     typename = const_gate_typename(name)
     quote
-        struct $(esc(typename)){T} <: QuCircuit.PrimitiveBlock{$n, T}
+        struct $(esc(typename)){T} <: QuCircuit.ConstantGate{$n, T}
         end
 
         const $(esc(name)) = $(esc(typename)){$CircuitDefaultType}()
@@ -140,7 +142,7 @@ function define_const_gate_methods(name, t, cname)
         (gate::$(esc(typename)))(r::AbstractRegister, params...) = apply!(r, gate, params...)
 
         # define shortcuts
-        (gate::$(esc(typename)))(pos) = (gate, pos)
+        (gate::$(esc(typename)))(pos) = BlockWithPosition(gate, pos)
         # TODO: use Repeated instead
         (gate::$(esc(typename)))(n::Int, pos) = KronBlock{n}(i=>$(esc(name)) for i in pos)
 

@@ -1,48 +1,54 @@
-export @const_gate
+export @compose, @line
 
-macro const_gate(expr)
-    @capture(expr, NAME_ = EXPR_)
-    CONST_NAME = Symbol(join([NAME, "CONST"], "_"))
-    ESC_CONST_NAME = esc(CONST_NAME)
-    GateType = Val{NAME}
+macro compose(args...)
+    if isa(first(args), Integer)
+        parse_static_circuit(args...)
+    else
+        parse_dynamic_circuit(args...)
+    end
+end
 
-    nqubits_ex = :(nqubits(::Type{$GateType}) = log2i(size($CONST_NAME, 1)))
-    mat_ex = :(mat(gate::ConstGate{N, $GateType, eltype($CONST_NAME)}) = $CONST_NAME)
+macro line(ex)
+end
 
+function parse_const_gate_type(ex::Symbol)
+    Symbol(join([ex, "Gate"]))
+end
+
+function parse_const_gate_type(ex::Expr)
+    first(ex.args) == Symbol(PKGNAME) || throw(ParseError("Invalid Package Name: $(first(ex.args))"))
+    Expr(:., Symbol(PKGNAME), QuoteNode(parse_const_gate_type(ex.args[2])))
+end
+
+function get_const_gate_type(ex)
+    sym = parse_const_gate_type(ex)
+    if !isdefined(sym)
+        throw(ParseError("Invalid Constant Gate: $sym"))
+    end
+    sym
+end
+
+function parse_static_circuit(n::Int, ex::Symbol)
     quote
-        import QuCircuit: nqubits, mat, isreflexive, ishermitian, ConstGate, show, KronBlock, PrimitiveBlock
-        const $CONST_NAME = $EXPR
+        $(esc(ex))
+    end
+end
 
-        N = log2i(size($CONST_NAME, 1))
+function parse_dynamic_circuit(ex::Symbol)
+    quote
+        QuCircuit.DynamicSized($(esc(ex)))
+    end
+end
 
-        struct $NAME{T} <: PrimitiveBlock{N, T}
-        end
-
-        $(esc(:nqubits))(::Type{$GateType}) = log2i(size($CONST_NAME, 1))
-        $(esc(:mat))(gate::ConstGate{N, $(GateType), eltype($CONST_NAME)}) = $CONST_NAME
-        # TODO: refactor this to a type trait
-        $(esc(:isreflexive))(gate::ConstGate{N, $GateType, eltype($CONST_NAME)}) = check_reflexive($CONST_NAME)
-        $(esc(:ishermitian))(gate::ConstGate{N, $GateType, eltype($CONST_NAME)}) = check_hermitian($CONST_NAME)
-
-        $(esc(NAME))() = gate($GateType)
-        $(esc(NAME))(r) = (gate($GateType), r)
-        $(esc(NAME))(n::Int, addr::Int) = KronBlock{n}(1=>gate($GateType))
-        $(esc(NAME))(n::Int, r) = KronBlock{n}(collect(r), collect(gate($GateType) for i in r))
-
-        function $(esc(:show))(io::IO, gate::ConstGate{N, $GateType, eltype($CONST_NAME)})
-            print(io, $(string(NAME)))
+function parse_static_circuit(n::Int, ex)
+    if Meta.isexpr(ex, :.) # const block with module name
+        gate_type = get_const_gate_type(ex)
+        quote
+            QuCircuit.kron($n, $(esc(ex)))
         end
     end
 end
 
-
-check_hermitian(op) = op' ≈ op
-
-function check_reflexive(op)
-    op * op ≈ speye(size(op, 1))
-end
-
-
-function declare_const_gate(typename, name)
-    typed_name = join()
+function parse_dynamic_circuit(ex)
+    println("parse dynamic")
 end

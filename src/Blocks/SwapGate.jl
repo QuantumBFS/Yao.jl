@@ -11,7 +11,3 @@ end
 # NOTE: this should not be matrix multiplication based
 function apply!(r::Register, g::Swap)
 end
-
-function show(io::IO, g::Swap)
-    print("Swap(", g.addr1, ", ", g.addr2, ")")
-end
