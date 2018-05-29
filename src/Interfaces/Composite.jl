@@ -78,7 +78,7 @@ export roll
 roll(n::Int, block::MatrixBlock) = Roller{n}(block)
 
 function roll(blocks::MatrixBlock...)
-    T = promote_type(datatype(each) for each in blocks)
+    T = promote_type([datatype(each) for each in blocks]...)
     N = sum(x->nqubits(x), blocks)
     Roller{N, T}(blocks)
 end
