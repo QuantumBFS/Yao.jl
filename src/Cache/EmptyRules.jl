@@ -12,12 +12,12 @@ clear all cache in this `type`.
 """
 empty!(::Type{CT}) where CT = empty!(global_cache(CT))
 
-"""
-    empty!(::MatrixBlock, signal; recursive=false)
+# """
+#     empty!(::MatrixBlock, signal; recursive=false)
 
-do nothing if this is a matrix block.
-"""
-empty!(c::MatrixBlock, signal::Int=1; recursive=false) = c
+# do nothing if this is a matrix block.
+# """
+# empty!(c::MatrixBlock, signal::Int=1; recursive=false) = c
 
 """
     empty!(object, signal; recursive=false)
@@ -64,14 +64,14 @@ function empty!(c::Cached{BT}, ::Type{CT}, recursive::Bool) where {CT, BT <: Com
 end
 
 function empty!(c::Cached, ::Type{CT}, signal::UInt, recursive::Bool) where CT
-    if iscacheable(c, signal)
+    if iscacheable(global_cache(CT), c.block, signal)
         empty!(c, CT, recursive)
     end
     c
 end
 
 function empty!(c::Cached{BT}, ::Type{CT}, signal::UInt, recursive::Bool) where {CT, BT <: CompositeBlock}
-    if iscacheable(global_cache(CT), c, signal)
+    if iscacheable(global_cache(CT), c.block, signal)
         empty!(global_cache(CT), c.block)
 
         if recursive

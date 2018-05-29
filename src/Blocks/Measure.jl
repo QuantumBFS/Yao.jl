@@ -5,7 +5,7 @@ Abstract block supertype which measurement block will inherit from.
 """
 abstract type AbstractMeasure{M} <: AbstractBlock end
 
-nqubit(::Type{T}) where {M, T <: AbstractMeasure{M}} = GreaterThan{M}
+nqubits(::Type{T}) where {M, T <: AbstractMeasure{M}} = GreaterThan{M}
 ninput(::Type{T}) where {M, T <: AbstractMeasure{M}} = GreaterThan{M}
 noutput(::Type{T}) where {M, T <: AbstractMeasure{M}} = AnySize
 
@@ -76,7 +76,7 @@ function measure(reg::Register, m::Int, ntimes::Int=1)
 end
 
 function measure!(reg::Register{B, T}, m::Int) where {B, T}
-    N = nqubit(reg)
+    N = nqubits(reg)
     p = _get_reduced_probability_distribution(reg, m)
     plans = map(_generate_sample_plan_from, p)
     samples = map(direct_sample_step, plans)
@@ -94,7 +94,7 @@ function measure!(reg::Register{B, T}, m::Int) where {B, T}
 end
 
 function measure_remove!(reg::Register{B, T}, m::Int) where {B, T}
-    N = nqubit(reg)
+    N = nqubits(reg)
     p = _get_reduced_probability_distribution(reg, m)
     plans = map(_generate_sample_plan_from, p)
     samples = map(direct_sample_step, plans)

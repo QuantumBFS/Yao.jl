@@ -17,5 +17,9 @@ include("Cache/Cache.jl")
 end
 
 @testset "interface" begin
-    include("PrettyInterface.jl")
+    include("Interfaces/Interfaces.jl")
+end
+
+@testset "show" begin
+include("show.jl")
 end

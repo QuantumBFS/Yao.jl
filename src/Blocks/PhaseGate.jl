@@ -1,19 +1,24 @@
-mutable struct PhiGate{T} <: PrimitiveBlock{1, Complex{T}}
+"""
+    PhiGate
+
+Global phase gate.
+"""
+mutable struct PhaseGate{PhaseType, T} <: PrimitiveBlock{1, Complex{T}}
     theta::T
 end
 
-sparse(gate::PhiGate) = sparse(full(gate))
-full(gate::PhiGate{T}) where T = exp(im * gate.theta) * Complex{T}[exp(-im * gate.theta) 0; 0  exp(im * gate.theta)]
+mat(gate::PhaseGate{:global, T}) where T = exp(im * gate.theta) * Const.Sparse.I2(T)
+mat(gate::PhaseGate{:shift, T}) where T = Complex{T}[1.0 0.0;0.0 exp(im * gate.theta)]
 
-copy(block::PhiGate) = PhiGate(block.theta)
-dispatch!(f::Function, block::PhiGate, theta) = (block.theta = f(block.theta, theta); block)
+copy(block::PhaseGate{PhaseType, T}) where {PhaseType, T} = PhaseGate{PhaseType, T}(block.theta)
+dispatch!(f::Function, block::PhaseGate, theta) = (block.theta = f(block.theta, theta); block)
 
 # Properties
-isreflexive(::PhiGate) = false
-ishermitian(::PhiGate) = false
-nparameters(::PhiGate) = 1
+nparameters(::PhaseGate) = 1
 
-# Pretty Printing
-function show(io::IO, g::PhiGate{T}) where T
-    print(io, "Phase Gate{$T}:", g.theta)
+==(lhs::PhaseGate, rhs::PhaseGate) = false
+==(lhs::PhaseGate{PT}, rhs::PhaseGate{PT}) where PT = lhs.theta == rhs.theta
+
+function hash(gate::PhaseGate, h::UInt)
+    hash(hash(gate.theta, object_id(gate)), h)
 end

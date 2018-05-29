@@ -9,7 +9,7 @@ cache_matrix(c::Cached) = cache_matrix(c.block)
 cache_type(c::Cached) = cache_type(c.block)
 
 # overload cache trait
-iscacheable(c::Cached, signal) = iscacheable(c.block, signal)
+iscacheable(c::Cached, signal::UInt) = iscacheable(c.block, signal)
 
 export iscached
 iscached(c::Cached) = iscached(cache_type(c), c)
@@ -20,23 +20,13 @@ iscached(server::DefaultServer, c::Cached) = iscached(server, c.block)
 # for block which is not cached this is equal
 apply!(reg::Register, c, signal)= apply!(reg, c)
 
-function sparse(c::Cached)
+function mat(c::Cached)
     if !iscached(c)
-        mat = dropzeros!(sparse(c.block))
-        update_cache(c, mat)
-        return mat
+        m = dropzeros!(sparse(c.block))
+        update_cache(c, m)
+        return m
     end
     pull(c)
-end
-
-function full(c::Cached)
-    if !iscached(c)
-        mat = full(c.block)
-        update_cache(c, mat)
-        return mat
-    end
-
-    full(pull(c))
 end
 
 function apply!(reg::Register, c::Cached, signal::UInt)
@@ -73,9 +63,9 @@ function setlevel(c::Cached, ::Type{CT}, level) where CT
     setlevel!(global_cache(CT), c.block, level)
 end
 
-function show(io::IO, c::Cached)
-    print(io, "(Cached) ")
-    print(io, c.block)
+function print_block(io::IO, c::Cached)
+    print(io, "(Cached)")
+    print_block(io, c.block)
 end
 
 #############################

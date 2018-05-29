@@ -32,7 +32,7 @@ end
 @testset "nparameters" begin
     @test nparameters(ChainBlock(X(), Y(), Z())) == 0
     @test nparameters(ChainBlock(phase(0.1), X(), phase(0.2))) == 2
-    @test nparameters(KronBlock{5}(1=>X(), 4=>rot(:X, 0.2))) == 1
+    @test nparameters(KronBlock{5}(1=>X(), 4=>rot(X, 0.2))) == 1
     @test nparameters(ControlBlock{5}([1, 2], phase(0.1), 4)) == 1
 end
 

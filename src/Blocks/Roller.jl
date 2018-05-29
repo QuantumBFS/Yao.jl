@@ -41,10 +41,10 @@ blocks(m::Roller) = m.blocks
 
 isunitary(m::Roller) = all(isunitary, m.blocks)
 
-function sparse(m::Roller{N, M}) where {N, M}
-    op = sparse(first(m.blocks))
+function mat(m::Roller{N, M}) where {N, M}
+    op = mat(first(m.blocks))
     for i=2:M
-        op = kron(sparse(m.blocks[i]), op)
+        op = kron(mat(m.blocks[i]), op)
     end
 
     return op
@@ -55,7 +55,7 @@ function apply!(reg::Register{B}, m::Roller{N, M}) where {B, N, M}
     st = reshape(reg.state, 1<<K, (1<<(N - 1)) * B)
 
     for i = 1:M
-        st .= sparse(m.blocks[i]) * st
+        st .= mat(m.blocks[i]) * st
         # directly use this to register
         # is dangerous, be careful, you have
         # to finish exactly M times, or the
@@ -66,18 +66,4 @@ function apply!(reg::Register{B}, m::Roller{N, M}) where {B, N, M}
     reg
 end
 
-function show(io::IO, m::Roller{N, M, T, BT}) where {N, M, T, BT}
-    print(io, "Roller on $N lines ($M blocks in total)")
 
-    if !isempty(m.blocks)
-        print(io, "\n")
-    end
-
-    for i in eachindex(m.blocks)
-        print(io, "\t", i, ": ", m.blocks[i])
-
-        if i != endof(m.blocks)
-            print(io, "\n")
-        end
-    end
-end

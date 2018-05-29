@@ -28,7 +28,7 @@ function dispatch!(c::Composer, params)
 end
 
 function (c::Composer)(reg::Register)
-    c(nqubit(reg))(reg)
+    c(nqubits(reg))(reg)
 end
 
 function show(io::IO, c::Composer)
@@ -67,11 +67,3 @@ chain(fs...) = x->chain([each(x) for each in fs])
 # cached
 cache(f, level::Int=1;recursive::Bool=false) = x->cache(f(x), level; recursive=recursive)
 cache(level::Int=1;recursive::Bool=false) = x->cache(x, level; recursive=recursive)
-
-import Base: map
-"""
-    map(block)
-
-map this block to all lines
-"""
-map(b::MatrixBlock) = n->kron(b for i=1:n)

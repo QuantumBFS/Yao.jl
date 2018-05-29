@@ -30,22 +30,30 @@ struct KronBlock{N, T} <: CompositeBlock{N, T}
     end
 
     function KronBlock{N}(args...) where N
+        KronBlock{N}(args)
+    end
+
+    function KronBlock{N}(arg::T) where {N, MT <: MatrixBlock, T <: Union{Pair{Int, MT}, MT}}
+        KronBlock{N}([arg])
+    end
+
+    function KronBlock{N}(itr) where N
         curr_head = 1
         blocks = MatrixBlock[]
         addrs = Int[]
 
-        for each in args
+        for each in itr
             if isa(each, MatrixBlock)
                 push!(blocks, each)
                 push!(addrs, curr_head)
-                curr_head += nqubit(each)
+                curr_head += nqubits(each)
             elseif isa(each, Union{Tuple, Pair})
                 curr_head, block = each
                 push!(addrs, curr_head)
                 push!(blocks, block)
-                curr_head += nqubit(block)
+                curr_head += nqubits(block)
             else
-                throw(MethodError(KronBlock, args))
+                throw(MethodError(KronBlock, itr))
             end
         end
 
@@ -105,17 +113,17 @@ length(k::KronBlock) = length(k.blocks)
 ###############
 eachindex(k::KronBlock) = k.addrs
 
-function sparse(k::KronBlock{N, T}) where {N, T}
+function mat(k::KronBlock{N, T}) where {N, T}
     curr_addr = 1
     first_block = first(k.blocks)
     first_addr = first(k.addrs)
 
     if curr_addr == first_addr
-        curr_addr += nqubit(first_block)
-        op = sparse(first_block)
+        curr_addr += nqubits(first_block)
+        op = mat(first_block)
     else
-        op = kron(sparse(first_block), speye(T, 1 << (first_addr - curr_addr)))
-        curr_addr = first_addr + nqubit(first_block)
+        op = kron(mat(first_block), speye(T, 1 << (first_addr - curr_addr)))
+        curr_addr = first_addr + nqubits(first_block)
     end
 
     for count = 2:length(k.addrs)
@@ -126,43 +134,12 @@ function sparse(k::KronBlock{N, T}) where {N, T}
             curr_addr = next_addr
         end
 
-        op = kron(sparse(next_block), op)
-        curr_addr += nqubit(next_block)
+        op = kron(mat(next_block), op)
+        curr_addr += nqubits(next_block)
     end
 
     if curr_addr <= N
         op = kron(speye(T, 1 << (N - curr_addr + 1)), op)
     end
     op
-end
-
-# Traits
-# inherits its children
-
-for NAME in [
-    :isunitary,
-    :ispure,
-    :isreflexive,
-    :ishermitian,
-]
-
-@eval begin
-    $NAME(k::KronBlock) = all($NAME, k.blocks)
-end
-end
-
-function show(io::IO, k::KronBlock{N, T}) where {N, T}
-    println(io, "KronBlock{", N, ", ", T, "}")
-
-    if length(k) == 0
-        print(io, "  with 0 blocks")
-        return
-    end
-
-    for i in eachindex(k.addrs)
-        print(io, "  ", k.addrs[i], ": ", k.blocks[i])
-        if i != endof(k.addrs)
-            print(io, "\n")
-        end
-    end
 end

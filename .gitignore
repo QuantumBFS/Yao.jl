@@ -8,3 +8,7 @@ docs/site/
 *.ipynb_checkpoints
 **/*.ipynb_checkpoints
 **/**/*.ipynb_checkpoints
+
+*.dat
+**/*.dat
+**/**/*.dat

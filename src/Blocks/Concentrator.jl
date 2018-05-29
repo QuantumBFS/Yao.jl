@@ -6,7 +6,7 @@ Concentrator(orders...) = Concentrator(orders)
 
 eltype(::Concentrator) = Bool
 isunitary(x::Concentrator) = true
-nqubit(x::Concentrator) = ninput(x)
+nqubits(x::Concentrator) = ninput(x)
 ninput(x::Concentrator) = GreaterThan{length(x.address)}
 noutput(x::Concentrator) = length(x.address)
 address(x::Concentrator) = x.address

@@ -1,13 +1,7 @@
 using Compat.Test
+using QuCircuit
 
-import QuCircuit: Sequence, AbstractBlock
-import QuCircuit: rand_state, zero_state, state, focus!,
-    X, Y, Z, H, C, gate, phase, focus, address, chain
-# Block Trait
-import QuCircuit: nqubit, ninput, noutput, isunitary, ispure
-# Required Methods
-import QuCircuit: apply!, dispatch!
-
+import QuCircuit: Sequence, AbstractBlock, apply!
 
 mutable struct Print <: AbstractBlock
     stream::String
@@ -18,8 +12,8 @@ apply!(reg, block::Print) = (block.stream = string(reg); reg)
 
     test_print = Print("")
     program = Sequence(
-        kron(5, gate(:X), gate(:Y)),
-        kron(5, gate(:X), 4=>gate(:Y)),
+        kron(5, X, Y),
+        kron(5, X, 4=>Y),
         test_print,
     )
 

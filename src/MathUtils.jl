@@ -1,5 +1,3 @@
-# literals
-
 export @bit_str, asindex
 
 struct QuBitStr
@@ -8,6 +6,8 @@ struct QuBitStr
 end
 
 import Base: length
+
+# use system interface
 asindex(bits::QuBitStr) = bits.val + 1
 length(bits::QuBitStr) = bits.len
 
@@ -27,6 +27,7 @@ import Base: show
 function show(io::IO, bitstr::QuBitStr)
     print(io, "QuBitStr(", bitstr.val, ", ", bitstr.len, ")")
 end
+
 
 # Integer Logrithm of 2
 # Ref: https://stackoverflow.com/questions/21442088

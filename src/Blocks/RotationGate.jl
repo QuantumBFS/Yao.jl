@@ -1,45 +1,24 @@
-mutable struct RotationGate{GT, T} <: PrimitiveBlock{1, Complex{T}}
+mutable struct RotationGate{T, GT <: PrimitiveBlock{1, Complex{T}}} <: PrimitiveBlock{1, Complex{T}}
+    U::GT
     theta::T
-
-    function RotationGate{GT}(theta::T) where {GT, T}
-        new{GT, T}(theta)
-    end
-
-    function RotationGate(x::Symbol, theta::T) where T
-        new{GateType{x}, T}(theta)
-    end
 end
 
 _make_rot_mat(I, U, theta) = I * cos(theta / 2) - im * sin(theta / 2) * U
-sparse(R::RotationGate{GT, T}) where {GT, T} = _make_rot_mat(Const.Sparse.I2(Complex{T}), sparse(gate(Complex{T}, GT)), R.theta)
-full(R::RotationGate{GT, T}) where {GT, T} = _make_rot_mat(Const.Dense.I2(Complex{T}), full(gate(Complex{T}, GT)), R.theta)
+mat(R::RotationGate{T, GT}) where {T, GT} = _make_rot_mat(Const.Dense.I2(Complex{T}), mat(R.U), R.theta)
 
-copy(block::RotationGate{GT}) where GT = RotationGate{GT}(block.theta)
+copy(R::RotationGate{T, GT}) where {T, GT} = RotationGate{T, GT}(copy(R.U), R.theta)
 
-function dispatch!(f::Function, block::RotationGate{GT}, theta) where {GT}
-    block.theta = f(block.theta, theta)
-    block
+function dispatch!(f::Function, R::RotationGate{T, GT}, theta) where {T, GT}
+    R.theta = f(R.theta, theta)
+    R
 end
 
 # Properties
 nparameters(::RotationGate) = 1
 
-##################
-# Pretty Printing
-##################
+==(lhs::RotationGate{TA, GTA}, rhs::RotationGate{TB, GTB}) where {TA, TB, GTA, GTB} = false
+==(lhs::RotationGate{TA, GT}, rhs::RotationGate{TB, GT}) where {TA, TB, GT} = lhs.theta == rhs.theta
 
-for (GTYPE, NAME) in [
-    (:X, "Rx"),
-    (:Y, "Ry"),
-    (:Z, "Rz"),
-]
-
-    GT = GateType{GTYPE}
-
-    @eval begin
-        function show(io::IO, g::RotationGate{$GT, T}) where T
-            print(io, $NAME, "{", T, "}: ", g.theta)
-        end
-    end
-
+function hash(gate::RotationGate, h::UInt)
+    hash(hash(gate.theta, object_id(gate)), h)
 end

@@ -13,6 +13,6 @@ include("MatrixBlock.jl")
 
 # others
 include("Concentrator.jl")
-include("Sequence.jl")
+# include("Sequence.jl")
 
 include("Measure.jl")

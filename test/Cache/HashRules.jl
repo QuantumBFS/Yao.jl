@@ -42,3 +42,17 @@ end
         @test hash2 == hash(g)
     end
 end
+
+@testset "roll" begin
+    @test roll(4, X) == roll(4, X)
+    @test roll(X, X, phase(0.1)) == roll(X, X, phase(0.1))
+
+    g = roll(X, X, phase(0.1))
+    for i = 1:1000
+        hash1 = hash(g)
+        g[3].theta = rand()
+        hash2 = hash(g)
+        @test hash1 != hash2
+        @test hash2 == hash(g)
+    end
+end
