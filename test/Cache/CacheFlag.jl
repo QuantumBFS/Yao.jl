@@ -32,7 +32,7 @@ end
 @testset "check recursive" begin
     g = kron(
         4,
-        X(), phase(0.1), rot(:X, 0.1)
+        X(), phase(0.1), Rx(0.1)
     )
 
     g = cache(g, recursive=true)

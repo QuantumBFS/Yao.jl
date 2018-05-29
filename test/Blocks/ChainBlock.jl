@@ -44,7 +44,7 @@ end
 end
 
 @testset "iteration" begin
-    test_list = [X(), Y(), phase(0.1), rot(:X)]
+    test_list = [X(), Y(), phase(0.1), rot(X)]
     g = ChainBlock(test_list)
 
     for (src, tg) in zip(g, test_list)
@@ -61,14 +61,14 @@ end
     push!(g, Z())
     @test g[3] == Z()
 
-    append!(g, [rot(:X), rot(:Y)])
-    @test g[4] == rot(:X)
-    @test g[5] == rot(:Y)
+    append!(g, [rot(X), rot(Y)])
+    @test g[4] == rot(X)
+    @test g[5] == rot(Y)
 
     prepend!(g, [phase(0.1)])
     @test g[1] == phase(0.1)
     @test g[2] == X()
-    @test g[end] == rot(:Y)
+    @test g[end] == rot(Y)
 end
 
 @testset "traits" begin

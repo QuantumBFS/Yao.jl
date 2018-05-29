@@ -12,9 +12,9 @@ end
 include("Concentrator.jl")
 end
 
-@testset "sequence" begin
-include("Sequence.jl")
-end
+# @testset "sequence" begin
+# include("Sequence.jl")
+# end
 
 @testset "measure" begin
 include("Measure.jl")

@@ -1,4 +1,4 @@
-export nqubit, nactive, nremain, nbatch, address, state, statevec, focus!
+export nqubits, nactive, nremain, nbatch, address, state, statevec, focus!
 
 export AbstractRegister, Register
 

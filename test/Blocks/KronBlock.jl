@@ -12,7 +12,7 @@ end
 GateSet = [
     X(), Y(), Z(),
     phase(0.1), phase(0.2), phase(0.3),
-    rot(:X, 0.1), rot(:Y, 0.4), rot(:Z, 0.2)
+    rot(X, 0.1), rot(Y, 0.4), rot(Z, 0.2)
 ]
 
 ⊗ = kron
@@ -43,7 +43,7 @@ end
 
 function random_dense_kron(n)
     addrs = randperm(n)
-    blocks = [(i, rand(GateSet)) for i in addrs]
+    blocks = [i=>rand(GateSet) for i in addrs]
     g = KronBlock{n}(blocks...)
     sorted_blocks = sort(blocks, by=x->x[1])
     t = mapreduce(x->sparse(x[2]), kron, speye(1), reverse(sorted_blocks))
@@ -61,9 +61,9 @@ function rand_kron_test(n)
     firstn = rand(1:n)
     addrs = randperm(n)
     blocks = [rand(GateSet) for i = 1:firstn]
-    seq = [(i, each) for (i, each) in zip(addrs[1:firstn], blocks)]
-    mats = [(i, sparse(each)) for (i, each) in zip(addrs[1:firstn], blocks)]
-    append!(mats, [(i, speye(2)) for i in addrs[firstn+1:end]])
+    seq = [i=>each for (i, each) in zip(addrs[1:firstn], blocks)]
+    mats = [i=>sparse(each) for (i, each) in zip(addrs[1:firstn], blocks)]
+    append!(mats, [i=>speye(2) for i in addrs[firstn+1:end]])
     sorted = sort(mats, by=x->x[1])
     mats = map(x->x[2], reverse(sorted))
 
@@ -95,7 +95,7 @@ end
 @testset "insertion" begin
 
     g = KronBlock{4}(X(), phase(0.1))
-    g[4] = rot(:X, 0.2)
+    g[4] = rot(X, 0.2)
     @test g[4].theta == 0.2
 
     g[2] = Y()
@@ -104,8 +104,8 @@ end
 end
 
 @testset "iteration" begin
-    g = KronBlock{5}(X(), (3, Y()), rot(:X), rot(:Y))
-    for (src, tg) in zip(g, [(1, X()), (3, Y()), (4, rot(:X)), (5, rot(:Y))])
+    g = KronBlock{5}(X(), 3=>Y(), rot(X), rot(Y))
+    for (src, tg) in zip(g, [1=>X, 3=>Y, 4=>rot(X), 5=>rot(Y)])
         @test src[1] == tg[1]
         @test src[2] == tg[2]
     end
@@ -117,12 +117,12 @@ end
 
 @testset "check traits" begin
     info("TODO: define traits for primitive blocks")
-    g = KronBlock{5}(X(), (3, Y()), rot(:X), rot(:Y))
+    g = KronBlock{5}(X(), 3=>Y(), rot(X), rot(Y))
     addrs(g) === g.addrs
     blocks(g) === g.blocks
     eltype(g) == Tuple{Int, MatrixBlock}
 
     @test isunitary(g) == true
     @test ispure(g) == true
-    @test isreflexive(g) == false
+    @test isreflexive(g) == true
 end

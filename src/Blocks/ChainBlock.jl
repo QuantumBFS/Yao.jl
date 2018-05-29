@@ -36,8 +36,7 @@ isunitary(c::ChainBlock) = all(isunitary, c.blocks)
 isreflexive(c::ChainBlock) = all(isreflexive, c.blocks)
 ishermitian(c::ChainBlock) = all(ishermitian, c.blocks)
 
-full(c::ChainBlock) = prod(x->full(x), reverse(c.blocks))
-sparse(c::ChainBlock) = prod(x->sparse(x), reverse(c.blocks))
+mat(c::ChainBlock) = prod(x->mat(x), reverse(c.blocks))
 
 # Additional Methods for Composite Blocks
 getindex(c::ChainBlock, index) = getindex(c.blocks, index)
@@ -75,19 +74,4 @@ function apply!(r::Register, c::ChainBlock)
         apply!(r, each)
     end
     r
-end
-
-function show(io::IO, c::ChainBlock{N, T}) where {N, T}
-    println(io, "ChainBlock{$N, $T}")
-    for i in eachindex(c.blocks)
-        if isassigned(c.blocks, i)
-            print(io, "\t", c.blocks[i])
-        else
-            print(io, "\t", "#undef")
-        end
-
-        if i != endof(c.blocks)
-            print(io, "\n")
-        end
-    end
 end

@@ -1,6 +1,6 @@
 struct Swap{N, T} <: PrimitiveBlock{N, T}
-    addr1::UInt
-    addr2::UInt
+    line1::UInt
+    line2::UInt
 end
 
 Swap(::Type{T}, N::Int, addr1, addr2) where T = Swap{N, T}(addr1, addr2)
@@ -10,8 +10,4 @@ end
 
 # NOTE: this should not be matrix multiplication based
 function apply!(r::Register, g::Swap)
-end
-
-function show(io::IO, g::Swap)
-    print("Swap(", g.addr1, ", ", g.addr2, ")")
 end

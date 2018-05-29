@@ -14,7 +14,9 @@ function hash(c::ChainBlock, h::UInt)
     hashkey
 end
 
-==(lhs::ChainBlock{N, T}, rhs::ChainBlock{N, T}) where {N, T} = all(lhs.blocks .== rhs.blocks)
+function ==(lhs::ChainBlock{N, T}, rhs::ChainBlock{N, T}) where {N, T}
+    (length(lhs.blocks) == length(rhs.blocks)) && all(lhs.blocks .== rhs.blocks)
+end
 
 # NOTE: kronecker blocks are equivalent if its addrs and blocks is the same
 function hash(block::KronBlock{N, T}, h::UInt) where {N, T}
@@ -42,26 +44,22 @@ function hash(ctrl::ControlBlock, h::UInt)
     hashkey
 end
 
-==(lhs::ControlBlock, rhs::ControlBlock) = false
 function ==(lhs::ControlBlock{BT, N, T}, rhs::ControlBlock{BT, N, T}) where {BT, N, T}
     (lhs.ctrl_qubits == rhs.ctrl_qubits) && (lhs.block == rhs.block) && (lhs.addr == rhs.addr)
+end
+
+==(lhs::Roller{N, M, T, BT}, rhs::Roller{N, M, T, BT}) where {N, M, T, BT} = lhs.blocks == rhs.blocks
+
+function hash(R::Roller, h::UInt)
+    hashkey = hash(object_id(R), h)
+    for each in R.blocks
+        hashkey = hash(each, hashkey)
+    end
+    hashkey
 end
 
 ###################
 # Primitive Blocks
 ###################
 
-==(lhs::PhiGate, rhs::PhiGate) = lhs.theta == rhs.theta
-
-function hash(gate::PhiGate, h::UInt)
-    hash(hash(gate.theta, object_id(gate)), h)
-end
-
-==(lhs::RotationGate, rhs::RotationGate) = false
-==(lhs::RotationGate{GT}, rhs::RotationGate{GT}) where GT = lhs.theta == rhs.theta
-
-function hash(gate::RotationGate, h::UInt)
-    hash(hash(gate.theta, object_id(gate)), h)
-end
-
-==(lhs::Swap, rhs::Swap) = (lhs.addr1 == rhs.addr1) && (lhs.addr2 == rhs.addr2)
+# ==(lhs::Swap, rhs::Swap) = (lhs.addr1 == rhs.addr1) && (lhs.addr2 == rhs.addr2)
