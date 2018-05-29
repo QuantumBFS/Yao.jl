@@ -36,27 +36,6 @@ abstract type AbstractBlock end
 export nqubits, ninput, noutput, isunitary, ispure, isreflexive, nparameters, mat
 import Base: ishermitian
 
-"""
-    nqubits(x) -> Integer
-
-Returns the number of qubits.
-"""
-function nqubits(x::AbstractBlock) end
-
-"""
-    ninput(x) -> Integer
-
-Returns the number of input qubits.
-"""
-function ninput end
-
-"""
-    noutput(x) -> Integer
-
-Returns the number of output qubits.
-"""
-function noutput end
-
 # nqubits(::AbstractBlock) = AnySize
 # ninput(::AbstractBlock) = AnySize
 # noutput(::AbstractBlock) = AnySize

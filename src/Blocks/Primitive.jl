@@ -16,4 +16,4 @@ include("RotationGate.jl")
 
 # TODO:
 # 1. new Primitive: SWAP gate
-include("SwapGate.jl")
+# include("SwapGate.jl")

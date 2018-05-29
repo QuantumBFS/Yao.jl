@@ -44,13 +44,22 @@ function hash(ctrl::ControlBlock, h::UInt)
     hashkey
 end
 
-==(lhs::ControlBlock, rhs::ControlBlock) = false
 function ==(lhs::ControlBlock{BT, N, T}, rhs::ControlBlock{BT, N, T}) where {BT, N, T}
     (lhs.ctrl_qubits == rhs.ctrl_qubits) && (lhs.block == rhs.block) && (lhs.addr == rhs.addr)
+end
+
+==(lhs::Roller{N, M, T, BT}, rhs::Roller{N, M, T, BT}) where {N, M, T, BT} = lhs.blocks == rhs.blocks
+
+function hash(R::Roller, h::UInt)
+    hashkey = hash(object_id(R), h)
+    for each in R.blocks
+        hashkey = hash(each, hashkey)
+    end
+    hashkey
 end
 
 ###################
 # Primitive Blocks
 ###################
 
-==(lhs::Swap, rhs::Swap) = (lhs.addr1 == rhs.addr1) && (lhs.addr2 == rhs.addr2)
+# ==(lhs::Swap, rhs::Swap) = (lhs.addr1 == rhs.addr1) && (lhs.addr2 == rhs.addr2)
