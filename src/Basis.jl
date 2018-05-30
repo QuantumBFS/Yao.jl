@@ -1,25 +1,114 @@
 module Basis
 
-export BInt, DInt, Ints, DInts
+export DInt, Ints, DInts
 export basis, bmask
 export bsizeof, bit_length, log2i
-export testall, testany, testval, setbit, setbit!, flip, flip!, neg, swapbits, swapbits!, takebit
+export testall, testany, testval, setbit, flip, neg, swapbits, takebit
 export indices_with
 
-#=
-DEFINE
----------------------
-binary basis is 0000 - 1111
-digital basis is 0 - (2^n-1)
-qubit counting is 1 - n
+"""
+    basis(num_bit::Int) = UnitRange{Int}
 
-FORMAT (should be)
----------------------
-binary basis: Bool
-digital basis: UInt64
-bit counting: Int
-=#
-const BInt = Int
+Returns the UnitRange for basis in Hilbert Space of num_bit qubits.
+"""
+function basis end
+
+
+"""
+    bmask(ibit::Int...) -> Int
+    bmask(bits::UnitRange{Int}) ->Int
+
+Return an integer with specific position masked, which is offten used as a mask for binary operations.
+"""
+function bmask end
+
+"""
+    bsizeof(x) -> Int
+
+Return the size of instance x, in number of bit.
+"""
+function bsizeof end
+
+"""
+    bit_length(x::Int) -> Int
+
+Return the number of bits required to represent input integer x.
+"""
+function bit_length end
+
+"""
+    log2i(x::Integer) -> Integer
+
+Return log2(x), this integer version of `log2` is fast but only valid for number equal to 2^n.
+Ref: https://stackoverflow.com/questions/21442088
+"""
+function log2i end
+
+"""
+    takebit(index::Int, ibit::Int) -> Int
+
+Return a bit at specific position.
+"""
+function takebit end
+
+"""
+    testany(index::Int, mask::Int) -> Bool
+
+Return true if any masked position of index is 1.
+"""
+function testany end
+
+"""
+    testall(index::Int, mask::Int) -> Bool
+
+Return true if all masked position of index is 1.
+"""
+function testall end
+
+"""
+    testval(index::Int, mask::Int, onemask::Int) -> Bool
+
+Return true if values at positions masked by `mask` with value 1 at positions masked by `onemask` and 0 otherwise.
+"""
+function testval end
+
+"""
+    setbit(index::Int, mask::Int) -> Int
+
+set the bit at masked position to 1.
+"""
+function setbit end
+
+"""
+    flip(index::Int, mask::Int) -> Int
+
+Return an Integer with bits at masked position flipped.
+"""
+function flip end
+
+"""
+    neg(index::Int, num_bit::Int) -> Int
+
+Return an integer with all bits flipped (with total number of bit `num_bit`).
+"""
+function neg end
+
+"""
+    swapbits(num::Int, i::Int, j::Int) -> Int
+
+Return an integer with bits at `i` and `j` flipped.
+"""
+function swapbits end
+
+"""
+    indices_with(num_bit::Int, poss::Vector{Int}, vals::Vector{Int}) -> Vector{Int}
+
+Return indices with specific positions `poss` with value `vals` in a hilbert space of `num_bit` qubits.
+"""
+function indices_with end
+
+
+
 const DInt = Int
 const Ints = Union{Vector{Int}, Int, UnitRange{Int}}
 const DInts = Union{Vector{DInt}, DInt, UnitRange{DInt}}
@@ -49,14 +138,12 @@ end
 bitarray(v::Number) = bitarray([v])
 
 ########## Bit-Wise Operations ##############
-bmask(ibit::Int...)::Int = sum([one(DInt) << (b-1) for b in ibit])
-bmask(bits::UnitRange{Int})::Int = ((one(DInt) << (bits.stop - bits.start + 1)) - one(DInt)) << (bits.start-1)
+bmask(ibit::Int...)::DInt = sum([one(DInt) << (b-1) for b in ibit])
+bmask(bits::UnitRange{Int})::DInt = ((one(DInt) << (bits.stop - bits.start + 1)) - one(DInt)) << (bits.start-1)
 
-# bit size
-bsizeof(x) = sizeof(x) << 3
+bsizeof(x)::Int = sizeof(x) << 3
 
-# Ref: https://stackoverflow.com/questions/21442088
-function bit_length(x::DInt)
+function bit_length(x::DInt)::Int
     local n = 0
     while x!=0
         n += 1
@@ -65,7 +152,7 @@ function bit_length(x::DInt)
     return n
 end
 
-function log2i(x::T)::T where T
+function log2i(x::T)::T where T <: Integer
     local n::T = 0
     while x&1!=1
         n += 1
@@ -83,11 +170,9 @@ testval(index::DInt, mask::DInt, onemask::DInt)::Bool = index&mask==onemask
 
 # set a bit
 setbit(index::DInt, mask::DInt)::DInt = indices | mask
-setbit!(indices::DInts, mask::DInt) = indices[:] |= mask
 
 # flip a bit/bits
 flip(index::DInt, mask::DInt)::DInt = index ⊻ mask
-flip!(indices::DInts, mask::DInt) = indices[:] = indices .⊻ mask
 # flip all bits
 neg(index::DInt, num_bit::Int)::DInt = bmask(1:num_bit) ⊻ index
 
@@ -98,9 +183,8 @@ function swapbits(num::DInt, i::Int, j::Int)::DInt
     k = (num >> j) & 1 - (num >> i) & 1
     num + k*(1<<i) - k*(1<<j)
 end
-swapbits!(bss::Vector{DInt}, i::Int, j::Int) = bss[:] = swapbits.(bss, i, j)
 
-function indices_with(num_bit::Int, poss::Vector{Int}, vals::Vector{BInt})::Vector{DInt}
+function indices_with(num_bit::Int, poss::Vector{Int}, vals::Vector{Int})::Vector{DInt}
     mask = bmask(poss...)
     onemask = bmask(poss[vals.!=0]...)
     filter(testval(mask, onemask), basis(num_bit))

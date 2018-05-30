@@ -1,5 +1,13 @@
 """
-Multiply and permute sparse matrix
+    PermMatrix{Tv, Ti}(perm::Vector{Ti}, vals::Vector{Tv}) where {Tv, Ti<:Integer}
+    PermMatrix(perm::Vector{Ti}, vals::Vector{Tv}) where {Tv, Ti}
+    PermMatrix(ds::AbstractMatrix)
+
+PermMatrix represents a special kind linear operator: Permute and Multiply, which means `M * v = v[perm] * val`
+Optimizations are used to make it much faster than `SparseMatrixCSC`.
+
+* `perm` is the permutation order,
+* `vals` is the multiplication factor.
 """
 struct PermMatrix{Tv, Ti<:Integer} <: AbstractMatrix{Tv}
     perm::Vector{Ti}   # new orders

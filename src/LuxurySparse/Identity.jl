@@ -1,5 +1,12 @@
 import Base: getindex, size, println
 
+"""
+    Identity{N, Tv}()
+    Identity{N}() where N = Identity{N, Int64}()
+    Identity(A::AbstractMatrix{T}) where T -> Identity
+
+Identity matrix, with size N as label, use `Int64` as its default type, both `*` and `kron` are optimized.
+"""
 struct Identity{N, Tv} <: AbstractMatrix{Tv} end
 Identity{N}() where N = Identity{N, Int64}()
 Identity(A::AbstractMatrix{T}) where T = Identity{size(A, 1) == size(A,2) ? size(A, 2) : throw(DimensionMismatch()), T}()

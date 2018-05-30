@@ -21,7 +21,7 @@ import Yao: takebit, flip, indices_with, bitarray, testall, testany
 
     # indices_with
     nbit = 5
-    poss, vals = [4,2,3], BInt[1,0,1]
+    poss, vals = [4,2,3], [1,0,1]
     @test indices_with(nbit, poss, vals) == filter(x-> takebit.(x, poss) == vals, basis(nbit))
 
     # bitarray version
