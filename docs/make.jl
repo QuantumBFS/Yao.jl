@@ -4,7 +4,7 @@ makedocs(
     modules = [Yao],
     clean = false,
     format = :html,
-    sitename = "Quantum Circuit Simulation for Julia",
+    sitename = "Yao",
     linkcheck = !("skiplinks" in ARGS),
     analytics = "UA-89508993-1",
     pages = [
