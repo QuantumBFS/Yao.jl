@@ -1,12 +1,58 @@
-using QuCircuit
-using MacroTools
+using QuCircuit, UnicodePlots, BenchmarkTools, Knet
+import QuCircuit: mat
 
-macro const_gate2(ex)
-    if @capture(ex, NAME_::TYPE_ = EXPR_)
-        println(NAME, TYPE)
-    elseif @capture(ex, NAME_ = EXPR_)
-        println(NAME)
-    end
+include("Circuit.jl")
+
+function gaussian_pdf(n, μ, σ)
+    x = collect(1:1<<n)
+    pl = @. 1 / sqrt(2pi * σ^2) * exp(-(x - μ)^2 / (2 * σ^2))
+    pl / sum(pl)
 end
 
-@const_gate2 X::Complex128 = [0 1;1 0]
+function get_nn_pairs(n)
+    pairs = []
+    for inth in 1:2
+        for i in inth:2:n
+            push!(pairs, (i, i % n + 1))
+        end
+    end
+    pairs
+end
+
+function train!(qcbm::QCBM, ptrain, optim; learning_rate=0.1, maxiter=100)
+    initialize!(qcbm)
+    kernel = Kernels.RBFKernel(nqubits(qcbm), [0.25], false)
+    history = Float64[]
+
+    for i = 1:maxiter
+        grad = gradient(qcbm, kernel, ptrain)
+        curr_loss = loss(qcbm, kernel, ptrain)
+        push!(history, curr_loss)
+        println(i, " step, loss = ", curr_loss)
+
+        # Warn: we need a primitive block to enable
+        # BLAS here.
+        params = parameters(qcbm)
+        Knet.update!(params, grad, optim)
+        dispatch!(qcbm, params)
+    end
+    history
+end
+
+
+function main(n, maxiter)
+    pg = gaussian_pdf(n, 2^5-0.5, 2^4)
+    fig = lineplot(0:1<<n - 1, pg)
+    display(fig)
+
+    qcbm = QCBM{n, 10}(get_nn_pairs(n))
+    optim = Adam(lr=0.1)
+    his = train!(qcbm, pg, optim, maxiter=maxiter)
+
+    display(lineplot(his, title = "loss"))
+    psi = qcbm()
+    p = abs2.(statevec(psi))
+    p = p / sum(p)
+    lineplot!(fig, p, color=:yellow, name="trained")
+    display(fig)
+end

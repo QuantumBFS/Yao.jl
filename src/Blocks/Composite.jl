@@ -61,12 +61,14 @@ function dispatch!(f::Function, c::CompositeBlock, params::Vector)
     count = 0
     for each in blocks(c)
         # NOTE: small copy is faster (?)
-        if nparameters(each) == 1
-            dispatch!(f, each, params[count + 1])
-            count += 1
-        else
-            dispatch!(f, each, params[count + 1 : count + nparameters(each)])
-            count += nparameters(each)
+        if nparameters(each) > 0
+            if nparameters(each) == 1
+                dispatch!(f, each, params[count + 1])
+                count += 1
+            else
+                dispatch!(f, each, params[count + 1 : count + nparameters(each)])
+                count += nparameters(each)
+            end
         end
     end
     c
