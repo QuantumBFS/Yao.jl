@@ -33,7 +33,7 @@ abstract type AbstractBlock end
 
 # Interface
 ## Trait
-export nqubits, ninput, noutput, isunitary, ispure, isreflexive, nparameters, mat
+export nqubits, ninput, noutput, isunitary, ispure, isreflexive, nparameters, mat, datatype
 import Base: ishermitian
 
 # nqubits(::AbstractBlock) = AnySize

@@ -1,6 +1,13 @@
-abstract type Kernel end
+"""
+    MMD Kernels
+"""
+module Kernels
 
-struct RBFKernel <: Kernel
+export expect, RBFKernel, loss
+
+abstract type AbstractKernel end
+
+struct RBFKernel <: AbstractKernel
     sigmas::Vector{Float64}
     matrix::Matrix{Float64}
 end
@@ -10,7 +17,7 @@ function RBFKernel(nqubits::Int, sigmas::Vector{Float64}, isbinary::Bool)
     return RBFKernel(sigmas, rbf_kernel_matrix(basis, basis, sigmas, isbinary))
 end
 
-expect(kernel::Kernel, px::Vector{Float64}, py::Vector{Float64}) = px' * kernel.matrix * py
+expect(kernel::RBFKernel, px::Vector{Float64}, py::Vector{Float64}) = px' * kernel.matrix * py
 
 # RBF Kernel
 
@@ -33,7 +40,9 @@ function rbf_kernel_matrix(x::Vector, y::Vector, sigmas::Vector{Float64}, isbina
     return K
 end
 
-function mmd_loss(px::AbstractVecOrMat{Float64}, kernel::Kernel, py::AbstractVecOrMat{Float64})
-    pxy = py - py
+function loss(px::AbstractVecOrMat{Float64}, kernel::RBFKernel, py::AbstractVecOrMat{Float64})
+    pxy = px - py
     return expect(kernel, pxy, pxy)
+end
+
 end

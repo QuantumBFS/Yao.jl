@@ -1,3 +1,5 @@
+__precompile__()
+
 """
 Flexible, Extensible Framework for Quantum Algorithm Design.
 
