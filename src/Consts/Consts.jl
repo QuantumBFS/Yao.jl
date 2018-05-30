@@ -4,16 +4,22 @@ export Const
 
 module Const
 
+import ..LuxurySparse: PermMatrix, Identity
+import ..Yao
 using Compat
 
 const SYM_LIST = [
-    (:P0, [1 0;0 0]),
-    (:P1, [0 0;0 1]),
-    (:X, [0 1;1 0]),
-    (:Y, [0 -im; im 0]),
-    (:Z, [1 0;0 -1]),
-    (:I2, eye(2)),
-    (:H, (elem = 1 / sqrt(2); [elem elem; elem -elem])),
+    (:P0, sparse(Yao.DefaultType[1 0;0 0])),
+    (:P1, sparse(Yao.DefaultType[0 0;0 1])),
+    (:X, PermMatrix([2,1], Yao.DefaultType[1+0im, 1])),
+    (:Y, PermMatrix([2,1], Yao.DefaultType[-im, im])),
+    (:Z, Diagonal(Yao.DefaultType[1+0im, -1])),
+    (:I2, Identity{2, Complex128}()),
+    (:H, (elem = 1 / sqrt(2); Yao.DefaultType[elem elem; elem -elem])),
+    (:CNOT, PermMatrix([1, 2, 4, 3], ones(Yao.DefaultType, 4))),
+    (:Toffoli, PermMatrix([1, 2, 3, 4, 5, 6, 8, 7], ones(Yao.DefaultType, 8))),
+    (:Pu, sparse([1], [2], [1+0im], 2, 2)),
+    (:Pd, sparse([2], [1], [1+0im], 2, 2)),
 ]
 
 const TYPE_LIST = [
@@ -22,6 +28,7 @@ const TYPE_LIST = [
     (:CF64, ComplexF64),
 ]
 
+include("Default.jl")
 include("Dense.jl")
 include("Sparse.jl")
 

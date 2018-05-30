@@ -1,6 +1,3 @@
-using Compat.LinearAlgebra
-using Compat.SparseArrays
-
 """
 Multiply and permute sparse matrix
 """

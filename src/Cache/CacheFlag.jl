@@ -1,3 +1,5 @@
+export Cached
+
 struct Cached{BT, N, T} <: MatrixBlock{N, T}
     block::BT
 end
@@ -84,3 +86,7 @@ done(c::Cached, st) = done(c.block, st)
 length(c::Cached) = length(c.block)
 eltype(c::Cached) = eltype(c.block)
 blocks(c::Cached) = blocks(c.block)
+
+import ..Blocks: print_subblocks
+
+print_subblocks(io::IO, tree::Cached, depth, charset, active_levels) = print_subblocks(io, tree.block, depth, charset, active_levels)

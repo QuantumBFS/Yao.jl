@@ -1,3 +1,6 @@
+export Roller
+
+
 """
     Roller{N, M, T, BT} <: CompositeBlock{N, T}
 

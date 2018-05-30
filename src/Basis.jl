@@ -1,3 +1,11 @@
+module Basis
+
+export BInt, DInt, Ints, DInts
+export basis, bmask
+export bsizeof, bit_length, log2i
+export testall, testany, testval, setbit, setbit!, flip, flip!, neg, swapbits, swapbits!, takebit
+export indices_with
+
 #=
 DEFINE
 ---------------------
@@ -11,9 +19,10 @@ binary basis: Bool
 digital basis: UInt64
 bit counting: Int
 =#
-using Compat: ComplexF64
 const BInt = Int
 const DInt = Int
+const Ints = Union{Vector{Int}, Int, UnitRange{Int}}
+const DInts = Union{Vector{DInt}, DInt, UnitRange{DInt}}
 
 basis(num_bit::Int) = UnitRange{DInt}(0, 1<<num_bit-1)
 
@@ -40,8 +49,6 @@ end
 bitarray(v::Number) = bitarray([v])
 
 ########## Bit-Wise Operations ##############
-const Ints = Union{Vector{Int}, Int, UnitRange{Int}}
-const DInts = Union{Vector{DInt}, DInt, UnitRange{DInt}}
 bmask(ibit::Int...)::Int = sum([one(DInt) << (b-1) for b in ibit])
 bmask(bits::UnitRange{Int})::Int = ((one(DInt) << (bits.stop - bits.start + 1)) - one(DInt)) << (bits.start-1)
 
@@ -111,4 +118,6 @@ function ghz(num_bit::Int; x::DInt=zero(DInt))
     v[x+1] = 1/sqrt(2)
     v[flip(x, bmask(1:num_bit))+1] = 1/sqrt(2)
     return v
+end
+
 end

@@ -1,3 +1,5 @@
+export ChainBlock
+
 """
     ChainBlock{N, T} <: CompositeBlock{N, T}
 

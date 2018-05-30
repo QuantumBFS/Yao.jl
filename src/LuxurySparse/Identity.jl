@@ -35,25 +35,32 @@ import Base: *, /, ==, +, -, ≈
 /(A::Identity{N, T}, B::Number) where {N, T} = Diagonal(fill(promote_type(T, eltype(B))(1/B), N))
 
 const IDP = Union{Diagonal, PermMatrix, Identity}
-const ID = Union{Diagonal, Identity}
 for op in [:+, :-, :(==), :≈]
-    @eval $op(A::IDP, B::SparseMatrixCSC) = $op(sparse(A), B)
-    @eval $op(B::SparseMatrixCSC, A::IDP) = $op(B, sparse(A))
 
-    # intra-IDP
-    @eval $op(A::PermMatrix, B::ID) = $op(sparse(A), sparse(B))
-    @eval $op(A::ID, B::PermMatrix) = $op(sparse(A), sparse(B))
-    @eval $op(A::PermMatrix, B::PermMatrix) = $op(sparse(A), sparse(B))
+    @eval begin
+        $op(A::IDP, B::SparseMatrixCSC) = $op(sparse(A), B)
+        $op(B::SparseMatrixCSC, A::IDP) = $op(B, sparse(A))
+
+        # intra-IDP
+        $op(A::PermMatrix, B::IDP) = $op(sparse(A), sparse(B))
+        $op(A::IDP, B::PermMatrix) = $op(sparse(A), sparse(B))
+        $op(A::PermMatrix, B::PermMatrix) = $op(sparse(A), sparse(B))
+    end
 
     # intra-ID
     if op in [:+, :-]
-        @eval $op(d1::Diagonal, d2::ID) = Diagonal($op(d1.diag, d2.diag))
-        @eval $op(d1::ID, d2::Diagonal) = Diagonal($op(d1.diag, d2.diag))
+        @eval begin
+            $op(d1::Diagonal, d2::Identity) = Diagonal($op(d1.diag, diag(d2)))
+            $op(d1::Identity, d2::Diagonal) = Diagonal($op(diag(d1), d2.diag))
+        end
     else
-        @eval $op(d1::ID, d2::Diagonal) = $op(d1.diag, d2.diag)
-        @eval $op(d1::Diagonal, d2::ID) = $op(d1.diag, d2.diag)
-        @eval $op(d1::Identity{Na}, d2::Identity{Nb}) where {Na, Nb} = $op(Na, Nb)
+        @eval begin
+            $op(d1::Identity, d2::Diagonal) = $op(diag(d1), d2.diag)
+            $op(d1::Diagonal, d2::Identity) = $op(d1.diag, diag(d2))
+            $op(d1::Identity{Na}, d2::Identity{Nb}) where {Na, Nb} = $op(Na, Nb)
+        end
     end
+
 end
 +(d1::Identity{Na, Ta}, d2::Identity{Nb, Tb}) where {Na, Nb, Ta, Tb} = d1==d2 ? Diagonal(fill(promote_types(Ta, Tb)(2), Na)) : throw(DimensionMismatch())
 -(d1::Identity{Na, Ta}, d2::Identity{Nb, Tb}) where {Na, Ta, Nb, Tb} = d1==d2 ? spzeros(promote_types(Ta, Tb), Na, Na) : throw(DimensionMismatch())
@@ -211,4 +218,7 @@ end
 ####### tags #########
 import Base: ishermitian
 ishermitian(D::Identity) = true
-II(n::Int) = Identity{n}()
+I(n::Int) = Identity{n}()
+
+import Base: eye
+eye(A::PermMatrix{Tv}) where Tv = Identity{size(A, 1) == size(A,2) ? size(A, 2) : throw(DimensionMismatch()), Tv}()

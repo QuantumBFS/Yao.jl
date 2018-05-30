@@ -9,7 +9,7 @@ end
 # kron, and wrap matrices with identities.
 function _wrap_identity(data_list::Vector{T}, num_bit_list::Vector{Int}) where T<:AbstractMatrix
     length(num_bit_list) == length(data_list) + 1 || throw(ArgumentError())
-    reduce((x,y)->x ⊗ y[1] ⊗ II(1<<y[2]), II(1 << num_bit_list[1]), zip(data_list, num_bit_list[2:end]))
+    reduce((x,y)->x ⊗ y[1] ⊗ I(1<<y[2]), I(1 << num_bit_list[1]), zip(data_list, num_bit_list[2:end]))
 end
 
 ###################### X, Y, Z Gates ######################
@@ -39,7 +39,7 @@ function zgate(::Type{MT}, num_bit::Int, bits::Ints) where MT<:Number
 end
 
 ####################### Controlled Gates #######################
-general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{Tg}, locs::Vector{Int}) where {Tg<:AbstractMatrix, Tp<:AbstractMatrix} = II(1<<num_bit) - hilbertkron(num_bit, projectors, cbits) + hilbertkron(num_bit, vcat(projectors, gates), vcat(cbits, locs))
+general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{Tg}, locs::Vector{Int}) where {Tg<:AbstractMatrix, Tp<:AbstractMatrix} = I(1<<num_bit) - hilbertkron(num_bit, projectors, cbits) + hilbertkron(num_bit, vcat(projectors, gates), vcat(cbits, locs))
 
 #### C-X/Y/Z Gates
 function cxgate(::Type{MT}, num_bit::Int, b1::Ints, b2::Ints) where MT<:Number

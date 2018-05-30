@@ -1,3 +1,9 @@
+module Cache
+
+using ..Registers
+using ..Blocks
+
+
 include("Core.jl")
 include("CacheElement.jl")
 include("DefaultServer.jl")
@@ -33,3 +39,5 @@ include("HashRules.jl")
 include("CacheRules.jl")
 include("UpdateRules.jl")
 include("EmptyRules.jl")
+
+end
