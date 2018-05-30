@@ -1,3 +1,5 @@
+export AbstractMeasure, Measure, MeasureAndRemove
+
 """
     AbstractMeasure{M} <: AbstractBlock
 

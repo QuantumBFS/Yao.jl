@@ -1,3 +1,5 @@
+export ControlBlock
+
 mutable struct ControlBlock{BlockType, N, T} <: CompositeBlock{N, T}
     ctrl_qubits::Vector{Int}
     block::BlockType
@@ -78,7 +80,7 @@ function _single_inverse_control_gate_sparse(control::Int, U, addr, nqubit)
     if control < addr
         op = A_kron_B(
             Const.Sparse.P1(T), control, 1,
-            speye(U), addr
+            Identity(U), addr
         )
         op += A_kron_B(
             Const.Sparse.P0(T), control, 1,
@@ -86,7 +88,7 @@ function _single_inverse_control_gate_sparse(control::Int, U, addr, nqubit)
         )
     else
         op = A_kron_B(
-            speye(U), addr, nqubit,
+            Identity(U), addr, nqubit,
             Const.Sparse.P1(T), control
         )
         op += A_kron_B(
@@ -104,7 +106,7 @@ function _single_control_gate_sparse(control::Int, U, addr, nqubit)
     if control < addr
         op = A_kron_B(
             Const.Sparse.P0(T), control, 1,
-            speye(U), addr
+            Identity(U), addr
         )
         op += A_kron_B(
             Const.Sparse.P1(T), control, 1,
@@ -112,7 +114,7 @@ function _single_control_gate_sparse(control::Int, U, addr, nqubit)
         )
     else
         op = A_kron_B(
-            speye(U), addr, nqubit,
+            Identity(U), addr, nqubit,
             Const.Sparse.P0(T), control
         )
         op += A_kron_B(
@@ -170,6 +172,11 @@ done(c::ControlBlock, st) = st == 2
 length(c::ControlBlock) = 1
 eachindex(c::ControlBlock) = c.addr
 blocks(c::ControlBlock) = [c.block]
+
+function mat(ctrl::ControlBlock{BT, N, T}) where {N, T, BT <: MatrixBlock{1, T}}
+    Intrinsics.controlled_U1(N, mat(ctrl.block), ctrl.ctrl_qubits, ctrl.addr)
+end
+
 
 # apply & dispatch
 # TODO: overload this with direct apply method

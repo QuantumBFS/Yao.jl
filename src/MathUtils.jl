@@ -1,61 +1,3 @@
-export @bit_str, asindex
-
-struct QuBitStr
-    val::UInt
-    len::Int
-end
-
-import Base: length
-
-# use system interface
-asindex(bits::QuBitStr) = bits.val + 1
-length(bits::QuBitStr) = bits.len
-
-macro bit_str(str)
-    @assert length(str) < 64 "we do not support large integer at the moment"
-    val = unsigned(0)
-    for (k, each) in enumerate(reverse(str))
-        if each == '1'
-            val += 1 << (k - 1)
-        end
-    end
-    QuBitStr(val, length(str))
-end
-
-import Base: show
-
-function show(io::IO, bitstr::QuBitStr)
-    print(io, "QuBitStr(", bitstr.val, ", ", bitstr.len, ")")
-end
-
-
-# Integer Logrithm of 2
-# Ref: https://stackoverflow.com/questions/21442088
-export log2i
-
-function bit_length(x)
-    local n = 0
-    while x!=0
-        n += 1
-        x >>= 1
-    end
-    return n
-end
-
-"""
-    log2i(x)
-
-logrithm for integer pow of 2
-"""
-function log2i(x::T)::T where T
-    local n::T = 0
-    while x&0x1!=1
-        n += 1
-        x >>= 1
-    end
-    return n
-end
-
 export batch_normalize!, batch_normalize
 
 """
@@ -116,4 +58,40 @@ end
         ex = :(rolldims2!(Val{$N}, Val{$B}, st); $ex)
     end
     ex
+end
+
+function irepeat(v::AbstractVector, n::Int)
+    nV = length(v)
+    res = similar(v, nV*n)
+    @inbounds for j = 1:nV
+        vj = v[j]
+        base = (j-1)*n
+        @inbounds @simd for i = 1:n
+            res[base+i] = vj
+        end
+    end
+    res
+end
+
+function orepeat(v::AbstractVector, n::Int)
+    nV = length(v)
+    res = similar(v, nV*n)
+    @inbounds for i = 1:n
+        base = (i-1)*nV
+        @inbounds @simd for j = 1:nV
+            res[base+j] = v[j]
+        end
+    end
+    res
+end
+
+import Base: randn, invperm
+randn(T::Type{Complex{F}}, n::Int...) where F = randn(F, n...) + im*randn(F, n...)
+
+function invperm(order)
+    v = similar(order)
+    @inbounds @simd for i=1:length(order)
+        v[order[i]] = i
+    end
+    v
 end

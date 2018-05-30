@@ -1,3 +1,5 @@
+export RotationGate
+
 mutable struct RotationGate{T, GT <: PrimitiveBlock{1, Complex{T}}} <: PrimitiveBlock{1, Complex{T}}
     U::GT
     theta::T

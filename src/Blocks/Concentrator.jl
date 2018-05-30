@@ -1,3 +1,5 @@
+export Concentrator
+
 struct Concentrator{T <: Union{Int, Tuple}} <: AbstractBlock
     address::T
 end

@@ -1,3 +1,5 @@
+export CompositeBlock
+
 """
     CompositeBlock{N, T} <: MatrixBlock{N, T}
 

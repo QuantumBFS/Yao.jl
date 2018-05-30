@@ -106,7 +106,7 @@ function register(::Type{RT}, ::Type{T}, bits::QuBitStr, nbatch::Int) where {RT,
 end
 
 function register(bits::QuBitStr, nbatch::Int=1)
-    register(Register, Complex128, bits, nbatch)
+    register(Register, Yao.DefaultType, bits, nbatch)
 end
 
 ## Config Initializers

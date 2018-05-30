@@ -1,3 +1,14 @@
+module Interfaces
+
+using Compat, Reexport
+
+using ..Registers
+using ..Blocks
+using ..Cache
+
+@reexport using ..Blocks
+@reexport using ..Registers
+
 # include("Macros.jl")
 include("PositionBlock.jl")
 include("Primitive.jl")
@@ -52,4 +63,6 @@ for BLOCK in [
         # 3. when input is a signal, compose as function call
         (x::$BLOCK)(s::Signal) = reg->apply!(reg, x, s)
     end
+end
+
 end

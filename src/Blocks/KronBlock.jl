@@ -1,3 +1,5 @@
+export KronBlock
+
 """
     KronBlock{N, T} <: CompositeBlock
 

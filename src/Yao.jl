@@ -1,4 +1,4 @@
-__precompile__()
+# __precompile__()
 
 """
 Flexible, Extensible Framework for Quantum Algorithm Design.
@@ -10,19 +10,24 @@ Flexible, Extensible Framework for Quantum Algorithm Design.
 """
 module Yao
 
-using Compat, MacroTools
+using Compat, Reexport
 
 PKGNAME = "Yao"
 ENVNAME = join([PKGNAME, "DefaultType"])
 
 @static if haskey(ENV, ENVNAME)
-    const CircuitDefaultType = parse(ENV[ENVNAME])
+    const DefaultType = parse(ENV[ENVNAME])
 else
-    const CircuitDefaultType = ComplexF64
+    const DefaultType = ComplexF64
 end
 
-include("Consts/Consts.jl")
+include("docs.jl")
+include("LuxurySparse/LuxurySparse.jl")
+include("Basis.jl")
 include("MathUtils.jl")
+
+include("Consts/Consts.jl")
+include("Intrinsics/Intrinsics.jl")
 
 include("Register/Register.jl")
 include("Blocks/Blocks.jl")
@@ -30,8 +35,6 @@ include("Blocks/Blocks.jl")
 include("Cache/Cache.jl")
 
 include("Interfaces/Interfaces.jl")
-
-include("show.jl")
-include("docs.jl")
+include("APIs.jl")
 
 end # module
