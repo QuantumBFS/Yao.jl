@@ -9,19 +9,27 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "#Quantum-Circuit-Simulation-for-Julia-1",
+    "location": "#Yao-1",
     "page": "Home",
-    "title": "Quantum Circuit Simulation for Julia",
+    "title": "Yao",
     "category": "section",
-    "text": "Welcome to Yao"
+    "text": "A General Purpose Quantum Computation Simulation FrameworkWelcome to Yao, a Flexible, Extensible, Efficient Framework for Quantum Algorithm Design. Yao (幺) is the Chinese character for unitary. It is also means the first (一) in Chinese (it is the first released package from QuantumBFS).We aim to provide a powerful tool for researchers, students to study and explore quantum computing in near term future, before quantum computer being used in large-scale."
 },
 
 {
-    "location": "#Introduction-1",
+    "location": "#Tutorial-1",
     "page": "Home",
-    "title": "Introduction",
+    "title": "Tutorial",
     "category": "section",
-    "text": "Yao.jl is a quantum circuit simulator written in Julia."
+    "text": "Pages = [\n    \"tutorial/GHZ.md\",\n    \"tutorial/QCBM.md\",\n    \"tutorial/QFT.md\",\n]\nDepth = 1"
+},
+
+{
+    "location": "#Manual-1",
+    "page": "Home",
+    "title": "Manual",
+    "category": "section",
+    "text": "Pages = [\n    \"man/block.md\",\n    \"man/cache.md\",\n]"
 },
 
 {
