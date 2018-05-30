@@ -7,10 +7,9 @@
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://QuantumBFS.github.io/Yao.jl/stable)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://QuantumBFS.github.io/Yao.jl/latest)
 
-Flexible, Extensible,  Integratable Framework for Quantum Algorithm Design.
+Flexible, Extensible, Efficient Framework for Quantum Algorithm Design.
 
 ## Project Goals
-
 
 ## Installation
 
@@ -24,8 +23,3 @@ julia> Pkg.clone("https://github.com/QuantumBFS/Yao.jl.git")
 
 - [**STABLE**]()
 - [**LATEST**](https://quantumbfs.github.io/Yao.jl/latest)
-
-
-## TODO
-
-- [] `apply!`: `full` -> `sparse`
