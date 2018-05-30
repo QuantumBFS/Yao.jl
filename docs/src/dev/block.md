@@ -6,31 +6,31 @@ a quantum circuit into serveral kinds of blocks. The uppermost abstract type for
 ## PureBlock
 
 ```@docs
-QuCircuit.MatrixBlock
+Yao.MatrixBlock
 ```
 
 ## Primitive Block
 
 ```@docs
-QuCircuit.PrimitiveBlock
+Yao.PrimitiveBlock
 ```
 
 ## Composite Block
 
 ```@docs
-QuCircuit.CompositeBlock
+Yao.CompositeBlock
 ```
 
 ## MeasureBlock
 
 ```@docs
-QuCircuit.AbstractMeasure
+Yao.AbstractMeasure
 ```
 
 ## Concentrator
 
 ```@docs
-QuCircuit.Concentrator
+Yao.Concentrator
 ```
 
 ![concentrator](../assets/figures/blockfocus.png)
@@ -38,7 +38,7 @@ QuCircuit.Concentrator
 ## Sequence
 
 ```@docs
-QuCircuit.Sequence
+Yao.Sequence
 ```
 
 # User Defined Block
@@ -50,8 +50,8 @@ You can extending the block system by overloading existing APIs.
 Extending constant gate is very simple:
 
 ```@example user_defined_constant
-using QuCircuit
-import QuCircuit: Gate, GateType, sparse, nqubits
+using Yao
+import Yao: Gate, GateType, sparse, nqubits
 # define the number of qubits
 nqubits(::Type{GateType{:CNOT}}) = 2
 # define its matrix form
@@ -71,8 +71,8 @@ Primitive blocks are very useful when you want to accelerate a specific oracle. 
 we can accelerate a Grover search oracle by define a custom subtype of `PrimitiveBlock`.
 
 ```julia
-using QuCircuit
-import QuCircuit: PrimitiveBlock, apply!, Register
+using Yao
+import Yao: PrimitiveBlock, apply!, Register
 
 struct GroverSearch{N, T} <: PrimitiveBlock{N, T}
 end

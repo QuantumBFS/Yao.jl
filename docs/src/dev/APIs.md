@@ -1,6 +1,6 @@
 # APIs
 
 ```@autodocs
-Modules = [QuCircuit]
+Modules = [Yao]
 Order   = [:constant, :type, :function]
 ```

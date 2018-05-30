@@ -71,7 +71,7 @@ function define_const_gate_struct(n, name)
 
     typename = const_gate_typename(name)
     quote
-        struct $(esc(typename)){T} <: QuCircuit.ConstantGate{$n, T}
+        struct $(esc(typename)){T} <: Yao.ConstantGate{$n, T}
         end
 
         const $(esc(name)) = $(esc(typename)){$CircuitDefaultType}()
@@ -92,7 +92,7 @@ function define_const_gate_property(f, property, name, cname)
     flag_name = Symbol(join(["flag", property], "_"))
     typename = const_gate_typename(name)
 
-    method_name = :(QuCircuit.$method_name)
+    method_name = :(Yao.$method_name)
     quote
         const $flag_name = $(f(cname))
         $(esc(method_name))(::Type{GT}) where {GT <: $(esc(typename))} = $flag_name
@@ -111,7 +111,7 @@ end
 function define_const_gate_mat_fallback(name, t)
     typename = const_gate_typename(name)
     quote
-        function $(esc(:(QuCircuit.mat)))(::Type{$(esc(typename)){T}}) where {T <: Complex}
+        function $(esc(:(Yao.mat)))(::Type{$(esc(typename)){T}}) where {T <: Complex}
             src = mat($(esc(typename)){$t})
             dest = similar(src, T)
             copy!(dest, src)
@@ -148,8 +148,8 @@ function define_const_gate_methods(name, t, cname)
 
         # define fallback methods for mat
         ## dispatch to default type
-        $(esc(:(QuCircuit.mat)))(::Type{$(esc(typename))}) = $(esc(:mat))($(esc(typename)){$CircuitDefaultType})
-        $(esc(:(QuCircuit.mat)))(gate::GT) where {GT <: $(esc(typename))} = $(esc(:mat))(GT)
+        $(esc(:(Yao.mat)))(::Type{$(esc(typename))}) = $(esc(:mat))($(esc(typename)){$CircuitDefaultType})
+        $(esc(:(Yao.mat)))(gate::GT) where {GT <: $(esc(typename))} = $(esc(:mat))(GT)
         $(define_const_gate_mat_fallback(name, t))
 
         # define properties
@@ -175,7 +175,7 @@ function define_typed_const_gate(name, t, ex)
         $n = log2i(size($CONST_NAME, 1))
         issuccessed = $(define_const_gate_struct(n, name))
 
-        $(esc(:(QuCircuit.mat)))(::Type{$(esc(typename)){$t}}) = $CONST_NAME
+        $(esc(:(Yao.mat)))(::Type{$(esc(typename)){$t}}) = $CONST_NAME
 
         # only define this for the first time
         if issuccessed
@@ -199,7 +199,7 @@ function define_const_gate_new_type(name, t)
         end
 
         const $CONST_NAME = mat($(esc(typename)){$t})
-        $(esc(:(QuCircuit.mat)))(::Type{$(esc(typename)){$t}}) = $CONST_NAME
+        $(esc(:(Yao.mat)))(::Type{$(esc(typename)){$t}}) = $CONST_NAME
     end
 end
 
@@ -227,7 +227,7 @@ function define_const_gate(name, ex)
         if !($elt <: Complex)
             warn($(esc(name)), " only accept complex typed matrix, your constant matrix has eltype: ", $elt)
         end
-        $(esc(:(QuCircuit.mat)))(::Type{$(esc(typename)){$elt}}) = $CONST_NAME
+        $(esc(:(Yao.mat)))(::Type{$(esc(typename)){$elt}}) = $CONST_NAME
 
         # only define this for the first time
         if issuccessed

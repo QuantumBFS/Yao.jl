@@ -1,6 +1,6 @@
 include("Kernel.jl")
 import .Kernels
-using QuCircuit, Lazy
+using Yao, Lazy
 
 function entangler(pairs)
     seq = []
@@ -15,7 +15,7 @@ layer(::Type{Val{:first}}) = roll(chain(Rx(), Rz()))
 layer(::Type{Val{:last}}) = roll(chain(Rz(), Rx()))
 layer(::Type{Val{:mid}}) = roll(chain(Rz(), Rx(), Rz()))
 
-struct QCBM{N, NL, CT, T} <: QuCircuit.CompositeBlock{N, T}
+struct QCBM{N, NL, CT, T} <: Yao.CompositeBlock{N, T}
     circuit::CT
 
     function QCBM{N, NL}(pairs) where {N, NL}
@@ -38,8 +38,8 @@ function (x::QCBM{N})(nbatch::Int=1) where N
     x.circuit(zero_state(N, nbatch))
 end
 
-QuCircuit.dispatch!(f::Function, qcbm::QCBM, params...) = (dispatch!(f, qcbm.circuit, params...); qcbm)
-QuCircuit.dispatch!(f::Function, qcbm::QCBM, params::Vector) = (dispatch!(f, qcbm.circuit, params); qcbm)
+Yao.dispatch!(f::Function, qcbm::QCBM, params...) = (dispatch!(f, qcbm.circuit, params...); qcbm)
+Yao.dispatch!(f::Function, qcbm::QCBM, params::Vector) = (dispatch!(f, qcbm.circuit, params); qcbm)
 
 function initialize!(qcbm::QCBM)
     params = 2pi * rand(nparameters(qcbm))
@@ -47,7 +47,7 @@ function initialize!(qcbm::QCBM)
 end
 
 (x::QCBM)(params...) = x.circuit(params...)
-@forward QCBM.circuit QuCircuit.mat, QuCircuit.apply!, QuCircuit.show, QuCircuit.nparameters, QuCircuit.blocks
+@forward QCBM.circuit Yao.mat, Yao.apply!, Yao.show, Yao.nparameters, Yao.blocks
 
 function parameters(qcbm::QCBM{N, NL}) where {N, NL}
     params = zeros(real(datatype(qcbm)), nparameters(qcbm))
@@ -59,7 +59,7 @@ function parameters(qcbm::QCBM{N, NL}) where {N, NL}
 end
 
 # TODO: remove this by a new primitive block
-function parameters!(params, idx, layer::QuCircuit.Roller)
+function parameters!(params, idx, layer::Yao.Roller)
     count = idx
     for each_line in layer
         for each in each_line

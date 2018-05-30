@@ -1,4 +1,4 @@
-using QuCircuit
+using Yao
 
 macro compose(args...)
     if isa(first(args), Integer)

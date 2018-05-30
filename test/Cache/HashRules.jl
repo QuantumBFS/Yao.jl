@@ -1,5 +1,5 @@
 using Compat.Test
-using QuCircuit
+using Yao
 
 @testset "chain" begin
     @test chain(X(), phase(0.1)) == chain(X(), phase(0.1))

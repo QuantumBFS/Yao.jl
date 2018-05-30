@@ -1,7 +1,7 @@
 using Compat.Test
-using QuCircuit
+using Yao
 # type
-import QuCircuit: Concentrator, GreaterThan
+import Yao: Concentrator, GreaterThan
 
 @testset "concentrator" begin
 

@@ -1,7 +1,7 @@
-using Documenter, QuCircuit
+using Documenter, Yao
 
 makedocs(
-    modules = [QuCircuit],
+    modules = [Yao],
     clean = false,
     format = :html,
     sitename = "Quantum Circuit Simulation for Julia",
@@ -35,11 +35,11 @@ makedocs(
         ],
     ],
     html_prettyurls = !("local" in ARGS),
-    html_canonical = "https://quantumbfs.github.io/QuCircuit.jl/latest/",
+    html_canonical = "https://quantumbfs.github.io/Yao.jl/latest/",
 )
 
 deploydocs(
-    repo = "github.com/QuantumBFS/QuCircuit.jl.git",
+    repo = "github.com/QuantumBFS/Yao.jl.git",
     target = "build",
     julia = "0.6",
     deps = nothing,

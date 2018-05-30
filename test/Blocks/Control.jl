@@ -1,10 +1,10 @@
 using Compat.Test
-using QuCircuit
-import QuCircuit: ControlBlock
-import QuCircuit: _single_control_gate_sparse,
+using Yao
+import Yao: ControlBlock
+import Yao: _single_control_gate_sparse,
                   _single_inverse_control_gate_sparse,
                   A_kron_B, ControlQuBit, PhaseGate
-# import QuCircuit: Const.Sparse.P0, Const.Sparse.P1
+# import Yao: Const.Sparse.P0, Const.Sparse.P1
 
 @testset "getindex & setindex" begin
 g = ControlBlock{4}([1, 2], phase(0.1), 4)

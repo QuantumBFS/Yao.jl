@@ -1,4 +1,4 @@
 using Compat.Test
-using QuCircuit
+using Yao
 
 # @test dispatch!(+, X()) == X()

@@ -1,9 +1,9 @@
 using Compat
 using Compat.Test
-using QuCircuit
-import QuCircuit: ChainBlock, KronBlock, ControlBlock, Roller,
+using Yao
+import Yao: ChainBlock, KronBlock, ControlBlock, Roller,
     Measure, MeasureAndRemove, Concentrator, Signal, RotationGate
-import QuCircuit: PhaseGate, RangedBlock
+import Yao: PhaseGate, RangedBlock
 
 @testset "phase gate" begin
     @test isa(phase(), PhaseGate{:global, Float64})

@@ -3,7 +3,7 @@
 First, you have to use this package in Julia.
 
 ```@example GHZ
-using QuCircuit
+using Yao
 ```
 
 Then let's define the oracle, it is a function of the number of qubits.

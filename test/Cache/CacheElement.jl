@@ -1,6 +1,6 @@
 using Compat.Test
-using QuCircuit
-import QuCircuit: CacheElement, setlevel!
+using Yao
+import Yao: CacheElement, setlevel!
 
 @testset "check cache element" begin
 ce = CacheElement(SparseMatrixCSC{Complex128, Int}, unsigned(2))

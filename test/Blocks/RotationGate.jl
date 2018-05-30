@@ -1,8 +1,8 @@
 using Compat.Test
 using Compat
-using QuCircuit
+using Yao
 
-import QuCircuit: RotationGate, PrimitiveBlock, Val
+import Yao: RotationGate, PrimitiveBlock, Val
 
 @testset "constructor" begin
 @test isa(RotationGate(X, 0.1), PrimitiveBlock{1, ComplexF64})

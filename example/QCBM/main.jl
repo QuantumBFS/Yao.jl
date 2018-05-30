@@ -1,5 +1,5 @@
-using QuCircuit, UnicodePlots, BenchmarkTools, Knet
-import QuCircuit: mat
+using Yao, UnicodePlots, BenchmarkTools, Knet
+import Yao: mat
 
 include("Circuit.jl")
 

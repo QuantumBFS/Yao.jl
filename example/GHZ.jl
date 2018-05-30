@@ -1,4 +1,4 @@
-using QuCircuit
+using Yao
 
 circuit(n) = n |> compose(
     X(1),

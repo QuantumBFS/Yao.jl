@@ -1,5 +1,5 @@
-import QuCircuit: AbstractRegister, Register
-using QuCircuit
+import Yao: AbstractRegister, Register
+using Yao
 import Compat: axes
 using Compat.Test
 

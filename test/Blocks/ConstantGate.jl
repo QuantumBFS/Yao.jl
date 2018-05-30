@@ -1,6 +1,6 @@
 using Compat.Test
 using Compat
-using QuCircuit
+using Yao
 
 @testset "builtins" begin
     for each in [X, Y, Z, H]

@@ -1,5 +1,5 @@
-using QuCircuit
-import QuCircuit: SKronBlock
+using Yao
+import Yao: SKronBlock
 
 
 SKronBlock(3, [1, 2], [X(), X()])

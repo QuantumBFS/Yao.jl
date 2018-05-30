@@ -1,8 +1,8 @@
 using Compat.Test
 
-import QuCircuit: rand_state, register, state
+import Yao: rand_state, register, state
 
-import QuCircuit: _generate_sample_plan_from, _get_reduced_probability_distribution,
+import Yao: _generate_sample_plan_from, _get_reduced_probability_distribution,
     direct_sample_step, direct_sample
 
 
@@ -23,7 +23,7 @@ import QuCircuit: _generate_sample_plan_from, _get_reduced_probability_distribut
     @test p[1][end] ≈ 0.5
 end
 
-import QuCircuit: measure!
+import Yao: measure!
 
 @testset "measure!" begin
 

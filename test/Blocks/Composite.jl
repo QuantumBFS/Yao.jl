@@ -16,8 +16,8 @@ end
     include("Roller.jl")
 end
 
-using QuCircuit
-import QuCircuit: KronBlock, ChainBlock, ControlBlock
+using Yao
+import Yao: KronBlock, ChainBlock, ControlBlock
 
 @testset "map" begin
     dst = ChainBlock(X(), Y(), Z())

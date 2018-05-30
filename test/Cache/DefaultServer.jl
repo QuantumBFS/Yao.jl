@@ -1,6 +1,6 @@
 using Compat.Test
-using QuCircuit
-import QuCircuit: DefaultServer, cache!, pull
+using Yao
+import Yao: DefaultServer, cache!, pull
 
 @testset "default server" begin
     ds = DefaultServer(SparseMatrixCSC{Complex128, Int})

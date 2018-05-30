@@ -1,5 +1,5 @@
 using Compat.Test
-using QuCircuit
+using Yao
 
 macro test_io(mime, obj, str)
     quote

@@ -1,7 +1,7 @@
 # Quantum Circuit Simulation for Julia
 
-Welcome to QuCircuit
+Welcome to Yao
 
 ## Introduction
 
-QuCircuit.jl is a quantum circuit simulator written in Julia.
+Yao.jl is a quantum circuit simulator written in Julia.

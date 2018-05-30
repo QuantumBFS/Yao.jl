@@ -1,7 +1,7 @@
 using Compat.Test
-using QuCircuit
+using Yao
 
-import QuCircuit: ChainBlock, KronBlock, Cached, Roller, PrimitiveBlock
+import Yao: ChainBlock, KronBlock, Cached, Roller, PrimitiveBlock
 
 @testset "chain" begin
     g = chain(X(), Y(), Z())

@@ -1,5 +1,5 @@
 using Compat.Test
-using QuCircuit
+using Yao
 
 @testset "primitive" begin
 g = cache(phase(0.1))

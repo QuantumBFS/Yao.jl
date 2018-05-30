@@ -1,7 +1,7 @@
 using Compat.Test
 using Compat
-using QuCircuit
-import QuCircuit: PhaseGate, PrimitiveBlock
+using Yao
+import Yao: PhaseGate, PrimitiveBlock
 
 @testset "constructor" begin
 @test isa(PhaseGate{:global, Float64}(0.1), PrimitiveBlock{1, ComplexF64})

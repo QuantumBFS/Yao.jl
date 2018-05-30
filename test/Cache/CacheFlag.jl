@@ -1,7 +1,7 @@
 using Compat.Test
-using QuCircuit
+using Yao
 
-import QuCircuit: Cached, cache_matrix, cache_type, iscacheable
+import Yao: Cached, cache_matrix, cache_type, iscacheable
 
 @testset "config" begin
 c = Cached(X())

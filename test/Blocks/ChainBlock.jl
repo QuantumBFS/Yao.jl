@@ -1,6 +1,6 @@
 using Compat.Test
-using QuCircuit
-import QuCircuit: ChainBlock
+using Yao
+import Yao: ChainBlock
 
 @testset "constructor" begin
 

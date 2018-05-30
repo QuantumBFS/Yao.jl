@@ -1,6 +1,6 @@
 using Compat.Test
-using QuCircuit
-import QuCircuit: log2i, bit_length
+using Yao
+import Yao: log2i, bit_length
 
 
 @testset "log2i" begin

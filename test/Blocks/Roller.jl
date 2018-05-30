@@ -1,7 +1,7 @@
 using Compat.Test
-using QuCircuit
+using Yao
 
-import QuCircuit: Roller
+import Yao: Roller
 
 @testset "constructor" begin
     g = Roller{5, Complex128}(X(), kron(2, X(), Y()), Z(), Z())

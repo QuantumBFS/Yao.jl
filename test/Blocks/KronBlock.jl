@@ -1,6 +1,6 @@
 using Compat.Test
-using QuCircuit
-import QuCircuit: KronBlock
+using Yao
+import Yao: KronBlock
 
 @testset "constructor" begin
 info("TODO: custom error exception")

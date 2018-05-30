@@ -1,7 +1,7 @@
 using Compat.Test
-using QuCircuit
+using Yao
 
-import QuCircuit: Sequence, AbstractBlock, apply!
+import Yao: Sequence, AbstractBlock, apply!
 
 mutable struct Print <: AbstractBlock
     stream::String
