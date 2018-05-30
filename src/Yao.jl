@@ -24,6 +24,8 @@ end
 include("Consts/Consts.jl")
 include("MathUtils.jl")
 
+include("Intrinsics/Intrinsics.jl")
+
 include("Register/Register.jl")
 include("Blocks/Blocks.jl")
 

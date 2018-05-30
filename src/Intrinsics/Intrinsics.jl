@@ -1,0 +1,6 @@
+include("Core.jl")
+include("basis.jl")
+include("permmatrix.jl")
+include("identity.jl")
+include("basic_gates.jl")
+include("gates.jl")
