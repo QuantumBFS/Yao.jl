@@ -14,39 +14,42 @@ ga('send', 'pageview');
     X(1) |&gt; C(3),
     X(3) |&gt; C(4),
     H(1:n),
-)</code></pre><pre><code class="language-none">circuit (generic function with 1 method)</code></pre></div><p>After we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.</p><pre><code class="language-">reg = register(bit&quot;0000&quot;)
+)</code></pre><pre><code class="language-none">circuit (generic function with 1 method)</code></pre></div><p>After we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.</p><div><pre><code class="language-julia">reg = register(bit&quot;0000&quot;)
 reg |&gt; circuit(4)
-reg</code></pre><p>Let&#39;s check the output:</p><div><pre><code class="language-julia">state(reg)</code></pre><pre><code class="language-none">16×1 Array{Complex{Float64},2}:
- 1.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im</code></pre></div><p>We have a GHZ state here, try to measure the first qubit</p><div><pre><code class="language-julia">reg |&gt; measure(1)
+reg</code></pre><pre><code class="language-none">Default Register (CPU, Complex{Float64}):
+    total: 4
+    batch: 1
+    active: 4</code></pre></div><p>Let&#39;s check the output:</p><div><pre><code class="language-julia">state(reg)</code></pre><pre><code class="language-none">16×1 Array{Complex{Float64},2}:
+     0.707107+0.0im
+          0.0+0.0im
+          0.0+0.0im
+          0.0+0.0im
+          0.0+0.0im
+          0.0+0.0im
+          0.0+0.0im
+ -2.77556e-17+0.0im
+  2.77556e-17+0.0im
+          0.0+0.0im
+          0.0+0.0im
+          0.0+0.0im
+          0.0+0.0im
+          0.0+0.0im
+          0.0+0.0im
+    -0.707107+0.0im</code></pre></div><p>We have a GHZ state here, try to measure the first qubit</p><div><pre><code class="language-julia">reg |&gt; measure(1)
 state(reg)</code></pre><pre><code class="language-none">16×1 Array{Complex{Float64},2}:
- 1.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im
- 0.0+0.0im</code></pre></div><p>GHZ state will collapse to <span>$|0000\rangle$</span> or <span>$|1111\rangle$</span> due to entanglement!</p><footer><hr/><a class="previous" href="../../"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../QFT/"><span class="direction">Next</span><span class="title">Quantum Fourier Transform</span></a></footer></article></body></html>
+         1.0+0.0im
+         0.0+0.0im
+         0.0+0.0im
+         0.0+0.0im
+ 3.92523e-17+0.0im
+         0.0+0.0im
+         0.0+0.0im
+         0.0+0.0im
+         0.0+0.0im
+         0.0+0.0im
+         0.0+0.0im
+         0.0+0.0im
+         0.0+0.0im
+         0.0+0.0im
+         0.0+0.0im
+         0.0+0.0im</code></pre></div><p>GHZ state will collapse to <span>$|0000\rangle$</span> or <span>$|1111\rangle$</span> due to entanglement!</p><footer><hr/><a class="previous" href="../../"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../QFT/"><span class="direction">Next</span><span class="title">Quantum Fourier Transform</span></a></footer></article></body></html>
