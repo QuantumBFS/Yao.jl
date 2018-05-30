@@ -1,19 +1,4 @@
-The Yao.jl package is licensed under the Apache License, Version 2.0:
 
-> COPYRIGHT
->
-> All contributions by Xiuzhe Luo
-> Copyright (c) 2018: Xiuzhe Luo.
-> All rights reserved.
->
-> All contributions by Jinguo Liu
-> Copyright (c) 2018: Jinguo Liu
-> All rights reserved
->
-> All contributions by Lei Wang
-> Copyright (c) 2018: Lei Wang
-> All rights reserved
->
 > Each contributor holds copyright over their respective contributions.
 > The project versioning (Git) records all such contribution source information.
 >
