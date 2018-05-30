@@ -5,14 +5,14 @@ Flexible, Extensible Framework for Quantum Algorithm Design.
 
 ## Environment Variables
 
-`QuCircuitDefaultType`: set default type used in simulation.
+`YaoDefaultType`: set default type used in simulation.
 
 """
-module QuCircuit
+module Yao
 
 using Compat, MacroTools
 
-PKGNAME = "QuCircuit"
+PKGNAME = "Yao"
 ENVNAME = join([PKGNAME, "DefaultType"])
 
 @static if haskey(ENV, ENVNAME)
