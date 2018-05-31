@@ -96,17 +96,7 @@ end
 
 # set default register
 function register(raw, nbatch::Int=1)
-    register(Register, raw, nbatch)
-end
-
-function register(::Type{RT}, ::Type{T}, bits::QuBitStr, nbatch::Int) where {RT, T}
-    st = zeros(T, 1 << length(bits), nbatch)
-    st[asindex(bits), :] .= 1
-    register(RT, st, nbatch)
-end
-
-function register(bits::QuBitStr, nbatch::Int=1)
-    register(Register, DefaultType, bits, nbatch)
+    register(DefaultRegister, raw, nbatch)
 end
 
 ## Config Initializers
@@ -118,7 +108,7 @@ end
 
 # config default register type
 function register(::Type{T}, n::Int, nbatch::Int, method::Symbol) where T
-    register(Register, T, n, nbatch, method)
+    register(DefaultRegister, T, n, nbatch, method)
 end
 
 # config default eltype

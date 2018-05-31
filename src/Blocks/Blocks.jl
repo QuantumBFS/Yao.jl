@@ -34,7 +34,7 @@ import ..LuxurySparse: I
 import ..Yao
 import ..Yao: DefaultType, nqubits, isunitary, isreflexive, nparameters, mat, datatype, dispatch!
 import Compat.LinearAlgebra: ishermitian
-import Base: hash, ==, eltype, show
+import Base: hash, ==, eltype, show, similar
 
 # module APIs
 export nqubits, ninput, noutput, isunitary, ispure, isreflexive, nparameters, mat, datatype, ishermitian

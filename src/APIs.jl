@@ -1,3 +1,5 @@
+export nqubits, address, state, focus!, isunitary, isreflexive, nparameters, datatype, mat, dispatch!
+
 # All exported methods and types docstring should be defined here.
 
 function nqubits end

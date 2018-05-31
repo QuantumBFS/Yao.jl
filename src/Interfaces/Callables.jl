@@ -16,7 +16,7 @@ for BLOCK in [
 ]
     @eval begin
         # 1. when input is register, call apply!
-        (x::$BLOCK)(reg::Register, params...) = apply!(reg, x, params...)
+        (x::$BLOCK)(reg::AbstractRegister, params...) = apply!(reg, x, params...)
         # 2. when input is a block, compose as function call
         (x::$BLOCK)(b::AbstractBlock) = reg->apply!(apply!(reg, b), x)
         # 3. when input is a signal, compose as function call

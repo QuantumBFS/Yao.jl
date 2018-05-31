@@ -27,7 +27,7 @@ function dispatch!(c::Composer, params)
     end
 end
 
-function (c::Composer)(reg::Register)
+function (c::Composer)(reg::AbstractRegister)
     c(nqubits(reg))(reg)
 end
 
@@ -65,5 +65,5 @@ end
 chain(fs...) = x->chain([each(x) for each in fs])
 
 # cached
-cache(f, level::Int=1;recursive::Bool=false) = x->cache(f(x), level; recursive=recursive)
+cache(f::Function, level::Int=1;recursive::Bool=false) = x->cache(f(x), level; recursive=recursive)
 cache(level::Int=1;recursive::Bool=false) = x->cache(x, level; recursive=recursive)

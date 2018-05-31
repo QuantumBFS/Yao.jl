@@ -1,3 +1,5 @@
+export Signal
+
 struct Signal
     sig::UInt
 end

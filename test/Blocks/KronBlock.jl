@@ -5,14 +5,14 @@ using Compat.LinearAlgebra
 using Compat.SparseArrays
 
 using Yao
-import Yao: KronBlock
+using Yao.Blocks
 
 @testset "constructor" begin
 @info "TODO: custom error exception"
 @test_throws MethodError KronBlock{2}(1=>X(), [2, Y()])
 end
 
-@testset "check sparse" begin
+@testset "check mat" begin
 
 GateSet = [
     X(), Y(), Z(),
@@ -21,27 +21,27 @@ GateSet = [
 ]
 
 ⊗ = kron
-U = sparse(X())
+U = mat(X())
 id = speye(2)
 
 @testset "case 1" begin
     mat = id ⊗ U
     g = KronBlock{2}(1=>X())
-    @test mat == sparse(g)
+    @test mat == mat(g)
 
     mat = U ⊗ id
     g = KronBlock{2}(2=>X())
-    @test mat == sparse(g)
+    @test mat == mat(g)
 end
 
 @testset "case 2" begin
-    mat = sparse(X()) ⊗ sparse(Y()) ⊗ sparse(Z())
+    mat = mat(X()) ⊗ mat(Y()) ⊗ mat(Z())
     g = KronBlock{3}(1=>Z(), 2=>Y(), 3=>X())
-    @test mat == sparse(g)
+    @test mat == mat(g)
 
     mat = id ⊗ mat
     g = KronBlock{4}(1=>Z(), 2=>Y(), 3=>X())
-    @test mat == sparse(g)
+    @test mat == mat(g)
 end
 
 @testset "random dense sequence" begin
@@ -51,8 +51,8 @@ function random_dense_kron(n)
     blocks = [i=>rand(GateSet) for i in addrs]
     g = KronBlock{n}(blocks...)
     sorted_blocks = sort(blocks, by=x->x[1])
-    t = mapreduce(x->sparse(x[2]), kron, speye(1), reverse(sorted_blocks))
-    sparse(g) ≈ t || @info(g)
+    t = mapreduce(x->mat(x[2]), kron, speye(1), reverse(sorted_blocks))
+    mat(g) ≈ t || @info(g)
 end
 
     for i = 2:8
@@ -60,21 +60,21 @@ end
     end
 end
 
-@testset "random sparse sequence" begin
+@testset "random mat sequence" begin
 
 function rand_kron_test(n)
     firstn = rand(1:n)
     addrs = randperm(n)
     blocks = [rand(GateSet) for i = 1:firstn]
     seq = [i=>each for (i, each) in zip(addrs[1:firstn], blocks)]
-    mats = [i=>sparse(each) for (i, each) in zip(addrs[1:firstn], blocks)]
+    mats = [i=>mat(each) for (i, each) in zip(addrs[1:firstn], blocks)]
     append!(mats, [i=>speye(2) for i in addrs[firstn+1:end]])
     sorted = sort(mats, by=x->x[1])
     mats = map(x->x[2], reverse(sorted))
 
     g = KronBlock{n}(seq...)
     t = reduce(kron, speye(1), mats)
-    sparse(g) ≈ t || @info(g)
+    mat(g) ≈ t || @info(g)
 end
 
 for i = 4:8
@@ -83,7 +83,7 @@ end
 
 end
 
-end # check sparse
+end # check mat
 
 @testset "allocation" begin
     g = KronBlock{4}(X(), phase(0.1))
@@ -104,7 +104,7 @@ end
     @test g[4].theta == 0.2
 
     g[2] = Y()
-    @test sparse(g[2]) == sparse(Y())
+    @test mat(g[2]) == mat(Y())
 
 end
 

@@ -1,3 +1,5 @@
+export CacheElement
+
 mutable struct CacheElement{TM <: AbstractMatrix}
     level::UInt
     data::Dict{Any, TM}

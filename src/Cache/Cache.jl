@@ -7,10 +7,15 @@ import ..LuxurySparse: I
 
 using ..Registers
 using ..Blocks
-import ..Blocks: print_subblocks, print_block
+
+# extend block system by cached
+import ..Blocks: print_subblocks, print_block, mat, apply!, dispatch!, blocks
 
 # import package configs
 import ..Yao: DefaultType
+import Base: push!, empty!, start, next, done, eltype, length, getindex, setindex!
+
+export setlevel!, cache, cache!, iscacheable, global_cache
 
 include("Core.jl")
 include("CacheElement.jl")
@@ -35,8 +40,6 @@ end
 #############
 # Interface
 #############
-export iscacheable
-
 # This will cause signal when signal is not actually unsigned
 iscacheable(block::MatrixBlock, signal::Int=1) = iscacheable(block, UInt(signal))
 iscacheable(block::MatrixBlock, signal::UInt) = iscacheable(block, cache_type(block), signal)

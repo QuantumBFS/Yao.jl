@@ -4,7 +4,7 @@ using Compat.LinearAlgebra
 using Compat.SparseArrays
 
 using Yao
-import Yao: Roller
+using Yao.Blocks
 
 @testset "constructor" begin
     g = Roller{5, ComplexF64}(X(), kron(2, X(), Y()), Z(), Z())
@@ -63,7 +63,7 @@ end
 @testset "matrix" begin
 g = Roller{5, ComplexF64}((X(), Y(), Z(), X(), X()))
 tg = kron(5, X(), Y(), Z(), X(), X())
-@test sparse(g) == sparse(tg)
+@test mat(g) == mat(tg)
 end
 
 @testset "traits" begin

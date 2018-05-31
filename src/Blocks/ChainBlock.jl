@@ -66,7 +66,7 @@ prepend!(c::ChainBlock, list) = (prepend!(c.blocks, list); c)
 
 mat(c::ChainBlock) = prod(x->mat(x), reverse(c.blocks))
 
-function apply!(r::Register, c::ChainBlock)
+function apply!(r::AbstractRegister, c::ChainBlock)
     for each in c
         apply!(r, each)
     end

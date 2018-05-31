@@ -11,7 +11,7 @@ abstract type AbstractBlock end
 # This is something will be fixed in 1.x
 # see https://github.com/JuliaLang/julia/issues/14919
 # We will define a call for each concrete type
-# (block::T)(reg::Register) where {T <: AbstractBlock} = apply!(reg, block)
+# (block::T)(reg::AbstractRegister) where {T <: AbstractBlock} = apply!(reg, block)
 
 import Base: copy
 # only shallow copy by default

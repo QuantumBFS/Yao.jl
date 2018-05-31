@@ -3,6 +3,7 @@ using Compat.Test
 using Compat.LinearAlgebra
 using Compat.SparseArrays
 using Yao
+using Yao.Blocks
 
 @testset "builtins" begin
     for each in [X, Y, Z, H]

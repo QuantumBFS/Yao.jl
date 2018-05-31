@@ -77,3 +77,6 @@ end
 ######### sparse array interfaces  #########
 nnz(M::PermMatrix) = length(M.vals)
 nonzeros(M::PermMatrix) = M.vals
+
+# TODO: implement this
+dropzeros!(M::PermMatrix) = M

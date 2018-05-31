@@ -54,7 +54,7 @@ nparameters(::Type{X}) where {X <: MatrixBlock} = 0
 
 datatype(block::MatrixBlock{N, T}) where {N, T} = T
 
-function apply!(reg::Register, b::MatrixBlock)
+function apply!(reg::AbstractRegister, b::MatrixBlock)
     reg.state .= mat(b) * reg
     reg
 end

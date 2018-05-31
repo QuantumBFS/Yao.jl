@@ -173,11 +173,6 @@ length(c::ControlBlock) = 1
 eachindex(c::ControlBlock) = c.addr
 blocks(c::ControlBlock) = [c.block]
 
-# apply & dispatch
-# TODO: overload this with direct apply method
-# function apply!(reg::Register, ctrl::ControlBlock)
-# end
-
 #################
 # Dispatch Rules
 #################

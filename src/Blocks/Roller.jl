@@ -52,7 +52,7 @@ function mat(m::Roller{N, M}) where {N, M}
     return op
 end
 
-function apply!(reg::Register{B}, m::Roller{N, M}) where {B, N, M}
+function apply!(reg::AbstractRegister{B}, m::Roller{N, M}) where {B, N, M}
     K = N ÷ M
     st = reshape(reg.state, 1<<K, (1<<(N - 1)) * B)
 

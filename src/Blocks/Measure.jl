@@ -55,7 +55,7 @@ function _reshape_to_active_remain_batch(reg::AbstractRegister{B}, m::Int) where
     reshape(state(reg), (1<<m, :, B))
 end
 
-function _get_reduced_probability_distribution(reg::Register{B}, m::Int) where B
+function _get_reduced_probability_distribution(reg::AbstractRegister{B}, m::Int) where B
     @assert m <= nactive(reg) "number of active qubits is less than measure qubits"
 
     s = _reshape_to_active_remain_batch(reg, m)
@@ -68,7 +68,7 @@ end
 # Measure Functions
 ####################
 
-function measure(reg::Register, m::Int, ntimes::Int=1)
+function measure(reg::AbstractRegister, m::Int, ntimes::Int=1)
     # NOTE: do we need to copy register here to preserve its
     # address? address is changed here, but state is not
     p = _get_reduced_probability_distribution(reg, m)
@@ -77,7 +77,7 @@ function measure(reg::Register, m::Int, ntimes::Int=1)
     pmap(x->direct_sample(x, ntimes), p)
 end
 
-function measure!(reg::Register{B, T}, m::Int) where {B, T}
+function measure!(reg::AbstractRegister{B, T}, m::Int) where {B, T}
     N = nqubits(reg)
     p = _get_reduced_probability_distribution(reg, m)
     plans = map(_generate_sample_plan_from, p)
@@ -95,7 +95,7 @@ function measure!(reg::Register{B, T}, m::Int) where {B, T}
     reg, samples
 end
 
-function measure_remove!(reg::Register{B, T}, m::Int) where {B, T}
+function measure_remove!(reg::AbstractRegister{B, T}, m::Int) where {B, T}
     N = nqubits(reg)
     p = _get_reduced_probability_distribution(reg, m)
     plans = map(_generate_sample_plan_from, p)
@@ -124,7 +124,7 @@ mutable struct Measure{M} <: AbstractMeasure{M}
     Measure{M}() where M = new{M}()
 end
 
-function apply!(reg::Register, block::Measure{M}) where M
+function apply!(reg::AbstractRegister, block::Measure{M}) where M
     _, samples = measure!(reg, M)
     block.result = samples
     reg
@@ -136,7 +136,7 @@ mutable struct MeasureAndRemove{M} <: AbstractMeasure{M}
     MeasureAndRemove{M}() where M = new{M}()
 end
 
-function apply!(reg::Register, block::MeasureAndRemove{M}) where M
+function apply!(reg::AbstractRegister, block::MeasureAndRemove{M}) where M
     reg, samples = measure_remove!(reg, M)
     block.result = samples
     reg

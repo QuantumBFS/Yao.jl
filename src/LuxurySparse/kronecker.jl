@@ -32,6 +32,7 @@ kron(A::Identity{Na, Ta}, B::Identity{Nb, Tb}) where {Na, Nb, Ta, Tb}= Identity{
 kron(A::Identity{Na}, B::Diagonal) where Na = Diagonal(orepeat(B.diag, Na))
 kron(B::Diagonal, A::Identity{Na}) where Na = Diagonal(irepeat(B.diag, Na))
 kron(A::Identity{1}, B::AbstractMatrix) = B
+kron(A::Identity{1}, B::PermMatrix) = B
 
 ####### diagonal kron ########
 kron(A::Diagonal, B::Diagonal) = Diagonal(kron(A.diag, B.diag))
@@ -144,11 +145,11 @@ function kron(A::PermMatrix{T}, B::Identity) where T
     PermMatrix(perm, vals)
 end
 
-function kron(A::Identity, B::PermMatrix{T}) where T
+function kron(A::Identity, B::PermMatrix{Tv, Ti}) where {Tv, Ti <: Integer}
     nA = size(A, 1)
     nB = size(B, 1)
     perm = Vector{Int}(nB*nA)
-    vals = Vector{T}(nB*nA)
+    vals = Vector{Tv}(nB*nA)
     @inbounds for i = 1:nA
         start = (i-1)*nB
         @inbounds @simd for j = 1:nB
