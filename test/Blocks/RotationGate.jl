@@ -36,8 +36,8 @@ end
 @testset "apply" begin
 g = RotationGate(X, 0.1)
 reg = rand_state(1)
-@test full(g) * state(reg) == state(apply!(reg, g))
-@test full(g) * state(reg) == state(g(reg))
+@test full(g) * state(reg) ≈ state(apply!(reg, g))
+@test full(g) * state(reg) ≈ state(g(reg))
 end
 
 @testset "hash & compare" begin
