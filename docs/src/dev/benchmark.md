@@ -5,13 +5,13 @@
 
 Following is the single qubit gate performance of ProjectQ, by applying X gate on 2nd qubit in a Hilbert space of N = 16 qubits. For system size N > 20, there is no significant overhead, indicated by perfect exponential scaling.
 
-![](projectq-xyz.png)
+![](../asset/figures/projectq-xyz.png)
 
 ## Repeated Gate Performance
 
 If we apply same gate, X, Y, Z on 6 qubits 2-7, we compare their performance with single qubit case.
 
-![](projectq-comparerepeat.png)
+![](../asset/figures/projectq-comparerepeat.png)
 
 Here, we see the reason why we need `Block` system and multiple dispatch to do structure specific optimization.
 
