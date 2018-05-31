@@ -22,12 +22,12 @@ struct Roller{N, M, T, BT <: Tuple} <: CompositeBlock{N, T}
 
     function Roller{N}(block::MatrixBlock{K, T}) where {N, K, T}
         M = Int(N / K)
-        new{N, M, T, NTuple{M, typeof(block)}}(ntuple(x->deepcopy(block), Val{M}))
+        new{N, M, T, NTuple{M, typeof(block)}}(ntuple(x->deepcopy(block), Val(M)))
     end
 end
 
 function copy(m::Roller{N, M, T, BT}) where {N, M, T, BT}
-    Roller{N, T}(ntuple(x->copy(m.blocks[x]), Val{M}))
+    Roller{N, T}(ntuple(x->copy(m.blocks[x]), Val(M)))
 end
 
 getindex(m::Roller, i) = getindex(m.blocks, i)
@@ -61,7 +61,7 @@ function apply!(reg::Register{B}, m::Roller{N, M}) where {B, N, M}
         # to finish exactly M times, or the
         # address of each qubit will not match
         # the value of state
-        rolldims!(Val{K}, Val{N}, Val{B}, statevec(reg))
+        rolldims!(Val(K), Val(N), Val(B), statevec(reg))
     end
     reg
 end

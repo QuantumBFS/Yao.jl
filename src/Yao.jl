@@ -1,4 +1,4 @@
-__precompile__()
+# __precompile__()
 
 """
 Flexible, Extensible Framework for Quantum Algorithm Design.
@@ -11,6 +11,9 @@ Flexible, Extensible Framework for Quantum Algorithm Design.
 module Yao
 
 using Compat, MacroTools
+using Compat.Random
+using Compat.LinearAlgebra
+using Compat.SparseArrays
 
 PKGNAME = "Yao"
 ENVNAME = join([PKGNAME, "DefaultType"])

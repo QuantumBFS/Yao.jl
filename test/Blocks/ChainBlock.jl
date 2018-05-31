@@ -1,4 +1,8 @@
+using Compat
 using Compat.Test
+using Compat.LinearAlgebra
+using Compat.SparseArrays
+
 using Yao
 import Yao: ChainBlock
 
@@ -20,7 +24,7 @@ end
 
     mat = sparse(kron(2, phase(0.1))) * sparse(kron(2, X(), Y()))
     @test sparse(g) == mat
-    @test full(g) == full(mat)
+    @test dense(g) == Matrix(mat)
 
     reg = rand_state(2)
     @test mat * state(reg) == state(apply!(reg, g))
@@ -72,7 +76,7 @@ end
 end
 
 @testset "traits" begin
-    info("TODO: check traits when primitive blocks' traits are all defined")
+    @info "TODO: check traits when primitive blocks' traits are all defined"
 
     g = ChainBlock(X(), Y())
     @test isunitary(g) == true

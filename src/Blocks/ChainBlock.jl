@@ -44,15 +44,15 @@ getindex(c::ChainBlock, index) = getindex(c.blocks, index)
 function setindex!(c::ChainBlock, val, index)
     0 < index || throw(BoundsError(c, index))
 
-    @inbounds if index > endof(c.blocks)
+    @inbounds if index > lastindex(c.blocks)
         push!(c.blocks, val)
     else
         setindex!(c.blocks, val, index)
     end
 end
 
-import Base: endof
-endof(c::ChainBlock) = endof(c.blocks)
+import Compat: lastindex
+lastindex(c::ChainBlock) = lastindex(c.blocks)
 
 ## Iterate contained blocks
 start(c::ChainBlock) = start(c.blocks)

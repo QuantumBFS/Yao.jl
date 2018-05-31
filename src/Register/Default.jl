@@ -55,7 +55,7 @@ register(::Type{Register}, raw, nbatch::Int) = Register(raw, nbatch)
 
 function register(::Type{InitMethod{:zero}}, ::Type{Register}, ::Type{T}, n::Int, nbatch::Int) where T
     raw = zeros(T, 1 << n, nbatch)
-    raw[1, :] = 1
+    raw[1, :] .= 1
     Register(raw, nbatch)
 end
 
@@ -133,7 +133,7 @@ function focus!(r::Register{B}, range::RangeType...) where B
     # permute address
     expand_range = [i for each in range for i in each]
     perm = collect(1:total)
-    inds = findin(perm, expand_range)
+    inds = findall(in(expand_range), perm)
     deleteat!(perm, inds)
     prepend!(perm, expand_range)
     permute!(r.address, perm)

@@ -20,5 +20,5 @@ nparameters(::PhaseGate) = 1
 ==(lhs::PhaseGate{PT}, rhs::PhaseGate{PT}) where PT = lhs.theta == rhs.theta
 
 function hash(gate::PhaseGate, h::UInt)
-    hash(hash(gate.theta, object_id(gate)), h)
+    hash(hash(gate.theta, objectid(gate)), h)
 end

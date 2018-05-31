@@ -95,7 +95,7 @@ end
 function _insert_new!(k::KronBlock, val, addr)
     push!(k.addrs, addr)
     push!(k.blocks, val)
-    k.slots[addr] = endof(k.addrs)
+    k.slots[addr] = lastindex(k.addrs)
     k
 end
 

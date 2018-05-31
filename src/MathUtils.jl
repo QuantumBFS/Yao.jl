@@ -92,7 +92,7 @@ kronprod(itr) = reduce(kron, speye(1), itr)
 
 # N: number of qubits
 # st: state vector with batch
-function rolldims2!(::Type{Val{N}}, ::Type{Val{B}}, st::AbstractMatrix) where {N, B}
+function rolldims2!(::Val{N}, ::Val{B}, st::AbstractMatrix) where {N, B}
     n = 1 << N
     halfn = 1 << (N - 1)
     temp = st[2:2:n, :]
@@ -101,7 +101,7 @@ function rolldims2!(::Type{Val{N}}, ::Type{Val{B}}, st::AbstractMatrix) where {N
     st
 end
 
-function rolldims2!(::Type{Val{N}}, ::Type{Val{1}}, st::AbstractVector) where {N}
+function rolldims2!(::Val{N}, ::Val{1}, st::AbstractVector) where {N}
     n = 1 << N
     halfn = 1 << (N - 1)
     temp = st[2:2:n]
@@ -110,10 +110,10 @@ function rolldims2!(::Type{Val{N}}, ::Type{Val{1}}, st::AbstractVector) where {N
     st
 end
 
-@generated function rolldims!(::Type{Val{K}}, ::Type{Val{N}}, ::Type{Val{B}}, st::AbstractVecOrMat) where {K, N, B}
-    ex = :(rolldims2!(Val{$N}, Val{$B}, st))
+@generated function rolldims!(::Val{K}, ::Val{N}, ::Val{B}, st::AbstractVecOrMat) where {K, N, B}
+    ex = :(rolldims2!(Val($N), Val($B), st))
     for i = 2:K
-        ex = :(rolldims2!(Val{$N}, Val{$B}, st); $ex)
+        ex = :(rolldims2!(Val($N), Val($B), st); $ex)
     end
     ex
 end

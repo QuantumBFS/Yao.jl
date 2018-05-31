@@ -1,8 +1,10 @@
-using Compat.Test
 using Compat
-using Yao
+using Compat.Test
+using Compat.LinearAlgebra
+using Compat.SparseArrays
 
-import Yao: RotationGate, PrimitiveBlock, Val
+using Yao
+import Yao: RotationGate, PrimitiveBlock
 
 @testset "constructor" begin
 @test isa(RotationGate(X, 0.1), PrimitiveBlock{1, ComplexF64})
@@ -18,7 +20,7 @@ for (DIRECTION, MAT) in [
     (Y, [cos(theta/2) -sin(theta/2); sin(theta/2) cos(theta/2)]),
     (Z, [exp(-im*theta/2) 0;0 exp(im*theta/2)])
 ]
-    @test full(RotationGate(DIRECTION, theta)) ≈ MAT
+    @test dense(RotationGate(DIRECTION, theta)) ≈ MAT
 end
 
 end
@@ -36,8 +38,8 @@ end
 @testset "apply" begin
 g = RotationGate(X, 0.1)
 reg = rand_state(1)
-@test full(g) * state(reg) == state(apply!(reg, g))
-@test full(g) * state(reg) == state(g(reg))
+@test dense(g) * state(reg) == state(apply!(reg, g))
+@test dense(g) * state(reg) == state(g(reg))
 end
 
 @testset "hash & compare" begin

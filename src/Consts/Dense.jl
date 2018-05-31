@@ -2,6 +2,9 @@ module Dense
 
 import ..Const: SYM_LIST, TYPE_LIST
 using Compat
+using Compat.LinearAlgebra
+using Compat.SparseArrays
+
 
 for (NAME, MAT) in SYM_LIST
 

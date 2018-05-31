@@ -1,9 +1,13 @@
+using Compat
 using Compat.Test
+using Compat.LinearAlgebra
+using Compat.SparseArrays
+
 using Yao
 import Yao: DefaultServer, cache!, pull
 
 @testset "default server" begin
-    ds = DefaultServer(SparseMatrixCSC{Complex128, Int})
+    ds = DefaultServer(SparseMatrixCSC{ComplexF64, Int})
     g = kron(3, X(), phase(0.1), Rx(0.1))
 
     # cache recursively

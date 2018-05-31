@@ -1,4 +1,8 @@
+using Compat
 using Compat.Test
+using Compat.LinearAlgebra
+using Compat.SparseArrays
+
 using Yao
 # type
 import Yao: Concentrator, GreaterThan

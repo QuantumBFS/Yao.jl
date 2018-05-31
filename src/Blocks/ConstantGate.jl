@@ -2,7 +2,7 @@ export @const_gate
 
 abstract type ConstantGate{N, T} <: PrimitiveBlock{N, T} end
 
-# TODO: better exception for X::Complex64 without import XGate
+# TODO: better exception for X::ComplexF32 without import XGate
 
 """
     @const_gate
@@ -13,7 +13,7 @@ gate.
 
 ## Example
 
-this defines X gate and bind a constant of type `Complex128` to method `mat`, which will be called
+this defines X gate and bind a constant of type `ComplexF64` to method `mat`, which will be called
 during your calculation of X gate. You should input the matrix type you want to use in your calculation,
 we will only help you do its element type conversion.
 
@@ -65,6 +65,7 @@ used in current scope). or it returns true.
 function define_const_gate_struct(n, name)
     # NOTE: isdefined requires a symbol
     # do not input an escaped symbol
+
     if isdefined(name)
         return :(false)
     end
@@ -191,7 +192,7 @@ define new constant matrix binding with `type` for this const gate. it throws
 `UndefVarError` if this constant gate is not defined.
 """
 function define_const_gate_new_type(name, t)
-    CONST_NAME = Symbol(join([name, "CONST"], "_"))
+    CONST_NAME = Symbol(name, "CONST", t)
     typename = const_gate_typename(name)
     quote
         if $(!isdefined(name))
@@ -210,7 +211,7 @@ define type, peroperties, matrix, etc. for this constant gate.
 """
 function define_const_gate(name, ex)
     n = :N
-    CONST_NAME = Symbol(join([name, "CONST"], "_"))
+    CONST_NAME = Symbol(name, "_CONST")
     elt = :FallbackType
     typename = const_gate_typename(name)
 
@@ -238,7 +239,7 @@ end
 
 
 for (NAME, _) in Const.SYM_LIST
-    GT = Symbol(join([NAME, "Gate"]))
+    GT = Symbol(NAME, "Gate")
     @eval begin
         export $NAME, $GT
         @const_gate $NAME = Const.Sparse.$NAME($CircuitDefaultType)

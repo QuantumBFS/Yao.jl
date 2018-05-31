@@ -20,5 +20,5 @@ nparameters(::RotationGate) = 1
 ==(lhs::RotationGate{TA, GT}, rhs::RotationGate{TB, GT}) where {TA, TB, GT} = lhs.theta == rhs.theta
 
 function hash(gate::RotationGate, h::UInt)
-    hash(hash(gate.theta, object_id(gate)), h)
+    hash(hash(gate.theta, objectid(gate)), h)
 end

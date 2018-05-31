@@ -1,9 +1,13 @@
+using Compat
 using Compat.Test
+using Compat.LinearAlgebra
+using Compat.SparseArrays
+
 using Yao
 import Yao: CacheElement, setlevel!
 
 @testset "check cache element" begin
-ce = CacheElement(SparseMatrixCSC{Complex128, Int}, unsigned(2))
+ce = CacheElement(SparseMatrixCSC{ComplexF64, Int}, unsigned(2))
 g = kron(3, X(), phase(0.1), Rx(0.1))
 push!(ce, g, sparse(g), unsigned(1)) # do nothing
 @test_throws KeyError pull(ce, g)
@@ -16,7 +20,7 @@ empty!(ce)
 end
 
 @testset "set level" begin
-ce = CacheElement(SparseMatrixCSC{Complex128, Int}, unsigned(2))
+ce = CacheElement(SparseMatrixCSC{ComplexF64, Int}, unsigned(2))
 setlevel!(ce, unsigned(3))
 @test ce.level == unsigned(3)
 end

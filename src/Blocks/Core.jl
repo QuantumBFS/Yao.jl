@@ -34,7 +34,7 @@ abstract type AbstractBlock end
 # Interface
 ## Trait
 export nqubits, ninput, noutput, isunitary, ispure, isreflexive, nparameters, mat, datatype
-import Base: ishermitian
+import Compat.LinearAlgebra: ishermitian
 
 # nqubits(::AbstractBlock) = AnySize
 # ninput(::AbstractBlock) = AnySize

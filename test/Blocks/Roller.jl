@@ -1,11 +1,14 @@
+using Compat
 using Compat.Test
-using Yao
+using Compat.LinearAlgebra
+using Compat.SparseArrays
 
+using Yao
 import Yao: Roller
 
 @testset "constructor" begin
-    g = Roller{5, Complex128}(X(), kron(2, X(), Y()), Z(), Z())
-    @test isa(g, Roller{5, 4, Complex128})
+    g = Roller{5, ComplexF64}(X(), kron(2, X(), Y()), Z(), Z())
+    @test isa(g, Roller{5, 4, ComplexF64})
 
     src = phase(0.1)
     g = Roller{4}(src)
@@ -33,7 +36,7 @@ end
         @test each.theta == 0.1
     end
 
-    g = Roller{5, Complex128}(X(), kron(2, X(), Y()), Z(), Z())
+    g = Roller{5, ComplexF64}(X(), kron(2, X(), Y()), Z(), Z())
     list = [X(), kron(2, X(), Y()), Z(), Z()]
     for (src, tg) in zip(g, list)
         @test src == tg
@@ -51,20 +54,20 @@ g = Roller{5}(X())
 end
 
 @testset "roll multiple blocks" begin
-g = Roller{5, Complex128}((X(), Y(), Z(), X(), X()))
+g = Roller{5, ComplexF64}((X(), Y(), Z(), X(), X()))
 tg = kron(5, X(), Y(), Z(), X(), X())
 @test state(g(register(bit"11111"))) == state(tg(register(bit"11111")))
 @test state(g(register(bit"11111", 3))) == state(tg(register(bit"11111", 3)))
 end
 
 @testset "matrix" begin
-g = Roller{5, Complex128}((X(), Y(), Z(), X(), X()))
+g = Roller{5, ComplexF64}((X(), Y(), Z(), X(), X()))
 tg = kron(5, X(), Y(), Z(), X(), X())
 @test sparse(g) == sparse(tg)
 end
 
 @testset "traits" begin
-g = Roller{5, Complex128}(X(), kron(2, X(), Y()), Z(), Z())
+g = Roller{5, ComplexF64}(X(), kron(2, X(), Y()), Z(), Z())
 @test eltype(g) == eltype(g.blocks)
 @test length(g) == 4
 @test isunitary(g) == true

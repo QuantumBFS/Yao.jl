@@ -1,5 +1,8 @@
 using Compat
 using Compat.Test
+using Compat.LinearAlgebra
+using Compat.SparseArrays
+
 using Yao
 import Yao: ChainBlock, KronBlock, ControlBlock, Roller,
     Measure, MeasureAndRemove, Concentrator, Signal, RotationGate

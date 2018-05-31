@@ -167,7 +167,7 @@ function print_block(io::IO, x::ControlBlock)
     for i in eachindex(x.ctrl_qubits)
         print_with_color(color(ControlBlock), io, x.ctrl_qubits[i]; bold=true)
 
-        if i != endof(x.ctrl_qubits)
+        if i != lastindex(x.ctrl_qubits)
             print_with_color(color(ControlBlock), io, ", "; bold=true)
         end
     end

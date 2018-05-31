@@ -1,5 +1,8 @@
-using Compat.Test
 using Compat
+using Compat.Test
+using Compat.LinearAlgebra
+using Compat.SparseArrays
+
 using Yao
 import Yao: PhaseGate, PrimitiveBlock
 
@@ -11,16 +14,16 @@ end
 
 @testset "matrix" begin
 g = PhaseGate{:shift, Float64}(pi)
-@test full(g) ≈ exp(im * pi/2) * [exp(-im * pi/2) 0; 0  exp(im * pi/2)]
+@test dense(g) ≈ exp(im * pi/2) * [exp(-im * pi/2) 0; 0  exp(im * pi/2)]
 g = PhaseGate{:global, Float64}(pi)
-@test full(g) ≈ exp(im * pi) * eye(2)
+@test dense(g) ≈ exp(im * pi) * eye(2)
 end
 
 @testset "apply" begin
 g = PhaseGate{:shift, Float64}(pi)
 reg = rand_state(1)
-@test full(g) * state(reg) ≈ state(apply!(reg, g))
-@test full(g) * state(reg) ≈ state(g(reg))
+@test dense(g) * state(reg) ≈ state(apply!(reg, g))
+@test dense(g) * state(reg) ≈ state(g(reg))
 end
 
 @testset "compare" begin

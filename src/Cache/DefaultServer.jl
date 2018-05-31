@@ -18,7 +18,7 @@ function iscacheable(server::DefaultServer, k::UInt)
 end
 
 function iscached(server::DefaultServer, block::MatrixBlock)
-    k = object_id(block)
+    k = objectid(block)
     k in keys(server.storage) || return false
     iscached(server.storage[k], block)
 end
@@ -83,7 +83,7 @@ function empty!(server::DefaultServer, key::UInt)
 end
 
 ##########################
-# Wrap to call object_id
+# Wrap to call objectid
 ##########################
 
 """
@@ -92,11 +92,11 @@ end
 whether this block is cacheable with current cache level.
 """
 @inline function iscacheable(server::DefaultServer, block::MatrixBlock, level::UInt)
-    iscacheable(server, object_id(block), level)
+    iscacheable(server, objectid(block), level)
 end
 
 @inline function iscacheable(server::DefaultServer, block::MatrixBlock)
-    iscacheable(server, object_id(block))
+    iscacheable(server, objectid(block))
 end
 
 """
@@ -105,7 +105,7 @@ end
 set block's cache level
 """
 @inline function setlevel!(server::DefaultServer, block::MatrixBlock, level::UInt)
-    setlevel!(server, object_id(block), level)
+    setlevel!(server, objectid(block), level)
 end
 
 """
@@ -114,7 +114,7 @@ end
 add a new cacheable block with cache level `level` to the server.
 """
 @inline function cache!(server::DefaultServer{TM}, block::MatrixBlock, level::UInt) where TM
-    cache!(server, object_id(block), level)
+    cache!(server, objectid(block), level)
 end
 
 """
@@ -124,12 +124,12 @@ push `val` to cache server, it will be cached if `level` is greater
 than stored level. Or it will do nothing.
 """
 @inline function push!(server::DefaultServer{TM}, block::MatrixBlock, val::TM, level::UInt) where TM
-    push!(server, object_id(block), block, val, level)
+    push!(server, objectid(block), block, val, level)
 end
 
 # force push
 @inline function push!(server::DefaultServer{TM}, block::MatrixBlock, val::TM) where TM
-    push!(server, object_id(block), block, val)
+    push!(server, objectid(block), block, val)
 end
 
 """
@@ -138,11 +138,11 @@ end
 pull current block's cache from server
 """
 @inline function pull(server::DefaultServer, block::MatrixBlock)
-    pull(server, object_id(block), block)
+    pull(server, objectid(block), block)
 end
 
 @inline function empty!(server::DefaultServer, block::MatrixBlock)
-    empty!(server, object_id(block))
+    empty!(server, objectid(block))
 end
 
 function empty!(server::DefaultServer)

@@ -1,6 +1,6 @@
 include("Kernel.jl")
 import .Kernels
-using Yao, Lazy
+using Yao, Lazy, Compat
 
 function entangler(pairs)
     seq = []
@@ -10,10 +10,10 @@ function entangler(pairs)
     compose(seq)
 end
 
-layer(x::Symbol) = layer(Val{x})
-layer(::Type{Val{:first}}) = roll(chain(Rx(), Rz()))
-layer(::Type{Val{:last}}) = roll(chain(Rz(), Rx()))
-layer(::Type{Val{:mid}}) = roll(chain(Rz(), Rx(), Rz()))
+layer(x::Symbol) = layer(Val(x))
+layer(::Val{:first}) = roll(chain(Rx(), Rz()))
+layer(::Val{:last}) = roll(chain(Rz(), Rx()))
+layer(::Val{:mid}) = roll(chain(Rz(), Rx(), Rz()))
 
 struct QCBM{N, NL, CT, T} <: Yao.CompositeBlock{N, T}
     circuit::CT

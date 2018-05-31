@@ -1,13 +1,14 @@
 import Yao: AbstractRegister, Register
 using Yao
+using Compat
 import Compat: axes
 using Compat.Test
 
 @testset "Constructors" begin
 
-    test_data = zeros(Complex64, 2^5, 3)
+    test_data = zeros(ComplexF32, 2^5, 3)
     reg = register(test_data, 3)
-    @test typeof(reg) == Register{3, Complex64}
+    @test typeof(reg) == Register{3, ComplexF32}
     @test address(reg) == collect(1:5)
     @test nqubits(reg) == 5
     @test nbatch(reg) == 3
@@ -22,7 +23,7 @@ using Compat.Test
     @test address(reg) == collect(1:5)
 
     # check default type
-    @test eltype(reg) == Complex128
+    @test eltype(reg) == ComplexF64
 
     creg = copy(reg)
     @test state(creg) == state(reg)

@@ -1,4 +1,8 @@
+using Compat
 using Compat.Test
+using Compat.LinearAlgebra
+using Compat.SparseArrays
+
 using Yao
 
 import Yao: Sequence, AbstractBlock, apply!
@@ -41,7 +45,7 @@ end
 
 # @testset "check example: ghz" begin
 #     num_bits = 4
-#     ghz_state = zeros(Complex128, 1<<num_bits)
+#     ghz_state = zeros(ComplexF64, 1<<num_bits)
 #     ghz_state[1] = 1 / sqrt(2)
 #     ghz_state[end] = -1 / sqrt(2)
 

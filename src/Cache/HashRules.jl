@@ -7,7 +7,7 @@ import Base: hash, ==
 ==(lhs::CompositeBlock, rhs::CompositeBlock) = false
 
 function hash(c::ChainBlock, h::UInt)
-    hashkey = hash(object_id(c), h)
+    hashkey = hash(objectid(c), h)
     for each in c.blocks
         hashkey = hash(each, hashkey)
     end
@@ -20,7 +20,7 @@ end
 
 # NOTE: kronecker blocks are equivalent if its addrs and blocks is the same
 function hash(block::KronBlock{N, T}, h::UInt) where {N, T}
-    hashkey = hash(object_id(block), h)
+    hashkey = hash(objectid(block), h)
 
     for (addr, block) in block
         hashkey = hash(addr, hashkey)
@@ -34,7 +34,7 @@ function ==(lhs::KronBlock{N, T}, rhs::KronBlock{N, T}) where {N, T}
 end
 
 function hash(ctrl::ControlBlock, h::UInt)
-    hashkey = hash(object_id(ctrl), h)
+    hashkey = hash(objectid(ctrl), h)
     for each in ctrl.ctrl_qubits
         hashkey = hash(each, hashkey)
     end
@@ -51,7 +51,7 @@ end
 ==(lhs::Roller{N, M, T, BT}, rhs::Roller{N, M, T, BT}) where {N, M, T, BT} = lhs.blocks == rhs.blocks
 
 function hash(R::Roller, h::UInt)
-    hashkey = hash(object_id(R), h)
+    hashkey = hash(objectid(R), h)
     for each in R.blocks
         hashkey = hash(each, hashkey)
     end

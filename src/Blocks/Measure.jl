@@ -57,7 +57,7 @@ function _get_reduced_probability_distribution(reg::Register{B}, m::Int) where B
     @assert m <= nactive(reg) "number of active qubits is less than measure qubits"
 
     s = _reshape_to_active_remain_batch(reg, m)
-    reduced_s = reshape(sum(s, 2), (1<<m, B))
+    reduced_s = reshape(sum(s, dims=2), (1<<m, B))
     p = abs2.(batch_normalize!(reduced_s))
     [view(p, :, i) for i=1:B]
 end

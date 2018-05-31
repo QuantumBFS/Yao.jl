@@ -1,5 +1,5 @@
 import Base: hash, ==
-export MatrixBlock
+export MatrixBlock, dense
 
 """
     MatrixBlock{N, T} <: AbstractBlock
@@ -70,9 +70,11 @@ nparameters(x::MatrixBlock) = 0
 nparameters(::Type{X}) where {X <: MatrixBlock} = 0
 
 
-import Base: full, sparse, eltype
+import Base: eltype
+import Compat.SparseArrays: sparse
+
 datatype(block::MatrixBlock{N, T}) where {N, T} = T
-full(block::MatrixBlock) = full(mat(block))
+dense(block::MatrixBlock) = Array(mat(block))
 sparse(block::MatrixBlock) = sparse(mat(block))
 
 function apply!(reg::Register, b::MatrixBlock)

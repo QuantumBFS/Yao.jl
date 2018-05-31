@@ -1,4 +1,6 @@
 using Compat.Test
+using Compat.LinearAlgebra
+using Compat.SparseArrays
 
 @testset "utils" begin
 include("MathUtils.jl")
@@ -20,6 +22,6 @@ end
     include("Interfaces/Interfaces.jl")
 end
 
-@testset "show" begin
-include("show.jl")
-end
+# @testset "show" begin
+# include("show.jl")
+# end

@@ -41,7 +41,7 @@ end
 
 function cache(block::Roller{N, M, T}, ::Type{CT}, level::UInt; recursive::Bool=false) where {N, M, T, CT}
     if recursive
-        roller = Roller{N, T}(ntuple(x->cache(block[x], level, recursive=true), Val{M})...)
+        roller = Roller{N, T}(ntuple(x->cache(block[x], level, recursive=true), Val(M))...)
     else
         roller = block
     end

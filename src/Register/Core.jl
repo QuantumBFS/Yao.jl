@@ -101,12 +101,12 @@ end
 
 function register(::Type{RT}, ::Type{T}, bits::QuBitStr, nbatch::Int) where {RT, T}
     st = zeros(T, 1 << length(bits), nbatch)
-    st[asindex(bits), :] = 1
+    st[asindex(bits), :] .= 1
     register(RT, st, nbatch)
 end
 
 function register(bits::QuBitStr, nbatch::Int=1)
-    register(Register, Complex128, bits, nbatch)
+    register(Register, ComplexF64, bits, nbatch)
 end
 
 ## Config Initializers

@@ -1,5 +1,7 @@
-using Compat.Test
 using Compat
+using Compat.Test
+using Compat.LinearAlgebra
+using Compat.SparseArrays
 using Yao
 
 @testset "builtins" begin
@@ -32,9 +34,6 @@ using Yao
     end
 end
 
-A = rand(Complex128, 2, 2)
-@const_gate TEST = A
-
 @testset "macro" begin
 
 @testset "bind new type" begin
@@ -45,11 +44,16 @@ A = rand(Complex128, 2, 2)
 end
 
 @testset "define new" begin
+
+    A = rand(ComplexF64, 2, 2)
+    @eval @const_gate TEST = $A
+
     @test_warn "TEST gate only accept complex typed matrix, your constant matrix has eltype: Float64" begin
-        @const_gate TEST = rand(2, 2)
+        @eval @const_gate TEST = rand(2, 2)
     end
 
-    @const_gate TEST::ComplexF32 = rand(2, 2)
+    # NOTE: this defines a global vairable
+    @eval @const_gate TEST::ComplexF32 = rand(2, 2)
 
     @test @allocated(TEST(ComplexF32)) == 0
 end

@@ -5,6 +5,9 @@ export Const
 module Const
 
 using Compat
+using Compat.LinearAlgebra
+using Compat.SparseArrays
+
 
 const SYM_LIST = [
     (:P0, [1 0;0 0]),

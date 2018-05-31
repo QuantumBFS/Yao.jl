@@ -1,4 +1,7 @@
 using Compat.Test
+using Compat.LinearAlgebra
+using Compat.SparseArrays
+
 using Yao
 import Yao: log2i, bit_length
 
