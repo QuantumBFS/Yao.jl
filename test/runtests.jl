@@ -19,7 +19,3 @@ end
 @testset "interface" begin
     include("Interfaces/Interfaces.jl")
 end
-
-@testset "show" begin
-include("show.jl")
-end
