@@ -53,20 +53,20 @@ end
 # factory methods
 register(::Type{Register}, raw, nbatch::Int) = Register(raw, nbatch)
 
-function register(::Type{InitMethod{:zero}}, ::Type{Register}, ::Type{T}, n::Int, nbatch::Int) where T
+function register(::Val{:zero}, ::Type{Register}, ::Type{T}, n::Int, nbatch::Int) where T
     raw = zeros(T, 1 << n, nbatch)
     raw[1, :] .= 1
     Register(raw, nbatch)
 end
 
-function register(::Type{InitMethod{:rand}}, ::Type{Register}, ::Type{T}, n::Int, nbatch::Int) where T
+function register(::Val{:rand}, ::Type{Register}, ::Type{T}, n::Int, nbatch::Int) where T
     theta = rand(real(T), 1 << n, nbatch)
     radius = rand(real(T), 1 << n, nbatch)
     raw = @. radius * exp(im * theta)
     Register(batch_normalize!(raw), nbatch)
 end
 
-function register(::Type{InitMethod{:randn}}, ::Type{Register}, ::Type{T}, n::Int, nbatch::Int) where T
+function register(::Val{:randn}, ::Type{Register}, ::Type{T}, n::Int, nbatch::Int) where T
     theta = randn(real(T), 1 << n, nbatch)
     radius = randn(real(T), 1 << n, nbatch)
     raw = @. radius * exp(im * theta)

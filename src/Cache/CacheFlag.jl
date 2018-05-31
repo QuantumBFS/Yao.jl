@@ -1,3 +1,5 @@
+export Cached
+
 struct Cached{BT, N, T} <: MatrixBlock{N, T}
     block::BT
 end
@@ -15,7 +17,6 @@ export iscached
 iscached(c::Cached) = iscached(cache_type(c), c)
 iscached(::Type{CT}, c::Cached) where CT = iscached(global_cache(CT), c)
 iscached(server::DefaultServer, c::Cached) = iscached(server, c.block)
-
 
 # for block which is not cached this is equal
 apply!(reg::Register, c, signal)= apply!(reg, c)
@@ -84,3 +85,7 @@ done(c::Cached, st) = done(c.block, st)
 length(c::Cached) = length(c.block)
 eltype(c::Cached) = eltype(c.block)
 blocks(c::Cached) = blocks(c.block)
+
+# Inherit Print
+
+print_subblocks(io::IO, tree::Cached, depth, charset, active_levels) = print_subblocks(io, tree.block, depth, charset, active_levels)

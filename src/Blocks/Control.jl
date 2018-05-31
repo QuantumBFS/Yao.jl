@@ -1,3 +1,5 @@
+export ControlBlock
+
 mutable struct ControlBlock{BlockType, N, T} <: CompositeBlock{N, T}
     ctrl_qubits::Vector{Int}
     block::BlockType
@@ -59,14 +61,14 @@ function mat(ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
     lowest_addr = min(minimum(abs.(ctrl_addrs)), ctrl.addr)
     if lowest_addr != 1 # lowest addr is not from the first
         nblank = lowest_addr - 1
-        U = kron(U, speye(T, 1 << nblank))
+        U = kron(U, I(T, 1 << nblank))
     end
 
     # check blank lines in the end
     highest_addr = max(maximum(abs.(ctrl_addrs)), ctrl.addr)
     if highest_addr != N # highest addr is not the last
         nblank = N - highest_addr
-        U = kron(speye(T, 1 << nblank), U)
+        U = kron(I(T, 1 << nblank), U)
     end
     U
 end
@@ -77,21 +79,21 @@ function _single_inverse_control_gate_sparse(control::Int, U, addr, nqubit)
     T = eltype(U)
     if control < addr
         op = A_kron_B(
-            Const.Sparse.P1(T), control, 1,
-            speye(U), addr
+            mat(P1(T)), control, 1,
+            Identity(U), addr
         )
         op += A_kron_B(
-            Const.Sparse.P0(T), control, 1,
+            mat(P0(T)), control, 1,
             U, addr
         )
     else
         op = A_kron_B(
-            speye(U), addr, nqubit,
-            Const.Sparse.P1(T), control
+            Identity(U), addr, nqubit,
+            mat(P1(T)), control
         )
         op += A_kron_B(
             U, addr, nqubit,
-            Const.Sparse.P0(T), control
+            mat(P0(T)), control
         )
     end
     op
@@ -103,21 +105,21 @@ function _single_control_gate_sparse(control::Int, U, addr, nqubit)
     T = eltype(U)
     if control < addr
         op = A_kron_B(
-            Const.Sparse.P0(T), control, 1,
-            speye(U), addr
+            mat(P0(T)), control, 1,
+            Identity(U), addr
         )
         op += A_kron_B(
-            Const.Sparse.P1(T), control, 1,
+            mat(P1(T)), control, 1,
             U, addr
         )
     else
         op = A_kron_B(
-            speye(U), addr, nqubit,
-            Const.Sparse.P0(T), control
+            Identity(U), addr, nqubit,
+            mat(P0(T)), control
         )
         op += A_kron_B(
             U, addr, nqubit,
-            Const.Sparse.P1(T), control
+            mat(P1(T)), control
         )
     end
     op
@@ -131,7 +133,7 @@ function A_kron_B(A, ia, na, B, ib)
     out = A
     if ia + na < ib
         blank_size = ib - ia - na
-        out = kron(speye(T, 1 << blank_size), out)
+        out = kron(I(T, 1 << blank_size), out)
     end
     kron(B, out)
 end
@@ -188,3 +190,19 @@ end
 function dispatch!(f::Function, ctrl::ControlBlock, params...)
     dispatch!(f, ctrl.block, params...)
 end
+
+function hash(ctrl::ControlBlock, h::UInt)
+    hashkey = hash(objectid(ctrl), h)
+    for each in ctrl.ctrl_qubits
+        hashkey = hash(each, hashkey)
+    end
+
+    hashkey = hash(ctrl.block, hashkey)
+    hashkey = hash(ctrl.addr, hashkey)
+    hashkey
+end
+
+function ==(lhs::ControlBlock{BT, N, T}, rhs::ControlBlock{BT, N, T}) where {BT, N, T}
+    (lhs.ctrl_qubits == rhs.ctrl_qubits) && (lhs.block == rhs.block) && (lhs.addr == rhs.addr)
+end
+

@@ -1,38 +1,8 @@
-export @bit_str, asindex
+"""
+    bit_length(x::Int) -> Int
 
-struct QuBitStr
-    val::UInt
-    len::Int
-end
-
-import Base: length
-
-# use system interface
-asindex(bits::QuBitStr) = bits.val + 1
-length(bits::QuBitStr) = bits.len
-
-macro bit_str(str)
-    @assert length(str) < 64 "we do not support large integer at the moment"
-    val = unsigned(0)
-    for (k, each) in enumerate(reverse(str))
-        if each == '1'
-            val += 1 << (k - 1)
-        end
-    end
-    QuBitStr(val, length(str))
-end
-
-import Base: show
-
-function show(io::IO, bitstr::QuBitStr)
-    print(io, "QuBitStr(", bitstr.val, ", ", bitstr.len, ")")
-end
-
-
-# Integer Logrithm of 2
-# Ref: https://stackoverflow.com/questions/21442088
-export log2i
-
+Return the number of bits required to represent input integer x.
+"""
 function bit_length(x)
     local n = 0
     while x!=0
@@ -43,9 +13,10 @@ function bit_length(x)
 end
 
 """
-    log2i(x)
+    log2i(x::Integer) -> Integer
 
-logrithm for integer pow of 2
+Return log2(x), this integer version of `log2` is fast but only valid for number equal to 2^n.
+Ref: https://stackoverflow.com/questions/21442088
 """
 function log2i(x::T)::T where T
     local n::T = 0
@@ -55,8 +26,6 @@ function log2i(x::T)::T where T
     end
     return n
 end
-
-export batch_normalize!, batch_normalize
 
 """
     batch_normalize!(matrix)
@@ -80,15 +49,6 @@ function batch_normalize(s::AbstractMatrix, p::Real=2)
     ts = copy(s)
     batch_normalize!(ts, p)
 end
-
-export kronprod
-
-"""
-    kronprod(itr)
-
-kronecker product all operators in the iterator.
-"""
-kronprod(itr) = reduce(kron, speye(1), itr)
 
 # N: number of qubits
 # st: state vector with batch
@@ -116,4 +76,33 @@ end
         ex = :(rolldims2!(Val($N), Val($B), st); $ex)
     end
     ex
+end
+
+"""
+    hilbertkron(nbits, ops, locs)
+
+kronecker given operators `ops` in hilbert space of size `nbits` at location `locs`.
+"""
+function hilbertkron(num_bit::Int, ops::Vector{T}, locs::Vector{Int}) where T<:AbstractMatrix
+    locs = num_bit - locs + 1
+    order = sortperm(locs)
+    _wrap_identity(ops[order], diff(vcat([0], locs[order], [num_bit+1])) - 1)
+end
+
+# kron, and wrap matrices with identities.
+function _wrap_identity(data_list::Vector{T}, num_bit_list::Vector{Int}) where T<:AbstractMatrix
+    length(num_bit_list) == length(data_list) + 1 || throw(ArgumentError())
+
+    ⊗ = kron
+    reduce(I(1 << num_bit_list[1]), zip(data_list, num_bit_list[2:end])) do x, y
+        x ⊗ y[1] ⊗ I(1<<y[2])
+    end
+end
+
+function invperm(order)
+    v = similar(order)
+    @inbounds @simd for i=1:length(order)
+        v[order[i]] = i
+    end
+    v
 end

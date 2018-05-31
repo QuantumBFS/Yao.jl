@@ -1,3 +1,17 @@
+module CacheServers
+
+using Compat.SparseArrays
+
+using ..LuxurySparse
+import ..LuxurySparse: I
+
+using ..Registers
+using ..Blocks
+import ..Blocks: print_subblocks, print_block
+
+# import package configs
+import ..Yao: DefaultType
+
 include("Core.jl")
 include("CacheElement.jl")
 include("DefaultServer.jl")
@@ -33,3 +47,6 @@ include("HashRules.jl")
 include("CacheRules.jl")
 include("UpdateRules.jl")
 include("EmptyRules.jl")
+
+
+end

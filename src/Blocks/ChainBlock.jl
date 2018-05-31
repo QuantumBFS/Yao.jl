@@ -1,3 +1,5 @@
+export ChainBlock
+
 """
     ChainBlock{N, T} <: CompositeBlock{N, T}
 
@@ -31,13 +33,6 @@ function similar(c::ChainBlock{N, T}) where {N, T}
     ChainBlock{N, T}(empty!(similar(c.blocks)))
 end
 
-# Block Properties
-isunitary(c::ChainBlock) = all(isunitary, c.blocks)
-isreflexive(c::ChainBlock) = all(isreflexive, c.blocks)
-ishermitian(c::ChainBlock) = all(ishermitian, c.blocks)
-
-mat(c::ChainBlock) = prod(x->mat(x), reverse(c.blocks))
-
 # Additional Methods for Composite Blocks
 getindex(c::ChainBlock, index) = getindex(c.blocks, index)
 
@@ -69,9 +64,23 @@ push!(c::ChainBlock, val::MatrixBlock) = (push!(c.blocks, val); c)
 append!(c::ChainBlock, list) = (append!(c.blocks, list); c)
 prepend!(c::ChainBlock, list) = (prepend!(c.blocks, list); c)
 
+mat(c::ChainBlock) = prod(x->mat(x), reverse(c.blocks))
+
 function apply!(r::Register, c::ChainBlock)
     for each in c
         apply!(r, each)
     end
     r
+end
+
+function hash(c::ChainBlock, h::UInt)
+    hashkey = hash(objectid(c), h)
+    for each in c.blocks
+        hashkey = hash(each, hashkey)
+    end
+    hashkey
+end
+
+function ==(lhs::ChainBlock{N, T}, rhs::ChainBlock{N, T}) where {N, T}
+    (length(lhs.blocks) == length(rhs.blocks)) && all(lhs.blocks .== rhs.blocks)
 end

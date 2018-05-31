@@ -10,7 +10,7 @@ Flexible, Extensible Framework for Quantum Algorithm Design.
 """
 module Yao
 
-using Compat, MacroTools
+using Compat, MacroTools, Reexport
 using Compat.Random
 using Compat.LinearAlgebra
 using Compat.SparseArrays
@@ -19,22 +19,26 @@ PKGNAME = "Yao"
 ENVNAME = join([PKGNAME, "DefaultType"])
 
 @static if haskey(ENV, ENVNAME)
-    const CircuitDefaultType = parse(ENV[ENVNAME])
+    const DefaultType = parse(ENV[ENVNAME])
 else
-    const CircuitDefaultType = ComplexF64
+    const DefaultType = ComplexF64
 end
 
-include("Consts/Consts.jl")
-include("MathUtils.jl")
+include("APIs.jl")
 
-include("Register/Register.jl")
+include("LuxurySparse/LuxurySparse.jl")
+include("Intrinsics/Intrinsics.jl")
+include("Registers/Registers.jl")
 include("Blocks/Blocks.jl")
-
 include("Cache/Cache.jl")
 
 include("Interfaces/Interfaces.jl")
 
-include("show.jl")
-include("docs.jl")
+
+# include("show.jl")
+# include("docs.jl")
+
+@reexport using .Registers # TODO: move this to interfaces
+@reexport using .Interfaces
 
 end # module

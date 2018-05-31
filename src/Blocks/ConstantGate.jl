@@ -1,11 +1,34 @@
-export @const_gate
+export @const_gate, ConstantGate, RangedBlock
 
 abstract type ConstantGate{N, T} <: PrimitiveBlock{N, T} end
+
+"""
+    RangedBlock
+
+A block with a range of its position. This is a duck typed block.
+It is not part of the block system. It is used to support auto-inferred
+position, etc.
+"""
+struct RangedBlock{BT, RT}
+    block::BT
+    range::RT
+end
+
+import Base: show
+
+function show(io::IO, x::RangedBlock{BT, Int}) where BT
+    print(io, x.block, " at line ", x.range)
+end
+
+function show(io::IO, x::RangedBlock)
+    print(io, x.block, " in line range ", x.range)
+end
+
 
 # TODO: better exception for X::ComplexF32 without import XGate
 
 """
-    @const_gate
+    @const_gate name[::type] = expression
 
 A macro to define new constant gate. It will automatically bind your assigned matrix to an constant, which
 will reduce the memory allocation. You can also use it to bind new type of matrix, or re-define this const
@@ -72,10 +95,10 @@ function define_const_gate_struct(n, name)
 
     typename = const_gate_typename(name)
     quote
-        struct $(esc(typename)){T} <: Yao.ConstantGate{$n, T}
+        struct $(esc(typename)){T} <: Yao.Blocks.ConstantGate{$n, T}
         end
 
-        const $(esc(name)) = $(esc(typename)){$CircuitDefaultType}()
+        const $(esc(name)) = $(esc(typename)){$DefaultType}()
         # printing infos
         $(define_const_gate_printing(name))
         true
@@ -93,7 +116,7 @@ function define_const_gate_property(f, property, name, cname)
     flag_name = Symbol(join(["flag", property], "_"))
     typename = const_gate_typename(name)
 
-    method_name = :(Yao.$method_name)
+    method_name = :(Yao.Blocks.$method_name)
     quote
         const $flag_name = $(f(cname))
         $(esc(method_name))(::Type{GT}) where {GT <: $(esc(typename))} = $flag_name
@@ -103,16 +126,16 @@ end
 
 function define_const_gate_properties(name, cname)
     quote
-        $(define_const_gate_property(x->:($x * $x ≈ speye(size($x, 1))), :reflexive, name, cname))
+        $(define_const_gate_property(x->:($x * $x ≈ Identity{size($x, 1)}()), :reflexive, name, cname))
         $(define_const_gate_property(x->:($x' ≈ $x), :hermitian, name, cname))
-        $(define_const_gate_property(x->:($x * $x' ≈ speye(size($x, 1))), :unitary, name, cname))
+        $(define_const_gate_property(x->:($x * $x' ≈ Identity{size($x, 1)}()), :unitary, name, cname))
     end
 end
 
 function define_const_gate_mat_fallback(name, t)
     typename = const_gate_typename(name)
     quote
-        function $(esc(:(Yao.mat)))(::Type{$(esc(typename)){T}}) where {T <: Complex}
+        function $(esc(:(Yao.Blocks.mat)))(::Type{$(esc(typename)){T}}) where {T <: Complex}
             src = mat($(esc(typename)){$t})
             dest = similar(src, T)
             copy!(dest, src)
@@ -136,7 +159,7 @@ function define_const_gate_methods(name, t, cname)
     quote
         # callable
         # use instance for factory methods
-        (::$(esc(typename)))() = $(esc(typename)){$CircuitDefaultType}()
+        (::$(esc(typename)))() = $(esc(typename)){$DefaultType}()
         (::$(esc(typename)))(::Type{T}) where {T <: Complex} = $(esc(typename)){T}()
 
         # forward to apply! if the first arg is a register
@@ -149,8 +172,8 @@ function define_const_gate_methods(name, t, cname)
 
         # define fallback methods for mat
         ## dispatch to default type
-        $(esc(:(Yao.mat)))(::Type{$(esc(typename))}) = $(esc(:mat))($(esc(typename)){$CircuitDefaultType})
-        $(esc(:(Yao.mat)))(gate::GT) where {GT <: $(esc(typename))} = $(esc(:mat))(GT)
+        $(esc(:(Yao.Blocks.mat)))(::Type{$(esc(typename))}) = $(esc(:mat))($(esc(typename)){$DefaultType})
+        $(esc(:(Yao.Blocks.mat)))(gate::GT) where {GT <: $(esc(typename))} = $(esc(:mat))(GT)
         $(define_const_gate_mat_fallback(name, t))
 
         # define properties
@@ -176,7 +199,7 @@ function define_typed_const_gate(name, t, ex)
         $n = log2i(size($CONST_NAME, 1))
         issuccessed = $(define_const_gate_struct(n, name))
 
-        $(esc(:(Yao.mat)))(::Type{$(esc(typename)){$t}}) = $CONST_NAME
+        $(esc(:(Yao.Blocks.mat)))(::Type{$(esc(typename)){$t}}) = $CONST_NAME
 
         # only define this for the first time
         if issuccessed
@@ -200,7 +223,7 @@ function define_const_gate_new_type(name, t)
         end
 
         const $CONST_NAME = mat($(esc(typename)){$t})
-        $(esc(:(Yao.mat)))(::Type{$(esc(typename)){$t}}) = $CONST_NAME
+        $(esc(:(Yao.Blocks.mat)))(::Type{$(esc(typename)){$t}}) = $CONST_NAME
     end
 end
 
@@ -228,7 +251,7 @@ function define_const_gate(name, ex)
         if !($elt <: Complex)
             warn($(esc(name)), " only accept complex typed matrix, your constant matrix has eltype: ", $elt)
         end
-        $(esc(:(Yao.mat)))(::Type{$(esc(typename)){$elt}}) = $CONST_NAME
+        $(esc(:(Yao.Blocks.mat)))(::Type{$(esc(typename)){$elt}}) = $CONST_NAME
 
         # only define this for the first time
         if issuccessed
@@ -238,10 +261,24 @@ function define_const_gate(name, ex)
 end
 
 
-for (NAME, _) in Const.SYM_LIST
+const SYM_LIST = [
+    (:P0, sparse(DefaultType[1 0;0 0])),
+    (:P1, sparse(DefaultType[0 0;0 1])),
+    (:X, PermMatrix([2,1], DefaultType[1+0im, 1])),
+    (:Y, PermMatrix([2,1], DefaultType[-im, im])),
+    (:Z, Diagonal(DefaultType[1+0im, -1])),
+    (:I2, Identity{2, DefaultType}()),
+    (:H, (elem = 1 / sqrt(2); DefaultType[elem elem; elem -elem])),
+    (:CNOT, PermMatrix([1, 2, 4, 3], ones(DefaultType, 4))),
+    (:Toffoli, PermMatrix([1, 2, 3, 4, 5, 6, 8, 7], ones(DefaultType, 8))),
+    (:Pu, sparse([1], [2], DefaultType[1+0im], 2, 2)),
+    (:Pd, sparse([2], [1], DefaultType[1+0im], 2, 2)),
+]
+
+for (NAME, MAT) in SYM_LIST
     GT = Symbol(NAME, "Gate")
     @eval begin
         export $NAME, $GT
-        @const_gate $NAME = Const.Sparse.$NAME($CircuitDefaultType)
+        @const_gate $NAME = $MAT
     end
 end

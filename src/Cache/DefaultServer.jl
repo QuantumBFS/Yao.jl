@@ -1,3 +1,5 @@
+export DefaultServer
+
 struct DefaultServer{TM} <: AbstractCacheServer
     storage::Dict{UInt, CacheElement{TM}}
 end

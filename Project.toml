@@ -1,0 +1,11 @@
+name = "Yao"
+uuid = "f06903c8-64e5-11e8-1763-994c17dfdeff"
+version = "0.1.0"
+authors = ["Roger-luo <hiroger@qq.com>"]
+
+[deps]
+Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"

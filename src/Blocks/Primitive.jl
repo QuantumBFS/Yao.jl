@@ -1,3 +1,5 @@
+export PrimitiveBlock
+
 """
     PrimitiveBlock{N, T} <: MatrixBlock{N, T}
 
