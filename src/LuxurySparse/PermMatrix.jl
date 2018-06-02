@@ -8,6 +8,8 @@ Optimizations are used to make it much faster than `SparseMatrixCSC`.
 
 * `perm` is the permutation order,
 * `vals` is the multiplication factor.
+
+[Generalized Permutation Matrix](https://en.wikipedia.org/wiki/Generalized_permutation_matrix)
 """
 struct PermMatrix{Tv, Ti<:Integer} <: AbstractMatrix{Tv}
     perm::Vector{Ti}   # new orders
@@ -35,8 +37,6 @@ function PermMatrix(ds::AbstractMatrix)
 end
 
 ################# Array Functions ##################
-# size, getindex
-import Base: size, getindex
 
 size(M::PermMatrix) = (length(M.perm), length(M.perm))
 function size(A::PermMatrix, d::Integer)
@@ -49,6 +49,7 @@ function size(A::PermMatrix, d::Integer)
     end
 end
 getindex(M::PermMatrix, i::Integer, j::Integer) = M.perm[i] == j ? M.vals[i] : 0
+copyto!(A::PermMatrix, B::PermMatrix) = (copyto!(A.perm, B.perm); copyto!(A.vals, B.vals); A)
 
 """
     pmrand(T::Type, n::Int) -> PermMatrix
@@ -60,19 +61,22 @@ function pmrand end
 pmrand(T::Type, n::Int) = PermMatrix(randperm(n), randn(T, n))
 pmrand(n::Int) = PermMatrix(randperm(n), randn(n))
 
+similar(x::PermMatrix{Tv, Ti}) where {Tv, Ti} = PermMatrix{Tv, Ti}(similar(x.perm), similar(x.vals))
+similar(x::PermMatrix{Tv, Ti}, ::Type{T}) where {Tv, Ti, T} = PermMatrix{T, Ti}(similar(x.perm), similar(x.vals, T))
+
 function sparse(M::PermMatrix)
     n = size(M, 1)
     dropzeros(sparse(collect(1:n), M.perm, M.vals, n, n))
 end
 
-import Base: show
-function show(io::IO, M::PermMatrix)
-    println("PermMatrix")
-    for item in zip(M.perm, M.vals)
-        i, p = item
-        println("- ($i) * $p")
-    end
-end
+# TODO: rewrite this
+# function show(io::IO, M::PermMatrix)
+#     println("PermMatrix")
+#     for item in zip(M.perm, M.vals)
+#         i, p = item
+#         println("- ($i) * $p")
+#     end
+# end
 
 ######### sparse array interfaces  #########
 nnz(M::PermMatrix) = length(M.vals)

@@ -34,11 +34,10 @@ include("Cache/Cache.jl")
 
 include("Interfaces/Interfaces.jl")
 
-
 # include("show.jl")
 # include("docs.jl")
 
-@reexport using .Registers # TODO: move this to interfaces
 @reexport using .Interfaces
+@reexport using .Registers # TODO: move this to interfaces
 
 end # module

@@ -37,6 +37,8 @@ end
 
 blocks(x::PrimitiveBlock) = ()
 
+print_tree(io::IO, tree::PrimitiveBlock, maxdepth) = print_block(io, tree)
+
 function print_tree(
     io::IO, tree, maxdepth = 5;
     line=nothing,
@@ -140,12 +142,24 @@ function print_subblocks(io::IO, tree::ControlBlock, depth, charset, active_leve
 end
 
 function print_block(io::IO, x::PrimitiveBlock)
-    print(io, x)
+
+    @static if VERSION < v"0.7-"
+        print(io, summary(x))
+    else
+        summary(io, x)
+    end
+
 end
 
 # FIXME: make this works in v0.7
 function print_block(io::IO, x::CompositeBlock)
-    print(io, summary(x))
+
+    @static if VERSION < v"0.7-"
+        print(io, summary(x))
+    else
+        summary(io, x)
+    end
+
 end
 
 function print_block(io::IO, x::ChainBlock)

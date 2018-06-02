@@ -1,5 +1,3 @@
-import Base: getindex, size, println
-
 """
     Identity{N, Tv}()
     Identity{N}() where N = Identity{N, Int64}()
@@ -19,6 +17,9 @@ getindex(A::Identity{N, T}, i::Integer, j::Integer) where {N, T} = T(i==j)
 nnz(M::Identity{N}) where N = N
 nonzeros(M::Identity{N, T}) where {N, T} = ones(T, N)
 ishermitian(D::Identity) = true
+
+similar(::Identity{N, Tv}) where {N, Tv} = Identity{N, Tv}()
+copyto!(A::Identity{N}, B::Identity{N}) where N = A
 
 """
     I([type], n) -> Identity

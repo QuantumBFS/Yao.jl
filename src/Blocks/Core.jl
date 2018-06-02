@@ -26,3 +26,18 @@ apply a `block` to a register `reg` with or without a cache signal.
 function apply! end
 
 dispatch!(block::AbstractBlock, params...) = dispatch!((θ, x)->x, block, params...)
+
+"""
+    print_block(io, block)
+
+define the style to print this block
+"""
+function print_block(io::IO, block)
+
+@static if VERSION < v"0.7-"
+    print(io, summary(block))
+else
+    summary(io, block)
+end
+
+end

@@ -78,6 +78,8 @@ dispatch!(c::Cached, params...) = (dispatch!(c.block, params...); c)
 
 getindex(c::Cached, index...) = getindex(c.block, index...)
 setindex!(c::Cached, val, index...) = setindex!(c.block, val, index...)
+getindex(s::DefaultServer, block::Cached) = getindex(s, block.block)
+
 
 start(c::Cached) = start(c.block)
 next(c::Cached, st) = next(c.block, st)

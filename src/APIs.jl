@@ -1,4 +1,4 @@
-export nqubits, address, state, focus!, isunitary, isreflexive, nparameters, datatype, mat, dispatch!
+export nqubits, address, state, focus!, isunitary, isreflexive, nparameters, datatype, mat, dispatch!, nbatch
 
 # All exported methods and types docstring should be defined here.
 

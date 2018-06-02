@@ -37,8 +37,8 @@ import Compat.LinearAlgebra: ishermitian
 import Base: hash, ==, eltype, show, similar
 
 # module APIs
-export address
-export nqubits, ninput, noutput, isunitary, ispure, isreflexive, nparameters, mat, datatype, ishermitian
+export address, @const_gate
+export nqubits, ninput, noutput, isunitary, ispure, isreflexive, nparameters, mat, datatype, matrix_type, ishermitian
 export apply!, dispatch!
 
 export AnySize, GreaterThan
@@ -49,8 +49,9 @@ ismatch(::GreaterThan{N}, n::Int) where N = n > N
 ismatch(::AnySize, n::Int) = true
 
 include("Core.jl")
-include("MatrixBlock.jl")
+include("RangedBlock.jl")
 
+include("MatrixBlock.jl")
 # others
 include("Concentrator.jl")
 # include("Sequence.jl")

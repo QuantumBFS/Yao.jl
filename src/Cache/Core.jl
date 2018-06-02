@@ -9,7 +9,10 @@ abstract type AbstractCacheServer end
 
 get the type that this block will use for cache.
 """
-cache_type(block::MatrixBlock{N, T}) where {N, T} = typeof(mat(block))
+function cache_type end
+
+# cache_type(block::PrimitiveBlock{N, T}) where {N, T} = typeof(mat(block))
+
 
 """
     cache_matrix(block)

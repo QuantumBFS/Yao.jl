@@ -14,9 +14,9 @@ import ..Blocks: print_subblocks, print_block, mat, apply!, dispatch!, blocks
 
 # import package configs
 import ..Yao: DefaultType
-import Base: push!, empty!, start, next, done, eltype, length, getindex, setindex!
+import Base: push!, empty!, start, next, done, eltype, length, getindex, setindex!, show
 
-export setlevel!, cache, cache!, iscacheable, global_cache
+export setlevel!, cache, cache!, iscacheable, global_cache, GLOBAL_CACHE_POOL
 
 include("Core.jl")
 include("CacheElement.jl")
