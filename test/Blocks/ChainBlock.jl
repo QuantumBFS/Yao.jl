@@ -27,7 +27,7 @@ end
     @test mat(g) ≈ m
 
     reg = rand_state(2)
-    @test mat * state(reg) == state(apply!(reg, g))
+    @test m * state(reg) == state(apply!(reg, g))
 
 end
 
@@ -80,8 +80,8 @@ end
 
     g = ChainBlock(X(), Y())
     @test isunitary(g) == true
-    @test isreflexive(g) == true
-    @test ishermitian(g) == true
+    @test isreflexive(g) == false
+    @test ishermitian(g) == false
     @test length(g) == 2
     @test eltype(g) == eltype(g.blocks)
 end

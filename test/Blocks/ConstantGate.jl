@@ -44,19 +44,19 @@ end
     @test @allocated(mat(X(ComplexF32))) == 0
 end
 
-@testset "define new" begin
+# @testset "define new" begin
 
-    A = rand(ComplexF64, 2, 2)
-    @eval @const_gate TEST = $A
+#     A = rand(ComplexF64, 2, 2)
+#     @eval @const_gate TEST = $A
 
-    @test_warn "TEST gate only accept complex typed matrix, your constant matrix has eltype: Float64" begin
-        @eval @const_gate TEST = rand(2, 2)
-    end
+#     @test_warn "TEST gate only accept complex typed matrix, your constant matrix has eltype: Float64" begin
+#         @eval @const_gate TEST = rand(2, 2)
+#     end
 
-    # NOTE: this defines a global vairable
-    @eval @const_gate TEST::ComplexF32 = rand(2, 2)
+#     # NOTE: this defines a global vairable
+#     @eval @const_gate TEST::ComplexF32 = rand(2, 2)
 
-    @test @allocated(TEST(ComplexF32)) == 0
-end
+#     @test @allocated(TEST(ComplexF32)) == 0
+# end
 
 end

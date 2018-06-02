@@ -118,7 +118,7 @@ function define_const_gate_property(f, property, name, cname)
 
     method_name = :(Yao.Blocks.$method_name)
     quote
-        const $flag_name = $(f(cname))
+        $flag_name = $(f(cname))
         $(esc(method_name))(::Type{GT}) where {GT <: $(esc(typename))} = $flag_name
         $(esc(method_name))(::GT) where {GT <: $(esc(typename))} = $flag_name
     end
@@ -138,7 +138,7 @@ function define_const_gate_mat_fallback(name, t)
         function $(esc(:(Yao.Blocks.mat)))(::Type{$(esc(typename)){T}}) where {T <: Complex}
             src = mat($(esc(typename)){$t})
             dest = similar(src, T)
-            copy!(dest, src)
+            copyto!(dest, src)
             dest
         end
     end
@@ -194,7 +194,7 @@ function define_typed_const_gate(name, t, ex)
 
     quote
         const $CONST_NAME = similar($(esc(ex)), $t)
-        copy!($CONST_NAME, $(esc(ex)))
+        copyto!($CONST_NAME, $(esc(ex)))
 
         $n = log2i(size($CONST_NAME, 1))
         issuccessed = $(define_const_gate_struct(n, name))
@@ -244,12 +244,12 @@ function define_const_gate(name, ex)
         issuccessed = $(define_const_gate_struct(n, name))
 
         if !issuccessed
-            warn($(esc(name)), " is already defined, check if your desired name is available.")
+            Compat.@warn($(esc(name)), " is already defined, check if your desired name is available.")
         end
 
         $elt = eltype($CONST_NAME)
         if !($elt <: Complex)
-            warn($(esc(name)), " only accept complex typed matrix, your constant matrix has eltype: ", $elt)
+            Compat.@warn($(esc(name)), " only accept complex typed matrix, your constant matrix has eltype: ", $elt)
         end
         $(esc(:(Yao.Blocks.mat)))(::Type{$(esc(typename)){$elt}}) = $CONST_NAME
 

@@ -8,7 +8,7 @@ import Base: getindex, size, println
 Identity matrix, with size N as label, use `Int64` as its default type, both `*` and `kron` are optimized.
 """
 struct Identity{N, Tv} <: AbstractMatrix{Tv} end
-Identity{N}() where N = Identity{N, Int64}()
+Identity{N}() where N = Identity{N, Bool}()
 Identity(A::AbstractMatrix{T}) where T = Identity{size(A, 1) == size(A,2) ? size(A, 2) : throw(DimensionMismatch()), T}()
 
 size(A::Identity{N}, i::Int) where N = N
@@ -29,3 +29,4 @@ function I end
 
 I(n::Int) = Identity{n, Bool}()
 I(::Type{T}, n::Int) where T = Identity{n, T}()
+I(A::AbstractMatrix) = Identity(A)

@@ -33,6 +33,9 @@ kron(A::Identity{Na}, B::Diagonal) where Na = Diagonal(orepeat(B.diag, Na))
 kron(B::Diagonal, A::Identity{Na}) where Na = Diagonal(irepeat(B.diag, Na))
 kron(A::Identity{1}, B::AbstractMatrix) = B
 kron(A::Identity{1}, B::PermMatrix) = B
+kron(A::Identity{1}, B::Diagonal) = B
+kron(A::Identity{1}, B::SparseMatrixCSC) = B
+kron(A::Identity{1}, B::Identity) = B
 
 ####### diagonal kron ########
 kron(A::Diagonal, B::Diagonal) = Diagonal(kron(A.diag, B.diag))
@@ -44,8 +47,8 @@ kron(A::SparseMatrixCSC, B::Diagonal) = kron(A, PermMatrix(B))
 
 function kron(A::AbstractMatrix{Tv}, B::Identity{Nb}) where {Nb, Tv}
     mA, nA = size(A)
-    nzval = Vector{Tv}(Nb*mA*nA)
-    rowval = Vector{Int}(Nb*mA*nA)
+    nzval = Vector{Tv}(undef, Nb*mA*nA)
+    rowval = Vector{Int}(undef, Nb*mA*nA)
     colptr = collect(1:mA:Nb*mA*nA+1)
     @inbounds for j = 1:nA
         source = A[:,j]
@@ -64,8 +67,8 @@ end
 
 function kron(A::Identity{Na}, B::AbstractMatrix{Tv}) where {Na, Tv}
     mB, nB = size(B)
-    rowval = Vector{Int}(nB*mB*Na)
-    nzval = Vector{Tv}(nB*mB*Na)
+    rowval = Vector{Int}(undef, nB*mB*Na)
+    nzval = Vector{Tv}(undef, nB*mB*Na)
     @inbounds for j in 1:Na
         r0 = (j-1)*mB
         @inbounds for j2 in 1:nB
@@ -83,10 +86,10 @@ end
 function kron(A::Identity{Na}, B::SparseMatrixCSC{T}) where {Na, T}
     mB, nB = size(B)
     nV = nnz(B)
-    nzval = Vector{T}(Na*nV)
-    rowval = Vector{Int}(Na*nV)
-    colptr = Vector{Int}(nB*Na+1)
-    nzval = Vector{T}(Na*nV)
+    nzval = Vector{T}(undef, Na*nV)
+    rowval = Vector{Int}(undef, Na*nV)
+    colptr = Vector{Int}(undef, nB*Na+1)
+    nzval = Vector{T}(undef, Na*nV)
     colptr[1] = 1
     @inbounds for i = 1:Na
         r0 = (i-1)*mB
@@ -106,9 +109,9 @@ end
 function kron(A::SparseMatrixCSC{T}, B::Identity{Nb}) where {T, Nb}
     mA, nA = size(A)
     nV = nnz(A)
-    rowval = Vector{Int}(Nb*nV)
-    colptr = Vector{Int}(nA*Nb+1)
-    nzval = Vector{T}(Nb*nV)
+    rowval = Vector{Int}(undef, Nb*nV)
+    colptr = Vector{Int}(undef, nA*Nb+1)
+    nzval = Vector{T}(undef, Nb*nV)
     z=1
     colptr[1] = 1
     @inbounds for i in 1:nA
@@ -131,8 +134,8 @@ end
 function kron(A::PermMatrix{T}, B::Identity) where T
     nA = size(A, 1)
     nB = size(B, 1)
-    vals = Vector{T}(nB*nA)
-    perm = Vector{Int}(nB*nA)
+    vals = Vector{T}(undef, nB*nA)
+    perm = Vector{Int}(undef, nB*nA)
     @inbounds for i = 1:nA
         start = (i-1)*nB
         permAi = (A.perm[i]-1)*nB
@@ -148,8 +151,8 @@ end
 function kron(A::Identity, B::PermMatrix{Tv, Ti}) where {Tv, Ti <: Integer}
     nA = size(A, 1)
     nB = size(B, 1)
-    perm = Vector{Int}(nB*nA)
-    vals = Vector{Tv}(nB*nA)
+    perm = Vector{Int}(undef, nB*nA)
+    vals = Vector{Tv}(undef, nB*nA)
     @inbounds for i = 1:nA
         start = (i-1)*nB
         @inbounds @simd for j = 1:nB
@@ -165,8 +168,8 @@ function kron(A::StridedMatrix{Tv}, B::PermMatrix{Tb}) where {Tv, Tb}
     mA, nA = size(A)
     nB = size(B, 1)
     perm = invperm(B.perm)
-    nzval = Vector{promote_type(Tv, Tb)}(mA*nA*nB)
-    rowval = Vector{Int}(mA*nA*nB)
+    nzval = Vector{promote_type(Tv, Tb)}(undef, mA*nA*nB)
+    rowval = Vector{Int}(undef, mA*nA*nB)
     colptr = collect(1:mA:nA*nB*mA+1)
     z = 1
     @inbounds for j = 1:nA
@@ -189,8 +192,8 @@ function kron(A::PermMatrix{Ta}, B::StridedMatrix{Tb}) where {Tb, Ta}
     mB, nB = size(B)
     nA = size(A, 1)
     perm = invperm(A.perm)
-    nzval = Vector{promote_type(Ta, Tb)}(mB*nA*nB)
-    rowval = Vector{Int}(mB*nA*nB)
+    nzval = Vector{promote_type(Ta, Tb)}(undef, mB*nA*nB)
+    rowval = Vector{Int}(undef, mB*nA*nB)
     colptr = collect(1:mB:nA*nB*mB+1)
     z = 1
     @inbounds for j = 1:nA
@@ -213,7 +216,7 @@ function kron(A::PermMatrix, B::PermMatrix)
     nA = size(A, 1)
     nB = size(B, 1)
     vals = kron(A.vals, B.vals)
-    perm = Vector{Int}(nB*nA)
+    perm = Vector{Int}(undef, nB*nA)
     @inbounds for i = 1:nA
         start = (i-1)*nB
         permAi = (A.perm[i]-1)*nB
@@ -232,9 +235,9 @@ function kron(A::PermMatrix{Ta}, B::SparseMatrixCSC{Tb}) where {Ta, Tb}
     mB, nB = size(B)
     nV = nnz(B)
     perm = invperm(A.perm)
-    nzval = Vector{promote_type(Ta, Tb)}(nA*nV)
-    rowval = Vector{Int}(nA*nV)
-    colptr = Vector{Int}(nA*nB+1)
+    nzval = Vector{promote_type(Ta, Tb)}(undef, nA*nV)
+    rowval = Vector{Int}(undef, nA*nV)
+    colptr = Vector{Int}(undef, nA*nB+1)
     colptr[1] = 1
     @inbounds @simd for i in 1:nA
         start_row = (i-1)*nV
@@ -258,9 +261,9 @@ function kron(A::SparseMatrixCSC{T}, B::PermMatrix{Tb}) where {T, Tb}
     mA, nA = size(A)
     nV = nnz(A)
     perm = invperm(B.perm)
-    rowval = Vector{Int}(nB*nV)
-    colptr = Vector{Int}(nA*nB+1)
-    nzval = Vector{promote_type(T, Tb)}(nB*nV)
+    rowval = Vector{Int}(undef, nB*nV)
+    colptr = Vector{Int}(undef, nA*nB+1)
+    nzval = Vector{promote_type(T, Tb)}(undef, nB*nV)
     z=1
     colptr[z] = 1
     @inbounds for i in 1:nA

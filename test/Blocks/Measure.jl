@@ -27,7 +27,7 @@ import Yao.Blocks: _generate_sample_plan_from, _get_reduced_probability_distribu
     @test p[1][end] ≈ 0.5
 end
 
-import Yao: measure!
+import Yao.Blocks: measure!
 
 @testset "measure!" begin
 

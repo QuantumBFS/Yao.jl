@@ -32,13 +32,16 @@ import ..LuxurySparse: I
 
 # import package APIs
 import ..Yao
-import ..Yao: DefaultType, nqubits, isunitary, isreflexive, nparameters, mat, datatype, dispatch!
+import ..Yao: DefaultType, nqubits, isunitary, isreflexive, nparameters, mat, datatype, dispatch!, address
 import Compat.LinearAlgebra: ishermitian
 import Base: hash, ==, eltype, show, similar
 
 # module APIs
+export address
 export nqubits, ninput, noutput, isunitary, ispure, isreflexive, nparameters, mat, datatype, ishermitian
 export apply!, dispatch!
+
+export AnySize, GreaterThan
 
 struct AnySize end
 struct GreaterThan{N} end
