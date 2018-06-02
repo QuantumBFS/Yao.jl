@@ -11,7 +11,7 @@ import Yao.Blocks: _generate_sample_plan_from, _get_reduced_probability_distribu
 
 
 @testset "test direct sampler" begin
-    @info "NOTE: This sampler should be replaced by a QuMC.jl sampler"
+    # NOTE: This sampler should be replaced by a QuMC.jl sampler
     s = normalize!(rand(ComplexF64, 1<<10))
     p = abs2.(s)
     plan = _generate_sample_plan_from(p)

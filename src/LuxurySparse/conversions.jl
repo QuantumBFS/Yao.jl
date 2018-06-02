@@ -13,7 +13,7 @@ import Base: convert
 convert(::Type{Identity{N, T}}, ::Identity) where {N, T} = Identity{N, T}()
 
 convert(::Type{SparseMatrixCSC{Tv, Ti}}, src::Identity{N}) where {Tv, Ti <: Integer, N} = SparseMatrixCSC{Tv, Ti}(SparseArrays.I, N, N)
-convert(::Type{Diagonal{T, DT}}, src::Identity{N}) where {N, T, DT} = Diagonal{T, DT}(ones(T, N))
+convert(::Type{Diagonal{T}}, src::Identity{N}) where {N, T} = Diagonal{T}(ones(T, N))
 convert(::Type{Array{T}}, src::Identity{N}) where {T, N} = Array{T}(LinearAlgebra.I, N, N)
 convert(::Type{PermMatrix{Tv, Ti}}, src::Identity{N}) where {N, Tv, Ti} = PermMatrix(Vector{Ti}(1:N), ones(Tv, N))
 # TODO: conversion between CuArray

@@ -1,5 +1,6 @@
 module CacheServers
 
+using Compat
 using Compat.SparseArrays
 
 using ..LuxurySparse

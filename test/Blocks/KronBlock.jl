@@ -10,7 +10,7 @@ using Yao.Blocks
 import Yao.LuxurySparse: I
 
 @testset "constructor" begin
-@info "TODO: custom error exception"
+# TODO: custom error exception
 @test_throws MethodError KronBlock{2}(1=>X, [2, Y])
 end
 
@@ -54,7 +54,7 @@ function random_dense_kron(n)
     g = KronBlock{n}(blocks...)
     sorted_blocks = sort(blocks, by=x->x[1])
     t = mapreduce(x->mat(x[2]), kron, I(1), reverse(sorted_blocks))
-    mat(g) ≈ t || @info(g)
+    mat(g) ≈ t || Compat.@info(g)
 end
 
     for i = 2:8
@@ -76,7 +76,7 @@ function rand_kron_test(n)
 
     g = KronBlock{n}(seq...)
     t = reduce(kron, I(1), mats)
-    mat(g) ≈ t || @info(g)
+    mat(g) ≈ t || Compat.@info(g)
 end
 
 for i = 4:8
@@ -123,7 +123,7 @@ end
 end
 
 @testset "check traits" begin
-    @info "TODO: define traits for primitive blocks"
+    # TODO: define traits for primitive blocks
     g = KronBlock{5}(X, 3=>Y, rot(X), rot(Y))
     addrs(g) === g.addrs
     blocks(g) === g.blocks

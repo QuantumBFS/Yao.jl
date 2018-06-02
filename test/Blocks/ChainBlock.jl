@@ -76,7 +76,7 @@ end
 end
 
 @testset "traits" begin
-    @info "TODO: check traits when primitive blocks' traits are all defined"
+    # TODO: check traits when primitive blocks' traits are all defined
 
     g = ChainBlock(X(), Y())
     @test isunitary(g) == true
