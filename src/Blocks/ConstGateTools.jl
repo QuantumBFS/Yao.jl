@@ -191,11 +191,11 @@ function define_gate(name, ex)
 
     quote
         $(bind_constant(const_binding, name, :DefaultType, ex))
-        # is_successed = $(define_struct(const_binding, name))
+        is_successed = $(define_struct(const_binding, name))
 
-        # if is_successed
-        #     $(define_methods(name, const_binding, :DefaultType))
-        # end
+        if is_successed
+            $(define_methods(name, const_binding, :DefaultType))
+        end
     end
 end
 
