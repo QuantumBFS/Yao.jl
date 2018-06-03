@@ -16,7 +16,7 @@ function iscacheable(server::DefaultServer{K}, object::K) where K
 end
 
 function iscached(server::DefaultServer{K}, object::K, params...) where K
-    iscacheable(server, object) && iscached(server[object], params...)
+    iscacheable(server, object) && iscached(server.storage[objectid(object)], params...)
 end
 
 function push!(server::DefaultServer{K}, val, index::K) where K

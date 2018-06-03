@@ -1,4 +1,4 @@
-export CachedBlock
+export CachedBlock, update_cache
 
 struct CachedBlock{ST, BT, N, T} <: MatrixBlock{N, T}
     server::ST
@@ -9,6 +9,17 @@ struct CachedBlock{ST, BT, N, T} <: MatrixBlock{N, T}
         new{ST, BT, N, T}(server, x, level)
     end
 end
+
+function update_cache(c::CachedBlock)
+    if !iscached(c.server, c.block)
+        m = dropzeros!(mat(c.block))
+        push!(c.server, m, c.block)
+    end
+    c
+end
+
+clear!(x::MatrixBlock) = x
+clear!(c::CachedBlock) = (clear!(c.server, c.block); c)
 
 # forward methods
 

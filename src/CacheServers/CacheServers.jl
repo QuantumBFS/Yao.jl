@@ -2,7 +2,7 @@ module CacheServers
 
 using Compat
 
-export get_server, pull, alloc!
+export get_server, pull, alloc!, iscached, iscacheable
 import Base: push!, delete!, clear!, getindex, show
 
 include("Core.jl")
