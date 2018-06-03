@@ -11,11 +11,13 @@ logdet(M::Identity) = 0
 *(A::Identity{N}, B::AbstractVector) where N = size(A, 2) == size(B, 1) ? B :
     throw(DimensionMismatch("matrix A has dimensions $(size(A)), matrix B has dimensions $((size(B, 1), 1))"))
 
-*(A::Identity{N}, B::AbstractMatrix) where N = size(A, 2) == size(B, 1) ? B :
-    throw(DimensionMismatch("matrix A has dimensions $(size(A)), matrix B has dimensions $(size(B))"))
+for MATTYPE in [:AbstractMatrix, :StridedMatrix, :Diagonal, :SparseMatrixCSC, :Matrix, :PermMatrix]
+    @eval *(A::Identity{N}, B::$MATTYPE) where N = N == size(B, 1) ? B :
+        throw(DimensionMismatch("matrix A has dimensions $(size(A)), matrix B has dimensions $(size(B))"))
 
-*(A::AbstractMatrix, B::Identity) = size(A, 2) == size(B, 1) ? B :
-    throw(DimensionMismatch("matrix A has dimensions $(size(A)), matrix B has dimensions $(size(B))"))
+        @eval *(A::$MATTYPE, B::Identity{N}) where N = size(A, 2) == N ? A :
+        throw(DimensionMismatch("matrix A has dimensions $(size(A)), matrix B has dimensions $(size(B))"))
+end
 
 # TODO: use Adjoint to fix this in v0.7
 *(A::AbstractVector, B::Identity) = size(A, 1) == size(B, 1) ? B :
@@ -44,7 +46,7 @@ function (*)(A::PermMatrix{Ta}, X::AbstractVector{Tx}) where {Ta, Tx}
     v
 end
 
-function (*)(X::AbstractVector{Tx}, A::PermMatrix{Ta}) where {Tx, Ta}
+function (*)(X::RowVector{Tx}, A::PermMatrix{Ta}) where {Tx, Ta}
     nX = length(X)
     nX == size(A, 1) || throw(DimensionMismatch())
     v = similar(X, promote_type(Tx, Ta))

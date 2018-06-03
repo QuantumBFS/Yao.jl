@@ -56,3 +56,5 @@ function main(n, maxiter)
     lineplot!(fig, p, color=:yellow, name="trained")
     display(fig)
 end
+
+main(6, 20)
