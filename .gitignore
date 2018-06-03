@@ -12,3 +12,5 @@ docs/site/
 *.dat
 **/*.dat
 **/**/*.dat
+
+*.pyc
