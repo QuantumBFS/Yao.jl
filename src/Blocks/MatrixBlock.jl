@@ -61,5 +61,6 @@ function apply!(reg::AbstractRegister, b::MatrixBlock)
     reg
 end
 
+include("BlockCache.jl")
 include("Primitive.jl")
 include("Composite.jl")

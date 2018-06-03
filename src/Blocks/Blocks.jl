@@ -28,13 +28,20 @@ using MacroTools
 using ..Intrinsics
 using ..Registers
 using ..LuxurySparse
+using ..CacheServers
+
+# force import I matrix
 import ..LuxurySparse: I
 
 # import package APIs
 import ..Yao
 import ..Yao: DefaultType, nqubits, isunitary, isreflexive, nparameters, mat, datatype, dispatch!, address
 import Compat.LinearAlgebra: ishermitian
-import Base: hash, ==, eltype, show, similar
+import Base: hash, ==, eltype, show, similar, getindex, setindex!, start, next, done, length
+
+# APIs for cache block's matrix
+export update_cache, clear_cache, cache
+import ..CacheServers: update!, iscached, clear!, pull
 
 # module APIs
 export address, @const_gate
@@ -49,8 +56,7 @@ ismatch(::GreaterThan{N}, n::Int) where N = n > N
 ismatch(::AnySize, n::Int) = true
 
 include("Core.jl")
-include("RangedBlock.jl")
-
+# include("RangedBlock.jl")
 include("MatrixBlock.jl")
 # others
 include("Concentrator.jl")

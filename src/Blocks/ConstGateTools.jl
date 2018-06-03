@@ -8,7 +8,7 @@ using ..LuxurySparse
 
 import ..Yao
 import ..Blocks
-import ..Blocks: PrimitiveBlock, ConstantGate, RangedBlock, DefaultType, log2i, mat, print_block
+import ..Blocks: PrimitiveBlock, ConstantGate, DefaultType, log2i, mat, print_block
 
 export @const_gate
 
@@ -133,8 +133,9 @@ function define_callables(name)
             # forward to apply! if the first arg is a register
             (gate::$(esc(gt_name)))(r::AbstractRegister, params...) = Blocks.apply!(r, gate, params...)
 
-            # define shortcuts
-            (gate::$(esc(gt_name)))(itr) = RangedBlock(gate, itr)
+            # # define shortcuts
+            # (gate::$(esc(gt_name)))(itr) = RangedBlock(gate, itr)
+
             # TODO: use Repeated instead
             (gate::$(esc(gt_name)))(n::Int, itr) = KronBlock{n}(i=>$(esc(name)) for i in pos)
         end

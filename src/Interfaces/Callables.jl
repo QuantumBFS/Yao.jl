@@ -12,7 +12,7 @@ for BLOCK in [
     Concentrator,
     # Sequence,
     Measure,
-    Cached,
+    CachedBlock,
 ]
     @eval begin
         # 1. when input is register, call apply!

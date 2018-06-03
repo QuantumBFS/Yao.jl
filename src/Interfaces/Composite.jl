@@ -57,19 +57,19 @@ function control(controls, block, addr)
     ControlBlock([controls...], block, addr)
 end
 
-function control(total::Int, controls)
-    x::RangedBlock->ControlBlock{total}([controls...], x.block, x.range)
-end
+# function control(total::Int, controls)
+#     x::RangedBlock->ControlBlock{total}([controls...], x.block, x.range)
+# end
 
-function control(controls)
-    x::RangedBlock->ControlBlock([controls...], x.block, x.range)
-end
+# function control(controls)
+#     x::RangedBlock->ControlBlock([controls...], x.block, x.range)
+# end
 
-function C(controls::Int...)
-    function _C(x::RangedBlock{BT, Int}) where BT
-        total->ControlBlock{total}([controls...], x.block, x.range)
-    end
-end
+# function C(controls::Int...)
+#     function _C(x::RangedBlock{BT, Int}) where BT
+#         total->ControlBlock{total}([controls...], x.block, x.range)
+#     end
+# end
 
 # 2.4 roller
 

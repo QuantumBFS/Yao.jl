@@ -5,7 +5,6 @@ using ..Blocks
 using ..CacheServers
 
 import ..Blocks: measure
-import ..CacheServers: cache
 
 # import package configs
 import ..Yao: DefaultType
@@ -13,14 +12,15 @@ import ..Yao: DefaultType
 # Macros
 export @const_gate
 
-export cache, update_cache, pull
+# export cache, update_cache, pull
 
 include("Signal.jl")
 include("Primitive.jl")
 include("Composite.jl")
 include("Measure.jl")
+include("Cache.jl")
 include("Callables.jl")
-include("Compose.jl")
+# include("Compose.jl")
 
 export focus
 

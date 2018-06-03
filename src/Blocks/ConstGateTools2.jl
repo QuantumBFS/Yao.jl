@@ -8,7 +8,7 @@ using ..LuxurySparse
 
 import ..Yao
 import ..Blocks
-import ..Blocks: PrimitiveBlock, ConstantGate, RangedBlock, DefaultType, log2i, mat, print_block
+import ..Blocks: PrimitiveBlock, ConstantGate, DefaultType, log2i, mat, print_block
 
 export @const_gate
 

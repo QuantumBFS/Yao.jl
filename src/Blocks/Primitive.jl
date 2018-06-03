@@ -16,6 +16,7 @@ abstract type PrimitiveBlock{N, T} <: MatrixBlock{N, T} end
 include("ConstGate.jl")
 include("PhaseGate.jl")
 include("RotationGate.jl")
+# include("CachedBlock.jl")
 
 # TODO:
 # 1. new Primitive: SWAP gate

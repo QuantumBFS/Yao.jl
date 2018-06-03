@@ -37,7 +37,8 @@ end
 
 blocks(x::PrimitiveBlock) = ()
 
-print_tree(io::IO, tree::PrimitiveBlock, maxdepth) = print_block(io, tree)
+print_tree(io::IO, tree::PrimitiveBlock, maxdepth=5) = print_block(io, tree)
+print_tree(io::IO, tree::CachedBlock{ST, BT}, maxdepth=5) where {ST, BT <: PrimitiveBlock} = print_block(io, tree)
 
 function print_tree(
     io::IO, tree, maxdepth = 5;
