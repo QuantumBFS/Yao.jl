@@ -17,7 +17,7 @@ export DInt, Ints, DInts
 export basis, bmask
 export bit_length, log2i
 export testall, testany, testval, setbit, flip, neg, swapbits, takebit
-export indices_with
+export indices_with, bitarray
 
 
 include("Math.jl")

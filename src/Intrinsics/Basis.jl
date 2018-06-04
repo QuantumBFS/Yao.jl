@@ -112,5 +112,5 @@ Return indices with specific positions `poss` with value `vals` in a hilbert spa
 function indices_with(num_bit::Int, poss::Vector{Int}, vals::Vector{Int})::Vector{DInt}
     mask = bmask(poss...)
     onemask = bmask(poss[vals.!=0]...)
-    filter(testval(mask, onemask), basis(num_bit))
+    filter(x->testval(x, mask, onemask), basis(num_bit))
 end
