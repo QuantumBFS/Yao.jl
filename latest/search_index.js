@@ -145,27 +145,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "dev/block/#Yao.MatrixBlock",
-    "page": "Block System",
-    "title": "Yao.MatrixBlock",
-    "category": "type",
-    "text": "MatrixBlock{N, T} <: AbstractBlock\n\nabstract type that all block with a matrix form will subtype from.\n\nextended APIs\n\nmat sparse full datatype\n\n\n\n"
-},
-
-{
     "location": "dev/block/#PureBlock-1",
     "page": "Block System",
     "title": "PureBlock",
     "category": "section",
     "text": "Yao.MatrixBlock"
-},
-
-{
-    "location": "dev/block/#Yao.PrimitiveBlock",
-    "page": "Block System",
-    "title": "Yao.PrimitiveBlock",
-    "category": "type",
-    "text": "PrimitiveBlock{N, T} <: MatrixBlock{N, T}\n\nabstract type that all primitive block will subtype from. A primitive block is a concrete block who can not be decomposed into other blocks. All composite block can be decomposed into several primitive blocks.\n\nNOTE: subtype for primitive block with parameter should implement hash and == method to enable key value cache.\n\n\n\n"
 },
 
 {
@@ -177,27 +161,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "dev/block/#Yao.CompositeBlock",
-    "page": "Block System",
-    "title": "Yao.CompositeBlock",
-    "category": "type",
-    "text": "CompositeBlock{N, T} <: MatrixBlock{N, T}\n\nabstract supertype which composite blocks will inherit from.\n\nextended APIs\n\nblocks: get an iteratable of all blocks contained by this CompositeBlock\n\n\n\n"
-},
-
-{
     "location": "dev/block/#Composite-Block-1",
     "page": "Block System",
     "title": "Composite Block",
     "category": "section",
     "text": "Yao.CompositeBlock"
-},
-
-{
-    "location": "dev/block/#Yao.AbstractMeasure",
-    "page": "Block System",
-    "title": "Yao.AbstractMeasure",
-    "category": "type",
-    "text": "AbstractMeasure{M} <: AbstractBlock\n\nAbstract block supertype which measurement block will inherit from.\n\n\n\n"
 },
 
 {
@@ -262,6 +230,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Quantum Register",
     "category": "section",
     "text": "Quantum Register is the abstraction of a quantum state being processed by a quantum circuit."
+},
+
+{
+    "location": "dev/register/#Yao.Registers.AbstractRegister",
+    "page": "Quantum Register",
+    "title": "Yao.Registers.AbstractRegister",
+    "category": "type",
+    "text": "AbstractRegister{B, T}\n\nabstract type that registers will subtype from. B is the batch size, T is the data type.\n\nRequired Properties\n\nProperty Description default\nnqubits(reg) get the total number of qubits. \nnactive(reg) get the number of active qubits. \nnremain(reg) get the number of remained qubits. nqubits - nactive\nnbatch(reg) get the number of batch. B\naddress(reg) get the address of this register. \nstate(reg) get the state of this register. It always return the matrix stored inside. \neltype(reg) get the element type stored by this register on classical memory. (the type Julia should use to represent amplitude) T\ncopy(reg) copy this register. \nsimilar(reg) construct a new register with similar configuration. \n\nRequired Methods\n\nMultiply\n\n*(op, reg)\n\ndefine how operator op act on this register. This is quite useful when there is a special approach to apply an operator on this register. (e.g a register with no batch, or a register with a MPS state, etc.)\n\nnote: Note\nbe careful, generally, operators can only be applied to a register, thus we should only overload this operation and do not overload *(reg, op).\n\nPack Address\n\npack_address!(reg, addrs)\n\npack addrs together to the first k-dimensions.\n\nExample\n\nGiven a register with dimension [2, 3, 1, 5, 4], we pack [5, 4] to the first 2 dimensions. We will get [5, 4, 2, 3, 1].\n\nFocus Address\n\nfocus!(reg, range)\n\nmerge address in range together as one dimension (the active space).\n\nExample\n\nGiven a register with dimension (2^4)x3 and address [1, 2, 3, 4], we focus address [3, 4], will pack [3, 4] together and merge them as the active space. Then we will have a register with size 2^2x(2^2x3), and address [3, 4, 1, 2].\n\nInitializers\n\nInitializers are functions that provide specific quantum states, e.g zero states, random states, GHZ states and etc.\n\nregister(::Type{RT}, raw, nbatch)\n\nan general initializer for input raw state array.\n\nregister(::Val{InitMethod}, ::Type{RT}, ::Type{T}, n, nbatch)\n\ninit register type RT with InitMethod type (e.g Val{:zero}) with element type T and total number qubits n with nbatch. This will be auto-binded to some shortcuts like zero_state, rand_state, randn_state.\n\n\n\n"
 },
 
 {
@@ -433,115 +409,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "dev/APIs/#Yao.AbstractBlock",
-    "page": "APIs",
-    "title": "Yao.AbstractBlock",
-    "category": "type",
-    "text": "AbstractBlock\n\nabstract type that all block will subtype from. N is the number of qubits.\n\nAPIs\n\nTraits\n\nnqubits ninput noutput isunitary ispure isreflexive ishermitian\n\nMethods\n\napply! copy dispatch!\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.AbstractRegister",
-    "page": "APIs",
-    "title": "Yao.AbstractRegister",
-    "category": "type",
-    "text": "AbstractRegister{B, T}\n\nabstract type that registers will subtype from. B is the batch size, T is the data type.\n\nRequired Properties\n\nProperty Description default\nnqubits(reg) get the total number of qubits. \nnactive(reg) get the number of active qubits. \nnremain(reg) get the number of remained qubits. nqubits - nactive\nnbatch(reg) get the number of batch. B\naddress(reg) get the address of this register. \nstate(reg) get the state of this register. It always return the matrix stored inside. \neltype(reg) get the element type stored by this register on classical memory. (the type Julia should use to represent amplitude) T\ncopy(reg) copy this register. \nsimilar(reg) construct a new register with similar configuration. \n\nRequired Methods\n\nMultiply\n\n*(op, reg)\n\ndefine how operator op act on this register. This is quite useful when there is a special approach to apply an operator on this register. (e.g a register with no batch, or a register with a MPS state, etc.)\n\nnote: Note\nbe careful, generally, operators can only be applied to a register, thus we should only overload this operation and do not overload *(reg, op).\n\nPack Address\n\npack_address!(reg, addrs)\n\npack addrs together to the first k-dimensions.\n\nExample\n\nGiven a register with dimension [2, 3, 1, 5, 4], we pack [5, 4] to the first 2 dimensions. We will get [5, 4, 2, 3, 1].\n\nFocus Address\n\nfocus!(reg, range)\n\nmerge address in range together as one dimension (the active space).\n\nExample\n\nGiven a register with dimension (2^4)x3 and address [1, 2, 3, 4], we focus address [3, 4], will pack [3, 4] together and merge them as the active space. Then we will have a register with size 2^2x(2^2x3), and address [3, 4, 1, 2].\n\nInitializers\n\nInitializers are functions that provide specific quantum states, e.g zero states, random states, GHZ states and etc.\n\nregister(::Type{RT}, raw, nbatch)\n\nan general initializer for input raw state array.\n\nregister(::Type{InitMethod}, ::Type{RT}, ::Type{T}, n, nbatch)\n\ninit register type RT with InitMethod type (e.g InitMethod{:zero}) with element type T and total number qubits n with nbatch. This will be auto-binded to some shortcuts like zero_state, rand_state, randn_state.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.address",
-    "page": "APIs",
-    "title": "Yao.address",
-    "category": "function",
-    "text": "address(reg)->Int\n\nget the address of this register.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.apply!",
-    "page": "APIs",
-    "title": "Yao.apply!",
-    "category": "function",
-    "text": "apply!(reg, block, [signal])\n\napply a block to a register reg with or without a cache signal.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.batch_normalize",
-    "page": "APIs",
-    "title": "Yao.batch_normalize",
-    "category": "function",
-    "text": "batch_normalize\n\nnormalize a batch of vector.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.batch_normalize!",
-    "page": "APIs",
-    "title": "Yao.batch_normalize!",
-    "category": "function",
-    "text": "batch_normalize!(matrix)\n\nnormalize a batch of vector.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.blocks",
-    "page": "APIs",
-    "title": "Yao.blocks",
-    "category": "function",
-    "text": "blocks(composite_block)\n\nget an iterator that iterate through all sub-blocks.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.dispatch!-Tuple{Function,Yao.CompositeBlock,Array{T,1} where T}",
-    "page": "APIs",
-    "title": "Yao.dispatch!",
-    "category": "method",
-    "text": "dispatch!(f, c, params) -> c\n\ndispatch parameters and tweak it according to callback function f(original, parameter)->new\n\ndispatch a vector of parameters to this composite block according to each sub-block\'s number of parameters.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.iscacheable-Tuple{Yao.DefaultServer,Yao.MatrixBlock,UInt64}",
-    "page": "APIs",
-    "title": "Yao.iscacheable",
-    "category": "method",
-    "text": "iscaheable(server, block, level) -> Bool\n\nwhether this block is cacheable with current cache level.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.ispure-Tuple{Yao.MatrixBlock}",
-    "page": "APIs",
-    "title": "Yao.ispure",
-    "category": "method",
-    "text": "ispure(x) -> Bool\n\nTest whether this operator is pure.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.isreflexive-Tuple{Any}",
+    "location": "dev/APIs/#Yao.isreflexive",
     "page": "APIs",
     "title": "Yao.isreflexive",
-    "category": "method",
+    "category": "function",
     "text": "isreflexive(x) -> Bool\n\nTest whether this operator is reflexive.\n\n\n\n"
 },
 
 {
-    "location": "dev/APIs/#Yao.isunitary-Tuple{Any}",
+    "location": "dev/APIs/#Yao.isunitary",
     "page": "APIs",
     "title": "Yao.isunitary",
-    "category": "method",
+    "category": "function",
     "text": "isunitary(x) -> Bool\n\nTest whether this operator is unitary.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.kronprod-Tuple{Any}",
-    "page": "APIs",
-    "title": "Yao.kronprod",
-    "category": "method",
-    "text": "kronprod(itr)\n\nkronecker product all operators in the iterator.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.log2i-Union{Tuple{T}, Tuple{T}} where T",
-    "page": "APIs",
-    "title": "Yao.log2i",
-    "category": "method",
-    "text": "log2i(x)\n\nlogrithm for integer pow of 2\n\n\n\n"
 },
 
 {
@@ -553,307 +433,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "dev/APIs/#Yao.nactive",
-    "page": "APIs",
-    "title": "Yao.nactive",
-    "category": "function",
-    "text": "nactive(reg)->Int\n\nget the number of active qubits.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.nbatch",
-    "page": "APIs",
-    "title": "Yao.nbatch",
-    "category": "function",
-    "text": "nbatch(reg)->Int\n\nget the number of batch.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.ninput",
-    "page": "APIs",
-    "title": "Yao.ninput",
-    "category": "function",
-    "text": "ninput(x) -> Integer\n\nReturns the number of input qubits.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.noutput",
-    "page": "APIs",
-    "title": "Yao.noutput",
-    "category": "function",
-    "text": "noutput(x) -> Integer\n\nReturns the number of output qubits.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.nparameters-Tuple{Yao.MatrixBlock}",
+    "location": "dev/APIs/#Yao.nparameters",
     "page": "APIs",
     "title": "Yao.nparameters",
-    "category": "method",
+    "category": "function",
     "text": "nparameters(x) -> Integer\n\nReturns the number of parameters of x.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.nqubits",
-    "page": "APIs",
-    "title": "Yao.nqubits",
-    "category": "function",
-    "text": "nqubits(x) -> Integer\n\nReturns the total number of qubits.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.nremain",
-    "page": "APIs",
-    "title": "Yao.nremain",
-    "category": "function",
-    "text": "nremain(reg)->Int\n\nget the number of remained qubits.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.pull-Tuple{Yao.DefaultServer,UInt64,Yao.MatrixBlock}",
-    "page": "APIs",
-    "title": "Yao.pull",
-    "category": "method",
-    "text": "pull(server, key, pkey) -> valtype\n\nget block\'s cache by (key, pkey)\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.pull-Tuple{Yao.DefaultServer,Yao.MatrixBlock}",
-    "page": "APIs",
-    "title": "Yao.pull",
-    "category": "method",
-    "text": "pull(server, block)\n\npull current block\'s cache from server\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.rand_state",
-    "page": "APIs",
-    "title": "Yao.rand_state",
-    "category": "function",
-    "text": "rand_state(n, nbatch)\n\nconstruct a normalized random state with uniform distributed theta and r with amplitude rcdot e^itheta.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.randn_state",
-    "page": "APIs",
-    "title": "Yao.randn_state",
-    "category": "function",
-    "text": "randn_state(n, nbatch)\n\nconstruct normalized a random state with normal distributed theta and r with amplitude rcdot e^itheta.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.register",
-    "page": "APIs",
-    "title": "Yao.register",
-    "category": "function",
-    "text": "register(::Type{RT}, raw, nbatch)\n\nan general initializer for input raw state array.\n\nregister(::Type{InitMethod}, ::Type{RT}, ::Type{T}, n, nbatch)\n\ninit register type RT with InitMethod type (e.g InitMethod{:zero}) with element type T and total number qubits n with nbatch. This will be auto-binded to some shortcuts like zero_state, rand_state, randn_state.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.state",
-    "page": "APIs",
-    "title": "Yao.state",
-    "category": "function",
-    "text": "state(reg)\n\nget the state of this register. It always return the matrix stored inside.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.statevec",
-    "page": "APIs",
-    "title": "Yao.statevec",
-    "category": "function",
-    "text": "statevec(reg)\n\nget the state vector of this register. It will always return the vector form (a matrix for batched register).\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.zero_state",
-    "page": "APIs",
-    "title": "Yao.zero_state",
-    "category": "function",
-    "text": "zero_state(n, nbatch)\n\nconstruct a zero state 00cdots 00rangle.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.ChainBlock",
-    "page": "APIs",
-    "title": "Yao.ChainBlock",
-    "category": "type",
-    "text": "ChainBlock{N, T} <: CompositeBlock{N, T}\n\nChainBlock is a basic construct tool to create user defined blocks horizontically. It is a Vector like composite type.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.KronBlock",
-    "page": "APIs",
-    "title": "Yao.KronBlock",
-    "category": "type",
-    "text": "KronBlock{N, T} <: CompositeBlock\n\ncomposite block that combine blocks by kronecker product.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.PhaseGate",
-    "page": "APIs",
-    "title": "Yao.PhaseGate",
-    "category": "type",
-    "text": "PhiGate\n\nGlobal phase gate.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.Roller",
-    "page": "APIs",
-    "title": "Yao.Roller",
-    "category": "type",
-    "text": "Roller{N, M, T, BT} <: CompositeBlock{N, T}\n\nmap a block type to all lines and use a rolling method to evaluate them.\n\nTODO\n\nfill identity like KronBlock\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Base.LinAlg.ishermitian-Tuple{Yao.MatrixBlock}",
-    "page": "APIs",
-    "title": "Base.LinAlg.ishermitian",
-    "category": "method",
-    "text": "ishermitian(x) -> Bool\n\nTest whether this operator is hermitian.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Base.empty!-Tuple{Yao.Cached,Int64}",
-    "page": "APIs",
-    "title": "Base.empty!",
-    "category": "method",
-    "text": "empty!(object, signal; recursive=false)\n\nclear this object\'s cache with signal, if signal < level, then do nothing.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Base.empty!-Tuple{Yao.Cached}",
-    "page": "APIs",
-    "title": "Base.empty!",
-    "category": "method",
-    "text": "empty!(object; recursive=false)\n\nforce clear this object\'s cache\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Base.empty!-Tuple{Yao.DefaultServer,UInt64}",
-    "page": "APIs",
-    "title": "Base.empty!",
-    "category": "method",
-    "text": "empty!(server, key)\n\nempty key\'s cache.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Base.empty!-Union{Tuple{CT}, Tuple{Type{CT}}} where CT",
-    "page": "APIs",
-    "title": "Base.empty!",
-    "category": "method",
-    "text": "empty!(type)\n\nclear all cache in this type.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Base.kron-Tuple{Int64,Vararg{Union{Pair, Tuple, Yao.MatrixBlock},N} where N}",
-    "page": "APIs",
-    "title": "Base.kron",
-    "category": "method",
-    "text": "kron(blocks...) -> KronBlock\nkron(iterator) -> KronBlock\nkron(total, blocks...) -> KronBlock\nkron(total, iterator) -> KronBlock\n\ncreate a KronBlock with a list of blocks or tuple of heads and blocks.\n\nExample\n\nblock1 = Gate(X)\nblock2 = Gate(Z)\nblock3 = Gate(Y)\nKronBlock(block1, (3, block2), block3)\n\nThis will automatically generate a block list looks like\n\n1 -- [X] --\n2 ---------\n3 -- [Z] --\n4 -- [Y] --\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Base.push!-Union{Tuple{TM}, Tuple{Yao.DefaultServer{TM},UInt64,Yao.MatrixBlock,TM,UInt64}} where TM",
-    "page": "APIs",
-    "title": "Base.push!",
-    "category": "method",
-    "text": "push!(server, key, pkey, val[, level]) -> server\n\npush (block, level) in hash key form to the server. update original cache with val. if input level is greater than stored level (input > stored).\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Base.push!-Union{Tuple{TM}, Tuple{Yao.DefaultServer{TM},Yao.MatrixBlock,TM,UInt64}} where TM",
-    "page": "APIs",
-    "title": "Base.push!",
-    "category": "method",
-    "text": "push!(server, block, val, level) -> server\n\npush val to cache server, it will be cached if level is greater than stored level. Or it will do nothing.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.cache!-Union{Tuple{TM}, Tuple{Yao.DefaultServer{TM},UInt64,UInt64}} where TM",
-    "page": "APIs",
-    "title": "Yao.cache!",
-    "category": "method",
-    "text": "cache!(server, key, level) -> server\n\nadd a new cacheable block with cache level level by upload its key to the server.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.cache!-Union{Tuple{TM}, Tuple{Yao.DefaultServer{TM},Yao.MatrixBlock,UInt64}} where TM",
-    "page": "APIs",
-    "title": "Yao.cache!",
-    "category": "method",
-    "text": "cache!(server, block, level) -> server\n\nadd a new cacheable block with cache level level to the server.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.cache_matrix-Tuple{Yao.MatrixBlock}",
-    "page": "APIs",
-    "title": "Yao.cache_matrix",
-    "category": "method",
-    "text": "cache_matrix(block)\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.cache_type-Union{Tuple{N}, Tuple{T}, Tuple{Yao.MatrixBlock{N,T}}} where T where N",
-    "page": "APIs",
-    "title": "Yao.cache_type",
-    "category": "method",
-    "text": "cache_type(block) -> type\n\nget the type that this block will use for cache.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.define_const_gate-Tuple{Any,Any}",
-    "page": "APIs",
-    "title": "Yao.define_const_gate",
-    "category": "method",
-    "text": "define_const_gate(name, ex)\n\ndefine type, peroperties, matrix, etc. for this constant gate.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.define_const_gate_new_type-Tuple{Any,Any}",
-    "page": "APIs",
-    "title": "Yao.define_const_gate_new_type",
-    "category": "method",
-    "text": "define_const_gate_new_type(name, type)\n\ndefine new constant matrix binding with type for this const gate. it throws UndefVarError if this constant gate is not defined.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.define_const_gate_property-NTuple{4,Any}",
-    "page": "APIs",
-    "title": "Yao.define_const_gate_property",
-    "category": "method",
-    "text": "define_const_gate_property(f, property, gate, mat_ex) -> ex\n\ndefine property calculated by an expression generated by function f with mat_ex for gate.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.define_const_gate_struct-Tuple{Any,Any}",
-    "page": "APIs",
-    "title": "Yao.define_const_gate_struct",
-    "category": "method",
-    "text": "define_const_gate_struct(n, name)\n\ndefine a immutable concrete type the constant gate. n is the number of qubits. name is the desired type name it will also be used as tag name, etc. It returns false if this constant gate is already defined (or this name is already used in current scope). or it returns true.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.define_typed_const_gate-Tuple{Any,Any,Any}",
-    "page": "APIs",
-    "title": "Yao.define_typed_const_gate",
-    "category": "method",
-    "text": "define_typed_const_gate(name, type, ex)\n\nlike define_const_gate, but this binds ex to a type specific by the user.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.parse_block",
-    "page": "APIs",
-    "title": "Yao.parse_block",
-    "category": "function",
-    "text": "parse_block\n\nplugable argument transformer, overload this for different interface.\n\n\n\n"
-},
-
-{
-    "location": "dev/APIs/#Yao.setlevel!-Tuple{Yao.DefaultServer,Yao.MatrixBlock,UInt64}",
-    "page": "APIs",
-    "title": "Yao.setlevel!",
-    "category": "method",
-    "text": "setlevel!(server, block, level)\n\nset block\'s cache level\n\n\n\n"
 },
 
 {
