@@ -5,7 +5,7 @@ using Compat.SparseArrays
 
 using Yao
 # type
-import Yao: Concentrator, GreaterThan
+using Yao.Blocks
 
 @testset "concentrator" begin
 

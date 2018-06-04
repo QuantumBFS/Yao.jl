@@ -3,7 +3,11 @@ using Compat.LinearAlgebra
 using Compat.SparseArrays
 
 @testset "utils" begin
-include("MathUtils.jl")
+include("Intrinsics/Intrinsics.jl")
+end
+
+@testset "luxury sparse" begin
+include("LuxurySparse/LuxurySparse.jl")
 end
 
 @testset "register" begin
@@ -15,11 +19,11 @@ include("Blocks/Blocks.jl")
 end
 
 @testset "cache" begin
-include("Cache/Cache.jl")
+include("CacheServers/CacheServers.jl")
 end
 
 @testset "interface" begin
-    include("Interfaces/Interfaces.jl")
+   include("Interfaces/Interfaces.jl")
 end
 
 # @testset "show" begin

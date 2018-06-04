@@ -4,7 +4,10 @@ using Compat.LinearAlgebra
 using Compat.SparseArrays
 
 using Yao
-import Yao: PhaseGate, PrimitiveBlock
+using Yao.LuxurySparse
+using Yao.Blocks
+
+import Yao.LuxurySparse: I
 
 @testset "constructor" begin
 @test isa(PhaseGate{:global, Float64}(0.1), PrimitiveBlock{1, ComplexF64})
@@ -14,16 +17,16 @@ end
 
 @testset "matrix" begin
 g = PhaseGate{:shift, Float64}(pi)
-@test dense(g) ≈ exp(im * pi/2) * [exp(-im * pi/2) 0; 0  exp(im * pi/2)]
+@test mat(g) ≈ exp(im * pi/2) * [exp(-im * pi/2) 0; 0  exp(im * pi/2)]
 g = PhaseGate{:global, Float64}(pi)
-@test dense(g) ≈ exp(im * pi) * eye(2)
+@test mat(g) ≈ exp(im * pi) * IMatrix(2)
 end
 
 @testset "apply" begin
 g = PhaseGate{:shift, Float64}(pi)
 reg = rand_state(1)
-@test dense(g) * state(reg) ≈ state(apply!(reg, g))
-@test dense(g) * state(reg) ≈ state(g(reg))
+@test mat(g) * state(reg) ≈ state(apply!(reg, g))
+@test mat(g) * state(reg) ≈ state(g(reg))
 end
 
 @testset "compare" begin

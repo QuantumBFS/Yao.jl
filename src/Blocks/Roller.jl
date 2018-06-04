@@ -1,3 +1,5 @@
+export Roller
+
 """
     Roller{N, M, T, BT} <: CompositeBlock{N, T}
 
@@ -50,7 +52,7 @@ function mat(m::Roller{N, M}) where {N, M}
     return op
 end
 
-function apply!(reg::Register{B}, m::Roller{N, M}) where {B, N, M}
+function apply!(reg::AbstractRegister{B}, m::Roller{N, M}) where {B, N, M}
     K = N ÷ M
     st = reshape(reg.state, 1<<K, (1<<(N - 1)) * B)
 
@@ -66,4 +68,12 @@ function apply!(reg::Register{B}, m::Roller{N, M}) where {B, N, M}
     reg
 end
 
+==(lhs::Roller{N, M, T, BT}, rhs::Roller{N, M, T, BT}) where {N, M, T, BT} = lhs.blocks == rhs.blocks
 
+function hash(R::Roller, h::UInt)
+    hashkey = hash(objectid(R), h)
+    for each in R.blocks
+        hashkey = hash(each, hashkey)
+    end
+    hashkey
+end

@@ -3,9 +3,10 @@ using Compat.Test
 using Compat.LinearAlgebra
 using Compat.SparseArrays
 
-import Yao: rand_state, register, state
+using Yao.Registers
+using Yao.Blocks
 
-import Yao: _generate_sample_plan_from, _get_reduced_probability_distribution,
+import Yao.Blocks: _generate_sample_plan_from, _get_reduced_probability_distribution,
     direct_sample_step, direct_sample
 
 
@@ -26,7 +27,7 @@ import Yao: _generate_sample_plan_from, _get_reduced_probability_distribution,
     @test p[1][end] ≈ 0.5
 end
 
-import Yao: measure!
+import Yao.Blocks: measure!
 
 @testset "measure!" begin
 

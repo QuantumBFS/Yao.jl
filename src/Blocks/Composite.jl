@@ -1,3 +1,13 @@
+# composite blocks are iterables
+import Base: start, next, done, eltype, length
+
+# composite blocks are indexable
+import Base: getindex, setindex!, map!, eachindex
+
+# Additional APIs
+export blocks, CompositeBlock
+
+
 """
     CompositeBlock{N, T} <: MatrixBlock{N, T}
 
@@ -10,19 +20,12 @@ abstract supertype which composite blocks will inherit from.
 """
 abstract type CompositeBlock{N, T} <: MatrixBlock{N, T} end
 
-# composite blocks are iterables
-import Base: start, next, done, eltype, length
-
-export blocks
 """
     blocks(composite_block)
 
 get an iterator that iterate through all sub-blocks.
 """
 function blocks end
-
-# composite blocks are indexable
-import Base: getindex, setindex!, map!, eachindex
 
 function map!(f::Function, dst::CompositeBlock, itr)
     @assert length(dst) >= length(itr) "composite block should have the same size"
@@ -84,6 +87,8 @@ function dispatch!(f::Function, c::CompositeBlock, params...)
     end
     c
 end
+
+==(lhs::CompositeBlock, rhs::CompositeBlock) = false
 
 include("ChainBlock.jl")
 include("KronBlock.jl")

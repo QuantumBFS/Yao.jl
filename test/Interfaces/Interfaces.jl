@@ -4,73 +4,69 @@ using Compat.LinearAlgebra
 using Compat.SparseArrays
 
 using Yao
-import Yao: ChainBlock, KronBlock, ControlBlock, Roller,
-    Measure, MeasureAndRemove, Concentrator, Signal, RotationGate
-import Yao: PhaseGate, RangedBlock
+using Yao.Blocks
 
 @testset "phase gate" begin
-    @test isa(phase(), PhaseGate{:global, Float64})
-    @test isa(shift(), PhaseGate{:shift, Float64})
+    @test phase() isa PhaseGate{:global, Float64}
+    @test shift() isa PhaseGate{:shift, Float64}
     @test phase().theta == 0.0
 end
 
 @testset "chain" begin
-    @test isa(chain(X(), Y(), Z()), ChainBlock)
-    @test isa(chain[X(), Y()], ChainBlock)
+    @test chain(X, Y, Z) isa ChainBlock
+    @test chain[X, Y] isa ChainBlock
 end
 
 @testset "kron" begin
     # varargs construction
-    @test isa(kron(2, X(), X()), KronBlock)
+    @test kron(2, X, X) isa KronBlock
     # lazy construction
-    @test isa(kron(X(), Y())(4), KronBlock)
+    @test kron(X, Y)(4) isa KronBlock
     # lazy construction (iterator)
-    @test isa(kron(X() for i=1:4)(4), KronBlock)
+    @test kron(X for i=1:4)(4) isa KronBlock
 end
 
 @testset "control" begin
-    @test isa(control(3, [1, 2], X(), 3), ControlBlock)
-    @test isa(control(5, 1:2, X(), 3), ControlBlock)
+    @test control(3, [1, 2], X, 3) isa ControlBlock
+    @test control(5, 1:2, X, 3) isa ControlBlock
 
-    @test isa(X(1) |> control(5, i for i in [2, 3, 6, 7]), ControlBlock)
-    @test isa(X(1) |> control(i for i in [2, 3, 6, 7]), ControlBlock)
+    @test (1=>X) |> control(8, i for i in [2, 3, 6, 7]) isa ControlBlock
+    @test ((1=>X) |> control(i for i in [2, 3, 6, 7]))(8) isa ControlBlock
 
-    @test isa((X(1) |> C(2, 3))(4), ControlBlock)
+    @test ((1=>X) |> C(2, 3))(4) isa ControlBlock
 end
 
 @testset "roll" begin
-    @test isa(roll(4, X()), Roller)
-    @test isa(roll(X())(4), Roller)
-    @test isa(roll(X(), Y(), Z()), Roller)
-    @test isa(roll(X())(4), Roller)
+    @test roll(4, X) isa Roller
+    @test roll(X)(4) isa Roller
+    @test roll(X, Y, Z)(5) isa Roller
+    @test roll(X)(4) isa Roller
 end
 
 @testset "measure" begin
-    @test isa(measure(2), Measure{2})
-    @test isa(measure_remove(2), MeasureAndRemove{2})
+    @test measure(2) isa Measure{2}
+    @test measure_remove(2) isa MeasureAndRemove{2}
 end
 
 @testset "focus" begin
-    @test isa(focus(1, 2, 3), Concentrator)
+    @test focus(1, 2, 3) isa Concentrator
 end
 
 @testset "signal" begin
-    @test isa(signal(2), Signal)
+    @test signal(2) isa Signal
     @test signal(2).sig == 2
 end
 
 @testset "pauli gates binding" begin
-    @test isa(X(), XGate{ComplexF64})
-    @test isa(X(2), RangedBlock)
-    @test isa(X(1:3), RangedBlock)
-    @test isa(X(4, 2), KronBlock)
-    @test isa(X(4, 1:3), KronBlock)
+    @test X isa XGate{ComplexF64}
+    @test X(4, 2) isa KronBlock
+    @test X(4, 1:3) isa KronBlock
 end
 
 @testset "gate" begin
-    @test isa(X, XGate{ComplexF64})
-    @test isa(X(ComplexF32), XGate{ComplexF32})
-    @test isa(Rx(1), RotationGate)
-    @test isa(Ry(1), RotationGate)
-    @test isa(Rz(1), RotationGate)
+    @test X isa XGate{ComplexF64}
+    @test X(ComplexF32) isa XGate{ComplexF32}
+    @test Rx(1) isa RotationGate
+    @test Ry(1) isa RotationGate
+    @test Rz(1) isa RotationGate
 end

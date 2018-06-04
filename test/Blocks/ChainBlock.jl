@@ -4,7 +4,7 @@ using Compat.LinearAlgebra
 using Compat.SparseArrays
 
 using Yao
-import Yao: ChainBlock
+using Yao.Blocks
 
 @testset "constructor" begin
 
@@ -22,12 +22,12 @@ end
         kron(2, phase(0.1))
     )
 
-    mat = sparse(kron(2, phase(0.1))) * sparse(kron(2, X(), Y()))
-    @test sparse(g) == mat
-    @test dense(g) == Matrix(mat)
+    m = mat(kron(2, phase(0.1))) * mat(kron(2, X, Y))
+    @test mat(g) ≈ m
+    @test mat(g) ≈ m
 
     reg = rand_state(2)
-    @test mat * state(reg) == state(apply!(reg, g))
+    @test m * state(reg) == state(apply!(reg, g))
 
 end
 
@@ -80,8 +80,8 @@ end
 
     g = ChainBlock(X(), Y())
     @test isunitary(g) == true
-    @test isreflexive(g) == true
-    @test ishermitian(g) == true
+    @test isreflexive(g) == false
+    @test ishermitian(g) == false
     @test length(g) == 2
     @test eltype(g) == eltype(g.blocks)
 end
