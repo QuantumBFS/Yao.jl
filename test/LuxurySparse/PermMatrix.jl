@@ -1,3 +1,4 @@
+using Compat
 using Compat.Test
 using Compat
 using Yao
