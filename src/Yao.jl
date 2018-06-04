@@ -1,4 +1,4 @@
-# __precompile__()
+__precompile__()
 
 """
 Flexible, Extensible Framework for Quantum Algorithm Design.
@@ -34,12 +34,7 @@ include("Intrinsics/Intrinsics.jl")
 include("Registers/Registers.jl")
 include("Blocks/Blocks.jl")
 
-# include("Cache/Cache.jl")
-
 include("Interfaces/Interfaces.jl")
-
-# include("show.jl")
-# include("docs.jl")
 
 @reexport using .Interfaces
 @reexport using .Registers # TODO: move this to interfaces

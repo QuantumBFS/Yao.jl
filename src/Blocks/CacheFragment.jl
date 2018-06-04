@@ -14,7 +14,6 @@ struct CacheFragment{BT, K, MT}
 end
 
 cache_type(x) = Any
-iscached(frag::CacheFragment{BT, BT, MT}) where {BT, MT} = frag.ref in keys(frag.storage)
 
 # default update rule
 function update!(frag::CacheFragment{BT, BT, MT}, val) where {BT, MT}

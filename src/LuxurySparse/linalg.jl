@@ -48,6 +48,7 @@ function (*)(A::PermMatrix{Ta}, X::AbstractVector{Tx}) where {Ta, Tx}
 end
 
 function (*)(X::RowVector{Tx}, A::PermMatrix{Ta}) where {Tx, Ta}
+    println("pass")
     nX = length(X)
     nX == size(A, 1) || throw(DimensionMismatch())
     v = similar(X, promote_type(Tx, Ta))

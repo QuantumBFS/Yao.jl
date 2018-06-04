@@ -18,13 +18,13 @@ end
 include("Blocks/Blocks.jl")
 end
 
-#@testset "cache" begin
-#include("Cache/Cache.jl")
-#end
+@testset "cache" begin
+include("CacheServers/CacheServers.jl")
+end
 
-#@testset "interface" begin
+# @testset "interface" begin
 #    include("Interfaces/Interfaces.jl")
-#end
+# end
 
 # @testset "show" begin
 # include("show.jl")

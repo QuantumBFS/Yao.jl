@@ -46,7 +46,9 @@ end
 
 pull `object` storage from server.
 """
-function pull(server::AbstractCacheServer, object, params...) end
+function pull(server::AbstractCacheServer, object, params...)
+    Compat.@warn "You need to implement pull method for $(typeof(object)) before pull it from server."
+end
 
 # getindex will call pull by default
 function getindex(server::AbstractCacheServer, index)
