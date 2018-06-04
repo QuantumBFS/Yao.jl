@@ -1,5 +1,5 @@
-############################ Tests ##########################
 using Compat.Test
+using Compat
 using Yao
 import Yao.LuxurySparse: PermMatrix, pmrand
 
@@ -13,7 +13,7 @@ v = [0.5, 0.3im, 0.2, 1.0]
 
 @testset "basic" begin
     @test p1==copy(p1)
-    @test eltype(p1) == Complex128
+    @test eltype(p1) == ComplexF64
     @test eltype(p2) == Float64
     @test eltype(p3) == Float64
     @test size(p1) == (4, 4)
