@@ -16,6 +16,11 @@ end
 include("Concentrator.jl")
 end
 
+@testset "cache" begin
+include("CacheFragment.jl")
+include("CachedBlock.jl")
+end
+
 # @testset "sequence" begin
 # include("Sequence.jl")
 # end
