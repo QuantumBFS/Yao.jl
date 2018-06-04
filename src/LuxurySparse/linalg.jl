@@ -37,7 +37,7 @@ end
 
 # NOTE: making them dry?
 # to vector
-function (*)(A::PermMatrix{Ta}, X::AbstractVector{Tx}) where {Ta, Tx}
+function *(A::PermMatrix{Ta}, X::AbstractVector{Tx}) where {Ta, Tx}
     nX = length(X)
     nX == size(A, 2) || throw(DimensionMismatch())
     v = similar(X, promote_type(Ta, Tx))
@@ -47,8 +47,7 @@ function (*)(A::PermMatrix{Ta}, X::AbstractVector{Tx}) where {Ta, Tx}
     v
 end
 
-function (*)(X::RowVector{Tx}, A::PermMatrix{Ta}) where {Tx, Ta}
-    println("pass")
+function *(X::RowVector{Tx}, A::PermMatrix{Ta}) where {Tx, Ta}
     nX = length(X)
     nX == size(A, 1) || throw(DimensionMismatch())
     v = similar(X, promote_type(Tx, Ta))
@@ -59,36 +58,74 @@ function (*)(X::RowVector{Tx}, A::PermMatrix{Ta}) where {Tx, Ta}
 end
 
 # to diagonal
-function (*)(D::Diagonal{Td}, A::PermMatrix{Ta}) where {Td, Ta}
+function *(D::Diagonal{Td}, A::PermMatrix{Ta}) where {Td, Ta}
     T = Base.promote_op(*, Td, Ta)
     PermMatrix(A.perm, A.vals .* D.diag)
 end
 
-function (*)(A::PermMatrix{Ta}, D::Diagonal{Td}) where {Td, Ta}
+function *(A::PermMatrix{Ta}, D::Diagonal{Td}) where {Td, Ta}
     T = Base.promote_op(*, Td, Ta)
     PermMatrix(A.perm, A.vals .* view(D.diag, A.perm))
 end
 
 # to self
-function (*)(A::PermMatrix, B::PermMatrix)
+function *(A::PermMatrix, B::PermMatrix)
     size(A, 1) == size(B, 1) || throw(DimensionMismatch())
     PermMatrix(B.perm[A.perm], A.vals.*view(B.vals, A.perm))
 end
 
 # to matrix
-function (*)(A::PermMatrix, X::AbstractMatrix)
+function *(A::PermMatrix, X::AbstractMatrix)
     size(X, 1) == size(A, 2) || throw(DimensionMismatch())
     return @views A.vals .* X[A.perm, :]   # this may be inefficient for sparse CSC matrix.
 end
 
-function (*)(X::AbstractMatrix, A::PermMatrix)
+function *(X::AbstractMatrix, A::PermMatrix)
     mX, nX = size(X)
     nX == size(A, 1) || throw(DimensionMismatch())
     return @views (A.vals' .* X)[:, invperm(A.perm)]
 end
 
+@static if VERSION >= v"0.7-"
+# NOTE: this is just a temperory fix for v0.7. We should overload mul! in
+# the future (when we start to drop v0.6) to enable buildin lazy evaluation.
+
+for MTYPE in [PermMatrix, IMatrix]
+
+    @eval begin
+
+        function *(lhs::Adjoint{T, <:AbstractArray{T}}, rhs::$MTYPE) where {T <: Real}
+            transpose(lhs.parent) * rhs
+        end
+
+        function *(lhs::Adjoint{T, <:AbstractArray{T}}, rhs::$MTYPE) where {T <: Complex}
+            conj(transpose(lhs.parent)) * rhs
+        end
+
+        function *(lhs::Adjoint{T, <:AbstractVector{T}}, rhs::$MTYPE) where {T <: Complex}
+            conj(transpose(lhs.parent)) * rhs
+        end
+
+        function *(lhs::Adjoint{T, <:AbstractVector{T}}, rhs::$MTYPE) where {T <: Real}
+            transpose(lhs.parent) * rhs
+        end
+
+        function *(lhs::Transpose{T, <:AbstractArray{T}}, rhs::$MTYPE) where T
+            copy(transpose(lhs.parent)) * rhs
+        end
+
+        function *(lhs::Transpose{T, <:AbstractVector{T}}, rhs::$MTYPE) where T
+            transpose(transpose(rhs) * lhs.parent)
+        end
+
+    end
+
+end # ex
+
+end
+
 # to sparse
-function (*)(A::PermMatrix, X::SparseMatrixCSC)
+function *(A::PermMatrix, X::SparseMatrixCSC)
     nA = size(A, 1)
     mX, nX = size(X)
     mX == nA || throw(DimensionMismatch())
@@ -105,7 +142,7 @@ function (*)(A::PermMatrix, X::SparseMatrixCSC)
     SparseMatrixCSC(mX, nX, X.colptr, rowval, nzval)
 end
 
-function (*)(X::SparseMatrixCSC, A::PermMatrix)
+function *(X::SparseMatrixCSC, A::PermMatrix)
     nA = size(A, 1)
     mX, nX = size(X)
     nX == nA || throw(DimensionMismatch())

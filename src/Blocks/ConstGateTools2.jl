@@ -128,7 +128,7 @@ function define_callables(name)
             # define shortcuts
             (gate::$(gt_name))(itr) = RangedBlock(gate, itr)
             # TODO: use Repeated instead
-            (gate::$(gt_name))(n::Int, itr) = KronBlock{n}(i=>$name for i in pos)
+            (gate::$(gt_name))(n::Int, itr) = KronBlock{n}(i=>$name for i in itr)
         end
     end
 end

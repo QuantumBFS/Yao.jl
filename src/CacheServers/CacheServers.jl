@@ -22,6 +22,7 @@ get_server(::Type{K}, ::Type{ELT}, params...; kwargs...) where {K, ELT} =
     get_server(DefaultServerType, K, ELT, params...; kwargs...)
 
 function get_server(::Type{ST}, ::Type{K}, ::Type{ELT}, params...; kwargs...) where {ST, K, ELT}
+    global ServerPool
     if ST{K, ELT} in keys(ServerPool)
         ServerPool[ST{K, ELT}]
     else
