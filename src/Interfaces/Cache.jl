@@ -1,4 +1,4 @@
-export cache, pull, update_cache
+export cache, pull, update_cache, clearall!
 
 const DefaultCacheServer = get_server(MatrixBlock, CacheFragment)
 
@@ -12,7 +12,7 @@ end
 
 function clearall!(x::CachedBlock{ST, BT}) where {ST, BT <: CompositeBlock}
     for each in blocks(x.block)
-        clear!(each)
+        clearall!(each)
     end
     clear!(x)
     x

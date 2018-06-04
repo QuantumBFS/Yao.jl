@@ -11,6 +11,9 @@ struct CachedBlock{ST, BT, N, T} <: MatrixBlock{N, T}
     end
 end
 
+iscached(c::CachedBlock) = iscached(c.server, c.block)
+iscacheable(c::CachedBlock) = iscacheable(c.server, c.block)
+
 function update_cache(c::CachedBlock)
     if !iscached(c.server, c.block)
         m = dropzeros!(mat(c.block))

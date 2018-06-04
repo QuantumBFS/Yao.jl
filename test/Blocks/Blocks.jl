@@ -21,10 +21,6 @@ include("CacheFragment.jl")
 include("CachedBlock.jl")
 end
 
-# @testset "sequence" begin
-# include("Sequence.jl")
-# end
-
 @testset "measure" begin
 include("Measure.jl")
 end

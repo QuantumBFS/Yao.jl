@@ -41,7 +41,7 @@ import Base: hash, ==, eltype, show, similar, getindex, setindex!, start, next, 
 
 # APIs for cache block's matrix
 export update_cache, clear_cache, cache
-import ..CacheServers: update!, iscached, clear!, pull
+import ..CacheServers: update!, iscached, clear!, pull, iscacheable
 
 # module APIs
 export address, @const_gate

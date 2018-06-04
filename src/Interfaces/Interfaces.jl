@@ -12,7 +12,7 @@ import ..Yao: DefaultType
 # Macros
 export @const_gate
 
-# export cache, update_cache, pull
+export cache, update_cache, pull, iscached, iscacheable
 
 include("Signal.jl")
 include("Primitive.jl")
@@ -20,7 +20,6 @@ include("Composite.jl")
 include("Measure.jl")
 include("Cache.jl")
 include("Callables.jl")
-# include("Compose.jl")
 
 export focus
 
