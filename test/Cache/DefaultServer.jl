@@ -3,8 +3,7 @@ using Compat.Test
 using Compat.LinearAlgebra
 using Compat.SparseArrays
 
-using Yao
-import Yao: DefaultServer, cache!, pull
+using Yao.CacheServers
 
 @testset "default server" begin
     ds = DefaultServer(SparseMatrixCSC{ComplexF64, Int})
@@ -17,15 +16,15 @@ import Yao: DefaultServer, cache!, pull
     end
 
     # update recursively
-    push!(ds, g, sparse(g))
+    push!(ds, g, sparse(mat(g)))
 
     for i=1:3
-        push!(ds, g[i], sparse(g[i]))
+        push!(ds, g[i], sparse(mat(g[i])))
     end
 
     # pull
-    pull(ds, g) == sparse(g)
+    pull(ds, g) == sparse(mat(g))
     for i=1:3
-        @test pull(ds, g[i]) == sparse(g[i])
+        @test pull(ds, g[i]) == sparse(mat(g[i]))
     end
 end

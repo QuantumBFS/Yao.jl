@@ -1,8 +1,13 @@
+export DefaultServer
+
 struct DefaultServer{TM} <: AbstractCacheServer
     storage::Dict{UInt, CacheElement{TM}}
 end
 
 DefaultServer(::Type{TM}) where TM = DefaultServer(Dict{UInt, CacheElement{TM}}())
+
+getindex(s::DefaultServer, uint::UInt) = getindex(s.storage, uint)
+getindex(s::DefaultServer, block::MatrixBlock) = getindex(s.storage, objectid(block))
 
 ########################
 # Direct Access Methods
@@ -73,15 +78,6 @@ get block's cache by (key, pkey)
     pull(server.storage[key], pkey)
 end
 
-"""
-    empty!(server, key)
-
-empty key's cache.
-"""
-function empty!(server::DefaultServer, key::UInt)
-    empty!(server.storage[key])
-end
-
 ##########################
 # Wrap to call objectid
 ##########################
@@ -142,7 +138,7 @@ pull current block's cache from server
 end
 
 @inline function empty!(server::DefaultServer, block::MatrixBlock)
-    empty!(server, objectid(block))
+    empty!(server[block])
 end
 
 function empty!(server::DefaultServer)

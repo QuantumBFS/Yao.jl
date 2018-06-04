@@ -1,3 +1,5 @@
+export AbstractCacheServer, cache_type, cache_matrix
+
 abstract type AbstractCacheServer end
 
 
@@ -7,11 +9,12 @@ abstract type AbstractCacheServer end
 
 get the type that this block will use for cache.
 """
-cache_type(block::MatrixBlock{N, T}) where {N, T} = SparseMatrixCSC{T, Int}
+function cache_type end
+
+# cache_type(block::PrimitiveBlock{N, T}) where {N, T} = typeof(mat(block))
+
 
 """
     cache_matrix(block)
 """
-cache_matrix(block::MatrixBlock) = sparse(block)
-
-import Base: empty!
+cache_matrix(block::MatrixBlock) = mat(block)

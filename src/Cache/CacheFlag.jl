@@ -1,3 +1,5 @@
+export Cached
+
 struct Cached{BT, N, T} <: MatrixBlock{N, T}
     block::BT
 end
@@ -16,20 +18,19 @@ iscached(c::Cached) = iscached(cache_type(c), c)
 iscached(::Type{CT}, c::Cached) where CT = iscached(global_cache(CT), c)
 iscached(server::DefaultServer, c::Cached) = iscached(server, c.block)
 
-
 # for block which is not cached this is equal
-apply!(reg::Register, c, signal)= apply!(reg, c)
+apply!(reg::AbstractRegister, c, signal)= apply!(reg, c)
 
 function mat(c::Cached)
     if !iscached(c)
-        m = dropzeros!(sparse(c.block))
+        m = dropzeros!(mat(c.block))
         update_cache(c, m)
         return m
     end
     pull(c)
 end
 
-function apply!(reg::Register, c::Cached, signal::UInt)
+function apply!(reg::AbstractRegister, c::Cached, signal::UInt)
     if iscached(c)
         reg.state .= pull(c) * reg
         return reg
@@ -72,11 +73,13 @@ end
 # Direct Inherited Methods
 #############################
 
-apply!(reg::Register, c::Cached) = apply!(reg, c.block)
+apply!(reg::AbstractRegister, c::Cached) = apply!(reg, c.block)
 dispatch!(c::Cached, params...) = (dispatch!(c.block, params...); c)
 
 getindex(c::Cached, index...) = getindex(c.block, index...)
 setindex!(c::Cached, val, index...) = setindex!(c.block, val, index...)
+getindex(s::DefaultServer, block::Cached) = getindex(s, block.block)
+
 
 start(c::Cached) = start(c.block)
 next(c::Cached, st) = next(c.block, st)
@@ -84,3 +87,7 @@ done(c::Cached, st) = done(c.block, st)
 length(c::Cached) = length(c.block)
 eltype(c::Cached) = eltype(c.block)
 blocks(c::Cached) = blocks(c.block)
+
+# Inherit Print
+
+print_subblocks(io::IO, tree::Cached, depth, charset, active_levels) = print_subblocks(io, tree.block, depth, charset, active_levels)

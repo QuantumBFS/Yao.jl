@@ -53,7 +53,6 @@ end
 function empty!(c::Cached{BT}, ::Type{CT}, recursive::Bool) where {CT, BT <: CompositeBlock}
     if iscacheable(global_cache(CT), c.block)
         empty!(global_cache(CT), c.block)
-
         if recursive
             for i in eachindex(c.block)
                 empty!(c.block[i], recursive=true)

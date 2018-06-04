@@ -4,8 +4,8 @@ using Compat.LinearAlgebra
 using Compat.SparseArrays
 
 using Yao
-
-import Yao: ChainBlock, KronBlock, Cached, Roller, PrimitiveBlock
+using Yao.CacheServers
+using Yao.Blocks
 
 @testset "chain" begin
     g = chain(X(), Y(), Z())

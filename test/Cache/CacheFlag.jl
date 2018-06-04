@@ -4,8 +4,7 @@ using Compat.LinearAlgebra
 using Compat.SparseArrays
 
 using Yao
-
-import Yao: Cached, cache_matrix, cache_type, iscacheable
+using Yao.CacheServers
 
 @testset "config" begin
 c = Cached(X())
@@ -18,7 +17,7 @@ end
 
 #     # will update cause this operation will use its matrix form
 #     @test state(g(register(bit"1"), 2)) == state(register(bit"0"))
-#     @test pull(g) == sparse(g.block) # NOTE: direct call of sparse on un-cache
+#     @test pull(g) == mat(g.block) # NOTE: direct call of mat on un-cache
 
 #     @test state(g(register(bit"1"))) == state(register(bit"0"))
 # end
@@ -27,7 +26,7 @@ end
     g = cache(X())
     @test_throws KeyError pull(g)
     update_cache(g)
-    @test pull(g) == sparse(g.block)
+    @test pull(g) == mat(g.block)
 
     empty!(g)
     @test_throws KeyError pull(g)
@@ -41,5 +40,5 @@ end
 
     g = cache(g, recursive=true)
 
-    sparse(g)
+    mat(g)
 end

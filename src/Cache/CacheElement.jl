@@ -1,3 +1,5 @@
+export CacheElement
+
 mutable struct CacheElement{TM <: AbstractMatrix}
     level::UInt
     data::Dict{Any, TM}
@@ -27,7 +29,15 @@ end
 
 empty!(c::CacheElement) = empty!(c.data)
 
+# TODO: only print root
 function show(io::IO, c::CacheElement)
     println(io, "CacheElement(level: ", c.level, ")")
-    println(io, c.data)
+    if isempty(c.data)
+        print(io, "empty")
+    else
+    # print element
+        for (key, val) in c.data
+            println(io, key, " => ", val)
+        end
+    end
 end

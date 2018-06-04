@@ -1,14 +1,15 @@
-import Yao: AbstractRegister, Register
-using Yao
 using Compat
-import Compat: axes
 using Compat.Test
+using Compat.LinearAlgebra
+using Compat.SparseArrays
+
+using Yao.Registers
 
 @testset "Constructors" begin
 
     test_data = zeros(ComplexF32, 2^5, 3)
     reg = register(test_data, 3)
-    @test typeof(reg) == Register{3, ComplexF32}
+    @test typeof(reg) == DefaultRegister{3, ComplexF32}
     @test address(reg) == collect(1:5)
     @test nqubits(reg) == 5
     @test nbatch(reg) == 3

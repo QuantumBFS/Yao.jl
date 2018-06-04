@@ -68,9 +68,9 @@ random states, GHZ states and etc.
 
 an general initializer for input raw state array.
 
-    register(::Type{InitMethod}, ::Type{RT}, ::Type{T}, n, nbatch)
+    register(::Val{InitMethod}, ::Type{RT}, ::Type{T}, n, nbatch)
 
-init register type `RT` with `InitMethod` type (e.g `InitMethod{:zero}`) with
+init register type `RT` with `InitMethod` type (e.g `Val{:zero}`) with
 element type `T` and total number qubits `n` with `nbatch`. This will be
 auto-binded to some shortcuts like `zero_state`, `rand_state`, `randn_state`.
 """
@@ -96,37 +96,32 @@ end
 
 # set default register
 function register(raw, nbatch::Int=1)
-    register(Register, raw, nbatch)
-end
-
-function register(::Type{RT}, ::Type{T}, bits::QuBitStr, nbatch::Int) where {RT, T}
-    st = zeros(T, 1 << length(bits), nbatch)
-    st[asindex(bits), :] .= 1
-    register(RT, st, nbatch)
-end
-
-function register(bits::QuBitStr, nbatch::Int=1)
-    register(Register, ComplexF64, bits, nbatch)
+    register(DefaultRegister, raw, nbatch)
 end
 
 ## Config Initializers
 
-abstract type InitMethod{T} end
-
 # enable multiple dispatch for different initializers
 function register(::Type{RT}, ::Type{T}, n::Int, nbatch::Int, method::Symbol) where {RT, T}
-    register(InitMethod{method}, RT, T, n, nbatch)
+    register(Val(method), RT, T, n, nbatch)
 end
 
 # config default register type
 function register(::Type{T}, n::Int, nbatch::Int, method::Symbol) where T
-    register(Register, T, n, nbatch, method)
+    register(DefaultRegister, T, n, nbatch, method)
 end
 
 # config default eltype
-register(n::Int, nbatch::Int, method::Symbol) = register(Compat.ComplexF64, n, nbatch, method)
+register(n::Int, nbatch::Int, method::Symbol) = register(DefaultType, n, nbatch, method)
 
 # shortcuts
 zero_state(n::Int, nbatch::Int=1) = register(n, nbatch, :zero)
 rand_state(n::Int, nbatch::Int=1) = register(n, nbatch, :rand)
 randn_state(n::Int, nbatch::Int=1) = register(n, nbatch, :randn)
+
+# function ghz(num_bit::Int; x::DInt=zero(DInt))
+#     v = zeros(DefaultType, 1<<num_bit)
+#     v[x+1] = 1/sqrt(2)
+#     v[flip(x, bmask(1:num_bit))+1] = 1/sqrt(2)
+#     return v
+# end

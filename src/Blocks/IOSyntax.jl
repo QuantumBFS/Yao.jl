@@ -37,6 +37,9 @@ end
 
 blocks(x::PrimitiveBlock) = ()
 
+print_tree(io::IO, tree::PrimitiveBlock, maxdepth=5) = print_block(io, tree)
+print_tree(io::IO, tree::CachedBlock{ST, BT}, maxdepth=5) where {ST, BT <: PrimitiveBlock} = print_block(io, tree)
+
 function print_tree(
     io::IO, tree, maxdepth = 5;
     line=nothing,
@@ -55,7 +58,7 @@ function print_tree(
     end
 
     if line !== nothing
-        print_with_color(:white, io, line; bold=true)
+        printstyled(io, line; bold=true, color=:white)
         print(io, "=>")
     end
     print_block(nodebuf, tree)
@@ -74,7 +77,6 @@ end
 print_tree(tree, args...; kwargs...) = print_tree(STDOUT::IO, tree, args...; kwargs...)
 
 print_subblocks(io::IO, tree, depth, charset, active_levels) = nothing
-print_subblocks(io::IO, tree::Cached, depth, charset, active_levels) = print_subblocks(io, tree.block, depth, charset, active_levels)
 
 function print_subblocks(io::IO, tree::CompositeBlock, depth, charset, active_levels)
     c = blocks(tree)
@@ -141,37 +143,49 @@ function print_subblocks(io::IO, tree::ControlBlock, depth, charset, active_leve
 end
 
 function print_block(io::IO, x::PrimitiveBlock)
-    print(io, x)
+
+    @static if VERSION < v"0.7-"
+        print(io, summary(x))
+    else
+        summary(io, x)
+    end
+
 end
 
 # FIXME: make this works in v0.7
 function print_block(io::IO, x::CompositeBlock)
-    print(io, summary(x))
+
+    @static if VERSION < v"0.7-"
+        print(io, summary(x))
+    else
+        summary(io, x)
+    end
+
 end
 
 function print_block(io::IO, x::ChainBlock)
-    print_with_color(color(ChainBlock), io, "chain"; bold=true)
+    printstyled(io, "chain"; bold=true, color=color(ChainBlock))
 end
 
 function print_block(io::IO, x::KronBlock)
-    print_with_color(color(KronBlock), io, "kron"; bold=true)
+    printstyled(io, "kron"; bold=true, color=color(KronBlock))
 end
 
 function print_block(io::IO, x::Roller)
-    print_with_color(color(Roller), io, "roller"; bold=true)
+    printstyled(io, "roller"; bold=true, color=color(Roller))
 end
 
 function print_block(io::IO, x::ControlBlock)
-    print_with_color(color(ControlBlock), io, "control("; bold=true)
+    printstyled(io, "control("; bold=true, color=color(ControlBlock))
 
     for i in eachindex(x.ctrl_qubits)
-        print_with_color(color(ControlBlock), io, x.ctrl_qubits[i]; bold=true)
+        printstyled(io, x.ctrl_qubits[i]; bold=true, color=color(ControlBlock))
 
         if i != lastindex(x.ctrl_qubits)
-            print_with_color(color(ControlBlock), io, ", "; bold=true)
+            printstyled(io, ", "; bold=true, color=color(ControlBlock))
         end
     end
-    print_with_color(color(ControlBlock), io, ")"; bold=true)
+    printstyled(io, ")"; bold=true, color=color(ControlBlock))
 end
 
 function print_block(io::IO, g::PhaseGate{:global})

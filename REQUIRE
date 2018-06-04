@@ -3,3 +3,4 @@ Compat
 DataStructures
 StaticArrays
 MacroTools
+Reexport

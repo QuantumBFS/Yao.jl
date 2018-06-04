@@ -20,7 +20,7 @@ end
 end
 
 using Yao
-import Yao: KronBlock, ChainBlock, ControlBlock
+using Yao.Blocks
 
 @testset "map" begin
     dst = ChainBlock(X(), Y(), Z())

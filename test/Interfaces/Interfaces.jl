@@ -4,9 +4,7 @@ using Compat.LinearAlgebra
 using Compat.SparseArrays
 
 using Yao
-import Yao: ChainBlock, KronBlock, ControlBlock, Roller,
-    Measure, MeasureAndRemove, Concentrator, Signal, RotationGate
-import Yao: PhaseGate, RangedBlock
+using Yao.Blocks
 
 @testset "phase gate" begin
     @test isa(phase(), PhaseGate{:global, Float64})

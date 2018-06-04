@@ -1,10 +1,9 @@
+using Compat
 using Compat.Test
 using Compat.LinearAlgebra
 using Compat.SparseArrays
 
-using Yao
-import Yao: log2i, bit_length
-
+using Yao.Intrinsics
 
 @testset "log2i" begin
 
@@ -36,10 +35,4 @@ end
         @test sum(s[:, i]) != 1
         @test sum(ss[:, i]) ≈ 1
     end
-end
-
-@testset "kronprod" begin
-⊗ = kron
-list = [rand(2, 2), rand(3, 3), rand(4, 4)]
-@test kronprod(list) == list[1] ⊗ list[2] ⊗ list[3]
 end

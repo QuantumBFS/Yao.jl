@@ -1,3 +1,23 @@
+module CacheServers
+
+using Compat
+using Compat.SparseArrays
+
+using ..LuxurySparse
+import ..LuxurySparse: I
+
+using ..Registers
+using ..Blocks
+
+# extend block system by cached
+import ..Blocks: print_subblocks, print_block, mat, apply!, dispatch!, blocks
+
+# import package configs
+import ..Yao: DefaultType
+import Base: push!, empty!, start, next, done, eltype, length, getindex, setindex!, show
+
+export setlevel!, cache, cache!, iscacheable, global_cache, GLOBAL_CACHE_POOL
+
 include("Core.jl")
 include("CacheElement.jl")
 include("DefaultServer.jl")
@@ -21,8 +41,6 @@ end
 #############
 # Interface
 #############
-export iscacheable
-
 # This will cause signal when signal is not actually unsigned
 iscacheable(block::MatrixBlock, signal::Int=1) = iscacheable(block, UInt(signal))
 iscacheable(block::MatrixBlock, signal::UInt) = iscacheable(block, cache_type(block), signal)
@@ -33,3 +51,6 @@ include("HashRules.jl")
 include("CacheRules.jl")
 include("UpdateRules.jl")
 include("EmptyRules.jl")
+
+
+end

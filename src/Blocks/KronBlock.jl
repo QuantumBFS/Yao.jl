@@ -1,3 +1,6 @@
+export KronBlock
+
+
 """
     KronBlock{N, T} <: CompositeBlock
 
@@ -113,6 +116,18 @@ length(k::KronBlock) = length(k.blocks)
 ###############
 eachindex(k::KronBlock) = k.addrs
 
+# mat(x::AbstractMatrix) = x
+
+# TODO: make this a generated function
+# function mat(k::KronBlock{N}) where N
+#     locs = @. N - k.addrs + 1
+#     num_bit_list = diff(vcat([0], k.addrs, [N+1])) .- 1
+#     ⊗ = kron
+#     reduce(I(1 << num_bit_list[1]), zip(k.blocks, num_bit_list[2:end])) do x, y
+#         mat(x) ⊗ mat(y[1]) ⊗ I(1<<y[2])
+#     end
+# end
+
 function mat(k::KronBlock{N, T}) where {N, T}
     curr_addr = 1
     first_block = first(k.blocks)
@@ -122,7 +137,7 @@ function mat(k::KronBlock{N, T}) where {N, T}
         curr_addr += nqubits(first_block)
         op = mat(first_block)
     else
-        op = kron(mat(first_block), speye(T, 1 << (first_addr - curr_addr)))
+        op = kron(mat(first_block), I(T, 1 << (first_addr - curr_addr)))
         curr_addr = first_addr + nqubits(first_block)
     end
 
@@ -130,7 +145,7 @@ function mat(k::KronBlock{N, T}) where {N, T}
         next_addr = k.addrs[count]
         next_block = k.blocks[count]
         if curr_addr != next_addr
-            op = kron(speye(T, 1 << (next_addr - curr_addr)), op)
+            op = kron(I(T, 1 << (next_addr - curr_addr)), op)
             curr_addr = next_addr
         end
 
@@ -139,7 +154,23 @@ function mat(k::KronBlock{N, T}) where {N, T}
     end
 
     if curr_addr <= N
-        op = kron(speye(T, 1 << (N - curr_addr + 1)), op)
+        op = kron(I(T, 1 << (N - curr_addr + 1)), op)
     end
     op
+end
+
+
+# NOTE: kronecker blocks are equivalent if its addrs and blocks is the same
+function hash(block::KronBlock{N, T}, h::UInt) where {N, T}
+    hashkey = hash(objectid(block), h)
+
+    for (addr, block) in block
+        hashkey = hash(addr, hashkey)
+        hashkey = hash(block, hashkey)
+    end
+    hashkey
+end
+
+function ==(lhs::KronBlock{N, T}, rhs::KronBlock{N, T}) where {N, T}
+    all(lhs.addrs .== rhs.addrs) && all(lhs.blocks .== rhs.blocks)
 end
