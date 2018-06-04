@@ -12,7 +12,6 @@ sp = sprand(4, 4, 0.3)
 v = [0.5, 0.3im, 0.2, 1.0]
 
 @testset "basic" begin
-    println(p1)
     @test p1==copy(p1)
     @test eltype(p1) == Complex128
     @test eltype(p2) == Float64

@@ -13,7 +13,6 @@ v = [0.5, 0.3im, 0.2, 1.0]
 dv = Diagonal(v)
 
 @testset "basic" begin
-    println(p1)
     @test p1==copy(p1)
     @test eltype(p1) == Bool
     @test size(p1) == (4, 4)
