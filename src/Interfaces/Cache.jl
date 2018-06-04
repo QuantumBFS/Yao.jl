@@ -61,5 +61,3 @@ function cache(server::AbstractCacheServer, block::Roller, level::Int; recursive
     alloc!(server, roller, CacheFragment(roller))
     CachedBlock(server, roller, level)
 end
-
-
