@@ -137,7 +137,7 @@ function define_callables(name)
             # (gate::$(esc(gt_name)))(itr) = RangedBlock(gate, itr)
 
             # TODO: use Repeated instead
-            (gate::$(esc(gt_name)))(n::Int, itr) = KronBlock{n}(i=>$(esc(name)) for i in pos)
+            (gate::$(esc(gt_name)))(n::Int, itr) = Yao.Blocks.KronBlock{n}(i=>$(esc(name)) for i in itr)
         end
     end
 end

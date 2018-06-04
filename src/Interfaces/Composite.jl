@@ -54,22 +54,24 @@ function control(total::Int, controls, block, addr)
 end
 
 function control(controls, block, addr)
-    ControlBlock([controls...], block, addr)
+    total->ControlBlock{total}([controls...], block, addr)
 end
 
-# function control(total::Int, controls)
-#     x::RangedBlock->ControlBlock{total}([controls...], x.block, x.range)
-# end
+function control(total::Int, controls)
+    x::Pair->ControlBlock{total}([controls...], x.second, x.first)
+end
 
-# function control(controls)
-#     x::RangedBlock->ControlBlock([controls...], x.block, x.range)
-# end
+function control(controls)
+    function _control(x::Pair)
+        total->ControlBlock{total}([controls...], x.second, x.first)
+    end
+end
 
-# function C(controls::Int...)
-#     function _C(x::RangedBlock{BT, Int}) where BT
-#         total->ControlBlock{total}([controls...], x.block, x.range)
-#     end
-# end
+function C(controls::Int...)
+    function _C(x::Pair{I, BT}) where {I, BT <: MatrixBlock}
+        total->ControlBlock{total}([controls...], x.second, x.first)
+    end
+end
 
 # 2.4 roller
 
@@ -77,10 +79,10 @@ export roll
 
 roll(n::Int, block::MatrixBlock) = Roller{n}(block)
 
-function roll(blocks::MatrixBlock...)
+function roll(N::Int, blocks::MatrixBlock...)
     T = promote_type([datatype(each) for each in blocks]...)
-    N = sum(x->nqubits(x), blocks)
+    @assert N >= sum(x->nqubits(x), blocks) "total number of qubits is not enough"
     Roller{N, T}(blocks)
 end
 
-roll(block::MatrixBlock) = n->roll(n, block)
+roll(blocks::MatrixBlock...) = n->roll(n, blocks...)
