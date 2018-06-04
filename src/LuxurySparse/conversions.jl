@@ -5,8 +5,13 @@ IMatrix(x::AbstractMatrix{T}) where T = IMatrix{T}(x)
 SparseMatrixCSC{Tv, Ti}(A::IMatrix{N}) where {Tv, Ti <: Integer, N} = SparseMatrixCSC{Tv, Ti}(I, N, N)
 SparseMatrixCSC{Tv}(A::IMatrix) where Tv = SparseMatrixCSC{Tv, Int}(A)
 SparseMatrixCSC(A::IMatrix{N, T}) where {N, T} = SparseMatrixCSC{T, Int}(I, N, N)
+
+@static if VERSION >= v"0.7-"
+    Diagonal{T, V}(::IMatrix{N}) where {T, V <: AbstractVector{T}, N} = Diagonal{T, V}(convert(V, ones(T, N)))
+end
 Diagonal{T}(::IMatrix{N}) where {T, N} = Diagonal{T}(ones(T, N))
 Diagonal(::IMatrix{N, T}) where {N, T} = Diagonal{T}(ones(T, N))
+
 
 Matrix{T}(::IMatrix{N}) where {T, N} = Matrix{T}(I, N, N)
 Matrix(::IMatrix{N, T}) where {N, T} = Matrix{T}(I, N, N)
