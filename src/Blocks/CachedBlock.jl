@@ -6,6 +6,7 @@ struct CachedBlock{ST, BT, N, T} <: MatrixBlock{N, T}
     level::Int
 
     function CachedBlock(server::ST, x::BT, level::Int) where {ST, N, T, BT <: MatrixBlock{N, T}}
+        alloc!(server, x, CacheFragment(x))
         new{ST, BT, N, T}(server, x, level)
     end
 end

@@ -4,6 +4,10 @@ struct CacheFragment{BT, K, MT}
     ref::BT
     storage::Dict{K, MT}
 
+    function CacheFragment{BT, K, MT}(x::BT) where {BT, K, MT}
+        new{BT, K, MT}(x, Dict{K, MT}())
+    end
+
     function CacheFragment{BT, K}(x::BT) where BT where K
         new{BT, K, cache_type(BT)}(x, Dict{K, cache_type(BT)}())
     end

@@ -19,7 +19,6 @@ function clearall!(x::CachedBlock{ST, BT}) where {ST, BT <: CompositeBlock}
 end
 
 function cache(server::AbstractCacheServer, x::MatrixBlock, level::Int; recursive::Bool=false)
-    alloc!(server, x, CacheFragment(x))
     CachedBlock(server, x, level)
 end
 
@@ -33,7 +32,6 @@ function cache(server::AbstractCacheServer, x::ChainBlock, level::Int; recursive
         chain = x
     end
 
-    alloc!(server, chain, CacheFragment(chain))
     CachedBlock(server, chain, level)
 end
 
@@ -47,7 +45,6 @@ function cache(server::AbstractCacheServer, block::KronBlock, level::Int; recurs
         x = block
     end
 
-    alloc!(server, x, CacheFragment(x))
     CachedBlock(server, x, level)
 end
 
@@ -58,6 +55,5 @@ function cache(server::AbstractCacheServer, block::Roller, level::Int; recursive
         roller = block
     end
 
-    alloc!(server, roller, CacheFragment(roller))
     CachedBlock(server, roller, level)
 end
