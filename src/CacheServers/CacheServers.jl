@@ -2,7 +2,7 @@ module CacheServers
 
 using Compat
 
-export get_server, pull, alloc!, iscached, iscacheable
+export get_server, pull, alloc!, iscached, iscacheable, update!
 import Compat.Distributed: clear!
 import Base: push!, delete!, getindex, show
 
