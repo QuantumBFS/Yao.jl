@@ -29,13 +29,6 @@ end
 
 PermMatrix(dmat::Diagonal) = PermMatrix(collect(1:size(dmat, 1)), dmat.diag)
 
-function PermMatrix(ds::AbstractMatrix)
-    i,j,v = findnz(ds)
-    j == collect(1:size(ds, 2)) || throw(ArgumentError("This is not a PermMatrix"))
-    order = invperm(i)
-    PermMatrix(order, v[order])
-end
-
 ################# Array Functions ##################
 
 size(M::PermMatrix) = (length(M.perm), length(M.perm))
@@ -58,8 +51,8 @@ Return random PermMatrix.
 """
 function pmrand end
 
-pmrand(T::Type, n::Int) = PermMatrix(randperm(n), randn(T, n))
-pmrand(n::Int) = PermMatrix(randperm(n), randn(n))
+pmrand(::Type{T}, n::Int) where T = PermMatrix(randperm(n), randn(T, n))
+pmrand(n::Int) = pmrand(Float64, n)
 
 similar(x::PermMatrix{Tv, Ti}) where {Tv, Ti} = PermMatrix{Tv, Ti}(similar(x.perm), similar(x.vals))
 similar(x::PermMatrix{Tv, Ti}, ::Type{T}) where {Tv, Ti, T} = PermMatrix{T, Ti}(similar(x.perm), similar(x.vals, T))
@@ -81,6 +74,4 @@ end
 ######### sparse array interfaces  #########
 nnz(M::PermMatrix) = length(M.vals)
 nonzeros(M::PermMatrix) = M.vals
-
-# TODO: implement this
 dropzeros!(M::PermMatrix) = M

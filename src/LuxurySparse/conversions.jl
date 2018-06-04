@@ -1,13 +1,3 @@
-function isidentity(X::PermMatrix)
-    X * X ≈ X
-end
-
-function isidentity(X::Matrix)
-    X * X ≈ X
-end
-
-isidentity(X::Identity) = true
-
 ####### conversions #######
 import Base: convert
 convert(::Type{Identity{N, T}}, ::Identity) where {N, T} = Identity{N, T}()
@@ -28,3 +18,12 @@ function convert(::Type{Matrix{T}}, X::PermMatrix) where T
 end
 
 convert(::Type{PermMatrix{T}}, B::PermMatrix) where T = PermMatrix(B.perm, T.(B.vals))
+
+function convert(::Type{PermMatrix}, ds::AbstractMatrix)
+    i,j,v = findnz(ds)
+    j == collect(1:size(ds, 2)) || throw(ArgumentError("This is not a PermMatrix"))
+    order = invperm(i)
+    PermMatrix(order, v[order])
+end
+
+convert(::Type{Identity{N, T}}, A::AbstractMatrix) where {N, T} = Identity{size(A, 1) == size(A,2) ? size(A, 2) : throw(DimensionMismatch()), T}()

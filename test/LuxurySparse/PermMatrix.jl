@@ -1,11 +1,13 @@
 ############################ Tests ##########################
 using Compat.Test
 using Yao
-import Yao.LuxurySparse: PermMatrix
+import Yao.LuxurySparse: PermMatrix, pmrand
 
+srand(2)
 p1 = PermMatrix([1,4,2,3],[0.1, 0.2, 0.4im, 0.5])
 p2 = PermMatrix([2,1,4,3],[0.1, 0.2, 0.4, 0.5])
-p3 = PermMatrix([4,1,2,3],[0.5, 0.4im, 0.3, 0.2])
+#p3 = PermMatrix([4,1,2,3],[0.5, 0.4im, 0.3, 0.2])
+p3 = pmrand(4)
 sp = sprand(4, 4, 0.3)
 v = [0.5, 0.3im, 0.2, 1.0]
 
@@ -14,7 +16,9 @@ v = [0.5, 0.3im, 0.2, 1.0]
     @test p1==copy(p1)
     @test eltype(p1) == Complex128
     @test eltype(p2) == Float64
+    @test eltype(p3) == Float64
     @test size(p1) == (4, 4)
+    @test size(p3) == (4, 4)
     @test size(p1, 1) == size(p1, 2) == 4
     @test Matrix(p1) == [0.1 0 0 0; 0 0 0 0.2; 0 0.4im 0 0; 0 0 0.5 0]
 end
@@ -22,6 +26,7 @@ end
 @testset "sparse" begin
     @test nnz(p1) == 4
     @test nonzeros(p1) == p1.vals
+    @test dropzeros!(p1) == p1
 end
 
 @testset "linalg" begin
@@ -61,6 +66,5 @@ end
 @testset "memorysafe" begin
     @test p1 == PermMatrix([1,4,2,3],[0.1, 0.2, 0.4im, 0.5])
     @test p2 == PermMatrix([2,1,4,3],[0.1, 0.2, 0.4, 0.5])
-    @test p3 == PermMatrix([4,1,2,3],[0.5, 0.4im, 0.3, 0.2])
     @test v == [0.5, 0.3im, 0.2, 1.0]
 end

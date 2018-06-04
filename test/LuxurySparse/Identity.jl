@@ -34,6 +34,8 @@ end
     @test imag(p1) == zeros(4, 4)
     @test p1' == eye(4)
     @test typeof(p1') == typeof(p1)
+
+    @test ishermitian(p1)
 end
 
 @testset "elementary" begin

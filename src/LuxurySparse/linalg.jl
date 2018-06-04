@@ -7,6 +7,12 @@ det(M::Identity) = 1
 diag(M::Identity{N, T}) where {N, T} = ones(T, N)
 logdet(M::Identity) = 0
 
+#det(M::PermMatrix) = parity(M.perm)*prod(M.vals)
+function inv(M::PermMatrix)
+    new_perm = invperm(M.perm)
+    return PermMatrix(new_perm, 1.0./M.vals[new_perm])
+end
+
 ####### multiply ###########
 *(A::Identity{N}, B::AbstractVector) where N = size(A, 2) == size(B, 1) ? B :
     throw(DimensionMismatch("matrix A has dimensions $(size(A)), matrix B has dimensions $((size(B, 1), 1))"))
@@ -20,17 +26,12 @@ for MATTYPE in [:AbstractMatrix, :StridedMatrix, :Diagonal, :SparseMatrixCSC, :M
 end
 
 # TODO: use Adjoint to fix this in v0.7
-*(A::AbstractVector, B::Identity) = size(A, 1) == size(B, 1) ? B :
+*(A::RowVector, B::Identity) = size(A, 1) == size(B, 1) ? B :
     throw(DimensionMismatch("matrix A has dimensions $(size(A)), matrix B has dimensions $(size(B))"))
 
 *(A::Identity, B::Identity) = size(A, 2) == size(B, 1) ? A :
     throw(DimensionMismatch("matrix A has dimensions $(size(A)), matrix B has dimensions $(size(B))"))
 
-
-function inv(M::PermMatrix)
-    new_perm = invperm(M.perm)
-    return PermMatrix(new_perm, 1.0./M.vals[new_perm])
-end
 
 ########## Multiplication #############
 

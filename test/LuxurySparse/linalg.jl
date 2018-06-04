@@ -12,6 +12,15 @@ pm = PermMatrix([2,3,4,1], randn(4))
 v = [0.5, 0.3im, 0.2, 1.0]
 dv = Diagonal(v)
 
+@testset "invdet" begin
+    ####### linear algebra  ######
+    @test inv(p1) == inv(Matrix(p1))
+    @test det(p1) == det(Matrix(p1))
+    @test diag(p1) == diag(Matrix(p1))
+    @test logdet(p1) == 0
+    @test inv(pm) == inv(Matrix(pm))
+end
+
 @testset "multiply" begin
     for source in [p1, sp, ds, dv, pm]
         for target in [p1, sp, ds, dv, pm]
@@ -34,7 +43,8 @@ dv = Diagonal(v)
 end
 
 @testset "mul-vector" begin
-    lres = v'*pm
+    # permutation multiply
+    lres = RowVector(conj(v))*pm  #! v' not realized!
     rres = pm*v
     flres = v' * Matrix(pm)
     frres = Matrix(pm) * v
@@ -42,4 +52,8 @@ end
     @test rres == frres
     @test eltype(lres) == eltype(flres)
     @test eltype(rres) == eltype(frres)
+
+    # identity
+    @test v'*p1 == v'
+    @test p1*v == v
 end
