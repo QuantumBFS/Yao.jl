@@ -1,7 +1,7 @@
+authors = ["Roger-luo <hiroger@qq.com>"]
 name = "Yao"
 uuid = "f06903c8-64e5-11e8-1763-994c17dfdeff"
 version = "0.1.0"
-authors = ["Roger-luo <hiroger@qq.com>"]
 
 [deps]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
