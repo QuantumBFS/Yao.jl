@@ -9,7 +9,7 @@ mutable struct PhaseGate{PhaseType, T} <: PrimitiveBlock{1, Complex{T}}
     theta::T
 end
 
-mat(gate::PhaseGate{:global, T}) where T = exp(im * gate.theta) * I(Complex{T}, 2)
+mat(gate::PhaseGate{:global, T}) where T = exp(im * gate.theta) * IMatrix{2, Complex{T}}()
 mat(gate::PhaseGate{:shift, T}) where T = Complex{T}[1.0 0.0;0.0 exp(im * gate.theta)]
 
 copy(block::PhaseGate{PhaseType, T}) where {PhaseType, T} = PhaseGate{PhaseType, T}(block.theta)

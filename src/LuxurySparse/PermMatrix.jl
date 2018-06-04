@@ -27,8 +27,6 @@ function PermMatrix(perm::Vector{Ti}, vals::Vector{Tv}) where {Tv, Ti}
     PermMatrix{Tv,Ti}(perm, vals)
 end
 
-PermMatrix(dmat::Diagonal) = PermMatrix(collect(1:size(dmat, 1)), dmat.diag)
-
 ################# Array Functions ##################
 
 size(M::PermMatrix) = (length(M.perm), length(M.perm))

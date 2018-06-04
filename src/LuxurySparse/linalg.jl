@@ -2,10 +2,10 @@ import Base: inv
 import Compat.LinearAlgebra: det, diag, logdet
 
 ####### linear algebra  ######
-inv(M::Identity) = M
-det(M::Identity) = 1
-diag(M::Identity{N, T}) where {N, T} = ones(T, N)
-logdet(M::Identity) = 0
+inv(M::IMatrix) = M
+det(M::IMatrix) = 1
+diag(M::IMatrix{N, T}) where {N, T} = ones(T, N)
+logdet(M::IMatrix) = 0
 
 #det(M::PermMatrix) = parity(M.perm)*prod(M.vals)
 function inv(M::PermMatrix)
@@ -14,22 +14,22 @@ function inv(M::PermMatrix)
 end
 
 ####### multiply ###########
-*(A::Identity{N}, B::AbstractVector) where N = size(A, 2) == size(B, 1) ? B :
+*(A::IMatrix{N}, B::AbstractVector) where N = size(A, 2) == size(B, 1) ? B :
     throw(DimensionMismatch("matrix A has dimensions $(size(A)), matrix B has dimensions $((size(B, 1), 1))"))
 
 for MATTYPE in [:AbstractMatrix, :StridedMatrix, :Diagonal, :SparseMatrixCSC, :Matrix, :PermMatrix]
-    @eval *(A::Identity{N}, B::$MATTYPE) where N = N == size(B, 1) ? B :
+    @eval *(A::IMatrix{N}, B::$MATTYPE) where N = N == size(B, 1) ? B :
         throw(DimensionMismatch("matrix A has dimensions $(size(A)), matrix B has dimensions $(size(B))"))
 
-        @eval *(A::$MATTYPE, B::Identity{N}) where N = size(A, 2) == N ? A :
+        @eval *(A::$MATTYPE, B::IMatrix{N}) where N = size(A, 2) == N ? A :
         throw(DimensionMismatch("matrix A has dimensions $(size(A)), matrix B has dimensions $(size(B))"))
 end
 
 # TODO: use Adjoint to fix this in v0.7
-*(A::RowVector, B::Identity) = size(A, 1) == size(B, 1) ? B :
+*(A::RowVector, B::IMatrix) = size(A, 1) == size(B, 1) ? B :
     throw(DimensionMismatch("matrix A has dimensions $(size(A)), matrix B has dimensions $(size(B))"))
 
-*(A::Identity, B::Identity) = size(A, 2) == size(B, 1) ? A :
+*(A::IMatrix, B::IMatrix) = size(A, 2) == size(B, 1) ? A :
     throw(DimensionMismatch("matrix A has dimensions $(size(A)), matrix B has dimensions $(size(B))"))
 
 

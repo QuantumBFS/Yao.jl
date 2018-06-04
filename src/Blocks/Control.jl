@@ -61,14 +61,14 @@ function mat(ctrl::ControlBlock{BT, N, T}) where {BT, N, T}
     lowest_addr = min(minimum(abs.(ctrl_addrs)), ctrl.addr)
     if lowest_addr != 1 # lowest addr is not from the first
         nblank = lowest_addr - 1
-        U = kron(U, I(T, 1 << nblank))
+        U = kron(U, IMatrix{1 << nblank, T}())
     end
 
     # check blank lines in the end
     highest_addr = max(maximum(abs.(ctrl_addrs)), ctrl.addr)
     if highest_addr != N # highest addr is not the last
         nblank = N - highest_addr
-        U = kron(I(T, 1 << nblank), U)
+        U = kron(IMatrix{1 << nblank, T}(), U)
     end
     U
 end
@@ -80,7 +80,7 @@ function _single_inverse_control_gate_sparse(control::Int, U, addr, nqubit)
     if control < addr
         op = A_kron_B(
             mat(P1(T)), control, 1,
-            Identity(U), addr
+            IMatrix(U), addr
         )
         op += A_kron_B(
             mat(P0(T)), control, 1,
@@ -88,7 +88,7 @@ function _single_inverse_control_gate_sparse(control::Int, U, addr, nqubit)
         )
     else
         op = A_kron_B(
-            Identity(U), addr, nqubit,
+            IMatrix(U), addr, nqubit,
             mat(P1(T)), control
         )
         op += A_kron_B(
@@ -106,7 +106,7 @@ function _single_control_gate_sparse(control::Int, U, addr, nqubit)
     if control < addr
         op = A_kron_B(
             mat(P0(T)), control, 1,
-            Identity(U), addr
+            IMatrix(U), addr
         )
         op += A_kron_B(
             mat(P1(T)), control, 1,
@@ -114,7 +114,7 @@ function _single_control_gate_sparse(control::Int, U, addr, nqubit)
         )
     else
         op = A_kron_B(
-            Identity(U), addr, nqubit,
+            IMatrix(U), addr, nqubit,
             mat(P0(T)), control
         )
         op += A_kron_B(
@@ -133,7 +133,7 @@ function A_kron_B(A, ia, na, B, ib)
     out = A
     if ia + na < ib
         blank_size = ib - ia - na
-        out = kron(I(T, 1 << blank_size), out)
+        out = kron(IMatrix{1 << blank_size, T}(), out)
     end
     kron(B, out)
 end

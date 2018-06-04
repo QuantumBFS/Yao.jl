@@ -94,8 +94,8 @@ function _wrap_identity(data_list::Vector{T}, num_bit_list::Vector{Int}) where T
     length(num_bit_list) == length(data_list) + 1 || throw(ArgumentError())
 
     ⊗ = kron
-    reduce(I(1 << num_bit_list[1]), zip(data_list, num_bit_list[2:end])) do x, y
-        x ⊗ y[1] ⊗ I(1<<y[2])
+    reduce(IMatrix(1 << num_bit_list[1]), zip(data_list, num_bit_list[2:end])) do x, y
+        x ⊗ y[1] ⊗ IMatrix(1<<y[2])
     end
 end
 

@@ -24,7 +24,7 @@ GateSet = [
 
 ⊗ = kron
 U = mat(X)
-id = I(2)
+id = IMatrix(2)
 
 @testset "case 1" begin
     m = id ⊗ U
@@ -53,7 +53,7 @@ function random_dense_kron(n)
     blocks = [i=>rand(GateSet) for i in addrs]
     g = KronBlock{n}(blocks...)
     sorted_blocks = sort(blocks, by=x->x[1])
-    t = mapreduce(x->mat(x[2]), kron, I(1), reverse(sorted_blocks))
+    t = mapreduce(x->mat(x[2]), kron, IMatrix(1), reverse(sorted_blocks))
     mat(g) ≈ t || Compat.@info(g)
 end
 
@@ -70,12 +70,12 @@ function rand_kron_test(n)
     blocks = [rand(GateSet) for i = 1:firstn]
     seq = [i=>each for (i, each) in zip(addrs[1:firstn], blocks)]
     mats = [i=>mat(each) for (i, each) in zip(addrs[1:firstn], blocks)]
-    append!(mats, [i=>I(2) for i in addrs[firstn+1:end]])
+    append!(mats, [i=>IMatrix(2) for i in addrs[firstn+1:end]])
     sorted = sort(mats, by=x->x.first)
     mats = map(x->x.second, reverse(sorted))
 
     g = KronBlock{n}(seq...)
-    t = reduce(kron, I(1), mats)
+    t = reduce(kron, IMatrix(1), mats)
     mat(g) ≈ t || Compat.@info(g)
 end
 

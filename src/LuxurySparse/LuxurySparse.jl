@@ -9,11 +9,11 @@ import Compat.LinearAlgebra: ishermitian
 import Compat.SparseArrays: SparseMatrixCSC, nnz, nonzeros, sparse, dropzeros!
 import Base: getindex, size, similar, copy, show
 
-export PermMatrix, pmrand, Identity, I
+export PermMatrix, pmrand, IMatrix, I
 
 dropzeros!(A::Diagonal) = A
 
-include("Identity.jl")
+include("IMatrix.jl")
 include("PermMatrix.jl")
 
 include("conversions.jl")

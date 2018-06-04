@@ -23,7 +23,7 @@ ninput(::MatrixBlock{N}) where N = N
 noutput(::MatrixBlock{N}) where N = N
 
 # NOTE: move to Intrinsics?
-isunitary(op) = op * op' ≈ I(size(op, 1))
+isunitary(op) = op * op' ≈ IMatrix(size(op, 1))
 isunitary(x::MatrixBlock) = isunitary(mat(x))
 isunitary(::Type{X}) where {X <: MatrixBlock} = isunitary(mat(X))
 
@@ -35,7 +35,7 @@ Test whether this operator is pure.
 ispure(x::MatrixBlock) = true
 ispure(::Type{X}) where {X <: MatrixBlock} = true
 
-isreflexive(op) = op * op ≈ I(size(op, 1))
+isreflexive(op) = op * op ≈ IMatrix(size(op, 1))
 isreflexive(x::MatrixBlock) = isreflexive(mat(x))
 isreflexive(::Type{X}) where {X <: MatrixBlock} = isreflexive(mat(X))
 

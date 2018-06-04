@@ -3,10 +3,10 @@ import Base: promote_rule
 # SparseMatrixCSC
 promote_rule(::Type{SparseMatrixCSC{Tv, Ti}}, ::Type{Matrix{T}}) where {Tv, Ti, T} = Matrix{promote_type(T, Tv)}
 
-# Identity
-promote_rule(::Type{Identity{N, T}}, ::Type{PermMatrix{Tv, Ti}}) where {N, T, Tv, Ti} = PermMatrix{promote_type(T, Tv), Ti}
-promote_rule(::Type{Identity{N, T}}, ::Type{SparseMatrixCSC{Tv, Ti}}) where {N, T, Tv, Ti} = SparseMatrixCSC{promote_type(T, Tv), Ti}
-promote_rule(::Type{Identity{M, TA}}, ::Type{Matrix{TB}}) where {M, TA, TB} = Array{TB, 2}
+# IMatrix
+promote_rule(::Type{IMatrix{N, T}}, ::Type{PermMatrix{Tv, Ti}}) where {N, T, Tv, Ti} = PermMatrix{promote_type(T, Tv), Ti}
+promote_rule(::Type{IMatrix{N, T}}, ::Type{SparseMatrixCSC{Tv, Ti}}) where {N, T, Tv, Ti} = SparseMatrixCSC{promote_type(T, Tv), Ti}
+promote_rule(::Type{IMatrix{M, TA}}, ::Type{Matrix{TB}}) where {M, TA, TB} = Array{TB, 2}
 
 # PermMatrix
 promote_rule(::Type{PermMatrix{TvA, TiA}}, ::Type{SparseMatrixCSC{TvB, TiB}}) where {TvA, TiA, TvB, TiB} =
@@ -16,7 +16,7 @@ promote_rule(::Type{PermMatrix{Tv, Ti}}, ::Type{Matrix{T}}) where {Tv, Ti, T} =
 
 # Diagonal
 @static if VERSION < v"0.7-"
-promote_rule(::Type{Identity{N, TA}}, ::Type{Diagonal{TB}}) where {N, TA, TB} = Diagonal{promote_type(TA, TB)}
+promote_rule(::Type{IMatrix{N, TA}}, ::Type{Diagonal{TB}}) where {N, TA, TB} = Diagonal{promote_type(TA, TB)}
 promote_rule(::Type{Diagonal{Tv}}, ::Type{Matrix{T}}) where {Tv, T} = Matrix{promote_type(Tv, T)}
 promote_rule(::Type{Diagonal{T}}, ::Type{SparseMatrixCSC{Tv, Ti}}) where {T, Tv, Ti} = SparseMatrixCSC{promote_type(T, Tv), Ti}
 else

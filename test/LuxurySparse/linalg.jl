@@ -1,11 +1,11 @@
 using Compat.Test
 
 using Yao
-import Yao.LuxurySparse: Identity, PermMatrix
+import Yao.LuxurySparse: IMatrix, PermMatrix
 
 srand(2)
 
-p1 = Identity{4}()
+p1 = IMatrix{4}()
 sp = sprand(Complex128, 4,4, 0.5)
 ds = rand(Complex128, 4,4)
 pm = PermMatrix([2,3,4,1], randn(4))
@@ -53,7 +53,7 @@ end
     @test eltype(lres) == eltype(flres)
     @test eltype(rres) == eltype(frres)
 
-    # identity
+    # IMatrix
     @test v'*p1 == v'
     @test p1*v == v
 end

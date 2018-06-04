@@ -19,7 +19,7 @@ end
 g = PhaseGate{:shift, Float64}(pi)
 @test mat(g) ≈ exp(im * pi/2) * [exp(-im * pi/2) 0; 0  exp(im * pi/2)]
 g = PhaseGate{:global, Float64}(pi)
-@test mat(g) ≈ exp(im * pi) * I(2)
+@test mat(g) ≈ exp(im * pi) * IMatrix(2)
 end
 
 @testset "apply" begin

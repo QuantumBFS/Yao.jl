@@ -1,14 +1,21 @@
-####### conversions #######
-import Base: convert
-convert(::Type{Identity{N, T}}, ::Identity) where {N, T} = Identity{N, T}()
+IMatrix{N, T}(::IMatrix) where {N, T} = IMatrix{N, T}()
+IMatrix{T}(A::AbstractMatrix) where T = IMatrix{size(A, 1) == size(A,2) ? size(A, 2) : throw(DimensionMismatch()), T}()
+IMatrix(x::AbstractMatrix{T}) where T = IMatrix{T}(x)
 
-convert(::Type{SparseMatrixCSC{Tv, Ti}}, src::Identity{N}) where {Tv, Ti <: Integer, N} = SparseMatrixCSC{Tv, Ti}(SparseArrays.I, N, N)
-convert(::Type{Diagonal{T}}, src::Identity{N}) where {N, T} = Diagonal{T}(ones(T, N))
-convert(::Type{Array{T}}, src::Identity{N}) where {T, N} = Array{T}(LinearAlgebra.I, N, N)
-convert(::Type{PermMatrix{Tv, Ti}}, src::Identity{N}) where {N, Tv, Ti} = PermMatrix(Vector{Ti}(1:N), ones(Tv, N))
-# TODO: conversion between CuArray
+SparseMatrixCSC{Tv, Ti}(A::IMatrix{N}) where {Tv, Ti <: Integer, N} = SparseMatrixCSC{Tv, Ti}(I, N, N)
+SparseMatrixCSC{Tv}(A::IMatrix) where Tv = SparseMatrixCSC{Tv, Int}(A)
+SparseMatrixCSC(A::IMatrix{N, T}) where {N, T} = SparseMatrixCSC{T, Int}(I, N, N)
+Diagonal{T}(::IMatrix{N}) where {T, N} = Diagonal{T}(ones(T, N))
+Diagonal(::IMatrix{N, T}) where {N, T} = Diagonal{T}(ones(T, N))
 
-function convert(::Type{Matrix{T}}, X::PermMatrix) where T
+Matrix{T}(::IMatrix{N}) where {T, N} = Matrix{T}(I, N, N)
+Matrix(::IMatrix{N, T}) where {N, T} = Matrix{T}(I, N, N)
+
+PermMatrix{Tv, Ti}(::IMatrix{N}) where {Tv, Ti, N} = PermMatrix{Tv, Ti}(Vector{Ti}(1:N), ones(Tv, N))
+PermMatrix{Tv}(X::IMatrix) where Tv = PermMatrix{Tv, Int}(X)
+PermMatrix(X::IMatrix{N, T}) where {N, T} = PermMatrix{T, Int}(X)
+
+function Matrix{T}(X::PermMatrix) where T
     n = size(X, 1)
     Mf = zeros(T, n, n)
     @inbounds for i=1:n
@@ -17,13 +24,22 @@ function convert(::Type{Matrix{T}}, X::PermMatrix) where T
     return Mf
 end
 
-convert(::Type{PermMatrix{T}}, B::PermMatrix) where T = PermMatrix(B.perm, T.(B.vals))
+PermMatrix{Tv, Ti}(A::PermMatrix) where {Tv, Ti} = PermMatrix(Vector{Ti}(A.perm), Vector{Tv}(A.vals))
 
-function convert(::Type{PermMatrix}, ds::AbstractMatrix)
-    i,j,v = findnz(ds)
-    j == collect(1:size(ds, 2)) || throw(ArgumentError("This is not a PermMatrix"))
+function PermMatrix{Tv, Ti}(A::AbstractMatrix) where {Tv, Ti}
+    i,j,v = findnz(A)
+    j == collect(1:size(A, 2)) || throw(ArgumentError("This is not a PermMatrix"))
     order = invperm(i)
-    PermMatrix(order, v[order])
+    PermMatrix{Tv, Ti}(Vector{Ti}(order), Vector{Tv}(v[order]))
 end
 
-convert(::Type{Identity{N, T}}, A::AbstractMatrix) where {N, T} = Identity{size(A, 1) == size(A,2) ? size(A, 2) : throw(DimensionMismatch()), T}()
+PermMatrix(A::AbstractMatrix{T}) where T = PermMatrix{T, Int}(A)
+PermMatrix(A::SparseMatrixCSC{Tv, Ti}) where {Tv, Ti} = PermMatrix{Tv, Ti}(A) # inherit indice type
+
+PermMatrix{Tv, Ti}(A::Diagonal) where {Tv, Ti} = PermMatrix(Vector{Ti}(1:size(A, 1)), Vector{Tv}(A.diag))
+PermMatrix(A::Diagonal{T}) where T = PermMatrix{T, Int}(A)
+
+import Base: convert
+convert(T::Type{<:PermMatrix}, m::AbstractMatrix) = m isa T ? m : T(m)
+convert(T::Type{<:IMatrix}, m::AbstractMatrix) = m isa T ? m : T(m)
+convert(T::Type{<:Diagonal}, m::AbstractMatrix) = m isa T ? m : T(m)

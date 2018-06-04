@@ -3,8 +3,8 @@ using Compat.Test
 using Compat.LinearAlgebra
 using Compat.SparseArrays
 
-@testset "Identity" begin
-    include("Identity.jl")
+@testset "IMatrix" begin
+    include("IMatrix.jl")
 end
 
 

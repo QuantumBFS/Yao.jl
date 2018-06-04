@@ -27,15 +27,15 @@ end
 # TODO: since 0.7 transpose is different, we don't take transpose serious here.
 ####### kronecker product ###########
 import Base: kron
-# TODO: if Identity{1}, do nothing
-kron(A::Identity{Na, Ta}, B::Identity{Nb, Tb}) where {Na, Nb, Ta, Tb}= Identity{Na*Nb, promote_type(Ta, Tb)}()
-kron(A::Identity{Na}, B::Diagonal) where Na = Diagonal(orepeat(B.diag, Na))
-kron(B::Diagonal, A::Identity{Na}) where Na = Diagonal(irepeat(B.diag, Na))
-kron(A::Identity{1}, B::AbstractMatrix) = B
-kron(A::Identity{1}, B::PermMatrix) = B
-kron(A::Identity{1}, B::Diagonal) = B
-kron(A::Identity{1}, B::SparseMatrixCSC) = B
-kron(A::Identity{1}, B::Identity) = B
+# TODO: if IMatrix{1}, do nothing
+kron(A::IMatrix{Na, Ta}, B::IMatrix{Nb, Tb}) where {Na, Nb, Ta, Tb}= IMatrix{Na*Nb, promote_type(Ta, Tb)}()
+kron(A::IMatrix{Na}, B::Diagonal) where Na = Diagonal(orepeat(B.diag, Na))
+kron(B::Diagonal, A::IMatrix{Na}) where Na = Diagonal(irepeat(B.diag, Na))
+kron(A::IMatrix{1}, B::AbstractMatrix) = B
+kron(A::IMatrix{1}, B::PermMatrix) = B
+kron(A::IMatrix{1}, B::Diagonal) = B
+kron(A::IMatrix{1}, B::SparseMatrixCSC) = B
+kron(A::IMatrix{1}, B::IMatrix) = B
 
 ####### diagonal kron ########
 kron(A::Diagonal, B::Diagonal) = Diagonal(kron(A.diag, B.diag))
@@ -45,7 +45,7 @@ kron(A::Diagonal, B::SparseMatrixCSC) = kron(PermMatrix(A), B)
 kron(A::SparseMatrixCSC, B::Diagonal) = kron(A, PermMatrix(B))
 
 
-function kron(A::AbstractMatrix{Tv}, B::Identity{Nb}) where {Nb, Tv}
+function kron(A::AbstractMatrix{Tv}, B::IMatrix{Nb}) where {Nb, Tv}
     mA, nA = size(A)
     nzval = Vector{Tv}(undef, Nb*mA*nA)
     rowval = Vector{Int}(undef, Nb*mA*nA)
@@ -65,7 +65,7 @@ function kron(A::AbstractMatrix{Tv}, B::Identity{Nb}) where {Nb, Tv}
     SparseMatrixCSC(mA*Nb, nA*Nb, colptr, rowval, nzval)
 end
 
-function kron(A::Identity{Na}, B::AbstractMatrix{Tv}) where {Na, Tv}
+function kron(A::IMatrix{Na}, B::AbstractMatrix{Tv}) where {Na, Tv}
     mB, nB = size(B)
     rowval = Vector{Int}(undef, nB*mB*Na)
     nzval = Vector{Tv}(undef, nB*mB*Na)
@@ -83,7 +83,7 @@ function kron(A::Identity{Na}, B::AbstractMatrix{Tv}) where {Na, Tv}
     SparseMatrixCSC(mB*Na, Na*nB, colptr, rowval, nzval)
 end
 
-function kron(A::Identity{Na}, B::SparseMatrixCSC{T}) where {Na, T}
+function kron(A::IMatrix{Na}, B::SparseMatrixCSC{T}) where {Na, T}
     mB, nB = size(B)
     nV = nnz(B)
     nzval = Vector{T}(undef, Na*nV)
@@ -106,7 +106,7 @@ function kron(A::Identity{Na}, B::SparseMatrixCSC{T}) where {Na, T}
     SparseMatrixCSC(mB*Na, nB*Na, colptr, rowval, nzval)
 end
 
-function kron(A::SparseMatrixCSC{T}, B::Identity{Nb}) where {T, Nb}
+function kron(A::SparseMatrixCSC{T}, B::IMatrix{Nb}) where {T, Nb}
     mA, nA = size(A)
     nV = nnz(A)
     rowval = Vector{Int}(undef, Nb*nV)
@@ -131,7 +131,7 @@ function kron(A::SparseMatrixCSC{T}, B::Identity{Nb}) where {T, Nb}
     SparseMatrixCSC(mA*Nb, nA*Nb, colptr, rowval, nzval)
 end
 
-function kron(A::PermMatrix{T}, B::Identity) where T
+function kron(A::PermMatrix{T}, B::IMatrix) where T
     nA = size(A, 1)
     nB = size(B, 1)
     vals = Vector{T}(undef, nB*nA)
@@ -148,7 +148,7 @@ function kron(A::PermMatrix{T}, B::Identity) where T
     PermMatrix(perm, vals)
 end
 
-function kron(A::Identity, B::PermMatrix{Tv, Ti}) where {Tv, Ti <: Integer}
+function kron(A::IMatrix, B::PermMatrix{Tv, Ti}) where {Tv, Ti <: Integer}
     nA = size(A, 1)
     nB = size(B, 1)
     perm = Vector{Int}(undef, nB*nA)
