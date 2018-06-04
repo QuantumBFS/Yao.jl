@@ -41,9 +41,20 @@ end
     @test g[1] isa XGate
     @test g[3] isa YGate
 
+    g[4] = Z
+    @test g[4] isa ZGate
+
     g = chain(X, Y)
     g = CachedBlock(s, g, 2)
 
     @test g[1] isa XGate
     @test g[2] isa YGate
+
+    @test start(g) == start(g.block)
+    @test next(g, start(g)) == next(g.block, start(g.block))
+    @test done(g, start(g)) == done(g.block, start(g.block))
+    @test length(g) == length(g.block)
+
+    @test eltype(g) == eltype(g.block)
+    @test blocks(g) == blocks(g.block)
 end
