@@ -1,6 +1,6 @@
 using Compat
 using Compat.Test
-using Compat
+using Compat.Random
 using Yao
 import Yao.LuxurySparse: PermMatrix, pmrand
 
@@ -30,11 +30,11 @@ end
 end
 
 @testset "linalg" begin
-    @test inv(p1) * p1 == eye(4)
-    @test p1*transpose(p1) == diagm(p1.vals.^2)
-    #@test p1*adjoint(p1) == diagm(abs.(p1.vals).^2)
+    @test inv(p1) * p1 ≈ Matrix(I, 4, 4)
+    @test p1*transpose(p1) == diagm(0=>p1.vals.^2)
+    #@test p1*adjoint(p1) == diagm(0=>abs.(p1.vals).^2)
     #@test all(isapprox.(adjoint(p3), transpose(conj(Matrix(p3)))))
-    @test p1*p1' == diagm(abs.(p1.vals).^2)
+    @test p1*p1' == diagm(0=>abs.(p1.vals).^2)
     @test all(isapprox.(p3', transpose(conj(Matrix(p3)))))
 end
 

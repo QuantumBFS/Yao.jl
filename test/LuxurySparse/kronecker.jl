@@ -1,5 +1,6 @@
 using Compat
 using Compat.Test
+using Compat.Random
 
 using Yao
 import Yao.LuxurySparse: IMatrix, PermMatrix
@@ -26,8 +27,8 @@ dv = Diagonal(v)
             @test eltype(lres) == eltype(flres)
             @test eltype(rres) == eltype(frres)
             if !(target === ds && source === ds)
-                @test !issubtype(typeof(lres), StridedMatrix)
-                @test !issubtype(typeof(rres), StridedMatrix)
+                @test !(typeof(lres) <: StridedMatrix)
+                @test !(typeof(rres) <: StridedMatrix)
             end
         end
     end

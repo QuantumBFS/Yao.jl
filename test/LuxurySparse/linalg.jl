@@ -36,8 +36,8 @@ end
                 @test eltype(rres) == eltype(frres)
             end
             if !(target === ds || source === ds)
-                @test !issubtype(typeof(lres), StridedMatrix)
-                @test !issubtype(typeof(rres), StridedMatrix)
+                @test !(typeof(lres) <: StridedMatrix)
+                @test !(typeof(rres) <: StridedMatrix)
             end
         end
     end
