@@ -15,3 +15,7 @@ end
 @testset "Rotation Gate" begin
     include("RotationGate.jl")
 end
+
+@testset "Swap Gate" begin
+    include("SwapGate.jl")
+end

@@ -16,8 +16,10 @@ end
 # Color Traits
 color(::Type{T}) where {T <: Roller} = :cyan
 color(::Type{T}) where {T <: KronBlock} = :cyan
+color(::Type{T}) where {T <: RepeatedBlock} = :cyan
 color(::Type{T}) where {T <: ChainBlock} = :blue
 color(::Type{T}) where {T <: ControlBlock} = :red
+color(::Type{T}) where {T <: Swap} = :magenta
 
 # Default Charset
 BlockTreeCharSet() = BlockTreeCharSet('├','└','│','─')
