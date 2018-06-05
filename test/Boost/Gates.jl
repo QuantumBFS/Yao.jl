@@ -1,32 +1,37 @@
 using Compat.Test
 using Yao
-import Yao: hilbertkron, general_controlled_gates, czgate, cygate, czgate, controlled_U1, xgate, ygate, zgate
+using Yao.Blocks
+using Yao.LuxurySparse
+using Yao.Intrinsics
+using Yao.Boost
+
+⊗ = kron
 
 @testset "gate utils" begin
-    @test hilbertkron(4, [PAULI_X, PAULI_Y], [3,2]) == II(2) ⊗ PAULI_X ⊗ PAULI_Y ⊗ II(2)
-    @test general_controlled_gates(2, [P1], [2], [PAULI_X], [1]) == CNOT_MAT
+    @test hilbertkron(4, [mat(X), mat(Y)], [3,2]) == IMatrix(2) ⊗ mat(X) ⊗ mat(Y) ⊗ IMatrix(2)
+    @test general_controlled_gates(2, [mat(P1)], [2], [mat(X)], [1]) == mat(CNOT)
 end
 
 @testset "controlled gates" begin
-    @test general_controlled_gates(2, [P1], [2], [PAULI_X], [1]) == CNOT_MAT
-    @test controlled_U1(3, PAULI_Z, [3], 2) == czgate(Complex128, 3, 3, 2) 
+    @test general_controlled_gates(2, [mat(P1)], [2], [mat(X)], [1]) == mat(CNOT)
+    @test controlled_U1(3, mat(Z), [3], 2) == czgate(Complex128, 3, 3, 2) 
     @test czgate(Complex128, 2, 1, 2) == [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 -1]
-    @test general_controlled_gates(12, [P1], [7], [PAULI_Z], [3]) == czgate(Complex128, 12, 7, 3)
+    @test general_controlled_gates(12, [mat(P1)], [7], [mat(Z)], [3]) == czgate(Complex128, 12, 7, 3)
     @test cxgate(Complex128, 2, 2, 1) == [1 0 0 0; 0 1 0 0; 0 0 0 1; 0 0 1 0]
-    @test general_controlled_gates(12, [P1], [7], [PAULI_X], [3]) == cxgate(Complex128, 12, 7, 3)
-    @test general_controlled_gates(3, [P1], [3], [PAULI_Y], [2]) == controlled_U1(3, PAULI_Y, [3], 2) == cygate(Complex128, 3, 3, 2)
+    @test general_controlled_gates(12, [mat(P1)], [7], [mat(X)], [3]) == cxgate(Complex128, 12, 7, 3)
+    @test general_controlled_gates(3, [mat(P1)], [3], [mat(Y)], [2]) == controlled_U1(3, mat(Y), [3], 2) == cygate(Complex128, 3, 3, 2)
 end
 
 @testset "single gate" begin
-    @test zgate(Complex128, 4, [1,2,3]) == hilbertkron(4, [PAULI_Z, PAULI_Z, PAULI_Z], [1,2,3])
+    @test zgate(Complex128, 4, [1,2,3]) == hilbertkron(4, [mat(Z), mat(Z), mat(Z)], [1,2,3])
 end
 
 @testset "basic gate" begin
     # check matrixes
     for (gate, MAT) in [
-        (xgate, PAULI_X),
-        (ygate, PAULI_Y),
-        (zgate, PAULI_Z),
+        (xgate, mat(X)),
+        (ygate, mat(Y)),
+        (zgate, mat(Z)),
         #(hgate, (elem = 1 / sqrt(2); [elem elem; elem -elem])),
     ]
         @test full(gate(Complex128, 1, 1)) == MAT

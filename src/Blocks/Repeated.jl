@@ -1,15 +1,15 @@
 export RepeatedBlock
 
-mutable struct RepeatedBlock{GT<:MatrixBlock, N, MT} <: CompositeBlock{N, MT}
+mutable struct RepeatedBlock{N, T, GT<:MatrixBlock} <: CompositeBlock{N, T}
     block::GT
     lines::Vector{Int}
 
     function RepeatedBlock{N, T}(block::GT) where {N, T, GT <: MatrixBlock}
-        new{GT, N, T}(block, Vector{Int}(1:N))
+        new{N, T, GT}(block, Vector{Int}(1:N))
     end
 
     function RepeatedBlock{N, T}(block::GT, lines::Vector{Int}) where {N, T, GT <: MatrixBlock}
-        new{GT, N, T}(block, lines)
+        new{N, T, GT}(block, lines)
     end
 end
 
@@ -37,6 +37,6 @@ function hash(rb::RepeatedBlock, h::UInt)
     hashkey
 end
 
-function ==(lhs::RepeatedBlock{BT, N, T}, rhs::RepeatedBlock{BT, N, T}) where {BT, N, T}
+function ==(lhs::RepeatedBlock{N, T, GT}, rhs::RepeatedBlock{N, T, GT}) where {N, T, GT}
     (lhs.block == rhs.block) && (lhs.lines == rhs.lines)
 end

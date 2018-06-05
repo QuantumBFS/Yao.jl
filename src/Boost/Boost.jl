@@ -7,6 +7,12 @@ using ..LuxurySparse
 
 import ..Blocks: mat, apply!
 
+export general_controlled_gates
+export xgate, ygate, zgate
+export cxgate, cygate, czgate
+export controlled_U1
+
+
 include("gates.jl")
 include("applys.jl")
 

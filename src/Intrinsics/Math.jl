@@ -78,10 +78,14 @@ end
     ex
 end
 
-"""
-    hilbertkron(nbits, ops, locs)
 
-kronecker given operators `ops` in hilbert space of size `nbits` at location `locs`.
+"""
+    hilbertkron(num_bit::Int, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix
+
+Return general kronecher product form of gates in Hilbert space of `num_bit` qubits.
+
+* `gates` are a list of single qubit gates.
+* `locs` should have the same length as `gates`, specifing the gates positions.
 """
 function hilbertkron(num_bit::Int, ops::Vector{T}, locs::Vector{Int}) where T<:AbstractMatrix
     locs = num_bit - locs + 1

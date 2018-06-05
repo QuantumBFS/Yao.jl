@@ -1,12 +1,22 @@
 ####################### Gate Utilities ######################
 
 ###################### X, Y, Z Gates ######################
+"""
+    xgate(::Type{MT}, num_bit::Int, bits::Ints) -> PermMatrix
+
+X Gate on multiple bits.
+"""
 function xgate(::Type{MT}, num_bit::Int, bits::Ints) where MT<:Number
     mask = bmask(bits...)
     order = map(b->flip(b, mask) + 1, basis(num_bit))
     PermMatrix(order, ones(MT, 1<<num_bit))
 end
 
+"""
+    ygate(::Type{MT}, num_bit::Int, bits::Ints) -> PermMatrix
+
+Y Gate on multiple bits.
+"""
 function ygate(::Type{MT}, num_bit::Int, bits::Ints) where MT<:Complex
     mask = bmask(bits...)
     order = Vector{Int}(1<<num_bit)
@@ -20,6 +30,11 @@ function ygate(::Type{MT}, num_bit::Int, bits::Ints) where MT<:Complex
     PermMatrix(order, vals)
 end
 
+"""
+    zgate(::Type{MT}, num_bit::Int, bits::Ints) -> Diagonal
+
+Z Gate on multiple bits.
+"""
 function zgate(::Type{MT}, num_bit::Int, bits::Ints) where MT<:Number
     mask = bmask(bits...)
     vals = map(b->count_ones(b&mask)%2==0 ? one(MT) : -one(MT), basis(num_bit))
@@ -27,9 +42,33 @@ function zgate(::Type{MT}, num_bit::Int, bits::Ints) where MT<:Number
 end
 
 ####################### Controlled Gates #######################
-general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{Tg}, locs::Vector{Int}) where {Tg<:AbstractMatrix, Tp<:AbstractMatrix} = I(1<<num_bit) - hilbertkron(num_bit, projectors, cbits) + hilbertkron(num_bit, vcat(projectors, gates), vcat(cbits, locs))
+"""
+    general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix
+
+Return general multi-controlled gates in hilbert space of `num_bit` qubits,
+
+* `projectors` are often chosen as `P0` and `P1` for inverse-Control and Control at specific position.
+* `cbits` should have the same length as `projectors`, specifing the controling positions.
+* `gates` are a list of controlled single qubit gates.
+* `locs` should have the same length as `gates`, specifing the gates positions.
+"""
+function general_controlled_gates(
+    n::Int,
+    projectors::Vector{<:AbstractMatrix},
+    cbits::Vector{Int},
+    gates::Vector{<:AbstractMatrix},
+    locs::Vector{Int}
+)
+    IMatrix(1<<n) - hilbertkron(n, projectors, cbits) +
+        hilbertkron(n, vcat(projectors, gates), vcat(cbits, locs))
+end
 
 #### C-X/Y/Z Gates
+"""
+    cxgate(::Type{MT}, num_bit::Int, b1::Ints, b2::Ints) -> PermMatrix
+
+Single (Multiple) Controlled-X Gate on single (multiple) bits.
+"""
 function cxgate(::Type{MT}, num_bit::Int, b1::Ints, b2::Ints) where MT<:Number
     mask = bmask(b1)
     mask2 = bmask(b2)
@@ -37,6 +76,11 @@ function cxgate(::Type{MT}, num_bit::Int, b1::Ints, b2::Ints) where MT<:Number
     PermMatrix(order, ones(MT, 1<<num_bit))
 end
 
+"""
+    cygate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) -> PermMatrix
+
+Single Controlled-Y Gate on single bit.
+"""
 function cygate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) where MT<:Complex
     mask2 = bmask(b2)
     order = collect(1:1<<num_bit)
@@ -53,6 +97,11 @@ function cygate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) where MT<:Complex
     PermMatrix(order, vals)
 end
 
+"""
+    czgate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) -> Diagonal
+
+Single Controlled-Z Gate on single bit.
+"""
 function czgate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) where MT<:Number
     mask2 = bmask(b2)
     vals = ones(MT, 1<<num_bit)
@@ -65,7 +114,17 @@ function czgate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) where MT<:Number
     end
     Diagonal(vals)
 end
- 
+
+"""
+    controlled_U1(num_bit::Int, gate::AbstractMatrix, cbits::Vector{Int}, b2::Int) -> AbstractMatrix
+
+Return general multi-controlled single qubit `gate` in hilbert space of `num_bit` qubits.
+
+* `cbits` specify the controling positions.
+* `b2` is the controlled position.
+"""
+function controlled_U1 end
+
 
 # general multi-control single-gate
 function controlled_U1(num_bit::Int, gate::PermMatrix{T}, cbits::Vector{Int}, b2::Int) where {T}
@@ -109,5 +168,3 @@ end
 # arbituary control PermMatrix gate: SparseMatrixCSC
 # TODO: to interface
 #toffoligate(num_bit::Int, b1::Int, b2::Int, b3::Int) = controlled_U1(num_bit, PAULI_X, [b1, b2], b3)
-
-

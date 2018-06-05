@@ -1,24 +1,24 @@
 using Compat.Test
 using Yao
-import Yao.Intrinsics: SingleControlBlock, RepeatedBlock
-import Yao.Const
+using Yao.Intrinsics
+using Yao.Blocks
+using Yao.Boost
 
-xg = XGate{ComplexF64}()
+# @testset "Single Control" begin
+#     cb = SingleControlBlock{XGate, 2, ComplexF64}(X, 2,1)
+#     @test mat(cb) == Const.Sparse.CNOT
+# end
 
-@testset "Single Control" begin
-    cb = SingleControlBlock{XGate, 2, ComplexF64}(xg, 2,1)
-    @test mat(cb) == Const.Sparse.CNOT
-end
-
-@testset "Single Control" begin
+@testset "Repeated" begin
     for G in [:X, :Y, :Z]
-        MAT = Symbol(:(Const.Sparse.PAULI_), G)
-        rb = RepeatedBlock{$(Symbol(G, :Gate)), 2, Complex128}(xg, [1,2])
-        @test mat(rb) == kron($MAT, $MAT)
+        @eval begin
+            rb = RepeatedBlock{2, Complex128}($G, [1,2])
+            @test mat(rb) ≈ kron(mat($G), mat($G))
+        end
     end
 end
 
-@testset "Single Control" begin
-    mcb = ControlBlock{XGate, 3, Complex128}(xg, [3, 2], 1)
-    @test mat(mcb) == Const.Sparse.Toffoli
+@testset "Multiple Control" begin
+    mcb = ControlBlock{3, Complex128}(X, [3, 2], 1)
+    @test mat(mcb) ≈ mat(Toffoli)
 end
