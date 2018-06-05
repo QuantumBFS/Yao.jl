@@ -25,5 +25,7 @@ julia> Pkg.clone("https://github.com/QuantumBFS/Yao.jl.git")
 
 ## Documentation
 
+The documentation is under development. There is only a few demos at the moment.
+
 - [**STABLE**](https://quantumbfs.github.io/Yao.jl/stable)
 - [**LATEST**](https://quantumbfs.github.io/Yao.jl/latest)
