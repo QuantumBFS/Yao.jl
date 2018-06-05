@@ -89,12 +89,11 @@ end
     @test mat(g) == op
 end
 
-# FIXME:
-# @testset "inverse control" begin
-#     g = ControlBlock{2}([-1, ], X, 2)
+@testset "inverse control" begin
+     g = ControlBlock{2}([-1, ], X, 2)
 
-#     op = U ⊗ mat(P0) + IMatrix(U) ⊗ mat(P1)
-#     @test mat(g) ≈ op
-# end
+    op = U ⊗ mat(P0) + IMatrix(U) ⊗ mat(P1)
+    @test mat(g) ≈ op
+end
 
 end # control matrix form

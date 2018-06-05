@@ -42,6 +42,7 @@ Return an integer with specific position masked, which is offten used as a mask 
 """
 function bmask end
 
+bmask() = DInt(0)
 bmask(ibit::Int...)::DInt = sum([one(DInt) << (b-1) for b in ibit])
 bmask(bits::UnitRange{Int})::DInt = ((one(DInt) << (bits.stop - bits.start + 1)) - one(DInt)) << (bits.start-1)
 
