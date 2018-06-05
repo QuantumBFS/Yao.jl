@@ -1,3 +1,28 @@
+function parse_block(n::Int, x::Pair{Int, BT}) where {BT <: MatrixBlock}
+    kron(n, x)
+end
+
+function parse_block(n::Int, x::Pair{I, BT}) where {I, BT <: MatrixBlock}
+    kron(n, i=>x.second for i in x.first)
+end
+
+function parse_block(n::Int, x::Pair{Int, BT}) where {BT <: ConstantGate}
+    repeat(n, x.second, [x.first, ])
+end
+
+function parse_block(n::Int, x::Pair{I, BT}) where {I, BT <: ConstantGate}
+    repeat(n, x.second, collect(x.first))
+end
+
+function parse_block(n::Int, x::Function)
+    x(n)
+end
+
+function parse_block(n::Int, x::MatrixBlock{N}) where N
+    n == N || throw(ArgumentError("number of qubits does not match: $x"))
+    x
+end
+
 # 2. composite blocks
 # 2.1 chain block
 export chain
@@ -5,14 +30,11 @@ export chain
 chain(n::Int) = ChainBlock(MatrixBlock{n}[])
 chain() = n -> chain(n)
 
-function chain(n, blocks)
-    _2block(x::Function) = x(n)
-    _2block(x::MatrixBlock) = x
-
-    if blocks isa Union{Function, MatrixBlock}
-        ChainBlock([_2block(blocks)])
+function chain(n::Int, blocks)
+    if blocks isa Union{Function, MatrixBlock, Pair}
+        ChainBlock([parse_block(n, blocks)])
     else
-        ChainBlock(MatrixBlock{n}[_2block(each) for each in blocks])
+        ChainBlock(MatrixBlock{n}[parse_block(n, each) for each in blocks])
     end
 end
 
@@ -22,8 +44,12 @@ function chain(blocks::Vector{MatrixBlock{N}}) where N
     ChainBlock(Vector{MatrixBlock{N}}(blocks))
 end
 
+function chain(n, blocks...)
+    ChainBlock(MatrixBlock{n}[parse_block(n, each) for each in blocks])
+end
+
 function chain(blocks::MatrixBlock{N}...) where N
-    ChainBlock(blocks...)
+    ChainBlock(collect(MatrixBlock{N}, blocks))
 end
 
 Base.getindex(::typeof(chain), xs...) = ChainBlock(xs...)
@@ -102,3 +128,10 @@ function roll(N::Int, blocks::MatrixBlock...)
 end
 
 roll(blocks::MatrixBlock...) = n->roll(n, blocks...)
+
+# 2.5 repeat
+
+import Base: repeat
+repeat(n::Int, x::MatrixBlock, lines) = RepeatedBlock{n}(x, lines)
+repeat(n::Int, x::MatrixBlock) = RepeatedBlock{n}(x)
+repeat(x::MatrixBlock, params...) = n->repeat(n, x, params...)

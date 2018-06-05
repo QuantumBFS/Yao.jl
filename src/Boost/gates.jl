@@ -1,6 +1,5 @@
 ####################### Gate Utilities ######################
 
-
 ###################### X, Y, Z Gates ######################
 """
     xgate(::Type{MT}, num_bit::Int, bits::Ints) -> PermMatrix
@@ -165,7 +164,6 @@ end
 function controlled_U1(num_bit::Int, gate::AbstractMatrix, cbits::Vector{Int}, cvals::Vector{Int}, b2::Int)
     general_controlled_gates(num_bit, [c==1 ? mat(P1) : mat(P0) for c in cvals], cbits, [gate], [b2])
 end
-
 
 # arbituary control PermMatrix gate: SparseMatrixCSC
 # TODO: to interface

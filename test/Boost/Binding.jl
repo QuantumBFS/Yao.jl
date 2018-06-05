@@ -12,13 +12,13 @@ using Yao.Boost
 @testset "Repeated" begin
     for G in [:X, :Y, :Z]
         @eval begin
-            rb = RepeatedBlock{2, Complex128}($G, [1,2])
+            rb = RepeatedBlock{2}($G, [1,2])
             @test mat(rb) ≈ kron(mat($G), mat($G))
         end
     end
 end
 
 @testset "Multiple Control" begin
-    mcb = ControlBlock{3, Complex128}(X, [3, 2], 1)
+    mcb = ControlBlock{3}([3, 2], 1=>X)
     @test mat(mcb) ≈ mat(Toffoli)
 end

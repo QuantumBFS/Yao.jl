@@ -22,6 +22,10 @@ end
 include("CacheServers/CacheServers.jl")
 end
 
+@testset "boost" begin
+include("Boost/Boost.jl")
+end
+
 @testset "interface" begin
    include("Interfaces/Interfaces.jl")
 end

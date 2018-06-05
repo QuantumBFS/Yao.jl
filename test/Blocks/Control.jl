@@ -90,7 +90,7 @@ end
 end
 
 @testset "inverse control" begin
-    g = ControlBlock{2}([-1, ], X, 2)
+     g = ControlBlock{2}([-1, ], X, 2)
 
     op = U ⊗ mat(P0) + IMatrix(U) ⊗ mat(P1)
     @test mat(g) ≈ op
