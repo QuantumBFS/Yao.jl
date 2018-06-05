@@ -147,7 +147,6 @@ end
 
 function controlled_U1(num_bit::Int, gate::Diagonal{T}, cbits::Vector{Int}, cvals::Vector{Int}, b2::Int) where {T}
     mask = bmask(cbits...)
-    mask2 = bmask(b2)
     onemask = bmask(cbits[cvals.==1]...)
 
     a, b = gate.diag
