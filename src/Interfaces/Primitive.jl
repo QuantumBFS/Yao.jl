@@ -1,4 +1,4 @@
-export phase, shift, Rx, Ry, Rz, rot
+export H, phase, shift, Rx, Ry, Rz, rot
 
 include("PauliGates.jl")
 

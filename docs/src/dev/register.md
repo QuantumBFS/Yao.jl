@@ -8,7 +8,7 @@ by a quantum circuit.
 You can always define your own quantum register by subtyping this abstract type.
 
 ```@docs
-Yao.AbstractRegister
+AbstractRegister
 ```
 
 The interface of a `AbstractRegister` looks like:
@@ -27,7 +27,7 @@ The interface of a `AbstractRegister` looks like:
 ### Factory Methods
 
 ```@docs
-Yao.Register
+Register
 ```
 
 - `reshaped_state`: state

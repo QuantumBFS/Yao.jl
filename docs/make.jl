@@ -1,7 +1,9 @@
-using Documenter, Yao
+using Documenter, Yao, Yao.Blocks
+using Yao.LuxurySparse, Yao.CacheServers, Yao.Intrinsics
+using Yao.Registers, Yao.Interfaces
 
 makedocs(
-    modules = [Yao],
+    modules = [Yao, Yao.Blocks, Yao.LuxurySparse, Yao.CacheServers, Yao.Intrinsics, Yao.Registers, Yao.Interfaces],
     clean = false,
     format = :html,
     sitename = "Yao",
@@ -14,25 +16,25 @@ makedocs(
             "tutorial/QFT.md",
             "tutorial/QCBM.md",
         ],
-        "Manual" => Any[
-            "man/blocks.md",
-            "man/cache.md",
-            "man/functional.md",
-        ],
-        "Developer Documentation" => Any[
-            "dev/block.md",
-            "dev/register.md",
-            "dev/cache.md",
-            "dev/visualization.md",
-            "dev/unittest.md",
-            "dev/APIs.md",
-        ],
-        "Theoretical Notes" => Any[
-            "theo/register.md",
-            "theo/rotation.md",
-            "theo/grover.md",
-            "theo/blocks.md",
-        ],
+        # "Manual" => Any[
+        #     "man/blocks.md",
+        #     "man/cache.md",
+        #     "man/functional.md",
+        # ],
+        # "Developer Documentation" => Any[
+        #     "dev/block.md",
+        #     "dev/register.md",
+        #     "dev/cache.md",
+        #     "dev/visualization.md",
+        #     "dev/unittest.md",
+        #     "dev/APIs.md",
+        # ],
+        # "Theoretical Notes" => Any[
+        #     "theo/register.md",
+        #     "theo/rotation.md",
+        #     "theo/grover.md",
+        #     "theo/blocks.md",
+        # ],
     ],
     html_prettyurls = !("local" in ARGS),
     html_canonical = "https://quantumbfs.github.io/Yao.jl/latest/",

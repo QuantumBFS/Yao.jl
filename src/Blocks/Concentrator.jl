@@ -1,5 +1,11 @@
 export Concentrator
 
+"""
+    Concentrator{<:Union{Int, Tuple}} <: AbstractBlock
+
+concentrates serveral lines together in the circuit, and expose
+it to other blocks.
+"""
 struct Concentrator{T <: Union{Int, Tuple}} <: AbstractBlock
     address::T
 end
