@@ -39,11 +39,7 @@ using Yao.Intrinsics
     #@test flipbits!(bitarray([12, 2]), [2, 1]) == [15, 1]
 end
 
-#= No Longer supported
-@testset "state" begin
-    q = ghz(3)
-    p = onehot(3, UInt(0))
-    @test isapprox(p, vcat([1],zeros(7)))
-    @test isapprox(q, vcat([1/sqrt(2)],zeros(6), [1/sqrt(2)]))
+@testset "SwapBits" begin
+    msk = bmask(2,5)
+    @test swapbits(7, msk) == 21
 end
-=#
