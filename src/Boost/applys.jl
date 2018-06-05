@@ -47,7 +47,7 @@ function yapply!(state::Vector{T}, bits::Ints) where T
     end
     mask = bmask(bits...)
     do_mask = bmask(bits[1])
-    factor = T(im^length(bits))
+    factor = T(-im^length(bits))
 
     @inbounds @simd for b = basis(state)
         local temp::T
@@ -57,11 +57,11 @@ function yapply!(state::Vector{T}, bits::Ints) where T
             i_ = flip(b, mask) + 1
             temp = state[i]
             if count_ones(b&mask)%2 == 1
-                state[i] = state[i_]*factor
-                state[i_] = -temp*factor
-            else
                 state[i] = -state[i_]*factor
                 state[i_] = temp*factor
+            else
+                state[i] = state[i_]*factor
+                state[i_] = -temp*factor
             end
         end
     end
@@ -74,7 +74,7 @@ function yapply!(state::Matrix{T}, bits::Ints) where T
     end
     mask = bmask(bits...)
     do_mask = bmask(bits[1])
-    factor = T(im^length(bits))
+    factor = T(-im^length(bits))
     M, N = size(state)
 
     @simd for b = basis(state)
@@ -85,9 +85,9 @@ function yapply!(state::Matrix{T}, bits::Ints) where T
             i = b+1
             i_ = flip(b, mask) + 1
             if count_ones(b&mask)%2 == 1
-                factor_ = factor
-            else
                 factor_ = -factor
+            else
+                factor_ = factor
             end
             @simd for c = 1:N
                 temp = state[i, c]

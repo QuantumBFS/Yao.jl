@@ -21,11 +21,11 @@ function ygate(::Type{MT}, num_bit::Int, bits::Ints) where MT<:Complex
     mask = bmask(bits...)
     order = Vector{Int}(1<<num_bit)
     vals = Vector{MT}(1<<num_bit)
-    factor = MT(im)^length(bits)
+    factor = MT(-im)^length(bits)
     for b = basis(num_bit)
         i = b+1
         order[i] = flip(b, mask) + 1
-        vals[i] = count_ones(b&mask)%2 == 1 ? factor : -factor
+        vals[i] = count_ones(b&mask)%2 == 1 ? -factor : factor
     end
     PermMatrix(order, vals)
 end
