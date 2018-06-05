@@ -34,6 +34,8 @@ include("Intrinsics/Intrinsics.jl")
 include("Registers/Registers.jl")
 include("Blocks/Blocks.jl")
 
+include("Boost/Boost.jl")
+
 include("Interfaces/Interfaces.jl")
 
 @reexport using .Interfaces

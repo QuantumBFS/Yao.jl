@@ -8,6 +8,8 @@ const DInts = Union{Vector{DInt}, DInt, UnitRange{DInt}}
 Returns the UnitRange for basis in Hilbert Space of num_bit qubits.
 """
 basis(num_bit::Int) = UnitRange{DInt}(0, 1<<num_bit-1)
+basis(state::AbstractArray)::UnitRange{DInt} = UnitRange{DInt}(0, size(state, 1)-1)
+
 
 ########## BitArray views ###################
 import Base: BitArray

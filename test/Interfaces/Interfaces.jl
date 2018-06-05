@@ -27,8 +27,8 @@ end
 end
 
 @testset "control" begin
-    @test control(3, [1, 2], X, 3) isa ControlBlock
-    @test control(5, 1:2, X, 3) isa ControlBlock
+    @test control(3, [1, 2], 3=>X) isa ControlBlock
+    @test control(5, 1:2, 3=>X) isa ControlBlock
 
     @test (1=>X) |> control(8, i for i in [2, 3, 6, 7]) isa ControlBlock
     @test ((1=>X) |> control(i for i in [2, 3, 6, 7]))(8) isa ControlBlock
