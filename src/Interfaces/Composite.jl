@@ -2,8 +2,24 @@
 # 2.1 chain block
 export chain
 
-function chain(blocks::Vector)
-    ChainBlock(blocks)
+chain(n::Int) = ChainBlock(MatrixBlock{n}[])
+chain() = n -> chain(n)
+
+function chain(n, blocks)
+    _2block(x::Function) = x(n)
+    _2block(x::MatrixBlock) = x
+
+    if blocks isa Union{Function, MatrixBlock}
+        ChainBlock([_2block(blocks)])
+    else
+        ChainBlock(MatrixBlock{n}[_2block(each) for each in blocks])
+    end
+end
+
+chain(blocks) = n -> chain(n, blocks)
+
+function chain(blocks::Vector{MatrixBlock{N}}) where N
+    ChainBlock(Vector{MatrixBlock{N}}(blocks))
 end
 
 function chain(blocks::MatrixBlock{N}...) where N
@@ -49,27 +65,27 @@ kron(blocks) = N->KronBlock{N}(blocks)
 
 export C, control
 
-function control(total::Int, controls, block, addr)
-    ControlBlock{total}([controls...], block, addr)
+function control(total::Int, controls, target)
+    ControlBlock{total}([controls...], target)
 end
 
-function control(controls, block, addr)
-    total->ControlBlock{total}([controls...], block, addr)
+function control(controls, target)
+    total->ControlBlock{total}([controls...], target)
 end
 
 function control(total::Int, controls)
-    x::Pair->ControlBlock{total}([controls...], x.second, x.first)
+    x::Pair->ControlBlock{total}([controls...], x)
 end
 
 function control(controls)
     function _control(x::Pair)
-        total->ControlBlock{total}([controls...], x.second, x.first)
+        total->ControlBlock{total}([controls...], x)
     end
 end
 
 function C(controls::Int...)
     function _C(x::Pair{I, BT}) where {I, BT <: MatrixBlock}
-        total->ControlBlock{total}([controls...], x.second, x.first)
+        total->ControlBlock{total}([controls...], x)
     end
 end
 

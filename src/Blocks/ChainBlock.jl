@@ -60,7 +60,17 @@ blocks(c::ChainBlock) = c.blocks
 
 # Additional Methods for Chain
 import Base: push!, append!, prepend!
-push!(c::ChainBlock, val::MatrixBlock) = (push!(c.blocks, val); c)
+push!(c::ChainBlock{N}, val::MatrixBlock{N}) where N = (push!(c.blocks, val); c)
+
+function push!(c::ChainBlock{N, T}, val::Pair{Int, BT}) where {N, T, BT <: MatrixBlock}
+    push!(c.blocks, KronBlock{N}(val))
+    c
+end
+
+function push!(c::ChainBlock{N, T}, val::Function) where {N, T}
+    push!(c, val(N))
+end
+
 append!(c::ChainBlock, list) = (append!(c.blocks, list); c)
 prepend!(c::ChainBlock, list) = (prepend!(c.blocks, list); c)
 

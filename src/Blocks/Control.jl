@@ -24,6 +24,10 @@ mutable struct ControlBlock{BlockType, N, T} <: CompositeBlock{N, T}
     end
 end
 
+function ControlBlock{N}(ctrl_qubits::Vector{Int}, target::Pair{Int, BT}) where {N, K, T, BT <: MatrixBlock{K, T}}
+    ControlBlock{N}(ctrl_qubits, target.second, target.first)
+end
+
 function ControlBlock(ctrl_qubits::Vector{Int}, block, addr::Int)
     N = max(maximum(abs.(ctrl_qubits)), addr)
     ControlBlock{N}(ctrl_qubits, block, addr)
