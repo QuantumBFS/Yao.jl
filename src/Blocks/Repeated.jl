@@ -4,11 +4,11 @@ mutable struct RepeatedBlock{N, T, GT<:MatrixBlock} <: CompositeBlock{N, T}
     block::GT
     lines::Vector{Int}
 
-    function RepeatedBlock{N, T}(block::GT) where {N, T, GT <: MatrixBlock}
+    function RepeatedBlock{N}(block::GT) where {N, M, T, GT <: MatrixBlock{M, T}}
         new{N, T, GT}(block, Vector{Int}(1:N))
     end
 
-    function RepeatedBlock{N, T}(block::GT, lines::Vector{Int}) where {N, T, GT <: MatrixBlock}
+    function RepeatedBlock{N}(block::GT, lines::Vector{Int}) where {N, M, T, GT <: MatrixBlock{M, T}}
         new{N, T, GT}(block, lines)
     end
 end
