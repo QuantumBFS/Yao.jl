@@ -5,7 +5,7 @@ using Yao.Blocks
 
 # import Yao: xapply!, yapply!, zapply!, cxapply!, cyapply!, czapply!
 
-apply2mat(applyfunc!::Function, num_bit::Int) = applyfunc!(eye(Complex128, 1<<num_bit))
+apply2mat(applyfunc!::Function, num_bit::Int) = applyfunc!(eye(ComplexF64, 1<<num_bit))
 
 # struct Register{N, T<:Complex}
 #     state::Vector{T}

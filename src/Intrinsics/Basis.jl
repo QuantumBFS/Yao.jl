@@ -95,15 +95,16 @@ Return an integer with all bits flipped (with total number of bit `num_bit`).
 neg(index::DInt, num_bit::Int)::DInt = bmask(1:num_bit) ⊻ index
 
 """
-    swapbits(num::Int, i::Int, j::Int) -> Int
+    swapbits(num::Int, mask12::Int) -> Int
 
 Return an integer with bits at `i` and `j` flipped.
 """
-function swapbits(num::DInt, i::Int, j::Int)::DInt
-    i = i-1
-    j = j-1
-    k = (num >> j) & 1 - (num >> i) & 1
-    num + k*(1<<i) - k*(1<<j)
+function swapbits(b::Int, mask12::Int)::Int
+    bm = b&mask12
+    if bm!=0 && bm!=mask12
+        b ⊻= mask12
+    end
+    b
 end
 
 """
