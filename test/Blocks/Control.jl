@@ -5,7 +5,7 @@ using Compat.SparseArrays
 
 using Yao
 using Yao.Blocks
-import Yao.LuxurySparse: I
+using Yao.LuxurySparse
 import Yao.Blocks: _single_control_gate_sparse,
     _single_inverse_control_gate_sparse,
     A_kron_B, ControlQuBit, PhaseGate
@@ -93,7 +93,7 @@ end
     g = ControlBlock{2}([-1, ], X, 2)
 
     op = U ⊗ mat(P0) + IMatrix(U) ⊗ mat(P1)
-    @test mat(g) == op
+    @test mat(g) ≈ op
 end
 
 end # control matrix form

@@ -27,7 +27,7 @@ function zgate(::Type{MT}, num_bit::Int, bits::Ints) where MT<:Number
 end
 
 ####################### Controlled Gates #######################
-general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{Tg}, locs::Vector{Int}) where {Tg<:AbstractMatrix, Tp<:AbstractMatrix} = I(1<<num_bit) - hilbertkron(num_bit, projectors, cbits) + hilbertkron(num_bit, vcat(projectors, gates), vcat(cbits, locs))
+general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{Tg}, locs::Vector{Int}) where {Tg<:AbstractMatrix, Tp<:AbstractMatrix} = IMatrix(1<<num_bit) - hilbertkron(num_bit, projectors, cbits) + hilbertkron(num_bit, vcat(projectors, gates), vcat(cbits, locs))
 
 #### C-X/Y/Z Gates
 function cxgate(::Type{MT}, num_bit::Int, b1::Ints, b2::Ints) where MT<:Number
@@ -65,7 +65,7 @@ function czgate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) where MT<:Number
     end
     Diagonal(vals)
 end
- 
+
 
 # general multi-control single-gate
 function controlled_U1(num_bit::Int, gate::PermMatrix{T}, cbits::Vector{Int}, b2::Int) where {T}
