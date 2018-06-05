@@ -13,9 +13,10 @@ import Base: show
 
 # import package APIs
 import ..Yao: DefaultType, nqubits, address, state, focus!
+import ..Intrinsics: basis
 
 # APIs
-export nqubits, nactive, nremain, nbatch, address, state, statevec, focus!
+export nqubits, nactive, nremain, nbatch, address, state, statevec, focus!, basis
 export AbstractRegister, Register
 
 # factories

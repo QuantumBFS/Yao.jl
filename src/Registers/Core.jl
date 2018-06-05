@@ -119,6 +119,8 @@ zero_state(n::Int, nbatch::Int=1) = register(n, nbatch, :zero)
 rand_state(n::Int, nbatch::Int=1) = register(n, nbatch, :rand)
 randn_state(n::Int, nbatch::Int=1) = register(n, nbatch, :randn)
 
+basis(r::AbstractRegister) = basis(nqubits(r))
+
 # function ghz(num_bit::Int; x::DInt=zero(DInt))
 #     v = zeros(DefaultType, 1<<num_bit)
 #     v[x+1] = 1/sqrt(2)
