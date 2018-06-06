@@ -21,7 +21,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Tutorial",
     "category": "section",
-    "text": "Pages = [\n    \"tutorial/GHZ.md\",\n    \"tutorial/QCBM.md\",\n    \"tutorial/QFT.md\",\n]\nDepth = 1"
+    "text": "Pages = [\n    \"tutorial/GHZ.md\",\n    \"tutorial/QFT.md\",\n    \"tutorial/QCBM.md\",\n]\nDepth = 1"
 },
 
 {
@@ -61,7 +61,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Fourier Transform",
     "title": "Quantum Fourier Transform",
     "category": "section",
-    "text": "function QFT(n::Int)\n    circuit = chain(n)\n    for i = 1:n - 1\n        push!(circuit, i=>H)\n        g = chain(\n            control([i, ], j=>shift(-2π/(1<< (j - i + 1))))\n            for j = i+1:n\n        )\n        push!(circuit, g)\n    end\n    push!(circuit, n=>H)\nend\n\nQFT(5)"
+    "text": "using Yao\n\nfunction QFT(n::Int)\n    circuit = chain(n)\n    for i = 1:n - 1\n        push!(circuit, i=>H)\n        g = chain(\n            control([i, ], j=>shift(-2π/(1<< (j - i + 1))))\n            for j = i+1:n\n        )\n        push!(circuit, g)\n    end\n    push!(circuit, n=>H)\nend\n\nQFT(5)In Yao, factory methods for blocks will be loaded lazily. For example, if you missed the total number of qubits of chain, then it will return a function that requires an input of an integer.If you missed the total number of qubits. It is OK. Just go on, it will be filled when its possible.chain(4, repeat(1=>X), kron(2=>Y))"
 },
 
 {
