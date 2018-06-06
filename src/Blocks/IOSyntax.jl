@@ -55,7 +55,7 @@ function print_tree(
     isa(io, IOContext) && (nodebuf = IOContext(nodebuf, io))
 
     # print circuit summary
-    if (tree == roottree) && title
+    if (tree === roottree) && title
         println(io, "Total: ", nqubits(tree), ", DataType: ", datatype(tree))
     end
 
