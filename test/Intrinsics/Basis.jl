@@ -25,9 +25,18 @@ using Yao.Intrinsics
     @test indices_with(nbit, poss, vals) == filter(x-> takebit.(x, poss) == vals, basis(nbit))
 
     # bitarray version
-    # b - take bit
-    ba1 = bitarray(ind)
-    ba2 = bitarray(inds)
+    # b - bitarray and take bit
+    ba1_f = bitarray(ind)
+    ba2_f = bitarray(inds)
+    @test bsizeof(ind) == 64
+    @test size(ba1_f) == (64,)
+    @test size(ba2_f) == (64, 2)
+
+    ba1 = bitarray(ind, num_bit=4)
+    ba2 = bitarray(inds, num_bit=4)
+    @test size(ba1) == (4,)
+    @test size(ba2) == (4, 2)
+
     @test ba1[2, 1] == takebit(ind, 2)
     @test ba1[[3, 2], 1] == takebit.(ind, [3, 2])
     @test ba2[2,:] == takebit.([ind, 2], 2)
@@ -43,3 +52,14 @@ end
     msk = bmask(2,5)
     @test swapbits(7, msk) == 21
 end
+
+@testset "EasyBasis" begin
+    @test bdistance(1,7) == 2
+    @test bitarray(2, num_bit=4) == [false, true, false, false]
+    @test packbits(BitArray([true, true, true])) == 7
+
+    @test packbits(bitarray(3, num_bit=10)) == 3
+    @test packbits(bitarray([5,3,7,21], num_bit=10)) == [5, 3, 7, 21]
+end
+
+

@@ -15,10 +15,10 @@ export hilbertkron
 # Basis
 export DInt, Ints, DInts
 export basis, bmask
-export bit_length, log2i
+export bit_length, log2i, bsizeof
 export testall, testany, testval, setbit, flip, neg, swapbits, takebit
-export indices_with, bitarray
-
+export indices_with, bitarray, packbits
+export bdistance
 
 include("Math.jl")
 include("Basis.jl")

@@ -13,25 +13,23 @@ basis(state::AbstractArray)::UnitRange{DInt} = UnitRange{DInt}(0, size(state, 1)
 
 ########## BitArray views ###################
 import Base: BitArray
-function bitarray(v::Vector{T}) where T<:Number
-    xdim = sizeof(eltype(v))*8
+function bitarray(v::Vector{T}; num_bit::Int=bsizeof(T)) where T<:Number
+    xdim = bsizeof(T)
     #ba = BitArray{2}(0, 0)
     ba = BitArray(0, 0)
     ba.chunks = reinterpret(DInt, v)
     ba.dims = (xdim, length(v))
     ba.len = xdim*length(v)
-    return ba
+    return ba[1:num_bit, :]
 end
+bitarray(v::T; num_bit=bsizeof(T)) where T<:Number = vec(bitarray([v], num_bit=num_bit))
 
-function bitarray(v::Vector{DInt})
-    ba = BitArray{2}(0, 0)
-    #ba = BitArray(undef, (0, 0))
-    ba.chunks = v
-    ba.dims = (64, length(v))
-    ba.len = 64*length(v)
-    return ba
-end
-bitarray(v::Number) = bitarray([v])
+"""
+    packbits(arr::AbstractArray) -> AbstractArray
+
+pack bits to integers, usually take a BitArray as input.
+"""
+packbits(arr::AbstractArray) = slicedim(sum(mapslices(x -> x .* (1 .<< (0:size(arr, 1)-1)), arr, 1), 1), 1, 1)
 
 ########## Bit-Wise Operations ##############
 """
@@ -118,3 +116,17 @@ function indices_with(num_bit::Int, poss::Vector{Int}, vals::Vector{Int})::Vecto
     onemask = bmask(poss[vals.!=0]...)
     filter(x->testval(x, mask, onemask), basis(num_bit))
 end
+
+"""
+    bsizeof(x) -> Int
+
+Return the size of object, in number of bit.
+"""
+bsizeof(x)::Int = sizeof(x) << 3
+
+"""
+    bdistance(i::DInt, j::DInt) -> Int
+
+Return number of different bits.
+"""
+bdistance(i::DInt, j::DInt)::Int = count_ones(i⊻j)
