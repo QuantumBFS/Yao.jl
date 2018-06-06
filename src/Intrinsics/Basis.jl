@@ -18,9 +18,9 @@ function bitarray(v::Vector{T}; num_bit::Int=bsizeof(T)) where T<:Number
     #ba = BitArray{2}(0, 0)
     ba = BitArray(0, 0)
     ba.len = xdim*length(v)
-    ba.len%bsizeof(DInt) == 0 || throw(ArgumentError("Illegal size of vector!"))
+    ba.len%64 == 0 || throw(ArgumentError("Illegal size of vector!"))
 
-    ba.chunks = reinterpret(DInt, v)
+    ba.chunks = reinterpret(UInt64, v)
     ba.dims = (xdim, length(v))
     return ba[1:num_bit, :]
 end
@@ -100,7 +100,7 @@ neg(index::DInt, num_bit::Int)::DInt = bmask(1:num_bit) ⊻ index
 
 Return an integer with bits at `i` and `j` flipped.
 """
-function swapbits(b::Int, mask12::Int)::Int
+function swapbits(b::DInt, mask12::DInt)::DInt
     bm = b&mask12
     if bm!=0 && bm!=mask12
         b ⊻= mask12
