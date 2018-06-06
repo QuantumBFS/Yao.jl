@@ -14,8 +14,8 @@ future, before quantum computer being used in large-scale.
 ```@contents
 Pages = [
     "tutorial/GHZ.md",
-    "tutorial/QCBM.md",
     "tutorial/QFT.md",
+    "tutorial/QCBM.md",
 ]
 Depth = 1
 ```

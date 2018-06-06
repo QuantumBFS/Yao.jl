@@ -2,6 +2,8 @@ export cache, pull, update_cache, clearall!
 
 const DefaultCacheServer = get_server(MatrixBlock, CacheFragment)
 
+cache(x::Function, level::Int=1; recursive=false) = n->cache(x(n), level; recursive=recursive)
+
 function cache(x::MatrixBlock, level::Int=1; recursive=false)
     cache(DefaultCacheServer, x, level, recursive=recursive)
 end

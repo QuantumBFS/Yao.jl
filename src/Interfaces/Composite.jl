@@ -27,7 +27,8 @@ end
 # 2.1 chain block
 export chain
 
-chain(n::Int) = ChainBlock(MatrixBlock{n}[])
+chain(::Type{T}, n::Int) where T = ChainBlock{n, T}([])
+chain(n::Int) = chain(DefaultType, n)
 chain() = n -> chain(n)
 
 function chain(n::Int, blocks)

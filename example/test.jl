@@ -24,7 +24,7 @@ TEST = kron(4, X, 3=>Z)
 
 new_block = @compose 8 begin
 
-    @line begin
+    @compose begin
         2=>X; 3=>Y; 5=>Z
     end
     3=>kron(X, Y, Z)
