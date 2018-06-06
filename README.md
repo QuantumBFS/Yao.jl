@@ -11,9 +11,17 @@ Flexible, Extensible, Efficient Framework for Quantum Algorithm Design.
 
 ## Project Goals
 
+Quantum computing is approaching. However, in the near term future, we will not be able to directly test our algorithm on a real quantum computer. Moreover, the way for quantum programming is still under development. We will need a classical playground to let us explore the world of quantum algorithms, quantum programming and even quantum information. Furthermore, recently progress on self-adaptive quantum algorithms like QAOA, quantum circuit born machines, etc. can not be analysed directly by theoretical tools, and they require numerical simulation.
+
+Our framework, Yao, aims to provide flexible utilities for simulating your own algorithms, which means you should be able to simulate your quantum algorithm with any possible numerical approach that maximize the machine performance without making everything a black box. We provide hierachical APIs for different development purpose. By overloading interfaces and defining new subtypes you will be able to create whatever you want for your simulation.
+
+## Contribution
+
+We do not accept PR at the moment. But if there is any comments please leave us an issue. We will start accepting PRs after v0.2.
+
 ## Installation
 
-The package is not registered yet.
+The package is registering. Use this command in REPL to add it at the moment.
 
 ```julia
 julia> Pkg.clone("https://github.com/QuantumBFS/Yao.jl.git")
@@ -21,5 +29,7 @@ julia> Pkg.clone("https://github.com/QuantumBFS/Yao.jl.git")
 
 ## Documentation
 
-- [**STABLE**]()
+The documentation is under development. There is only a few demos at the moment.
+
+- [**STABLE**](https://quantumbfs.github.io/Yao.jl/stable)
 - [**LATEST**](https://quantumbfs.github.io/Yao.jl/latest)
