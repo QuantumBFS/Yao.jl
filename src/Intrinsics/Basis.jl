@@ -17,9 +17,11 @@ function bitarray(v::Vector{T}; num_bit::Int=bsizeof(T)) where T<:Number
     xdim = bsizeof(T)
     #ba = BitArray{2}(0, 0)
     ba = BitArray(0, 0)
+    ba.len = xdim*length(v)
+    ba.len%bsizeof(DInt) == 0 || throw(ArgumentError("Illegal size of vector!"))
+
     ba.chunks = reinterpret(DInt, v)
     ba.dims = (xdim, length(v))
-    ba.len = xdim*length(v)
     return ba[1:num_bit, :]
 end
 bitarray(v::T; num_bit=bsizeof(T)) where T<:Number = vec(bitarray([v], num_bit=num_bit))
