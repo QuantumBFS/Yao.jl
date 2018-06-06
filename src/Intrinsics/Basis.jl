@@ -13,16 +13,13 @@ basis(state::AbstractArray)::UnitRange{DInt} = UnitRange{DInt}(0, size(state, 1)
 
 ########## BitArray views ###################
 import Base: BitArray
-function bitarray(v::Vector{T}; num_bit::Int=bsizeof(T)) where T<:Number
-    xdim = bsizeof(T)
+function bitarray(v::Vector{T}; num_bit::Int=64) where T<:Number
     #ba = BitArray{2}(0, 0)
     ba = BitArray(0, 0)
-    ba.len = xdim*length(v)
-    ba.len%64 == 0 || throw(ArgumentError("Illegal size of vector!"))
-
-    ba.chunks = reinterpret(UInt64, v)
-    ba.dims = (xdim, length(v))
-    return ba[1:num_bit, :]
+    ba.len = 64*length(v)
+    ba.chunks = UInt64.(v)
+    ba.dims = (64, length(v))
+    return view(ba, 1:num_bit, :)
 end
 bitarray(v::T; num_bit=bsizeof(T)) where T<:Number = vec(bitarray([v], num_bit=num_bit))
 
