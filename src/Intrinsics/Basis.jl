@@ -13,25 +13,38 @@ basis(state::AbstractArray)::UnitRange{DInt} = UnitRange{DInt}(0, size(state, 1)
 
 ########## BitArray views ###################
 import Base: BitArray
-function bitarray(v::Vector{T}) where T<:Number
-    xdim = sizeof(eltype(v))*8
+"""
+    bitarray(v::Vector; num_bit::Int=64) -> BitArray
+    bitarray(v::T; num_bit=bsizeof(T)) -> BitArray
+
+Construct BitArray from an integer vector, the lazy non-efficient version.
+"""
+function bitarray(v::Vector{T}; num_bit::Int=64) where T<:Number
     #ba = BitArray{2}(0, 0)
     ba = BitArray(0, 0)
-    ba.chunks = reinterpret(DInt, v)
-    ba.dims = (xdim, length(v))
-    ba.len = xdim*length(v)
-    return ba
+    ba.len = 64*length(v)
+    ba.chunks = UInt64.(v)
+    ba.dims = (64, length(v))
+    view(ba, 1:num_bit, :)
 end
 
-function bitarray(v::Vector{DInt})
-    ba = BitArray{2}(0, 0)
-    #ba = BitArray(undef, (0, 0))
-    ba.chunks = v
-    ba.dims = (64, length(v))
+function bitarray(v::Vector{T}) where T<:Union{UInt64, Int64}
+    #ba = BitArray{2}(0, 0)
+    ba = BitArray(0, 0)
     ba.len = 64*length(v)
-    return ba
+    ba.chunks = reinterpret(UInt64, v)
+    ba.dims = (64, length(v))
+    ba
 end
-bitarray(v::Number) = bitarray([v])
+
+bitarray(v::T; num_bit=64) where T<:Number = vec(bitarray([v], num_bit=num_bit))
+
+"""
+    packbits(arr::AbstractArray) -> AbstractArray
+
+pack bits to integers, usually take a BitArray as input.
+"""
+packbits(arr::AbstractArray) = slicedim(sum(mapslices(x -> x .* (1 .<< (0:size(arr, 1)-1)), arr, 1), 1), 1, 1)
 
 ########## Bit-Wise Operations ##############
 """
@@ -100,7 +113,7 @@ neg(index::DInt, num_bit::Int)::DInt = bmask(1:num_bit) ⊻ index
 
 Return an integer with bits at `i` and `j` flipped.
 """
-function swapbits(b::Int, mask12::Int)::Int
+function swapbits(b::DInt, mask12::DInt)::DInt
     bm = b&mask12
     if bm!=0 && bm!=mask12
         b ⊻= mask12
@@ -118,3 +131,17 @@ function indices_with(num_bit::Int, poss::Vector{Int}, vals::Vector{Int})::Vecto
     onemask = bmask(poss[vals.!=0]...)
     filter(x->testval(x, mask, onemask), basis(num_bit))
 end
+
+"""
+    bsizeof(x) -> Int
+
+Return the size of object, in number of bit.
+"""
+bsizeof(x)::Int = sizeof(x) << 3
+
+"""
+    bdistance(i::DInt, j::DInt) -> Int
+
+Return number of different bits.
+"""
+bdistance(i::DInt, j::DInt)::Int = count_ones(i⊻j)
