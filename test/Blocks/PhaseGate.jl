@@ -26,7 +26,6 @@ end
 g = PhaseGate{:shift, Float64}(pi)
 reg = rand_state(1)
 @test mat(g) * state(reg) ≈ state(apply!(reg, g))
-@test mat(g) * state(reg) ≈ state(g(reg))
 end
 
 @testset "compare" begin

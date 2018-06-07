@@ -35,7 +35,7 @@ using Yao.Blocks
     @test nactive(reg) == length(2:3) + 1
     @test address(reg) == UInt[3, 2, 6, 8, 5, 1, 4, 7]
 
-    reg |> focus(1:8)
+    apply!(reg, focus(1:8))
     @test nactive(reg) == 8
     @test address(reg) == UInt[3, 2, 6, 8, 5, 1, 4, 7]
 end

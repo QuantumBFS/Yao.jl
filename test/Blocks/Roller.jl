@@ -49,15 +49,15 @@ end
 
 @testset "tile one block" begin
 g = Roller{5}(X())
-@test state(g(register(bit"11111"))) == state(register(bit"00000"))
-@test state(g(register(bit"11111", 3))) == state(register(bit"00000", 3))
+@test state(apply!(register(bit"11111"), g)) == state(register(bit"00000"))
+@test state(apply!(register(bit"11111", 3), g)) == state(register(bit"00000", 3))
 end
 
 @testset "roll multiple blocks" begin
 g = Roller{5, ComplexF64}((X(), Y(), Z(), X(), X()))
 tg = kron(5, X(), Y(), Z(), X(), X())
-@test state(g(register(bit"11111"))) == state(tg(register(bit"11111")))
-@test state(g(register(bit"11111", 3))) == state(tg(register(bit"11111", 3)))
+@test state(apply!(register(bit"11111"), g)) == state(apply!(register(bit"11111"), tg))
+@test state(apply!(register(bit"11111", 3), g)) == state(apply!(register(bit"11111", 3), tg))
 end
 
 @testset "matrix" begin

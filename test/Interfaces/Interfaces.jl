@@ -59,8 +59,6 @@ end
 
 @testset "pauli gates binding" begin
     @test X isa XGate{ComplexF64}
-    @test X(4, 2) isa KronBlock
-    @test X(4, 1:3) isa KronBlock
 end
 
 @testset "gate" begin
