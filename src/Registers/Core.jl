@@ -89,11 +89,6 @@ eltype(r::AbstractRegister{B, T}) where {B, T} = T
 
 # Factory Methods
 
-# set unsigned conversion rules for nbatch
-function register(::Type{RT}, raw, nbatch::Int) where RT
-    register(RT, raw, unsigned(nbatch))
-end
-
 # set default register
 function register(raw, nbatch::Int=1)
     register(DefaultRegister, raw, nbatch)
@@ -120,6 +115,18 @@ rand_state(n::Int, nbatch::Int=1) = register(n, nbatch, :rand)
 randn_state(n::Int, nbatch::Int=1) = register(n, nbatch, :randn)
 
 basis(r::AbstractRegister) = basis(nqubits(r))
+
+import Base: +, -, kron
+
+for op in [:+, :-]
+    @eval function ($op)(lhs::RT, rhs::AbstractRegister{B}) where {B, RT <: AbstractRegister{B}}
+        register(RT, ($op)(state(lhs), state(rhs)), Int(B))
+    end
+end
+
+function kron(lhs::RT, rhs::AbstractRegister{B}) where {B, RT <: AbstractRegister{B}}
+    register(RT, kron(state(rhs), state(lhs)), Int(B))
+end
 
 # function ghz(num_bit::Int; x::DInt=zero(DInt))
 #     v = zeros(DefaultType, 1<<num_bit)

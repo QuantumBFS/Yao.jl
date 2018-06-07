@@ -11,9 +11,9 @@ mutable struct DefaultRegister{B, T} <: AbstractRegister{B, T}
 
     nactive::Int # this is the total number of active qubits
     # NOTE: we should replace this with a static mutable vector in the future
-    address::Vector{UInt} # this indicates the absolute address of each qubit
+    address::Vector{Int} # this indicates the absolute address of each qubit
 
-    function DefaultRegister(raw::Matrix{T}, address::Vector{UInt}, nactive::UInt, nbatch::Int) where T
+    function DefaultRegister(raw::Matrix{T}, address::Vector{Int}, nactive::Int, nbatch::Int) where T
         active_len, remain_len = _len_active_remain(raw, nbatch)
 
         ispow2(active_len) && ispow2(remain_len) ||
@@ -30,7 +30,7 @@ end
 
 function DefaultRegister(raw::Matrix, nbatch::Int)
     active_len, remain_len = _len_active_remain(raw, nbatch)
-    N = unsigned(log2i(active_len * remain_len))
+    N = log2i(active_len * remain_len)
     DefaultRegister(raw, collect(0x1:N), N, nbatch)
 end
 
@@ -53,22 +53,22 @@ function similar(r::DefaultRegister{B, T}) where {B, T}
 end
 
 # factory methods
-register(::Type{DefaultRegister}, raw, nbatch::Int) = DefaultRegister(raw, nbatch)
+register(::Type{<:DefaultRegister}, raw, nbatch::Int) = DefaultRegister(raw, nbatch)
 
-function register(::Val{:zero}, ::Type{DefaultRegister}, ::Type{T}, n::Int, nbatch::Int) where T
+function register(::Val{:zero}, ::Type{<:DefaultRegister}, ::Type{T}, n::Int, nbatch::Int) where T
     raw = zeros(T, 1 << n, nbatch)
     raw[1, :] .= 1
     DefaultRegister(raw, nbatch)
 end
 
-function register(::Val{:rand}, ::Type{DefaultRegister}, ::Type{T}, n::Int, nbatch::Int) where T
+function register(::Val{:rand}, ::Type{<:DefaultRegister}, ::Type{T}, n::Int, nbatch::Int) where T
     theta = rand(real(T), 1 << n, nbatch)
     radius = rand(real(T), 1 << n, nbatch)
     raw = @. radius * exp(im * theta)
     DefaultRegister(batch_normalize!(raw), nbatch)
 end
 
-function register(::Val{:randn}, ::Type{DefaultRegister}, ::Type{T}, n::Int, nbatch::Int) where T
+function register(::Val{:randn}, ::Type{<:DefaultRegister}, ::Type{T}, n::Int, nbatch::Int) where T
     theta = randn(real(T), 1 << n, nbatch)
     radius = randn(real(T), 1 << n, nbatch)
     raw = @. radius * exp(im * theta)
