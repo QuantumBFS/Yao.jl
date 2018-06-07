@@ -39,7 +39,6 @@ end
 g = RotationGate(X, 0.1)
 reg = rand_state(1)
 @test mat(g) * state(reg) == state(apply!(reg, g))
-@test mat(g) * state(reg) == state(g(reg))
 end
 
 @testset "hash & compare" begin

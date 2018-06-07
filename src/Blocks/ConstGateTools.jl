@@ -129,15 +129,6 @@ function define_callables(name)
             # factory methods
             (::$(esc(gt_name)))() = $(esc(gt_name)){$DefaultType}()
             (::$(esc(gt_name)))(::Type{T}) where {T <: Complex} = $(esc(gt_name)){T}()
-
-            # forward to apply! if the first arg is a register
-            (gate::$(esc(gt_name)))(r::AbstractRegister, params...) = Blocks.apply!(r, gate, params...)
-
-            # # define shortcuts
-            # (gate::$(esc(gt_name)))(itr) = RangedBlock(gate, itr)
-
-            # TODO: use Repeated instead
-            (gate::$(esc(gt_name)))(n::Int, itr) = Yao.Blocks.KronBlock{n}(i=>$(esc(name)) for i in itr)
         end
     end
 end
