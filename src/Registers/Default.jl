@@ -47,6 +47,7 @@ state(r::DefaultRegister) = r.state
 statevec(r::DefaultRegister{B}) where B = reshape(r.state, 1 << nqubits(r), B)
 statevec(r::DefaultRegister{1}) = reshape(r.state, 1 << nqubits(r))
 copy(r::DefaultRegister) = DefaultRegister(r)
+normalize!(r::DefaultRegister) = (batch_normalize!(r.state); r)
 
 function similar(r::DefaultRegister{B, T}) where {B, T}
     DefaultRegister(similar(r.state), copy(r.address), r.nactive, B)

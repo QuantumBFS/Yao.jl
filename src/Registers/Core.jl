@@ -128,6 +128,10 @@ function kron(lhs::RT, rhs::AbstractRegister{B}) where {B, RT <: AbstractRegiste
     register(RT, kron(state(rhs), state(lhs)), Int(B))
 end
 
+import Base: normalize!
+
+normalize!(r::AbstractRegister) = throw(MethodError(:normalize!, r))
+
 # function ghz(num_bit::Int; x::DInt=zero(DInt))
 #     v = zeros(DefaultType, 1<<num_bit)
 #     v[x+1] = 1/sqrt(2)
