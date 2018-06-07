@@ -53,7 +53,7 @@ function similar(r::DefaultRegister{B, T}) where {B, T}
 end
 
 # factory methods
-register(::Type{<:DefaultRegister}, raw, nbatch::Int) = DefaultRegister(batch_normalize!(raw), nbatch)
+register(::Type{<:DefaultRegister}, raw, nbatch::Int) = DefaultRegister(raw, nbatch)
 
 function register(::Val{:zero}, ::Type{<:DefaultRegister}, ::Type{T}, n::Int, nbatch::Int) where T
     raw = zeros(T, 1 << n, nbatch)
