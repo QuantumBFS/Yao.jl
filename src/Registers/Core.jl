@@ -14,7 +14,6 @@ data type.
 | `nactive(reg)` | get the number of active qubits.                                                                                     |                  |
 | `nremain(reg)` | get the number of remained qubits.                                                                                   | nqubits - nactive |
 | `nbatch(reg)`  | get the number of batch.                                                                                             | `B`              |
-| `address(reg)` | get the address of this register.                                                                                    |                  |
 | `state(reg)`   | get the state of this register. It always return the matrix stored inside.                                           |                  |
 | `eltype(reg)`  | get the element type stored by this register on classical memory. (the type Julia should use to represent amplitude) | `T`              |
 | `copy(reg)`    | copy this register.                                                                                                  |                  |
@@ -36,8 +35,6 @@ a register with no batch, or a register with a MPS state, etc.)
     we should only overload this operation and do not overload `*(reg, op)`.
 
 ### Pack Address
-
-    pack_address!(reg, addrs)
 
 pack `addrs` together to the first k-dimensions.
 
