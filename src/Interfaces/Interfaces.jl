@@ -20,7 +20,7 @@ include("Composite.jl")
 include("Measure.jl")
 include("Cache.jl")
 
-export with, with!
+export on, on!, with, with!
 
 function with(f::Function, r::AbstractRegister)
     f(copy(r))
@@ -30,11 +30,11 @@ function with!(f::Function, r::AbstractRegister)
     f(r)
 end
 
-function with(r::AbstractRegister, params...)
+function on(r::AbstractRegister, params...)
     block->apply!(copy(r), block, params...)
 end
 
-function with!(r::AbstractRegister, params...)
+function on!(r::AbstractRegister, params...)
     block->apply!(r, block, params...)
 end
 
