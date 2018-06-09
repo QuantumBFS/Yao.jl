@@ -12,11 +12,11 @@ import Base: eltype, copy, similar, *
 import Base: show
 
 # import package APIs
-import ..Yao: DefaultType, nqubits, address, state, focus!
+import ..Yao: DefaultType, nqubits, state, focus!, relax!
 import ..Intrinsics: basis
 
 # APIs
-export nqubits, nactive, nremain, nbatch, address, state, statevec, focus!, basis
+export nqubits, nactive, nremain, nbatch, state, statevec, hypercubic, focus!, relax!, basis
 export AbstractRegister, Register
 
 # factories

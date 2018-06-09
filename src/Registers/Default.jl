@@ -1,96 +1,133 @@
 export DefaultRegister
 
-@inline function _len_active_remain(raw::Matrix, nbatch)
-    active_len, nbatch_and_remain = size(raw)
-    remain_len = nbatch_and_remain ÷ nbatch
-    active_len, remain_len
-end
-
 mutable struct DefaultRegister{B, T} <: AbstractRegister{B, T}
     state::Matrix{T} # this stores a batched state
-    nqubits::Int # this is the total number of active qubits
 
-    function DefaultRegister(raw::Matrix{T}, nqubits::Int, nbatch::Int) where T
-        active_len, remain_len = _len_active_remain(raw, nbatch)
-
-        ispow2(active_len) && ispow2(remain_len) ||
+    function DefaultRegister(raw::Matrix{T}, nbatch::Int=1) where T
+        ispow2(size(raw, 1)) && ispow2(size(raw, 2)/nbatch) ||
             throw(Compat.InexactError(:DefaultRegister, DefaultRegister, raw))
-
-        new{nbatch, T}(raw, nqubits)
+        new{nbatch, T}(raw)
     end
 
     # copy method
     function DefaultRegister(r::DefaultRegister{B, T}) where {B, T}
-        new{B, T}(copy(r.state), nqubits(r))
+        new{B, T}(copy(r.state))
     end
 end
 
-function DefaultRegister(raw::Matrix, nbatch::Int)
+function DefaultRegister(raw::Vector)
     active_len, remain_len = _len_active_remain(raw, nbatch)
     N = log2i(active_len * remain_len)
     DefaultRegister(raw, N, nbatch)
 end
 
-#function DefaultRegister(raw::Vector, nbatch::Int)
-    #DefaultRegister(repeat(raw, inner=(1, nbatch)), nbatch)
-#end
-
 # Required Properties
 
-nqubits(r::DefaultRegister) = r.nqubits
+nqubits(r::DefaultRegister{B}) where B = length(r.state) ÷ B
 nactive(r::DefaultRegister) = log2i(size(state(r), 1))
 state(r::DefaultRegister) = r.state
-statevec(r::DefaultRegister{B}) where B = reshape(r.state, 1 << nqubits(r), B)
-statevec(r::DefaultRegister{1}) = reshape(r.state, 1 << nqubits(r))
+statevec(r::DefaultRegister{B}) where B = reshape(r.state, :, B)
+statevec(r::DefaultRegister{1}) = reshape(r.state, :)
+hypercubic(reg::DefaultRegister{B}) where B = reshape(reg.state, fill(2, nqubits(reg))..., B)
+hypercubic(reg::DefaultRegister{1}) = reshape(reg.state, fill(2, nqubits(reg))...)
 copy(r::DefaultRegister) = DefaultRegister(r)
 normalize!(r::DefaultRegister) = (batch_normalize!(r.state); r)
 
 function similar(r::DefaultRegister{B, T}) where {B, T}
-    DefaultRegister(similar(r.state), nqubits(r), B)
+    DefaultRegister(similar(r.state), B)
 end
 
-# factory methods
-register(::Type{<:DefaultRegister}, raw, nbatch::Int) = DefaultRegister(raw, nbatch)
+# -> zero_state is an easier interface
+zero_state(::Type{T}, n::Int, nbatch::Int=1) = DefaultRegister(zeros(T, 1<<n, nbatch))
+rand_state(::Type{T}, n::Int, nbatch::Int=1) = DefaultRegister(zeros(T, 1<<n, nbatch))
 
-function register(::Val{:zero}, ::Type{<:DefaultRegister}, ::Type{T}, n::Int, nbatch::Int) where T
-    raw = zeros(T, 1 << n, nbatch)
-    raw[1, :] .= 1
-    DefaultRegister(raw, nbatch)
+for FUNC in [:zero_state, :rand_state]
+    @eval FUNC(n::Int, nbatch::Int=1) = FUNC(ComplexF64, n, nbatch)
 end
 
-function register(::Val{:rand}, ::Type{<:DefaultRegister}, ::Type{T}, n::Int, nbatch::Int) where T
-    theta = rand(real(T), 1 << n, nbatch)
-    radius = rand(real(T), 1 << n, nbatch)
-    raw = @. radius * exp(im * theta)
-    DefaultRegister(batch_normalize!(raw), nbatch)
+# set default register
+function register(raw, nbatch::Int=1)
+    register(DefaultRegister, raw, nbatch)
 end
 
-function register(::Val{:randn}, ::Type{<:DefaultRegister}, ::Type{T}, n::Int, nbatch::Int) where T
-    theta = randn(real(T), 1 << n, nbatch)
-    radius = randn(real(T), 1 << n, nbatch)
-    raw = @. radius * exp(im * theta)
-    DefaultRegister(batch_normalize!(raw), nbatch)
+# enable multiple dispatch for different initializers
+function register(::Type{RT}, ::Type{T}, n::Int, nbatch::Int, method::Symbol) where {RT, T}
+    register(Val(method), RT, T, n, nbatch)
 end
+
+# config default eltype
+register(n::Int, nbatch::Int, method::Symbol) = register(DefaultType, n, nbatch, method)
+
+# shortcuts
+#zero_state(n::Int, nbatch::Int=1) = register(n, nbatch, :zero)
+#rand_state(n::Int, nbatch::Int=1) = register(n, nbatch, :rand)
+#randn_state(n::Int, nbatch::Int=1) = register(n, nbatch, :randn)
+
+
+#function register(::Val{:rand}, ::Type{<:DefaultRegister}, ::Type{T}, n::Int, nbatch::Int) where T
+#    theta = rand(real(T), 1 << n, nbatch)
+#    radius = rand(real(T), 1 << n, nbatch)
+#    raw = @. radius * exp(im * theta)
+#    DefaultRegister(batch_normalize!(raw), nbatch)
+#end
+
+#function register(::Val{:randn}, ::Type{<:DefaultRegister}, ::Type{T}, n::Int, nbatch::Int) where T
+#    theta = randn(real(T), 1 << n, nbatch)
+#    radius = randn(real(T), 1 << n, nbatch)
+#    raw = @. radius * exp(im * theta)
+#    DefaultRegister(batch_normalize!(raw), nbatch)
+#end
+
+#randn_state(n::Int, nbatch::Int=1) = register(n, nbatch, :randn)
 
 # NOTE: we use relative address here
 # the input are desired orders of current
 # address, not the desired address.
 # orders here can be any iterable
 
-##### super inefficient!
+##############################################
+#            focus! and relax!
+##############################################
 Ints = Union{Vector{Int}, UnitRange{Int}, Int}
+move_ahead(ndim::Int, head::Ints) = vcat(head, setdiff(1:ndim, head))
+
+function group_permutedims(arr::AbstractArray, order::Vector{Int})
+    nshape, norder = shapeorder(size(arr), order)
+    permutedims(reshape(arr, nshape...), norder)
+end
+
 function focus!(reg::DefaultRegister{B}, bits::Ints) where B
     nbit = nqubits(reg)
-    norder = vcat(bits, setdiff(1:nbit, bits), nbit+1)
-    @views reg.state = reshape(permutedims(reshape(reg.state, fill(2, nbit)...,B), norder), :, (1<<(nbit-length(bits)))*B)
+    norder = move_ahead(nbit+(B==1 ? 0 : 1), bits)
+    reg.state = reshape(group_permutedims(reg |> hypercubic, norder), :, (1<<(nbit-length(bits)))*B)
     reg
 end
 
 function relax!(reg::DefaultRegister{B}, bits::Ints) where B
     nbit = nqubits(reg)
-    norder = vcat(bits, setdiff(1:nbit, bits), nbit+1) |> invperm
-    @views reg.state = reshape(permutedims(reshape(reg.state, fill(2, nbit)...,B), norder), :, B)
+    norder = move_ahead(nbit+(B==1 ? 0 : 1), bits) |> invperm
+    reg.state = reshape(group_permutedims(reg |> hypercubic, norder), :, B)
     reg
+end
+
+"""
+Get the compact shape and order for permutedims.
+"""
+function shapeorder(shape::NTuple, order::Vector{Int})
+    nshape = Int[]
+    norder = Int[]
+    k_pre = -1
+    for k in order
+        if k == k_pre+1
+            nshape[end] *= shape[k]
+        else
+            push!(norder, k)
+            push!(nshape, shape[k])
+        end
+        k_pre = k
+    end
+    invorder = norder |> sortperm
+    nshape[invorder], invorder |> invperm
 end
 
 # we convert state to a vector to use
