@@ -88,11 +88,17 @@ eltype(r::AbstractRegister{B, T}) where {B, T} = T
 
 basis(r::AbstractRegister) = basis(nqubits(r))
 
-import Base: +, -, kron
+import Base: +, -, kron, ==, !=
 
 for op in [:+, :-]
-    @eval function ($op)(lhs::RT, rhs::AbstractRegister{B}) where {B, RT <: AbstractRegister{B}}
-        register(RT, ($op)(state(lhs), state(rhs)), Int(B))
+    @eval function ($op)(lhs::RT, rhs::RT) where {RT <: AbstractRegister}
+        RT(($op)(state(lhs), state(rhs)))
+    end
+end
+
+for op in [:(==)]
+    @eval function ($op)(lhs::RT, rhs::RT) where RT <: AbstractRegister
+        ($op)(state(lhs), state(rhs))
     end
 end
 

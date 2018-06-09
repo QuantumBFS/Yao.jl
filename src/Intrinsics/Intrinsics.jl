@@ -19,6 +19,7 @@ export bit_length, log2i, bsizeof
 export testall, testany, testval, setbit, flip, neg, swapbits, takebit
 export indices_with, bitarray, packbits
 export bdistance
+export onehotvec
 
 include("Math.jl")
 include("Basis.jl")

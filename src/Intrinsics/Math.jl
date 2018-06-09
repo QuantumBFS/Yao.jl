@@ -103,6 +103,9 @@ function _wrap_identity(data_list::Vector{T}, num_bit_list::Vector{Int}) where T
     end
 end
 
+import Base: randn, invperm
+randn(T::Type{Complex{F}}, n::Int...) where F = randn(F, n...) + im*randn(F, n...)
+
 function invperm(order)
     v = similar(order)
     @inbounds @simd for i=1:length(order)

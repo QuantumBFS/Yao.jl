@@ -145,3 +145,14 @@ bsizeof(x)::Int = sizeof(x) << 3
 Return number of different bits.
 """
 bdistance(i::DInt, j::DInt)::Int = count_ones(i⊻j)
+
+"""
+    onehotvec(::Type{T}, num_bit::Int, x::DInt) -> Vector{T}
+
+one-hot wave vector.
+"""
+function onehotvec(::Type{T}, num_bit::Int, x::DInt) where T
+    v = zeros(T, 1<<num_bit)
+    v[x+1] = 1
+    v
+end

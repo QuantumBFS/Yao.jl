@@ -3,10 +3,10 @@ export DefaultRegister
 mutable struct DefaultRegister{B, T} <: AbstractRegister{B, T}
     state::Matrix{T} # this stores a batched state
 
-    function DefaultRegister(raw::Matrix{T}, nbatch::Int=1) where T
-        ispow2(size(raw, 1)) && ispow2(size(raw, 2)/nbatch) ||
+    function DefaultRegister{B, T}(raw::Matrix{T}) where {B, T}
+        ispow2(size(raw, 1)) && ispow2(size(raw, 2) ÷ B) ||
             throw(Compat.InexactError(:DefaultRegister, DefaultRegister, raw))
-        new{nbatch, T}(raw)
+        new{B, T}(raw)
     end
 
     # copy method
@@ -15,77 +15,35 @@ mutable struct DefaultRegister{B, T} <: AbstractRegister{B, T}
     end
 end
 
-function DefaultRegister(raw::Vector)
-    active_len, remain_len = _len_active_remain(raw, nbatch)
-    N = log2i(active_len * remain_len)
-    DefaultRegister(raw, N, nbatch)
-end
+DefaultRegister{B}(raw::Matrix{T}) where {B, T} = DefaultRegister{B, T}(raw)
+
+# register without batch
+register(raw::Vector) = DefaultRegister{1}(reshape(raw, :, 1))
+register(raw::Matrix) = DefaultRegister{size(raw, 2)}(raw)
 
 # Required Properties
 
-nqubits(r::DefaultRegister{B}) where B = length(r.state) ÷ B
+nqubits(r::DefaultRegister{B}) where B = log2i(length(r.state) ÷ B)
 nactive(r::DefaultRegister) = log2i(size(state(r), 1))
 state(r::DefaultRegister) = r.state
 statevec(r::DefaultRegister{B}) where B = reshape(r.state, :, B)
-statevec(r::DefaultRegister{1}) = reshape(r.state, :)
+statevec(r::DefaultRegister{1}) = vec(r.state)
 hypercubic(reg::DefaultRegister{B}) where B = reshape(reg.state, fill(2, nqubits(reg))..., B)
 hypercubic(reg::DefaultRegister{1}) = reshape(reg.state, fill(2, nqubits(reg))...)
-copy(r::DefaultRegister) = DefaultRegister(r)
+copy(r::DefaultRegister{B}) where B = DefaultRegister{B}(copy(state(r)))
 normalize!(r::DefaultRegister) = (batch_normalize!(r.state); r)
 
-function similar(r::DefaultRegister{B, T}) where {B, T}
-    DefaultRegister(similar(r.state), B)
-end
+similar(r::DefaultRegister{B, T}) where {B, T} = DefaultRegister{B}(similar(r.state))
 
 # -> zero_state is an easier interface
-zero_state(::Type{T}, n::Int, nbatch::Int=1) = DefaultRegister(zeros(T, 1<<n, nbatch))
-rand_state(::Type{T}, n::Int, nbatch::Int=1) = DefaultRegister(zeros(T, 1<<n, nbatch))
+zero_state(::Type{T}, n::Int, nbatch::Int=1) where T = register((arr=zeros(T, 1<<n, nbatch); arr[1,:]=1; arr))
+rand_state(::Type{T}, n::Int, nbatch::Int=1) where T = register(randn(T, 1<<n, nbatch) + im*randn(T, 1<<n, nbatch)) |> normalize!
 
 for FUNC in [:zero_state, :rand_state]
-    @eval FUNC(n::Int, nbatch::Int=1) = FUNC(ComplexF64, n, nbatch)
+    @eval $FUNC(n::Int, nbatch::Int=1) = $FUNC(DefaultType, n, nbatch)
 end
 
-# set default register
-function register(raw, nbatch::Int=1)
-    register(DefaultRegister, raw, nbatch)
-end
-
-# enable multiple dispatch for different initializers
-function register(::Type{RT}, ::Type{T}, n::Int, nbatch::Int, method::Symbol) where {RT, T}
-    register(Val(method), RT, T, n, nbatch)
-end
-
-# config default eltype
-register(n::Int, nbatch::Int, method::Symbol) = register(DefaultType, n, nbatch, method)
-
-# shortcuts
-#zero_state(n::Int, nbatch::Int=1) = register(n, nbatch, :zero)
-#rand_state(n::Int, nbatch::Int=1) = register(n, nbatch, :rand)
-#randn_state(n::Int, nbatch::Int=1) = register(n, nbatch, :randn)
-
-
-#function register(::Val{:rand}, ::Type{<:DefaultRegister}, ::Type{T}, n::Int, nbatch::Int) where T
-#    theta = rand(real(T), 1 << n, nbatch)
-#    radius = rand(real(T), 1 << n, nbatch)
-#    raw = @. radius * exp(im * theta)
-#    DefaultRegister(batch_normalize!(raw), nbatch)
-#end
-
-#function register(::Val{:randn}, ::Type{<:DefaultRegister}, ::Type{T}, n::Int, nbatch::Int) where T
-#    theta = randn(real(T), 1 << n, nbatch)
-#    radius = randn(real(T), 1 << n, nbatch)
-#    raw = @. radius * exp(im * theta)
-#    DefaultRegister(batch_normalize!(raw), nbatch)
-#end
-
-#randn_state(n::Int, nbatch::Int=1) = register(n, nbatch, :randn)
-
-# NOTE: we use relative address here
-# the input are desired orders of current
-# address, not the desired address.
-# orders here can be any iterable
-
-##############################################
+#############################################
 #            focus! and relax!
 ##############################################
 Ints = Union{Vector{Int}, UnitRange{Int}, Int}
@@ -98,15 +56,25 @@ end
 
 function focus!(reg::DefaultRegister{B}, bits::Ints) where B
     nbit = nqubits(reg)
-    norder = move_ahead(nbit+(B==1 ? 0 : 1), bits)
-    reg.state = reshape(group_permutedims(reg |> hypercubic, norder), :, (1<<(nbit-length(bits)))*B)
+    if all(bits == 1:length(bits))
+        arr = reg.state
+    else
+        norder = move_ahead(nbit+(B==1 ? 0 : 1), bits)
+        arr = group_permutedims(reg |> hypercubic, norder)
+    end
+    reg.state = reshape(arr, :, (1<<(nbit-length(bits)))*B)
     reg
 end
 
 function relax!(reg::DefaultRegister{B}, bits::Ints) where B
     nbit = nqubits(reg)
-    norder = move_ahead(nbit+(B==1 ? 0 : 1), bits) |> invperm
-    reg.state = reshape(group_permutedims(reg |> hypercubic, norder), :, B)
+    if all(bits == 1:length(bits))
+        arr = reg.state
+    else
+        norder = move_ahead(nbit+(B==1 ? 0 : 1), bits) |> invperm
+        arr = group_permutedims(reg |> hypercubic, norder)
+    end
+    reg.state = reshape(arr, :, B)
     reg
 end
 
