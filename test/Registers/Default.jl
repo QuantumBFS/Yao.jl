@@ -15,6 +15,7 @@ using Yao.Intrinsics
     @test state(reg) === test_data
     @test statevec(reg) == test_data
     @test hypercubic(reg) == reshape(test_data, 2,2,2,2,2,3)
+    @test !isnormalized(reg)
 
     # zero state initializer
     reg = zero_state(5, 3)
@@ -22,6 +23,8 @@ using Yao.Intrinsics
 
     # rand state initializer
     reg = rand_state(5, 3)
+    @test reg |> probs ≈ abs2.(reg.state)
+    @test isnormalized(reg)
 
     # check default type
     @test eltype(reg) == ComplexF64
@@ -40,7 +43,8 @@ end
     @test nbatch(reg) == 1
     @test state(reg) == reshape(test_data, :, 1)
     @test statevec(reg) == test_data
-    @test hypercubic(reg) == reshape(test_data, 2,2,2,2,2)
+    @test hypercubic(reg) == reshape(test_data, 2,2,2,2,2,1)
+    @test !isnormalized(reg)
 
     # zero state initializer
     reg = zero_state(5)
@@ -48,6 +52,8 @@ end
 
     # rand state initializer
     reg = rand_state(5)
+    @test reg |> probs ≈ vec(abs2.(reg.state))
+    @test isnormalized(reg)
 
     # check default type
     @test eltype(reg) == ComplexF64
@@ -88,8 +94,10 @@ end
     # conanical shape
     reg0 = rand_state(5, 3)
     @test focus!(copy(reg0), [1,4,2]) == naive_focus!(copy(reg0), [1,4,2])
+    @test relax!(relax!(focus!(focus!(copy(reg0), [1,4,2]), 2), 2, 3), [1,4,2]) == reg0
 
     reg = focus!(copy(reg0), 2:3)
+    @test reg |> probs ≈ hcat([sum(abs2.(reshape(reg.state[i,:], :, 3)), 1)[1,:] for i in 1:4]...)'
     @test size(state(reg)) == (2^2, 2^3*3)
     @test nactive(reg) == 2
     @test nremain(reg) == 3
@@ -97,10 +105,12 @@ end
 
     reg0 = rand_state(8)
     reg = focus!(copy(reg0), 7)
+    @test reg |> probs ≈ sum(abs2.(reg.state), 2)[:,1]
     @test nactive(reg) == 1
 
     reg0 = rand_state(10)
     reg  = focus!(copy(reg0), 1:8)
+    @test hypercubic(reg) == reshape(reg0.state, fill(2, 8)...,4)
     @test nactive(reg) == 8
-    @test reg0  == relax!(reg, 1:8)
+    @test reg0  == relax!(reg, 1:8) == relax!(reg)
 end

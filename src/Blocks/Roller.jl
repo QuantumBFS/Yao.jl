@@ -58,11 +58,6 @@ function apply!(reg::AbstractRegister{B}, m::Roller{N, M}) where {B, N, M}
 
     for i = 1:M
         st .= mat(m.blocks[i]) * st
-        # directly use this to register
-        # is dangerous, be careful, you have
-        # to finish exactly M times, or the
-        # address of each qubit will not match
-        # the value of state
         rolldims!(Val(K), Val(N), Val(B), statevec(reg))
     end
     reg

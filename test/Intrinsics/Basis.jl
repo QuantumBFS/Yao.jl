@@ -1,4 +1,5 @@
 ######### Tests #########
+using Compat
 using Compat.Test
 using Compat.Iterators
 
@@ -64,4 +65,6 @@ end
     @test packbits(bitarray([5,3,7,21], num_bit=10)) == [5, 3, 7, 21]
 end
 
-
+@testset "State Utilities" begin
+    @test onehotvec(ComplexF64, 2, 2) == [0, 0, 1, 0]
+end

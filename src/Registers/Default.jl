@@ -28,8 +28,7 @@ nactive(r::DefaultRegister) = log2i(size(state(r), 1))
 state(r::DefaultRegister) = r.state
 statevec(r::DefaultRegister{B}) where B = reshape(r.state, :, B)
 statevec(r::DefaultRegister{1}) = vec(r.state)
-hypercubic(reg::DefaultRegister{B}) where B = reshape(reg.state, fill(2, nqubits(reg))..., B)
-hypercubic(reg::DefaultRegister{1}) = reshape(reg.state, fill(2, nqubits(reg))...)
+hypercubic(reg::DefaultRegister{B}) where B = reshape(reg.state, fill(2, nactive(reg))..., :)
 copy(r::DefaultRegister{B}) where B = DefaultRegister{B}(copy(state(r)))
 normalize!(r::DefaultRegister) = (batch_normalize!(r.state); r)
 
@@ -43,10 +42,27 @@ for FUNC in [:zero_state, :rand_state]
     @eval $FUNC(n::Int, nbatch::Int=1) = $FUNC(DefaultType, n, nbatch)
 end
 
+function probs(r::DefaultRegister{1})
+    if size(r.state, 2) == 1
+        return vec(r.state .|> abs2)
+    else
+        return squeeze(sum(r.state .|> abs2, 2), 2)
+    end
+end
+
+function probs(r::DefaultRegister{B}) where B
+    if size(r.state, 2) == B
+        return r.state .|> abs2
+    else
+        probs = reshape(r.state .|> abs2, size(r.state, 1), :, B)
+        return squeeze(sum(probs, 2), 2)
+    end
+end
+
 #############################################
 #            focus! and relax!
 ##############################################
-Ints = Union{Vector{Int}, UnitRange{Int}, Int}
+Ints = Union{Vector{Int}, UnitRange{Int}, Int, NTuple}
 move_ahead(ndim::Int, head::Ints) = vcat(head, setdiff(1:ndim, head))
 
 function group_permutedims(arr::AbstractArray, order::Vector{Int})
@@ -55,28 +71,28 @@ function group_permutedims(arr::AbstractArray, order::Vector{Int})
 end
 
 function focus!(reg::DefaultRegister{B}, bits::Ints) where B
-    nbit = nqubits(reg)
-    if all(bits == 1:length(bits))
+    nbit = nactive(reg)
+    if all(bits .== 1:length(bits))
         arr = reg.state
     else
-        norder = move_ahead(nbit+(B==1 ? 0 : 1), bits)
+        norder = move_ahead(nbit+1, bits)
         arr = group_permutedims(reg |> hypercubic, norder)
     end
     reg.state = reshape(arr, :, (1<<(nbit-length(bits)))*B)
     reg
 end
 
-function relax!(reg::DefaultRegister{B}, bits::Ints) where B
-    nbit = nqubits(reg)
-    if all(bits == 1:length(bits))
-        arr = reg.state
-    else
-        norder = move_ahead(nbit+(B==1 ? 0 : 1), bits) |> invperm
-        arr = group_permutedims(reg |> hypercubic, norder)
+function relax!(reg::DefaultRegister{B}, bits::Ints, nbit::Int=nqubits(reg)) where B
+    reg.state = reshape(reg.state, 1<<nbit, :)
+    if any(bits .!= 1:length(bits))
+        norder = move_ahead(nbit+1, bits) |> invperm
+        reg.state = reshape(group_permutedims(reg |> hypercubic, norder), 1<<nbit, :)
     end
-    reg.state = reshape(arr, :, B)
     reg
 end
+
+relax!(reg::DefaultRegister, nbit::Int=nqubits(reg)) = relax!(reg, Int[], nbit)
+isnormalized(reg::DefaultRegister) = all(sum(copy(reg) |> relax! |> probs, 1) .≈ 1)
 
 """
 Get the compact shape and order for permutedims.

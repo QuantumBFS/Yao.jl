@@ -5,6 +5,7 @@ using Compat.Random
 using Compat.LinearAlgebra
 using Compat.SparseArrays
 using ..Intrinsics
+using StatsBase
 
 
 import Base: length
@@ -16,7 +17,7 @@ import ..Yao: DefaultType, nqubits, state, focus!, relax!
 import ..Intrinsics: basis
 
 # APIs
-export nqubits, nactive, nremain, nbatch, state, statevec, hypercubic, focus!, relax!, basis
+export nqubits, nactive, nremain, nbatch, state, statevec, hypercubic, focus!, relax!, basis, probs, isnormalized
 export AbstractRegister, Register
 
 # factories

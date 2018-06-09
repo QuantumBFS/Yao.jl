@@ -118,20 +118,13 @@ normalize!(r::AbstractRegister) = throw(MethodError(:normalize!, r))
 """
     statevec(r::AbstractRegister) -> AbstractArray
 
-Return the raveled state (vector) form of this register.                                  .                                           |                  |
+Return the raveled state (vector) form of this register.
 """
 function statevec end
 
 """
     hypercubic(r::AbstractRegister) -> AbstractArray
 
-Return the hypercubic form (high dimensional tensor) of this register.                                  .                                       |                  |
+Return the hypercubic form (high dimensional tensor) of this register, only active qubits are considered.
 """
 function hypercubic end
-
-# function ghz(num_bit::Int; x::DInt=zero(DInt))
-#     v = zeros(DefaultType, 1<<num_bit)
-#     v[x+1] = 1/sqrt(2)
-#     v[flip(x, bmask(1:num_bit))+1] = 1/sqrt(2)
-#     return v
-# end

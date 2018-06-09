@@ -15,12 +15,7 @@ abstract type that all block with a matrix form will subtype from.
 abstract type MatrixBlock{N, T} <: AbstractBlock end
 
 nqubits(::Type{MT}) where {N, MT <: MatrixBlock{N}} = N
-ninput(::Type{MT}) where {N, MT <: MatrixBlock{N}} = N
-noutput(::Type{MT}) where {N, MT <: MatrixBlock{N}} = N
-
 nqubits(::MatrixBlock{N}) where N = N
-ninput(::MatrixBlock{N}) where N = N
-noutput(::MatrixBlock{N}) where N = N
 
 # NOTE: move to Intrinsics?
 isunitary(op) = op * op' ≈ IMatrix(size(op, 1))

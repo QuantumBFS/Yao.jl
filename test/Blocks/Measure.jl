@@ -6,37 +6,15 @@ using Compat.SparseArrays
 using Yao.Registers
 using Yao.Blocks
 
-import Yao.Blocks: _generate_sample_plan_from, _get_reduced_probability_distribution,
-    direct_sample_step, direct_sample
-
-
-@testset "test direct sampler" begin
-    # NOTE: This sampler should be replaced by a QuMC.jl sampler
-    s = normalize!(rand(ComplexF64, 1<<10))
-    p = abs2.(s)
-    plan = _generate_sample_plan_from(p)
-    @test plan[end] ≈ sum(p)
-    @test plan[1] ≈ p[1]
-
-    # a GHZ state
-    state_array = zeros(ComplexF64, 1<<10)
-    state_array[1] = 1/sqrt(2); state_array[end] = 1/sqrt(2);
-    reg = register(state_array)
-    p = _get_reduced_probability_distribution(reg, 4)
-    @test p[1][1] ≈ 0.5
-    @test p[1][end] ≈ 0.5
-end
-
-import Yao.Blocks: measure!
+import Yao.Blocks: measure!, measure_remove!, Measure, MeasureAndRemove
 
 @testset "measure!" begin
-
     # a GHZ state
     state_array = zeros(ComplexF64, 1<<4)
     state_array[1] = 1/sqrt(2); state_array[end] = 1/sqrt(2);
     reg = register(state_array)
 
-    s, samples = measure!(reg, 1) # measure first qubit
+    s, samples = measure!(reg) # measure first qubit
     # we will get
     # |0000> or |1111>
     if samples[1] == 0
@@ -44,4 +22,43 @@ import Yao.Blocks: measure!
     else
         @test state(s)[end] ≈ 1
     end
+end
+
+@testset "normalize and clapse" begin
+    reg = focus!(rand_state(5, 3), 2:3)
+
+    reg2 = copy(reg)
+    pre = nothing
+    for i in 1:5
+        reg2, res = measure!(reg2)
+        @test reg2 |> isnormalized
+        @test nactive(reg2) == nactive(reg)
+        if pre!=nothing
+            @test pre == res
+        end
+        pre = res
+    end
+
+    reg2 = copy(reg)
+    pre = nothing
+    m = Measure()
+    for i in 1:5
+        reg2 = apply!(reg2, m)
+        @test reg2 |> isnormalized
+        @test nactive(reg2) == nactive(reg)
+        if pre!=nothing
+            @test pre == m.result
+        end
+        pre = m.result
+    end
+end
+
+@testset "measure and remove" begin
+    reg = focus!(rand_state(5, 3), 2:3)
+    reg2 = copy(reg)
+    mr = MeasureAndRemove()
+    apply!(reg2, mr)
+    @test nqubits(reg2) == 3
+    @test nactive(reg2) == 0
+    @test reg2 |> isnormalized
 end
