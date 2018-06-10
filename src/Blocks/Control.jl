@@ -182,13 +182,9 @@ blocks(c::ControlBlock) = [c.block]
 #################
 
 # NOTE: ControlBlock will forward parameters directly without loop
-function dispatch!(f::Function, ctrl::ControlBlock, params::Vector)
-    dispatch!(f, ctrl.block, params)
-end
-
-function dispatch!(f::Function, ctrl::ControlBlock, params...)
-    dispatch!(f, ctrl.block, params...)
-end
+dispatch!(ctrl::ControlBlock, params...) = dispatch!(ctrl.block, params...)
+dispatch!(f::Function, ctrl::ControlBlock, params...) = dispatch!(f, ctrl.block, params...)
+cache_key(ctrl::ControlBlock) = cache_key(ctrl.block)
 
 function hash(ctrl::ControlBlock, h::UInt)
     hashkey = hash(objectid(ctrl), h)

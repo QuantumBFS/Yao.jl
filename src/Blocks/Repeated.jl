@@ -28,6 +28,7 @@ blocks(rb::RepeatedBlock) = [rb.block]
 
 copy(x::RepeatedBlock) = RepeatedBlock
 
+dispatch!(rb::RepeatedBlock, params...) = dispatch!(rb.block, params...)
 dispatch!(f::Function, rb::RepeatedBlock, params...) = dispatch!(f, rb.block, params...)
 
 function hash(rb::RepeatedBlock, h::UInt)
@@ -39,6 +40,10 @@ end
 
 function ==(lhs::RepeatedBlock{N, T, GT}, rhs::RepeatedBlock{N, T, GT}) where {N, T, GT}
     (lhs.block == rhs.block) && (lhs.lines == rhs.lines)
+end
+
+function cache_key(rb::RepeatedBlock)
+    cache_key(rb.block)
 end
 
 function print_block(io::IO, rb::RepeatedBlock{N}) where N

@@ -24,6 +24,8 @@ function hash(gate::PhaseGate, h::UInt)
     hash(hash(gate.theta, objectid(gate)), h)
 end
 
+cache_key(gate::PhaseGate) = gate.theta
+
 function print_block(io::IO, g::PhaseGate)
     print(io, "Global Phase Gate:", g.theta)
 end

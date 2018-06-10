@@ -78,6 +78,10 @@ function hash(R::Roller, h::UInt)
     hashkey
 end
 
+function cache_key(R::Roller{N, M}) where {N, M}
+    ntuple(k->cache_key(R.blocks[k]), Val(M))
+end
+
 function print_block(io::IO, x::Roller)
     printstyled(io, "roller"; bold=true, color=color(Roller))
 end
