@@ -16,8 +16,7 @@ function dispatch!(f::Function, R::RotationGate{T, GT}, theta) where {T, GT}
 end
 
 # Properties
-nparameters(::Type{<:RotationGate}) = 1
-parameters(x::RotationGate) = [x.theta]
+nparameters(::RotationGate) = 1
 
 ==(lhs::RotationGate{TA, GTA}, rhs::RotationGate{TB, GTB}) where {TA, TB, GTA, GTB} = false
 ==(lhs::RotationGate{TA, GT}, rhs::RotationGate{TB, GT}) where {TA, TB, GT} = lhs.theta == rhs.theta
@@ -27,4 +26,8 @@ function hash(gate::RotationGate{T, GT}, h::UInt) where {T, GT}
     hashkey = hash(gate.theta, hashkey)
     hashkey = hash(gate.U, hashkey)
     hashkey
+end
+
+function print_block(io::IO, R::RotationGate)
+    print(io, "Rot ", R.U, ": ", R.theta)
 end

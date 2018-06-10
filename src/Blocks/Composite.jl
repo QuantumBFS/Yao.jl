@@ -44,15 +44,6 @@ function nparameters(c::CompositeBlock)
     count
 end
 
-# TODO: make this a lazy list
-function parameters(c::CompositeBlock)
-    params = []
-    for each in blocks(c)
-        append!(params, parameters(each))
-    end
-    params
-end
-
 #################
 # Dispatch Rules
 #################
@@ -98,6 +89,17 @@ function dispatch!(f::Function, c::CompositeBlock, params...)
 end
 
 ==(lhs::CompositeBlock, rhs::CompositeBlock) = false
+
+# FIXME: make this works in v0.7
+function print_block(io::IO, x::CompositeBlock)
+
+    @static if VERSION < v"0.7-"
+        print(io, summary(x))
+    else
+        summary(io, x)
+    end
+
+end
 
 include("ChainBlock.jl")
 include("KronBlock.jl")

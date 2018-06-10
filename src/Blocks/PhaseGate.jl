@@ -5,24 +5,26 @@ export PhaseGate
 
 Global phase gate.
 """
-mutable struct PhaseGate{T} <: PrimitiveBlock{1, Complex{T}}
+mutable struct PhaseGate{PhaseType, T} <: PrimitiveBlock{1, Complex{T}}
     theta::T
 end
 
-mat(gate::PhaseGate{T}) where T = exp(im * gate.theta) * IMatrix{2, Complex{T}}()
+mat(gate::PhaseGate{:global, T}) where T = exp(im * gate.theta) * IMatrix{2, Complex{T}}()
+mat(gate::PhaseGate{:shift, T}) where T = Complex{T}[1.0 0.0;0.0 exp(im * gate.theta)]
 
-copy(block::PhaseGate{T}) where T = PhaseGate{T}(block.theta)
+copy(block::PhaseGate{PhaseType, T}) where {PhaseType, T} = PhaseGate{PhaseType, T}(block.theta)
 dispatch!(f::Function, block::PhaseGate, theta) = (block.theta = f(block.theta, theta); block)
 
 # Properties
-nparameters(::Type{<:PhaseGate}) = 1
-parameters(x::PhaseGate) = [x.theta]
+nparameters(::PhaseGate) = 1
 
-==(lhs::PhaseGate, rhs::PhaseGate) = lhs.theta == rhs.theta
+==(lhs::PhaseGate, rhs::PhaseGate) = false
+==(lhs::PhaseGate{PT}, rhs::PhaseGate{PT}) where PT = lhs.theta == rhs.theta
 
 function hash(gate::PhaseGate, h::UInt)
     hash(hash(gate.theta, objectid(gate)), h)
 end
+
 
 function print_block(io::IO, g::PhaseGate)
     print(io, "Global Phase Gate:", g.theta)
