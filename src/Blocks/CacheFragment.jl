@@ -13,23 +13,21 @@ struct CacheFragment{BT, K, MT}
     end
 
     function CacheFragment(x::BT) where BT
-        CacheFragment{BT, BT}(x)
+        CacheFragment{BT, typeof(cache_key(x))}(x)
     end
 end
 
-cache_type(x) = Any
-
 # default update rule
-function update!(frag::CacheFragment{BT, BT, MT}, val) where {BT, MT}
+function update!(frag::CacheFragment, val)
     if !iscached(frag)
-        frag.storage[frag.ref] = val
+        frag.storage[cache_key(frag.ref)] = val
     end
     frag
 end
 
 function iscached(frag::CacheFragment)
-    frag.ref in keys(frag.storage)
+    cache_key(frag.ref) in keys(frag.storage)
 end
 
-pull(frag::CacheFragment{BT, BT, MT}) where {BT, MT} = frag.storage[frag.ref]
+pull(frag::CacheFragment) = frag.storage[cache_key(frag.ref)]
 clear!(frag::CacheFragment) = (empty!(frag.storage); frag)

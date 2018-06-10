@@ -17,6 +17,8 @@ function dispatch!(f::Function, x::PrimitiveBlock, params...)
     x
 end
 
+cache_key(x::PrimitiveBlock) = 0x1
+
 include("ConstGate.jl")
 include("PhaseGate.jl")
 include("ShiftGate.jl")
