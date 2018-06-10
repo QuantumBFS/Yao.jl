@@ -24,6 +24,8 @@ function hash(gate::ShiftGate, h::UInt)
     hash(hash(gate.theta, objectid(gate)), h)
 end
 
+cache_key(gate::ShiftGate) = gate.theta
+
 function print_block(io::IO, g::ShiftGate)
     print(io, "Phase Shift Gate:", g.theta)
 end

@@ -83,6 +83,10 @@ function apply!(r::AbstractRegister, c::ChainBlock)
     r
 end
 
+function cache_key(c::ChainBlock)
+    [cache_key(each) for each in c.blocks]
+end
+
 function hash(c::ChainBlock, h::UInt)
     hashkey = hash(objectid(c), h)
     for each in c.blocks

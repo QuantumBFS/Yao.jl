@@ -1,3 +1,8 @@
+function cache_key end
+function cache_type end
+
+cache_type(x) = Any
+
 include("CacheFragment.jl")
 include("CachedBlock.jl")
 
