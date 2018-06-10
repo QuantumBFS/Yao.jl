@@ -36,14 +36,6 @@ function map!(f::Function, dst::CompositeBlock, itr)
     dst
 end
 
-function parameters(c::CompositeBlock)
-    out = []
-    for each in blocks(c)
-        append!(out, parameters(each))
-    end
-    out
-end
-
 function nparameters(c::CompositeBlock)
     count = 0
     for each in blocks(c)
@@ -78,27 +70,33 @@ dispatch a vector of parameters to this composite block according to
 each sub-block's number of parameters.
 """
 function dispatch!(x::CompositeBlock, itr)
-    st = start(itr)
-    for block in Iterators.filter(x->nparameters(x) > 0, blocks(x))
-        params, st = next(itr, st)
-        dispatch!(block, params...)
-    end
+    @assert nparameters(x) == length(itr) "number of parameters does not match"
 
-    if !done(itr, st)
-        throw(BoundsError(x, st))
+    count = 0
+    for block in filter(x->nparameters(x) > 0, blocks(x))
+        params = view(itr, count+1:count+nparameters(block))
+        if block isa CompositeBlock
+            dispatch!(block, params)
+        else
+            dispatch!(block, params...)
+        end
+        count += 1
     end
     x
 end
 
 function dispatch!(f::Function, x::CompositeBlock, itr)
-    st = start(itr)
-    for block in Iterators.filter(x->nparameters(x) > 0, blocks(x))
-        params, st = next(itr, st)
-        dispatch!(f, block, params...)
-    end
+    @assert nparameters(x) == length(itr) "number of parameters does not match"
 
-    if !done(itr, st)
-        throw(BoundsError(x, st))
+    count = 0
+    for block in filter(x->nparameters(x) > 0, blocks(x))
+        params = view(itr, count+1:count+nparameters(block))
+        if block isa CompositeBlock
+            dispatch!(f, block, params)
+        else
+            dispatch!(f, block, params...)
+        end
+        count += 1
     end
     x
 end

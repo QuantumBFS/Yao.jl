@@ -57,7 +57,7 @@ end
     end
 
     dispatch!(+, g, [1, 1, 1])
-    for (each, p) in zip(blocks(p), params)
+    for (each, p) in zip(blocks(g), params)
         @test each.theta == p + 1
     end
 
@@ -68,9 +68,8 @@ end
     @test g[3][1].theta == 2
     @test g[3][2].theta == 3
 
-    # direct dispatch
     g = KronBlock{5}(1=>phase(0.1), 3=>X, 5=>ChainBlock(phase(0.2), phase(0.3)))
-    dispatch!(g, 1, [2, 3])
+    dispatch!(g, [1, 2, 3])
     @test g[1].theta == 1
     @test g[5][1].theta == 2
     @test g[5][2].theta == 3

@@ -21,6 +21,7 @@ module Blocks
 
 using Compat
 using Compat.Random
+using Compat.Iterators
 using Compat.LinearAlgebra
 using Compat.SparseArrays
 

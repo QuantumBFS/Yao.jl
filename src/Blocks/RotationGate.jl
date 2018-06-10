@@ -10,8 +10,8 @@ mat(R::RotationGate{T, GT}) where {T, GT} = _make_rot_mat(IMatrix{2, Complex{T}}
 
 copy(R::RotationGate{T, GT}) where {T, GT} = RotationGate{T, GT}(copy(R.U), R.theta)
 
-function dispatch!(R::RotationGate{T, GT}, theta::Vector) where {T, GT}
-    R.theta = theta[1]
+function dispatch!(R::RotationGate, theta)
+    R.theta = theta
     R
 end
 
