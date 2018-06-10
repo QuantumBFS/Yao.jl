@@ -1,6 +1,6 @@
 export ControlBlock
 
-mutable struct ControlBlock{BlockType, N, T} <: CompositeBlock{N, T}
+mutable struct ControlBlock{BlockType, N, M, T} <: CompositeBlock{N, T}
     ctrl_qubits::Vector{Int}
     block::BlockType
     addr::Int

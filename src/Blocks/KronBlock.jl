@@ -67,7 +67,7 @@ end
 function copy(k::KronBlock{N, T}) where {N, T}
     slots = copy(k.slots)
     addrs = copy(k.addrs)
-    blocks = [copy(each) for each in k.blocks]
+    blocks = copy(blocks)
     KronBlock{N, T}(slots, addrs, blocks)
 end
 
@@ -119,46 +119,14 @@ eachindex(k::KronBlock) = k.addrs
 # mat(x::AbstractMatrix) = x
 
 # TODO: make this a generated function
-# function mat(k::KronBlock{N}) where N
-#     locs = @. N - k.addrs + 1
-#     num_bit_list = diff(vcat([0], k.addrs, [N+1])) .- 1
-#     ⊗ = kron
-#     reduce(IMatrix(1 << num_bit_list[1]), zip(k.blocks, num_bit_list[2:end])) do x, y
-#         mat(x) ⊗ mat(y[1]) ⊗ IMatrix(1<<y[2])
-#     end
-# end
-
-function mat(k::KronBlock{N, T}) where {N, T}
-    curr_addr = 1
-    first_block = first(k.blocks)
-    first_addr = first(k.addrs)
-
-    if curr_addr == first_addr
-        curr_addr += nqubits(first_block)
-        op = mat(first_block)
-    else
-        op = kron(mat(first_block), IMatrix{1 << (first_addr - curr_addr), T}())
-        curr_addr = first_addr + nqubits(first_block)
+function mat(k::KronBlock{N}) where N
+    locs = @. N - k.addrs + 1
+    num_bit_list = diff(vcat([0], k.addrs, [N+1])) .- 1
+    ⊗ = kron
+    reduce(IMatrix(1 << num_bit_list[1]), zip(k.blocks, num_bit_list[2:end])) do x, y
+        mat(x) ⊗ mat(y[1]) ⊗ IMatrix(1<<y[2])
     end
-
-    for count = 2:length(k.addrs)
-        next_addr = k.addrs[count]
-        next_block = k.blocks[count]
-        if curr_addr != next_addr
-            op = kron(IMatrix{1 << (next_addr - curr_addr), T}(), op)
-            curr_addr = next_addr
-        end
-
-        op = kron(mat(next_block), op)
-        curr_addr += nqubits(next_block)
-    end
-
-    if curr_addr <= N
-        op = kron(IMatrix{1 << (N - curr_addr + 1), T}(), op)
-    end
-    op
 end
-
 
 # NOTE: kronecker blocks are equivalent if its addrs and blocks is the same
 function hash(block::KronBlock{N, T}, h::UInt) where {N, T}

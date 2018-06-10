@@ -34,7 +34,7 @@ import ..LuxurySparse: I
 
 # import package APIs
 import ..Yao
-import ..Yao: DefaultType, isunitary, isreflexive, nparameters, mat, datatype, dispatch!, nqubits, nactive
+import ..Yao: DefaultType, datatype, dispatch!, nqubits, nactive
 import ..Yao.Registers: focus!, relax!
 import Compat.LinearAlgebra: ishermitian
 import Base: hash, ==, eltype, show, similar, getindex, setindex!, start, next, done, length

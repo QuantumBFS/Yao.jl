@@ -4,38 +4,4 @@ export nqubits, nactive, isunitary, isreflexive, nparameters, datatype, mat, dis
 
 function nqubits end
 function nactive end
-
-"""
-    isunitary(x) -> Bool
-
-Test whether this operator is unitary.
-"""
-function isunitary end
-
-"""
-    isreflexive(x) -> Bool
-
-Test whether this operator is reflexive.
-"""
-function isreflexive end
-
-"""
-    nparameters(x) -> Integer
-
-Returns the number of parameters of `x`.
-"""
-function nparameters end
-
-"""
-    parameters(block) -> Vector
-
-Returns a list of all parameters in block.
-"""
-function parameters end
 function datatype end
-
-"""
-    mat(block) -> Matrix
-"""
-function mat end
-function dispatch! end
