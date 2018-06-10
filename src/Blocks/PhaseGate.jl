@@ -15,7 +15,8 @@ copy(block::PhaseGate{T}) where T = PhaseGate{T}(block.theta)
 dispatch!(block::PhaseGate, theta::Vector) = (block.theta = theta[1]; block)
 
 # Properties
-nparameters(::PhaseGate) = 1
+nparameters(::Type{<:PhaseGate}) = 1
+parameters(x::PhaseGate) = [x.theta]
 
 ==(lhs::PhaseGate, rhs::PhaseGate) = lhs.theta == rhs.theta
 
