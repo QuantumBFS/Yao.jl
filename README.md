@@ -21,10 +21,10 @@ We do not accept PR at the moment. But if there is any comments please leave us 
 
 ## Installation
 
-The package is registering. Use this command in REPL to add it at the moment.
+The package is registered. Use this command to install
 
 ```julia
-julia> Pkg.clone("https://github.com/QuantumBFS/Yao.jl.git")
+julia> Pkg.add("Yao")
 ```
 
 ## Documentation
