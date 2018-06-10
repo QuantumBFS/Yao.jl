@@ -1,19 +1,3 @@
-function parse_block(n::Int, x::Pair{Int, BT}) where {BT <: MatrixBlock}
-    kron(n, x)
-end
-
-function parse_block(n::Int, x::Pair{I, BT}) where {I, BT <: MatrixBlock}
-    kron(n, i=>x.second for i in x.first)
-end
-
-function parse_block(n::Int, x::Pair{Int, BT}) where {BT <: ConstantGate}
-    repeat(n, x.second, [x.first, ])
-end
-
-function parse_block(n::Int, x::Pair{I, BT}) where {I, BT <: ConstantGate}
-    repeat(n, x.second, collect(x.first))
-end
-
 function parse_block(n::Int, x::Function)
     x(n)
 end

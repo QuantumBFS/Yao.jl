@@ -6,6 +6,12 @@ export DefaultRegister
     active_len, remain_len
 end
 
+"""
+    DefaultRegister{B, T} <: AbstractRegister{B, T}
+
+Default type for a quantum register. It contains a dense array that represents
+a batched quantum state with batch size `B` of type `T`.
+"""
 mutable struct DefaultRegister{B, T} <: AbstractRegister{B, T}
     state::Matrix{T} # this stores a batched state
 

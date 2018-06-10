@@ -10,24 +10,9 @@ The benefit of this solution includes:
 - more convenient for traversing cached parameters
 - this solution offer us flexibility for future implementation on GPUs and large clusters.
 
-## Julia's Dict
+## CacheServers
 
-```julia
-Base.hashindex(key, sz)
+```@autodocs
+Modules = [Yao.CacheServers]
+Order   = [:constant, :type, :function]
 ```
-
-`sz` is the total length of the list of slots.
-
-*TO BE DONE...*
-
-## Implementation
-
-Unlike parameter servers in deep learning frameworks.
-Our cache server contains not only the cached (sparse) matrix,
-but also its related cache level,
-which defines its update priority during the evluation of a quantum circuit.
-Or it can be viewed as a parameter server that stores a `CacheElement`).
-
-### Solutions
-
-*TO BE DONE...*

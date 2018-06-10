@@ -89,6 +89,13 @@ eltype(r::AbstractRegister{B, T}) where {B, T} = T
 
 # Factory Methods
 
+"""
+    register(raw, [nbatch=1])
+
+Construct a register with type of `DefaultRegister`.
+"""
+function register end
+
 # set default register
 function register(raw, nbatch::Int=1)
     register(DefaultRegister, raw, nbatch)
@@ -124,6 +131,11 @@ for op in [:+, :-]
     end
 end
 
+"""
+    kron(lhs, rhs)
+
+Merge two registers together with kronecker tensor product.
+"""
 function kron(lhs::RT, rhs::AbstractRegister{B}) where {B, RT <: AbstractRegister{B}}
     register(RT, kron(state(rhs), state(lhs)), Int(B))
 end

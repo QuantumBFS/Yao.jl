@@ -1,5 +1,10 @@
 import Base: repeat
 
+"""
+    QuBitStr
+
+String literal for qubits.
+"""
 struct QuBitStr
     val::UInt
     len::Int
@@ -11,6 +16,12 @@ QuBitStr(str::String) = QuBitStr(bitstring2int(str), length(str))
 asindex(bits::QuBitStr) = bits.val + 1
 length(bits::QuBitStr) = bits.len
 
+"""
+    @bit_str -> QuBitStr
+
+Construct a bit string. such as `bit"0000"`. The bit strings also supports string concat. Just use
+it like normal strings.
+"""
 macro bit_str(str)
     @assert length(str) < 64 "we do not support large integer at the moment"
     QuBitStr(str)
