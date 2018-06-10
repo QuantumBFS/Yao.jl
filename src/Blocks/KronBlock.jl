@@ -174,3 +174,7 @@ end
 function ==(lhs::KronBlock{N, T}, rhs::KronBlock{N, T}) where {N, T}
     all(lhs.addrs .== rhs.addrs) && all(lhs.blocks .== rhs.blocks)
 end
+
+function print_block(io::IO, x::KronBlock)
+    printstyled(io, "kron"; bold=true, color=color(KronBlock))
+end

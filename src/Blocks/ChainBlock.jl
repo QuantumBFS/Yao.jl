@@ -74,10 +74,10 @@ end
 append!(c::ChainBlock, list) = (append!(c.blocks, list); c)
 prepend!(c::ChainBlock, list) = (prepend!(c.blocks, list); c)
 
-mat(c::ChainBlock) = prod(x->mat(x), reverse(c.blocks))
+mat(c::ChainBlock) = prod(x->mat(x), c.blocks)
 
 function apply!(r::AbstractRegister, c::ChainBlock)
-    for each in c
+    for each in reverse(c.blocks)
         apply!(r, each)
     end
     r
@@ -93,4 +93,8 @@ end
 
 function ==(lhs::ChainBlock{N, T}, rhs::ChainBlock{N, T}) where {N, T}
     (length(lhs.blocks) == length(rhs.blocks)) && all(lhs.blocks .== rhs.blocks)
+end
+
+function print_block(io::IO, x::ChainBlock)
+    printstyled(io, "chain"; bold=true, color=color(ChainBlock))
 end

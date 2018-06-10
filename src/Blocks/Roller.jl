@@ -77,3 +77,7 @@ function hash(R::Roller, h::UInt)
     end
     hashkey
 end
+
+function print_block(io::IO, x::Roller)
+    printstyled(io, "roller"; bold=true, color=color(Roller))
+end

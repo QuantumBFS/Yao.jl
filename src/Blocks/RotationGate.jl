@@ -27,3 +27,7 @@ function hash(gate::RotationGate{T, GT}, h::UInt) where {T, GT}
     hashkey = hash(gate.U, hashkey)
     hashkey
 end
+
+function print_block(io::IO, R::RotationGate)
+    print(io, "Rot ", R.U, ": ", R.theta)
+end

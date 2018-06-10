@@ -26,7 +26,7 @@ Returns a global phase gate.
 """
 function phase end
 
-phase(::Type{T}, theta) where {T <: Complex} = PhaseGate{:global, real(T)}(theta)
+phase(::Type{T}, theta) where {T <: Complex} = PhaseGate{real(T)}(theta)
 phase(theta=0.0) = phase(DefaultType, theta)
 
 """
@@ -36,7 +36,7 @@ Returns a phase shift gate.
 """
 function shift end
 
-shift(::Type{T}, theta) where {T <: Complex} = PhaseGate{:shift, real(T)}(theta)
+shift(::Type{T}, theta) where {T <: Complex} = ShiftGate{real(T)}(theta)
 shift(theta=0.0) = shift(DefaultType, theta)
 
 """
