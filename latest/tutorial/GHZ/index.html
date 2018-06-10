@@ -6,17 +6,55 @@ m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 
 ga('create', 'UA-89508993-1', 'auto');
 ga('send', 'pageview');
-</script><link rel="canonical" href="https://quantumbfs.github.io/Yao.jl/latest/tutorial/GHZ/index.html"/><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>Yao</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../">Home</a></li><li><span class="toctext">Tutorial</span><ul><li class="current"><a class="toctext" href>Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</a><ul class="internal"></ul></li><li><a class="toctext" href="../QFT/">Quantum Fourier Transform</a></li><li><a class="toctext" href="../QCBM/">Quantum Circuit Born Machine</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Tutorial</li><li><a href>Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</a></li></ul><a class="edit-page" href="https://github.com/QuantumBFS/Yao.jl/blob/master/docs/src/tutorial/GHZ.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Prepare-Greenberger–Horne–Zeilinger-state-with-Quantum-Circuit-1" href="#Prepare-Greenberger–Horne–Zeilinger-state-with-Quantum-Circuit-1">Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</a></h1><p>First, you have to use this package in Julia.</p><div><pre><code class="language-julia">using Yao</code></pre></div><p>Then let&#39;s define the oracle, it is a function of the number of qubits. The whole oracle looks like this:</p><pre><code class="language-">n = 4
-circuit = chain(
-    kron(n, 1=&gt;X),
-    kron(n, i=&gt;H for i in 2:n),
-    control(n, [2, ], X, 1),
-    control(n, [4, ], X, 3),
-    control(n, [3, ], X, 1),
-    control(n, [4, ], X, 3),
-    roll(n, H)
-);</code></pre><p>Let me explain what happens here. Firstly, we have a <code>X</code> gate which is applied to the first qubit. We need decide how we calculate this numerically, <code>Yao</code> offers serveral different approach to this. The simplest (but not the most efficient) one is to use kronecker product which will product <code>X</code> with <code>I</code> on other lines to gather an operator in the whole space and then apply it to the register. The first argument <code>n</code> means the number of qubits.</p><div><pre><code class="language-julia">kron(n, 1=&gt;X)</code></pre><pre><code class="language-none">Total: 4, DataType: Complex{Float64}
+</script><link rel="canonical" href="https://quantumbfs.github.io/Yao.jl/latest/tutorial/GHZ/index.html"/><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>Yao</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../">Home</a></li><li><span class="toctext">Tutorial</span><ul><li class="current"><a class="toctext" href>Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</a><ul class="internal"></ul></li><li><a class="toctext" href="../QFT/">Quantum Fourier Transform</a></li><li><a class="toctext" href="../QCBM/">Quantum Circuit Born Machine</a></li></ul></li><li><span class="toctext">Manual</span><ul><li><a class="toctext" href="../../man/interfaces/">Interfaces</a></li><li><a class="toctext" href="../../man/registers/">Registers</a></li><li><a class="toctext" href="../../man/blocks/">Blocks System</a></li><li><a class="toctext" href="../../man/cache/">Cache System</a></li><li><a class="toctext" href="../../man/intrinsics/">Intrinsics</a></li><li><a class="toctext" href="../../man/luxurysparse/">LuxurySparse</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Tutorial</li><li><a href>Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</a></li></ul><a class="edit-page" href="https://github.com/QuantumBFS/Yao.jl/blob/master/docs/src/tutorial/GHZ.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Prepare-Greenberger–Horne–Zeilinger-state-with-Quantum-Circuit-1" href="#Prepare-Greenberger–Horne–Zeilinger-state-with-Quantum-Circuit-1">Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</a></h1><p>First, you have to use this package in Julia.</p><div><pre><code class="language-julia">using Yao</code></pre></div><p>Then let&#39;s define the oracle, it is a function of the number of qubits. The whole oracle looks like this:</p><div><pre><code class="language-julia">n = 4
+circuit(n) = chain(
+    n,
+    kron(i=&gt;H for i in 1:n),
+    control([4, ], 3=&gt;X),
+    control([3, ], 1=&gt;X),
+    control([4, ], 3=&gt;X),
+    control([2, ], 1=&gt;X),
+    kron(i=&gt;H for i in 2:n),
+    repeat(1=&gt;X),
+);</code></pre></div><p>Let me explain what happens here. Firstly, we have a <code>X</code> gate which is applied to the first qubit. We need decide how we calculate this numerically, <code>Yao</code> offers serveral different approach to this. The simplest (but not the most efficient) one is to use kronecker product which will product <code>X</code> with <code>I</code> on other lines to gather an operator in the whole space and then apply it to the register. The first argument <code>n</code> means the number of qubits.</p><div><pre><code class="language-julia">kron(n, 1=&gt;X)</code></pre><pre><code class="language-none">Total: 4, DataType: Complex{Float64}
 kron
-└─ 1=&gt;X gate</code></pre></div><p>Similar with <code>kron</code>, we then need to apply some controled gates.</p><pre><code class="language-">control(n, [2, ], X, 1)</code></pre><p>This means there is a <code>X</code> gate on the first qubit that is controled by the second qubit. In fact, you can also create a controled gate with multiple control qubits, like</p><pre><code class="language-">control(n, [2, 3], X, 1)</code></pre><p>In the end, we need to apply <code>H</code> gate to all lines, of course, you can do it by <code>kron</code>, but we offer something more efficient called <code>roll</code>, this applies a single gate each time on each qubit without calculating a new large operator, which will be extremely efficient for calculating small gates that tiles on almost every lines.</p><p>The whole circuit is a chained structure of the above blocks. And we actually store a quantum circuit in a tree structure.</p><pre><code class="language-">circuit</code></pre><p>After we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.</p><pre><code class="language-">r = circuit(register(bit&quot;0000&quot;))
-r</code></pre><p>Let&#39;s check the output:</p><pre><code class="language-">statevec(r)</code></pre><p>We have a GHZ state here, try to measure the first qubit</p><pre><code class="language-">r |&gt; measure(1)
-statevec(r)</code></pre><p>GHZ state will collapse to <span>$|0000\rangle$</span> or <span>$|1111\rangle$</span> due to entanglement!</p><footer><hr/><a class="previous" href="../../"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../QFT/"><span class="direction">Next</span><span class="title">Quantum Fourier Transform</span></a></footer></article></body></html>
+└─ 1=&gt;X gate</code></pre></div><p>Similar with <code>kron</code>, we then need to apply some controled gates.</p><div><pre><code class="language-julia">control(n, [2, ], 1=&gt;X)</code></pre><pre><code class="language-none">Total: 4, DataType: Complex{Float64}
+control(2)
+└─ 1=&gt;X gate</code></pre></div><p>This means there is a <code>X</code> gate on the first qubit that is controled by the second qubit. In fact, you can also create a controled gate with multiple control qubits, like</p><div><pre><code class="language-julia">control(n, [2, 3], 1=&gt;X)</code></pre><pre><code class="language-none">Total: 4, DataType: Complex{Float64}
+control(2, 3)
+└─ 1=&gt;X gate</code></pre></div><p>In the end, we need to apply <code>H</code> gate to all lines, of course, you can do it by <code>kron</code>, but we offer something more efficient called <code>roll</code>, this applies a single gate each time on each qubit without calculating a new large operator, which will be extremely efficient for calculating small gates that tiles on almost every lines.</p><p>The whole circuit is a chained structure of the above blocks. And we actually store a quantum circuit in a tree structure.</p><div><pre><code class="language-julia">circuit</code></pre><pre><code class="language-none">circuit (generic function with 1 method)</code></pre></div><p>After we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.</p><div><pre><code class="language-julia">r = circuit(4) |&gt; on(register(bit&quot;0000&quot;))
+r</code></pre><pre><code class="language-none">DefaultRegister{1, Complex{Float64}}
+    active qubits: 4/4</code></pre></div><p>Let&#39;s check the output:</p><div><pre><code class="language-julia">statevec(r)</code></pre><pre><code class="language-none">16-element Array{Complex{Float64},1}:
+  0.707107+0.0im
+       0.0+0.0im
+       0.0+0.0im
+       0.0+0.0im
+       0.0+0.0im
+       0.0+0.0im
+       0.0+0.0im
+       0.0+0.0im
+       0.0+0.0im
+       0.0+0.0im
+       0.0+0.0im
+       0.0+0.0im
+       0.0+0.0im
+       0.0+0.0im
+       0.0+0.0im
+ -0.707107+0.0im</code></pre></div><p>We have a GHZ state here, try to measure the first qubit</p><div><pre><code class="language-julia">measure(1) |&gt; on!(r)
+statevec(r)</code></pre><pre><code class="language-none">16-element Array{Complex{Float64},1}:
+ 1.0+0.0im
+ 0.0+0.0im
+ 0.0+0.0im
+ 0.0+0.0im
+ 0.0+0.0im
+ 0.0+0.0im
+ 0.0+0.0im
+ 0.0+0.0im
+ 0.0+0.0im
+ 0.0+0.0im
+ 0.0+0.0im
+ 0.0+0.0im
+ 0.0+0.0im
+ 0.0+0.0im
+ 0.0+0.0im
+ 0.0+0.0im</code></pre></div><p>GHZ state will collapse to <span>$|0000\rangle$</span> or <span>$|1111\rangle$</span> due to entanglement!</p><footer><hr/><a class="previous" href="../../"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../QFT/"><span class="direction">Next</span><span class="title">Quantum Fourier Transform</span></a></footer></article></body></html>

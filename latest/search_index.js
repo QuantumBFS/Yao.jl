@@ -45,7 +45,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
     "title": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
     "category": "section",
-    "text": "First, you have to use this package in Julia.using YaoThen let\'s define the oracle, it is a function of the number of qubits. The whole oracle looks like this:n = 4\ncircuit = chain(\n    kron(n, 1=>X),\n    kron(n, i=>H for i in 2:n),\n    control(n, [2, ], X, 1),\n    control(n, [4, ], X, 3),\n    control(n, [3, ], X, 1),\n    control(n, [4, ], X, 3),\n    roll(n, H)\n);Let me explain what happens here. Firstly, we have a X gate which is applied to the first qubit. We need decide how we calculate this numerically, Yao offers serveral different approach to this. The simplest (but not the most efficient) one is to use kronecker product which will product X with I on other lines to gather an operator in the whole space and then apply it to the register. The first argument n means the number of qubits.kron(n, 1=>X)Similar with kron, we then need to apply some controled gates.control(n, [2, ], X, 1)This means there is a X gate on the first qubit that is controled by the second qubit. In fact, you can also create a controled gate with multiple control qubits, likecontrol(n, [2, 3], X, 1)In the end, we need to apply H gate to all lines, of course, you can do it by kron, but we offer something more efficient called roll, this applies a single gate each time on each qubit without calculating a new large operator, which will be extremely efficient for calculating small gates that tiles on almost every lines.The whole circuit is a chained structure of the above blocks. And we actually store a quantum circuit in a tree structure.circuitAfter we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.r = circuit(register(bit\"0000\"))\nrLet\'s check the output:statevec(r)We have a GHZ state here, try to measure the first qubitr |> measure(1)\nstatevec(r)GHZ state will collapse to 0000rangle or 1111rangle due to entanglement!"
+    "text": "First, you have to use this package in Julia.using YaoThen let\'s define the oracle, it is a function of the number of qubits. The whole oracle looks like this:n = 4\ncircuit(n) = chain(\n    n,\n    kron(i=>H for i in 1:n),\n    control([4, ], 3=>X),\n    control([3, ], 1=>X),\n    control([4, ], 3=>X),\n    control([2, ], 1=>X),\n    kron(i=>H for i in 2:n),\n    repeat(1=>X),\n);Let me explain what happens here. Firstly, we have a X gate which is applied to the first qubit. We need decide how we calculate this numerically, Yao offers serveral different approach to this. The simplest (but not the most efficient) one is to use kronecker product which will product X with I on other lines to gather an operator in the whole space and then apply it to the register. The first argument n means the number of qubits.kron(n, 1=>X)Similar with kron, we then need to apply some controled gates.control(n, [2, ], 1=>X)This means there is a X gate on the first qubit that is controled by the second qubit. In fact, you can also create a controled gate with multiple control qubits, likecontrol(n, [2, 3], 1=>X)In the end, we need to apply H gate to all lines, of course, you can do it by kron, but we offer something more efficient called roll, this applies a single gate each time on each qubit without calculating a new large operator, which will be extremely efficient for calculating small gates that tiles on almost every lines.The whole circuit is a chained structure of the above blocks. And we actually store a quantum circuit in a tree structure.circuitAfter we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.r = circuit(4) |> on(register(bit\"0000\"))\nrLet\'s check the output:statevec(r)We have a GHZ state here, try to measure the first qubitmeasure(1) |> on!(r)\nstatevec(r)GHZ state will collapse to 0000rangle or 1111rangle due to entanglement!"
 },
 
 {
@@ -78,6 +78,734 @@ var documenterSearchIndex = {"docs": [
     "title": "Quantum Circuit Born Machine",
     "category": "section",
     "text": ""
+},
+
+{
+    "location": "man/interfaces/#",
+    "page": "Interfaces",
+    "title": "Interfaces",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "man/interfaces/#Yao.Blocks.H",
+    "page": "Interfaces",
+    "title": "Yao.Blocks.H",
+    "category": "constant",
+    "text": "H\n\nThe Hadamard gate acts on a single qubit. It maps the basis state 0rangle to frac0rangle + 1ranglesqrt2 and 1rangle to frac0rangle - 1ranglesqrt2, which means that a measurement will have equal probabilities to become 1 or 0. It is representated by the Hadamard matrix:\n\nH = frac1sqrt2 beginpmatrix\n1  1 \n1  -1\nendpmatrix\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Blocks.X",
+    "page": "Interfaces",
+    "title": "Yao.Blocks.X",
+    "category": "constant",
+    "text": "X\n\nThe Pauli-X gate acts on a single qubit. It is the quantum equivalent of the NOT gate for classical computers (with respect to the standard basis 0rangle, 1rangle). It is represented by the Pauli X matrix:\n\nX = beginpmatrix\n0  1\n1  0\nendpmatrix\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Blocks.Y",
+    "page": "Interfaces",
+    "title": "Yao.Blocks.Y",
+    "category": "constant",
+    "text": "Y\n\nThe Pauli-Y gate acts on a single qubit. It equates to a rotation around the Y-axis of the Bloch sphere by pi radians. It maps 0rangle to i1rangle and 1rangle to -i0rangle. It is represented by the Pauli Y matrix:\n\nY = beginpmatrix\n0  -i\ni  0\nendpmatrix\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Blocks.Z",
+    "page": "Interfaces",
+    "title": "Yao.Blocks.Z",
+    "category": "constant",
+    "text": "Z\n\nThe Pauli-Z gate acts on a single qubit. It equates to a rotation around the Z-axis of the Bloch sphere by pi radians. Thus, it is a special case of a phase shift gate (see shift) with theta = pi. It leaves the basis state 0rangle unchanged and maps 1rangle to -1rangle. Due to this nature, it is sometimes called phase-flip. It is represented by the Pauli Z matrix:\n\nZ = beginpmatrix\n1  0\n0  -1\nendpmatrix\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.Rx",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.Rx",
+    "category": "function",
+    "text": "Rx([type=Yao.DefaultType], [theta=0.0]) -> RotationGate{type, X}\n\nReturns a rotation X gate.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.Ry",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.Ry",
+    "category": "function",
+    "text": "Ry([type=Yao.DefaultType], [theta=0.0]) -> RotationGate{type, Y}\n\nReturns a rotation Y gate.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.Rz",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.Rz",
+    "category": "function",
+    "text": "Rz([type=Yao.DefaultType], [theta=0.0]) -> RotationGate{type, Z}\n\nReturns a rotation Z gate.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.chain",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.chain",
+    "category": "function",
+    "text": "chain([T], n::Int) -> ChainBlock\nchain([n], blocks) -> ChainBlock\n\nReturns a ChainBlock. This factory method can be called lazily if you missed the total number of qubits.\n\nThis chains several blocks with the same size together.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.focus-Tuple",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.focus",
+    "category": "method",
+    "text": "focus(orders...) -> Concentrator\n\nfocus serveral lines.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.on!-Tuple{Yao.Registers.AbstractRegister,Vararg{Any,N} where N}",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.on!",
+    "category": "method",
+    "text": "on!(register, [params...]) -> f(block)\n\nReturns a lambda function that takes a block as its argument with configurations on this register in place.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.on-Tuple{Yao.Registers.AbstractRegister,Vararg{Any,N} where N}",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.on",
+    "category": "method",
+    "text": "on(register, [params...]) -> f(block)\n\nReturns a lambda function that takes a block as its argument with configurations on a copy of this register.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.phase",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.phase",
+    "category": "function",
+    "text": "phase([type=Yao.DefaultType], [theta=0.0]) -> PhaseGate{:global}\n\nReturns a global phase gate.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.roll",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.roll",
+    "category": "function",
+    "text": "roll([n], blocks...)\n\nConstruct a Roller block, which is a faster way to calculate similar small blocks tile on the whole address.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.rot",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.rot",
+    "category": "function",
+    "text": "rot([type=Yao.DefaultType], U, [theta=0.0]) -> RotationGate{type, U}\n\nReturns an arbitrary rotation gate on U.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.shift",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.shift",
+    "category": "function",
+    "text": "shift([type=Yao.DefaultType], [theta=0.0]) -> PhaseGate{:shift}\n\nReturns a phase shift gate.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Blocks.XGate",
+    "page": "Interfaces",
+    "title": "Yao.Blocks.XGate",
+    "category": "type",
+    "text": "XGate{T} <: ConstantGate{1, T}\n\nThe block type for Pauli-X gate. See docs for X for more information.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Blocks.YGate",
+    "page": "Interfaces",
+    "title": "Yao.Blocks.YGate",
+    "category": "type",
+    "text": "YGate{T} <: ConstantGate{1, T}\n\nThe block type for Pauli-Y gate. See docs for Y for more information.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Blocks.ZGate",
+    "page": "Interfaces",
+    "title": "Yao.Blocks.ZGate",
+    "category": "type",
+    "text": "ZGate{T} <: ConstantGate{1, T}\n\nThe block type for Pauli-Z gate. See docs for Z for more information.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Union{Pair, Tuple, Yao.Blocks.MatrixBlock},N} where N}",
+    "page": "Interfaces",
+    "title": "Base.kron",
+    "category": "method",
+    "text": "kron(blocks...) -> KronBlock\nkron(iterator) -> KronBlock\nkron(total, blocks...) -> KronBlock\nkron(total, iterator) -> KronBlock\n\ncreate a KronBlock with a list of blocks or tuple of heads and blocks.\n\nExample\n\nblock1 = Gate(X)\nblock2 = Gate(Z)\nblock3 = Gate(Y)\nKronBlock(block1, (3, block2), block3)\n\nThis will automatically generate a block list looks like\n\n1 -- [X] --\n2 ---------\n3 -- [Z] --\n4 -- [Y] --\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Base.repeat-Tuple{Int64,Pair{Int64,#s404} where #s404<:Yao.Blocks.MatrixBlock}",
+    "page": "Interfaces",
+    "title": "Base.repeat",
+    "category": "method",
+    "text": "repeat([n], pairs)\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Interfaces-1",
+    "page": "Interfaces",
+    "title": "Interfaces",
+    "category": "section",
+    "text": "Modules = [Yao.Interfaces]\nOrder   = [:constant, :type, :function]"
+},
+
+{
+    "location": "man/registers/#",
+    "page": "Registers",
+    "title": "Registers",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "man/registers/#Registers-1",
+    "page": "Registers",
+    "title": "Registers",
+    "category": "section",
+    "text": "Quantum circuits process quantum states. A quantum state being processing by a quantum circuit will be stored on a quantum register. In Yao we provide several types for registers. The default type for registers is the Yao.Registers.DefaultRegister.You can directly use factory method register"
+},
+
+{
+    "location": "man/registers/#Storage-1",
+    "page": "Registers",
+    "title": "Storage",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "man/registers/#LDT-format-1",
+    "page": "Registers",
+    "title": "LDT format",
+    "category": "section",
+    "text": "Concepturely, a wave function psirangle can be represented in a low dimentional tensor (LDT) format of order-3, L(f, r, b).f: focused (i.e. operational) dimensions\nr: remaining dimensions\nb: batch dimension.For simplicity, let\'s ignore batch dimension for the momentum, we havepsirangle = sumlimits_xy L(x y ) jrangleirangleGiven a configuration x (in operational space), we want get the i-th bit using (x<<i) & 0x1, which means putting the small end the qubit with smaller index. In this representation L(x) will get return langle xpsirangle.note: Note\nWhy not the other convension: Using the convention of putting 1st bit on the big end will need to know the total number of qubits n in order to know such positional information."
+},
+
+{
+    "location": "man/registers/#HDT-format-1",
+    "page": "Registers",
+    "title": "HDT format",
+    "category": "section",
+    "text": "Julia storage is column major, if we reshape the wave function to a shape of 2times2times  times2 and get the HDT (high dimensional tensor) format representation H, we can use H(x_1 x_2  x_3) to get langle xpsirangle."
+},
+
+{
+    "location": "man/registers/#Operations-1",
+    "page": "Registers",
+    "title": "Operations",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "man/registers/#Kronecker-product-of-operators-1",
+    "page": "Registers",
+    "title": "Kronecker product of operators",
+    "category": "section",
+    "text": "In order to put small bits on little end, the Kronecker product is O = o_n otimes ldots otimes o_2 otimes o_1 where the subscripts are qubit indices."
+},
+
+{
+    "location": "man/registers/#Measurements-1",
+    "page": "Registers",
+    "title": "Measurements",
+    "category": "section",
+    "text": "Measure means sample and projection."
+},
+
+{
+    "location": "man/registers/#Sample-1",
+    "page": "Registers",
+    "title": "Sample",
+    "category": "section",
+    "text": "Suppose we want to measure operational subspace, we can first getp(x) = langle xpsirangle^2 = sumlimits_y L(x y )^2Then we sample an asim p(x). If we just sample and don\'t really measure (change wave function), its over."
+},
+
+{
+    "location": "man/registers/#Projection-1",
+    "page": "Registers",
+    "title": "Projection",
+    "category": "section",
+    "text": "psirangle = sum_y L(a y )sqrtp(a) arangle yrangleGood! then we can just remove the operational qubit space since x and y spaces are totally decoupled and x is known as in state a, then we getpsirangle_r = sum_y l(0 y ) yranglewhere l = L(a:a, :, :)/sqrt(p(a))."
+},
+
+{
+    "location": "man/registers/#Yao.Registers.AbstractRegister",
+    "page": "Registers",
+    "title": "Yao.Registers.AbstractRegister",
+    "category": "type",
+    "text": "AbstractRegister{B, T}\n\nabstract type that registers will subtype from. B is the batch size, T is the data type.\n\nRequired Properties\n\nProperty Description default\nnqubits(reg) get the total number of qubits. \nnactive(reg) get the number of active qubits. \nnremain(reg) get the number of remained qubits. nqubits - nactive\nnbatch(reg) get the number of batch. B\naddress(reg) get the address of this register. \nstate(reg) get the state of this register. It always return the matrix stored inside. \neltype(reg) get the element type stored by this register on classical memory. (the type Julia should use to represent amplitude) T\ncopy(reg) copy this register. \nsimilar(reg) construct a new register with similar configuration. \n\nRequired Methods\n\nMultiply\n\n*(op, reg)\n\ndefine how operator op act on this register. This is quite useful when there is a special approach to apply an operator on this register. (e.g a register with no batch, or a register with a MPS state, etc.)\n\nnote: Note\nbe careful, generally, operators can only be applied to a register, thus we should only overload this operation and do not overload *(reg, op).\n\nPack Address\n\npack_address!(reg, addrs)\n\npack addrs together to the first k-dimensions.\n\nExample\n\nGiven a register with dimension [2, 3, 1, 5, 4], we pack [5, 4] to the first 2 dimensions. We will get [5, 4, 2, 3, 1].\n\nFocus Address\n\nfocus!(reg, range)\n\nmerge address in range together as one dimension (the active space).\n\nExample\n\nGiven a register with dimension (2^4)x3 and address [1, 2, 3, 4], we focus address [3, 4], will pack [3, 4] together and merge them as the active space. Then we will have a register with size 2^2x(2^2x3), and address [3, 4, 1, 2].\n\nInitializers\n\nInitializers are functions that provide specific quantum states, e.g zero states, random states, GHZ states and etc.\n\nregister(::Type{RT}, raw, nbatch)\n\nan general initializer for input raw state array.\n\nregister(::Val{InitMethod}, ::Type{RT}, ::Type{T}, n, nbatch)\n\ninit register type RT with InitMethod type (e.g Val{:zero}) with element type T and total number qubits n with nbatch. This will be auto-binded to some shortcuts like zero_state, rand_state, randn_state.\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.DefaultRegister",
+    "page": "Registers",
+    "title": "Yao.Registers.DefaultRegister",
+    "category": "type",
+    "text": "DefaultRegister{B, T} <: AbstractRegister{B, T}\n\nDefault type for a quantum register. It contains a dense array that represents a batched quantum state with batch size B of type T.\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.register",
+    "page": "Registers",
+    "title": "Yao.Registers.register",
+    "category": "function",
+    "text": "register(raw, [nbatch=1])\n\nConstruct a register with type of DefaultRegister.\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.QuBitStr",
+    "page": "Registers",
+    "title": "Yao.Registers.QuBitStr",
+    "category": "type",
+    "text": "QuBitStr\n\nString literal for qubits.\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Base.kron-Union{Tuple{B}, Tuple{RT,Yao.Registers.AbstractRegister{B,T} where T}, Tuple{RT}} where RT<:(Yao.Registers.AbstractRegister{B,T} where T) where B",
+    "page": "Registers",
+    "title": "Base.kron",
+    "category": "method",
+    "text": "kron(lhs, rhs)\n\nMerge two registers together with kronecker tensor product.\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Registers-2",
+    "page": "Registers",
+    "title": "Registers",
+    "category": "section",
+    "text": "Modules = [Yao.Registers]\nOrder   = [:constant, :type, :function]"
+},
+
+{
+    "location": "man/blocks/#",
+    "page": "Blocks System",
+    "title": "Blocks System",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "man/blocks/#Blocks-System-1",
+    "page": "Blocks System",
+    "title": "Blocks System",
+    "category": "section",
+    "text": "Blocks are the basic component of a quantum circuit in Yao."
+},
+
+{
+    "location": "man/blocks/#Block-System-1",
+    "page": "Blocks System",
+    "title": "Block System",
+    "category": "section",
+    "text": "The whole framework is consist of a block system. The whole system characterize a quantum circuit into serveral kinds of blocks. The uppermost abstract type for the whole system is AbstractBlock"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.AbstractBlock",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.AbstractBlock",
+    "category": "type",
+    "text": "AbstractBlock\n\nabstract type that all block will subtype from. N is the number of qubits.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.AbstractMeasure",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.AbstractMeasure",
+    "category": "type",
+    "text": "AbstractMeasure{M} <: AbstractBlock\n\nAbstract block supertype which measurement block will inherit from.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.ChainBlock",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.ChainBlock",
+    "category": "type",
+    "text": "ChainBlock{N, T} <: CompositeBlock{N, T}\n\nChainBlock is a basic construct tool to create user defined blocks horizontically. It is a Vector like composite type.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.CompositeBlock",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.CompositeBlock",
+    "category": "type",
+    "text": "CompositeBlock{N, T} <: MatrixBlock{N, T}\n\nabstract supertype which composite blocks will inherit from.\n\nextended APIs\n\nblocks: get an iteratable of all blocks contained by this CompositeBlock\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.Concentrator",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.Concentrator",
+    "category": "type",
+    "text": "Concentrator{<:Union{Int, Tuple}} <: AbstractBlock\n\nconcentrates serveral lines together in the circuit, and expose it to other blocks.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.KronBlock",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.KronBlock",
+    "category": "type",
+    "text": "KronBlock{N, T} <: CompositeBlock\n\ncomposite block that combine blocks by kronecker product.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.MatrixBlock",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.MatrixBlock",
+    "category": "type",
+    "text": "MatrixBlock{N, T} <: AbstractBlock\n\nabstract type that all block with a matrix form will subtype from.\n\nextended APIs\n\nmat sparse full datatype\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.PhaseGate",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.PhaseGate",
+    "category": "type",
+    "text": "PhiGate\n\nGlobal phase gate.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.PrimitiveBlock",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.PrimitiveBlock",
+    "category": "type",
+    "text": "PrimitiveBlock{N, T} <: MatrixBlock{N, T}\n\nabstract type that all primitive block will subtype from. A primitive block is a concrete block who can not be decomposed into other blocks. All composite block can be decomposed into several primitive blocks.\n\nNOTE: subtype for primitive block with parameter should implement hash and == method to enable key value cache.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.Roller",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.Roller",
+    "category": "type",
+    "text": "Roller{N, M, T, BT} <: CompositeBlock{N, T}\n\nmap a block type to all lines and use a rolling method to evaluate them.\n\nTODO\n\nfill identity like KronBlock\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.ShiftGate",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.ShiftGate",
+    "category": "type",
+    "text": "ShiftGate <: PrimitiveBlock\n\nPhase shift gate.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Base.LinAlg.ishermitian-Tuple{Yao.Blocks.MatrixBlock}",
+    "page": "Blocks System",
+    "title": "Base.LinAlg.ishermitian",
+    "category": "method",
+    "text": "ishermitian(x) -> Bool\n\nTest whether this operator is hermitian.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.apply!",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.apply!",
+    "category": "function",
+    "text": "apply!(reg, block, [signal])\n\napply a block to a register reg with or without a cache signal.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.blocks",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.blocks",
+    "category": "function",
+    "text": "blocks(composite_block)\n\nget an iterator that iterate through all sub-blocks.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.ispure-Tuple{Yao.Blocks.MatrixBlock}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.ispure",
+    "category": "method",
+    "text": "ispure(x) -> Bool\n\nTest whether this operator is pure.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.dispatch!-Tuple{Yao.Blocks.CompositeBlock,Any}",
+    "page": "Blocks System",
+    "title": "Yao.dispatch!",
+    "category": "method",
+    "text": "dispatch!(f, c, params) -> c\n\ndispatch parameters and tweak it according to callback function f(original, parameter)->new\n\ndispatch a vector of parameters to this composite block according to each sub-block\'s number of parameters.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.print_block-Tuple{IO,Any}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.print_block",
+    "category": "method",
+    "text": "print_block(io, block)\n\ndefine the style to print this block\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Blocks-1",
+    "page": "Blocks System",
+    "title": "Blocks",
+    "category": "section",
+    "text": "Modules = [Yao.Blocks]\nOrder   = [:constant, :type, :function]"
+},
+
+{
+    "location": "man/cache/#",
+    "page": "Cache System",
+    "title": "Cache System",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "man/cache/#Cache-System-1",
+    "page": "Cache System",
+    "title": "Cache System",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "man/intrinsics/#",
+    "page": "Intrinsics",
+    "title": "Intrinsics",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.basis-Tuple{Int64}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.basis",
+    "category": "method",
+    "text": "basis(num_bit::Int) = UnitRange{Int}\n\nReturns the UnitRange for basis in Hilbert Space of num_bit qubits.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.batch_normalize",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.batch_normalize",
+    "category": "function",
+    "text": "batch_normalize\n\nnormalize a batch of vector.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.batch_normalize!",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.batch_normalize!",
+    "category": "function",
+    "text": "batch_normalize!(matrix)\n\nnormalize a batch of vector.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.bdistance-Tuple{Int64,Int64}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.bdistance",
+    "category": "method",
+    "text": "bdistance(i::DInt, j::DInt) -> Int\n\nReturn number of different bits.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.bit_length-Tuple{Any}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.bit_length",
+    "category": "method",
+    "text": "bit_length(x::Int) -> Int\n\nReturn the number of bits required to represent input integer x.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.bitarray-Union{Tuple{Array{T,1}}, Tuple{T}} where T<:Number",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.bitarray",
+    "category": "method",
+    "text": "bitarray(v::Vector; num_bit::Int=64) -> BitArray\nbitarray(v::T; num_bit=bsizeof(T)) -> BitArray\n\nConstruct BitArray from an integer vector, the lazy non-efficient version.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.bmask",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.bmask",
+    "category": "function",
+    "text": "bmask(ibit::Int...) -> Int\nbmask(bits::UnitRange{Int}) ->Int\n\nReturn an integer with specific position masked, which is offten used as a mask for binary operations.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.bsizeof-Tuple{Any}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.bsizeof",
+    "category": "method",
+    "text": "bsizeof(x) -> Int\n\nReturn the size of object, in number of bit.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.flip-Tuple{Int64,Int64}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.flip",
+    "category": "method",
+    "text": "flip(index::Int, mask::Int) -> Int\n\nReturn an Integer with bits at masked position flipped.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.hilbertkron-Union{Tuple{Int64,Array{T,1},Array{Int64,1}}, Tuple{T}} where T<:(AbstractArray{T,2} where T)",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.hilbertkron",
+    "category": "method",
+    "text": "hilbertkron(num_bit::Int, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix\n\nReturn general kronecher product form of gates in Hilbert space of num_bit qubits.\n\ngates are a list of single qubit gates.\nlocs should have the same length as gates, specifing the gates positions.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.indices_with-Tuple{Int64,Array{Int64,1},Array{Int64,1}}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.indices_with",
+    "category": "method",
+    "text": "indices_with(num_bit::Int, poss::Vector{Int}, vals::Vector{Int}) -> Vector{Int}\n\nReturn indices with specific positions poss with value vals in a hilbert space of num_bit qubits.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.log2i-Union{Tuple{T}, Tuple{T}} where T",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.log2i",
+    "category": "method",
+    "text": "log2i(x::Integer) -> Integer\n\nReturn log2(x), this integer version of log2 is fast but only valid for number equal to 2^n. Ref: https://stackoverflow.com/questions/21442088\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.neg-Tuple{Int64,Int64}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.neg",
+    "category": "method",
+    "text": "neg(index::Int, num_bit::Int) -> Int\n\nReturn an integer with all bits flipped (with total number of bit num_bit).\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.packbits-Tuple{AbstractArray}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.packbits",
+    "category": "method",
+    "text": "packbits(arr::AbstractArray) -> AbstractArray\n\npack bits to integers, usually take a BitArray as input.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.setbit-Tuple{Int64,Int64}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.setbit",
+    "category": "method",
+    "text": "setbit(index::Int, mask::Int) -> Int\n\nset the bit at masked position to 1.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.swapbits-Tuple{Int64,Int64}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.swapbits",
+    "category": "method",
+    "text": "swapbits(num::Int, mask12::Int) -> Int\n\nReturn an integer with bits at i and j flipped.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.takebit-Tuple{Int64,Int64}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.takebit",
+    "category": "method",
+    "text": "takebit(index::Int, ibit::Int) -> Int\n\nReturn a bit at specific position.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.testall-Tuple{Int64,Int64}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.testall",
+    "category": "method",
+    "text": "testall(index::Int, mask::Int) -> Bool\n\nReturn true if all masked position of index is 1.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.testany-Tuple{Int64,Int64}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.testany",
+    "category": "method",
+    "text": "testany(index::Int, mask::Int) -> Bool\n\nReturn true if any masked position of index is 1.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.testval-Tuple{Int64,Int64,Int64}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.testval",
+    "category": "method",
+    "text": "testval(index::Int, mask::Int, onemask::Int) -> Bool\n\nReturn true if values at positions masked by mask with value 1 at positions masked by onemask and 0 otherwise.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Base.sort-Tuple{Tuple}",
+    "page": "Intrinsics",
+    "title": "Base.sort",
+    "category": "method",
+    "text": "sort(t::Tuple; lt=isless, by=identity, rev::Bool=false) -> ::Tuple\n\nSorts the tuple t.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Base.sortperm-Tuple{Tuple}",
+    "page": "Intrinsics",
+    "title": "Base.sortperm",
+    "category": "method",
+    "text": "sortperm(t::Tuple; lt=isless, by=identity, rev::Bool=false) -> ::Tuple\n\nComputes a tuple that contains the permutation required to sort t.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Intrinsics-1",
+    "page": "Intrinsics",
+    "title": "Intrinsics",
+    "category": "section",
+    "text": "Modules = [Yao.Intrinsics]\nOrder   = [:constant, :type, :function]"
+},
+
+{
+    "location": "man/luxurysparse/#",
+    "page": "LuxurySparse",
+    "title": "LuxurySparse",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "man/luxurysparse/#LuxurySparse-1",
+    "page": "LuxurySparse",
+    "title": "LuxurySparse",
+    "category": "section",
+    "text": "We provide more detailed optimization through a self-defined sparse library which is more efficient for operations related to quantum gates."
+},
+
+{
+    "location": "man/luxurysparse/#Yao.LuxurySparse.IMatrix",
+    "page": "LuxurySparse",
+    "title": "Yao.LuxurySparse.IMatrix",
+    "category": "type",
+    "text": "IMatrix{N, Tv}()\nIMatrix{N}() where N = IMatrix{N, Int64}()\nIMatrix(A::AbstractMatrix{T}) where T -> IMatrix\n\nIMatrix matrix, with size N as label, use Int64 as its default type, both * and kron are optimized.\n\n\n\n"
+},
+
+{
+    "location": "man/luxurysparse/#Yao.LuxurySparse.PermMatrix",
+    "page": "LuxurySparse",
+    "title": "Yao.LuxurySparse.PermMatrix",
+    "category": "type",
+    "text": "PermMatrix{Tv, Ti}(perm::Vector{Ti}, vals::Vector{Tv}) where {Tv, Ti<:Integer}\nPermMatrix(perm::Vector{Ti}, vals::Vector{Tv}) where {Tv, Ti}\nPermMatrix(ds::AbstractMatrix)\n\nPermMatrix represents a special kind linear operator: Permute and Multiply, which means M * v = v[perm] * val Optimizations are used to make it much faster than SparseMatrixCSC.\n\nperm is the permutation order,\nvals is the multiplication factor.\n\nGeneralized Permutation Matrix\n\n\n\n"
+},
+
+{
+    "location": "man/luxurysparse/#Yao.LuxurySparse.pmrand",
+    "page": "LuxurySparse",
+    "title": "Yao.LuxurySparse.pmrand",
+    "category": "function",
+    "text": "pmrand(T::Type, n::Int) -> PermMatrix\n\nReturn random PermMatrix.\n\n\n\n"
+},
+
+{
+    "location": "man/luxurysparse/#API-1",
+    "page": "LuxurySparse",
+    "title": "API",
+    "category": "section",
+    "text": "Modules = [Yao.LuxurySparse]\nOrder   = [:constant, :type, :function]"
 },
 
 ]}
