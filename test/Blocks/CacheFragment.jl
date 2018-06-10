@@ -6,7 +6,7 @@ using Yao.CacheServers
 using Yao.LuxurySparse
 
 @testset "constructor" begin
-    @test CacheFragment(X) isa CacheFragment{XGate{ComplexF64}, XGate{ComplexF64}, Any}
+    @test CacheFragment(X) isa CacheFragment{XGate{ComplexF64}, UInt8, Any}
     @test CacheFragment{XGate{ComplexF64}, Int, PermMatrix{ComplexF64, Int}}(X) isa
         CacheFragment{XGate{ComplexF64}, Int, PermMatrix{ComplexF64, Int}}
     @test CacheFragment{XGate{ComplexF64}, Int}(X) isa CacheFragment{XGate{ComplexF64}, Int, Any}
