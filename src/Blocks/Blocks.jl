@@ -35,7 +35,7 @@ import ..LuxurySparse: I
 
 # import package APIs
 import ..Yao
-import ..Yao: DefaultType, nqubits, isunitary, isreflexive, nparameters, mat, datatype, dispatch!, address
+import ..Yao: DefaultType, nqubits, isunitary, isreflexive, nparameters, parameters, mat, datatype, dispatch!, address
 import Compat.LinearAlgebra: ishermitian
 import Base: hash, ==, eltype, show, similar, getindex, setindex!, start, next, done, length
 
@@ -45,7 +45,7 @@ import ..CacheServers: update!, iscached, clear!, pull, iscacheable
 
 # module APIs
 export address, @const_gate
-export nqubits, ninput, noutput, isunitary, ispure, isreflexive, nparameters, mat, datatype, matrix_type, ishermitian
+export nqubits, ninput, noutput, isunitary, ispure, isreflexive, nparameters, parameters, mat, datatype, matrix_type, ishermitian
 export apply!, dispatch!
 
 export AnySize, GreaterThan

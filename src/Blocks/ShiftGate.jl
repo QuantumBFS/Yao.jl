@@ -15,7 +15,8 @@ copy(block::ShiftGate{T}) where T = ShiftGate{T}(block.theta)
 dispatch!(f::Function, block::ShiftGate, theta) = (block.theta = f(block.theta, theta); block)
 
 # Properties
-nparameters(::ShiftGate) = 1
+nparameters(::Type{ShiftGate}) = 1
+parameters(x::ShiftGate) = [x.theta]
 
 ==(lhs::ShiftGate, rhs::ShiftGate) = lhs.theta == rhs.theta
 

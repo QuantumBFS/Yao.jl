@@ -27,6 +27,13 @@ function isreflexive end
 Returns the number of parameters of `x`.
 """
 function nparameters end
+
+"""
+    parameters(block) -> Vector
+
+Returns a list of all parameters in block.
+"""
+function parameters end
 function datatype end
 
 """
