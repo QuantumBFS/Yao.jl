@@ -56,14 +56,11 @@ import Base: kron
     kron(total, blocks...) -> KronBlock
     kron(total, iterator) -> KronBlock
 
-create a `KronBlock` with a list of blocks or tuple of heads and blocks.
+create a [`KronBlock`](@ref) with a list of blocks or tuple of heads and blocks.
 
 ## Example
-```julia
-block1 = Gate(X)
-block2 = Gate(Z)
-block3 = Gate(Y)
-KronBlock(block1, (3, block2), block3)
+```@example
+kron(4, X, 3=>Z, Y)
 ```
 This will automatically generate a block list looks like
 ```
@@ -83,6 +80,13 @@ kron(blocks) = N->KronBlock{N}(blocks)
 # 2.3 control block
 
 export C, control
+
+"""
+    control([total], controls, target) -> ControlBlock
+
+Constructs a [`ControlBlock`](@ref)
+"""
+function control end
 
 function control(total::Int, controls, target)
     ControlBlock{total}([controls...], target)

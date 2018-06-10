@@ -1,6 +1,10 @@
+```@meta
+CurrentModule = Yao.Interfaces
+```
+
 # Interfaces
 
 ```@autodocs
-Modules = [Yao.Interfaces]
-Order   = [:constant, :type, :function]
+Modules = [Interfaces]
+Order   = [:module, :constant, :type, :macro, :function]
 ```

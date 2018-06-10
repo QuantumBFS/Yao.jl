@@ -57,11 +57,9 @@ ismatch(::GreaterThan{N}, n::Int) where N = n > N
 ismatch(::AnySize, n::Int) = true
 
 include("Core.jl")
-# include("RangedBlock.jl")
 include("MatrixBlock.jl")
 # others
 include("Concentrator.jl")
-# include("Sequence.jl")
 include("Measure.jl")
 include("IOSyntax.jl")
 

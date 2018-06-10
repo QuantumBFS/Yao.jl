@@ -1,5 +1,10 @@
 export ControlBlock
 
+"""
+    ControlBlock{BT, N, T} <: CompositeBlock{N, T}
+
+control block.
+"""
 mutable struct ControlBlock{BlockType, N, T} <: CompositeBlock{N, T}
     ctrl_qubits::Vector{Int}
     block::BlockType

@@ -57,5 +57,5 @@ where `l = L(a:a, :, :)/sqrt(p(a))`.
 
 ```@autodocs
 Modules = [Yao.Registers]
-Order   = [:constant, :type, :function]
+Order   = [:module, :constant, :type, :macro, :function]
 ```

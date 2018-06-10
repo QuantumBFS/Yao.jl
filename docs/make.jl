@@ -24,8 +24,9 @@ makedocs(
             "man/intrinsics.md",
             "man/luxurysparse.md",
         ],
-        # "Developer Documentation" => Any[
-        # ],
+        "Developer Documentation" => Any[
+            "dev/extending-blocks.md"
+        ],
         # "Theoretical Notes" => Any[
         #     "theo/register.md",
         #     "theo/rotation.md",

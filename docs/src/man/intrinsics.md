@@ -2,5 +2,5 @@
 
 ```@autodocs
 Modules = [Yao.Intrinsics]
-Order   = [:constant, :type, :function]
+Order   = [:module, :constant, :type, :macro, :function]
 ```
