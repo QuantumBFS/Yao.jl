@@ -36,6 +36,14 @@ function map!(f::Function, dst::CompositeBlock, itr)
     dst
 end
 
+function parameters(c::CompositeBlock)
+    out = []
+    for each in blocks(c)
+        append!(out, parameters(each))
+    end
+    out
+end
+
 function nparameters(c::CompositeBlock)
     count = 0
     for each in blocks(c)

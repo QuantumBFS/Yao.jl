@@ -25,5 +25,6 @@ end
 
 include("ConstGate.jl")
 include("PhaseGate.jl")
+include("ShiftGate.jl")
 include("RotationGate.jl")
 include("SwapGate.jl")
