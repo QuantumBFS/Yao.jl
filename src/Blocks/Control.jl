@@ -205,3 +205,15 @@ function ==(lhs::ControlBlock{BT, N, T}, rhs::ControlBlock{BT, N, T}) where {BT,
     (lhs.ctrl_qubits == rhs.ctrl_qubits) && (lhs.block == rhs.block) && (lhs.addr == rhs.addr)
 end
 
+function print_block(io::IO, x::ControlBlock)
+    printstyled(io, "control("; bold=true, color=color(ControlBlock))
+
+    for i in eachindex(x.ctrl_qubits)
+        printstyled(io, x.ctrl_qubits[i]; bold=true, color=color(ControlBlock))
+
+        if i != lastindex(x.ctrl_qubits)
+            printstyled(io, ", "; bold=true, color=color(ControlBlock))
+        end
+    end
+    printstyled(io, ")"; bold=true, color=color(ControlBlock))
+end

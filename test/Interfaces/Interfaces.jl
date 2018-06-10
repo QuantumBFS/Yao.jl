@@ -7,8 +7,8 @@ using Yao
 using Yao.Blocks
 
 @testset "phase gate" begin
-    @test phase() isa PhaseGate{:global, Float64}
-    @test shift() isa PhaseGate{:shift, Float64}
+    @test phase() isa PhaseGate{Float64}
+    @test shift() isa ShiftGate{Float64}
     @test phase().theta == 0.0
 end
 

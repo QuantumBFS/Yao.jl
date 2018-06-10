@@ -24,3 +24,8 @@ nparameters(::PhaseGate) = 1
 function hash(gate::PhaseGate, h::UInt)
     hash(hash(gate.theta, objectid(gate)), h)
 end
+
+
+function print_block(io::IO, g::PhaseGate)
+    print(io, "Global Phase Gate:", g.theta)
+end

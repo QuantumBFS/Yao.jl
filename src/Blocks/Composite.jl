@@ -90,6 +90,17 @@ end
 
 ==(lhs::CompositeBlock, rhs::CompositeBlock) = false
 
+# FIXME: make this works in v0.7
+function print_block(io::IO, x::CompositeBlock)
+
+    @static if VERSION < v"0.7-"
+        print(io, summary(x))
+    else
+        summary(io, x)
+    end
+
+end
+
 include("ChainBlock.jl")
 include("KronBlock.jl")
 include("Control.jl")
