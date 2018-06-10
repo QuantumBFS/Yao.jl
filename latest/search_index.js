@@ -9,11 +9,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "#Yao",
+    "page": "Home",
+    "title": "Yao",
+    "category": "module",
+    "text": "Flexible, Extensible Framework for Quantum Algorithm Design.\n\nEnvironment Variables\n\nYaoDefaultType: set default type used in simulation.\n\n\n\n"
+},
+
+{
     "location": "#Yao-1",
     "page": "Home",
     "title": "Yao",
     "category": "section",
-    "text": "A General Purpose Quantum Computation Simulation FrameworkWelcome to Yao, a Flexible, Extensible, Efficient Framework for Quantum Algorithm Design. Yao (幺) is the Chinese character for unitary. It is also means the first (一) in Chinese (it is the first released package from QuantumBFS).We aim to provide a powerful tool for researchers, students to study and explore quantum computing in near term future, before quantum computer being used in large-scale."
+    "text": "A General Purpose Quantum Computation Simulation FrameworkWelcome to Yao, a Flexible, Extensible, Efficient Framework for Quantum Algorithm Design. Yao (幺) is the Chinese character for unitary. It is also means the first (一) in Chinese (it is the first released package from QuantumBFS).We aim to provide a powerful tool for researchers, students to study and explore quantum computing in near term future, before quantum computer being used in large-scale.Yao"
 },
 
 {
@@ -29,7 +37,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Manual",
     "category": "section",
-    "text": "Pages = [\n    \"man/block.md\",\n    \"man/cache.md\",\n]"
+    "text": "Pages = [\n    \"man/interfaces.md\",\n    \"man/registers.md\",\n    \"man/blocks.md\",\n    \"man/cache.md\",\n    \"man/intrinsics.md\",\n    \"man/luxurysparse.md\",\n]\nDepth = 1"
 },
 
 {
@@ -85,7 +93,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Interfaces",
     "category": "page",
-    "text": ""
+    "text": "CurrentModule = Yao.Interfaces"
 },
 
 {
@@ -150,6 +158,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Interfaces.chain",
     "category": "function",
     "text": "chain([T], n::Int) -> ChainBlock\nchain([n], blocks) -> ChainBlock\n\nReturns a ChainBlock. This factory method can be called lazily if you missed the total number of qubits.\n\nThis chains several blocks with the same size together.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.control",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.control",
+    "category": "function",
+    "text": "control([total], controls, target) -> ControlBlock\n\nConstructs a ControlBlock\n\n\n\n"
 },
 
 {
@@ -237,7 +253,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Base.kron",
     "category": "method",
-    "text": "kron(blocks...) -> KronBlock\nkron(iterator) -> KronBlock\nkron(total, blocks...) -> KronBlock\nkron(total, iterator) -> KronBlock\n\ncreate a KronBlock with a list of blocks or tuple of heads and blocks.\n\nExample\n\nblock1 = Gate(X)\nblock2 = Gate(Z)\nblock3 = Gate(Y)\nKronBlock(block1, (3, block2), block3)\n\nThis will automatically generate a block list looks like\n\n1 -- [X] --\n2 ---------\n3 -- [Z] --\n4 -- [Y] --\n\n\n\n"
+    "text": "kron(blocks...) -> KronBlock\nkron(iterator) -> KronBlock\nkron(total, blocks...) -> KronBlock\nkron(total, iterator) -> KronBlock\n\ncreate a KronBlock with a list of blocks or tuple of heads and blocks.\n\nExample\n\nkron(4, X, 3=>Z, Y)\n\nThis will automatically generate a block list looks like\n\n1 -- [X] --\n2 ---------\n3 -- [Z] --\n4 -- [Y] --\n\n\n\n"
 },
 
 {
@@ -253,7 +269,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Interfaces",
     "category": "section",
-    "text": "Modules = [Yao.Interfaces]\nOrder   = [:constant, :type, :function]"
+    "text": "Modules = [Interfaces]\nOrder   = [:module, :constant, :type, :macro, :function]"
 },
 
 {
@@ -353,6 +369,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/registers/#Yao.Registers.@bit_str-Tuple{Any}",
+    "page": "Registers",
+    "title": "Yao.Registers.@bit_str",
+    "category": "macro",
+    "text": "@bit_str -> QuBitStr\n\nConstruct a bit string. such as bit\"0000\". The bit strings also supports string concat. Just use it like normal strings.\n\n\n\n"
+},
+
+{
     "location": "man/registers/#Yao.Registers.register",
     "page": "Registers",
     "title": "Yao.Registers.register",
@@ -381,7 +405,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Registers",
     "title": "Registers",
     "category": "section",
-    "text": "Modules = [Yao.Registers]\nOrder   = [:constant, :type, :function]"
+    "text": "Modules = [Yao.Registers]\nOrder   = [:module, :constant, :type, :macro, :function]"
 },
 
 {
@@ -389,7 +413,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Blocks System",
     "category": "page",
-    "text": ""
+    "text": "CurrentModule = Yao.Blocks"
 },
 
 {
@@ -406,6 +430,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Block System",
     "category": "section",
     "text": "The whole framework is consist of a block system. The whole system characterize a quantum circuit into serveral kinds of blocks. The uppermost abstract type for the whole system is AbstractBlock"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks",
+    "page": "Blocks System",
+    "title": "Yao.Blocks",
+    "category": "module",
+    "text": "APIs\n\nTraits\n\nnqubits ninput noutput isunitary ispure isreflexive ishermitian\n\nMethods\n\napply! copy dispatch!\n\n\n\n"
 },
 
 {
@@ -446,6 +478,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.Concentrator",
     "category": "type",
     "text": "Concentrator{<:Union{Int, Tuple}} <: AbstractBlock\n\nconcentrates serveral lines together in the circuit, and expose it to other blocks.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.ControlBlock",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.ControlBlock",
+    "category": "type",
+    "text": "ControlBlock{BT, N, T} <: CompositeBlock{N, T}\n\ncontrol block.\n\n\n\n"
 },
 
 {
@@ -494,6 +534,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.ShiftGate",
     "category": "type",
     "text": "ShiftGate <: PrimitiveBlock\n\nPhase shift gate.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.ConstGateTools.@const_gate",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.ConstGateTools.@const_gate",
+    "category": "macro",
+    "text": "@const_gate name[::T] = matrix\n\nDefine a new constant gate.\n\n\n\n"
 },
 
 {
@@ -549,7 +597,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Blocks",
     "category": "section",
-    "text": "Modules = [Yao.Blocks]\nOrder   = [:constant, :type, :function]"
+    "text": "Modules = [Yao.Blocks]\nOrder   = [:module, :constant, :type, :macro, :function]"
 },
 
 {
@@ -561,11 +609,83 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/cache/#Yao.CacheServers.AbstractCacheServer",
+    "page": "Cache System",
+    "title": "Yao.CacheServers.AbstractCacheServer",
+    "category": "type",
+    "text": "AbstractCacheServer{K, ELT}\n\n\n\n"
+},
+
+{
+    "location": "man/cache/#Yao.CacheServers.alloc!-Tuple{Yao.CacheServers.AbstractCacheServer,Any,Any}",
+    "page": "Cache System",
+    "title": "Yao.CacheServers.alloc!",
+    "category": "method",
+    "text": "alloc!(server, object, storage) -> server\n\nalloc new storage on the server.\n\n\n\n"
+},
+
+{
+    "location": "man/cache/#Yao.CacheServers.iscacheable-Tuple{Yao.CacheServers.AbstractCacheServer,Any}",
+    "page": "Cache System",
+    "title": "Yao.CacheServers.iscacheable",
+    "category": "method",
+    "text": "iscacheable(server, object)\n\ncheck if there is available space to storage this object\'s value. (if this object was allocated on the server before.).\n\n\n\n"
+},
+
+{
+    "location": "man/cache/#Yao.CacheServers.iscached-Tuple{Yao.CacheServers.AbstractCacheServer,Any,Vararg{Any,N} where N}",
+    "page": "Cache System",
+    "title": "Yao.CacheServers.iscached",
+    "category": "method",
+    "text": "iscached(server, object, [params...])\n\ncheck if this object (with params) is already cached.\n\n\n\n"
+},
+
+{
+    "location": "man/cache/#Yao.CacheServers.pull-Tuple{Yao.CacheServers.AbstractCacheServer,Any,Vararg{Any,N} where N}",
+    "page": "Cache System",
+    "title": "Yao.CacheServers.pull",
+    "category": "method",
+    "text": "pull(server, object, params...) -> value\n\npull object storage from server.\n\n\n\n"
+},
+
+{
+    "location": "man/cache/#Yao.CacheServers.update!-Tuple{Any,Any}",
+    "page": "Cache System",
+    "title": "Yao.CacheServers.update!",
+    "category": "method",
+    "text": "update!(storage, val) -> storage\n\n\n\n"
+},
+
+{
+    "location": "man/cache/#Base.Distributed.clear!-Tuple{Yao.CacheServers.AbstractCacheServer,Any}",
+    "page": "Cache System",
+    "title": "Base.Distributed.clear!",
+    "category": "method",
+    "text": "clear!(server, object) -> server\n\nclear the storage in the server of this object.\n\n\n\n"
+},
+
+{
+    "location": "man/cache/#Base.delete!-Tuple{Yao.CacheServers.AbstractCacheServer,Any}",
+    "page": "Cache System",
+    "title": "Base.delete!",
+    "category": "method",
+    "text": "delete!(server, object) -> server\n\ndelete this object from the server. (the storage will be deleted)\n\n\n\n"
+},
+
+{
+    "location": "man/cache/#Base.push!-Tuple{Yao.CacheServers.AbstractCacheServer,Any,Any}",
+    "page": "Cache System",
+    "title": "Base.push!",
+    "category": "method",
+    "text": "push!(server, val, object) -> server\n\npush val to the storage of object in the server.\n\n\n\n"
+},
+
+{
     "location": "man/cache/#Cache-System-1",
     "page": "Cache System",
     "title": "Cache System",
     "category": "section",
-    "text": ""
+    "text": "Modules = [Yao.CacheServers]\nOrder   = [:module, :constant, :type, :macro, :function]"
 },
 
 {
@@ -757,7 +877,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Intrinsics",
     "title": "Intrinsics",
     "category": "section",
-    "text": "Modules = [Yao.Intrinsics]\nOrder   = [:constant, :type, :function]"
+    "text": "Modules = [Yao.Intrinsics]\nOrder   = [:module, :constant, :type, :macro, :function]"
 },
 
 {
@@ -766,14 +886,6 @@ var documenterSearchIndex = {"docs": [
     "title": "LuxurySparse",
     "category": "page",
     "text": ""
-},
-
-{
-    "location": "man/luxurysparse/#LuxurySparse-1",
-    "page": "LuxurySparse",
-    "title": "LuxurySparse",
-    "category": "section",
-    "text": "We provide more detailed optimization through a self-defined sparse library which is more efficient for operations related to quantum gates."
 },
 
 {
@@ -801,11 +913,51 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/luxurysparse/#API-1",
+    "location": "man/luxurysparse/#LuxurySparse-1",
     "page": "LuxurySparse",
-    "title": "API",
+    "title": "LuxurySparse",
     "category": "section",
-    "text": "Modules = [Yao.LuxurySparse]\nOrder   = [:constant, :type, :function]"
+    "text": "We provide more detailed optimization through a self-defined sparse library which is more efficient for operations related to quantum gates.Modules = [Yao.LuxurySparse]\nOrder   = [:module, :constant, :type, :macro, :function]"
+},
+
+{
+    "location": "dev/extending-blocks/#",
+    "page": "Extending Blocks",
+    "title": "Extending Blocks",
+    "category": "page",
+    "text": "CurrentModule = Yao.Blocks"
+},
+
+{
+    "location": "dev/extending-blocks/#Extending-Blocks-1",
+    "page": "Extending Blocks",
+    "title": "Extending Blocks",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "dev/extending-blocks/#Extending-constant-gate-1",
+    "page": "Extending Blocks",
+    "title": "Extending constant gate",
+    "category": "section",
+    "text": "We prepared a macro for you about constant gates like X, Y, Z.Simply use @const_gate."
+},
+
+{
+    "location": "dev/extending-blocks/#Extending-Primitive-Block-with-parameters-1",
+    "page": "Extending Blocks",
+    "title": "Extending Primitive Block with parameters",
+    "category": "section",
+    "text": "First, define your own block type by subtyping PrimitiveBlock. And import methods you will need to overloadusing Yao, Yao.Blocks\nimport Yao.Blocks: mat, dispatch!, parameters # this is the mimimal methods you will need to overload\n\nmutable struct NewPrimitive{T} <: PrimitiveBlock{1, T}\n   theta::T\nendSecond define its matrix form.mat(g::NewPrimitive{T}) where T = Complex{T}[sin(g.theta) 0; cos(g.theta) 0]Yao will use this matrix to do the simulation by default. However, if you know how to directly apply your block to a quantum register, you can also overload apply! to make your simulation become more efficient. But this is not required.import Yao.Blocks: apply!\napply!(r::AbstractRegister, x::NewPrimitive) = # some efficient way to simulate this blockThird If your block contains parameters, declare which member it is with dispatch! and how to get them by parametersdispatch!(g::NewPrimitive, theta) = (g.theta = theta; g)\nparameters(x::NewPrimitive) = x.thetaThe prototype of dispatch! is simple, just directly write the parameters as your function argument. e.gmutable struct MultiParam{N, T} <: PrimitiveBlock{N, Complex{T}}\n  theta::T\n  phi::T\nendjust write:dispatch!(x::MultiParam, theta, phi) = (x.theta = theta; x.phi = phi; x)or maybe your block contains a vector of parameters:mutable struct VecParam{N, T} <: PrimitiveBlock{N, T}\n  params::Vector{T}\nendjust write:dispatch!(x::VecParam, params) = (x.params .= params; x)be careful, the assignment should be in-placed with .= rather than =.If the number of parameters in your new block is fixed, we recommend you to declare this with a type trait nparameters:import Yao.Blocks: nparameters\nnparameters(::Type{<:NewPrimitive}) = 1But it is OK if you do not define this trait, Yao will find out how many parameters you have dynamically.Fourth If you want to enable cache of this new block, you have to define your own cache_key. usually just use your parameters as the key if you want to cache the matrix form of different parameters, which will accelerate your simulation with a cost of larger memory allocation. You can simply define it with cache_keyimport Yao.Blocks: cache_key\ncache_key(x::NewPrimitive) = x.theta"
+},
+
+{
+    "location": "dev/extending-blocks/#Extending-Composite-Blocks-1",
+    "page": "Extending Blocks",
+    "title": "Extending Composite Blocks",
+    "category": "section",
+    "text": "Composite blocks are blocks that are able to contain other blocks."
 },
 
 ]}
