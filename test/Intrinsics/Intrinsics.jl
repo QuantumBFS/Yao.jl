@@ -9,3 +9,11 @@ end
 @testset "basis" begin
 include("Basis.jl")
 end
+
+@testset "macro tools" begin
+include("MacroTools.jl")
+end
+
+@testset "tuple tools" begin
+include("TupleTools.jl")
+end
