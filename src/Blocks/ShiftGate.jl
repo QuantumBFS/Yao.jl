@@ -12,11 +12,11 @@ end
 mat(gate::ShiftGate{T}) where T = Complex{T}[1.0 0.0;0.0 exp(im * gate.theta)]
 
 copy(block::ShiftGate{T}) where T = ShiftGate{T}(block.theta)
-dispatch!(f::Function, block::ShiftGate, theta) = (block.theta = f(block.theta, theta); block)
+dispatch!(block::ShiftGate, theta::Vector) = (block.theta = theta[1]; block)
 
 # Properties
-nparameters(::Type{ShiftGate}) = 1
-parameters(x::ShiftGate) = [x.theta]
+nparameters(::Type{<:ShiftGate}) = 1
+parameters(x::ShiftGate) = x.theta
 
 ==(lhs::ShiftGate, rhs::ShiftGate) = lhs.theta == rhs.theta
 

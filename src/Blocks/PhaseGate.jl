@@ -12,10 +12,10 @@ end
 mat(gate::PhaseGate{T}) where T = exp(im * gate.theta) * IMatrix{2, Complex{T}}()
 
 copy(block::PhaseGate{T}) where T = PhaseGate{T}(block.theta)
-dispatch!(f::Function, block::PhaseGate, theta) = (block.theta = f(block.theta, theta); block)
+dispatch!(block::PhaseGate, theta) = (block.theta = theta; block)
 
 # Properties
-nparameters(::PhaseGate) = 1
+nparameters(::Type{<:PhaseGate}) = 1
 parameters(x::PhaseGate) = x.theta
 
 ==(lhs::PhaseGate, rhs::PhaseGate) = lhs.theta == rhs.theta
