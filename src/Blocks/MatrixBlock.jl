@@ -44,10 +44,10 @@ ishermitian(::Type{X}) where {X <: MatrixBlock} = check_hermitian(mat(X))
 
 check_hermitian(op) = op' ≈ op
 
-nparameters(x::BT) where BT = nparameters(BT)
+nparameters(x::MatrixBlock) = length(parameters(x))
 nparameters(::Type{X}) where {X <: MatrixBlock} = 0
 
-parameters(x::MatrixBlock) = []
+parameters(x::MatrixBlock) = ()
 
 datatype(block::MatrixBlock{N, T}) where {N, T} = T
 
@@ -57,6 +57,10 @@ function apply!(reg::AbstractRegister, b::MatrixBlock)
     reg.state .= mat(b) * reg
     reg
 end
+
+# dispatch!(block::MatrixBlock, params...) = dispatch!((θ, x)->x, block, params...)
+
+function dispatch! end
 
 include("BlockCache.jl")
 include("Primitive.jl")

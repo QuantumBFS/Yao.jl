@@ -60,6 +60,7 @@ function mat end
 function dispatch! end
 
 dispatch!(block::AbstractBlock, params...) = dispatch!((θ, x)->x, block, params...)
+# FIXME: make this works in v0.7
 
 """
     print_block(io, block)

@@ -7,7 +7,7 @@ using Compat.SparseArrays
 using Yao
 using Yao.Blocks
 
-import Yao.LuxurySparse: I
+import Yao.LuxurySparse: IMatrix
 
 @testset "constructor" begin
 # TODO: custom error exception
@@ -89,10 +89,15 @@ end # check mat
 
 @testset "allocation" begin
     g = KronBlock{4}(X, phase(0.1))
+    # deep copy
+    cg = deepcopy(g)
+    cg[2].theta = 0.2
+    @test g[2].theta == 0.1
+
+    # shallow copy
     cg = copy(g)
     cg[2].theta = 0.2
-
-    @test g[2].theta == 0.1
+    @test g[2].theta == 0.2
 
     sg = similar(g)
     @test_throws KeyError sg[2]

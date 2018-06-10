@@ -20,6 +20,7 @@ module Blocks
 
 using Compat
 using Compat.Random
+using Compat.Iterators
 using Compat.LinearAlgebra
 using Compat.SparseArrays
 
@@ -34,7 +35,7 @@ import ..LuxurySparse: I
 
 # import package APIs
 import ..Yao
-import ..Yao: DefaultType, datatype, dispatch!, nqubits, nactive
+import ..Yao: DefaultType, datatype, nqubits, nactive
 import ..Yao.Registers: focus!, relax!
 import Compat.LinearAlgebra: ishermitian
 import Base: hash, ==, eltype, show, similar, getindex, setindex!, start, next, done, length
@@ -44,7 +45,7 @@ export update_cache, clear_cache, cache
 import ..CacheServers: update!, iscached, clear!, pull, iscacheable
 
 # module APIs
-export address, @const_gate
+export address, blocks, @const_gate
 export nqubits, nactive, isunitary, ispure, isreflexive, nparameters, mat, datatype, matrix_type, ishermitian
 export apply!, dispatch!
 

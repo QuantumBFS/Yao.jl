@@ -67,7 +67,7 @@ end
 function copy(k::KronBlock{N, T}) where {N, T}
     slots = copy(k.slots)
     addrs = copy(k.addrs)
-    blocks = copy(blocks)
+    blocks = copy(k.blocks)
     KronBlock{N, T}(slots, addrs, blocks)
 end
 
@@ -116,15 +116,14 @@ length(k::KronBlock) = length(k.blocks)
 ###############
 eachindex(k::KronBlock) = k.addrs
 
-# mat(x::AbstractMatrix) = x
-
-# TODO: make this a generated function
 function mat(k::KronBlock{N}) where N
-    locs = @. N - k.addrs + 1
-    num_bit_list = diff(vcat([0], k.addrs, [N+1])) .- 1
+    locs = N - addrs(k) + 1
+    order = sortperm(locs)
+    num_bit_list = diff(vcat([0], locs[order], [N+1])) - 1
+
     ⊗ = kron
-    reduce(IMatrix(1 << num_bit_list[1]), zip(k.blocks, num_bit_list[2:end])) do x, y
-        mat(x) ⊗ mat(y[1]) ⊗ IMatrix(1<<y[2])
+    reduce(IMatrix(1 << num_bit_list[1]), zip(blocks(k)[order], num_bit_list[2:end])) do x, y
+        x ⊗ mat(y[1]) ⊗ IMatrix(1<<y[2])
     end
 end
 
