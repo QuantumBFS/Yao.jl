@@ -9,7 +9,7 @@ It maps ``|0\\rangle`` to ``i|1\\rangle`` and ``|1\\rangle`` to ``-i|0\\rangle``
 
 """It equates to a rotation around the Z-axis of the Bloch sphere by ``\\pi`` radians.
 Thus, it is a special case of a phase shift gate (see `shift`) with ``\\theta = \\pi``.
-It leaves the basis state ``|0\\rangle`` unchanged and maps ``|1\\range`` to ``-|1\\rangle``.
+It leaves the basis state ``|0\\rangle`` unchanged and maps ``|1\\rangle`` to ``-|1\\rangle``.
 Due to this nature, it is sometimes called phase-flip."""
 ]
 

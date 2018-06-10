@@ -47,8 +47,6 @@ function chain(blocks::MatrixBlock{N}...) where N
     ChainBlock(collect(MatrixBlock{N}, blocks))
 end
 
-Base.getindex(::typeof(chain), xs...) = ChainBlock(xs...)
-
 # 2.2 kron block
 import Base: kron
 
@@ -114,6 +112,14 @@ end
 
 export roll
 
+"""
+    roll([n], blocks...)
+
+Construct a [`Roller`](@ref) block, which is a faster way to calculate
+similar small blocks tile on the whole address.
+"""
+function roll end
+
 roll(n::Int, block::MatrixBlock) = Roller{n}(block)
 
 function roll(N::Int, blocks::MatrixBlock...)
@@ -127,6 +133,10 @@ roll(blocks::MatrixBlock...) = n->roll(n, blocks...)
 # 2.5 repeat
 
 import Base: repeat
+
+"""
+    repeat([n], pairs)
+"""
 repeat(n::Int, x::Pair{Int, <:MatrixBlock}) = RepeatedBlock{n}(x.second, [x.first])
 repeat(n::Int, x::MatrixBlock, lines) = RepeatedBlock{n}(x, lines)
 repeat(n::Int, x::MatrixBlock) = RepeatedBlock{n}(x)

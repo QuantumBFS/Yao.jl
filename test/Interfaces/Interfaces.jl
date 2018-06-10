@@ -14,7 +14,6 @@ end
 
 @testset "chain" begin
     @test chain(X, Y, Z) isa ChainBlock
-    @test chain[X, Y] isa ChainBlock
 end
 
 @testset "kron" begin
