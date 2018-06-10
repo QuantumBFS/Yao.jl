@@ -190,14 +190,6 @@ function print_block(io::IO, x::ControlBlock)
     printstyled(io, ")"; bold=true, color=color(ControlBlock))
 end
 
-function print_block(io::IO, g::PhaseGate{:global})
-    print(io, "Global Phase Gate:", g.theta)
-end
-
-function print_block(io::IO, g::PhaseGate{:shift})
-    print(io, "Phase Shift Gate:", g.theta)
-end
-
 function print_block(io::IO, R::RotationGate)
     print(io, "Rot ", R.U, ": ", R.theta)
 end

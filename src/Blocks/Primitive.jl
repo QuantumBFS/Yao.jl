@@ -14,5 +14,6 @@ abstract type PrimitiveBlock{N, T} <: MatrixBlock{N, T} end
 
 include("ConstGate.jl")
 include("PhaseGate.jl")
+include("ShiftGate.jl")
 include("RotationGate.jl")
 include("SwapGate.jl")
