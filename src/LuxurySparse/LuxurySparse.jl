@@ -10,7 +10,15 @@ import Compat.LinearAlgebra: ishermitian
 import Compat.SparseArrays: SparseMatrixCSC, nnz, nonzeros, sparse, dropzeros!
 import Base: getindex, size, similar, copy, show
 
-export PermMatrix, pmrand, IMatrix, I
+export PermMatrix, pmrand, IMatrix, I, fast_invperm
+
+function fast_invperm(order)
+    v = similar(order)
+    @inbounds @simd for i=1:length(order)
+        v[order[i]] = i
+    end
+    v
+end
 
 dropzeros!(A::Diagonal) = A
 

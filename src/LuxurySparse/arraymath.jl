@@ -18,7 +18,7 @@ end
 copy(M::PermMatrix) = PermMatrix(copy(M.perm), copy(M.vals))
 
 function transpose(M::PermMatrix)
-    new_perm = invperm(M.perm)
+    new_perm = fast_invperm(M.perm)
     return PermMatrix(new_perm, M.vals[new_perm])
 end
 

@@ -4,3 +4,4 @@ DataStructures
 StaticArrays
 MacroTools
 Reexport
+StatsBase

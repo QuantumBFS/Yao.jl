@@ -9,7 +9,7 @@ logdet(M::IMatrix) = 0
 
 #det(M::PermMatrix) = parity(M.perm)*prod(M.vals)
 function inv(M::PermMatrix)
-    new_perm = invperm(M.perm)
+    new_perm = fast_invperm(M.perm)
     return PermMatrix(new_perm, 1.0./M.vals[new_perm])
 end
 
@@ -83,7 +83,7 @@ end
 function *(X::AbstractMatrix, A::PermMatrix)
     mX, nX = size(X)
     nX == size(A, 1) || throw(DimensionMismatch())
-    return @views (A.vals' .* X)[:, invperm(A.perm)]
+    return @views (A.vals' .* X)[:, fast_invperm(A.perm)]
 end
 
 @static if VERSION >= v"0.7-"
@@ -129,7 +129,7 @@ function *(A::PermMatrix, X::SparseMatrixCSC)
     nA = size(A, 1)
     mX, nX = size(X)
     mX == nA || throw(DimensionMismatch())
-    perm = invperm(A.perm)
+    perm = fast_invperm(A.perm)
     nzval = similar(X.nzval)
     rowval = similar(X.rowval)
     @inbounds for j = 1:nA
@@ -146,7 +146,7 @@ function *(X::SparseMatrixCSC, A::PermMatrix)
     nA = size(A, 1)
     mX, nX = size(X)
     nX == nA || throw(DimensionMismatch())
-    perm = invperm(A.perm)
+    perm = fast_invperm(A.perm)
     nzval = similar(X.nzval)
     colptr = similar(X.colptr)
     rowval = similar(X.rowval)
