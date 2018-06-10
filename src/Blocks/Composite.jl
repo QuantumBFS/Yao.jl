@@ -60,24 +60,19 @@ dispatch parameters and tweak it according to callback function `f(original, par
 dispatch a vector of parameters to this composite block according to
 each sub-block's number of parameters.
 """
-function dispatch!(f::Function, c::CompositeBlock, params::Vector)
+function dispatch!(c::CompositeBlock, params::Vector)
     count = 0
     for each in blocks(c)
         # NOTE: small copy is faster (?)
         if nparameters(each) > 0
-            if nparameters(each) == 1
-                dispatch!(f, each, params[count + 1])
-                count += 1
-            else
-                dispatch!(f, each, params[count + 1 : count + nparameters(each)])
-                count += nparameters(each)
-            end
+            dispatch!(each, params[count + 1 : count + nparameters(each)])
+            count += nparameters(each)
         end
     end
     c
 end
 
-function dispatch!(f::Function, c::CompositeBlock, params...)
+function dispatch!(c::CompositeBlock, params...)
     idx = 1
     for each in blocks(c)
         if nparameters(each) > 0
@@ -89,17 +84,6 @@ function dispatch!(f::Function, c::CompositeBlock, params...)
 end
 
 ==(lhs::CompositeBlock, rhs::CompositeBlock) = false
-
-# FIXME: make this works in v0.7
-function print_block(io::IO, x::CompositeBlock)
-
-    @static if VERSION < v"0.7-"
-        print(io, summary(x))
-    else
-        summary(io, x)
-    end
-
-end
 
 include("ChainBlock.jl")
 include("KronBlock.jl")
