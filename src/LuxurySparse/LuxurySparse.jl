@@ -7,7 +7,7 @@ using Compat.Random
 
 import Compat: copyto!
 import Compat.LinearAlgebra: ishermitian
-import Compat.SparseArrays: SparseMatrixCSC, nnz, nonzeros, sparse, dropzeros!
+import Compat.SparseArrays: SparseMatrixCSC, nnz, nonzeros, dropzeros!
 import Base: getindex, size, similar, copy, show
 
 export PermMatrix, pmrand, IMatrix, I, fast_invperm

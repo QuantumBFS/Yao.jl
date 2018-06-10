@@ -24,7 +24,7 @@ register(raw::Matrix) = DefaultRegister{size(raw, 2)}(raw)
 # Required Properties
 
 nqubits(r::DefaultRegister{B}) where B = log2i(length(r.state) ÷ B)
-nactive(r::DefaultRegister) = log2i(size(state(r), 1))
+nactive(r::DefaultRegister) = state(r) |> nqubits
 state(r::DefaultRegister) = r.state
 statevec(r::DefaultRegister{B}) where B = reshape(r.state, :, B)
 statevec(r::DefaultRegister{1}) = vec(r.state)

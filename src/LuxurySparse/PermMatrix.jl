@@ -55,11 +55,6 @@ pmrand(n::Int) = pmrand(Float64, n)
 similar(x::PermMatrix{Tv, Ti}) where {Tv, Ti} = PermMatrix{Tv, Ti}(similar(x.perm), similar(x.vals))
 similar(x::PermMatrix{Tv, Ti}, ::Type{T}) where {Tv, Ti, T} = PermMatrix{T, Ti}(similar(x.perm), similar(x.vals, T))
 
-function sparse(M::PermMatrix)
-    n = size(M, 1)
-    dropzeros(sparse(collect(1:n), M.perm, M.vals, n, n))
-end
-
 # TODO: rewrite this
 # function show(io::IO, M::PermMatrix)
 #     println("PermMatrix")

@@ -19,6 +19,6 @@ using Yao.Boost
 end
 
 @testset "Multiple Control" begin
-    mcb = ControlBlock{3}([3, 2], 1=>X)
+    mcb = ControlBlock{3}((3, 2), X, 1)
     @test mat(mcb) ≈ mat(Toffoli)
 end

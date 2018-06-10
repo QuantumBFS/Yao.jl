@@ -127,6 +127,10 @@ function mat(k::KronBlock{N}) where N
     end
 end
 
+function cache_key(x::KronBlock)
+    [cache_key(each) for each in x.blocks]
+end
+
 # NOTE: kronecker blocks are equivalent if its addrs and blocks is the same
 function hash(block::KronBlock{N, T}, h::UInt) where {N, T}
     hashkey = hash(objectid(block), h)

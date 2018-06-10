@@ -22,6 +22,21 @@ dv = Diagonal(v)
     @test Matrix(p1) == [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 1]
 end
 
+@testset "conversion" begin
+    for mat in [p1, pm, dv]
+        @test mat == SparseMatrixCSC(mat)
+        @test mat == Matrix(mat)
+        @test mat == typeof(mat)(Matrix(mat))
+        @test mat == typeof(mat)(SparseMatrixCSC(mat))
+    end
+    for mat in [p1, pm, dv]
+        @test mat == PermMatrix(mat)
+        @test mat == typeof(mat)(PermMatrix(mat))
+    end
+    @test Diagonal(p1) == p1
+    @test p1 == typeof(p1)(Diagonal(p1))
+end
+
 @testset "sparse" begin
     @test nnz(p1) == 4
     @test nonzeros(p1) == ones(4)

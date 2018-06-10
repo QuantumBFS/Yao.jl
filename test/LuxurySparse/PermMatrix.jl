@@ -39,7 +39,7 @@ end
 end
 
 @testset "mul" begin
-    @test p3*p2 == sparse(p3)*p2 == Matrix(p3)*p2
+    @test p3*p2 == SparseMatrixCSC(p3)*p2 == Matrix(p3)*p2
 
     # Multiply vector
     @test p3*v == Matrix(p3)*v

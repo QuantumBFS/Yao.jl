@@ -46,7 +46,7 @@ import ..CacheServers: update!, iscached, clear!, pull, iscacheable
 
 # module APIs
 export address, blocks, @const_gate
-export nqubits, nactive, isunitary, ispure, isreflexive, nparameters, mat, datatype, matrix_type, ishermitian
+export nqubits, nactive, isunitary, ispure, isreflexive, nparameters, mat, datatype, matrix_type, ishermitian, parameters
 export apply!, dispatch!
 
 export AnySize, GreaterThan

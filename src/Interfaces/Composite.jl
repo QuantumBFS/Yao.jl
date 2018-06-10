@@ -103,26 +103,26 @@ kron(blocks) = N->KronBlock{N}(blocks)
 export C, control
 
 function control(total::Int, controls, target)
-    ControlBlock{total}([controls...], target)
+    ControlBlock{total}((controls...), target)
 end
 
 function control(controls, target)
-    total->ControlBlock{total}([controls...], target)
+    total->ControlBlock{total}((controls...), target)
 end
 
 function control(total::Int, controls)
-    x::Pair->ControlBlock{total}([controls...], x)
+    x::Pair->ControlBlock{total}((controls...), x)
 end
 
 function control(controls)
     function _control(x::Pair)
-        total->ControlBlock{total}([controls...], x)
+        total->ControlBlock{total}((controls...), x)
     end
 end
 
 function C(controls::Int...)
     function _C(x::Pair{I, BT}) where {I, BT <: MatrixBlock}
-        total->ControlBlock{total}([controls...], x)
+        total->ControlBlock{total}((controls...), x)
     end
 end
 
