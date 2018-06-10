@@ -27,6 +27,16 @@ end
 # 2.1 chain block
 export chain
 
+"""
+    chain([T], n::Int) -> ChainBlock
+    chain([n], blocks) -> ChainBlock
+
+Returns a `ChainBlock`. This factory method can be called lazily if you
+missed the total number of qubits.
+
+This chains several blocks with the same size together.
+"""
+function chain end
 chain(::Type{T}, n::Int) where T = ChainBlock{n, T}([])
 chain(n::Int) = chain(DefaultType, n)
 chain() = n -> chain(n)
@@ -133,6 +143,8 @@ roll(blocks::MatrixBlock...) = n->roll(n, blocks...)
 # 2.5 repeat
 
 import Base: repeat
+repeat(n::Int, x::Pair{Int, <:MatrixBlock}) = RepeatedBlock{n}(x.second, [x.first])
 repeat(n::Int, x::MatrixBlock, lines) = RepeatedBlock{n}(x, lines)
 repeat(n::Int, x::MatrixBlock) = RepeatedBlock{n}(x)
 repeat(x::MatrixBlock, params...) = n->repeat(n, x, params...)
+repeat(x::Pair) = n->repeat(n, x)

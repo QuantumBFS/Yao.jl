@@ -74,10 +74,10 @@ end
 append!(c::ChainBlock, list) = (append!(c.blocks, list); c)
 prepend!(c::ChainBlock, list) = (prepend!(c.blocks, list); c)
 
-mat(c::ChainBlock) = prod(x->mat(x), reverse(c.blocks))
+mat(c::ChainBlock) = prod(x->mat(x), c.blocks)
 
 function apply!(r::AbstractRegister, c::ChainBlock)
-    for each in c
+    for each in reverse(c.blocks)
         apply!(r, each)
     end
     r
