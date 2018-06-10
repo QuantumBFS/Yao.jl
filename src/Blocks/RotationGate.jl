@@ -17,7 +17,7 @@ end
 
 # Properties
 nparameters(::Type{<:RotationGate}) = 1
-parameters(x::RotationGate) = [x.theta]
+parameters(x::RotationGate) = x.theta
 
 ==(lhs::RotationGate{TA, GTA}, rhs::RotationGate{TB, GTB}) where {TA, TB, GTA, GTB} = false
 ==(lhs::RotationGate{TA, GT}, rhs::RotationGate{TB, GT}) where {TA, TB, GT} = lhs.theta == rhs.theta

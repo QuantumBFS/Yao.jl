@@ -49,10 +49,10 @@ ishermitian(::Type{X}) where {X <: MatrixBlock} = check_hermitian(mat(X))
 
 check_hermitian(op) = op' ≈ op
 
-nparameters(x::BT) where BT = nparameters(BT)
+nparameters(x::MatrixBlock) = length(parameters(x))
 nparameters(::Type{X}) where {X <: MatrixBlock} = 0
 
-parameters(x::MatrixBlock) = []
+parameters(x::MatrixBlock) = ()
 
 datatype(block::MatrixBlock{N, T}) where {N, T} = T
 
@@ -65,17 +65,7 @@ end
 
 # dispatch!(block::MatrixBlock, params...) = dispatch!((θ, x)->x, block, params...)
 
-# TODO: make this in-place
-function dispatch!(f::Function, block::MatrixBlock, params::Vector)
-    @assert nparameters(block) == length(params) "number of parameters does not match"
-    _params = similar(params)
-
-    @inbounds for (theta, i) in zip(parameters(block), eachindex(params))
-        _params[i] = f(theta, params[i])
-    end
-
-    dispatch!(block, _params)
-end
+function dispatch! end
 
 include("BlockCache.jl")
 include("Primitive.jl")

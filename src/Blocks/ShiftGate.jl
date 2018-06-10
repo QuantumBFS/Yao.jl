@@ -15,8 +15,8 @@ copy(block::ShiftGate{T}) where T = ShiftGate{T}(block.theta)
 dispatch!(block::ShiftGate, theta::Vector) = (block.theta = theta[1]; block)
 
 # Properties
-nparameters(::Type{ShiftGate}) = 1
-parameters(x::ShiftGate) = [x.theta]
+nparameters(::Type{<:ShiftGate}) = 1
+parameters(x::ShiftGate) = x.theta
 
 ==(lhs::ShiftGate, rhs::ShiftGate) = lhs.theta == rhs.theta
 

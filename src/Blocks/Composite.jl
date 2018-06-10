@@ -69,27 +69,30 @@ dispatch parameters and tweak it according to callback function `f(original, par
 dispatch a vector of parameters to this composite block according to
 each sub-block's number of parameters.
 """
-function dispatch!(c::CompositeBlock, params::Vector)
-    count = 0
-    for each in blocks(c)
-        # NOTE: small copy is faster (?)
-        if nparameters(each) > 0
-            dispatch!(each, params[count + 1 : count + nparameters(each)])
-            count += nparameters(each)
-        end
+function dispatch!(x::CompositeBlock, itr)
+    st = start(itr)
+    for block in Iterators.filter(x->nparameters(x) > 0, blocks(x))
+        params, st = next(itr, st)
+        dispatch!(block, params...)
     end
-    c
+
+    if !done(itr, st)
+        throw(BoundsError(x, st))
+    end
+    x
 end
 
-function dispatch!(c::CompositeBlock, params...)
-    idx = 1
-    for each in blocks(c)
-        if nparameters(each) > 0
-            dispatch!(f, each, params[idx])
-            idx += 1
-        end
+function dispatch!(f::Function, x::CompositeBlock, itr)
+    st = start(itr)
+    for block in Iterators.filter(x->nparameters(x) > 0, blocks(x))
+        params, st = next(itr, st)
+        dispatch!(f, block, params...)
     end
-    c
+
+    if !done(itr, st)
+        throw(BoundsError(x, st))
+    end
+    x
 end
 
 ==(lhs::CompositeBlock, rhs::CompositeBlock) = false
