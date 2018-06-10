@@ -13,7 +13,7 @@ import Base: eltype, copy, similar, *
 import Base: show
 
 # import package APIs
-import ..Yao: DefaultType, nqubits, state, focus!, relax!
+import ..Yao: DefaultType, nqubits, nactive
 import ..Intrinsics: basis
 
 # APIs

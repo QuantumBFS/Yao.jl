@@ -44,12 +44,13 @@ end
 end
 
 @testset "measure" begin
-    @test measure(2) isa Measure{2}
-    @test measure_remove(2) isa MeasureAndRemove{2}
+    @test MEASURE isa Measure
+    @test MEASURE_REMOVE isa MeasureAndRemove
 end
 
-@testset "focus" begin
-    @test focus(1, 2, 3) isa Concentrator
+@testset "concentrate" begin
+    r = roll(4, X)
+    @test concentrate(8, r, [6, 1, 2, 3]) isa Concentrator
 end
 
 @testset "signal" begin

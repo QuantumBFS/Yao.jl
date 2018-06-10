@@ -1,11 +1,9 @@
-export nqubits, address, state, focus!, isunitary, isreflexive, nparameters, datatype, mat, dispatch!, nbatch
+export nqubits, nactive, isunitary, isreflexive, nparameters, datatype, mat, dispatch!, nbatch
 
 # All exported methods and types docstring should be defined here.
 
 function nqubits end
-function state end
-function focus! end
-function relax! end
+function nactive end
 
 """
     isunitary(x) -> Bool

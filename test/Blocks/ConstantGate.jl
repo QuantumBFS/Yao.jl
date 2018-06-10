@@ -8,8 +8,6 @@ using Yao.Blocks
 @testset "builtins" begin
     for each in [X, Y, Z, H]
         @test nqubits(each) == 1
-        @test ninput(each) == 1
-        @test noutput(each) == 1
         @test isunitary(each) == true
         @test isreflexive(each) == true
         @test ispure(each) == true

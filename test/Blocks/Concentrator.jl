@@ -13,7 +13,7 @@ using Yao.Blocks
     c = Concentrator{10}(block, [1,3,9,2]);
 
     @test nqubits(c) == 10
-    @test nfocus(c) == 4
+    @test nactive(c) == 4
     @test isunitary(c) == true
     @test isreflexive(c) == true
     @test ishermitian(c) == true

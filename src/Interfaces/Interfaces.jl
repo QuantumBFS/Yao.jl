@@ -20,13 +20,13 @@ include("Composite.jl")
 include("Measure.jl")
 include("Cache.jl")
 
-export focus
+export concentrate
 
 """
-    focus(orders...) -> Concentrator
+    concentrate(orders...) -> Concentrator
 
-focus serveral lines.
+concentrate on serveral lines.
 """
-focus(orders...) = Concentrator(orders...)
+concentrate(nbit::Int, block::AbstractBlock, orders::Vector{Int}) = Concentrator{nbit}(block, orders)
 
 end

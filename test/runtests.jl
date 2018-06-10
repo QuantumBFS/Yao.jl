@@ -11,7 +11,7 @@ include("LuxurySparse/LuxurySparse.jl")
 end
 
 @testset "register" begin
-include("Registers/Default.jl")
+include("Registers/Registers.jl")
 end
 
 @testset "blocks" begin
