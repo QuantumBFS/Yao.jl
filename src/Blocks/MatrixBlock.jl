@@ -49,8 +49,10 @@ ishermitian(::Type{X}) where {X <: MatrixBlock} = check_hermitian(mat(X))
 
 check_hermitian(op) = op' ≈ op
 
-nparameters(x::MatrixBlock) = 0
+nparameters(x::BT) where BT = nparameters(BT)
 nparameters(::Type{X}) where {X <: MatrixBlock} = 0
+
+parameters(x::MatrixBlock) = []
 
 datatype(block::MatrixBlock{N, T}) where {N, T} = T
 

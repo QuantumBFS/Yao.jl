@@ -44,6 +44,15 @@ function nparameters(c::CompositeBlock)
     count
 end
 
+# TODO: make this a lazy list
+function parameters(c::CompositeBlock)
+    params = []
+    for each in blocks(c)
+        append!(params, parameters(each))
+    end
+    params
+end
+
 #################
 # Dispatch Rules
 #################
