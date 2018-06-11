@@ -102,27 +102,29 @@ kron(blocks) = N->KronBlock{N}(blocks)
 
 export C, control
 
+decode_sign(ctrls::Int...) = ctrls .|> abs, ctrls .|> sign .|> (x->(1+x)÷2)
+
 function control(total::Int, controls, target)
-    ControlBlock{total}((controls...), target)
+    ControlBlock{total}(decode_sign(controls...)..., target.second, target.first)
 end
 
 function control(controls, target)
-    total->ControlBlock{total}((controls...), target)
+    total->ControlBlock{total}(decode_sign(controls...)..., target.second, target.first)
 end
 
 function control(total::Int, controls)
-    x::Pair->ControlBlock{total}((controls...), x)
+    x::Pair->ControlBlock{total}(decode_sign(controls...)..., x.second, x.first)
 end
 
 function control(controls)
     function _control(x::Pair)
-        total->ControlBlock{total}((controls...), x)
+        total->ControlBlock{total}(decode_sign(controls...)..., x.second, x.first)
     end
 end
 
 function C(controls::Int...)
     function _C(x::Pair{I, BT}) where {I, BT <: MatrixBlock}
-        total->ControlBlock{total}((controls...), x)
+        total->ControlBlock{total}(decode_sign(controls...)..., x.second, x.first)
     end
 end
 
