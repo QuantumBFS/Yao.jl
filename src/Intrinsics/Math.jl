@@ -78,19 +78,25 @@ end
     ex
 end
 
+nqubits(m::AbstractArray) = size(m, 1) |> log2i
 
 """
     hilbertkron(num_bit::Int, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix
 
 Return general kronecher product form of gates in Hilbert space of `num_bit` qubits.
 
-* `gates` are a list of single qubit gates.
-* `locs` should have the same length as `gates`, specifing the gates positions.
+* `gates` are a list of matrices.
+* `start_locs` should have the same length as `gates`, specifing the gates starting positions.
 """
-function hilbertkron(num_bit::Int, ops::Vector{T}, locs::Vector{Int}) where T<:AbstractMatrix
-    locs = num_bit - locs + 1
-    order = sortperm(locs)
-    _wrap_identity(ops[order], diff(vcat([0], locs[order], [num_bit+1])) - 1)
+function hilbertkron(num_bit::Int, ops::Vector{T}, start_locs::Vector{Int}) where T<:AbstractMatrix
+    sizes = [op |> nqubits for op in ops]
+    start_locs = num_bit - start_locs - sizes + 2
+    
+    order = sortperm(start_locs)
+    sorted_ops = ops[order]
+    sorted_start_locs = start_locs[order]
+    
+    _wrap_identity(sorted_ops, vcat(sorted_start_locs[1]-1, diff(push!(sorted_start_locs, num_bit+1)) .- sizes))
 end
 
 # kron, and wrap matrices with identities.
@@ -103,10 +109,5 @@ function _wrap_identity(data_list::Vector{T}, num_bit_list::Vector{Int}) where T
     end
 end
 
-function invperm(order)
-    v = similar(order)
-    @inbounds @simd for i=1:length(order)
-        v[order[i]] = i
-    end
-    v
-end
+import Base: randn
+randn(T::Type{Complex{F}}, n::Int...) where F = randn(F, n...) + im*randn(F, n...)

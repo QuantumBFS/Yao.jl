@@ -36,13 +36,13 @@ end
     @test nparameters(ChainBlock(X, Y, Z)) == 0
     @test nparameters(ChainBlock(phase(0.1), X, phase(0.2))) == 2
     @test nparameters(KronBlock{5}(1=>X, 4=>rot(X, 0.2))) == 1
-    @test nparameters(ControlBlock{5}([1, 2], phase(0.1), 4)) == 1
+    @test nparameters(ControlBlock{5}((1, 2), phase(0.1), 4)) == 1
 end
 
 @testset "parameters" begin
 @test parameters(ChainBlock(phase(0.1), shift(0.2))) ≈ [0.1, 0.2]
 @test parameters(ChainBlock(kron(4, 1=>phase(0.1), 3=>rot(X, 0.2)))) ≈ [0.1, 0.2]
-@test parameters(ControlBlock{5}([1, 2], phase(0.1), 4)) ≈ [0.1]
+@test parameters(ControlBlock{5}((1, 2), phase(0.1), 4)) ≈ [0.1]
 @test parameters(KronBlock{5}(1=>X, 4=>rot(X, 0.2))) ≈ [0.2]
 end
 

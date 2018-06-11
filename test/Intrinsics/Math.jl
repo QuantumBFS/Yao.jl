@@ -36,3 +36,13 @@ end
         @test sum(ss[:, i]) ≈ 1
     end
 end
+
+@testset "hilbertkron" begin
+    A,B,C,D = [randn(2,2) for i = 1:4]
+    II = speye(2)
+    ⊗ = kron
+    @test hilbertkron(4, [A, B], [3, 1]) ≈ II ⊗ A ⊗ II ⊗ B
+    @test hilbertkron(4, [A ⊗ B, C], [3, 1]) ≈ A ⊗ B ⊗ II ⊗ C
+    @test hilbertkron(4, [A ⊗ B], [1]) ≈ II ⊗ II ⊗ A ⊗ B
+    @test hilbertkron(4, [A ⊗ B, C ⊗ D], [1, 3]) ≈ C ⊗ D ⊗ A ⊗ B
+end

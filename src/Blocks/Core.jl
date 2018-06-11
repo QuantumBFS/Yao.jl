@@ -25,6 +25,41 @@ apply a `block` to a register `reg` with or without a cache signal.
 """
 function apply! end
 
+"""
+    isunitary(x) -> Bool
+
+Test whether this operator is unitary.
+"""
+function isunitary end
+
+"""
+    isreflexive(x) -> Bool
+
+Test whether this operator is reflexive.
+"""
+function isreflexive end
+
+"""
+    nparameters(x) -> Integer
+
+Returns the number of parameters of `x`.
+"""
+function nparameters end
+
+"""
+    parameters(block) -> Vector
+
+Returns a list of all parameters in block.
+"""
+function parameters end
+
+"""
+    mat(block) -> Matrix
+"""
+function mat end
+function dispatch! end
+
+dispatch!(block::AbstractBlock, params...) = dispatch!((θ, x)->x, block, params...)
 # FIXME: make this works in v0.7
 
 """

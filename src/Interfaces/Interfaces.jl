@@ -20,6 +20,7 @@ include("Composite.jl")
 include("Measure.jl")
 include("Cache.jl")
 
+export concentrate
 export on, on!
 
 function apply_on!(r::AbstractRegister, block::AbstractBlock, params...; kwargs...)
@@ -53,10 +54,10 @@ end
 export focus
 
 """
-    focus(orders...) -> Concentrator
+    concentrate(orders...) -> Concentrator
 
-focus serveral lines.
+concentrate on serveral lines.
 """
-focus(orders...) = Concentrator(orders...)
+concentrate(nbit::Int, block::AbstractBlock, orders::Vector{Int}) = Concentrator{nbit}(block, orders)
 
 end

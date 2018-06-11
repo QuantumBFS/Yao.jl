@@ -10,12 +10,13 @@ data type.
 
 |    Property    |                                                     Description                                                      |     default      |
 |:--------------:|:--------------------------------------------------------------------------------------------------------------------:|:----------------:|
-| `nqubits(reg)`  | get the total number of qubits.                                                                                      |                  |
+| `nqubits(reg)`  | get the total number of qubits.                                                                                     |                  |
 | `nactive(reg)` | get the number of active qubits.                                                                                     |                  |
 | `nremain(reg)` | get the number of remained qubits.                                                                                   | nqubits - nactive |
 | `nbatch(reg)`  | get the number of batch.                                                                                             | `B`              |
-| `address(reg)` | get the address of this register.                                                                                    |                  |
 | `state(reg)`   | get the state of this register. It always return the matrix stored inside.                                           |                  |
+| `statevec(reg)`| get the raveled state of this register.                                  .                                           |                  |
+| `hypercubic(reg)`| get the hypercubic form of this register.                                  .                                       |                  |
 | `eltype(reg)`  | get the element type stored by this register on classical memory. (the type Julia should use to represent amplitude) | `T`              |
 | `copy(reg)`    | copy this register.                                                                                                  |                  |
 | `similar(reg)` | construct a new register with similar configuration.                                                                 |                  |
@@ -36,8 +37,6 @@ a register with no batch, or a register with a MPS state, etc.)
     we should only overload this operation and do not overload `*(reg, op)`.
 
 ### Pack Address
-
-    pack_address!(reg, addrs)
 
 pack `addrs` together to the first k-dimensions.
 
@@ -87,47 +86,19 @@ nremain(r::AbstractRegister) = nqubits(r) - nactive(r)
 nbatch(r::AbstractRegister{B}) where B = B
 eltype(r::AbstractRegister{B, T}) where {B, T} = T
 
-# Factory Methods
-
-"""
-    register(raw, [nbatch=1])
-
-Construct a register with type of `DefaultRegister`.
-"""
-function register end
-
-# set default register
-function register(raw, nbatch::Int=1)
-    register(DefaultRegister, raw, nbatch)
-end
-
-## Config Initializers
-
-# enable multiple dispatch for different initializers
-function register(::Type{RT}, ::Type{T}, n::Int, nbatch::Int, method::Symbol) where {RT, T}
-    register(Val(method), RT, T, n, nbatch)
-end
-
-# config default register type
-function register(::Type{T}, n::Int, nbatch::Int, method::Symbol) where T
-    register(DefaultRegister, T, n, nbatch, method)
-end
-
-# config default eltype
-register(n::Int, nbatch::Int, method::Symbol) = register(DefaultType, n, nbatch, method)
-
-# shortcuts
-zero_state(n::Int, nbatch::Int=1) = register(n, nbatch, :zero)
-rand_state(n::Int, nbatch::Int=1) = register(n, nbatch, :rand)
-randn_state(n::Int, nbatch::Int=1) = register(n, nbatch, :randn)
-
 basis(r::AbstractRegister) = basis(nqubits(r))
 
-import Base: +, -, kron
+import Base: +, -, kron, ==, !=
 
 for op in [:+, :-]
-    @eval function ($op)(lhs::RT, rhs::AbstractRegister{B}) where {B, RT <: AbstractRegister{B}}
-        register(RT, ($op)(state(lhs), state(rhs)), Int(B))
+    @eval function ($op)(lhs::RT, rhs::RT) where {RT <: AbstractRegister}
+        RT(($op)(state(lhs), state(rhs)))
+    end
+end
+
+for op in [:(==)]
+    @eval function ($op)(lhs::RT, rhs::RT) where RT <: AbstractRegister
+        ($op)(state(lhs), state(rhs))
     end
 end
 
@@ -142,11 +113,23 @@ end
 
 import Base: normalize!
 
+"""
+    normalize!(r::AbstractRegister) -> AbstractRegister
+
+Return the register with normalized state.
+"""
 normalize!(r::AbstractRegister) = throw(MethodError(:normalize!, r))
 
-# function ghz(num_bit::Int; x::DInt=zero(DInt))
-#     v = zeros(DefaultType, 1<<num_bit)
-#     v[x+1] = 1/sqrt(2)
-#     v[flip(x, bmask(1:num_bit))+1] = 1/sqrt(2)
-#     return v
-# end
+"""
+    statevec(r::AbstractRegister) -> AbstractArray
+
+Return the raveled state (vector) form of this register.
+"""
+function statevec end
+
+"""
+    hypercubic(r::AbstractRegister) -> AbstractArray
+
+Return the hypercubic form (high dimensional tensor) of this register, only active qubits are considered.
+"""
+function hypercubic end

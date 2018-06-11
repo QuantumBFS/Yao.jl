@@ -1,26 +1,33 @@
 export Concentrator
 
 """
-    Concentrator{<:Union{Int, Tuple}} <: AbstractBlock
+    Concentrator{N} <: AbstractBlock
 
 concentrates serveral lines together in the circuit, and expose
 it to other blocks.
 """
-struct Concentrator{T <: Union{Int, Tuple}} <: AbstractBlock
-    address::T
+struct Concentrator{N, T, BT <: AbstractBlock} <: CompositeBlock{N, T}
+    block::BT
+    address::Vector{Int}
+end
+Concentrator{N}(block::BT, address::Vector{Int}) where {N, BT<:AbstractBlock} = Concentrator{N, Bool, BT}(block, address)
+function Concentrator{N}(block::BT, address::Vector{Int}) where {N, M, T, BT<:MatrixBlock{M, T}}
+    length(address) == M && N>=M || throw(ArgumentError("length of address must be equal to the size of block, and smaller than size of itself."))
+    Concentrator{N, T, BT}(block, address)
 end
 
-Concentrator(orders...) = Concentrator(orders)
+blocks(c::Concentrator) = [c.block]
+nqubits(::Concentrator{N}) where N = N
+eltype(::Concentrator{N, T}) where {N, T}= T
+nactive(c::Concentrator) = length(c.address)
+address(c::Concentrator) = c.address
 
-eltype(::Concentrator) = Bool
-isunitary(x::Concentrator) = true
-nqubits(x::Concentrator) = ninput(x)
-ninput(x::Concentrator) = GreaterThan{length(x.address)}
-noutput(x::Concentrator) = length(x.address)
-address(x::Concentrator) = x.address
+apply!(reg::AbstractRegister, c::Concentrator) = relax!(apply!(focus!(reg, address(c)), c.block), address(c), nqubits(c))
 
-apply!(reg::AbstractRegister, block::Concentrator) = focus!(reg, address(block)...)
+for FUNC in [:isunitary, :isreflexive, :ishermitian]
+    @eval $FUNC(c::Concentrator) = $FUNC(c.block)
+end
 
-function show(io::IO, block::Concentrator)
-    print(io, "Concentrator: ", block.address)
+function show(io::IO, c::Concentrator)
+    print(io, "Concentrator: ", c.address)
 end

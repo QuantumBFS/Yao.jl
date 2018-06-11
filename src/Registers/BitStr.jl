@@ -46,12 +46,10 @@ function show(io::IO, bitstr::QuBitStr)
 end
 
 
-function register(::Type{RT}, ::Type{T}, bits::QuBitStr, nbatch::Int) where {RT, T}
+function register(::Type{T}, bits::QuBitStr, nbatch::Int) where T
     st = zeros(T, 1 << length(bits), nbatch)
     st[asindex(bits), :] .= 1
-    register(RT, st, nbatch)
+    register(st)
 end
 
-function register(bits::QuBitStr, nbatch::Int=1)
-    register(DefaultRegister, DefaultType, bits, nbatch)
-end
+register(bits::QuBitStr, nbatch::Int=1) = register(DefaultType, bits, nbatch)

@@ -18,7 +18,7 @@ end
 copy(M::PermMatrix) = PermMatrix(copy(M.perm), copy(M.vals))
 
 function transpose(M::PermMatrix)
-    new_perm = invperm(M.perm)
+    new_perm = fast_invperm(M.perm)
     return PermMatrix(new_perm, M.vals[new_perm])
 end
 
@@ -43,13 +43,13 @@ const IDP = Union{Diagonal, PermMatrix, IMatrix}
 for op in [:+, :-, :(==), :≈]
 
     @eval begin
-        $op(A::IDP, B::SparseMatrixCSC) = $op(sparse(A), B)
-        $op(B::SparseMatrixCSC, A::IDP) = $op(B, sparse(A))
+        $op(A::IDP, B::SparseMatrixCSC) = $op(SparseMatrixCSC(A), B)
+        $op(B::SparseMatrixCSC, A::IDP) = $op(B, SparseMatrixCSC(A))
 
         # intra-IDP
-        $op(A::PermMatrix, B::IDP) = $op(sparse(A), sparse(B))
-        $op(A::IDP, B::PermMatrix) = $op(sparse(A), sparse(B))
-        $op(A::PermMatrix, B::PermMatrix) = $op(sparse(A), sparse(B))
+        $op(A::PermMatrix, B::IDP) = $op(SparseMatrixCSC(A), SparseMatrixCSC(B))
+        $op(A::IDP, B::PermMatrix) = $op(SparseMatrixCSC(A), SparseMatrixCSC(B))
+        $op(A::PermMatrix, B::PermMatrix) = $op(SparseMatrixCSC(A), SparseMatrixCSC(B))
     end
 
     # intra-ID

@@ -1,6 +1,4 @@
-# 3. measurement
-export measure
-measure(m::Int) = Measure{m}()
+export MEASURE, MEASURE_REMOVE
 
-export measure_remove
-measure_remove(m::Int) = MeasureAndRemove{m}()
+const MEASURE = Measure()
+const MEASURE_REMOVE = MeasureAndRemove()

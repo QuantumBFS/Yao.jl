@@ -1,43 +1,17 @@
-export nqubits, address, state, focus!, isunitary, isreflexive, nparameters, datatype, mat, dispatch!, nbatch
+export nqubits, nactive, isunitary, isreflexive, nparameters, datatype, mat, dispatch!, nbatch
 
 # All exported methods and types docstring should be defined here.
 
+"""
+    nqubits(m::AbstractRegister) -> Int
+number of qubits in a register,
+
+    nqubits(m::AbstractBlock) -> Int
+number of qubits applied for a block,
+
+    nqubits(m::AbstractArray) -> Int
+size of the first dimension of an array, in 2^nqubits.
+"""
 function nqubits end
-function address end
-function state end
-function focus! end
-
-"""
-    isunitary(x) -> Bool
-
-Test whether this operator is unitary.
-"""
-function isunitary end
-
-"""
-    isreflexive(x) -> Bool
-
-Test whether this operator is reflexive.
-"""
-function isreflexive end
-
-"""
-    nparameters(x) -> Integer
-
-Returns the number of parameters of `x`.
-"""
-function nparameters end
-
-"""
-    parameters(block) -> Vector
-
-Returns a list of all parameters in block.
-"""
-function parameters end
+function nactive end
 function datatype end
-
-"""
-    mat(block) -> Matrix
-"""
-function mat end
-function dispatch! end

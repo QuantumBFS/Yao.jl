@@ -4,8 +4,7 @@
 ### Traits
 
 `nqubits`
-`ninput`
-`noutput`
+`nactive`
 `isunitary`
 `ispure`
 `isreflexive`
@@ -36,7 +35,8 @@ import ..LuxurySparse: I
 
 # import package APIs
 import ..Yao
-import ..Yao: DefaultType, nqubits, isunitary, isreflexive, nparameters, parameters, mat, datatype, dispatch!, address
+import ..Yao: DefaultType, datatype, nqubits, nactive
+import ..Yao.Registers: focus!, relax!
 import Compat.LinearAlgebra: ishermitian
 import Base: hash, ==, eltype, show, similar, getindex, setindex!, start, next, done, length
 
@@ -45,8 +45,8 @@ export update_cache, clear_cache, cache
 import ..CacheServers: update!, iscached, clear!, pull, iscacheable
 
 # module APIs
-export address, @const_gate
-export nqubits, ninput, noutput, isunitary, ispure, isreflexive, nparameters, parameters, mat, datatype, matrix_type, ishermitian
+export address, blocks, @const_gate
+export nqubits, nactive, isunitary, ispure, isreflexive, nparameters, mat, datatype, matrix_type, ishermitian, parameters
 export apply!, dispatch!
 
 export AnySize, GreaterThan

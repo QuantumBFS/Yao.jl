@@ -8,34 +8,15 @@ using Yao
 using Yao.Blocks
 
 @testset "concentrator" begin
+    reg = rand_state(10)
+    block = kron(4, 2=>X)
+    c = Concentrator{10}(block, [1,3,9,2]);
 
-    concentrator = Concentrator(2, 3)
+    @test nqubits(c) == 10
+    @test nactive(c) == 4
+    @test isunitary(c) == true
+    @test isreflexive(c) == true
+    @test ishermitian(c) == true
 
-    @test address(concentrator) == (2, 3)
-    @test ninput(concentrator) == GreaterThan{2}
-    @test noutput(concentrator) == 2
-    @test nqubits(concentrator) == GreaterThan{2}
-    @test isunitary(concentrator) == true
-
-    reg = rand_state(4)
-    apply!(reg, concentrator)
-    @test nactive(reg) == 2
-    @test address(reg) == [2, 3, 1, 4]
-
-    reg = rand_state(8)
-    apply!(reg, focus(2, 3, 5))
-    @test nactive(reg) == 3
-    @test address(reg) == UInt[2, 3, 5, 1, 4, 6, 7, 8]
-
-    apply!(reg, focus(8, 2))
-    @test nactive(reg) == 2
-    @test address(reg) == UInt[8, 3, 2, 5, 1, 4, 6, 7]
-
-    apply!(reg, focus(2:3, 7))
-    @test nactive(reg) == length(2:3) + 1
-    @test address(reg) == UInt[3, 2, 6, 8, 5, 1, 4, 7]
-
-    apply!(reg, focus(1:8))
-    @test nactive(reg) == 8
-    @test address(reg) == UInt[3, 2, 6, 8, 5, 1, 4, 7]
+    @test apply!(copy(reg), c) == apply!(copy(reg), kron(10, 3=>X))
 end

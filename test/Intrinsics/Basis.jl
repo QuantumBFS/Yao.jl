@@ -1,4 +1,5 @@
 ######### Tests #########
+using Compat
 using Compat.Test
 using Compat.Iterators
 
@@ -29,9 +30,9 @@ using Yao.Intrinsics
     ba1_f = bitarray(ind)
     ba2_f = bitarray(inds)
     ba3_f = bitarray(Int32.(inds))
-    @test bsizeof(ind) == sizeof(Int)*8
-    @test size(ba1_f) == (sizeof(Int)*8,)
-    @test size(ba2_f) == (sizeof(Int)*8, 2)
+    @test bsizeof(ind) == 64
+    @test size(ba1_f) == (64,)
+    @test size(ba2_f) == (64, 2)
     @test Int.(ba2_f[1:32,:]) == Int.(ba3_f[1:32,:])
 
     ba1 = bitarray(ind, num_bit=4)
@@ -64,4 +65,6 @@ end
     @test packbits(bitarray([5,3,7,21], num_bit=10)) == [5, 3, 7, 21]
 end
 
-
+@testset "State Utilities" begin
+    @test onehotvec(ComplexF64, 2, 2) == [0, 0, 1, 0]
+end
