@@ -1,3 +1,5 @@
+import ..Blocks: measure
+
 export MEASURE, MEASURE_REMOVE
 
 const MEASURE = Measure()

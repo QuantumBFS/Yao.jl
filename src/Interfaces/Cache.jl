@@ -1,4 +1,4 @@
-export cache, pull, update_cache, clearall!
+export cache, pull, update_cache, clearall!, iscached, iscacheable
 
 const DefaultCacheServer = get_server(MatrixBlock, CacheFragment)
 

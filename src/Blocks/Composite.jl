@@ -59,8 +59,6 @@ end
 
 # TODO: optimize for blocks full of parameters
 
-
-
 """
     dispatch!(f, c, params) -> c
 
@@ -108,3 +106,4 @@ include("KronBlock.jl")
 include("Control.jl")
 include("Roller.jl")
 include("Repeated.jl")
+include("Concentrator.jl")

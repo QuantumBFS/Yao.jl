@@ -1,5 +1,10 @@
 export RepeatedBlock
 
+"""
+    RepeatedBlock{N, T, GT} <: CompositeBlock{N, T}
+
+repeat the same block on given lines.
+"""
 mutable struct RepeatedBlock{N, T, GT<:MatrixBlock} <: CompositeBlock{N, T}
     block::GT
     lines::Vector{Int}

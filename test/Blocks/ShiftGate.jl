@@ -42,7 +42,6 @@ g = ShiftGate{Float64}(0.1)
 @test noutput(g) == 1
 @test isreflexive(g) == false
 @test isunitary(g) == true
-@test ispure(g) == true
 @test ishermitian(g) == false
 end
 

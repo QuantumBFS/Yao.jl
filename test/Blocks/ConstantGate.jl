@@ -10,7 +10,6 @@ using Yao.Blocks
         @test nqubits(each) == 1
         @test isunitary(each) == true
         @test isreflexive(each) == true
-        @test ispure(each) == true
         @test ishermitian(each) == true
 
         # new constant gate is the same

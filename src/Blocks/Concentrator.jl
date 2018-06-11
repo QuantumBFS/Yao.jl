@@ -28,6 +28,6 @@ for FUNC in [:isunitary, :isreflexive, :ishermitian]
     @eval $FUNC(c::Concentrator) = $FUNC(c.block)
 end
 
-function show(io::IO, c::Concentrator)
+function print_block(io::IO, c::Concentrator)
     print(io, "Concentrator: ", c.address)
 end

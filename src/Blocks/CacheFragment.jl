@@ -1,5 +1,10 @@
 export CacheFragment
 
+"""
+    CacheFragment{BT, K, MT}
+
+A fragment that will be stored for each cached block (of type `BT`) on a cache server.
+"""
 struct CacheFragment{BT, K, MT}
     ref::BT
     storage::Dict{K, MT}
