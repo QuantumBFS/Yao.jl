@@ -10,7 +10,7 @@ import ..Blocks: mat, apply!
 export general_controlled_gates
 export xgate, ygate, zgate
 export cxgate, cygate, czgate
-export controlled_U1
+export controlled_U1, controller
 
 export xapply!, yapply!, zapply!
 export cxapply!, cyapply!, czapply!

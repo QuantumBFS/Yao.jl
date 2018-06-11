@@ -20,7 +20,7 @@ export DInt, Ints, DInts
 export basis, bmask
 export bit_length, log2i, bsizeof, nqubits
 export testall, testany, testval, setbit, flip, neg, swapbits, takebit
-export indices_with, bitarray, packbits
+export indices_with, bitarray, packbits, controller
 export bdistance
 export onehotvec
 

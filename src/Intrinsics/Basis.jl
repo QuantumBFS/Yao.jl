@@ -156,3 +156,15 @@ function onehotvec(::Type{T}, num_bit::Int, x::DInt) where T
     v[x+1] = 1
     v
 end
+
+"""
+    controller(cbits, cvals) -> Function
+
+Return a function that test whether a basis at `cbits` takes specific value `cvals`.
+"""
+function controller(cbits, cvals)
+    do_mask = bmask(cbits...)
+    onepos = cvals.==1
+    onemask = any(onepos) ? bmask(cbits[onepos]...) : 0
+    return b->testval(b, do_mask, onemask)
+end

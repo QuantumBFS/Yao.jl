@@ -62,15 +62,40 @@ function zapply!(state::VecOrMat{T}, bit::Int) where T
     state
 end
 
-function cxapply!(state::VecOrMat{T}, cbits, vals, b2::Ints) where T
-    do_mask = bmask(cbits..., b2[1])
-    onemask = bmask(cbits[cvals.==1]...)
+################### Multi Controlled Version ####################
+
+function czapply!(state::VecOrMat{T}, cbits, cvals, b2::Int) where T
+    c = controller([cbits..., b2[1]], [cvals..., 1])
+    @simd for b = basis(state)
+        if b |> c
+            mulrow(state, b+1, -1)
+        end
+    end
+    state
+end
+
+function cyapply!(state::VecOrMat{T}, cbits, cvals, b2::Int) where T
+    c = controller([cbits..., b2[1]], [cvals..., 0])
+    mask2 = bmask(b2...)
+    @simd for b = basis(state)
+        local i_::Int
+        if b |> c
+            i = b+1
+            i_ = flip(b, mask2) + 1
+            swaprows(state, i, i_, im, -im)
+        end
+    end
+    state
+end
+
+
+function cxapply!(state::VecOrMat{T}, cbits, cvals, b2) where T
+    c = controller([cbits..., b2[1]], [cvals..., 0])
     mask2 = bmask(b2...)
 
     @simd for b = basis(state)
-        local temp::T
         local i_::Int
-        if testval(b, do_mask, onemask)
+        if b |> c
             i = b+1
             i_ = flip(b, mask2) + 1
             swaprows(state, i, i_)
@@ -79,28 +104,31 @@ function cxapply!(state::VecOrMat{T}, cbits, vals, b2::Ints) where T
     state
 end
 
-function czapply!(state::VecOrMat{T}, cbits::Int, b2::Int) where T
+################### Single Controlled Version ####################
+
+function czapply!(state::VecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
     mask2 = bmask(b2)
-    step = 1<<(cbits-1)
-    step_2 = 1<<cbits
-    for j = step:step_2:length(state)-1
+    step = 1<<(cbit-1)
+    step_2 = 1<<cbit
+    start = cval==1 ? step : 0
+    for j = start:step_2:size(state, 1)-step+start
         @simd for i = j+1:j+step
             if testall(i-1, mask2)
-                @inbounds mulrow(state, i, -1)
+                mulrow(state, i, -1)
             end
         end
     end
     state
 end
 
-function cyapply!(state::VecOrMat{T}, cbits::Int, b2::Int) where T
+function cyapply!(state::VecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
     mask2 = bmask(b2)
-    mask = bmask(cbits, b2)
+    mask = bmask(cbit, b2)
 
-    step = 1<<(cbits-1)
-    step_2 = 1<<cbits
-    for j = step:step_2:length(state)-1
-        local temp::T
+    step = 1<<(cbit-1)
+    step_2 = 1<<cbit
+    start = cval==1 ? step : 0
+    for j = start:step_2:size(state, 1)-step+start
         local i_::Int
         @simd for b = j:j+step-1
             @inbounds if testall(b, mask2)
@@ -117,3 +145,25 @@ function cyapply!(state::VecOrMat{T}, cbits::Int, b2::Int) where T
     end
     state
 end
+
+function cxapply!(state::VecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
+    mask2 = bmask(b2)
+    mask = bmask(cbit, b2)
+
+    step = 1<<(cbit-1)
+    step_2 = 1<<cbit
+    start = cval==1 ? step : 0
+    for j = start:step_2:size(state, 1)-step+start
+        local i_::Int
+        @simd for b = j:j+step-1
+            @inbounds if testall(b, mask2)
+                i = b+1
+                i_ = flip(b, mask2) + 1
+                swaprows(state, i, i_)
+            end
+        end
+    end
+    state
+end
+
+
