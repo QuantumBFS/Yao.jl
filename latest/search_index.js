@@ -505,6 +505,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.ConstantGate",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.ConstantGate",
+    "category": "type",
+    "text": "ConstantGate{N, T} <: PrimitiveBlock{N, T}\n\nAbstract type for constant gates.\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.ControlBlock",
     "page": "Blocks System",
     "title": "Yao.Blocks.ControlBlock",
