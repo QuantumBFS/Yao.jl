@@ -18,7 +18,7 @@ end
 function ControlBlock{N}(ctrl_qubits::NTuple{C, Int}, vals::NTuple{C, Int}, block::BT, addr::Int) where {BT<:AbstractBlock, N, C}
     ControlBlock{N, BT, C, Bool}(ctrl_qubits, vals, block, addr)
 end
-function ControlBlock{N}(ctrl_qubits::NTuple{C, Int}, vals::NTuple{C, Int}, block::BT, addr::Int) where {N, C, T, BT<:MatrixBlock{N, T}}
+function ControlBlock{N}(ctrl_qubits::NTuple{C, Int}, vals::NTuple{C, Int}, block::BT, addr::Int) where {N, M, C, T, BT<:MatrixBlock{M, T}}
     ControlBlock{N, BT, C, T}(ctrl_qubits, vals, block, addr)
 end
 

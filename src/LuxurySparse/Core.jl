@@ -12,6 +12,13 @@ mulrow row i by f.
 """
 function mulrow end
 
+"""
+    matvec(x::VecOrMat) -> MatOrVec
+
+Return vector if a matrix is a column vector, else untouched.
+"""
+function matvec end
+
 function swaprows(v::Matrix{T}, i::Int, j::Int, f1, f2) where T
     @simd for c = 1:size(v, 2)
         local temp::T
@@ -64,4 +71,5 @@ function fast_invperm(order)
 end
 
 dropzeros!(A::Diagonal) = A
-
+matvec(x::Matrix) = size(x, 2) == 1 ? vec(x) : x
+matvec(x::Vector) = x
