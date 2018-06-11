@@ -18,31 +18,9 @@ circuit(n) = chain(
     repeat(1=&gt;X),
 );</code></pre></div><p>Let me explain what happens here. Firstly, we have a <code>X</code> gate which is applied to the first qubit. We need decide how we calculate this numerically, <code>Yao</code> offers serveral different approach to this. The simplest (but not the most efficient) one is to use kronecker product which will product <code>X</code> with <code>I</code> on other lines to gather an operator in the whole space and then apply it to the register. The first argument <code>n</code> means the number of qubits.</p><div><pre><code class="language-julia">kron(n, 1=&gt;X)</code></pre><pre><code class="language-none">Total: 4, DataType: Complex{Float64}
 kron
-└─ 1=&gt;X gate</code></pre></div><p>Similar with <code>kron</code>, we then need to apply some controled gates.</p><div><pre><code class="language-julia">control(n, [2, ], 1=&gt;X)</code></pre><pre><code class="language-none">Total: 4, DataType: Bool
+└─ 1=&gt;X gate</code></pre></div><p>Similar with <code>kron</code>, we then need to apply some controled gates.</p><div><pre><code class="language-julia">control(n, [2, ], 1=&gt;X)</code></pre><pre><code class="language-none">Total: 4, DataType: Complex{Float64}
 control(2)
-└─ 1=&gt;X gate</code></pre></div><p>This means there is a <code>X</code> gate on the first qubit that is controled by the second qubit. In fact, you can also create a controled gate with multiple control qubits, like</p><div><pre><code class="language-julia">control(n, [2, 3], 1=&gt;X)</code></pre><pre><code class="language-none">Total: 4, DataType: Bool
+└─ 1=&gt;X gate</code></pre></div><p>This means there is a <code>X</code> gate on the first qubit that is controled by the second qubit. In fact, you can also create a controled gate with multiple control qubits, like</p><div><pre><code class="language-julia">control(n, [2, 3], 1=&gt;X)</code></pre><pre><code class="language-none">Total: 4, DataType: Complex{Float64}
 control(2, 3)
-└─ 1=&gt;X gate</code></pre></div><p>In the end, we need to apply <code>H</code> gate to all lines, of course, you can do it by <code>kron</code>, but we offer something more efficient called <code>roll</code>, this applies a single gate each time on each qubit without calculating a new large operator, which will be extremely efficient for calculating small gates that tiles on almost every lines.</p><p>The whole circuit is a chained structure of the above blocks. And we actually store a quantum circuit in a tree structure.</p><div><pre><code class="language-julia">circuit</code></pre><pre><code class="language-none">circuit (generic function with 1 method)</code></pre></div><p>After we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.</p><div><pre><code class="language-julia">r = circuit(4) |&gt; on(register(bit&quot;0000&quot;))
-r</code></pre><pre><code class="language-none">DefaultRegister{1, Complex{Float64}}
-    active qubits: 4/4</code></pre></div><p>Let&#39;s check the output:</p><div><pre><code class="language-julia">statevec(r)</code></pre><pre><code class="language-none">16-element Array{Complex{Float64},1}:
-     0.707107+0.0im
-          0.0+0.0im
-          0.0+0.0im
-          0.0+0.0im
-          0.0+0.0im
-          0.0+0.0im
-          0.0+0.0im
- -2.77556e-17+0.0im
-  2.77556e-17+0.0im
-          0.0+0.0im
-          0.0+0.0im
-          0.0+0.0im
-          0.0+0.0im
-          0.0+0.0im
-          0.0+0.0im
-    -0.707107+0.0im</code></pre></div><p>We have a GHZ state here, try to measure the first qubit</p><div><pre><code class="language-julia">measure(r, 5)</code></pre><pre><code class="language-none">5-element Array{Int64,1}:
-  0
- 15
- 15
-  0
- 15</code></pre></div><p>GHZ state will collapse to <span>$|0000\rangle$</span> or <span>$|1111\rangle$</span> due to entanglement!</p><footer><hr/><a class="previous" href="../../"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../QFT/"><span class="direction">Next</span><span class="title">Quantum Fourier Transform</span></a></footer></article></body></html>
+└─ 1=&gt;X gate</code></pre></div><p>In the end, we need to apply <code>H</code> gate to all lines, of course, you can do it by <code>kron</code>, but we offer something more efficient called <code>roll</code>, this applies a single gate each time on each qubit without calculating a new large operator, which will be extremely efficient for calculating small gates that tiles on almost every lines.</p><p>The whole circuit is a chained structure of the above blocks. And we actually store a quantum circuit in a tree structure.</p><div><pre><code class="language-julia">circuit</code></pre><pre><code class="language-none">circuit (generic function with 1 method)</code></pre></div><p>After we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.</p><pre><code class="language-">r = circuit(4) |&gt; on(register(bit&quot;0000&quot;))
+r</code></pre><p>Let&#39;s check the output:</p><pre><code class="language-">statevec(r)</code></pre><p>We have a GHZ state here, try to measure the first qubit</p><pre><code class="language-">measure(r, 5)</code></pre><p>GHZ state will collapse to <span>$|0000\rangle$</span> or <span>$|1111\rangle$</span> due to entanglement!</p><footer><hr/><a class="previous" href="../../"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../QFT/"><span class="direction">Next</span><span class="title">Quantum Fourier Transform</span></a></footer></article></body></html>

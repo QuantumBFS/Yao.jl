@@ -297,7 +297,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Base.repeat-Tuple{Int64,Pair{Int64,#s407} where #s407<:Yao.Blocks.MatrixBlock}",
+    "location": "man/interfaces/#Base.repeat-Tuple{Int64,Pair{Int64,#s410} where #s410<:Yao.Blocks.MatrixBlock}",
     "page": "Interfaces",
     "title": "Base.repeat",
     "category": "method",
@@ -597,7 +597,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.ControlBlock",
     "category": "type",
-    "text": "ControlBlock{BT, N, C, B, T} <: CompositeBlock{N, T}\n\nBT: controlled block type, N: number of qubits, C: number of control bits, T: type of matrix.\n\n\n\n"
+    "text": "ControlBlock{BT, N, C, B, T} <: CompositeBlock{N, T}\n\nN: number of qubits, BT: controlled block type, C: number of control bits, T: type of matrix.\n\n\n\n"
 },
 
 {
@@ -737,7 +737,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.cache_type-Tuple{Type{#s18} where #s18<:Yao.Blocks.MatrixBlock}",
+    "location": "man/blocks/#Yao.Blocks.cache_type-Tuple{Type{#s21} where #s21<:Yao.Blocks.MatrixBlock}",
     "page": "Blocks System",
     "title": "Yao.Blocks.cache_type",
     "category": "method",
@@ -945,6 +945,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/intrinsics/#Yao.Intrinsics.controller-Tuple{Any,Any}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.controller",
+    "category": "method",
+    "text": "controller(cbits, cvals) -> Function\n\nReturn a function that test whether a basis at cbits takes specific value cvals.\n\n\n\n"
+},
+
+{
     "location": "man/intrinsics/#Yao.Intrinsics.flip-Tuple{Int64,Int64}",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.flip",
@@ -1113,11 +1121,43 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/luxurysparse/#Yao.LuxurySparse.fast_invperm-Tuple{Any}",
+    "page": "LuxurySparse",
+    "title": "Yao.LuxurySparse.fast_invperm",
+    "category": "method",
+    "text": "faster invperm\n\n\n\n"
+},
+
+{
+    "location": "man/luxurysparse/#Yao.LuxurySparse.matvec",
+    "page": "LuxurySparse",
+    "title": "Yao.LuxurySparse.matvec",
+    "category": "function",
+    "text": "matvec(x::VecOrMat) -> MatOrVec\n\nReturn vector if a matrix is a column vector, else untouched.\n\n\n\n"
+},
+
+{
+    "location": "man/luxurysparse/#Yao.LuxurySparse.mulrow",
+    "page": "LuxurySparse",
+    "title": "Yao.LuxurySparse.mulrow",
+    "category": "function",
+    "text": "mulrow(v::VecOrMat, i::Int, f) -> VecOrMat\n\nmulrow row i by f.\n\n\n\n"
+},
+
+{
     "location": "man/luxurysparse/#Yao.LuxurySparse.pmrand",
     "page": "LuxurySparse",
     "title": "Yao.LuxurySparse.pmrand",
     "category": "function",
     "text": "pmrand(T::Type, n::Int) -> PermMatrix\n\nReturn random PermMatrix.\n\n\n\n"
+},
+
+{
+    "location": "man/luxurysparse/#Yao.LuxurySparse.swaprows",
+    "page": "LuxurySparse",
+    "title": "Yao.LuxurySparse.swaprows",
+    "category": "function",
+    "text": "swaprows(v::VecOrMat, i::Int, j::Int, [f1, f2]) -> VecOrMat\n\nSwap two rows i and j of a matrix/vector, f1 and f2 are two factors applied on i-th and j-th element of input matrix/vector, default is 1.\n\n\n\n"
 },
 
 {
@@ -1145,7 +1185,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.cxgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Array{Int64,1},Array{Int64,1},Union{Array{Int64,1}, Int64, UnitRange{Int64}}}} where MT<:Number",
+    "location": "man/boost/#Yao.Boost.cxgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Any,Any,Union{Array{Int64,1}, Int64, UnitRange{Int64}}}} where MT<:Number",
     "page": "Boost",
     "title": "Yao.Boost.cxgate",
     "category": "method",
@@ -1153,7 +1193,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.cygate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Array{Int64,1},Array{Int64,1},Int64}} where MT<:Complex",
+    "location": "man/boost/#Yao.Boost.cygate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Any,Any,Int64}} where MT<:Complex",
     "page": "Boost",
     "title": "Yao.Boost.cygate",
     "category": "method",
@@ -1161,7 +1201,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.czgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Array{Int64,1},Array{Int64,1},Int64}} where MT<:Number",
+    "location": "man/boost/#Yao.Boost.czgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Any,Any,Int64}} where MT<:Number",
     "page": "Boost",
     "title": "Yao.Boost.czgate",
     "category": "method",
@@ -1169,7 +1209,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s405,1} where #s405<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s404,1} where #s404<:(AbstractArray{T,2} where T),Array{Int64,1}}",
+    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s408,1} where #s408<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s407,1} where #s407<:(AbstractArray{T,2} where T),Array{Int64,1}}",
     "page": "Boost",
     "title": "Yao.Boost.general_controlled_gates",
     "category": "method",
