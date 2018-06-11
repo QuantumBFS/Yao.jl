@@ -5,15 +5,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Home",
     "category": "page",
-    "text": ""
-},
-
-{
-    "location": "#Yao",
-    "page": "Home",
-    "title": "Yao",
-    "category": "module",
-    "text": "Flexible, Extensible Framework for Quantum Algorithm Design.\n\nEnvironment Variables\n\nYaoDefaultType: set default type used in simulation.\n\n\n\n"
+    "text": "CurrentModule = Yao"
 },
 
 {
@@ -21,7 +13,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Yao",
     "category": "section",
-    "text": "A General Purpose Quantum Computation Simulation FrameworkWelcome to Yao, a Flexible, Extensible, Efficient Framework for Quantum Algorithm Design. Yao (幺) is the Chinese character for unitary. It is also means the first (一) in Chinese (it is the first released package from QuantumBFS).We aim to provide a powerful tool for researchers, students to study and explore quantum computing in near term future, before quantum computer being used in large-scale.Yao"
+    "text": "A General Purpose Quantum Computation Simulation FrameworkWelcome to Yao, a Flexible, Extensible, Efficient Framework for Quantum Algorithm Design. Yao (幺) is the Chinese character for unitary. It is also means the first (一) in Chinese (it is the first released package from QuantumBFS).We aim to provide a powerful tool for researchers, students to study and explore quantum computing in near term future, before quantum computer being used in large-scale."
 },
 
 {
@@ -53,7 +45,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
     "title": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
     "category": "section",
-    "text": "First, you have to use this package in Julia.using YaoThen let\'s define the oracle, it is a function of the number of qubits. The whole oracle looks like this:n = 4\ncircuit(n) = chain(\n    n,\n    kron(i=>H for i in 1:n),\n    control([4, ], 3=>X),\n    control([3, ], 1=>X),\n    control([4, ], 3=>X),\n    control([2, ], 1=>X),\n    kron(i=>H for i in 2:n),\n    repeat(1=>X),\n);Let me explain what happens here. Firstly, we have a X gate which is applied to the first qubit. We need decide how we calculate this numerically, Yao offers serveral different approach to this. The simplest (but not the most efficient) one is to use kronecker product which will product X with I on other lines to gather an operator in the whole space and then apply it to the register. The first argument n means the number of qubits.kron(n, 1=>X)Similar with kron, we then need to apply some controled gates.control(n, [2, ], 1=>X)This means there is a X gate on the first qubit that is controled by the second qubit. In fact, you can also create a controled gate with multiple control qubits, likecontrol(n, [2, 3], 1=>X)In the end, we need to apply H gate to all lines, of course, you can do it by kron, but we offer something more efficient called roll, this applies a single gate each time on each qubit without calculating a new large operator, which will be extremely efficient for calculating small gates that tiles on almost every lines.The whole circuit is a chained structure of the above blocks. And we actually store a quantum circuit in a tree structure.circuitAfter we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.r = circuit(4) |> on(register(bit\"0000\"))\nrLet\'s check the output:statevec(r)We have a GHZ state here, try to measure the first qubitmeasure(1) |> on!(r)\nstatevec(r)GHZ state will collapse to 0000rangle or 1111rangle due to entanglement!"
+    "text": "First, you have to use this package in Julia.using YaoThen let\'s define the oracle, it is a function of the number of qubits. The whole oracle looks like this:n = 4\ncircuit(n) = chain(\n    n,\n    kron(i=>H for i in 1:n),\n    control([4, ], 3=>X),\n    control([3, ], 1=>X),\n    control([4, ], 3=>X),\n    control([2, ], 1=>X),\n    kron(i=>H for i in 2:n),\n    repeat(1=>X),\n);Let me explain what happens here. Firstly, we have a X gate which is applied to the first qubit. We need decide how we calculate this numerically, Yao offers serveral different approach to this. The simplest (but not the most efficient) one is to use kronecker product which will product X with I on other lines to gather an operator in the whole space and then apply it to the register. The first argument n means the number of qubits.kron(n, 1=>X)Similar with kron, we then need to apply some controled gates.control(n, [2, ], 1=>X)This means there is a X gate on the first qubit that is controled by the second qubit. In fact, you can also create a controled gate with multiple control qubits, likecontrol(n, [2, 3], 1=>X)In the end, we need to apply H gate to all lines, of course, you can do it by kron, but we offer something more efficient called roll, this applies a single gate each time on each qubit without calculating a new large operator, which will be extremely efficient for calculating small gates that tiles on almost every lines.The whole circuit is a chained structure of the above blocks. And we actually store a quantum circuit in a tree structure.circuitAfter we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.r = circuit(4) |> on(register(bit\"0000\"))\nrLet\'s check the output:statevec(r)We have a GHZ state here, try to measure the first qubitmeasure(r, 5)GHZ state will collapse to 0000rangle or 1111rangle due to entanglement!"
 },
 
 {
@@ -86,6 +78,46 @@ var documenterSearchIndex = {"docs": [
     "title": "Quantum Circuit Born Machine",
     "category": "section",
     "text": ""
+},
+
+{
+    "location": "man/yao/#",
+    "page": "Yao",
+    "title": "Yao",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "man/yao/#Yao",
+    "page": "Yao",
+    "title": "Yao",
+    "category": "module",
+    "text": "Flexible, Extensible Framework for Quantum Algorithm Design.\n\nEnvironment Variables\n\nYaoDefaultType: set default type used in simulation.\n\n\n\n"
+},
+
+{
+    "location": "man/yao/#Yao.nactive",
+    "page": "Yao",
+    "title": "Yao.nactive",
+    "category": "function",
+    "text": "nactive(x) -> Int\n\nReturns number of active qubits\n\n\n\n"
+},
+
+{
+    "location": "man/yao/#Yao.nqubits",
+    "page": "Yao",
+    "title": "Yao.nqubits",
+    "category": "function",
+    "text": "nqubits(m::AbstractRegister) -> Int\n\nReturns number of qubits in a register,\n\nnqubits(m::AbstractBlock) -> Int\n\nReturns number of qubits applied for a block,\n\nnqubits(m::AbstractArray) -> Int\n\nReturns size of the first dimension of an array, in 2^nqubits.\n\n\n\n"
+},
+
+{
+    "location": "man/yao/#Yao-1",
+    "page": "Yao",
+    "title": "Yao",
+    "category": "section",
+    "text": "Modules = [Yao]\nOrder   = [:module, :constant, :type, :macro, :function]"
 },
 
 {
@@ -222,6 +254,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Interfaces.shift",
     "category": "function",
     "text": "shift([type=Yao.DefaultType], [theta=0.0]) -> PhaseGate{:shift}\n\nReturns a phase shift gate.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.swap",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.swap",
+    "category": "function",
+    "text": "swap([n], [type], line1, line2) -> Swap\n\nReturns a swap gate on line1 and line2\n\n\n\n"
 },
 
 {
@@ -385,6 +425,38 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/registers/#Yao.Registers.measure",
+    "page": "Registers",
+    "title": "Yao.Registers.measure",
+    "category": "function",
+    "text": "measure(register, [n=1]) -> Vector\n\nmeasure active qubits for n times.\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.measure_remove!-Union{Tuple{B}, Tuple{Yao.Registers.AbstractRegister{B,T} where T}} where B",
+    "page": "Registers",
+    "title": "Yao.Registers.measure_remove!",
+    "category": "method",
+    "text": "measure_remove!(register)\n\nmeasure the active qubits of this register and remove them.\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.register",
+    "page": "Registers",
+    "title": "Yao.Registers.register",
+    "category": "function",
+    "text": "register([type], bit_str, [nbatch=1]) -> DefaultRegister\n\nReturns a DefaultRegister by inputing a bit string, e.g\n\nusing Yao\nregister(bit\"0000\")\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.register-Tuple{Array{T,1} where T}",
+    "page": "Registers",
+    "title": "Yao.Registers.register",
+    "category": "method",
+    "text": "register(raw) -> DefaultRegister\n\nReturns a DefaultRegister from a raw dense array (Vector or Matrix).\n\n\n\n"
+},
+
+{
     "location": "man/registers/#Yao.Registers.statevec",
     "page": "Registers",
     "title": "Yao.Registers.statevec",
@@ -457,14 +529,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks",
-    "page": "Blocks System",
-    "title": "Yao.Blocks",
-    "category": "module",
-    "text": "APIs\n\nTraits\n\nnqubits nactive isunitary ispure isreflexive ishermitian\n\nMethods\n\napply! copy dispatch!\n\n\n\n"
-},
-
-{
     "location": "man/blocks/#Yao.Blocks.AbstractBlock",
     "page": "Blocks System",
     "title": "Yao.Blocks.AbstractBlock",
@@ -478,6 +542,22 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.AbstractMeasure",
     "category": "type",
     "text": "AbstractMeasure <: AbstractBlock\n\nAbstract block supertype which measurement block will inherit from.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.CacheFragment",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.CacheFragment",
+    "category": "type",
+    "text": "CacheFragment{BT, K, MT}\n\nA fragment that will be stored for each cached block (of type BT) on a cache server.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.CachedBlock",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.CachedBlock",
+    "category": "type",
+    "text": "CachedBlock{ST, BT, N, T} <: MatrixBlock{N, T}\n\nA label type that tags an instance of type BT. It forwards every methods of the block it contains, except mat and apply!, it will cache the matrix form whenever the program has.\n\n\n\n"
 },
 
 {
@@ -517,7 +597,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.ControlBlock",
     "category": "type",
-    "text": "ControlBlock{BT, N, C, B, T}\n\nBT: controlled block type, N: number of qubits, C: number of control bits, T: type of matrix.\n\n\n\n"
+    "text": "ControlBlock{BT, N, C, B, T} <: CompositeBlock{N, T}\n\nBT: controlled block type, N: number of qubits, C: number of control bits, T: type of matrix.\n\n\n\n"
 },
 
 {
@@ -533,7 +613,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.MatrixBlock",
     "category": "type",
-    "text": "MatrixBlock{N, T} <: AbstractBlock\n\nabstract type that all block with a matrix form will subtype from.\n\nextended APIs\n\nmat sparse full datatype\n\n\n\n"
+    "text": "MatrixBlock{N, T} <: AbstractBlock\n\nabstract type that all block with a matrix form will subtype from.\n\n\n\n"
 },
 
 {
@@ -550,6 +630,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.PrimitiveBlock",
     "category": "type",
     "text": "PrimitiveBlock{N, T} <: MatrixBlock{N, T}\n\nabstract type that all primitive block will subtype from. A primitive block is a concrete block who can not be decomposed into other blocks. All composite block can be decomposed into several primitive blocks.\n\nNOTE: subtype for primitive block with parameter should implement hash and == method to enable key value cache.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.RepeatedBlock",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.RepeatedBlock",
+    "category": "type",
+    "text": "RepeatedBlock{N, T, GT} <: CompositeBlock{N, T}\n\nrepeat the same block on given lines.\n\n\n\n"
 },
 
 {
@@ -577,14 +665,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Base.LinAlg.ishermitian-Tuple{Yao.Blocks.MatrixBlock}",
-    "page": "Blocks System",
-    "title": "Base.LinAlg.ishermitian",
-    "category": "method",
-    "text": "ishermitian(x) -> Bool\n\nTest whether this operator is hermitian.\n\n\n\n"
-},
-
-{
     "location": "man/blocks/#Yao.Blocks.apply!",
     "page": "Blocks System",
     "title": "Yao.Blocks.apply!",
@@ -601,6 +681,22 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.datatype-Union{Tuple{N}, Tuple{T}, Tuple{Yao.Blocks.MatrixBlock{N,T}}} where T where N",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.datatype",
+    "category": "method",
+    "text": "datatype(x) -> DataType\n\nReturns the data type of x.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.dispatch!",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.dispatch!",
+    "category": "function",
+    "text": "dispatch!(block, params)\ndispatch!(block, params...)\n\ndispatch parameters to this block.\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.dispatch!-Tuple{Yao.Blocks.CompositeBlock,Any}",
     "page": "Blocks System",
     "title": "Yao.Blocks.dispatch!",
@@ -609,35 +705,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.ispure-Tuple{Yao.Blocks.MatrixBlock}",
-    "page": "Blocks System",
-    "title": "Yao.Blocks.ispure",
-    "category": "method",
-    "text": "ispure(x) -> Bool\n\nTest whether this operator is pure.\n\n\n\n"
-},
-
-{
-    "location": "man/blocks/#Yao.Blocks.isreflexive",
-    "page": "Blocks System",
-    "title": "Yao.Blocks.isreflexive",
-    "category": "function",
-    "text": "isreflexive(x) -> Bool\n\nTest whether this operator is reflexive.\n\n\n\n"
-},
-
-{
-    "location": "man/blocks/#Yao.Blocks.isunitary",
-    "page": "Blocks System",
-    "title": "Yao.Blocks.isunitary",
-    "category": "function",
-    "text": "isunitary(x) -> Bool\n\nTest whether this operator is unitary.\n\n\n\n"
-},
-
-{
     "location": "man/blocks/#Yao.Blocks.mat",
     "page": "Blocks System",
     "title": "Yao.Blocks.mat",
     "category": "function",
-    "text": "mat(block) -> Matrix\n\n\n\n"
+    "text": "mat(block) -> Matrix\n\nReturns the matrix form of this block.\n\n\n\n"
 },
 
 {
@@ -657,11 +729,43 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.cache_key",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.cache_key",
+    "category": "function",
+    "text": "cache_key(block)\n\nReturns the key that identify the matrix cache of this block. By default, we use the returns of parameters as its key.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.cache_type-Tuple{Type{#s18} where #s18<:Yao.Blocks.MatrixBlock}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.cache_type",
+    "category": "method",
+    "text": "cache_type(::Type) -> DataType\n\nA type trait that defines the element type that a CacheFragment will use.\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.print_block-Tuple{IO,Any}",
     "page": "Blocks System",
     "title": "Yao.Blocks.print_block",
     "category": "method",
     "text": "print_block(io, block)\n\ndefine the style to print this block\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Intrinsics.isreflexive",
+    "page": "Blocks System",
+    "title": "Yao.Intrinsics.isreflexive",
+    "category": "function",
+    "text": "isreflexive(x) -> Bool\n\nTest whether this operator is reflexive.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Intrinsics.isunitary",
+    "page": "Blocks System",
+    "title": "Yao.Intrinsics.isunitary",
+    "category": "function",
+    "text": "isunitary(x) -> Bool\n\nTest whether this operator is unitary.\n\n\n\n"
 },
 
 {
@@ -769,6 +873,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/intrinsics/#Base.LinAlg.ishermitian-Tuple{Any}",
+    "page": "Intrinsics",
+    "title": "Base.LinAlg.ishermitian",
+    "category": "method",
+    "text": "ishermitian(op) -> Bool\n\ncheck if this operator is hermitian.\n\n\n\n"
+},
+
+{
     "location": "man/intrinsics/#Yao.Intrinsics.basis-Tuple{Int64}",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.basis",
@@ -854,6 +966,22 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Intrinsics.indices_with",
     "category": "method",
     "text": "indices_with(num_bit::Int, poss::Vector{Int}, vals::Vector{Int}) -> Vector{Int}\n\nReturn indices with specific positions poss with value vals in a hilbert space of num_bit qubits.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.isreflexive-Tuple{Any}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.isreflexive",
+    "category": "method",
+    "text": "isreflexive(op) -> Bool\n\ncheck if this operator is reflexive.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.isunitary-Tuple{Any}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.isunitary",
+    "category": "method",
+    "text": "isunitary(op) -> Bool\n\ncheck if this operator is a unitary operator.\n\n\n\n"
 },
 
 {
@@ -1001,6 +1129,86 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/boost/#",
+    "page": "Boost",
+    "title": "Boost",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "man/boost/#Yao.Boost.controlled_U1",
+    "page": "Boost",
+    "title": "Yao.Boost.controlled_U1",
+    "category": "function",
+    "text": "controlled_U1(num_bit::Int, gate::AbstractMatrix, cbits::Vector{Int}, b2::Int) -> AbstractMatrix\n\nReturn general multi-controlled single qubit gate in hilbert space of num_bit qubits.\n\ncbits specify the controling positions.\nb2 is the controlled position.\n\n\n\n"
+},
+
+{
+    "location": "man/boost/#Yao.Boost.cxgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Array{Int64,1},Array{Int64,1},Union{Array{Int64,1}, Int64, UnitRange{Int64}}}} where MT<:Number",
+    "page": "Boost",
+    "title": "Yao.Boost.cxgate",
+    "category": "method",
+    "text": "cxgate(::Type{MT}, num_bit::Int, b1::Ints, b2::Ints) -> PermMatrix\n\nSingle (Multiple) Controlled-X Gate on single (multiple) bits.\n\n\n\n"
+},
+
+{
+    "location": "man/boost/#Yao.Boost.cygate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Array{Int64,1},Array{Int64,1},Int64}} where MT<:Complex",
+    "page": "Boost",
+    "title": "Yao.Boost.cygate",
+    "category": "method",
+    "text": "cygate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) -> PermMatrix\n\nSingle Controlled-Y Gate on single bit.\n\n\n\n"
+},
+
+{
+    "location": "man/boost/#Yao.Boost.czgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Array{Int64,1},Array{Int64,1},Int64}} where MT<:Number",
+    "page": "Boost",
+    "title": "Yao.Boost.czgate",
+    "category": "method",
+    "text": "czgate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) -> Diagonal\n\nSingle Controlled-Z Gate on single bit.\n\n\n\n"
+},
+
+{
+    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s405,1} where #s405<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s404,1} where #s404<:(AbstractArray{T,2} where T),Array{Int64,1}}",
+    "page": "Boost",
+    "title": "Yao.Boost.general_controlled_gates",
+    "category": "method",
+    "text": "general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix\n\nReturn general multi-controlled gates in hilbert space of num_bit qubits,\n\nprojectors are often chosen as P0 and P1 for inverse-Control and Control at specific position.\ncbits should have the same length as projectors, specifing the controling positions.\ngates are a list of controlled single qubit gates.\nlocs should have the same length as gates, specifing the gates positions.\n\n\n\n"
+},
+
+{
+    "location": "man/boost/#Yao.Boost.xgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Union{Array{Int64,1}, Int64, UnitRange{Int64}}}} where MT<:Number",
+    "page": "Boost",
+    "title": "Yao.Boost.xgate",
+    "category": "method",
+    "text": "xgate(::Type{MT}, num_bit::Int, bits::Ints) -> PermMatrix\n\nX Gate on multiple bits.\n\n\n\n"
+},
+
+{
+    "location": "man/boost/#Yao.Boost.ygate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Union{Array{Int64,1}, Int64, UnitRange{Int64}}}} where MT<:Complex",
+    "page": "Boost",
+    "title": "Yao.Boost.ygate",
+    "category": "method",
+    "text": "ygate(::Type{MT}, num_bit::Int, bits::Ints) -> PermMatrix\n\nY Gate on multiple bits.\n\n\n\n"
+},
+
+{
+    "location": "man/boost/#Yao.Boost.zgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Union{Array{Int64,1}, Int64, UnitRange{Int64}}}} where MT<:Number",
+    "page": "Boost",
+    "title": "Yao.Boost.zgate",
+    "category": "method",
+    "text": "zgate(::Type{MT}, num_bit::Int, bits::Ints) -> Diagonal\n\nZ Gate on multiple bits.\n\n\n\n"
+},
+
+{
+    "location": "man/boost/#Boost-1",
+    "page": "Boost",
+    "title": "Boost",
+    "category": "section",
+    "text": "Boost is an optimization module that offers many functions for optimization.Modules = [Yao.Boost]\nOrder   = [:module, :constant, :type, :macro, :function]"
+},
+
+{
     "location": "dev/extending-blocks/#",
     "page": "Extending Blocks",
     "title": "Extending Blocks",
@@ -1037,7 +1245,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Extending Blocks",
     "title": "Extending Composite Blocks",
     "category": "section",
-    "text": "Composite blocks are blocks that are able to contain other blocks."
+    "text": "Composite blocks are blocks that are able to contain other blocks. To define a new composite block you only need to define your new type as a subtype of CompositeBlock, and define a new method called blocks which will provide an iterator that iterates the blocks contained by this composite block."
+},
+
+{
+    "location": "dev/extending-blocks/#Custom-Pretty-Printing-1",
+    "page": "Extending Blocks",
+    "title": "Custom Pretty Printing",
+    "category": "section",
+    "text": "The whole quantum circuit is represented as a tree in the block system. Therefore, we print a block as a tree. To define your own syntax to print, simply overloads the print_block method. Then it will appears in the block tree syntax automatically.print_block(io::IO, block::MyBlockType)"
 },
 
 ]}
