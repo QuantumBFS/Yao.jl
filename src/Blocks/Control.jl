@@ -1,10 +1,10 @@
 export ControlBlock
 
 """
-    ControlBlock{BT, N, C, B, T}
+    ControlBlock{N, BT, C, B, T}
 
-BT: controlled block type,
 N: number of qubits,
+BT: controlled block type,
 C: number of control bits,
 T: type of matrix.
 """

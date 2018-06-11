@@ -11,7 +11,7 @@ import ..Yao: nqubits
 # MathUtils
 export batch_normalize!, batch_normalize
 export rolldims2!, rolldims!
-export hilbertkron
+export hilbertkron, linop2dense, rotmat
 
 include("Math.jl")
 
