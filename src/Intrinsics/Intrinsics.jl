@@ -31,6 +31,7 @@ include("MacroTools.jl")
 
 include("TupleTools.jl")
 
+import Compat.LinearAlgebra: ishermitian
 export isunitary, isreflexive, ishermitian
 include("OperatorTraits.jl")
 

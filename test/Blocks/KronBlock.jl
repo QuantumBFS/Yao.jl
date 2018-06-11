@@ -135,6 +135,5 @@ end
     eltype(g) == Tuple{Int, MatrixBlock}
 
     @test isunitary(g) == true
-    @test ispure(g) == true
     @test isreflexive(g) == true
 end
