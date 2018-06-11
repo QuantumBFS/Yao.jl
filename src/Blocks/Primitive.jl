@@ -17,7 +17,7 @@ function dispatch!(f::Function, x::PrimitiveBlock, params...)
     x
 end
 
-cache_key(x::PrimitiveBlock) = 0x1
+cache_key(x::PrimitiveBlock) = parameters(x)
 
 include("ConstGate.jl")
 include("PhaseGate.jl")
