@@ -111,3 +111,6 @@ end
 
 import Base: randn
 randn(T::Type{Complex{F}}, n::Int...) where F = randn(F, n...) + im*randn(F, n...)
+
+rotate_matrix(gate::AbstractMatrix, θ::Real) = expm(-0.5im*θ*Matrix(gate))
+linop2dense(applyfunc!::Function, num_bit::Int) = applyfunc!(eye(ComplexF64, 1<<num_bit))

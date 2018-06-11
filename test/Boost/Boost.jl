@@ -1,8 +1,12 @@
 using Compat
 using Compat.Test
 
-@testset "binding" begin
-include("Binding.jl")
+@testset "control" begin
+include("Control.jl")
+end
+
+@testset "repeated" begin
+include("Repeated.jl")
 end
 
 @testset "applys" begin

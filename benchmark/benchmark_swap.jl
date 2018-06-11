@@ -19,4 +19,12 @@ bg["matrix"] = @benchmarkable swapgate(Complex128, 16, 3, 7)
 bg["apply-mat"] = @benchmarkable swapapply!($(state), 7, 3)
 bg["apply-vec"] = @benchmarkable swapapply!($(vec(state)), 7, 3)
 
+#bg = bench["SingleControlXYZ"] = BenchmarkGroup()
+#@benchmark cyapply!(s, 7, 1, 3)
+#@benchmark czapply!(s, 7, 1, 3)
+#@benchmark cxapply!(s, 15, 13, 3)
+#@benchmark cxapply!(s, (7, 2), (1, 0), 3)
+#@benchmark cyapply!(s, (7, 2), (1, 0), 3)
+#@benchmark czapply!(s, (7, 2), (1, 0), 3)
+
 showall(run(bench, verbose=true))

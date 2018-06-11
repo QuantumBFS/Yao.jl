@@ -3,8 +3,8 @@ export ControlBlock
 """
     ControlBlock{BT, N, C, B, T} <: CompositeBlock{N, T}
 
-BT: controlled block type,
 N: number of qubits,
+BT: controlled block type,
 C: number of control bits,
 T: type of matrix.
 """
@@ -19,7 +19,7 @@ function ControlBlock{N}(ctrl_qubits::NTuple{C, Int}, vals::NTuple{C, Int}, bloc
     ControlBlock{N, BT, C, Bool}(ctrl_qubits, vals, block, addr)
 end
 
-function ControlBlock{N}(ctrl_qubits::NTuple{C, Int}, vals::NTuple{C, Int}, block::BT, addr::Int) where {N, C, T, BT<:MatrixBlock{N, T}}
+function ControlBlock{N}(ctrl_qubits::NTuple{C, Int}, vals::NTuple{C, Int}, block::BT, addr::Int) where {N, M, C, T, BT<:MatrixBlock{M, T}}
     ControlBlock{N, BT, C, T}(ctrl_qubits, vals, block, addr)
 end
 

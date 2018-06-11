@@ -69,11 +69,10 @@ end
 
 Single (Multiple) Controlled-X Gate on single (multiple) bits.
 """
-function cxgate(::Type{MT}, num_bit::Int, cbits::Vector{Int}, cvals::Vector{Int}, b2::Ints) where MT<:Number
-    mask = bmask(cbits...)
-    onemask = bmask(cbits[cvals.==1]...)
+function cxgate(::Type{MT}, num_bit::Int, cbits, cvals, b2::Ints) where MT<:Number
+    c = controller(cbits, cvals)
     mask2 = bmask(b2)
-    order = map(i->testval(i, mask, onemask) ? flip(i, mask2)+1 : i+1, basis(num_bit))
+    order = map(i -> c(i) ? flip(i, mask2)+1 : i+1, basis(num_bit))
     PermMatrix(order, ones(MT, 1<<num_bit))
 end
 
@@ -82,15 +81,14 @@ end
 
 Single Controlled-Y Gate on single bit.
 """
-function cygate(::Type{MT}, num_bit::Int, cbits::Vector{Int}, cvals::Vector{Int}, b2::Int) where MT<:Complex
-    mask = bmask(cbits...)
-    onemask = bmask(cbits[cvals.==1]...)
+function cygate(::Type{MT}, num_bit::Int, cbits, cvals, b2::Int) where MT<:Complex
+    c = controller(cbits, cvals)
     mask2 = bmask(b2)
     order = Vector{Int}(1<<num_bit)
     vals = Vector{MT}(1<<num_bit)
     @simd for b = 0:1<<num_bit-1
         i = b+1
-        if testval(b, mask, onemask)
+        if b |> c
             @inbounds order[i] = flip(b, mask2) + 1
             @inbounds vals[i] = testany(b, mask2) ? MT(im) : -MT(im)
         else
@@ -106,10 +104,9 @@ end
 
 Single Controlled-Z Gate on single bit.
 """
-function czgate(::Type{MT}, num_bit::Int, cbits::Vector{Int}, cvals::Vector{Int}, b2::Int) where MT<:Number
-    mask = bmask(cbits..., b2)
-    onemask = bmask(cbits[cvals.==1]..., b2)
-    vals = map(i->testval(i, mask, onemask) ? MT(-1) : MT(1), basis(num_bit))
+function czgate(::Type{MT}, num_bit::Int, cbits, cvals, b2::Int) where MT<:Number
+    c = controller([cbits...,b2], [cvals..., 1])
+    vals = map(i -> c(i) ? MT(-1) : MT(1), basis(num_bit))
     Diagonal(vals)
 end
 

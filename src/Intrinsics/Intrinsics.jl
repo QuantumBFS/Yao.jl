@@ -11,7 +11,7 @@ import ..Yao: nqubits
 # MathUtils
 export batch_normalize!, batch_normalize
 export rolldims2!, rolldims!
-export hilbertkron
+export hilbertkron, linop2dense, rotmat
 
 include("Math.jl")
 
@@ -20,7 +20,7 @@ export DInt, Ints, DInts
 export basis, bmask
 export bit_length, log2i, bsizeof, nqubits
 export testall, testany, testval, setbit, flip, neg, swapbits, takebit
-export indices_with, bitarray, packbits
+export indices_with, bitarray, packbits, controller
 export bdistance
 export onehotvec
 

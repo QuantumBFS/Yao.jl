@@ -7,38 +7,6 @@ for (G, MATFUNC) in zip(GATES, [:xgate, :ygate, :zgate])
     end
 end
 
-function apply!(r::AbstractRegister{1}, rb::RepeatedBlock{N, T, <:XGate}) where {N, T}
-    if nremain(r) == 0
-        xapply!(vec(state(r)), rb.lines)
-    else
-        xapply!(state(r), rb.lines)
-    end
-end
-
-function apply!(r::AbstractRegister{1}, rb::RepeatedBlock{N, T, <:YGate}) where {N, T}
-    if nremain(r) == 0
-        yapply!(vec(state(r)), rb.lines)
-    else
-        yapply!(state(r), rb.lines)
-    end
-end
-
-function apply!(r::AbstractRegister{1}, rb::RepeatedBlock{N, T, <:ZGate}) where {N, T}
-    if nremain(r) == 0
-        zapply!(vec(state(r)), rb.lines)
-    else
-        zapply!(state(r), rb.lines)
-    end
-end
-
-function apply!(r::AbstractRegister, rb::RepeatedBlock{N, T, <:XGate}) where {N, T}
-    xapply!(state(r), rb.lines)
-end
-
-function apply!(r::AbstractRegister, rb::RepeatedBlock{N, T, <:YGate}) where {N, T}
-    yapply!(state(r), rb.lines)
-end
-
-function apply!(r::AbstractRegister, rb::RepeatedBlock{N, T, <:ZGate}) where {N, T}
-    zapply!(state(r), rb.lines)
+for (GATE, METHOD) in zip([:XGate, :YGate, :ZGate], [:xapply!, :yapply!, :zapply!])
+    @eval apply!(r::AbstractRegister{B}, rb::RepeatedBlock{N, T, <:$GATE}) where {B, N, T} = ($METHOD(r.state |> matvec, rb.lines); r)
 end

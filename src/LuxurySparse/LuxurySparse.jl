@@ -11,17 +11,9 @@ import Compat.SparseArrays: SparseMatrixCSC, nnz, nonzeros, dropzeros!
 import Base: getindex, size, similar, copy, show
 
 export PermMatrix, pmrand, IMatrix, I, fast_invperm
+export swaprows, mulrow, matvec
 
-function fast_invperm(order)
-    v = similar(order)
-    @inbounds @simd for i=1:length(order)
-        v[order[i]] = i
-    end
-    v
-end
-
-dropzeros!(A::Diagonal) = A
-
+include("Core.jl")
 include("IMatrix.jl")
 include("PermMatrix.jl")
 

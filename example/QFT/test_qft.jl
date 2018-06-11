@@ -9,9 +9,6 @@ fftblock = QFT(num_bit)
 reg = rand_state(num_bit)
 rv = copy(statevec(reg))
 
-rotgate(gate::AbstractMatrix, θ::Real) = expm(-0.5im*θ*Matrix(gate))
-apply2mat(applyfunc!::Function, num_bit::Int) = applyfunc!(eye(ComplexF64, 1<<num_bit))
-
 @testset "fft" begin
     @test Matrix(mat(chain(IQFT(3), QFT(3)))) ≈ eye(1<<3)
 
