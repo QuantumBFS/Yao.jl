@@ -161,19 +161,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/interfaces/#Yao.Interfaces.concentrate-Tuple{Int64,Yao.Blocks.AbstractBlock,Array{Int64,1}}",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.concentrate",
+    "category": "method",
+    "text": "concentrate(orders...) -> Concentrator\n\nconcentrate on serveral lines.\n\n\n\n"
+},
+
+{
     "location": "man/interfaces/#Yao.Interfaces.control",
     "page": "Interfaces",
     "title": "Yao.Interfaces.control",
     "category": "function",
     "text": "control([total], controls, target) -> ControlBlock\n\nConstructs a ControlBlock\n\n\n\n"
-},
-
-{
-    "location": "man/interfaces/#Yao.Interfaces.focus-Tuple",
-    "page": "Interfaces",
-    "title": "Yao.Interfaces.focus",
-    "category": "method",
-    "text": "focus(orders...) -> Concentrator\n\nfocus serveral lines.\n\n\n\n"
 },
 
 {
@@ -257,7 +257,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Base.repeat-Tuple{Int64,Pair{Int64,#s404} where #s404<:Yao.Blocks.MatrixBlock}",
+    "location": "man/interfaces/#Base.repeat-Tuple{Int64,Pair{Int64,#s407} where #s407<:Yao.Blocks.MatrixBlock}",
     "page": "Interfaces",
     "title": "Base.repeat",
     "category": "method",
@@ -357,7 +357,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Registers",
     "title": "Yao.Registers.AbstractRegister",
     "category": "type",
-    "text": "AbstractRegister{B, T}\n\nabstract type that registers will subtype from. B is the batch size, T is the data type.\n\nRequired Properties\n\nProperty Description default\nnqubits(reg) get the total number of qubits. \nnactive(reg) get the number of active qubits. \nnremain(reg) get the number of remained qubits. nqubits - nactive\nnbatch(reg) get the number of batch. B\naddress(reg) get the address of this register. \nstate(reg) get the state of this register. It always return the matrix stored inside. \neltype(reg) get the element type stored by this register on classical memory. (the type Julia should use to represent amplitude) T\ncopy(reg) copy this register. \nsimilar(reg) construct a new register with similar configuration. \n\nRequired Methods\n\nMultiply\n\n*(op, reg)\n\ndefine how operator op act on this register. This is quite useful when there is a special approach to apply an operator on this register. (e.g a register with no batch, or a register with a MPS state, etc.)\n\nnote: Note\nbe careful, generally, operators can only be applied to a register, thus we should only overload this operation and do not overload *(reg, op).\n\nPack Address\n\npack_address!(reg, addrs)\n\npack addrs together to the first k-dimensions.\n\nExample\n\nGiven a register with dimension [2, 3, 1, 5, 4], we pack [5, 4] to the first 2 dimensions. We will get [5, 4, 2, 3, 1].\n\nFocus Address\n\nfocus!(reg, range)\n\nmerge address in range together as one dimension (the active space).\n\nExample\n\nGiven a register with dimension (2^4)x3 and address [1, 2, 3, 4], we focus address [3, 4], will pack [3, 4] together and merge them as the active space. Then we will have a register with size 2^2x(2^2x3), and address [3, 4, 1, 2].\n\nInitializers\n\nInitializers are functions that provide specific quantum states, e.g zero states, random states, GHZ states and etc.\n\nregister(::Type{RT}, raw, nbatch)\n\nan general initializer for input raw state array.\n\nregister(::Val{InitMethod}, ::Type{RT}, ::Type{T}, n, nbatch)\n\ninit register type RT with InitMethod type (e.g Val{:zero}) with element type T and total number qubits n with nbatch. This will be auto-binded to some shortcuts like zero_state, rand_state, randn_state.\n\n\n\n"
+    "text": "AbstractRegister{B, T}\n\nabstract type that registers will subtype from. B is the batch size, T is the data type.\n\nRequired Properties\n\nProperty Description default\nnqubits(reg) get the total number of qubits. \nnactive(reg) get the number of active qubits. \nnremain(reg) get the number of remained qubits. nqubits - nactive\nnbatch(reg) get the number of batch. B\nstate(reg) get the state of this register. It always return the matrix stored inside. \nstatevec(reg) get the raveled state of this register.                                  . \nhypercubic(reg) get the hypercubic form of this register.                                  . \neltype(reg) get the element type stored by this register on classical memory. (the type Julia should use to represent amplitude) T\ncopy(reg) copy this register. \nsimilar(reg) construct a new register with similar configuration. \n\nRequired Methods\n\nMultiply\n\n*(op, reg)\n\ndefine how operator op act on this register. This is quite useful when there is a special approach to apply an operator on this register. (e.g a register with no batch, or a register with a MPS state, etc.)\n\nnote: Note\nbe careful, generally, operators can only be applied to a register, thus we should only overload this operation and do not overload *(reg, op).\n\nPack Address\n\npack addrs together to the first k-dimensions.\n\nExample\n\nGiven a register with dimension [2, 3, 1, 5, 4], we pack [5, 4] to the first 2 dimensions. We will get [5, 4, 2, 3, 1].\n\nFocus Address\n\nfocus!(reg, range)\n\nmerge address in range together as one dimension (the active space).\n\nExample\n\nGiven a register with dimension (2^4)x3 and address [1, 2, 3, 4], we focus address [3, 4], will pack [3, 4] together and merge them as the active space. Then we will have a register with size 2^2x(2^2x3), and address [3, 4, 1, 2].\n\nInitializers\n\nInitializers are functions that provide specific quantum states, e.g zero states, random states, GHZ states and etc.\n\nregister(::Type{RT}, raw, nbatch)\n\nan general initializer for input raw state array.\n\nregister(::Val{InitMethod}, ::Type{RT}, ::Type{T}, n, nbatch)\n\ninit register type RT with InitMethod type (e.g Val{:zero}) with element type T and total number qubits n with nbatch. This will be auto-binded to some shortcuts like zero_state, rand_state, randn_state.\n\n\n\n"
 },
 
 {
@@ -377,11 +377,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/registers/#Yao.Registers.register",
+    "location": "man/registers/#Yao.Registers.hypercubic",
     "page": "Registers",
-    "title": "Yao.Registers.register",
+    "title": "Yao.Registers.hypercubic",
     "category": "function",
-    "text": "register(raw, [nbatch=1])\n\nConstruct a register with type of DefaultRegister.\n\n\n\n"
+    "text": "hypercubic(r::AbstractRegister) -> AbstractArray\n\nReturn the hypercubic form (high dimensional tensor) of this register, only active qubits are considered.\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.statevec",
+    "page": "Registers",
+    "title": "Yao.Registers.statevec",
+    "category": "function",
+    "text": "statevec(r::AbstractRegister) -> AbstractArray\n\nReturn the raveled state (vector) form of this register.\n\n\n\n"
 },
 
 {
@@ -393,11 +401,27 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/registers/#Base.LinAlg.normalize!-Tuple{Yao.Registers.AbstractRegister}",
+    "page": "Registers",
+    "title": "Base.LinAlg.normalize!",
+    "category": "method",
+    "text": "normalize!(r::AbstractRegister) -> AbstractRegister\n\nReturn the register with normalized state.\n\n\n\n"
+},
+
+{
     "location": "man/registers/#Base.kron-Union{Tuple{B}, Tuple{RT,Yao.Registers.AbstractRegister{B,T} where T}, Tuple{RT}} where RT<:(Yao.Registers.AbstractRegister{B,T} where T) where B",
     "page": "Registers",
     "title": "Base.kron",
     "category": "method",
     "text": "kron(lhs, rhs)\n\nMerge two registers together with kronecker tensor product.\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.shapeorder-Tuple{Tuple{Vararg{T,N}} where T where N,Array{Int64,1}}",
+    "page": "Registers",
+    "title": "Yao.Registers.shapeorder",
+    "category": "method",
+    "text": "Get the compact shape and order for permutedims.\n\n\n\n"
 },
 
 {
@@ -437,7 +461,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks",
     "category": "module",
-    "text": "APIs\n\nTraits\n\nnqubits ninput noutput isunitary ispure isreflexive ishermitian\n\nMethods\n\napply! copy dispatch!\n\n\n\n"
+    "text": "APIs\n\nTraits\n\nnqubits nactive isunitary ispure isreflexive ishermitian\n\nMethods\n\napply! copy dispatch!\n\n\n\n"
 },
 
 {
@@ -453,7 +477,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.AbstractMeasure",
     "category": "type",
-    "text": "AbstractMeasure{M} <: AbstractBlock\n\nAbstract block supertype which measurement block will inherit from.\n\n\n\n"
+    "text": "AbstractMeasure <: AbstractBlock\n\nAbstract block supertype which measurement block will inherit from.\n\n\n\n"
 },
 
 {
@@ -477,7 +501,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.Concentrator",
     "category": "type",
-    "text": "Concentrator{<:Union{Int, Tuple}} <: AbstractBlock\n\nconcentrates serveral lines together in the circuit, and expose it to other blocks.\n\n\n\n"
+    "text": "Concentrator{N} <: AbstractBlock\n\nconcentrates serveral lines together in the circuit, and expose it to other blocks.\n\n\n\n"
 },
 
 {
@@ -485,7 +509,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.ControlBlock",
     "category": "type",
-    "text": "ControlBlock{BT, N, T} <: CompositeBlock{N, T}\n\ncontrol block.\n\n\n\n"
+    "text": "ControlBlock{BT, N, C, B, T}\n\nBT: controlled block type, N: number of qubits, C: number of control bits, T: type of matrix.\n\n\n\n"
 },
 
 {
@@ -569,6 +593,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.dispatch!-Tuple{Yao.Blocks.CompositeBlock,Any}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.dispatch!",
+    "category": "method",
+    "text": "dispatch!(f, c, params) -> c\n\ndispatch parameters and tweak it according to callback function f(original, parameter)->new\n\ndispatch a vector of parameters to this composite block according to each sub-block\'s number of parameters.\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.ispure-Tuple{Yao.Blocks.MatrixBlock}",
     "page": "Blocks System",
     "title": "Yao.Blocks.ispure",
@@ -577,11 +609,43 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.dispatch!-Tuple{Yao.Blocks.CompositeBlock,Any}",
+    "location": "man/blocks/#Yao.Blocks.isreflexive",
     "page": "Blocks System",
-    "title": "Yao.dispatch!",
-    "category": "method",
-    "text": "dispatch!(f, c, params) -> c\n\ndispatch parameters and tweak it according to callback function f(original, parameter)->new\n\ndispatch a vector of parameters to this composite block according to each sub-block\'s number of parameters.\n\n\n\n"
+    "title": "Yao.Blocks.isreflexive",
+    "category": "function",
+    "text": "isreflexive(x) -> Bool\n\nTest whether this operator is reflexive.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.isunitary",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.isunitary",
+    "category": "function",
+    "text": "isunitary(x) -> Bool\n\nTest whether this operator is unitary.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.mat",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.mat",
+    "category": "function",
+    "text": "mat(block) -> Matrix\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.nparameters",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.nparameters",
+    "category": "function",
+    "text": "nparameters(x) -> Integer\n\nReturns the number of parameters of x.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.parameters",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.parameters",
+    "category": "function",
+    "text": "parameters(block) -> Vector\n\nReturns a list of all parameters in block.\n\n\n\n"
 },
 
 {
@@ -773,7 +837,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.hilbertkron",
     "category": "method",
-    "text": "hilbertkron(num_bit::Int, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix\n\nReturn general kronecher product form of gates in Hilbert space of num_bit qubits.\n\ngates are a list of single qubit gates.\nlocs should have the same length as gates, specifing the gates positions.\n\n\n\n"
+    "text": "hilbertkron(num_bit::Int, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix\n\nReturn general kronecher product form of gates in Hilbert space of num_bit qubits.\n\ngates are a list of matrices.\nstart_locs should have the same length as gates, specifing the gates starting positions.\n\n\n\n"
 },
 
 {
@@ -798,6 +862,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Intrinsics.neg",
     "category": "method",
     "text": "neg(index::Int, num_bit::Int) -> Int\n\nReturn an integer with all bits flipped (with total number of bit num_bit).\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.onehotvec-Union{Tuple{Type{T},Int64,Int64}, Tuple{T}} where T",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.onehotvec",
+    "category": "method",
+    "text": "onehotvec(::Type{T}, num_bit::Int, x::DInt) -> Vector{T}\n\none-hot wave vector.\n\n\n\n"
 },
 
 {
