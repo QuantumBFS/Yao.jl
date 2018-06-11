@@ -102,6 +102,11 @@ for op in [:(==)]
     end
 end
 
+"""
+    kron(lhs, rhs)
+
+Merge two registers together with kronecker tensor product.
+"""
 function kron(lhs::RT, rhs::AbstractRegister{B}) where {B, RT <: AbstractRegister{B}}
     register(RT, kron(state(rhs), state(lhs)), Int(B))
 end

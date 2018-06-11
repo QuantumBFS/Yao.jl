@@ -9,6 +9,11 @@ Quantum Algorithm Design. **Yao** (幺) is the Chinese character for unitary. It
 We aim to provide a powerful tool for researchers, students to study and explore quantum computing in near term
 future, before quantum computer being used in large-scale.
 
+
+```@docs
+Yao
+```
+
 ## Tutorial
 
 ```@contents
@@ -24,7 +29,12 @@ Depth = 1
 
 ```@contents
 Pages = [
-    "man/block.md",
+    "man/interfaces.md",
+    "man/registers.md",
+    "man/blocks.md",
     "man/cache.md",
+    "man/intrinsics.md",
+    "man/luxurysparse.md",
 ]
+Depth = 1
 ```

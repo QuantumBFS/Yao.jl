@@ -1,19 +1,3 @@
-function parse_block(n::Int, x::Pair{Int, BT}) where {BT <: MatrixBlock}
-    kron(n, x)
-end
-
-function parse_block(n::Int, x::Pair{I, BT}) where {I, BT <: MatrixBlock}
-    kron(n, i=>x.second for i in x.first)
-end
-
-function parse_block(n::Int, x::Pair{Int, BT}) where {BT <: ConstantGate}
-    repeat(n, x.second, [x.first, ])
-end
-
-function parse_block(n::Int, x::Pair{I, BT}) where {I, BT <: ConstantGate}
-    repeat(n, x.second, collect(x.first))
-end
-
 function parse_block(n::Int, x::Function)
     x(n)
 end
@@ -63,8 +47,6 @@ function chain(blocks::MatrixBlock{N}...) where N
     ChainBlock(collect(MatrixBlock{N}, blocks))
 end
 
-Base.getindex(::typeof(chain), xs...) = ChainBlock(xs...)
-
 # 2.2 kron block
 import Base: kron
 
@@ -74,14 +56,11 @@ import Base: kron
     kron(total, blocks...) -> KronBlock
     kron(total, iterator) -> KronBlock
 
-create a `KronBlock` with a list of blocks or tuple of heads and blocks.
+create a [`KronBlock`](@ref) with a list of blocks or tuple of heads and blocks.
 
 ## Example
-```julia
-block1 = Gate(X)
-block2 = Gate(Z)
-block3 = Gate(Y)
-KronBlock(block1, (3, block2), block3)
+```@example
+kron(4, X, 3=>Z, Y)
 ```
 This will automatically generate a block list looks like
 ```
@@ -103,6 +82,13 @@ kron(blocks) = N->KronBlock{N}(blocks)
 export C, control
 
 decode_sign(ctrls::Int...) = ctrls .|> abs, ctrls .|> sign .|> (x->(1+x)÷2)
+
+"""
+    control([total], controls, target) -> ControlBlock
+
+Constructs a [`ControlBlock`](@ref)
+"""
+function control end
 
 function control(total::Int, controls, target)
     ControlBlock{total}(decode_sign(controls...)..., target.second, target.first)
@@ -132,6 +118,14 @@ end
 
 export roll
 
+"""
+    roll([n], blocks...)
+
+Construct a [`Roller`](@ref) block, which is a faster way to calculate
+similar small blocks tile on the whole address.
+"""
+function roll end
+
 roll(n::Int, block::MatrixBlock) = Roller{n}(block)
 
 function roll(N::Int, blocks::MatrixBlock...)
@@ -145,6 +139,10 @@ roll(blocks::MatrixBlock...) = n->roll(n, blocks...)
 # 2.5 repeat
 
 import Base: repeat
+
+"""
+    repeat([n], pairs)
+"""
 repeat(n::Int, x::Pair{Int, <:MatrixBlock}) = RepeatedBlock{n}(x.second, [x.first])
 repeat(n::Int, x::MatrixBlock, lines) = RepeatedBlock{n}(x, lines)
 repeat(n::Int, x::MatrixBlock) = RepeatedBlock{n}(x)

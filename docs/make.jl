@@ -16,19 +16,17 @@ makedocs(
             "tutorial/QFT.md",
             "tutorial/QCBM.md",
         ],
-        # "Manual" => Any[
-        #     "man/blocks.md",
-        #     "man/cache.md",
-        #     "man/functional.md",
-        # ],
-        # "Developer Documentation" => Any[
-        #     "dev/block.md",
-        #     "dev/register.md",
-        #     "dev/cache.md",
-        #     "dev/visualization.md",
-        #     "dev/unittest.md",
-        #     "dev/APIs.md",
-        # ],
+        "Manual" => Any[
+            "man/interfaces.md",
+            "man/registers.md",
+            "man/blocks.md",
+            "man/cache.md",
+            "man/intrinsics.md",
+            "man/luxurysparse.md",
+        ],
+        "Developer Documentation" => Any[
+            "dev/extending-blocks.md"
+        ],
         # "Theoretical Notes" => Any[
         #     "theo/register.md",
         #     "theo/rotation.md",

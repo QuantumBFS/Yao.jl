@@ -12,14 +12,15 @@ The whole oracle looks like this:
 
 ```@example GHZ
 n = 4
-circuit = chain(
-    kron(n, 1=>X),
-    kron(n, i=>H for i in 2:n),
-    control(n, [2, ], X, 1),
-    control(n, [4, ], X, 3),
-    control(n, [3, ], X, 1),
-    control(n, [4, ], X, 3),
-    roll(n, H)
+circuit(n) = chain(
+    n,
+    kron(i=>H for i in 1:n),
+    control([4, ], 3=>X),
+    control([3, ], 1=>X),
+    control([4, ], 3=>X),
+    control([2, ], 1=>X),
+    kron(i=>H for i in 2:n),
+    repeat(1=>X),
 );
 ```
 
@@ -37,14 +38,14 @@ kron(n, 1=>X)
 Similar with `kron`, we then need to apply some controled gates.
 
 ```@example GHZ
-control(n, [2, ], X, 1)
+control(n, [2, ], 1=>X)
 ```
 
 This means there is a `X` gate on the first qubit that is controled by the second qubit. In fact,
 you can also create a controled gate with multiple control qubits, like
 
 ```@example GHZ
-control(n, [2, 3], X, 1)
+control(n, [2, 3], 1=>X)
 ```
 
 In the end, we need to apply `H` gate to all lines, of course, you can do it by `kron`,
@@ -64,7 +65,7 @@ input it into the oracle. You will then receive this register after
 processing it.
 
 ```@example GHZ
-r = circuit(register(bit"0000"))
+r = circuit(4) |> on(register(bit"0000"))
 r
 ```
 
@@ -77,7 +78,7 @@ statevec(r)
 We have a GHZ state here, try to measure the first qubit
 
 ```@example GHZ
-r |> measure(1)
+measure(1) |> on!(r)
 statevec(r)
 ```
 

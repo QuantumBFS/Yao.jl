@@ -1,6 +1,6 @@
-# Cache System
+# Intrinsics
 
 ```@autodocs
-Modules = [Yao.CacheServers]
+Modules = [Yao.Intrinsics]
 Order   = [:module, :constant, :type, :macro, :function]
 ```
