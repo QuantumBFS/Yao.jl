@@ -13,7 +13,7 @@ using ..CacheServers
 
 # import package APIs
 import ..Yao
-import ..Yao: DefaultType, datatype, nqubits, nactive
+import ..Yao: DefaultType, nqubits, nactive
 import ..Registers: focus!, relax!
 import ..Intrinsics: ishermitian, isunitary, isreflexive
 import ..CacheServers: update!, iscached, clear!, pull, iscacheable

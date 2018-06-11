@@ -28,6 +28,8 @@ export @bit_str, asindex
 
 include("BitStr.jl")
 include("Core.jl")
+include("Measure.jl")
+
 include("Default.jl")
 
 # NOTE: these two are not implemented

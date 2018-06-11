@@ -99,4 +99,17 @@ cache_key(x::NewPrimitive) = x.theta
 
 ## Extending Composite Blocks
 
-Composite blocks are blocks that are able to contain other blocks.
+Composite blocks are blocks that are able to contain other blocks. To define a new composite block
+you only need to define your new type as a subtype of [`CompositeBlock`](@ref), and define a new method
+called [`blocks`](@ref) which will provide an iterator that iterates the blocks contained by this composite
+block.
+
+## Custom Pretty Printing
+
+The whole quantum circuit is represented as a tree in the block system. Therefore, we print a block as a tree.
+To define your own syntax to print, simply overloads the [`print_block`](@ref) method. Then it will appears in
+the block tree syntax automatically.
+
+```julia
+print_block(io::IO, block::MyBlockType)
+```

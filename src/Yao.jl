@@ -30,15 +30,11 @@ include("LuxurySparse/LuxurySparse.jl")
 include("CacheServers/CacheServers.jl")
 
 include("Intrinsics/Intrinsics.jl")
-
 include("Registers/Registers.jl")
 include("Blocks/Blocks.jl")
-
 include("Boost/Boost.jl")
-
 include("Interfaces/Interfaces.jl")
 
 @reexport using .Interfaces
-@reexport using .Registers # TODO: move this to interfaces
 
 end # module

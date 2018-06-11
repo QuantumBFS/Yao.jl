@@ -17,12 +17,14 @@ makedocs(
             "tutorial/QCBM.md",
         ],
         "Manual" => Any[
+            "man/yao.md",
             "man/interfaces.md",
             "man/registers.md",
             "man/blocks.md",
             "man/cache.md",
             "man/intrinsics.md",
             "man/luxurysparse.md",
+            "man/boost.md",
         ],
         "Developer Documentation" => Any[
             "dev/extending-blocks.md"

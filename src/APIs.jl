@@ -1,17 +1,20 @@
-export nqubits, nactive, isunitary, isreflexive, nparameters, datatype, mat, dispatch!, nbatch
-
-# All exported methods and types docstring should be defined here.
+export nqubits, nactive
 
 """
     nqubits(m::AbstractRegister) -> Int
-number of qubits in a register,
+Returns number of qubits in a register,
 
     nqubits(m::AbstractBlock) -> Int
-number of qubits applied for a block,
+Returns number of qubits applied for a block,
 
     nqubits(m::AbstractArray) -> Int
-size of the first dimension of an array, in 2^nqubits.
+Returns size of the first dimension of an array, in 2^nqubits.
 """
 function nqubits end
+
+"""
+    nactive(x) -> Int
+
+Returns number of active qubits
+"""
 function nactive end
-function datatype end

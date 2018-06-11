@@ -29,6 +29,12 @@ end
 nparameters(x::MatrixBlock) = length(parameters(x))
 nparameters(::Type{X}) where {X <: MatrixBlock} = 0
 parameters(x::MatrixBlock) = ()
+
+"""
+    datatype(x) -> DataType
+
+Returns the data type of x.
+"""
 datatype(block::MatrixBlock{N, T}) where {N, T} = T
 
 include("BlockCache.jl")
