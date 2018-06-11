@@ -40,7 +40,6 @@ g = PhaseGate{Float64}(0.1)
 @test nqubits(g) == 1
 @test isreflexive(g) == false
 @test isunitary(g) == true
-@test ispure(g) == true
 @test ishermitian(g) == false
 end
 

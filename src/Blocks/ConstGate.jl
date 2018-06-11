@@ -14,6 +14,8 @@ Define a new constant gate.
 """
 :(@const_gate)
 
+copy(x::ConstantGate) = x
+
 @static if VERSION < v"0.7-"
     include("ConstGateTools.jl")
 else

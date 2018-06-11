@@ -84,6 +84,13 @@ function rot end
 rot(::Type{T}, U::GT, theta=0.0) where {T, GT} = RotationGate{real(T), GT}(U, theta)
 rot(U::MatrixBlock, theta=0.0) = rot(DefaultType, U, theta)
 
+"""
+    swap([n], [type], line1, line2) -> Swap
+
+Returns a swap gate on `line1` and `line2`
+"""
+function swap end
+
 swap(n::Int, ::Type{T}, line1::Int, line2::Int) where T = Swap{n, T}(line1, line2)
 swap(::Type{T}, line1::Int, line2::Int) where T = n -> swap(n, T, line1, line2)
 swap(n::Int, line1::Int, line2::Int) = Swap{n, DefaultType}(line1, line2)

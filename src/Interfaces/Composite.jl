@@ -148,3 +148,14 @@ repeat(n::Int, x::MatrixBlock, lines) = RepeatedBlock{n}(x, lines)
 repeat(n::Int, x::MatrixBlock) = RepeatedBlock{n}(x)
 repeat(x::MatrixBlock, params...) = n->repeat(n, x, params...)
 repeat(x::Pair) = n->repeat(n, x)
+
+
+export focus
+export concentrate
+
+"""
+    concentrate(orders...) -> Concentrator
+
+concentrate on serveral lines.
+"""
+concentrate(nbit::Int, block::AbstractBlock, orders::Vector{Int}) = Concentrator{nbit}(block, orders)

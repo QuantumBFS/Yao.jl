@@ -25,6 +25,11 @@ end
 DefaultRegister{B}(raw::Matrix{T}) where {B, T} = DefaultRegister{B, T}(raw)
 
 # register without batch
+"""
+    register(raw) -> DefaultRegister
+
+Returns a [`DefaultRegister`](@ref) from a raw dense array (`Vector` or `Matrix`).
+"""
 register(raw::Vector) = DefaultRegister{1}(reshape(raw, :, 1))
 register(raw::Matrix) = DefaultRegister{size(raw, 2)}(raw)
 

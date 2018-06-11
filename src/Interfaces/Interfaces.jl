@@ -1,18 +1,20 @@
 module Interfaces
 
+using Reexport
 using ..Registers
 using ..Blocks
 using ..CacheServers
 
-import ..Blocks: measure
-
 # import package configs
 import ..Yao: DefaultType
+
+@reexport using ..Registers
 
 # Macros
 export @const_gate
 
-export cache, update_cache, pull, iscached, iscacheable
+# Block APIs
+export mat, apply!
 
 include("Signal.jl")
 include("Primitive.jl")
@@ -20,7 +22,6 @@ include("Composite.jl")
 include("Measure.jl")
 include("Cache.jl")
 
-export concentrate
 export on, on!
 
 function apply_on!(r::AbstractRegister, block::AbstractBlock, params...; kwargs...)
@@ -50,14 +51,5 @@ configurations on this `register` in place.
 function on!(r::AbstractRegister, params...; kwargs...)
     x->apply_on!(r, x, params...; kwargs...)
 end
-
-export focus
-
-"""
-    concentrate(orders...) -> Concentrator
-
-concentrate on serveral lines.
-"""
-concentrate(nbit::Int, block::AbstractBlock, orders::Vector{Int}) = Concentrator{nbit}(block, orders)
 
 end

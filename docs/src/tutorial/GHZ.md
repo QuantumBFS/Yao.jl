@@ -78,8 +78,7 @@ statevec(r)
 We have a GHZ state here, try to measure the first qubit
 
 ```@example GHZ
-measure(1) |> on!(r)
-statevec(r)
+measure(r, 5)
 ```
 
 GHZ state will collapse to ``|0000\rangle`` or ``|1111\rangle`` due to entanglement!
