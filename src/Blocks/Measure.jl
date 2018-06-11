@@ -7,10 +7,6 @@ Abstract block supertype which measurement block will inherit from.
 """
 abstract type AbstractMeasure <: AbstractBlock end
 
-nqubits(::Type{T}) where {T <: AbstractMeasure} = AnySize
-nqubits(m::AbstractMeasure) = AnySize
-datatype(m::AbstractMeasure) = Bool
-
 export measure, measure!, measure_remove
 
 ####################

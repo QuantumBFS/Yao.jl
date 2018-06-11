@@ -8,16 +8,6 @@ qubits.
 """
 abstract type AbstractBlock end
 
-# This is something will be fixed in 1.x
-# see https://github.com/JuliaLang/julia/issues/14919
-# We will define a call for each concrete type
-# (block::T)(reg::AbstractRegister) where {T <: AbstractBlock} = apply!(reg, block)
-
-import Base: copy
-# only shallow copy by default
-# overload this when block contains parameters
-copy(x::AbstractBlock) = x
-
 """
     apply!(reg, block, [signal])
 
@@ -55,12 +45,18 @@ function parameters end
 
 """
     mat(block) -> Matrix
+
+Returns the matrix form of this block.
 """
 function mat end
-function dispatch! end
 
-dispatch!(block::AbstractBlock, params...) = dispatch!((θ, x)->x, block, params...)
-# FIXME: make this works in v0.7
+"""
+    dispatch!(block, params)
+    dispatch!(block, params...)
+
+dispatch parameters to this block.
+"""
+function dispatch! end
 
 """
     print_block(io, block)

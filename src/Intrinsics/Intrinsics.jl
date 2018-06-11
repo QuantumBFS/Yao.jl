@@ -31,4 +31,7 @@ include("MacroTools.jl")
 
 include("TupleTools.jl")
 
+export isunitary, isreflexive, ishermitian
+include("OperatorTraits.jl")
+
 end

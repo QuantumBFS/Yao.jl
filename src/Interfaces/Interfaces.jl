@@ -12,8 +12,6 @@ import ..Yao: DefaultType
 # Macros
 export @const_gate
 
-export cache, update_cache, pull, iscached, iscacheable
-
 include("Signal.jl")
 include("Primitive.jl")
 include("Composite.jl")

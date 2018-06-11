@@ -4,9 +4,8 @@ using Compat
 using Compat.Random
 using Compat.LinearAlgebra
 using Compat.SparseArrays
-using ..Intrinsics
 using StatsBase
-
+using ..Intrinsics
 
 import Base: length
 import Base: eltype, copy, similar, *
