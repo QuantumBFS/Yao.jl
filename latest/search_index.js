@@ -409,6 +409,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/registers/#Yao.Registers.Focus",
+    "page": "Registers",
+    "title": "Yao.Registers.Focus",
+    "category": "type",
+    "text": "Focus{N} <: AbatractBlock\n\nFocus manager, with N the number of qubits.\n\n\n\n"
+},
+
+{
     "location": "man/registers/#Yao.Registers.@bit_str-Tuple{Any}",
     "page": "Registers",
     "title": "Yao.Registers.@bit_str",
@@ -417,11 +425,43 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/registers/#Yao.Registers.extend!-Union{Tuple{B}, Tuple{T}, Tuple{Yao.Registers.DefaultRegister{B,T},Int64}} where T where B",
+    "page": "Registers",
+    "title": "Yao.Registers.extend!",
+    "category": "method",
+    "text": "extend!(r::DefaultRegister, n::Int) -> DefaultRegister\nextend!(n::Int) -> Function\n\nextend the register by n bits in state |0>. i.e. |psi> -> |000> ⊗ |psi>, extended bits have higher indices. If only an integer is provided, then perform lazy evaluation.\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.focus!",
+    "page": "Registers",
+    "title": "Yao.Registers.focus!",
+    "category": "function",
+    "text": "focus!(reg::DefaultRegister, bits::Ints) -> DefaultRegister\nfocus!(locs::Int...) -> Function\n\nFocus register on specified active bits.\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.focuspair!-Tuple{Vararg{Int64,N} where N}",
+    "page": "Registers",
+    "title": "Yao.Registers.focuspair!",
+    "category": "method",
+    "text": "focuspair(locs::Int...) -> NTuple{2, Function}\n\nReturn focus! and relax! function for specific lines.\n\n\n\n"
+},
+
+{
     "location": "man/registers/#Yao.Registers.hypercubic",
     "page": "Registers",
     "title": "Yao.Registers.hypercubic",
     "category": "function",
     "text": "hypercubic(r::AbstractRegister) -> AbstractArray\n\nReturn the hypercubic form (high dimensional tensor) of this register, only active qubits are considered.\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.isnormalized-Tuple{Yao.Registers.DefaultRegister}",
+    "page": "Registers",
+    "title": "Yao.Registers.isnormalized",
+    "category": "method",
+    "text": "isnormalized(reg::DefaultRegister) -> Bool\n\nReturn true if a register is normalized else false.\n\n\n\n"
 },
 
 {
@@ -454,6 +494,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Registers.register",
     "category": "method",
     "text": "register(raw) -> DefaultRegister\n\nReturns a DefaultRegister from a raw dense array (Vector or Matrix).\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.relax!",
+    "page": "Registers",
+    "title": "Yao.Registers.relax!",
+    "category": "function",
+    "text": "relax!(reg::DefaultRegister; nbit::Int=nqubits(reg)) -> DefaultRegister\nrelax!(reg::DefaultRegister, bits::Ints; nbit::Int=nqubits(reg)) -> DefaultRegister\nrelax!(bits::Ints...; nbit::Int=-1) -> Function\n\nInverse transformation of focus, with nbit is the number of active bits of target register.\n\n\n\n"
 },
 
 {
@@ -885,7 +933,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.basis",
     "category": "method",
-    "text": "basis(num_bit::Int) = UnitRange{Int}\n\nReturns the UnitRange for basis in Hilbert Space of num_bit qubits.\n\n\n\n"
+    "text": "basis(num_bit::Int) -> UnitRange{Int}\nbasis(state::AbstractArray) -> UnitRange{Int}\n\nReturns the UnitRange for basis in Hilbert Space of num_bit qubits. If an array is supplied, it will return a basis having the same size with the first diemension of array.\n\n\n\n"
 },
 
 {
@@ -921,11 +969,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.bitarray-Union{Tuple{Array{T,1}}, Tuple{T}} where T<:Number",
+    "location": "man/intrinsics/#Yao.Intrinsics.bitarray-Union{Tuple{Array{T,1},Int64}, Tuple{T}} where T<:Number",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.bitarray",
     "category": "method",
-    "text": "bitarray(v::Vector; num_bit::Int=64) -> BitArray\nbitarray(v::T; num_bit=bsizeof(T)) -> BitArray\n\nConstruct BitArray from an integer vector, the lazy non-efficient version.\n\n\n\n"
+    "text": "bitarray(v::Vector, [num_bit::Int]) -> BitArray\nbitarray(v::Int, num_bit::Int) -> BitArray\nbitarray(num_bit::Int) -> Function\n\nConstruct BitArray from an integer vector, if num_bit not supplied, it is 64. If an integer is supplied, it returns a function mapping a Vector/Int to bitarray.\n\n\n\n"
 },
 
 {
