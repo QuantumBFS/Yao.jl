@@ -27,28 +27,24 @@ using Yao.Intrinsics
 
     # bitarray version
     # b - bitarray and take bit
-    ba1_f = bitarray(ind)
+    ba1_f = bitarray(ind, 64)
     ba2_f = bitarray(inds)
-    ba3_f = bitarray(Int32.(inds))
-    # @test bsizeof(ind) == 64
+    ba3_f = bitarray(Int32.(inds), 32)
+    @test bsizeof(ind) == sizeof(Int)*8
     @test size(ba1_f) == (64,)
     @test size(ba2_f) == (64, 2)
-    @test Int.(ba2_f[1:32,:]) == Int.(ba3_f[1:32,:])
+    @test Int.(ba2_f[1:32,:]) == Int.(ba3_f)
 
-    ba1 = bitarray(ind, num_bit=4)
-    ba2 = bitarray(inds, num_bit=4)
+    ba1 = bitarray(ind, 4)
+    ba2 = bitarray(inds, 4)
     @test size(ba1) == (4,)
     @test size(ba2) == (4, 2)
+    @test ind |> bitarray(4) == ba1
+    @test inds |> bitarray(4) == ba2
 
     @test ba1[2, 1] == takebit(ind, 2)
     @test ba1[[3, 2], 1] == takebit.(ind, [3, 2])
     @test ba2[2,:] == takebit.([ind, 2], 2)
-
-    # b - flip
-    #@test flipbits!(bitarray(12), 1) == 13
-    #@test flipbits!(bitarray(12), [1, 3]) == 9
-    #@test flipbits!(bitarray([12, 2]), 2) == [14, 0]
-    #@test flipbits!(bitarray([12, 2]), [2, 1]) == [15, 1]
 end
 
 @testset "SwapBits" begin
@@ -58,11 +54,11 @@ end
 
 @testset "EasyBasis" begin
     @test bdistance(1,7) == 2
-    @test bitarray(2, num_bit=4) == [false, true, false, false]
+    @test bitarray(2, 4) == [false, true, false, false]
     @test packbits(BitArray([true, true, true])) == 7
 
-    @test packbits(bitarray(3, num_bit=10)) == 3
-    @test packbits(bitarray([5,3,7,21], num_bit=10)) == [5, 3, 7, 21]
+    @test packbits(bitarray(3, 10)) == 3
+    @test packbits(bitarray([5,3,7,21], 10)) == [5, 3, 7, 21]
 end
 
 @testset "State Utilities" begin

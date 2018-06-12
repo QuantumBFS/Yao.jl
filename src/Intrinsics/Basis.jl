@@ -3,9 +3,11 @@ const Ints = Union{Vector{Int}, Int, UnitRange{Int}}
 const DInts = Union{Vector{DInt}, DInt, UnitRange{DInt}}
 
 """
-    basis(num_bit::Int) = UnitRange{Int}
+    basis(num_bit::Int) -> UnitRange{Int}
+    basis(state::AbstractArray) -> UnitRange{Int}
 
 Returns the UnitRange for basis in Hilbert Space of num_bit qubits.
+If an array is supplied, it will return a basis having the same size with the first diemension of array.
 """
 basis(num_bit::Int) = UnitRange{DInt}(0, 1<<num_bit-1)
 basis(state::AbstractArray)::UnitRange{DInt} = UnitRange{DInt}(0, size(state, 1)-1)
@@ -14,12 +16,14 @@ basis(state::AbstractArray)::UnitRange{DInt} = UnitRange{DInt}(0, size(state, 1)
 ########## BitArray views ###################
 import Base: BitArray
 """
-    bitarray(v::Vector; num_bit::Int=64) -> BitArray
-    bitarray(v::T; num_bit=bsizeof(T)) -> BitArray
+    bitarray(v::Vector, [num_bit::Int]) -> BitArray
+    bitarray(v::Int, num_bit::Int) -> BitArray
+    bitarray(num_bit::Int) -> Function
 
-Construct BitArray from an integer vector, the lazy non-efficient version.
+Construct BitArray from an integer vector, if num_bit not supplied, it is 64.
+If an integer is supplied, it returns a function mapping a Vector/Int to bitarray.
 """
-function bitarray(v::Vector{T}; num_bit::Int=64) where T<:Number
+function bitarray(v::Vector{T}, num_bit::Int)::BitArray{2} where T<:Number
     #ba = BitArray{2}(0, 0)
     ba = BitArray(0, 0)
     ba.len = 64*length(v)
@@ -28,7 +32,7 @@ function bitarray(v::Vector{T}; num_bit::Int=64) where T<:Number
     view(ba, 1:num_bit, :)
 end
 
-function bitarray(v::Vector{T}) where T<:Union{UInt64, Int64}
+function bitarray(v::Vector{T})::BitArray{2} where T<:Union{UInt64, Int64}
     #ba = BitArray{2}(0, 0)
     ba = BitArray(0, 0)
     ba.len = 64*length(v)
@@ -37,7 +41,8 @@ function bitarray(v::Vector{T}) where T<:Union{UInt64, Int64}
     ba
 end
 
-bitarray(v::T; num_bit=64) where T<:Number = vec(bitarray([v], num_bit=num_bit))
+bitarray(v::Number, num_bit::Int)::BitArray{1} = vec(bitarray([v], num_bit))
+bitarray(nbit::Int) = x->bitarray(x, nbit)
 
 """
     packbits(arr::AbstractArray) -> AbstractArray
