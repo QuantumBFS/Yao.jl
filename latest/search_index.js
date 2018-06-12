@@ -297,7 +297,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Base.repeat-Tuple{Int64,Pair{Int64,#s410} where #s410<:Yao.Blocks.MatrixBlock}",
+    "location": "man/interfaces/#Base.repeat-Tuple{Int64,Pair{Int64,#s415} where #s415<:Yao.Blocks.MatrixBlock}",
     "page": "Interfaces",
     "title": "Base.repeat",
     "category": "method",
@@ -693,7 +693,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.Roller",
     "category": "type",
-    "text": "Roller{N, M, T, BT} <: CompositeBlock{N, T}\n\nmap a block type to all lines and use a rolling method to evaluate them.\n\nTODO\n\nfill identity like KronBlock\n\n\n\n"
+    "text": "Roller{N, T, BT} <: CompositeBlock{N, T}\n\nmap a block type to all lines and use a rolling method to evaluate them.\n\nTODO\n\nfill identity like KronBlock -> To interface.\n\n\n\n"
 },
 
 {
@@ -777,30 +777,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.cache_key",
-    "page": "Blocks System",
-    "title": "Yao.Blocks.cache_key",
-    "category": "function",
-    "text": "cache_key(block)\n\nReturns the key that identify the matrix cache of this block. By default, we use the returns of parameters as its key.\n\n\n\n"
-},
-
-{
-    "location": "man/blocks/#Yao.Blocks.cache_type-Tuple{Type{#s21} where #s21<:Yao.Blocks.MatrixBlock}",
-    "page": "Blocks System",
-    "title": "Yao.Blocks.cache_type",
-    "category": "method",
-    "text": "cache_type(::Type) -> DataType\n\nA type trait that defines the element type that a CacheFragment will use.\n\n\n\n"
-},
-
-{
-    "location": "man/blocks/#Yao.Blocks.print_block-Tuple{IO,Any}",
-    "page": "Blocks System",
-    "title": "Yao.Blocks.print_block",
-    "category": "method",
-    "text": "print_block(io, block)\n\ndefine the style to print this block\n\n\n\n"
-},
-
-{
     "location": "man/blocks/#Yao.Intrinsics.isreflexive",
     "page": "Blocks System",
     "title": "Yao.Intrinsics.isreflexive",
@@ -814,6 +790,30 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Intrinsics.isunitary",
     "category": "function",
     "text": "isunitary(x) -> Bool\n\nTest whether this operator is unitary.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.cache_key",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.cache_key",
+    "category": "function",
+    "text": "cache_key(block)\n\nReturns the key that identify the matrix cache of this block. By default, we use the returns of parameters as its key.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.cache_type-Tuple{Type{#s24} where #s24<:Yao.Blocks.MatrixBlock}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.cache_type",
+    "category": "method",
+    "text": "cache_type(::Type) -> DataType\n\nA type trait that defines the element type that a CacheFragment will use.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.print_block-Tuple{IO,Any}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.print_block",
+    "category": "method",
+    "text": "print_block(io, block)\n\ndefine the style to print this block\n\n\n\n"
 },
 
 {
@@ -1185,11 +1185,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/luxurysparse/#Yao.LuxurySparse.mulrow",
+    "location": "man/luxurysparse/#Yao.LuxurySparse.mulrow!",
     "page": "LuxurySparse",
-    "title": "Yao.LuxurySparse.mulrow",
+    "title": "Yao.LuxurySparse.mulrow!",
     "category": "function",
-    "text": "mulrow(v::VecOrMat, i::Int, f) -> VecOrMat\n\nmulrow row i by f.\n\n\n\n"
+    "text": "mulrow!(v::VecOrMat, i::Int, f) -> VecOrMat\n\nmultiply row i by f.\n\n\n\n"
+},
+
+{
+    "location": "man/luxurysparse/#Yao.LuxurySparse.notdense",
+    "page": "LuxurySparse",
+    "title": "Yao.LuxurySparse.notdense",
+    "category": "function",
+    "text": "notdense(M) -> Bool\n\nReturn true if a matrix is not dense.\n\nNote: It is not exactly same as isparse, e.g. Diagonal, IMatrix and PermMatrix are both notdense but not isparse.\n\n\n\n"
 },
 
 {
@@ -1201,11 +1209,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/luxurysparse/#Yao.LuxurySparse.swaprows",
+    "location": "man/luxurysparse/#Yao.LuxurySparse.swaprows!",
     "page": "LuxurySparse",
-    "title": "Yao.LuxurySparse.swaprows",
+    "title": "Yao.LuxurySparse.swaprows!",
     "category": "function",
-    "text": "swaprows(v::VecOrMat, i::Int, j::Int, [f1, f2]) -> VecOrMat\n\nSwap two rows i and j of a matrix/vector, f1 and f2 are two factors applied on i-th and j-th element of input matrix/vector, default is 1.\n\n\n\n"
+    "text": "swaprows!(v::VecOrMat, i::Int, j::Int, [f1, f2]) -> VecOrMat\n\nSwap two rows i and j of a matrix/vector, f1 and f2 are two factors applied on i-th and j-th element of input matrix/vector, default is 1.\n\n\n\n"
 },
 
 {
@@ -1257,7 +1265,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s408,1} where #s408<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s407,1} where #s407<:(AbstractArray{T,2} where T),Array{Int64,1}}",
+    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s413,1} where #s413<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s412,1} where #s412<:(AbstractArray{T,2} where T),Array{Int64,1}}",
     "page": "Boost",
     "title": "Yao.Boost.general_controlled_gates",
     "category": "method",
