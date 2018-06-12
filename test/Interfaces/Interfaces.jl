@@ -37,9 +37,7 @@ end
 
 @testset "roll" begin
     @test roll(4, X) isa Roller
-    @test roll(X)(4) isa Roller
-    @test roll(X, Y, Z)(5) isa Roller
-    @test roll(X)(4) isa Roller
+    @test roll(X, Y, Z) isa Roller
 end
 
 @testset "measure" begin

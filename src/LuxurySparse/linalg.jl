@@ -90,6 +90,7 @@ end
 # NOTE: this is just a temperory fix for v0.7. We should overload mul! in
 # the future (when we start to drop v0.6) to enable buildin lazy evaluation.
 
+#=
 for MTYPE in [PermMatrix, IMatrix]
 
     @eval begin
@@ -119,8 +120,25 @@ for MTYPE in [PermMatrix, IMatrix]
         end
 
     end
-
 end # ex
+=#
+
+*(x::Adjoint{<:Any,<:AbstractVector}, D::PermMatrix) = RowVector(conj(parent(x)))*D
+*(x::Transpose{<:Any,<:AbstractVector}, D::PermMatrix) = RowVector(parent(x))*D
+*(A::Adjoint{<:Any,<:AbstractArray}, D::PermMatrix) = Adjoint(adjoint(D)*parent(A))
+*(A::Transpose{<:Any,<:AbstractArray}, D::PermMatrix) = Transpose(transpose(D)*parent(A))
+*(A::Adjoint{<:Any,<:PermMatrix}, D::PermMatrix) = adjoint(parent(A))*D
+*(A::Transpose{<:Any,<:PermMatrix}, D::PermMatrix) = transpose(parent(A))*D
+*(A::PermMatrix, D::Adjoint{<:Any,<:PermMatrix}) = A*adjoint(parent(D))
+*(A::PermMatrix, D::Transpose{<:Any,<:PermMatrix}) = A*transpose(parent(D))
+
+############### Transpose, Adjoint for IMatrix ###############
+for MAT in [:AbstractArray, :AbstractVector, :PermMatrix, :IMatrix]
+    @eval *(x::Adjoint{<:Any,<:$MAT}, D::IMatrix) = Adjoint(D*parent(x))
+    @eval *(x::Transpose{<:Any,<:$MAT}, D::IMatrix) = Transpose(D*parent(x))
+end
+*(A::IMatrix, D::Transpose{<:Any,<:IMatrix}) = A*D
+*(A::IMatrix, D::Adjoint{<:Any,<:IMatrix}) = A*D
 
 end
 

@@ -112,17 +112,23 @@ end
 done(k::KronBlock, st) = st > length(k)
 eltype(k::KronBlock) = Tuple{Int, MatrixBlock}
 length(k::KronBlock) = length(k.blocks)
+isunitary(k::KronBlock) = all(isunitary, k.blocks)
+ishermitian(k::KronBlock) = all(ishermitian, k.blocks)
+isreflexive(k::KronBlock) = all(isreflexive, k.blocks)
 
 ###############
 eachindex(k::KronBlock) = k.addrs
 
 function mat(k::KronBlock{N}) where N
-    locs = N - addrs(k) + 1
-    order = sortperm(locs)
-    num_bit_list = diff(vcat([0], locs[order], [N+1])) - 1
-
+    sizes = [op |> nqubits for op in k.blocks]
+    start_locs = N - k.addrs - sizes + 1
+    
+    order = sortperm(start_locs)
+    sorted_start_locs = start_locs[order]
+    num_bit_list = vcat(diff(push!(sorted_start_locs, N)) .- sizes)
+ 
     ⊗ = kron
-    reduce(IMatrix(1 << num_bit_list[1]), zip(blocks(k)[order], num_bit_list[2:end])) do x, y
+    reduce(IMatrix(1 << sorted_start_locs[1]), zip(k.blocks[order], num_bit_list)) do x, y
         x ⊗ mat(y[1]) ⊗ IMatrix(1<<y[2])
     end
 end

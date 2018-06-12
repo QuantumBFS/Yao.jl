@@ -52,7 +52,7 @@ end
 
 function cache(server::AbstractCacheServer, block::Roller, level::Int; recursive::Bool=false)
     if recursive
-        roller = Roller{N, T}(ntuple(x->cache(server, block[x], level, recursive=recursive), Val(M))...)
+        roller = Roller{T}(ntuple(x->cache(server, block[x], level, recursive=recursive), Val(M))...)
     else
         roller = block
     end
