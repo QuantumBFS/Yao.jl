@@ -71,39 +71,29 @@ function probs(r::DefaultRegister{B}) where B
     end
 end
 
-#############################################
-#            focus! and relax!
-##############################################
-Ints = Union{Vector{Int}, UnitRange{Int}, Int, NTuple}
-move_ahead(ndim::Int, head::Ints) = vcat(head, setdiff(1:ndim, head))
+"""
+    extend!(r::DefaultRegister, n::Int) -> DefaultRegister
+    extend!(n::Int) -> Function
 
-function group_permutedims(arr::AbstractArray, order::Vector{Int})
-    nshape, norder = shapeorder(size(arr), order)
-    permutedims(reshape(arr, nshape...), norder)
+extend the register by n bits in state |0>.
+i.e. |psi> -> |000> ⊗ |psi>, extended bits have higher indices.
+If only an integer is provided, then perform lazy evaluation.
+"""
+function extend!(r::DefaultRegister{B, T}, n::Int) where {B, T}
+    mat = r.state
+    M, N = size(mat)
+    r.state = zeros(T, M*(1<<n), N)
+    r.state[1:M, :] = mat
+    r
 end
 
-function focus!(reg::DefaultRegister{B}, bits::Ints) where B
-    nbit = nactive(reg)
-    if all(bits .== 1:length(bits))
-        arr = reg.state
-    else
-        norder = move_ahead(nbit+1, bits)
-        arr = group_permutedims(reg |> hypercubic, norder)
-    end
-    reg.state = reshape(arr, :, (1<<(nbit-length(bits)))*B)
-    reg
-end
+extend!(n::Int) = r->extend!(r, n)
 
-function relax!(reg::DefaultRegister{B}, bits::Ints, nbit::Int=nqubits(reg)) where B
-    reg.state = reshape(reg.state, 1<<nbit, :)
-    if any(bits .!= 1:length(bits))
-        norder = move_ahead(nbit+1, bits) |> invperm
-        reg.state = reshape(group_permutedims(reg |> hypercubic, norder), 1<<nbit, :)
-    end
-    reg
-end
+"""
+    isnormalized(reg::DefaultRegister) -> Bool
 
-relax!(reg::DefaultRegister, nbit::Int=nqubits(reg)) = relax!(reg, Int[], nbit)
+Return true if a register is normalized else false.
+"""
 isnormalized(reg::DefaultRegister) = all(sum(copy(reg) |> relax! |> probs, 1) .≈ 1)
 
 """

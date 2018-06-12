@@ -22,7 +22,7 @@ eltype(::Concentrator{N, T}) where {N, T}= T
 nactive(c::Concentrator) = length(c.address)
 address(c::Concentrator) = c.address
 
-apply!(reg::AbstractRegister, c::Concentrator) = relax!(apply!(focus!(reg, address(c)), c.block), address(c), nqubits(c))
+apply!(reg::AbstractRegister, c::Concentrator) = relax!(apply!(focus!(reg, address(c)), c.block), address(c), nbit=nqubits(c))
 
 for FUNC in [:isunitary, :isreflexive, :ishermitian]
     @eval $FUNC(c::Concentrator) = $FUNC(c.block)

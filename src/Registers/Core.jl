@@ -88,7 +88,7 @@ eltype(r::AbstractRegister{B, T}) where {B, T} = T
 
 basis(r::AbstractRegister) = basis(nqubits(r))
 
-import Base: +, -, kron, ==, !=
+import Base: +, -, kron, ==, ≈
 
 for op in [:+, :-]
     @eval function ($op)(lhs::RT, rhs::RT) where {RT <: AbstractRegister}
@@ -96,7 +96,7 @@ for op in [:+, :-]
     end
 end
 
-for op in [:(==)]
+for op in [:(==), :≈]
     @eval function ($op)(lhs::RT, rhs::RT) where RT <: AbstractRegister
         ($op)(state(lhs), state(rhs))
     end
@@ -133,3 +133,20 @@ function statevec end
 Return the hypercubic form (high dimensional tensor) of this register, only active qubits are considered.
 """
 function hypercubic end
+
+"""
+    relax!(reg::DefaultRegister; nbit::Int=nqubits(reg)) -> DefaultRegister
+    relax!(reg::DefaultRegister, bits::Ints; nbit::Int=nqubits(reg)) -> DefaultRegister
+    relax!(bits::Ints...; nbit::Int=-1) -> Function
+
+Inverse transformation of focus, with nbit is the number of active bits of target register.
+"""
+function relax! end
+
+"""
+    focus!(reg::DefaultRegister, bits::Ints) -> DefaultRegister
+    focus!(locs::Int...) -> Function
+
+Focus register on specified active bits.
+"""
+function focus! end

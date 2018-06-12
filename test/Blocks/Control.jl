@@ -81,4 +81,9 @@ end
     @test mat(g) ≈ op
 end
 
+@testset "control two-bit gate" begin
+    g = ControlBlock{3}((3, ), CNOT, 1)
+    @test mat(g) ≈ mat(Toffoli)
+end
+
 end # control matrix form

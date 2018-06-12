@@ -6,4 +6,5 @@ using Compat.SparseArrays
 
 @testset "default register" begin
     include("Default.jl")
+    include("Focus.jl")
 end
