@@ -128,13 +128,10 @@ function roll end
 
 roll(n::Int, block::MatrixBlock) = Roller{n}(block)
 
-function roll(N::Int, blocks::MatrixBlock...)
+function roll(blocks::MatrixBlock...)
     T = promote_type([datatype(each) for each in blocks]...)
-    @assert N >= sum(x->nqubits(x), blocks) "total number of qubits is not enough"
-    Roller{N, T}(blocks)
+    Roller{T}(blocks)
 end
-
-roll(blocks::MatrixBlock...) = n->roll(n, blocks...)
 
 # 2.5 repeat
 

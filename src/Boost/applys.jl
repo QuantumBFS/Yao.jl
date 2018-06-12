@@ -10,7 +10,7 @@ function xapply!(state::VecOrMat{T}, bits::Ints) where T
         @inbounds if testany(b, do_mask)
             i = b+1
             i_ = flip(b, mask) + 1
-            swaprows(state, i, i_)
+            swaprows!(state, i, i_)
         end
     end
     state
@@ -36,7 +36,7 @@ function yapply!(state::VecOrMat{T}, bits::Ints) where T
             i_ = flip(b, mask) + 1
             factor1 = count_ones(b&mask)%2 == 1 ? -factor : factor
             factor2 = factor1*bit_parity
-            swaprows(state, i, i_, factor2, factor1)
+            swaprows!(state, i, i_, factor2, factor1)
         end
     end
     state
@@ -46,7 +46,7 @@ function zapply!(state::VecOrMat{T}, bits::Ints) where T
     mask = bmask(bits...)
     for b in basis(state)
         if count_ones(b&mask)%2==1
-            mulrow(state, b+1, -1)
+            mulrow!(state, b+1, -1)
         end
     end
     state
@@ -56,7 +56,7 @@ function zapply!(state::VecOrMat{T}, bit::Int) where T
     mask = bmask(bit)
     @simd for b in basis(state)
         if testany(b, mask)
-            mulrow(state, b+1, -1)
+            mulrow!(state, b+1, -1)
         end
     end
     state
@@ -68,7 +68,7 @@ function czapply!(state::VecOrMat{T}, cbits, cvals, b2::Int) where T
     c = controller([cbits..., b2[1]], [cvals..., 1])
     @simd for b = basis(state)
         if b |> c
-            mulrow(state, b+1, -1)
+            mulrow!(state, b+1, -1)
         end
     end
     state
@@ -82,7 +82,7 @@ function cyapply!(state::VecOrMat{T}, cbits, cvals, b2::Int) where T
         if b |> c
             i = b+1
             i_ = flip(b, mask2) + 1
-            swaprows(state, i, i_, im, -im)
+            swaprows!(state, i, i_, im, -im)
         end
     end
     state
@@ -98,7 +98,7 @@ function cxapply!(state::VecOrMat{T}, cbits, cvals, b2) where T
         if b |> c
             i = b+1
             i_ = flip(b, mask2) + 1
-            swaprows(state, i, i_)
+            swaprows!(state, i, i_)
         end
     end
     state
@@ -114,7 +114,7 @@ function czapply!(state::VecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
     for j = start:step_2:size(state, 1)-step+start
         @simd for i = j+1:j+step
             if testall(i-1, mask2)
-                mulrow(state, i, -1)
+                mulrow!(state, i, -1)
             end
         end
     end
@@ -139,7 +139,7 @@ function cyapply!(state::VecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
                 else
                     factor = T(-im)
                 end
-                swaprows(state, i, i_, -factor, factor)
+                swaprows!(state, i, i_, -factor, factor)
             end
         end
     end
@@ -159,7 +159,7 @@ function cxapply!(state::VecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
             @inbounds if testall(b, mask2)
                 i = b+1
                 i_ = flip(b, mask2) + 1
-                swaprows(state, i, i_)
+                swaprows!(state, i, i_)
             end
         end
     end

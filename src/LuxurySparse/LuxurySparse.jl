@@ -10,8 +10,8 @@ import Compat.LinearAlgebra: ishermitian
 import Compat.SparseArrays: SparseMatrixCSC, nnz, nonzeros, dropzeros!
 import Base: getindex, size, similar, copy, show
 
-export PermMatrix, pmrand, IMatrix, I, fast_invperm
-export swaprows, mulrow, matvec
+export PermMatrix, pmrand, IMatrix, I, fast_invperm, notdense
+export swaprows!, mulrow!, matvec, mulcol!, swapcols!
 
 include("Core.jl")
 include("IMatrix.jl")

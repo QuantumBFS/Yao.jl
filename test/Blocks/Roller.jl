@@ -5,45 +5,46 @@ using Compat.SparseArrays
 
 using Yao
 using Yao.Blocks
+using Yao.Intrinsics
 
 @testset "constructor" begin
-    g = Roller{5, ComplexF64}(X(), kron(2, X(), Y()), Z(), Z())
-    @test isa(g, Roller{5, 4, ComplexF64})
+    g = Roller{ComplexF64}(X(), kron(2, X(), Y()), Z(), Z())
+    @test isa(g, Roller{5, ComplexF64})
 
     src = phase(0.1)
     g = Roller{4}(src)
-    g[1].theta = 0.2
+    g.blocks[1].theta = 0.2
     @test src.theta == 0.1
-    @test g[2].theta == 0.1
+    @test g.blocks[2].theta == 0.1
 end
 
 @testset "copy" begin
     g = Roller{4}(phase(0.1))
     cg = copy(g)
 
-    cg[1].theta = 1.0
-    @test g[1].theta == 0.1
+    cg.blocks[1].theta = 1.0
+    @test g.blocks[1].theta == 1.0
 end
 
 @testset "setindex" begin
     g = Roller{4}(phase(0.1))
-    @test_throws MethodError g[1] = X()
+    @test_throws MethodError g.blocks[1] = X()
 end
 
 @testset "iteration" begin
     g = Roller{5}(phase(0.1))
-    for each in g
+    for each in g.blocks
         @test each.theta == 0.1
     end
 
-    g = Roller{5, ComplexF64}(X(), kron(2, X(), Y()), Z(), Z())
+    g = Roller{ComplexF64}(X(), kron(2, X(), Y()), Z(), Z())
     list = [X(), kron(2, X(), Y()), Z(), Z()]
-    for (src, tg) in zip(g, list)
+    for (src, tg) in zip(g.blocks, list)
         @test src == tg
     end
 
-    for i in eachindex(g)
-        @test g[i] == list[i]
+    for i in eachindex(g.blocks)
+        @test g.blocks[i] == list[i]
     end
 end
 
@@ -54,21 +55,22 @@ g = Roller{5}(X())
 end
 
 @testset "roll multiple blocks" begin
-g = Roller{5, ComplexF64}((X(), Y(), Z(), X(), X()))
+g = Roller{ComplexF64}((X(), Y(), Z(), X(), X()))
 tg = kron(5, X(), Y(), Z(), X(), X())
 @test state(apply!(register(bit"11111"), g)) == state(apply!(register(bit"11111"), tg))
 @test state(apply!(register(bit"11111", 3), g)) == state(apply!(register(bit"11111", 3), tg))
 end
 
 @testset "matrix" begin
-g = Roller{5, ComplexF64}((X(), Y(), Z(), X(), X()))
-tg = kron(5, X(), Y(), Z(), X(), X())
-@test mat(g) == mat(tg)
+    g = Roller{ComplexF64}((X, kron(2, Y, Z), X, X))
+    tg = kron(5, X, Y, Z, X, X)
+    @test mat(g) == mat(tg)
+    @test linop2dense(r->apply!(register(r), g) |> statevec, 5) == mat(tg)
 end
 
 @testset "traits" begin
-g = Roller{5, ComplexF64}(X(), kron(2, X(), Y()), Z(), Z())
-@test eltype(g) == eltype(g.blocks)
-@test length(g) == 4
+g = Roller{ComplexF64}(X(), kron(2, X(), Y()), Z(), Z())
 @test isunitary(g) == true
+@test isreflexive(g) == true
+@test ishermitian(g) == true
 end

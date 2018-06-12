@@ -27,6 +27,7 @@ export update_cache
 export address, blocks, @const_gate
 export nqubits, nactive, nparameters, mat, datatype, parameters
 export apply!, dispatch!
+export ishermitian, isunitary, isreflexive
 
 include("Core.jl")
 include("MatrixBlock.jl")

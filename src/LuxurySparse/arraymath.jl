@@ -1,12 +1,12 @@
 import Base: conj, copy, real, ctranspose, imag
-import Compat.LinearAlgebra: transpose, transpose!, ctranspose!
+import Compat.LinearAlgebra: transpose, transpose!, ctranspose!, adjoint!, adjoint
 
 
 # IMatrix
-for func in (:conj, :real, :ctranspose, :transpose, :copy)
+for func in (:conj, :real, :ctranspose, :transpose, :adjoint, :copy)
     @eval ($func)(M::IMatrix{N, T}) where {N, T} = IMatrix{N, T}()
 end
-for func in (:ctranspose!, :transpose!)
+for func in (:ctranspose!, :adjoint!, :transpose!)
     @eval ($func)(M::IMatrix) = M
 end
 imag(M::IMatrix{N, T}) where {N, T} = Diagonal(zeros(T,N))

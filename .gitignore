@@ -12,3 +12,4 @@ docs/site/
 *.dat
 **/*.dat
 **/**/*.dat
+*.swp

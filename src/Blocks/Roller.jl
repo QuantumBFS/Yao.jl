@@ -1,74 +1,51 @@
 export Roller
 
 """
-    Roller{N, M, T, BT} <: CompositeBlock{N, T}
+    Roller{N, T, BT} <: CompositeBlock{N, T}
 
 map a block type to all lines and use a rolling
 method to evaluate them.
 
 ## TODO
 
-fill identity like `KronBlock`
+fill identity like `KronBlock` -> To interface.
 """
-struct Roller{N, M, T, BT <: Tuple} <: CompositeBlock{N, T}
+struct Roller{N, T, BT <: Tuple} <: CompositeBlock{N, T}
     blocks::BT
-
-    function Roller{N, T}(blocks::Tuple) where {N, T}
-        M = length(blocks)
-        new{N, M, T, typeof(blocks)}(blocks)
-    end
-
-    function Roller{N, T}(blocks::MatrixBlock...) where {N, T}
-        Roller{N, T}(blocks)
-    end
-
-    function Roller{N}(block::MatrixBlock{K, T}) where {N, K, T}
-        M = Int(N / K)
-        new{N, M, T, NTuple{M, typeof(block)}}(ntuple(x->deepcopy(block), Val(M)))
+    function Roller{N, T, BT}(blocks::BT) where {N, T, BT}
+        sum(nqubits, blocks) == N || throw("Size of blocks does not match roller size.")
+        new{N, T, BT}(blocks)
     end
 end
 
-function copy(m::Roller{N, M, T, BT}) where {N, M, T, BT}
-    Roller{N, T}(ntuple(x->copy(m.blocks[x]), Val(M)))
+Roller{T}(blocks::Tuple) where T = Roller{sum(nqubits, blocks), T, typeof(blocks)}(blocks)
+Roller{T}(blocks::MatrixBlock...) where T = Roller{T}(blocks)
+
+function Roller{N}(block::MatrixBlock{K, T}) where {N, K, T}
+    Roller{N, T, NTuple{N÷K, typeof(block)}}(ntuple(x->deepcopy(block), Val(N÷K)))
 end
 
-getindex(m::Roller, i) = getindex(m.blocks, i)
-start(m::Roller) = start(m.blocks)
-next(m::Roller, st) = next(m.blocks, st)
-done(m::Roller, st) = done(m.blocks, st)
-eltype(m::Roller) = eltype(m.blocks)
-length(m::Roller) = length(m.blocks)
-eachindex(m::Roller) = eachindex(m.blocks)
+copy(m::Roller) = typeof(m)(m.blocks)
+
 blocks(m::Roller) = m.blocks
-
 isunitary(m::Roller) = all(isunitary, m.blocks)
+ishermitian(m::Roller) = all(ishermitian, m.blocks)
+isreflexive(m::Roller) = all(isreflexive, m.blocks)
 
-function mat(m::Roller{N, M}) where {N, M}
-    op = mat(first(m.blocks))
-    for i=2:M
-        op = kron(mat(m.blocks[i]), op)
-    end
+⊗ = kron
+mat(m::Roller) = mapreduce(blk->mat(blk), ⊗, m.blocks[end:-1:1])
 
-    return op
-end
-
-function apply!(reg::AbstractRegister{B}, m::Roller{N, M}) where {B, N, M}
-    K = N ÷ M
-    st = reshape(reg.state, 1<<K, (1<<(N - 1)) * B)
-
-    for i = 1:M
-        st .= mat(m.blocks[i]) * st
-        # directly use this to register
-        # is dangerous, be careful, you have
-        # to finish exactly M times, or the
-        # address of each qubit will not match
-        # the value of state
+function apply!(reg::AbstractRegister{B}, m::Roller{N}) where {B, N}
+    st = reg.state
+    for block in m.blocks
+        K = nqubits(block)
+        st[:] = vec(mat(block) * reshape(st, 1<<K, :))
         rolldims!(Val(K), Val(N), Val(B), statevec(reg))
     end
     reg
 end
 
-==(lhs::Roller{N, M, T, BT}, rhs::Roller{N, M, T, BT}) where {N, M, T, BT} = lhs.blocks == rhs.blocks
+==(lhs::Roller{N, T, BT}, rhs::Roller{N, T, BT}) where {N, T, BT} = lhs.blocks == rhs.blocks
 
 function hash(R::Roller, h::UInt)
     hashkey = hash(objectid(R), h)
@@ -78,8 +55,8 @@ function hash(R::Roller, h::UInt)
     hashkey
 end
 
-function cache_key(R::Roller{N, M}) where {N, M}
-    ntuple(k->cache_key(R.blocks[k]), Val(M))
+function cache_key(R::Roller)
+    ntuple(k->cache_key(R.blocks[k]), Val(R.blocks |> length))
 end
 
 function print_block(io::IO, x::Roller)
