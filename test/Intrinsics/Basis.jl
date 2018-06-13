@@ -28,7 +28,7 @@ using Yao.Intrinsics
     # bitarray version
     # b - bitarray and take bit
     ba1_f = bitarray(ind, 64)
-    ba2_f = bitarray(inds)
+    ba2_f = bitarray(Int64.(inds))
     ba3_f = bitarray(Int32.(inds), 32)
     @test bsizeof(ind) == sizeof(Int)*8
     @test size(ba1_f) == (64,)
