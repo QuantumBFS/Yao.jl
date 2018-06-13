@@ -9,28 +9,36 @@ using Yao.Blocks
 @testset "constructor" begin
 
     g = ChainBlock(
-        kron(2, phase(0.1)),
-        kron(2, X(), Y()),
+        kron(2, 1=>phase(0.1)),
+        kron(2, 1=>X(), Y()),
     )
 
     @test g isa ChainBlock{2, ComplexF64} # default type
-    @test g.blocks == [kron(2, phase(0.1)), kron(2, X(), Y())]
+    @test g.blocks == [kron(2, 1=>phase(0.1)), kron(2, 1=>X(), Y())]
 end
 
 @testset "matrix" begin
 g = ChainBlock(
-    kron(2, phase(0.1)),
-    kron(2, X, Y),
+    kron(2, 1=>phase(0.1)),
+    kron(2, 1=>X, Y),
 )
 
-m = mat(kron(2, phase(0.1))) * mat(kron(2, X, Y))
+m = mat(kron(2, 1=>phase(0.1))) * mat(kron(2, 1=>X, Y))
 @test mat(g) ≈ m
+
+g = ChainBlock(
+    kron(4, 1=>phase(0.1)),
+    kron(4, 1=>X, Y),
+)
+
+@test usedbits(g) == [1, 2]
+@test addrs(g) == [1, 1]
 end
 
 @testset "apply" begin
 g = ChainBlock(
-    kron(2, phase(0.1)),
-    kron(2, X, Y),
+    kron(2, 1=>phase(0.1)),
+    kron(2, 1=>X, Y),
 )
 
 reg = rand_state(2)

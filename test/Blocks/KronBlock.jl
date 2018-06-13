@@ -6,12 +6,14 @@ using Compat.SparseArrays
 
 using Yao
 using Yao.Blocks
+using Yao.Intrinsics
 
 import Yao.LuxurySparse: IMatrix
 
 @testset "constructor" begin
 # TODO: custom error exception
 @test_throws MethodError KronBlock{2}(1=>X, [2, Y])
+@test_throws AddressConflictError KronBlock{5}(4=>CNOT, 5=>X)
 end
 
 @testset "check mat" begin
@@ -24,6 +26,7 @@ GateSet = [
 
 ⊗ = kron
 U = mat(X)
+U2 = mat(CNOT)
 id = IMatrix(2)
 
 @testset "case 1" begin
@@ -34,6 +37,14 @@ id = IMatrix(2)
     m = U ⊗ id
     g = KronBlock{2}(2=>X)
     @test m == mat(g)
+    @test addrs(g) == [2]
+    @test usedbits(g) == [2]
+
+    m = U2 ⊗ id ⊗ U ⊗ id
+    g = KronBlock{5}(4=>CNOT, 2=>X)
+    @test m == mat(g)
+    @test addrs(g) == [2, 4]
+    @test usedbits(g) == [2, 4, 5]
 end
 
 @testset "case 2" begin

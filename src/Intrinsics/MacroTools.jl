@@ -1,4 +1,18 @@
+"""
+    AddressConflictError <: Exception
+
+Address conflict error in Block Construction.
+"""
 struct AddressConflictError <: Exception
+    msg::String
+end
+
+"""
+    QubitMismatchError <: Exception
+
+Qubit number mismatch error when applying a Block to a Register or concatenating Blocks.
+"""
+struct QubitMismatchError <: Exception
     msg::String
 end
 

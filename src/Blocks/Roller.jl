@@ -19,7 +19,8 @@ struct Roller{N, T, BT <: Tuple} <: CompositeBlock{N, T}
 end
 
 Roller{T}(blocks::Tuple) where T = Roller{sum(nqubits, blocks), T, typeof(blocks)}(blocks)
-Roller{T}(blocks::MatrixBlock...) where T = Roller{T}(blocks)
+Roller(blocks::Tuple) = Roller{blocks|>_blockpromote}(blocks)
+Roller(blocks::AbstractBlock...) = Roller(blocks)
 
 function Roller{N}(block::MatrixBlock{K, T}) where {N, K, T}
     Roller{N, T, NTuple{N÷K, typeof(block)}}(ntuple(x->deepcopy(block), Val(N÷K)))
@@ -28,6 +29,7 @@ end
 copy(m::Roller) = typeof(m)(m.blocks)
 
 blocks(m::Roller) = m.blocks
+addrs(m::Roller) = cumsum([[1]; [nqubits(b) for b in m.blocks[1:end-1]]])
 isunitary(m::Roller) = all(isunitary, m.blocks)
 ishermitian(m::Roller) = all(ishermitian, m.blocks)
 isreflexive(m::Roller) = all(isreflexive, m.blocks)

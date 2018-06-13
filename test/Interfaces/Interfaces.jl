@@ -5,6 +5,7 @@ using Compat.SparseArrays
 
 using Yao
 using Yao.Blocks
+using Yao.Intrinsics
 
 @testset "phase gate" begin
     @test phase() isa PhaseGate{Float64}
@@ -36,8 +37,17 @@ end
 end
 
 @testset "roll" begin
-    @test roll(4, X) isa Roller
-    @test roll(X, Y, Z) isa Roller
+    rr = rollrepeat(4, X)
+    ro = roll(3, X, Y, Z)
+    @test rr isa Roller
+    @test usedbits(rr) == [1,2,3,4]
+    @test ro isa Roller
+    @test usedbits(ro) == [1,2,3]
+    @test addrs(ro) == [1,2,3]
+    r2 = rollrepeat(4, CNOT)
+    @test addrs(r2) == [1,3]
+    @test usedbits(r2) == [1,2, 3, 4]
+    @test_throws AddressConflictError rollrepeat(3, CNOT)
 end
 
 @testset "measure" begin
@@ -46,7 +56,7 @@ end
 end
 
 @testset "concentrate" begin
-    r = roll(4, X)
+    r = rollrepeat(4, X)
     @test concentrate(8, r, [6, 1, 2, 3]) isa Concentrator
 end
 

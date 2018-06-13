@@ -8,8 +8,10 @@ using Yao.Blocks
 using Yao.Intrinsics
 
 @testset "constructor" begin
-    g = Roller{ComplexF64}(X(), kron(2, X(), Y()), Z(), Z())
+    g = Roller(X(), kron(2, 1=>X, Y), Z(), Z())
     @test isa(g, Roller{5, ComplexF64})
+    @test usedbits(g) == [1:5...]
+    @test addrs(g) == [1, 2, 4, 5]
 
     src = phase(0.1)
     g = Roller{4}(src)
@@ -37,8 +39,8 @@ end
         @test each.theta == 0.1
     end
 
-    g = Roller{ComplexF64}(X(), kron(2, X(), Y()), Z(), Z())
-    list = [X(), kron(2, X(), Y()), Z(), Z()]
+    g = Roller(X(), kron(2, 1=>X(), Y()), Z(), Z())
+    list = [X(), kron(2, 1=>X(), Y()), Z(), Z()]
     for (src, tg) in zip(g.blocks, list)
         @test src == tg
     end
@@ -55,21 +57,30 @@ g = Roller{5}(X())
 end
 
 @testset "roll multiple blocks" begin
-g = Roller{ComplexF64}((X(), Y(), Z(), X(), X()))
-tg = kron(5, X(), Y(), Z(), X(), X())
+g = Roller((X(), Y(), Z(), X(), X()))
+tg = kron(5, 1=>X(), Y(), Z(), X(), X())
 @test state(apply!(register(bit"11111"), g)) == state(apply!(register(bit"11111"), tg))
 @test state(apply!(register(bit"11111", 3), g)) == state(apply!(register(bit"11111", 3), tg))
 end
 
 @testset "matrix" begin
-    g = Roller{ComplexF64}((X, kron(2, Y, Z), X, X))
-    tg = kron(5, X, Y, Z, X, X)
+    g = Roller((X, kron(2, 1=>Y, Z), X, X))
+    tg = kron(5, 1=>X, Y, Z, X, X)
     @test mat(g) == mat(tg)
     @test linop2dense(r->apply!(register(r), g) |> statevec, 5) == mat(tg)
+
+
+    ⊗ = kron
+    U = mat(X)
+    U2 = mat(CNOT)
+    id = mat(I2)
+    m = U2 ⊗ id ⊗ U ⊗ id
+    r = roll(5, I2, X, I2, CNOT)
+    @test m == mat(r)
 end
 
 @testset "traits" begin
-g = Roller{ComplexF64}(X(), kron(2, X(), Y()), Z(), Z())
+g = Roller(X(), kron(2, 1=>X(), Y()), Z(), Z())
 @test isunitary(g) == true
 @test isreflexive(g) == true
 @test ishermitian(g) == true

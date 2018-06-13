@@ -65,6 +65,7 @@ end
 @testset "multi control with blank" begin
     g = ControlBlock{7}((6, 4, 2), X, 3) # -> [2, 4, 6]
     @test nqubits(g) == 7
+    @test usedbits(g) == [6, 4, 2, 3]
 
     op = IMatrix(U) ⊗ mat(P0) + U ⊗ mat(P1) # 2, 3
     op = mat(P0) ⊗ IMatrix(op) + mat(P1) ⊗ op # 2, 3, 4
@@ -84,6 +85,8 @@ end
 @testset "control two-bit gate" begin
     g = ControlBlock{3}((3, ), CNOT, 1)
     @test mat(g) ≈ mat(Toffoli)
+    @test addrs(g) == [1]
+    @test usedbits(g) == [3, 1, 2]
 end
 
 end # control matrix form

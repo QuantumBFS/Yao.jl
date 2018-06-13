@@ -17,6 +17,7 @@ function mat(g::Swap{N, T}) where {N, T}
 end
 
 apply!(r::AbstractRegister, rb::Swap) = swapapply!(state(r) |> matvec, rb.addr1, rb.addr2)
+usedbits(rb::Swap) = [addr1, addr2]
 
 function swapapply!(state::VecOrMat{T}, b1::Int, b2::Int) where T
     mask1 = bmask(b1)

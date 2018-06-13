@@ -3,6 +3,7 @@ module Interfaces
 using Reexport
 using ..Registers
 using ..Blocks
+using ..Blocks: _blockpromote
 using ..CacheServers
 
 # import package configs

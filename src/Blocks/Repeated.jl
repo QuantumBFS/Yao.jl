@@ -24,6 +24,8 @@ function RepeatedBlock{N}(block::GT, addrs::Vector{Int}) where {N, M, T, GT <: M
 end
 
 blocks(rb::RepeatedBlock) = [rb.block]
+addrs(rb::RepeatedBlock) = rb.addrs
+usedbits(rb::RepeatedBlock) = vcat([i.+(0:nqubits(rb.block)-1) for i in addrs(rb)]...)
 copy(x::RepeatedBlock) = typeof(x)(block, copy(x.addrs))
 
 dispatch!(rb::RepeatedBlock, params...) = dispatch!(rb.block, params...)
