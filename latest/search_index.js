@@ -197,7 +197,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Yao.Interfaces.concentrate",
     "category": "method",
-    "text": "concentrate(orders...) -> Concentrator\n\nconcentrate on serveral lines.\n\n\n\n"
+    "text": "concentrate(nbit::Int, block::AbstractBlock, addrs::Vector{Int}) -> Concentrator{nbit}\n\nconcentrate blocks on serveral addrs.\n\n\n\n"
 },
 
 {
@@ -237,7 +237,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Yao.Interfaces.roll",
     "category": "function",
-    "text": "roll([n], blocks...)\n\nConstruct a Roller block, which is a faster way to calculate similar small blocks tile on the whole address.\n\n\n\n"
+    "text": "roll([n::Int,] block::MatrixBlock) -> Roller{n}\n\nConstruct a Roller block, which is a faster than KronBlock to calculate similar small blocks tile on the whole address.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.rollrepeat",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.rollrepeat",
+    "category": "function",
+    "text": "rollrepeat([n::Int,] block::MatrixBlock) -> Roller{n}\n\nConstruct a Roller block, which is a faster than KronBlock to calculate similar small blocks tile on the whole address.\n\n\n\n"
 },
 
 {
@@ -289,19 +297,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Union{Pair, Tuple, Yao.Blocks.MatrixBlock},N} where N}",
+    "location": "man/interfaces/#Base.kron-Tuple{Int64,Pair,Vararg{Union{Pair, Yao.Blocks.MatrixBlock},N} where N}",
     "page": "Interfaces",
     "title": "Base.kron",
     "category": "method",
-    "text": "kron(blocks...) -> KronBlock\nkron(iterator) -> KronBlock\nkron(total, blocks...) -> KronBlock\nkron(total, iterator) -> KronBlock\n\ncreate a KronBlock with a list of blocks or tuple of heads and blocks.\n\nExample\n\nkron(4, X, 3=>Z, Y)\n\nThis will automatically generate a block list looks like\n\n1 -- [X] --\n2 ---------\n3 -- [Z] --\n4 -- [Y] --\n\n\n\n"
+    "text": "kron([total::Int, ]block0::Pair, blocks::Union{MatrixBlock, Pair}...) -> KronBlock{total}\n\ncreate a KronBlock with a list of blocks or tuple of heads and blocks. If total is not provided, return a lazy constructor.\n\nExample\n\nkron(4, 1=>X, 3=>Z, Y)\n\nThis will automatically generate a block list looks like\n\n1 -- [X] --\n2 ---------\n3 -- [Z] --\n4 -- [Y] --\n\n\n\n"
 },
 
 {
-    "location": "man/interfaces/#Base.repeat-Tuple{Int64,Pair{Int64,#s415} where #s415<:Yao.Blocks.MatrixBlock}",
+    "location": "man/interfaces/#Base.repeat-Tuple{Int64,Yao.Blocks.MatrixBlock,Any}",
     "page": "Interfaces",
     "title": "Base.repeat",
     "category": "method",
-    "text": "repeat([n], pairs)\n\n\n\n"
+    "text": "repeat([n::Int,] x::MatrixBlock, [addrs]) -> RepeatedBlock{n}\n\nConstruct a RepeatedBlock, if n (the number of qubits) not supplied, using lazy evaluation. If addrs not supplied, blocks will fill the qubit space.\n\n\n\n"
 },
 
 {
@@ -685,7 +693,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.RepeatedBlock",
     "category": "type",
-    "text": "RepeatedBlock{N, T, GT} <: CompositeBlock{N, T}\n\nrepeat the same block on given lines.\n\n\n\n"
+    "text": "RepeatedBlock{N, T, GT} <: CompositeBlock{N, T}\n\nrepeat the same block on given addrs.\n\n\n\n"
 },
 
 {
@@ -777,6 +785,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.usedbits-Union{Tuple{N}, Tuple{Yao.Blocks.MatrixBlock{N,T} where T}} where N",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.usedbits",
+    "category": "method",
+    "text": "addrs(block::AbstractBlock) -> Vector{Int}\n\nOccupied addresses (include control bits and bits occupied by blocks), fall back to all bits if this method is not provided.\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Intrinsics.isreflexive",
     "page": "Blocks System",
     "title": "Yao.Intrinsics.isreflexive",
@@ -790,6 +806,22 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Intrinsics.isunitary",
     "category": "function",
     "text": "isunitary(x) -> Bool\n\nTest whether this operator is unitary.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks._allmatblock-Tuple{Any}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks._allmatblock",
+    "category": "method",
+    "text": "all blocks are matrix blocks\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks._blockpromote-Tuple{Any}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks._blockpromote",
+    "category": "method",
+    "text": "promote types of blocks\n\n\n\n"
 },
 
 {
@@ -918,6 +950,22 @@ var documenterSearchIndex = {"docs": [
     "title": "Intrinsics",
     "category": "page",
     "text": ""
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.AddressConflictError",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.AddressConflictError",
+    "category": "type",
+    "text": "AddressConflictError <: Exception\n\nAddress conflict error in Block Construction.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.QubitMismatchError",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.QubitMismatchError",
+    "category": "type",
+    "text": "QubitMismatchError <: Exception\n\nQubit number mismatch error when applying a Block to a Register or concatenating Blocks.\n\n\n\n"
 },
 
 {
@@ -1265,7 +1313,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s413,1} where #s413<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s412,1} where #s412<:(AbstractArray{T,2} where T),Array{Int64,1}}",
+    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s411,1} where #s411<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s410,1} where #s410<:(AbstractArray{T,2} where T),Array{Int64,1}}",
     "page": "Boost",
     "title": "Yao.Boost.general_controlled_gates",
     "category": "method",
