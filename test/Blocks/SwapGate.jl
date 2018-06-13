@@ -3,9 +3,8 @@ using Compat.Test
 
 using Yao.Blocks
 using Yao.LuxurySparse
+using Yao.Intrinsics
 import Yao.Blocks: swapapply!
-
-linop2dense(applyfunc!::Function, num_bit::Int) = applyfunc!(Matrix{ComplexF64}(I, 1<<num_bit, 1<<num_bit))
 
 @testset "matrix" begin
     @test mat(Swap{2, ComplexF64}(1, 2)) ≈ PermMatrix([1, 3, 2, 4], ones(1<<2))

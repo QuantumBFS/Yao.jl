@@ -3,7 +3,7 @@
 
 check if this operator is a unitary operator.
 """
-isunitary(op) = op * op' ≈ IMatrix(size(op, 1))
+isunitary(op) = op' * op ≈ IMatrix(size(op, 1))
 
 """
     isreflexive(op) -> Bool

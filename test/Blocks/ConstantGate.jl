@@ -11,10 +11,6 @@ using Yao.Blocks
         @test isunitary(each) == true
         @test isreflexive(each) == true
         @test ishermitian(each) == true
-
-        # new constant gate is the same
-        # no copy occurred
-        @test X() === X
     end
 
 

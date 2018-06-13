@@ -88,9 +88,9 @@ end
 
 function define_traits(name, binding)
     quote
-        $(define_property_trait(x->:($x * $x ≈ IMatrix{size($x, 1)}()), :isreflexive, name, binding))
-        $(define_property_trait(x->:($x' ≈ $x), :ishermitian, name, binding))
-        $(define_property_trait(x->:($x * $x' ≈ IMatrix{size($x, 1)}()), :isunitary, name, binding))
+        $(define_property_trait(x->:(Yao.Intrinsics.isreflexive($x)), :isreflexive, name, binding))
+        $(define_property_trait(x->:(Yao.Intrinsics.ishermitian($x)), :ishermitian, name, binding))
+        $(define_property_trait(x->:(Yao.Intrinsics.isunitary($x)), :isunitary, name, binding))
     end
 end
 
