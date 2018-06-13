@@ -25,7 +25,7 @@ using Yao.Blocks
 @testset "map" begin
     dst = ChainBlock(X, Y, Z)
     src = KronBlock{5}(X, Y, Z)
-    map!(x->kron(2, Z), dst, blocks(src))
+    map!(x->kron(2, 1=>Z), dst, blocks(src))
 
     for each in dst
         @test isa(each, KronBlock)

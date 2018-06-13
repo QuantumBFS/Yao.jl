@@ -15,10 +15,11 @@ struct KronBlock{N, T} <: CompositeBlock{N, T}
         new{N, T}(slots, addrs, blocks)
     end
 
-    function KronBlock{N, T}(addrs::Vector, blocks::Vector) where {N, T}
+    function KronBlock{N, T}(addrs::Vector, blocks::Vector{MatrixBlock}) where {N, T}
         perm = sortperm(addrs)
         permute!(addrs, perm)
         permute!(blocks, perm)
+        _assert_addr_safe(N, [i:i+nqubits(b)-1 for (i, b) in zip(addrs, blocks)])
 
         slots = zeros(Int, N)
         for (i, each) in enumerate(addrs)
@@ -27,7 +28,7 @@ struct KronBlock{N, T} <: CompositeBlock{N, T}
         new{N, T}(slots, addrs, blocks)
     end
 
-    function KronBlock{N}(addrs::Vector, blocks::Vector) where N
+    function KronBlock{N}(addrs::Vector, blocks::Vector{MatrixBlock}) where N
         T = promote_type([datatype(each) for each in blocks]...)
         KronBlock{N, T}(addrs, blocks)
     end
@@ -79,9 +80,9 @@ function similar(k::KronBlock{N, T}) where {N, T}
 end
 
 # some useful interface
-export addrs
 addrs(k::KronBlock) = k.addrs
 blocks(k::KronBlock) = k.blocks
+usedbits(k::KronBlock) = vcat([(i-1).+usedbits(b) for (i, b) in zip(addrs(k), blocks(k))]...)
 
 function getindex(k::KronBlock, addr)
     index = k.slots[addr]
@@ -120,15 +121,15 @@ isreflexive(k::KronBlock) = all(isreflexive, k.blocks)
 eachindex(k::KronBlock) = k.addrs
 
 function mat(k::KronBlock{N}) where N
-    sizes = [op |> nqubits for op in k.blocks]
-    start_locs = N - k.addrs - sizes + 1
+    sizes = [op |> nqubits for op in blocks(k)]
+    start_locs = N - addrs(k) - sizes + 1
     
     order = sortperm(start_locs)
     sorted_start_locs = start_locs[order]
-    num_bit_list = vcat(diff(push!(sorted_start_locs, N)) .- sizes)
+    num_bit_list = vcat(diff(push!(sorted_start_locs, N)) .- sizes[order])
  
     ⊗ = kron
-    reduce(IMatrix(1 << sorted_start_locs[1]), zip(k.blocks[order], num_bit_list)) do x, y
+    reduce(IMatrix(1 << sorted_start_locs[1]), zip(blocks(k)[order], num_bit_list)) do x, y
         x ⊗ mat(y[1]) ⊗ IMatrix(1<<y[2])
     end
 end

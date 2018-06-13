@@ -24,7 +24,7 @@ import Base: copy, hash, ==, eltype, show, similar, getindex, setindex!, start, 
 export update_cache
 
 # module APIs
-export address, blocks, @const_gate
+export usedbits, addrs, blocks, @const_gate
 export nqubits, nactive, nparameters, mat, datatype, parameters
 export apply!, dispatch!
 export ishermitian, isunitary, isreflexive

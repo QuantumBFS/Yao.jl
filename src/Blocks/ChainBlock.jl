@@ -26,7 +26,7 @@ function ChainBlock(blocks::MatrixBlock{N}...) where N
 end
 
 function copy(c::ChainBlock{N, T}) where {N, T}
-    ChainBlock{N, T}([copy(each) for each in c.blocks])
+    ChainBlock{N, T}(copy(c.blocks))
 end
 
 function similar(c::ChainBlock{N, T}) where {N, T}
@@ -57,6 +57,8 @@ length(c::ChainBlock) = length(c.blocks)
 eltype(c::ChainBlock) = eltype(c.blocks)
 eachindex(c::ChainBlock) = eachindex(c.blocks)
 blocks(c::ChainBlock) = c.blocks
+addrs(c::ChainBlock) = ones(Int, blocks(c)|>length)
+usedbits(c::ChainBlock) = unique(vcat([usedbits(b) for b in blocks(c)]...))
 
 # Additional Methods for Chain
 import Base: push!, append!, prepend!

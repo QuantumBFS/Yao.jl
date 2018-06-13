@@ -8,7 +8,7 @@ end
 _make_rot_mat(I, U, theta) = I * cos(theta / 2) - im * sin(theta / 2) * U
 mat(R::RotationGate{T, GT}) where {T, GT} = _make_rot_mat(IMatrix{2, Complex{T}}(), mat(R.U), R.theta)
 
-copy(R::RotationGate{T, GT}) where {T, GT} = RotationGate{T, GT}(copy(R.U), R.theta)
+copy(R::RotationGate{T, GT}) where {T, GT} = RotationGate{T, GT}(R.U, R.theta)
 
 function dispatch!(R::RotationGate, theta)
     R.theta = theta

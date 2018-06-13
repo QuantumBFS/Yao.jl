@@ -37,6 +37,18 @@ Returns the data type of x.
 """
 datatype(block::MatrixBlock{N, T}) where {N, T} = T
 
+"""all blocks are matrix blocks"""
+_allmatblock(blocks) = all(b->b isa MatrixBlock, blocks)
+"""promote types of blocks"""
+_blockpromote(blocks) = promote_type([each isa MatrixBlock ? datatype(each) : Bool for each in blocks]...)
+
+"""
+    addrs(block::AbstractBlock) -> Vector{Int}
+
+Occupied addresses (include control bits and bits occupied by blocks), fall back to all bits if this method is not provided.
+"""
+usedbits(block::MatrixBlock{N}) where N = collect(1:N)
+
 include("BlockCache.jl")
 include("Primitive.jl")
 include("Composite.jl")

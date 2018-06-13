@@ -13,6 +13,10 @@ mutable struct ControlBlock{N, BT<:AbstractBlock, C, T} <: CompositeBlock{N, T}
     vals::NTuple{C, Int}
     block::BT
     addr::Int
+    function ControlBlock{N, BT, C, T}(ctrl_qubits, vals, block, addr) where {N, C, T, BT<:AbstractBlock}
+        _assert_addr_safe(N, [[b:b for b in ctrl_qubits]; [addr:addr+nqubits(block)-1]])
+        new{N, BT, C, T}(ctrl_qubits, vals, block, addr)
+    end
 end
 
 function ControlBlock{N}(ctrl_qubits::NTuple{C, Int}, vals::NTuple{C, Int}, block::BT, addr::Int) where {BT<:AbstractBlock, N, C}
@@ -26,7 +30,7 @@ end
 ControlBlock{N}(ctrl_qubits::NTuple{C, Int}, block::AbstractBlock, addr::Int) where {N, C} = ControlBlock{N}(ctrl_qubits, (ones(Int, C)...), block, addr)
 
 function copy(ctrl::ControlBlock{N, BT, C, T}) where {BT, N, C, T}
-    ControlBlock{N, BT, C, T}((ctrl.ctrl_qubits...), (ctrl.vals...), ctrl.block, ctrl.addr)
+    ControlBlock{N, BT, C, T}(ctrl.ctrl_qubits, ctrl.vals, ctrl.block, ctrl.addr)
 end
 
 projector(val) = val==0 ? mat(P0) : mat(P1)
@@ -41,7 +45,8 @@ mat(c::ControlBlock{N}) where N = general_controlled_gates(N, [(c.vals .|> proje
 mat(c::ControlBlock{N, BT, 1}) where {N, BT} = general_c1_gates(N, c.vals[1] |> projector, c.ctrl_qubits[1], [mat(c.block)], [c.addr])
 
 blocks(c::ControlBlock) = [c.block]
-addrs(c::ControlBlock) = [c.ctrl_qubits..., (c.addr.+addrs(c.blocks).-1)...]
+addrs(c::ControlBlock) = [c.addr]
+usedbits(c::ControlBlock) = [c.ctrl_qubits..., ((c.addr-1).+usedbits(c.block))...]
 
 #################
 # Dispatch Rules

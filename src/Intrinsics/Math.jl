@@ -95,8 +95,9 @@ function hilbertkron(num_bit::Int, ops::Vector{T}, start_locs::Vector{Int}) wher
     order = sortperm(start_locs)
     sorted_ops = ops[order]
     sorted_start_locs = start_locs[order]
+    num_ids = vcat(sorted_start_locs[1]-1, diff(push!(sorted_start_locs, num_bit+1)) .- sizes[order])
     
-    _wrap_identity(sorted_ops, vcat(sorted_start_locs[1]-1, diff(push!(sorted_start_locs, num_bit+1)) .- sizes))
+    _wrap_identity(sorted_ops, num_ids)
 end
 
 # kron, and wrap matrices with identities.

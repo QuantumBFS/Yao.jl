@@ -45,4 +45,9 @@ end
     @test hilbertkron(4, [A ⊗ B, C], [3, 1]) ≈ A ⊗ B ⊗ II ⊗ C
     @test hilbertkron(4, [A ⊗ B], [1]) ≈ II ⊗ II ⊗ A ⊗ B
     @test hilbertkron(4, [A ⊗ B, C ⊗ D], [1, 3]) ≈ C ⊗ D ⊗ A ⊗ B
+
+    U = randn(2,2)
+    U2 = randn(4,4)
+    m = U2 ⊗ II ⊗ U ⊗ II
+    @test m == hilbertkron(5, [U, U2], [2, 4])
 end

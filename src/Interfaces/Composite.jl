@@ -51,16 +51,14 @@ end
 import Base: kron
 
 """
-    kron(blocks...) -> KronBlock
-    kron(iterator) -> KronBlock
-    kron(total, blocks...) -> KronBlock
-    kron(total, iterator) -> KronBlock
+    kron([total::Int, ]block0::Pair, blocks::Union{MatrixBlock, Pair}...) -> KronBlock{total}
 
 create a [`KronBlock`](@ref) with a list of blocks or tuple of heads and blocks.
+If total is not provided, return a lazy constructor.
 
 ## Example
 ```@example
-kron(4, X, 3=>Z, Y)
+kron(4, 1=>X, 3=>Z, Y)
 ```
 This will automatically generate a block list looks like
 ```
@@ -70,11 +68,14 @@ This will automatically generate a block list looks like
 4 -- [Y] --
 ```
 """
-kron(total::Int, blocks::Union{MatrixBlock, Tuple, Pair}...) = KronBlock{total}(blocks)
+kron(total::Int, block0::Pair, blocks::Union{MatrixBlock, Pair}...) = KronBlock{total}((block0, blocks...))
+function kron(total::Int, blocks::MatrixBlock...)
+    sum(nqubits, blocks) == total || throw(AddressConflictError("Size of blocks does not match roller size."))
+    KronBlock{total}(blocks)
+end
 kron(total::Int, g::Base.Generator) = KronBlock{total}(g)
 # NOTE: this is ambiguous
-# kron(total::Int, blocks) = KronBlock{total}(blocks)
-kron(blocks::Union{MatrixBlock, Tuple{Int, <:MatrixBlock}, Pair{Int, <:MatrixBlock}}...) = N->KronBlock{N}(blocks)
+kron(blocks::Union{MatrixBlock, Pair{Int, <:MatrixBlock}}...) = N->KronBlock{N}(blocks)
 kron(blocks) = N->KronBlock{N}(blocks)
 
 # 2.3 control block
@@ -116,43 +117,48 @@ end
 
 # 2.4 roller
 
-export roll
+export roll, rollrepeat
 
 """
-    roll([n], blocks...)
+    rollrepeat([n::Int,] block::MatrixBlock) -> Roller{n}
 
-Construct a [`Roller`](@ref) block, which is a faster way to calculate
+Construct a [`Roller`](@ref) block, which is a faster than [`KronBlock`](@ref) to calculate
+similar small blocks tile on the whole address.
+"""
+function rollrepeat end
+rollrepeat(n::Int, block::MatrixBlock) = Roller{n}(block)
+rollrepeat(block::MatrixBlock) = n->rollrepeat(n, block)
+
+"""
+    roll([n::Int,] block::MatrixBlock) -> Roller{n}
+
+Construct a [`Roller`](@ref) block, which is a faster than [`KronBlock`](@ref) to calculate
 similar small blocks tile on the whole address.
 """
 function roll end
 
-roll(n::Int, block::MatrixBlock) = Roller{n}(block)
-
-function roll(blocks::MatrixBlock...)
-    T = promote_type([datatype(each) for each in blocks]...)
-    Roller{T}(blocks)
-end
+roll(blocks::MatrixBlock...) = n->Roller(blocks)
+roll(n, blocks::MatrixBlock...) = Roller{n, blocks|>_blockpromote, typeof(blocks)}(blocks)
 
 # 2.5 repeat
 
 import Base: repeat
 
 """
-    repeat([n], pairs)
+    repeat([n::Int,] x::MatrixBlock, [addrs]) -> RepeatedBlock{n}
+
+Construct a [`RepeatedBlock`](@ref), if n (the number of qubits) not supplied, using lazy evaluation.
+If addrs not supplied, blocks will fill the qubit space.
 """
-repeat(n::Int, x::Pair{Int, <:MatrixBlock}) = RepeatedBlock{n}(x.second, [x.first])
-repeat(n::Int, x::MatrixBlock, lines) = RepeatedBlock{n}(x, lines)
+repeat(n::Int, x::MatrixBlock, addrs) = RepeatedBlock{n}(x, addrs)
 repeat(n::Int, x::MatrixBlock) = RepeatedBlock{n}(x)
 repeat(x::MatrixBlock, params...) = n->repeat(n, x, params...)
-repeat(x::Pair) = n->repeat(n, x)
 
-
-export focus
 export concentrate
 
 """
-    concentrate(orders...) -> Concentrator
+    concentrate(nbit::Int, block::AbstractBlock, addrs::Vector{Int}) -> Concentrator{nbit}
 
-concentrate on serveral lines.
+concentrate blocks on serveral addrs.
 """
-concentrate(nbit::Int, block::AbstractBlock, orders::Vector{Int}) = Concentrator{nbit}(block, orders)
+concentrate(nbit::Int, block::AbstractBlock, addrs::Vector{Int}) = Concentrator{nbit}(block, addrs)
