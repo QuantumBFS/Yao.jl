@@ -13,7 +13,7 @@ fill identity like `KronBlock` -> To interface.
 struct Roller{N, T, BT <: Tuple} <: CompositeBlock{N, T}
     blocks::BT
     function Roller{N, T, BT}(blocks::BT) where {N, T, BT}
-        sum(nqubits, blocks) == N || throw("Size of blocks does not match roller size.")
+        sum(nqubits, blocks) == N || throw(AddressConflictError("Size of blocks does not match roller size."))
         new{N, T, BT}(blocks)
     end
 end

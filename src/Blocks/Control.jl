@@ -13,6 +13,10 @@ mutable struct ControlBlock{N, BT<:AbstractBlock, C, T} <: CompositeBlock{N, T}
     vals::NTuple{C, Int}
     block::BT
     addr::Int
+    function ControlBlock{N, BT, C, T}(ctrl_qubits, vals, block, addr) where {N, C, T, BT<:AbstractBlock}
+        _assert_addr_safe(N, [[b:b for b in ctrl_qubits]; [addr:addr+nqubits(block)-1]])
+        new{N, BT, C, T}(ctrl_qubits, vals, block, addr)
+    end
 end
 
 function ControlBlock{N}(ctrl_qubits::NTuple{C, Int}, vals::NTuple{C, Int}, block::BT, addr::Int) where {BT<:AbstractBlock, N, C}

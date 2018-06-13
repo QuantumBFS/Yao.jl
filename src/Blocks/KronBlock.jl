@@ -15,10 +15,11 @@ struct KronBlock{N, T} <: CompositeBlock{N, T}
         new{N, T}(slots, addrs, blocks)
     end
 
-    function KronBlock{N, T}(addrs::Vector, blocks::Vector) where {N, T}
+    function KronBlock{N, T}(addrs::Vector, blocks::Vector{MatrixBlock}) where {N, T}
         perm = sortperm(addrs)
         permute!(addrs, perm)
         permute!(blocks, perm)
+        _assert_addr_safe(N, [i:i+nqubits(b)-1 for (i, b) in zip(addrs, blocks)])
 
         slots = zeros(Int, N)
         for (i, each) in enumerate(addrs)
@@ -27,7 +28,7 @@ struct KronBlock{N, T} <: CompositeBlock{N, T}
         new{N, T}(slots, addrs, blocks)
     end
 
-    function KronBlock{N}(addrs::Vector, blocks::Vector) where N
+    function KronBlock{N}(addrs::Vector, blocks::Vector{MatrixBlock}) where N
         T = promote_type([datatype(each) for each in blocks]...)
         KronBlock{N, T}(addrs, blocks)
     end

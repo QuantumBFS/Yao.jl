@@ -26,7 +26,8 @@ export onehotvec
 
 include("Basis.jl")
 
-export @assert_addr_safe
+export @assert_addr_safe, @assert_addr_fit, @assert_addr_inbounds, AddressConflictError
+export _assert_addr_safe, _assert_addr_fit, _assert_addr_inbounds
 include("MacroTools.jl")
 
 include("TupleTools.jl")
