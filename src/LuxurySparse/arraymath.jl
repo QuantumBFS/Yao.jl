@@ -1,5 +1,9 @@
 import Base: conj, copy, real, ctranspose, imag
-import Compat.LinearAlgebra: transpose, transpose!, ctranspose!, adjoint!, adjoint
+import Compat.LinearAlgebra: transpose, transpose!, ctranspose!
+
+@static if VERSION >= v"0.7-"
+    import LinearAlgebra: adjoint!, adjoint
+end
 
 
 # IMatrix
@@ -69,4 +73,3 @@ for op in [:+, :-, :(==), :≈]
 end
 +(d1::IMatrix{Na, Ta}, d2::IMatrix{Nb, Tb}) where {Na, Nb, Ta, Tb} = d1==d2 ? Diagonal(fill(promote_types(Ta, Tb)(2), Na)) : throw(DimensionMismatch())
 -(d1::IMatrix{Na, Ta}, d2::IMatrix{Nb, Tb}) where {Na, Ta, Nb, Tb} = d1==d2 ? spzeros(promote_types(Ta, Tb), Na, Na) : throw(DimensionMismatch())
-
