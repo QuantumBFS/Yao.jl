@@ -10,11 +10,11 @@ using Yao.Blocks
 
     g = ChainBlock(
         kron(2, 1=>phase(0.1)),
-        kron(2, 1=>X(), Y()),
+        kron(2, 1=>X, Y),
     )
 
     @test g isa ChainBlock{2, ComplexF64} # default type
-    @test g.blocks == [kron(2, 1=>phase(0.1)), kron(2, 1=>X(), Y())]
+    @test g.blocks == [kron(2, 1=>phase(0.1)), kron(2, 1=>X, Y)]
 end
 
 @testset "matrix" begin
