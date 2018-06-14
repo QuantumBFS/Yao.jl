@@ -1,6 +1,8 @@
-using Yao, UnicodePlots, BenchmarkTools
-import Yao: mat
+module QCBM
 
+using Yao, UnicodePlots, Knet
+
+include("Kernels.jl")
 include("Circuit.jl")
 
 function gaussian_pdf(n, μ, σ)
@@ -19,7 +21,7 @@ function get_nn_pairs(n)
     pairs
 end
 
-function train!(qcbm::QCBM, ptrain, optim; learning_rate=0.1, maxiter=100)
+function train!(qcbm::Model, ptrain, optim; learning_rate=0.1, maxiter=100)
     initialize!(qcbm)
     kernel = Kernels.RBFKernel(nqubits(qcbm), [0.25], false)
     history = Float64[]
@@ -39,13 +41,12 @@ function train!(qcbm::QCBM, ptrain, optim; learning_rate=0.1, maxiter=100)
     history
 end
 
-
 function main(n, maxiter)
     pg = gaussian_pdf(n, 2^5-0.5, 2^4)
     fig = lineplot(0:1<<n - 1, pg)
     display(fig)
 
-    qcbm = QCBM{n, 10}(get_nn_pairs(n))
+    qcbm = Model{n, 10}(get_nn_pairs(n))
     optim = Adam(lr=0.1)
     his = train!(qcbm, pg, optim, maxiter=maxiter)
 
@@ -57,4 +58,6 @@ function main(n, maxiter)
     display(fig)
 end
 
-main(6, 20)
+end
+
+QCBM.main(6, 20)

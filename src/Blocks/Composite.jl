@@ -36,6 +36,10 @@ function map!(f::Function, dst::CompositeBlock, itr)
     dst
 end
 
+function parameter_type(c::CompositeBlock)
+    promote_type([parameter_type(each) for each in blocks(c)]...)
+end
+
 function nparameters(c::CompositeBlock)
     count = 0
     for each in blocks(c)
@@ -46,7 +50,7 @@ end
 
 # TODO: make this a lazy list
 function parameters(c::CompositeBlock)
-    params = []
+    params = parameter_type(c)[]
     for each in blocks(c)
         append!(params, parameters(each))
     end
@@ -71,7 +75,7 @@ function dispatch!(x::CompositeBlock, itr)
     @assert nparameters(x) == length(itr) "number of parameters does not match"
 
     count = 0
-    for block in filter(x->nparameters(x) > 0, blocks(x))
+    for block in Iterators.filter(x->nparameters(x) > 0, blocks(x))
         params = view(itr, count+1:count+nparameters(block))
         if block isa CompositeBlock
             dispatch!(block, params)
@@ -87,7 +91,7 @@ function dispatch!(f::Function, x::CompositeBlock, itr)
     @assert nparameters(x) == length(itr) "number of parameters does not match"
 
     count = 0
-    for block in filter(x->nparameters(x) > 0, blocks(x))
+    for block in Iterators.filter(x->nparameters(x) > 0, blocks(x))
         params = view(itr, count+1:count+nparameters(block))
         if block isa CompositeBlock
             dispatch!(f, block, params)

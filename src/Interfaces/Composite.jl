@@ -132,15 +132,38 @@ rollrepeat(n::Int, block::MatrixBlock) = Roller{n}(block)
 rollrepeat(block::MatrixBlock) = n->rollrepeat(n, block)
 
 """
-    roll([n::Int,] block::MatrixBlock) -> Roller{n}
+    roll([n::Int, ], blocks...) -> Roller{n}
 
 Construct a [`Roller`](@ref) block, which is a faster than [`KronBlock`](@ref) to calculate
 similar small blocks tile on the whole address.
 """
 function roll end
 
-roll(blocks::MatrixBlock...) = n->Roller(blocks)
-roll(n, blocks::MatrixBlock...) = Roller{n, blocks|>_blockpromote, typeof(blocks)}(blocks)
+function roll(n::Int, blocks...)
+    curr_head = 1
+    list = []
+    for each in blocks
+        if each isa MatrixBlock
+            push!(list, each)
+            curr_head += nqubits(each)
+        elseif each isa Pair{Int, <:MatrixBlock}
+            line, b = each
+            k = line - curr_head
+
+            push!(list, kron(k, i=>I2 for i=1:k))
+            push!(list, b)
+            curr_head = line + nqubits(b)
+        end
+    end
+
+    k = n - curr_head + 1
+    k > 0 && push!(list, kron(k, i=>I2 for i=1:k))
+
+    sum(nqubits, list) == n || throw(ErrorException("number of qubits mismatch"))
+    Roller(list...)
+end
+
+roll(blocks...) = n->roll(n, blocks...)
 
 # 2.5 repeat
 

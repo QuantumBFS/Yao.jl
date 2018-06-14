@@ -18,6 +18,7 @@ function dispatch!(f::Function, x::PrimitiveBlock, params...)
 end
 
 cache_key(x::PrimitiveBlock) = parameters(x)
+parameter_type(x::PrimitiveBlock) = eltype(parameters(x))
 
 include("ConstGate.jl")
 include("PhaseGate.jl")
