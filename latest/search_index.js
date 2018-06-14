@@ -713,14 +713,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.ConstGateTools.@const_gate",
-    "page": "Blocks System",
-    "title": "Yao.Blocks.ConstGateTools.@const_gate",
-    "category": "macro",
-    "text": "@const_gate name[::T] = matrix\n\nDefine a new constant gate.\n\n\n\n"
-},
-
-{
     "location": "man/blocks/#Yao.Blocks.apply!",
     "page": "Blocks System",
     "title": "Yao.Blocks.apply!",
@@ -1313,7 +1305,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s411,1} where #s411<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s410,1} where #s410<:(AbstractArray{T,2} where T),Array{Int64,1}}",
+    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s406,1} where #s406<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s405,1} where #s405<:(AbstractArray{T,2} where T),Array{Int64,1}}",
     "page": "Boost",
     "title": "Yao.Boost.general_controlled_gates",
     "category": "method",
