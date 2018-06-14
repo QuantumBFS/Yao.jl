@@ -10,7 +10,7 @@ def _show_benchres(datafile, savefile, legends):
     else:
         data = datafile
     with DataPlt(filename=savefile, figsize=(5,4)) as dp:
-        plt.plot(np.arange(10, 28, 3), data/1e3)
+        plt.plot(np.arange(10, 28, 3), data/1e6)
         plt.legend(legends)
         plt.yscale('log')
         plt.ylabel(r'$t/ms$')
@@ -19,7 +19,7 @@ def _show_benchres(datafile, savefile, legends):
 
 class PltBench():
     def xyz(self):
-        _show_benchres('xyz-report.dat', 'projectq-xyz.png', ['X', 'Y', 'Z', 'CX', 'CY', 'CZ'])
+        _show_benchres('xyzcxyz.dat', 'yao-xyz.png', ['X', 'CX', 'Y', 'CY', 'Z', 'CZ'])
 
     def repeatxyz(self):
         _show_benchres('repeatxyz-report.dat', 'projectq-repeatxyz.png', ['X(2-7)', 'Y(2-7)', 'Z(2-7)'])

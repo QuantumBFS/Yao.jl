@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import sys
+sys.path.insert(0, "../")
 from plotlib import *
 import fire
 
@@ -8,16 +10,23 @@ def _show_benchres(datafile, savefile, legends):
     else:
         data = datafile
     with DataPlt(filename=savefile, figsize=(5,4)) as dp:
-        plt.plot(np.arange(10, 28, 3), data/1e6)
+        plt.plot(np.arange(10, 28, 3), data/1e3)
         plt.legend(legends)
         plt.yscale('log')
         plt.ylabel(r'$t/ms$')
         plt.xlabel(r'$N$')
-        plt.ylim(1e-1, 1e2)
+        plt.ylim(1e-2, 1e2)
 
 class PltBench():
     def xyz(self):
-        _show_benchres('xyzcxyz.dat', 'yao-xyz.png', ['X', 'CX', 'Y', 'CY', 'Z', 'CZ'])
+        qdata = np.loadtxt('projectq/xyz-report.dat').reshape([6, 6])
+        ydata = np.loadtxt('yao/xyzcxyz.dat').reshape([6, 6])/1e3
+        _show_benchres(np.concatenate([qdata[:,:3], ydata[:,0:6:2]], axis=1), 'comparexyz.png', ['Q-X', 'Q-Y', 'Q-Z', 'Y-X', 'Y-Y', 'Y-Z'])
+
+    def cxyz(self):
+        qdata = np.loadtxt('projectq/xyz-report.dat').reshape([6, 6])
+        ydata = np.loadtxt('yao/xyzcxyz.dat').reshape([6, 6])/1e3
+        _show_benchres(np.concatenate([qdata[:,3:], ydata[:,1:6:2]], axis=1), 'comparecxyz.png', ['Q-CX', 'Q-CY', 'Q-CZ', 'Y-CX', 'Y-CY', 'Y-CZ'])
 
     def repeatxyz(self):
         _show_benchres('repeatxyz-report.dat', 'projectq-repeatxyz.png', ['X(2-7)', 'Y(2-7)', 'Z(2-7)'])

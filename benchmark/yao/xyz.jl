@@ -22,4 +22,4 @@ for (ib, nbit) in enumerate(10:3:25)
     end
 end
 println(res_list)
-writedlm("xyzcyxz.dat", res_list)
+writedlm("xyzcxyz.dat", res_list)
