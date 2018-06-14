@@ -13,7 +13,7 @@ import Base: show
 
 # import package APIs
 import ..Yao: DefaultType, nqubits, nactive
-import ..Intrinsics: basis
+import ..Intrinsics: basis, hypercubic
 
 # APIs
 export nqubits, nactive, nremain, nbatch, state, statevec, hypercubic, focus!, relax!, focuspair!, extend!, basis, probs, isnormalized

@@ -40,7 +40,7 @@ nactive(r::DefaultRegister) = state(r) |> nqubits
 state(r::DefaultRegister) = r.state
 statevec(r::DefaultRegister{B}) where B = reshape(r.state, :, B)
 statevec(r::DefaultRegister{1}) = vec(r.state)
-hypercubic(reg::DefaultRegister{B}) where B = reshape(reg.state, fill(2, nactive(reg))..., :)
+hypercubic(reg::DefaultRegister{B}) where B = reshape(reg.state, ntuple(i->2, Val(nactive(reg)))..., :)
 copy(r::DefaultRegister{B}) where B = DefaultRegister{B}(copy(state(r)))
 normalize!(r::DefaultRegister) = (batch_normalize!(r.state); r)
 

@@ -90,39 +90,6 @@ end
 # NOTE: this is just a temperory fix for v0.7. We should overload mul! in
 # the future (when we start to drop v0.6) to enable buildin lazy evaluation.
 
-#=
-for MTYPE in [PermMatrix, IMatrix]
-
-    @eval begin
-
-        function *(lhs::Adjoint{T, <:AbstractArray{T}}, rhs::$MTYPE) where {T <: Real}
-            transpose(lhs.parent) * rhs
-        end
-
-        function *(lhs::Adjoint{T, <:AbstractArray{T}}, rhs::$MTYPE) where {T <: Complex}
-            conj(transpose(lhs.parent)) * rhs
-        end
-
-        function *(lhs::Adjoint{T, <:AbstractVector{T}}, rhs::$MTYPE) where {T <: Complex}
-            conj(transpose(lhs.parent)) * rhs
-        end
-
-        function *(lhs::Adjoint{T, <:AbstractVector{T}}, rhs::$MTYPE) where {T <: Real}
-            transpose(lhs.parent) * rhs
-        end
-
-        function *(lhs::Transpose{T, <:AbstractArray{T}}, rhs::$MTYPE) where T
-            copy(transpose(lhs.parent)) * rhs
-        end
-
-        function *(lhs::Transpose{T, <:AbstractVector{T}}, rhs::$MTYPE) where T
-            transpose(transpose(rhs) * lhs.parent)
-        end
-
-    end
-end # ex
-=#
-
 *(x::Adjoint{<:Any,<:AbstractVector}, D::PermMatrix) = Matrix(x)*D
 *(x::Transpose{<:Any,<:AbstractVector}, D::PermMatrix) = Matrix(x)*D
 *(A::Adjoint{<:Any,<:AbstractArray}, D::PermMatrix) = Adjoint(adjoint(D)*parent(A))

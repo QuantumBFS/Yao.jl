@@ -5,7 +5,7 @@ using Yao.Blocks
 using Yao.Boost
 
 @testset "Single Control" begin
-    cb = ControlBlock{2}((2,), X, 1)
+    cb = ControlBlock{2}((1,), X, 2)
     @test mat(cb) ≈ mat(CNOT)
 
     for G in [X, Y, Z, H]
@@ -17,7 +17,7 @@ using Yao.Boost
 end
 
 @testset "Multiple Control" begin
-    mcb = ControlBlock{3}((3, 2), X, 1)
+    mcb = ControlBlock{3}((1, 2), X, 3)
     @test mat(mcb) ≈ mat(Toffoli)
     for G in [X, Y, Z, H]
         cb = ControlBlock{6}((2, 5, 1), (1, 0, 0), G, 3)

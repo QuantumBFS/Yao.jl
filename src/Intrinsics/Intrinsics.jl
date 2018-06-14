@@ -23,6 +23,7 @@ export testall, testany, testval, setbit, flip, neg, swapbits, takebit
 export indices_with, bitarray, packbits, controller
 export bdistance
 export onehotvec
+export hypercubic, reorder
 
 include("Basis.jl")
 

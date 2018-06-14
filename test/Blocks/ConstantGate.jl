@@ -4,6 +4,11 @@ using Compat.LinearAlgebra
 using Compat.SparseArrays
 using Yao
 using Yao.Blocks
+using Yao.LuxurySparse
+using Yao.Intrinsics
+
+CNOT_R = PermMatrix([1, 2, 4, 3], ones(ComplexF64, 4))
+Toffoli_R = PermMatrix([1, 2, 3, 4, 5, 6, 8, 7], ones(ComplexF64, 8))
 
 @testset "builtins" begin
     for each in [X, Y, Z, H]
@@ -12,6 +17,14 @@ using Yao.Blocks
         @test isreflexive(each) == true
         @test ishermitian(each) == true
     end
+    @test nqubits(CNOT) == 2
+    @test isunitary(CNOT) == true
+    @test isreflexive(CNOT) == true
+    @test ishermitian(CNOT) == true
+    @test nqubits(Toffoli) == 3
+    @test isunitary(Toffoli) == true
+    @test isreflexive(Toffoli) == true
+    @test ishermitian(Toffoli) == true
 
 
     @testset "matrix" begin
@@ -25,6 +38,8 @@ using Yao.Blocks
             @test mat(each) ≈ MAT
 
         end
+        mat(CNOT) |> reorder |> CNOT_R
+        mat(Toffoli) |> reorder |> Toffoli_R
     end
 end
 

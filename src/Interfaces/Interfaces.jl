@@ -5,6 +5,7 @@ using ..Registers
 using ..Blocks
 using ..Blocks: _blockpromote
 using ..CacheServers
+using ..Intrinsics
 
 # import package configs
 import ..Yao: DefaultType
