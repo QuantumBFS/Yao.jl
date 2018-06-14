@@ -1,3 +1,5 @@
+# This part declares factory functions for constructing composite blocks
+
 function parse_block(n::Int, x::Function)
     x(n)
 end
