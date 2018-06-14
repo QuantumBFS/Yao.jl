@@ -173,3 +173,28 @@ function controller(cbits, cvals)
     onemask = any(onepos) ? bmask(cbits[onepos]...) : 0
     return b->testval(b, do_mask, onemask)
 end
+
+"""
+subspace spanned by bits placed on given positions.
+"""
+function subspace(num_bit::Int, poss::Vector{Int}, base::Int)
+    if length(poss) == 0
+        return [base]
+    else
+        rest, pos = poss[1:end-1], poss[end]
+        # efficiency of vcat?
+        return vcat(subspace(num_bit, rest, base), subspace(num_bit, rest, flip(base, bmask(pos))))
+    end
+end
+
+function itercontrol(num_bit::Int, poss::Vector{Int}, vals::Vector{Int})
+    remain_poss = setdiff(1:num_bit, poss)
+    subspace(num_bit, remain_poss, bmask(poss[vals.!=0]...))
+end
+
+################### Test for subspace and itercontrol #################
+import Compat.Test
+@test itercontrol(2, [1], [1]) == [1, 3]
+@test itercontrol(2, [2], [1]) == [2, 3]
+@test subspace(2, [1], 0) == [0, 1]
+@test subspace(2, [2], 1) == [1, 3]
