@@ -42,7 +42,7 @@ g = ChainBlock(
 )
 
 reg = rand_state(2)
-@test statevec(g |> on(reg)) ≈ mat(g) * reg
+@test statevec(with(g, reg)) ≈ mat(g) * reg
 end
 
 @testset "iteration" begin

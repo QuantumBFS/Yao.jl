@@ -49,6 +49,11 @@ function with!(f::Function, r::AbstractRegister)
     r
 end
 
+function with!(g::AbstractBlock, r::AbstractRegister)
+    apply!(r, g)
+    r
+end
+
 """
     with(f, register)
 
@@ -57,6 +62,12 @@ Provide a copy context for blocks operating this register.
 function with(f::Function, r::AbstractRegister)
     cr = copy(r)
     f(Context(cr))
+    cr
+end
+
+function with(g::AbstractBlock, r::AbstractRegister)
+    cr = copy(r)
+    apply!(cr, g)
     cr
 end
 
