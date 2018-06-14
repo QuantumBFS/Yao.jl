@@ -29,7 +29,6 @@ end
 adjoint(S::PermMatrix{<:Real}) = transpose(S)
 adjoint(S::PermMatrix{<:Complex}) = conj(transpose(S))
 
-
 # scalar
 import Base: *, /, ==, +, -, ≈
 *(A::IMatrix{N, T}, B::Number) where {N, T} = Diagonal(fill(promote_type(T, eltype(B))(B), N))
