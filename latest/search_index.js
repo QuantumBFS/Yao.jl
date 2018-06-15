@@ -45,7 +45,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
     "title": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
     "category": "section",
-    "text": "First, you have to use this package in Julia.using YaoThen let\'s define the oracle, it is a function of the number of qubits. The whole oracle looks like this:n = 4\ncircuit(n) = chain(\n    n,\n    repeat(X, [1, ]),\n    kron(i=>H for i in 2:n),\n    control([2, ], 1=>X),\n    control([4, ], 3=>X),\n    control([3, ], 1=>X),\n    control([4, ], 3=>X),\n    kron(i=>H for i in 1:n),\n)Let me explain what happens here. Firstly, we have a X gate which is applied to the first qubit. We need decide how we calculate this numerically, Yao offers serveral different approach to this. The simplest (but not the most efficient) one is to use kronecker product which will product X with I on other lines to gather an operator in the whole space and then apply it to the register. The first argument n means the number of qubits.kron(n, 1=>X)Similar with kron, we then need to apply some controled gates.control(n, [2, ], 1=>X)This means there is a X gate on the first qubit that is controled by the second qubit. In fact, you can also create a controled gate with multiple control qubits, likecontrol(n, [2, 3], 1=>X)In the end, we need to apply H gate to all lines, of course, you can do it by kron, but we offer something more efficient called roll, this applies a single gate each time on each qubit without calculating a new large operator, which will be extremely efficient for calculating small gates that tiles on almost every lines.The whole circuit is a chained structure of the above blocks. And we actually store a quantum circuit in a tree structure.circuitAfter we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.r = circuit(4) |> on(register(bit\"0000\"))\nrLet\'s check the output:statevec(r)We have a GHZ state here, try to measure the first qubitmeasure(r, 5)GHZ state will collapse to 0000rangle or 1111rangle due to entanglement!"
+    "text": "First, you have to use this package in Julia.using YaoThen let\'s define the oracle, it is a function of the number of qubits. The whole oracle looks like this:n = 4\ncircuit(n) = chain(\n    n,\n    repeat(X, [1, ]),\n    kron(i=>H for i in 2:n),\n    control([2, ], 1=>X),\n    control([4, ], 3=>X),\n    control([3, ], 1=>X),\n    control([4, ], 3=>X),\n    kron(i=>H for i in 1:n),\n)Let me explain what happens here. Firstly, we have a X gate which is applied to the first qubit. We need decide how we calculate this numerically, Yao offers serveral different approach to this. The simplest (but not the most efficient) one is to use kronecker product which will product X with I on other lines to gather an operator in the whole space and then apply it to the register. The first argument n means the number of qubits.kron(n, 1=>X)Similar with kron, we then need to apply some controled gates.control(n, [2, ], 1=>X)This means there is a X gate on the first qubit that is controled by the second qubit. In fact, you can also create a controled gate with multiple control qubits, likecontrol(n, [2, 3], 1=>X)In the end, we need to apply H gate to all lines, of course, you can do it by kron, but we offer something more efficient called roll, this applies a single gate each time on each qubit without calculating a new large operator, which will be extremely efficient for calculating small gates that tiles on almost every lines.The whole circuit is a chained structure of the above blocks. And we actually store a quantum circuit in a tree structure.circuitAfter we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.r = with(register(bit\"0000\")) do r\n  r |> circuit(4)\nendLet\'s check the output:statevec(r)We have a GHZ state here, try to measure the first qubitmeasure(r, 5)GHZ state will collapse to 0000rangle or 1111rangle due to entanglement!"
 },
 
 {
@@ -209,22 +209,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Yao.Interfaces.on!-Tuple{Yao.Registers.AbstractRegister,Vararg{Any,N} where N}",
-    "page": "Interfaces",
-    "title": "Yao.Interfaces.on!",
-    "category": "method",
-    "text": "on!(register, [params...]) -> f(block)\n\nReturns a lambda function that takes a block as its argument with configurations on this register in place.\n\n\n\n"
-},
-
-{
-    "location": "man/interfaces/#Yao.Interfaces.on-Tuple{Yao.Registers.AbstractRegister,Vararg{Any,N} where N}",
-    "page": "Interfaces",
-    "title": "Yao.Interfaces.on",
-    "category": "method",
-    "text": "on(register, [params...]) -> f(block)\n\nReturns a lambda function that takes a block as its argument with configurations on a copy of this register.\n\n\n\n"
-},
-
-{
     "location": "man/interfaces/#Yao.Interfaces.phase",
     "page": "Interfaces",
     "title": "Yao.Interfaces.phase",
@@ -237,7 +221,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Yao.Interfaces.roll",
     "category": "function",
-    "text": "roll([n::Int,] block::MatrixBlock) -> Roller{n}\n\nConstruct a Roller block, which is a faster than KronBlock to calculate similar small blocks tile on the whole address.\n\n\n\n"
+    "text": "roll([n::Int, ], blocks...) -> Roller{n}\n\nConstruct a Roller block, which is a faster than KronBlock to calculate similar small blocks tile on the whole address.\n\n\n\n"
 },
 
 {
@@ -270,6 +254,22 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Interfaces.swap",
     "category": "function",
     "text": "swap([n], [type], line1, line2) -> Swap\n\nReturns a swap gate on line1 and line2\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.with!-Tuple{Function,Yao.Registers.AbstractRegister}",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.with!",
+    "category": "method",
+    "text": "with!(f, register)\n\nProvide a writable context for blocks operating this register.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.with-Tuple{Function,Yao.Registers.AbstractRegister}",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.with",
+    "category": "method",
+    "text": "with(f, register)\n\nProvide a copy context for blocks operating this register.\n\n\n\n"
 },
 
 {
