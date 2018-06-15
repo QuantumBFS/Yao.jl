@@ -1,21 +1,3 @@
-"""
-    AddressConflictError <: Exception
-
-Address conflict error in Block Construction.
-"""
-struct AddressConflictError <: Exception
-    msg::String
-end
-
-"""
-    QubitMismatchError <: Exception
-
-Qubit number mismatch error when applying a Block to a Register or concatenating Blocks.
-"""
-struct QubitMismatchError <: Exception
-    msg::String
-end
-
 function _assert_addr_inbounds(n::Int, addrs::Vector{UnitRange{Int}})
     addrs = sort(addrs, by=x->x.start)
     (minimum(first(addrs)) > 0 && maximum(last(addrs)) <= n) || throw(AddressConflictError("addr out of bounds"))

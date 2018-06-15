@@ -3,11 +3,7 @@ import .Kernels
 using Yao, Lazy, Compat
 
 function entangler(pairs)
-    seq = []
-    for (ctrl, u) in pairs
-        push!(seq, X(u) |> C(ctrl))
-    end
-    compose(seq)
+    chain(control([cirl, ], u=>X) for (ctrl, u) in pairs)
 end
 
 layer(x::Symbol) = layer(Val(x))

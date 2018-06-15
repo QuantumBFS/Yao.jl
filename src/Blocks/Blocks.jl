@@ -25,7 +25,7 @@ export update_cache
 
 # module APIs
 export usedbits, addrs, blocks, @const_gate
-export nqubits, nactive, nparameters, mat, datatype, parameters, reorder, invorder
+export nqubits, nactive, nparameters, mat, datatype, parameters, parameter_type, reorder, invorder
 export apply!, dispatch!
 export ishermitian, isunitary, isreflexive
 

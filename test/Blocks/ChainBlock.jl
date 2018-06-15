@@ -42,7 +42,7 @@ g = ChainBlock(
 )
 
 reg = rand_state(2)
-@test statevec(g |> on(reg)) ≈ mat(g) * reg
+@test statevec(with(g, reg)) ≈ mat(g) * reg
 end
 
 @testset "iteration" begin
@@ -75,7 +75,6 @@ end
 
 @testset "traits" begin
     # TODO: check traits when primitive blocks' traits are all defined
-
     g = ChainBlock(X, Y)
     @test isunitary(g) == true
     @test isreflexive(g) == false

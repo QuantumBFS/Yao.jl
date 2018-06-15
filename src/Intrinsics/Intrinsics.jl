@@ -8,6 +8,8 @@ using ..LuxurySparse
 import ..LuxurySparse: I
 import ..Yao: nqubits, reorder, invorder
 
+include("Exceptions.jl")
+
 # MathUtils
 export batch_normalize!, batch_normalize
 export rolldims2!, rolldims!
