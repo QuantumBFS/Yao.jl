@@ -39,6 +39,10 @@ function |>(io::Context, block::AbstractBlock)
     apply!(io.r, block)
 end
 
+function |>(io::Context, f::Function)
+    io |> f(nqubits(io.r))
+end
+
 """
     with!(f, register)
 

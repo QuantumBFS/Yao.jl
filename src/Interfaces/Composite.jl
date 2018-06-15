@@ -27,27 +27,25 @@ chain(::Type{T}, n::Int) where T = ChainBlock{n, T}([])
 chain(n::Int) = chain(DefaultType, n)
 chain() = n -> chain(n)
 
+function chain(n::Int, blocks...)
+    ChainBlock([parse_block(n, each) for each in blocks])
+end
+
+chain(blocks...) = n -> chain(n, blocks...)
+
 function chain(n::Int, blocks)
-    if blocks isa Union{Function, MatrixBlock, Pair}
-        ChainBlock([parse_block(n, blocks)])
-    else
-        ChainBlock(MatrixBlock{n}[parse_block(n, each) for each in blocks])
-    end
+    ChainBlock([parse_block(n, each) for each in blocks])
+end
+
+function chain(n::Int, f::Function)
+    ChainBlock([f(n)])
+end
+
+function chain(blocks::MatrixBlock...)
+    ChainBlock(blocks...)
 end
 
 chain(blocks) = n -> chain(n, blocks)
-
-function chain(blocks::Vector{MatrixBlock{N}}) where N
-    ChainBlock(Vector{MatrixBlock{N}}(blocks))
-end
-
-function chain(n, blocks...)
-    ChainBlock(MatrixBlock{n}[parse_block(n, each) for each in blocks])
-end
-
-function chain(blocks::MatrixBlock{N}...) where N
-    ChainBlock(collect(MatrixBlock{N}, blocks))
-end
 
 # 2.2 kron block
 import Base: kron
@@ -150,7 +148,7 @@ function roll(n::Int, blocks...)
             line, b = each
             k = line - curr_head
 
-            push!(list, kron(k, i=>I2 for i=1:k))
+            k > 0 && push!(list, kron(k, i=>I2 for i=1:k))
             push!(list, b)
             curr_head = line + nqubits(b)
         end
