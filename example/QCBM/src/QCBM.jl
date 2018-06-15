@@ -32,8 +32,6 @@ function train!(qcbm::Model, ptrain, optim; learning_rate=0.1, maxiter=100)
         push!(history, curr_loss)
         println(i, " step, loss = ", curr_loss)
 
-        # Warn: we need a primitive block to enable
-        # BLAS here.
         params = parameters(qcbm)
         Knet.update!(params, grad, optim)
         dispatch!(qcbm, params)

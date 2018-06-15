@@ -70,6 +70,10 @@ end
         dispatch!(*, g, [0.1, 0.1])
         @test parameters(g[1]) ≈ 0.1
         @test parameters(g[2]) ≈ 0.2
+
+        dispatch!(-, g, [0.1, 0.2])
+        @test parameters(g[1]) ≈ 0.0
+        @test parameters(g[2]) ≈ 0.0
     end
 
 end
