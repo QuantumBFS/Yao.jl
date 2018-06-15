@@ -113,6 +113,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/yao/#Yao.reorder",
+    "page": "Yao",
+    "title": "Yao.reorder",
+    "category": "function",
+    "text": "Reorder the lines of qubits.\n\n\n\n"
+},
+
+{
     "location": "man/yao/#Yao-1",
     "page": "Yao",
     "title": "Yao",
@@ -433,6 +441,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/registers/#Yao.Intrinsics.hypercubic",
+    "page": "Registers",
+    "title": "Yao.Intrinsics.hypercubic",
+    "category": "function",
+    "text": "hypercubic(r::AbstractRegister) -> AbstractArray\n\nReturn the hypercubic form (high dimensional tensor) of this register, only active qubits are considered.\n\n\n\n"
+},
+
+{
     "location": "man/registers/#Yao.Registers.extend!-Union{Tuple{B}, Tuple{T}, Tuple{Yao.Registers.DefaultRegister{B,T},Int64}} where T where B",
     "page": "Registers",
     "title": "Yao.Registers.extend!",
@@ -454,14 +470,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Registers.focuspair!",
     "category": "method",
     "text": "focuspair(locs::Int...) -> NTuple{2, Function}\n\nReturn focus! and relax! function for specific lines.\n\n\n\n"
-},
-
-{
-    "location": "man/registers/#Yao.Registers.hypercubic",
-    "page": "Registers",
-    "title": "Yao.Registers.hypercubic",
-    "category": "function",
-    "text": "hypercubic(r::AbstractRegister) -> AbstractArray\n\nReturn the hypercubic form (high dimensional tensor) of this register, only active qubits are considered.\n\n\n\n"
 },
 
 {
@@ -510,6 +518,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Registers.relax!",
     "category": "function",
     "text": "relax!(reg::DefaultRegister; nbit::Int=nqubits(reg)) -> DefaultRegister\nrelax!(reg::DefaultRegister, bits::Ints; nbit::Int=nqubits(reg)) -> DefaultRegister\nrelax!(bits::Ints...; nbit::Int=-1) -> Function\n\nInverse transformation of focus, with nbit is the number of active bits of target register.\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.stack-Tuple{Vararg{Yao.Registers.DefaultRegister,N} where N}",
+    "page": "Registers",
+    "title": "Yao.Registers.stack",
+    "category": "method",
+    "text": "stack(regs::DefaultRegister...) -> DefaultRegister\n\nstack multiple registers into a batch.\n\n\n\n"
 },
 
 {
@@ -1113,6 +1129,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/intrinsics/#Yao.Intrinsics.reordered_basis-Tuple{Int64,Array{Int64,1}}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.reordered_basis",
+    "category": "method",
+    "text": "Reordered Basis\n\n\n\n"
+},
+
+{
     "location": "man/intrinsics/#Yao.Intrinsics.setbit-Tuple{Int64,Int64}",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.setbit",
@@ -1305,7 +1329,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s406,1} where #s406<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s405,1} where #s405<:(AbstractArray{T,2} where T),Array{Int64,1}}",
+    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s408,1} where #s408<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s407,1} where #s407<:(AbstractArray{T,2} where T),Array{Int64,1}}",
     "page": "Boost",
     "title": "Yao.Boost.general_controlled_gates",
     "category": "method",
