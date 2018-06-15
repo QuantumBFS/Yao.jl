@@ -82,11 +82,12 @@ function dispatch!(x::CompositeBlock, itr)
         else
             dispatch!(block, params...)
         end
-        count += 1
+        count += nparameters(block)
     end
     x
 end
 
+# TODO: polish this later
 function dispatch!(f::Function, x::CompositeBlock, itr)
     @assert nparameters(x) == length(itr) "number of parameters does not match"
 
@@ -98,7 +99,7 @@ function dispatch!(f::Function, x::CompositeBlock, itr)
         else
             dispatch!(f, block, params...)
         end
-        count += 1
+        count += nparameters(block)
     end
     x
 end
