@@ -69,9 +69,13 @@ We would like a framework that is about to have the following features:
 
 To contribute to this project, please open an [issue](https://github.com/QuantumBFS/Yao.jl/issues) first to discuss with us in case we may not accept your PR.
 
+## Related work
+
+[ProjectQ](https://github.com/ProjectQ-Framework/ProjectQ): An open source software framework for quantum computing
+
 ## Author
 
-This project is en effort of QuantumBFS, an open source organization for quantum science founded in Prof. Lei Wang's group of Institute of Physics, Chinese Academy of Science. All the contributors are listed in the [contributors](https://github.com/QuantumBFS/Yao.jl/graphs/contributors).
+This project is an effort of QuantumBFS, an open source organization for quantum science. All the contributors are listed in the [contributors](https://github.com/QuantumBFS/Yao.jl/graphs/contributors).
 
 ## License
 
