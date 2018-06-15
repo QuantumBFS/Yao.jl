@@ -13,7 +13,7 @@ method to enable key value cache.
 abstract type PrimitiveBlock{N, T} <: MatrixBlock{N, T} end
 
 function dispatch!(f::Function, x::PrimitiveBlock, params...)
-    dispatch!(x, (parameters(x) .+ params)...)
+    dispatch!(x, f.(parameters(x), params)...)
     x
 end
 
