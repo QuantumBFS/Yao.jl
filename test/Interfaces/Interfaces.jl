@@ -7,6 +7,29 @@ using Yao
 using Yao.Blocks
 using Yao.Intrinsics
 
+@testset "with context" begin
+    r = register(bit"00000")
+    with!(r) do r
+        r |> chain(repeat(X), kron(3=>Y))
+        r |> roll(1=>phase(0.1))
+    end
+    @test statevec(r) != statevec(register(bit"000000"))
+
+    r = register(bit"0000")
+    with(r) do r
+        r |> chain(4, repeat(X))
+    end
+
+    @test statevec(r) ≈ statevec(register(bit"0000"))
+
+    r = register(bit"0000")
+    with(repeat(4, X), r)
+    @test statevec(r) ≈ statevec(register(bit"0000"))
+
+    with!(repeat(4, X), r)
+    @test statevec(r) ≈ statevec(register(bit"1111"))
+end
+
 @testset "phase gate" begin
     @test phase() isa PhaseGate{Float64}
     @test shift() isa ShiftGate{Float64}

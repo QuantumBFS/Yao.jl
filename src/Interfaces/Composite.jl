@@ -1,3 +1,5 @@
+# This part declares factory functions for constructing composite blocks
+
 function parse_block(n::Int, x::Function)
     x(n)
 end
@@ -25,27 +27,25 @@ chain(::Type{T}, n::Int) where T = ChainBlock{n, T}([])
 chain(n::Int) = chain(DefaultType, n)
 chain() = n -> chain(n)
 
+function chain(n::Int, blocks...)
+    ChainBlock([parse_block(n, each) for each in blocks])
+end
+
+chain(blocks...) = n -> chain(n, blocks...)
+
 function chain(n::Int, blocks)
-    if blocks isa Union{Function, MatrixBlock, Pair}
-        ChainBlock([parse_block(n, blocks)])
-    else
-        ChainBlock(MatrixBlock{n}[parse_block(n, each) for each in blocks])
-    end
+    ChainBlock([parse_block(n, each) for each in blocks])
+end
+
+function chain(n::Int, f::Function)
+    ChainBlock([f(n)])
+end
+
+function chain(blocks::MatrixBlock...)
+    ChainBlock(blocks...)
 end
 
 chain(blocks) = n -> chain(n, blocks)
-
-function chain(blocks::Vector{MatrixBlock{N}}) where N
-    ChainBlock(Vector{MatrixBlock{N}}(blocks))
-end
-
-function chain(n, blocks...)
-    ChainBlock(MatrixBlock{n}[parse_block(n, each) for each in blocks])
-end
-
-function chain(blocks::MatrixBlock{N}...) where N
-    ChainBlock(collect(MatrixBlock{N}, blocks))
-end
 
 # 2.2 kron block
 import Base: kron
@@ -130,15 +130,38 @@ rollrepeat(n::Int, block::MatrixBlock) = Roller{n}(block)
 rollrepeat(block::MatrixBlock) = n->rollrepeat(n, block)
 
 """
-    roll([n::Int,] block::MatrixBlock) -> Roller{n}
+    roll([n::Int, ], blocks...) -> Roller{n}
 
 Construct a [`Roller`](@ref) block, which is a faster than [`KronBlock`](@ref) to calculate
 similar small blocks tile on the whole address.
 """
 function roll end
 
-roll(blocks::MatrixBlock...) = n->Roller(blocks)
-roll(n, blocks::MatrixBlock...) = Roller{n, blocks|>_blockpromote, typeof(blocks)}(blocks)
+function roll(n::Int, blocks...)
+    curr_head = 1
+    list = []
+    for each in blocks
+        if each isa MatrixBlock
+            push!(list, each)
+            curr_head += nqubits(each)
+        elseif each isa Pair{Int, <:MatrixBlock}
+            line, b = each
+            k = line - curr_head
+
+            k > 0 && push!(list, kron(k, i=>I2 for i=1:k))
+            push!(list, b)
+            curr_head = line + nqubits(b)
+        end
+    end
+
+    k = n - curr_head + 1
+    k > 0 && push!(list, kron(k, i=>I2 for i=1:k))
+
+    sum(nqubits, list) == n || throw(ErrorException("number of qubits mismatch"))
+    Roller(list...)
+end
+
+roll(blocks...) = n->roll(n, blocks...)
 
 # 2.5 repeat
 

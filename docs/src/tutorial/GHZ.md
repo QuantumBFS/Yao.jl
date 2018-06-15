@@ -64,8 +64,9 @@ input it into the oracle. You will then receive this register after
 processing it.
 
 ```@example GHZ
-r = circuit(4) |> on(register(bit"0000"))
-r
+r = with(register(bit"0000")) do r
+  r |> circuit(4)
+end
 ```
 
 Let's check the output:

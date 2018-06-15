@@ -19,5 +19,5 @@ nonzeros(M::IMatrix{N, T}) where {N, T} = ones(T, N)
 ishermitian(D::IMatrix) = true
 notdense(::IMatrix) = true
 
-similar(::IMatrix{N, Tv}) where {N, Tv} = IMatrix{N, Tv}()
+similar(::IMatrix{N, Tv}, ::Type{T}) where {N, Tv, T} = IMatrix{N, T}()
 copyto!(A::IMatrix{N}, B::IMatrix{N}) where N = A
