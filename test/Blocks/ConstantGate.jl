@@ -38,8 +38,8 @@ Toffoli_R = PermMatrix([1, 2, 3, 4, 5, 6, 8, 7], ones(ComplexF64, 8))
             @test mat(each) ≈ MAT
 
         end
-        mat(CNOT) |> reorder |> CNOT_R
-        mat(Toffoli) |> reorder |> Toffoli_R
+        @test mat(CNOT) |> invorder == CNOT_R
+        @test mat(Toffoli) |> invorder == Toffoli_R
     end
 end
 

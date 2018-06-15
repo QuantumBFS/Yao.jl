@@ -3,7 +3,6 @@ using Compat.Test
 using Compat.LinearAlgebra
 using Compat.SparseArrays
 
-using Yao.Registers
 using Yao.Intrinsics
 
 @testset "reorder" begin
@@ -16,10 +15,5 @@ using Yao.Intrinsics
     ⊗ = kron
     @test reorder(C ⊗ B ⊗ A, [3,1,2]) ≈ B ⊗ A ⊗ C
     @test invorder(C ⊗ B ⊗ A) ≈ A ⊗ B ⊗ C
-
-
-    v1, v2, v3 = randn(2), randn(2), randn(2)
-    using Compat.Test
-    @test repeat(register(v1 ⊗ v2 ⊗ v3), 2) |> invorder! ≈ repeat(register(v3 ⊗ v2 ⊗ v1), 2)
 
 end

@@ -101,4 +101,9 @@ end
     reg = register(bit"00000") + register(bit"11001") |> normalize!;
     @test stack(reg, reg) |> nbatch == 2
     @test repeat(reg, 5) |> nbatch == 5
+
+    ⊗ = kron
+    v1, v2, v3 = randn(2), randn(2), randn(2)
+    @test repeat(register(v1 ⊗ v2 ⊗ v3), 2) |> invorder! ≈ repeat(register(v3 ⊗ v2 ⊗ v1), 2)
+    @test repeat(register(v1 ⊗ v2 ⊗ v3), 2) |> reorder!(3,2,1) ≈ repeat(register(v3 ⊗ v2 ⊗ v1), 2)
 end

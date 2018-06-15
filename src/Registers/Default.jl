@@ -45,6 +45,12 @@ copy(r::DefaultRegister{B}) where B = DefaultRegister{B}(copy(state(r)))
 normalize!(r::DefaultRegister) = (batch_normalize!(r.state); r)
 
 similar(r::DefaultRegister{B, T}) where {B, T} = DefaultRegister{B}(similar(r.state))
+
+"""
+    stack(regs::DefaultRegister...) -> DefaultRegister
+
+stack multiple registers into a batch.
+"""
 stack(regs::DefaultRegister...) = DefaultRegister{sum(nbatch, regs)}(hcat((reg.state for reg in regs)...))
 Base.repeat(reg::DefaultRegister{B}, n::Int) where B = DefaultRegister{B*n}(hcat((reg.state for i=1:n)...))
 
@@ -153,3 +159,15 @@ else
         print(io, "    active qubits: ", nactive(r), "/", nqubits(r))
     end
 end
+
+############## Reordering #################
+function reorder!(reg::DefaultRegister, orders)
+    for i in 1:size(reg.state, 2)
+        reg.state[:,i] = reorder(reg.state[:, i], orders)
+    end
+    reg
+end
+
+reorder!(orders::Int...) = reg::DefaultRegister -> reorder!(reg, [orders...])
+
+invorder!(reg::DefaultRegister) = reorder!(reg, nqubits(reg):-1:1)
