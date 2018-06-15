@@ -115,3 +115,10 @@ randn(T::Type{Complex{F}}, n::Int...) where F = randn(F, n...) + im*randn(F, n..
 
 rotate_matrix(gate::AbstractMatrix, θ::Real) = expm(-0.5im*θ*Matrix(gate))
 linop2dense(applyfunc!::Function, num_bit::Int) = applyfunc!(eye(ComplexF64, 1<<num_bit))
+hypercubic(A::Array) = reshape(A, fill(2, size(A) |> prod |> log2i)...)
+function reorder(A::Matrix)
+    M, N = size(A)
+    m, n = M |> log2i, N |> log2i
+    A = A |> hypercubic
+    reshape(permutedims(A, [m:-1:1..., n+m:-1:m+1...]), M, N)
+end

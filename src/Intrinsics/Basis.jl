@@ -1,7 +1,6 @@
 const DInt = Int
 const Ints = Union{Vector{Int}, Int, UnitRange{Int}}
 const DInts = Union{Vector{DInt}, DInt, UnitRange{DInt}}
-
 """
     basis(num_bit::Int) -> UnitRange{Int}
     basis(state::AbstractArray) -> UnitRange{Int}
@@ -172,4 +171,53 @@ function controller(cbits, cvals)
     onepos = cvals.==1
     onemask = any(onepos) ? bmask(cbits[onepos]...) : 0
     return b->testval(b, do_mask, onemask)
+end
+
+struct Reorderer{N}
+    orders::Vector{Int}
+    taker::Vector{Int}
+    differ::Vector{Int}
+end
+
+"""Reordered Basis"""
+reordered_basis(nbit::Int, orders::Vector{Int}) = Reorderer{nbit}(orders, bmask.(orders), (1:nbit).-orders)
+
+Base.start(ro::Reorderer)::Int = 0
+Base.done(ro::Reorderer{N}, state::Int) where N = state == 1<<N
+function Base.next(ro::Reorderer, state::Int)::Tuple{Int, Int}
+    _reorder(state, ro.taker, ro.differ), state+1
+end
+Base.eltype(::Reorderer) = Int
+Base.eltype(::Type{Reorderer}) = Int
+Base.length(::Reorderer{N}) where N = 1<<N
+Base.size(::Reorderer{N}) where N = 1<<N
+Base.iteratoreltype(::Type{Reorderer}) = Int
+Base.iteratorsize(::Type{Reorderer}) = 1<<N
+
+@inline function _reorder(b::Int, taker::Vector{Int}, differ::Vector{Int})::Int
+    out::Int = 0
+    @simd for i = 1:length(differ)
+        @inbounds out += (b&taker[i]) << differ[i]
+    end
+    out
+end
+
+function reorder(v::AbstractVector, orders)
+    nbit = length(orders)
+    nbit == length(v) |> log2i || throw(DimensionMismatch("size of array not match length of order"))
+    nv = similar(v)
+    taker, differ = bmask.(orders), (1:nbit).-orders
+
+    for b in basis(nbit)
+        @inbounds nv[b+1] = v[_reorder(b, taker, differ)+1]
+    end
+    nv
+end
+
+function reorder(A::Union{Matrix, SparseMatrixCSC}, orders)
+    M, N = size(A)
+    nbit = M|>log2i
+    od = [1+b for b in reordered_basis(nbit, orders)]
+    od = od |> invperm
+    A[od, od]
 end

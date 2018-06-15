@@ -17,3 +17,7 @@ end
 @testset "tuple tools" begin
 include("TupleTools.jl")
 end
+
+@testset "reorder" begin
+include("reorder.jl")
+end

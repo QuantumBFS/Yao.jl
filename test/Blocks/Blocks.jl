@@ -24,3 +24,6 @@ end
 @testset "measure" begin
 include("Measure.jl")
 end
+@testset "reorder" begin
+include("reorder.jl")
+end

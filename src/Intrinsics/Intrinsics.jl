@@ -6,7 +6,7 @@ using Compat.SparseArrays
 
 using ..LuxurySparse
 import ..LuxurySparse: I
-import ..Yao: nqubits
+import ..Yao: nqubits, reorder, invorder
 
 include("Exceptions.jl")
 
@@ -25,6 +25,7 @@ export testall, testany, testval, setbit, flip, neg, swapbits, takebit
 export indices_with, bitarray, packbits, controller
 export bdistance
 export onehotvec
+export hypercubic, reordered_basis, Reorderer, reorder, invorder
 
 include("Basis.jl")
 
