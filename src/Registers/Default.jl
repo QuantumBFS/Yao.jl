@@ -45,6 +45,8 @@ copy(r::DefaultRegister{B}) where B = DefaultRegister{B}(copy(state(r)))
 normalize!(r::DefaultRegister) = (batch_normalize!(r.state); r)
 
 similar(r::DefaultRegister{B, T}) where {B, T} = DefaultRegister{B}(similar(r.state))
+stack(regs::DefaultRegister...) = DefaultRegister{sum(nbatch, regs)}(hcat((reg.state for reg in regs)...))
+Base.repeat(reg::DefaultRegister{B}, n::Int) where B = DefaultRegister{B*n}(hcat((reg.state for i=1:n)...))
 
 # -> zero_state is an easier interface
 zero_state(::Type{T}, n::Int, nbatch::Int=1) where T = register((arr=zeros(T, 1<<n, nbatch); arr[1,:]=1; arr))

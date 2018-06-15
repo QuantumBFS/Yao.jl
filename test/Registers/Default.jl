@@ -96,3 +96,9 @@ end
     @test copy(reg) |> extend!(2) |> nactive == 5
     @test copy(reg) |> extend!(2) |> focus!(4,5) |> measure_remove! |> first |> relax! ≈ reg
 end
+
+@testset "stack repeat" begin
+    reg = register(bit"00000") + register(bit"11001") |> normalize!;
+    @test stack(reg, reg) |> nbatch == 2
+    @test repeat(reg, 5) |> nbatch == 5
+end

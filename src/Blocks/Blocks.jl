@@ -13,7 +13,7 @@ using ..CacheServers
 
 # import package APIs
 import ..Yao
-import ..Yao: DefaultType, nqubits, nactive
+import ..Yao: DefaultType, nqubits, nactive, reorder, invorder
 import ..Registers: focus!, relax!
 import ..Intrinsics: ishermitian, isunitary, isreflexive
 import ..CacheServers: update!, iscached, clear!, pull, iscacheable
@@ -25,7 +25,7 @@ export update_cache
 
 # module APIs
 export usedbits, addrs, blocks, @const_gate
-export nqubits, nactive, nparameters, mat, datatype, parameters
+export nqubits, nactive, nparameters, mat, datatype, parameters, reorder, invorder
 export apply!, dispatch!
 export ishermitian, isunitary, isreflexive
 
@@ -34,5 +34,6 @@ include("MatrixBlock.jl")
 # others
 include("Measure.jl")
 include("IOSyntax.jl")
+include("reorder.jl")
 
 end

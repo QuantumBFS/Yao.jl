@@ -1,4 +1,4 @@
-export nqubits, nactive
+export nqubits, nactive, reorder, invorder
 
 """
     nqubits(m::AbstractRegister) -> Int
@@ -18,3 +18,9 @@ function nqubits end
 Returns number of active qubits
 """
 function nactive end
+
+"""
+Reorder the lines of qubits.
+"""
+function reorder end
+invorder(v) = reorder(v, collect(nqubits(v):-1:1))

@@ -173,34 +173,21 @@ function controller(cbits, cvals)
     return b->testval(b, do_mask, onemask)
 end
 
-function _breorder(b, orders::Vector{Int})
-    @simd for i = 1:length(orders)
-        @inbounds res[b+1] += (b&taker[i]) << i-orders[i]
-    end
-end
-
-function breorder(nbit::Int, orders::Vector{Int})
-    res = zeros(Int, 1<<nbit)
-    taker = [bmask(o) for o in orders]
-    for b in basis(nbit)
-    end
-    res
-end
-
 struct Reorderer{N}
     orders::Vector{Int}
     taker::Vector{Int}
     differ::Vector{Int}
 end
 
-function reordered_basis(nbit::Int, orders::Vector{Int})
-    return Reorderer{nbit}(orders, bmask.(orders), (1:nbit).-orders)
-end
+"""Reordered Basis"""
+reordered_basis(nbit::Int, orders::Vector{Int}) = Reorderer{nbit}(orders, bmask.(orders), (1:nbit).-orders)
+
 Base.start(ro::Reorderer)::Int = 0
 Base.done(ro::Reorderer{N}, state::Int) where N = state == 1<<N
 function Base.next(ro::Reorderer, state::Int)::Tuple{Int, Int}
     _reorder(state, ro.taker, ro.differ), state+1
 end
+Base.eltype(::Reorderer) = Int
 Base.eltype(::Type{Reorderer}) = Int
 Base.length(::Reorderer{N}) where N = 1<<N
 Base.size(::Reorderer{N}) where N = 1<<N
@@ -213,56 +200,4 @@ Base.iteratorsize(::Type{Reorderer}) = 1<<N
         @inbounds out += (b&taker[i]) << differ[i]
     end
     out
-end
-
-function reorder(v::Vector, orders)
-    nbit = length(orders)
-    nbit == length(v) |> log2i || throw(DimensionMismatch("size of array not match length of order"))
-    nv = similar(v)
-    taker, differ = bmask.(orders), (1:nbit).-orders
-
-    for b in basis(nbit)
-        @inbounds nv[b+1] = v[_reorder(b, taker, differ)+1]
-    end
-    nv
-end
-
-invorder(v) = reorder(v, collect((size(v, 1)|>log2i):-1:1))
-
-################### Test ######################
-using Compat.Test
-@test reorder(collect(0:7), [3,2,1]) == [0, 4, 2, 6, 1, 5, 3, 7]
-@test invorder(collect(0:7)) == [0, 4, 2, 6, 1, 5, 3, 7]
-
-################## Benchmarks #################
-using BenchmarkTools
-v = collect(0:1<<16-1)
-orders = randperm(16)
-#bres = @benchmark  reorder($v, $orders)
-#@code_warntype  collect((reordered_basis(16, orders)))
-#bres = @benchmark  collect((reordered_basis(16, orders)))
-
-function reorder(A::Union{Matrix, SparseMatrixCSC}, orders)
-    M, N = size(A)
-    nbit = M|>log2i
-    od = reordered_basis(nbit, orders) .+ 1
-    od = od |> invperm
-    A[od, od]
-end
-
-A = randn(2, 2)
-B = randn(2, 2)
-C = randn(2, 2)
-⊗ = kron
-@test reorder(C ⊗ B ⊗ A, [3,1,2]) ≈ B ⊗ A ⊗ C
-@test invorder(C ⊗ B ⊗ A) ≈ A ⊗ B ⊗ C
-
-
-reorder(A::IMatrix, orders) = A
-function reorder(A::PermMatrix, orders)
-    M = size(A, 1)
-    nbit = M|>log2i
-    od = reordered_basis(nbit, orders) .+ 1
-    throw(Exception(""))
-    return PermMatrix(perm[od], vals[od])
 end
