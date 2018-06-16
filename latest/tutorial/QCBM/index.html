@@ -6,4 +6,229 @@ m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 
 ga('create', 'UA-89508993-1', 'auto');
 ga('send', 'pageview');
-</script><link rel="canonical" href="https://quantumbfs.github.io/Yao.jl/latest/tutorial/QCBM/index.html"/><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>Yao</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../">Home</a></li><li><span class="toctext">Tutorial</span><ul><li><a class="toctext" href="../GHZ/">Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</a></li><li><a class="toctext" href="../QFT/">Quantum Fourier Transform</a></li><li class="current"><a class="toctext" href>Quantum Circuit Born Machine</a><ul class="internal"></ul></li></ul></li><li><span class="toctext">Manual</span><ul><li><a class="toctext" href="../../man/yao/">Yao</a></li><li><a class="toctext" href="../../man/interfaces/">Interfaces</a></li><li><a class="toctext" href="../../man/registers/">Registers</a></li><li><a class="toctext" href="../../man/blocks/">Blocks System</a></li><li><a class="toctext" href="../../man/cache/">Cache System</a></li><li><a class="toctext" href="../../man/intrinsics/">Intrinsics</a></li><li><a class="toctext" href="../../man/luxurysparse/">LuxurySparse</a></li><li><a class="toctext" href="../../man/boost/">Boost</a></li></ul></li><li><span class="toctext">Developer Documentation</span><ul><li><a class="toctext" href="../../dev/extending-blocks/">Extending Blocks</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Tutorial</li><li><a href>Quantum Circuit Born Machine</a></li></ul><a class="edit-page" href="https://github.com/QuantumBFS/Yao.jl/blob/master/docs/src/tutorial/QCBM.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Quantum Circuit Born Machine</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Quantum-Circuit-Born-Machine-1" href="#Quantum-Circuit-Born-Machine-1">Quantum Circuit Born Machine</a></h1><footer><hr/><a class="previous" href="../QFT/"><span class="direction">Previous</span><span class="title">Quantum Fourier Transform</span></a><a class="next" href="../../man/yao/"><span class="direction">Next</span><span class="title">Yao</span></a></footer></article></body></html>
+</script><link rel="canonical" href="https://quantumbfs.github.io/Yao.jl/latest/tutorial/QCBM/index.html"/><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>Yao</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../">Home</a></li><li><span class="toctext">Tutorial</span><ul><li><a class="toctext" href="../GHZ/">Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</a></li><li><a class="toctext" href="../QFT/">Quantum Fourier Transform</a></li><li class="current"><a class="toctext" href>Quantum Circuit Born Machine</a><ul class="internal"><li><a class="toctext" href="#Training-target-1">Training target</a></li><li><a class="toctext" href="#Build-Circuits-1">Build Circuits</a></li><li><a class="toctext" href="#MMD-Loss-and-Gradients-1">MMD Loss &amp; Gradients</a></li><li><a class="toctext" href="#Optimizer-1">Optimizer</a></li><li><a class="toctext" href="#Start-Training-1">Start Training</a></li></ul></li></ul></li><li><span class="toctext">Manual</span><ul><li><a class="toctext" href="../../man/yao/">Yao</a></li><li><a class="toctext" href="../../man/interfaces/">Interfaces</a></li><li><a class="toctext" href="../../man/registers/">Registers</a></li><li><a class="toctext" href="../../man/blocks/">Blocks System</a></li><li><a class="toctext" href="../../man/cache/">Cache System</a></li><li><a class="toctext" href="../../man/intrinsics/">Intrinsics</a></li><li><a class="toctext" href="../../man/luxurysparse/">LuxurySparse</a></li><li><a class="toctext" href="../../man/boost/">Boost</a></li></ul></li><li><span class="toctext">Developer Documentation</span><ul><li><a class="toctext" href="../../dev/extending-blocks/">Extending Blocks</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Tutorial</li><li><a href>Quantum Circuit Born Machine</a></li></ul><a class="edit-page" href="https://github.com/QuantumBFS/Yao.jl/blob/master/docs/src/tutorial/QCBM.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Quantum Circuit Born Machine</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Quantum-Circuit-Born-Machine-1" href="#Quantum-Circuit-Born-Machine-1">Quantum Circuit Born Machine</a></h1><p>Quantum circuit born machine is a fresh approach to quantum machine learning. It use a parameterized quantum circuit to learning machine learning tasks with gradient based optimization. In this tutorial, we will show how to implement it with <strong>Yao</strong> (幺) framework.</p><p>about the framework</p><pre><code class="language-julia-repl">
+julia&gt; ?幺
+ERROR: UndefVarError: ? not defined</code></pre><h2><a class="nav-anchor" id="Training-target-1" href="#Training-target-1">Training target</a></h2><p>a gaussian distribution</p><div><pre><code class="language-julia">function gaussian_pdf(n, μ, σ)
+    x = collect(1:1&lt;&lt;n)
+    pl = @. 1 / sqrt(2pi * σ^2) * exp(-(x - μ)^2 / (2 * σ^2))
+    pl / sum(pl)
+end</code></pre><pre><code class="language-none">gaussian_pdf (generic function with 1 method)</code></pre></div><div>\[f(x \left| \mu, \sigma^2\right) = \frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}\]</div><div><pre><code class="language-julia">const n = 6
+const maxiter = 20
+pg = gaussian_pdf(n, 2^5-0.5, 2^4)</code></pre></div><pre><code class="language-julia">fig = plot(0:1&lt;&lt;n-1, pg)</code></pre><p><img src="../../assets/figures/QCBM_1.svg" alt="Gaussian Distribution"/></p><h2><a class="nav-anchor" id="Build-Circuits-1" href="#Build-Circuits-1">Build Circuits</a></h2><h3><a class="nav-anchor" id="Building-Blocks-1" href="#Building-Blocks-1">Building Blocks</a></h3><p>Gates are grouped to become a layer in a circuit, this layer can be <strong>Arbitrary Rotation</strong> or <strong>CNOT entangler</strong>. Which are used as our basic building blocks of <strong>Born Machines</strong>.</p><h4><a class="nav-anchor" id="Arbitrary-Rotation-1" href="#Arbitrary-Rotation-1">Arbitrary Rotation</a></h4><p>Arbitrary Rotation is built with <strong>Rotation Gate on Z</strong>, <strong>Rotation Gate on X</strong> and <strong>Rotation Gate on Z</strong>:</p><div>\[Rz(\theta) \cdot Rx(\theta) \cdot Rz(\theta)\]</div><p>Since our input will be a <span>$|0\dots 0\rangle$</span> state. The first layer of arbitrary rotation can just use <span>$Rx(\theta) \cdot Rz(\theta)$</span> and the last layer of arbitrary rotation could just use <span>$Rz(\theta)\cdot Rx(\theta)$</span></p><p>In <strong>幺</strong>, every Hilbert operator is a <strong>block</strong> type, this includes all <strong>quantum gates</strong> and <strong>quantum oracles</strong>. In general, operators appears in a quantum circuit can be divided into <strong>Composite Blocks</strong> and <strong>Primitive Blocks</strong>.</p><p>We follow the low abstraction principle and thus each block represents a certain approach of calculation. The simplest <strong>Composite Block</strong> is a <strong>Chain Block</strong>, which chains other blocks (oracles) with the same number of qubits together. It is just a simple mathematical composition of operators with same size. e.g.</p><div>\[\text{chain(X, Y, Z)} \iff X \cdot Y \cdot Z\]</div><p>We can construct an arbitrary rotation block by chain <span>$Rz$</span>, <span>$Rx$</span>, <span>$Rz$</span> together.</p><pre><code class="language-julia-repl">julia&gt; chain(Rz(), Rx(), Rz())
+Total: 1, DataType: Complex{Float64}
+chain
+├─ Rot Z gate: 0.0
+├─ Rot X gate: 0.0
+└─ Rot Z gate: 0.0</code></pre><p><code>Rx</code>, <code>Ry</code> and <code>Rz</code> will construct new rotation gate, which are just shorthands for <code>rot(X, 0.0)</code>, etc.</p><p>Then, let&#39;s pile them up vertically with another method called <strong>rollrepeat</strong></p><div><pre><code class="language-julia">layer(x::Symbol) = layer(Val(x))
+layer(::Val{:first}) = rollrepeat(chain(Rx(), Rz()))</code></pre><pre><code class="language-none">layer (generic function with 2 methods)</code></pre></div><p>In <strong>幺</strong>, the factory method <strong>rollrepeat</strong> will construct a block called <strong>Roller</strong>. It is mathematically equivalent to the kronecker product of all operators in this layer:</p><div>\[rollrepeat(n, U) \iff roll(n, \text{i=&gt;U for i = 1:n}) \iff kron(n, \text{i=&gt;U for i=1:n}) \iff U \otimes \dots \otimes U\]</div><pre><code class="language-julia-repl">julia&gt; roll(4, i=&gt;X for i = 1:4)
+Total: 4, DataType: Complex{Float64}
+roller
+├─ X gate
+├─ X gate
+├─ X gate
+└─ X gate</code></pre><pre><code class="language-julia-repl">julia&gt; rollrepeat(4, X)
+Total: 4, DataType: Complex{Float64}
+roller
+├─ X gate
+├─ X gate
+├─ X gate
+└─ X gate</code></pre><pre><code class="language-julia-repl">julia&gt; kron(4, i=&gt;X for i = 1:4)
+Total: 4, DataType: Complex{Float64}
+kron
+├─ 1=&gt;X gate
+├─ 2=&gt;X gate
+├─ 3=&gt;X gate
+└─ 4=&gt;X gate</code></pre><p>However, <code>kron</code> is calculated differently comparing to <code>roll</code>. In principal, <strong>Roller</strong> will be able to calculate small blocks with same size with higher efficiency. But for large blocks <strong>Roller</strong> may be slower. In <strong>幺</strong>, we offer you this freedom to choose the most suitable solution.</p><p>all factory methods will <strong>lazy</strong> evaluate <strong>the first arguements</strong>, which is the number of qubits. It will return a lambda function that requires a single interger input. The instance of desired block will only be constructed until all the information is filled.</p><pre><code class="language-julia-repl">julia&gt; rollrepeat(X)
+(::#33) (generic function with 1 method)</code></pre><pre><code class="language-julia-repl">julia&gt; rollrepeat(X)(4)
+Total: 4, DataType: Complex{Float64}
+roller
+├─ X gate
+├─ X gate
+├─ X gate
+└─ X gate</code></pre><p>When you filled all the information in somewhere of the declaration, 幺 will be able to infer the others.</p><pre><code class="language-julia-repl">julia&gt; chain(4, rollrepeat(X), rollrepeat(Y))
+Total: 4, DataType: Complex{Float64}
+chain
+├─ roller
+│  ├─ X gate
+│  ├─ X gate
+│  ├─ X gate
+│  └─ X gate
+└─ roller
+   ├─ Y gate
+   ├─ Y gate
+   ├─ Y gate
+   └─ Y gate</code></pre><p>We will now define the rest of rotation layers</p><div><pre><code class="language-julia">layer(::Val{:last}) = rollrepeat(chain(Rz(), Rx()))
+layer(::Val{:mid}) = rollrepeat(chain(Rz(), Rx(), Rz()))</code></pre><pre><code class="language-none">layer (generic function with 4 methods)</code></pre></div><h4><a class="nav-anchor" id="CNOT-Entangler-1" href="#CNOT-Entangler-1">CNOT Entangler</a></h4><p>Another component of quantum circuit born machine is several <strong>CNOT</strong> operators applied on different qubits.</p><div><pre><code class="language-julia">entangler(pairs) = chain(control([ctrl, ], target=&gt;X) for (ctrl, target) in pairs)</code></pre><pre><code class="language-none">entangler (generic function with 1 method)</code></pre></div><p>We can then define such a born machine</p><div><pre><code class="language-julia">function QCBM(n, nlayer, pairs)
+    circuit = chain(n)
+    push!(circuit, layer(:first))
+
+    for i = 1:(nlayer - 1)
+        push!(circuit, cache(entangler(pairs)))
+        push!(circuit, layer(:mid))
+    end
+
+    push!(circuit, cache(entangler(pairs)))
+    push!(circuit, layer(:last))
+
+    circuit
+end</code></pre></div><p>We use the method <code>cache</code> here to tag the entangler block that it should be cached after its first run, because it is actually a constant oracle. Let&#39;s see what will be constructed</p><pre><code class="language-julia-repl">julia&gt; QCBM(4, 1, [1=&gt;2, 2=&gt;3, 3=&gt;4])
+Total: 4, DataType: Complex{Float64}
+chain
+├─ roller
+│  ├─ chain
+│  │  ├─ Rot X gate: 0.0
+│  │  └─ Rot Z gate: 0.0
+│  ├─ chain
+│  │  ├─ Rot X gate: 0.0
+│  │  └─ Rot Z gate: 0.0
+│  ├─ chain
+│  │  ├─ Rot X gate: 0.0
+│  │  └─ Rot Z gate: 0.0
+│  └─ chain
+│     ├─ Rot X gate: 0.0
+│     └─ Rot Z gate: 0.0
+├─ (Cached)chain
+│  ├─ control(1)
+│  │  └─ 2=&gt;X gate
+│  ├─ control(2)
+│  │  └─ 3=&gt;X gate
+│  └─ control(3)
+│     └─ 4=&gt;X gate
+└─ roller
+   ├─ chain
+   │  ├─ Rot Z gate: 0.0
+   │  └─ Rot X gate: 0.0
+   ├─ chain
+   │  ├─ Rot Z gate: 0.0
+   │  └─ Rot X gate: 0.0
+   ├─ chain
+   │  ├─ Rot Z gate: 0.0
+   │  └─ Rot X gate: 0.0
+   └─ chain
+      ├─ Rot Z gate: 0.0
+      └─ Rot X gate: 0.0</code></pre><p>Let&#39;s define a circuit to use later</p><div><pre><code class="language-julia">circuit = QCBM(6, 10, [1=&gt;2, 3=&gt;4, 5=&gt;6, 2=&gt;3, 4=&gt;5, 6=&gt;1])</code></pre></div><h2><a class="nav-anchor" id="MMD-Loss-and-Gradients-1" href="#MMD-Loss-and-Gradients-1">MMD Loss &amp; Gradients</a></h2><p>The MMD loss is describe below:</p><div>\[\begin{aligned}
+\mathcal{L} &amp;= \left| \sum_{x} p \theta(x) \phi(x) - \sum_{x} \pi(x) \phi(x) \right|^2\\
+            &amp;= \langle K(x, y) \rangle_{x \sim p_{\theta}, y\sim p_{\theta}} - 2 \langle K(x, y) \rangle_{x\sim p_{\theta}, y\sim \pi} + \langle K(x, y) \rangle_{x\sim\pi, y\sim\pi}
+\end{aligned}\]</div><p>We will use a squared exponential kernel here.</p><div><pre><code class="language-julia">struct Kernel
+    sigma::Float64
+    matrix::Matrix{Float64}
+end
+
+function Kernel(nqubits, sigma)
+    basis = collect(0:(1&lt;&lt;nqubits - 1))
+    Kernel(sigma, kernel_matrix(basis, basis, sigma))
+end
+
+expect(kernel::Kernel, px::Vector{Float64}, py::Vector{Float64}) = px&#39; * kernel.matrix * py
+loss(qcbm, kernel::Kernel, ptrain) = (p = get_prob(qcbm) - ptrain; expect(kernel, p, p))</code></pre><pre><code class="language-none">WARNING: Method definition (::Type{ex-QCBM.Kernel})(Any, Any) in module ex-QCBM at none:2 overwritten at none:3.</code></pre></div><p>Next, let&#39;s define the kernel matrix</p><div><pre><code class="language-julia">function kernel_matrix(x, y, sigma)
+    dx2 = (x .- y&#39;).^2
+    gamma = 1.0 / (2 * sigma)
+    K = exp.(-gamma * dx2)
+    K
+end</code></pre></div><h3><a class="nav-anchor" id="Gradients-1" href="#Gradients-1">Gradients</a></h3><p>the gradient of MMD loss is</p><div>\[\begin{aligned}
+\frac{\partial \mathcal{L}}{\partial \theta^i_l} &amp;= \langle K(x, y) \rangle_{x\sim p_{\theta^+}, y\sim p_{\theta}} - \langle K(x, y) \rangle_{x\sim p_{\theta}^-, y\sim p_{\theta}}\\
+&amp;- \langle K(x, y) \rangle _{x\sim p_{\theta^+}, y\sim\pi} + \langle K(x, y) \rangle_{x\sim p_{\theta^-}, y\sim\pi}
+\end{aligned}\]</div><p>We have to update one parameter of each rotation gate each time, and calculate its gradient then collect them. Since we will need to calculate the probability from the state vector frequently, let&#39;s define a shorthand first.</p><p>Firstly, you have to define a quantum register. Each run of a QCBM&#39;s input is a simple <span>$|00\cdots 0\rangle$</span> state. We provide string literal <code>bit</code> to help you define one-hot state vectors like this</p><pre><code class="language-julia-repl">julia&gt; r = register(bit&quot;0000&quot;)
+DefaultRegister{1, Complex{Float64}}
+    active qubits: 4/4</code></pre><p>We provide two method to apply a block to a register:</p><pre><code class="language-none">with(f, register)</code></pre><p>This method declares a context that has no side-effect, which means rather than apply a block directly to a register, it will copy the register first and then apply the block to this copy.</p><pre><code class="language-none">with!(f, register)</code></pre><p>This method declares a context that will have side-effect, which means the block will be applied to the register directly.</p><p>In side the context you should use a pip <code>|&gt;</code> to apply a block, which will looks like this:</p><div><pre><code class="language-julia">our_register = register(bit&quot;0&quot;^5)
+
+new_register = with(our_register) do r
+    r |&gt; kron(1=&gt;X)
+    r |&gt; kron(2=&gt;X)
+end</code></pre><pre><code class="language-none">DefaultRegister{1, Complex{Float64}}
+    active qubits: 5/5</code></pre></div><pre><code class="language-julia-repl">julia&gt; state(new_register) ≈ state(our_register)
+false
+
+julia&gt; state(new_register) ≈ state(register(bit&quot;00011&quot;))
+true</code></pre><p>For convenience, we also provide the following interface, which allows you to apply a pre-defined circuit to a register.</p><pre><code class="language-none">with(block, register)
+with!(block, register)</code></pre><pre><code class="language-julia-repl">julia&gt; with(circuit, register(bit&quot;0&quot;^6))
+DefaultRegister{1, Complex{Float64}}
+    active qubits: 6/6</code></pre><p>Now, we define its shorthand</p><pre><code class="language-julia">get_prob(qcbm) = with!(qcbm, register(bit&quot;0&quot;^6)) |&gt; statevec .|&gt; abs2</code></pre><p>We will first iterate through each layer contains rotation gates and allocate an array to store our gradient</p><pre><code class="language-julia">function gradient(n, nlayers, qcbm, kernel, ptrain)
+    prob = get_prob(qcbm)
+    grad = zeros(real(datatype(qcbm)), nparameters(qcbm))
+    idx = 0
+    for ilayer = 1:2:(2 * nlayers + 1)
+        idx = grad_layer!(grad, idx, prob, qcbm, qcbm[ilayer], kernel, ptrain)
+    end
+    grad
+end</code></pre><p>Then we iterate through each rotation gate.</p><pre><code class="language-julia">function grad_layer!(grad, idx, prob, qcbm, layer, kernel, ptrain)
+    count = idx
+    for each_line in blocks(layer)
+        for each in blocks(each_line)
+            gradient!(grad, count+1, prob, qcbm, each, kernel, ptrain)
+            count += 1
+        end
+    end
+    count
+end</code></pre><p>We update each parameter by rotate it <span>$-\pi/2$</span> and <span>$\pi/2$</span></p><pre><code class="language-julia">function gradient!(grad, idx, prob, qcbm, gate, kernel, ptrain)
+    dispatch!(+, gate, pi / 2)
+    prob_pos = get_prob(qcbm)
+
+    dispatch!(-, gate, pi)
+    prob_neg = get_prob(qcbm)
+
+    dispatch!(+, gate, pi / 2) # set back
+
+    grad_pos = expect(kernel, prob, prob_pos) - expect(kernel, prob, prob_neg)
+    grad_neg = expect(kernel, ptrain, prob_pos) - expect(kernel, ptrain, prob_neg)
+    grad[idx] = grad_pos - grad_neg
+    grad
+end</code></pre><h2><a class="nav-anchor" id="Optimizer-1" href="#Optimizer-1">Optimizer</a></h2><p>We will use the Adam optimizer. Since we don&#39;t want you to install another package for this, the following code for this optimizer is copied from <a href="https://github.com/denizyuret/Knet.jl">Knet.jl</a></p><p>Reference: <a href="https://arxiv.org/abs/1412.6980">Kingma, D. P., &amp; Ba, J. L. (2015)</a>. Adam: a Method for Stochastic Optimization. International Conference on Learning Representations, 1–13.</p><pre><code class="language-julia">mutable struct Adam
+    lr::AbstractFloat
+    gclip::AbstractFloat
+    beta1::AbstractFloat
+    beta2::AbstractFloat
+    eps::AbstractFloat
+    t::Int
+    fstm
+    scndm
+end
+
+Adam(; lr=0.001, gclip=0, beta1=0.9, beta2=0.999, eps=1e-8)=Adam(lr, gclip, beta1, beta2, eps, 0, nothing, nothing)
+
+function update!(w, g, p::Adam)
+    gclip!(g, p.gclip)
+    if p.fstm===nothing; p.fstm=zeros(w); p.scndm=zeros(w); end
+    p.t += 1
+    BLAS.scale!(p.beta1, p.fstm)
+    BLAS.axpy!(1-p.beta1, g, p.fstm)
+    BLAS.scale!(p.beta2, p.scndm)
+    BLAS.axpy!(1-p.beta2, g .* g, p.scndm)
+    fstm_corrected = p.fstm / (1 - p.beta1 ^ p.t)
+    scndm_corrected = p.scndm / (1 - p.beta2 ^ p.t)
+    BLAS.axpy!(-p.lr, (fstm_corrected ./ (sqrt.(scndm_corrected) + p.eps)), w)
+end
+
+function gclip!(g, gclip)
+    if gclip == 0
+        g
+    else
+        gnorm = vecnorm(g)
+        if gnorm &lt;= gclip
+            g
+        else
+            BLAS.scale!(gclip/gnorm, g)
+        end
+    end
+end</code></pre><h2><a class="nav-anchor" id="Start-Training-1" href="#Start-Training-1">Start Training</a></h2><p>The training of the quantum circuit is simple, just iterate through the steps.</p><pre><code class="language-julia">function train!(qcbm, ptrain, optim; learning_rate=0.1, niter=50)
+    # initialize the parameters
+    params = 2pi * rand(nparameters(qcbm))
+    dispatch!(qcbm, params)
+    kernel = Kernel(nqubits(qcbm), 0.25)
+
+    n, nlayers = nqubits(qcbm), (length(qcbm)-1)÷2
+    history = Float64[]
+
+    for i = 1:niter
+        grad = gradient(n, nlayers, qcbm, kernel, ptrain)
+        curr_loss = loss(qcbm, kernel, ptrain)
+        push!(history, curr_loss)        
+        params = parameters(qcbm)
+        update!(params, grad, optim)
+        dispatch!(qcbm, params)
+    end
+    history
+end</code></pre><pre><code class="language-julia">optim = Adam(lr=0.1)
+his = train!(circuit, pg, optim, niter=50, learning_rate=0.1)
+plot(1:50, his, xlabel=&quot;iteration&quot;, ylabel=&quot;loss&quot;)</code></pre><p><img src="../../assets/figures/QCBM_2.svg" alt="History"/></p><pre><code class="language-julia">p = get_prob(circuit)
+plot(0:1&lt;&lt;n-1, p, pg, xlabel=&quot;x&quot;, ylabel=&quot;p&quot;)</code></pre><p><img src="../../assets/figures/QCBM_3.svg" alt="Learnt Distribution"/></p><footer><hr/><a class="previous" href="../QFT/"><span class="direction">Previous</span><span class="title">Quantum Fourier Transform</span></a><a class="next" href="../../man/yao/"><span class="direction">Next</span><span class="title">Yao</span></a></footer></article></body></html>
