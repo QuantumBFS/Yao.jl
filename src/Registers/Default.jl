@@ -170,4 +170,4 @@ end
 
 reorder!(orders::Int...) = reg::DefaultRegister -> reorder!(reg, [orders...])
 
-invorder!(reg::DefaultRegister) = reorder!(reg, nqubits(reg):-1:1)
+invorder!(reg::DefaultRegister) = reorder!(reg, collect(nqubits(reg):-1:1))
