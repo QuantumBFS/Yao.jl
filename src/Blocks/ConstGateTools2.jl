@@ -12,6 +12,30 @@ import ..Blocks: PrimitiveBlock, ConstantGate, DefaultType, log2i, mat, print_bl
 
 export @const_gate
 
+"""
+    @const_gate NAME = MAT_EXPR
+    @const_gate NAME::Type = MAT_EXPR
+    @const_Gate NAME::Type
+
+This macro simplify the definition of a constant gate. It will automatically bind the matrix form
+to a constant which will reduce memory allocation in the runtime.
+
+```julia
+@const_gate X = ComplexF64[0 1;1 0]
+```
+
+or
+
+```julia
+@const_gate X::ComplexF64 = [0 1;1 0]
+```
+
+You can bind new element types by simply re-declare with a type annotation.
+
+```julia
+@const_gate X::ComplexF32
+```
+"""
 macro const_gate(ex)
     if @capture(ex, NAME_::TYPE_ = EXPR_)
         define_gate(NAME, TYPE, EXPR)

@@ -137,10 +137,15 @@ similar small blocks tile on the whole address.
 """
 function roll end
 
-function roll(n::Int, blocks...)
+roll(blocks...) = n->roll(n, blocks...)
+roll(itr) = n->roll(n, itr)
+
+roll(n::Int, blocks...) = roll(n, blocks)
+
+function roll(n::Int, itr)
     curr_head = 1
     list = []
-    for each in blocks
+    for each in itr
         if each isa MatrixBlock
             push!(list, each)
             curr_head += nqubits(each)
@@ -160,8 +165,6 @@ function roll(n::Int, blocks...)
     sum(nqubits, list) == n || throw(ErrorException("number of qubits mismatch"))
     Roller(list...)
 end
-
-roll(blocks...) = n->roll(n, blocks...)
 
 # 2.5 repeat
 

@@ -1,7 +1,11 @@
-using Documenter, Yao, Yao.Blocks
-using Yao.LuxurySparse, Yao.CacheServers, Yao.Intrinsics
-using Yao.Registers, Yao.Interfaces
+using Documenter
+using Yao, Yao.Blocks, Yao.LuxurySparse, Yao.CacheServers, Yao.Intrinsics, Yao.Registers, Yao.Interfaces
 
+# TODO: use Literate to process examples
+# using Literate
+# preprocess tutorial scripts
+
+# make documents
 makedocs(
     modules = [Yao, Yao.Blocks, Yao.LuxurySparse, Yao.CacheServers, Yao.Intrinsics, Yao.Registers, Yao.Interfaces],
     clean = false,
@@ -29,12 +33,6 @@ makedocs(
         "Developer Documentation" => Any[
             "dev/extending-blocks.md"
         ],
-        # "Theoretical Notes" => Any[
-        #     "theo/register.md",
-        #     "theo/rotation.md",
-        #     "theo/grover.md",
-        #     "theo/blocks.md",
-        # ],
     ],
     html_prettyurls = !("local" in ARGS),
     html_canonical = "https://quantumbfs.github.io/Yao.jl/latest/",
