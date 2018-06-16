@@ -11,15 +11,15 @@ Extensible, Efficient Framework for Quantum Algorithm Design for humans.
 
 ## Introduction
 
-Yao is an open source framework, aiming for
+Yao is an open source framework for
 
-- quantum algorithm design,
-- variational quantum circuit optimization,
+- quantum algorithm design;
+- quantum machine learning;
 - learning quantum computation.
 
 on a classical computer.
 
-We provide **hierarchical** APIs for scientists to extend this framework for different purposes. The whole framework is highly **modularized**. 
+We provide **hierarchical** APIs for scientists to extend this framework for different purposes. The whole framework is highly **modularized**.
 
 ![](docs/src/assets/figures/framework.png)
 
@@ -47,14 +47,14 @@ The documentation is under development. There is only a few demos at the moment.
 
 ## Motivation
 Comparing with state of art quantum simulators, our library is inspired by quantum circuit optimization.
-Variational quantum optimization algorithms like quantum circuit Born machine (QCBM), quantum optimization algorithm (QAOA), variational quantum eigensolver (VQE) and quantum circuit learning (QCL) et. al. are promissing killer apps on a near term quantum computers.
-These algorithms require the flexibility to tune parameters and have well defined patterns such as "Arbituary Rotation Block" and "CNOT Entangler".
+Variational quantum optimization algorithms like quantum circuit Born machine (QCBM), quantum optimization algorithm (QAOA), variational quantum eigensolver (VQE) and quantum circuit learning (QCL) et. al. are promising killer apps on a near term quantum computers.
+These algorithms require the flexibility to tune parameters and have well defined patterns such as "Arbitrary Rotation Block" and "CNOT Entangler".
 
 In Yao, we call these patterns "blocks". If we regard every gate or gate pattern as a "block", then the framework can
 
 * be flexible to dispatch parameters,
-* cache matrices of blocks to speed up furture runs,
-* allow hierachical design of quantum algorithms
+* cache matrices of blocks to speed up future runs,
+* allow hierarchical design of quantum algorithms
 
 Thanks to Julia's duck type and multiple dispatch features, user can
 
@@ -67,17 +67,16 @@ Thanks to Julia's duck type and multiple dispatch features, user can
 
 Yao is a framework that is about to have the following features:
 
-- **Hierarchical APIs**
-  - APIs from **low abstraction quantum operators** to **highly abstract** circuit block objects.
 - **Extensibility**
   - define new operations with a minimum number of methods in principle.
   - extend with new operations on different hardware should be easy, (e.g GPUs, near term quantum devices, FPGAs, etc.)
 - **Efficiency**
   - comparing with python, julia have no significant overhead on small scale circuit.
-  - special methods are dispatched to frequently used blocks.
+  - special optimized methods are dispatched to frequently used blocks.
   - double interfaces "apply!" and "cache server + mat" allow us to choose freely when to sacrifice memory for faster simulation and when to sacrifice the speed to simulate more qubits.
 - **Easy to Use**
-  - As a white box simulator, it is easy to use APIs such as  `mat` and `usedbits` so that users will be aware of what they are doing right through the interface.
+  - As a white-box simulator, rather than using a black box, users will be aware of what their simulation are doing right through the interface.
+  - **Hierarchical APIs** from **low abstraction quantum operators** to **highly abstract** circuit block objects.
 
 
 ## Contribution
