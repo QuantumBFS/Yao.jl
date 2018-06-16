@@ -45,7 +45,7 @@ pkg> add Yao
 
 ## Motivation
 Comparing with state of art quantum simulators, our library is inspired by quantum circuit optimization.
-Variational quantum optimization algorithms like quantum circuit Born machine (QCBM), quantum optimization algorithm (QAOA), variational quantum eigensolver (VQE) and quantum circuit learning (QCL) et. al. are promising killer apps on a near term quantum computers.
+Variational quantum optimization algorithms like quantum circuit Born machine ([QCBM](https://arxiv.org/abs/1804.04168)), quantum approximate optimization algorithm ([QAOA](http://arxiv.org/abs/1411.4028)), variational quantum eigensolver ([VQE](https://doi.org/10.1038/ncomms5213)) and quantum circuit learning ([QCL](http://arxiv.org/abs/1803.00745)) et. al. are promising killer apps on a near term quantum computers.
 These algorithms require the flexibility to tune parameters and have well defined patterns such as "Arbitrary Rotation Block" and "CNOT Entangler".
 
 In Yao, we call these patterns "blocks". If we regard every gate or gate pattern as a "block", then the framework can
