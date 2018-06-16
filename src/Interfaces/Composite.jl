@@ -138,7 +138,7 @@ similar small blocks tile on the whole address.
 function roll end
 
 roll(blocks...) = n->roll(n, blocks...)
-roll(itr) = n->roll(itr)
+roll(itr) = n->roll(n, itr)
 
 roll(n::Int, blocks...) = roll(n, blocks)
 
