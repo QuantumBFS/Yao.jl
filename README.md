@@ -19,9 +19,8 @@ Yao is an open source framework for
 
 on a classical computer.
 
-We provide **hierarchical** APIs for scientists to extend this framework for different purposes. The whole framework is highly **modularized**.
-
 ![](docs/src/assets/figures/framework.png)
+We provide **hierarchical** APIs for scientists to extend this framework for different purposes. The whole framework is highly **modularized**.
 
 ## Installation
 
