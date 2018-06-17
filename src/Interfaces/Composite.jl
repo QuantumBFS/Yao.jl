@@ -147,8 +147,12 @@ function roll(n::Int, blocks::MatrixBlock...)
     Roller(blocks...)
 end
 
+function roll(n::Int, a::Pair, blocks...)
+    roll(n, (a, blocks...))
+end
+
 function roll(n::Int, itr)
-    first(itr) isa Pair || throw(ArgumentError("Expect a Pair as first arguement."))
+    first(itr) isa Pair || throw(ArgumentError("Expect a Pair"))
 
     curr_head = 1
     list = []
