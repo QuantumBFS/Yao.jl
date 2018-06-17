@@ -137,10 +137,15 @@ similar small blocks tile on the whole address.
 """
 function roll end
 
-function roll(n::Int, blocks...)
+roll(blocks...) = n->roll(n, blocks...)
+roll(itr) = n->roll(n, itr)
+
+roll(n::Int, blocks...) = roll(n, blocks)
+
+function roll(n::Int, itr)
     curr_head = 1
     list = []
-    for each in blocks
+    for each in itr
         if each isa MatrixBlock
             push!(list, each)
             curr_head += nqubits(each)
@@ -161,8 +166,6 @@ function roll(n::Int, blocks...)
     Roller(list...)
 end
 
-roll(blocks...) = n->roll(n, blocks...)
-
 # 2.5 repeat
 
 import Base: repeat
@@ -173,7 +176,7 @@ import Base: repeat
 Construct a [`RepeatedBlock`](@ref), if n (the number of qubits) not supplied, using lazy evaluation.
 If addrs not supplied, blocks will fill the qubit space.
 """
-repeat(n::Int, x::MatrixBlock, addrs) = RepeatedBlock{n}(x, addrs)
+repeat(n::Int, x::MatrixBlock, addrs) = RepeatedBlock{n}(x, collect(addrs))
 repeat(n::Int, x::MatrixBlock) = RepeatedBlock{n}(x)
 repeat(x::MatrixBlock, params...) = n->repeat(n, x, params...)
 

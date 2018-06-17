@@ -1,14 +1,22 @@
 __precompile__()
 
 """
-Flexible, Extensible Framework for Quantum Algorithm Design.
+Extensible Framework for Quantum Algorithm Design for Humans.
 
-## Environment Variables
-
-`YaoDefaultType`: set default type used in simulation.
-
+简单易用可扩展的量子算法设计框架。
 """
 module Yao
+
+export 幺
+
+"""
+Extensible Framework for Quantum Algorithm Design for Humans.
+
+简单易用可扩展的量子算法设计框架。
+
+幺 means unitary in Chinese.
+"""
+const 幺 = Yao
 
 using Compat, MacroTools, Reexport
 using Compat.Random
