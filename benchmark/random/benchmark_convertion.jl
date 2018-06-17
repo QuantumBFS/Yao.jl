@@ -4,8 +4,8 @@ using Yao
 using Yao.LuxurySparse
 
 Id = IMatrix{1<<16}()
-Pm = pmrand(Complex128, 1<<16)
-Dv = Diagonal(randn(Complex128, 1<<16))
+Pm = pmrand(ComplexF64, 1<<16)
+Dv = Diagonal(randn(ComplexF64, 1<<16))
 
 bench = BenchmarkGroup()
 bg = bench["To Sparse"] = BenchmarkGroup()

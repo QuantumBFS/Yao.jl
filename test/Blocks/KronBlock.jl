@@ -80,7 +80,7 @@ function rand_kron_test(n)
     addrs = randperm(n)
     blocks = [rand(GateSet) for i = 1:firstn]
     seq = [i=>each for (i, each) in zip(addrs[1:firstn], blocks)]
-    mats = [i=>mat(each) for (i, each) in zip(addrs[1:firstn], blocks)]
+    mats = Any[i=>mat(each) for (i, each) in zip(addrs[1:firstn], blocks)]
     append!(mats, [i=>IMatrix(2) for i in addrs[firstn+1:end]])
     sorted = sort(mats, by=x->x.first)
     mats = map(x->x.second, reverse(sorted))
