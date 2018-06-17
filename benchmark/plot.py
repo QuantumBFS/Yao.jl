@@ -17,36 +17,38 @@ def _show_benchres(datafile, savefile, legends):
         plt.xlabel(r'$N$')
         plt.ylim(1e-2, 1e2)
 
+def fbench(token, legends, version=7):
+    if version == 6:
+        ydata = np.loadtxt('yao/v0.6.3-pre.1/%s-report.dat'%token).reshape([6,-1])
+    else:
+        ydata = np.loadtxt('yao/v0.7.0-alpha.147/%s-report.dat'%token).reshape([6,-1])
+    qdata = np.loadtxt('projectq/0.3.6/%s-report.dat'%token).reshape([6,-1])
+    _show_benchres(np.concatenate([qdata, ydata], axis=1), '../docs/src/assets/figures/%s-bench.png'%token, ['Q-%s'%l for l in legends] + ['Y-%s'%l for l in legends])
+
 class PltBench():
     def xyz(self):
-        qdata = np.loadtxt('projectq/xyz-report.dat').reshape([6, 6])
-        ydata = np.loadtxt('yao/xyzcxyz.dat').reshape([6, 6])/1e3
-        _show_benchres(np.concatenate([qdata[:,:3], ydata[:,0:6:2]], axis=1), 'comparexyz.png', ['Q-X', 'Q-Y', 'Q-Z', 'Y-X', 'Y-Y', 'Y-Z'])
+        fbench("xyz", ['X', 'Y', 'Z'], 7)
 
     def cxyz(self):
-        qdata = np.loadtxt('projectq/xyz-report.dat').reshape([6, 6])
-        ydata = np.loadtxt('yao/xyzcxyz.dat').reshape([6, 6])/1e3
-        _show_benchres(np.concatenate([qdata[:,3:], ydata[:,1:6:2]], axis=1), 'comparecxyz.png', ['Q-CX', 'Q-CY', 'Q-CZ', 'Y-CX', 'Y-CY', 'Y-CZ'])
+        fbench("cxyz", ['CX', 'CY', 'CZ'], 7)
 
     def repeatxyz(self):
-        _show_benchres('repeatxyz-report.dat', 'projectq-repeatxyz.png', ['X(2-7)', 'Y(2-7)', 'Z(2-7)'])
-
-    def comparer(self):
-        data = np.loadtxt('xyz-report.dat').reshape([6, 6])
-        datar = np.loadtxt('repeatxyz-report.dat').reshape([6, 3])
-        _show_benchres(np.concatenate([data[:,:1], datar[:,:1]/6], axis=1), 'projectq-comparerepeat.png', ['X(2)', 'X(2-7) (time devided by 6)'])
+        fbench("repeatxyz", ['X(2-7)', 'Y(2-7)', 'Z(2-7)'], 7)
 
     def hgate(self):
-        data = np.loadtxt('h-report.dat').reshape([6, 3])
-        data[:,2]/=6
-        print(data[:,2]/data[:,0])
-        _show_benchres(data, 'projectq-h.png', ['H', 'CH', 'H(2-7) (time / 6)'])
+        qdata = np.loadtxt('projectq/0.3.6/h-report.dat').reshape([6, 3])
+        #ydata = np.loadtxt('yao/v0.6.3-pre.1/cxyz-report.dat').reshape([6, 3])
+        ydata = np.loadtxt('yao/v0.7.0-alpha.147/h-report.dat').reshape([6, 3])
+
+        qdata[:,2]/=6
+        ydata[:,2]/=6
+        _show_benchres(np.concatenate([qdata, ydata], axis=1), '../docs/src/assets/figures/hgate-bench.png', ['Q-H', 'Q-CH', 'Q-H(2-7) (time / 6)', 'Y-H', 'Y-CH', 'Y-H(2-7) (time / 6)'])
 
     def toffoli(self):
-        _show_benchres('toffoli-report.dat', 'projectq-toffoli.png', ['toffoli'])
+        fbench("toffoli", ['Toffoli'], 7)
 
     def rot(self):
-        _show_benchres('rot-report.dat', 'projectq-rot.png', ['Rx', 'Ry', 'Rz', 'C-Rx', 'C-Ry', 'C-Rz'])
+        fbench("rot", ['Rx', 'Ry', 'Rz'], 7)
 
 if __name__ == '__main__':
     fire.Fire(PltBench)
