@@ -1,9 +1,10 @@
 using Yao
 using BenchmarkTools
+push!(LOAD_PATH, "/home/jgliu/jcode")
 
 const NL = 10:3:25
 
-function bench_gate(ops, filename)
+function bgate(ops, filename)
     println("Benchmarking $filename ...")
     res_list = zeros(6, ops |> length)
     for (ib, nbit) in enumerate(NL)
@@ -52,3 +53,16 @@ end
 function bench_toffoli()
     bgate([control((2,3), 5=>X)], "toffoli-report.dat")
 end
+
+function bench_all()
+    bench_xyz()
+    bench_cxyz()
+    bench_repeatxyz()
+    bench_hgate()
+    bench_hgate()
+    bench_rot()
+    bench_crot()
+    bench_toffoli()
+end
+
+bench_all()
