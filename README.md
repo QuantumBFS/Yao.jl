@@ -1,4 +1,9 @@
-# Yao
+<div align="center"> <img
+src="https://rawgit.com/QuantumBFS/Yao.jl/master/docs/src/assets/logo.svg"
+alt="Yao Logo" width="210"></img>
+<h1>Yao</h1>
+</div>
+
 
 [![Build Status](https://travis-ci.org/QuantumBFS/Yao.jl.svg?branch=master)](https://travis-ci.org/QuantumBFS/Yao.jl)
 [![Build status](https://ci.appveyor.com/api/projects/status/kjagpnqoetugmuxt?svg=true)](https://ci.appveyor.com/project/Roger-luo/yao-jl)
@@ -18,10 +23,6 @@ Yao is an open source framework for
 - learning quantum computation.
 
 on a classical computer.
-
-We provide **hierarchical** APIs for scientists to extend this framework for different purposes. The whole framework is highly **modularized**.
-
-![](docs/src/assets/figures/framework.png)
 
 ## Installation
 
@@ -76,6 +77,8 @@ Yao is a framework that is about to have the following features:
   - As a white-box simulator, rather than using a black box, users will be aware of what their simulation are doing right through the interface.
   - **Hierarchical APIs** from **low abstraction quantum operators** to **highly abstract** circuit block objects.
 
+![](docs/src/assets/figures/framework.png)
+The whole framework is highly **modularized**, researchers can extend this framework for different purposes.
 
 ## Contribution
 

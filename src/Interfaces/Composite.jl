@@ -187,7 +187,7 @@ import Base: repeat
 Construct a [`RepeatedBlock`](@ref), if n (the number of qubits) not supplied, using lazy evaluation.
 If addrs not supplied, blocks will fill the qubit space.
 """
-repeat(n::Int, x::MatrixBlock, addrs) = RepeatedBlock{n}(x, addrs)
+repeat(n::Int, x::MatrixBlock, addrs) = RepeatedBlock{n}(x, collect(addrs))
 repeat(n::Int, x::MatrixBlock) = RepeatedBlock{n}(x)
 repeat(x::MatrixBlock, params...) = n->repeat(n, x, params...)
 

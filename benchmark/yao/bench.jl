@@ -1,6 +1,5 @@
 using Yao
 using BenchmarkTools
-push!(LOAD_PATH, "/home/jgliu/jcode")
 
 const NL = 10:3:25
 
