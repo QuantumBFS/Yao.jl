@@ -1,4 +1,9 @@
-# Yao
+<div align="center"> <img
+src=""
+alt="Yao Logo" width="210"></img>
+<h1>Yao</h1>
+</div>
+
 
 [![Build Status](https://travis-ci.org/QuantumBFS/Yao.jl.svg?branch=master)](https://travis-ci.org/QuantumBFS/Yao.jl)
 [![Build status](https://ci.appveyor.com/api/projects/status/kjagpnqoetugmuxt?svg=true)](https://ci.appveyor.com/project/Roger-luo/yao-jl)
@@ -73,7 +78,7 @@ Yao is a framework that is about to have the following features:
   - **Hierarchical APIs** from **low abstraction quantum operators** to **highly abstract** circuit block objects.
 
 ![](docs/src/assets/figures/framework.png)
-The whole framework is highly **modularized**, scientists can extend this framework for different purposes. 
+The whole framework is highly **modularized**, researchers can extend this framework for different purposes.
 
 ## Contribution
 
