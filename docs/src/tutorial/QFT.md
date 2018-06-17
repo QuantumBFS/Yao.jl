@@ -1,4 +1,5 @@
 # Quantum Fourier Transform
+![ghz](../assets/figures/qft.png)
 
 ```@example QFT
 using Yao

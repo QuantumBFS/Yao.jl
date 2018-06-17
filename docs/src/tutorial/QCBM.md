@@ -44,6 +44,8 @@ fig = plot(0:1<<n-1, pg)
 
 Gates are grouped to become a layer in a circuit, this layer can be **Arbitrary Rotation** or **CNOT entangler**. Which are used as our basic building blocks of **Born Machines**.
 
+![differentiable ciruit](../assets/figures/differentiable.png)
+
 #### Arbitrary Rotation
 
 Arbitrary Rotation is built with **Rotation Gate on Z**, **Rotation Gate on X** and **Rotation Gate on Z**:

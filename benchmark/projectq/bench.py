@@ -46,6 +46,15 @@ class BenchMark():
                 tl.append(qbenchmark(func, nsite, num_bench)*1e6)
         np.savetxt('xyz-report.dat', tl)
 
+
+    def cxyz(self):
+        tl = []
+        for nsite, num_bench in zip(NL, [1000, 1000, 1000, 100, 10, 5]):
+            print('========== N: %d ============'%nsite)
+            for func in [bG(ops.X), bG(ops.Y), bG(ops.Z), bCG(ops.X), bCG(ops.Y), bCG(ops.Z)]:
+                tl.append(qbenchmark(func, nsite, num_bench)*1e6)
+        np.savetxt('xyz-report.dat', tl)
+
     def repeatxyz(self):
         tl = []
         for nsite, num_bench in zip(NL, [1000, 1000, 1000, 100, 10, 5]):

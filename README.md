@@ -12,7 +12,7 @@ alt="Yao Logo" width="210"></img>
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://QuantumBFS.github.io/Yao.jl/stable)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://QuantumBFS.github.io/Yao.jl/latest)
 
-Extensible, Efficient Framework for Quantum Algorithm Design for humans.
+Extensible, Efficient Framework for Quantum Algorithm Design for Humans.
 
 ## Introduction
 

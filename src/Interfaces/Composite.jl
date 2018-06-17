@@ -70,10 +70,10 @@ This will automatically generate a block list looks like
 """
 kron(total::Int, block0::Pair, blocks::Union{MatrixBlock, Pair}...) = KronBlock{total}((block0, blocks...))
 function kron(total::Int, blocks::MatrixBlock...)
-    sum(nqubits, blocks) == total || throw(AddressConflictError("Size of blocks does not match roller size."))
+    sum(nqubits, blocks) == total || throw(AddressConflictError("Size of blocks does not match total size."))
     KronBlock{total}(blocks)
 end
-kron(total::Int, g::Base.Generator) = KronBlock{total}(g)
+kron(total::Int, g) = KronBlock{total}(g)
 # NOTE: this is ambiguous
 kron(blocks::Union{MatrixBlock, Pair{Int, <:MatrixBlock}}...) = N->KronBlock{N}(blocks)
 kron(blocks) = N->KronBlock{N}(blocks)
@@ -142,7 +142,18 @@ roll(itr) = n->roll(n, itr)
 
 roll(n::Int, blocks...) = roll(n, blocks)
 
+function roll(n::Int, blocks::MatrixBlock...)
+    sum(nqubits, blocks) == n || throw(AddressConflictError("Size of blocks does not match total size."))
+    Roller(blocks...)
+end
+
+function roll(n::Int, a::Pair, blocks...)
+    roll(n, (a, blocks...))
+end
+
 function roll(n::Int, itr)
+    first(itr) isa Pair || throw(ArgumentError("Expect a Pair"))
+
     curr_head = 1
     list = []
     for each in itr
