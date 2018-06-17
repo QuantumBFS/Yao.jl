@@ -10,7 +10,7 @@ makedocs(
     modules = [Yao, Yao.Blocks, Yao.LuxurySparse, Yao.CacheServers, Yao.Intrinsics, Yao.Registers, Yao.Interfaces],
     clean = false,
     format = :html,
-    sitename = "Yao",
+    sitename = "Yao.jl",
     linkcheck = !("skiplinks" in ARGS),
     analytics = "UA-89508993-1",
     pages = [

@@ -7,7 +7,9 @@ using Yao
 ```
 
 Then let's define the oracle, it is a function of the number of qubits.
-The whole oracle looks like this:
+The circuit looks like this:
+
+![ghz](../assets/figures/ghz4.png)
 
 ```@example GHZ
 n = 4
