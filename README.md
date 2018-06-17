@@ -19,9 +19,6 @@ Yao is an open source framework for
 
 on a classical computer.
 
-![](docs/src/assets/figures/framework.png)
-We provide **hierarchical** APIs for scientists to extend this framework for different purposes. The whole framework is highly **modularized**.
-
 ## Installation
 
 The package is registered. In Julia **v0.6**, you can use this command to install
@@ -75,6 +72,8 @@ Yao is a framework that is about to have the following features:
   - As a white-box simulator, rather than using a black box, users will be aware of what their simulation are doing right through the interface.
   - **Hierarchical APIs** from **low abstraction quantum operators** to **highly abstract** circuit block objects.
 
+![](docs/src/assets/figures/framework.png)
+The whole framework is highly **modularized**, scientists can extend this framework for different purposes. 
 
 ## Contribution
 
