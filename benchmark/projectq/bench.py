@@ -76,9 +76,17 @@ class BenchMark():
         tl = []
         for nsite, num_bench in zip(NL, [1000, 1000, 1000, 100, 10, 5]):
             print('========== N: %d ============'%nsite)
-            for func in [bRot(ops.Rx), bRot(ops.Ry), bRot(ops.Rz), bCRot(ops.Rx), bCRot(ops.Ry), bCRot(ops.Rz)]:
+            for func in [bRot(ops.Rx), bRot(ops.Ry), bRot(ops.Rz)]:
                 tl.append(qbenchmark(func, nsite, num_bench)*1e6)
         np.savetxt('rot-report.dat', tl)
+
+    def crot(self):
+        tl = []
+        for nsite, num_bench in zip(NL, [1000, 1000, 1000, 100, 10, 5]):
+            print('========== N: %d ============'%nsite)
+            for func in [bCRot(ops.Rx), bCRot(ops.Ry), bCRot(ops.Rz)]:
+                tl.append(qbenchmark(func, nsite, num_bench)*1e6)
+        np.savetxt('crot-report.dat', tl)
 
     def toffoli(self):
         tl = []
