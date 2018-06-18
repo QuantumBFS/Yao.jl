@@ -16,4 +16,18 @@ In v0.7, please type `]` to pkg mode, and use this command
 pkg> add IJulia
 ```
 
+Then, use IJulia to open notebook service.
+
+```julia
+julia> using IJulia
+
+julia> IJulia.notebook()
+```
+
+Or just open it from command line
+
+```sh
+jupyter-notebook xxxx.ipynb
+```
+
 ### Quantum Circuit Born Machine
