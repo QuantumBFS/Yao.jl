@@ -23,7 +23,7 @@ def fbench(token, legends, version=7):
     else:
         ydata = np.loadtxt('yao/v0.7.0-alpha.147/%s-report.dat'%token).reshape([6,-1])
     qdata = np.loadtxt('projectq/0.3.6/%s-report.dat'%token).reshape([6,-1])
-    _show_benchres(np.concatenate([qdata, ydata], axis=1), '../docs/src/assets/figures/%s-bench.png'%token, ['Q-%s'%l for l in legends] + ['Y-%s'%l for l in legends])
+    _show_benchres(np.concatenate([qdata, ydata], axis=1), '../docs/src/assets/benchmarks/%s-bench.png'%token, ['Q-%s'%l for l in legends] + ['Y-%s'%l for l in legends])
 
 class PltBench():
     def xyz(self):
