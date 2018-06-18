@@ -50,5 +50,7 @@ class PltBench():
     def rot(self):
         fbench("rot", ['Rx', 'Ry', 'Rz'], 7)
 
+    def crot(self):
+        fbench("crot", ['CRx', 'CRy', 'CRz'], 7)
 if __name__ == '__main__':
     fire.Fire(PltBench)
