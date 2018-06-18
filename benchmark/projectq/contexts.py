@@ -50,7 +50,7 @@ class ProjectQContext(object):
             # locations = {0: 0, 1: 1, 2: 2, 3:3} # swap order of lines 0-1-2.
             # self.backend.set_qubit_locations(locations)
         elif self.task == 'simulate':
-            self.backend = Simulator()
+            self.backend = Simulator(gate_fusion=True)
         elif self.task == 'ibm':
             # choose device
             device = self.ibm_config.get('device', 'ibmqx2' if self.num_bit<=5 else 'ibmqx5')
@@ -70,7 +70,7 @@ class ProjectQContext(object):
                     device=device, verbose=True)
         else:
             raise ValueError('engine %s not defined' % self.task)
-        self.eng = MainEngine(self.backend)
+        self.eng = MainEngine(self.backend, engine_list=[])
         # initialize register
         self.qureg = self.eng.allocate_qureg(self.num_bit)
         return self
