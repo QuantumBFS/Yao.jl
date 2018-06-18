@@ -77,7 +77,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Circuit Born Machine",
     "title": "Quantum Circuit Born Machine",
     "category": "section",
-    "text": "Quantum circuit born machine is a fresh approach to quantum machine learning. It use a parameterized quantum circuit to learning machine learning tasks with gradient based optimization. In this tutorial, we will show how to implement it with Yao (幺) framework.about the frameworkusing Yao # hide\n?幺"
+    "text": "Quantum circuit born machine is a fresh approach to quantum machine learning. It use a parameterized quantum circuit to learning machine learning tasks with gradient based optimization. In this tutorial, we will show how to implement it with Yao (幺) framework.about the frameworkusing Yao # hide\n@doc 幺"
 },
 
 {
