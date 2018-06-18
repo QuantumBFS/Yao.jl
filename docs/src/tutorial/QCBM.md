@@ -7,7 +7,7 @@ about the framework
 
 ```@repl QCBM
 using Yao # hide
-?幺
+@doc 幺
 ```
 
 ## Training target
