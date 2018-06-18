@@ -68,10 +68,10 @@ end
     reg1 = zero_state(5)
     reg2 = register(bit"00100")
     @test reg1!=reg2
-    @test statevec(reg2) == onehotvec(Complex128, nbit, 4)
+    @test statevec(reg2) == onehotvec(ComplexF64, nbit, 4)
     reg3 = reg1 + reg2
-    @test statevec(reg3) == onehotvec(Complex128, nbit, 4) + onehotvec(Complex128, nbit, 0)
-    @test statevec(reg3 |> normalize!) == (onehotvec(Complex128, nbit, 4) + onehotvec(Complex128, nbit, 0))/sqrt(2)
+    @test statevec(reg3) == onehotvec(ComplexF64, nbit, 4) + onehotvec(ComplexF64, nbit, 0)
+    @test statevec(reg3 |> normalize!) == (onehotvec(ComplexF64, nbit, 4) + onehotvec(ComplexF64, nbit, 0))/sqrt(2)
     @test (reg1 + reg2 - reg1) == reg2
 end
 
@@ -95,4 +95,15 @@ end
     reg = rand_state(3, 5)
     @test copy(reg) |> extend!(2) |> nactive == 5
     @test copy(reg) |> extend!(2) |> focus!(4,5) |> measure_remove! |> first |> relax! ≈ reg
+end
+
+@testset "stack repeat" begin
+    reg = register(bit"00000") + register(bit"11001") |> normalize!;
+    @test stack(reg, reg) |> nbatch == 2
+    @test repeat(reg, 5) |> nbatch == 5
+
+    ⊗ = kron
+    v1, v2, v3 = randn(2), randn(2), randn(2)
+    @test repeat(register(v1 ⊗ v2 ⊗ v3), 2) |> invorder! ≈ repeat(register(v3 ⊗ v2 ⊗ v1), 2)
+    @test repeat(register(v1 ⊗ v2 ⊗ v3), 2) |> reorder!(3,2,1) ≈ repeat(register(v3 ⊗ v2 ⊗ v1), 2)
 end

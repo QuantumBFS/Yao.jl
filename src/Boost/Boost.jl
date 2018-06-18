@@ -12,7 +12,7 @@ export xgate, ygate, zgate
 export cxgate, cygate, czgate
 export controlled_U1, controller
 
-export xapply!, yapply!, zapply!
+export xapply!, yapply!, zapply!, u1apply!
 export cxapply!, cyapply!, czapply!
 
 include("gates.jl")

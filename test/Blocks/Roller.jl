@@ -8,7 +8,7 @@ using Yao.Blocks
 using Yao.Intrinsics
 
 @testset "constructor" begin
-    g = Roller(X(), kron(2, 1=>X, Y), Z(), Z())
+    g = Roller(X, kron(2, 1=>X, Y), Z, Z)
     @test isa(g, Roller{5, ComplexF64})
     @test usedbits(g) == [1:5...]
     @test addrs(g) == [1, 2, 4, 5]
@@ -30,7 +30,7 @@ end
 
 @testset "setindex" begin
     g = Roller{4}(phase(0.1))
-    @test_throws MethodError g.blocks[1] = X()
+    @test_throws MethodError g.blocks[1] = X
 end
 
 @testset "iteration" begin
@@ -39,8 +39,8 @@ end
         @test each.theta == 0.1
     end
 
-    g = Roller(X(), kron(2, 1=>X(), Y()), Z(), Z())
-    list = [X(), kron(2, 1=>X(), Y()), Z(), Z()]
+    g = Roller(X, kron(2, 1=>X, Y), Z, Z)
+    list = [X, kron(2, 1=>X, Y), Z, Z]
     for (src, tg) in zip(g.blocks, list)
         @test src == tg
     end
@@ -51,14 +51,14 @@ end
 end
 
 @testset "tile one block" begin
-g = Roller{5}(X())
+g = Roller{5}(X)
 @test state(apply!(register(bit"11111"), g)) == state(register(bit"00000"))
 @test state(apply!(register(bit"11111", 3), g)) == state(register(bit"00000", 3))
 end
 
 @testset "roll multiple blocks" begin
-g = Roller((X(), Y(), Z(), X(), X()))
-tg = kron(5, 1=>X(), Y(), Z(), X(), X())
+g = Roller((X, Y, Z, X, X))
+tg = kron(5, 1=>X, Y, Z, X, X)
 @test state(apply!(register(bit"11111"), g)) == state(apply!(register(bit"11111"), tg))
 @test state(apply!(register(bit"11111", 3), g)) == state(apply!(register(bit"11111", 3), tg))
 end
@@ -80,7 +80,7 @@ end
 end
 
 @testset "traits" begin
-g = Roller(X(), kron(2, 1=>X(), Y()), Z(), Z())
+g = Roller(X, kron(2, 1=>X, Y), Z, Z)
 @test isunitary(g) == true
 @test isreflexive(g) == true
 @test ishermitian(g) == true

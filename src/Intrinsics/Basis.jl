@@ -1,7 +1,6 @@
 const DInt = Int
 const Ints = Union{Vector{Int}, Int, UnitRange{Int}}
 const DInts = Union{Vector{DInt}, DInt, UnitRange{DInt}}
-
 """
     basis(num_bit::Int) -> UnitRange{Int}
     basis(state::AbstractArray) -> UnitRange{Int}
@@ -174,27 +173,51 @@ function controller(cbits, cvals)
     return b->testval(b, do_mask, onemask)
 end
 
-"""
-subspace spanned by bits placed on given positions.
-"""
-function subspace(num_bit::Int, poss::Vector{Int}, base::Int)
-    if length(poss) == 0
-        return [base]
-    else
-        rest, pos = poss[1:end-1], poss[end]
-        # efficiency of vcat?
-        return vcat(subspace(num_bit, rest, base), subspace(num_bit, rest, flip(base, bmask(pos))))
+struct Reorderer{N}
+    orders::Vector{Int}
+    taker::Vector{Int}
+    differ::Vector{Int}
+end
+
+"""Reordered Basis"""
+reordered_basis(nbit::Int, orders::Vector{Int}) = Reorderer{nbit}(orders, bmask.(orders), (1:nbit).-orders)
+
+Base.start(ro::Reorderer)::Int = 0
+Base.done(ro::Reorderer{N}, state::Int) where N = state == 1<<N
+function Base.next(ro::Reorderer, state::Int)::Tuple{Int, Int}
+    _reorder(state, ro.taker, ro.differ), state+1
+end
+Base.eltype(::Reorderer) = Int
+Base.eltype(::Type{Reorderer}) = Int
+Base.length(::Reorderer{N}) where N = 1<<N
+Base.size(::Reorderer{N}) where N = 1<<N
+Base.iteratoreltype(::Type{Reorderer}) = Int
+Base.iteratorsize(::Type{Reorderer}) = 1<<N
+
+@inline function _reorder(b::Int, taker::Vector{Int}, differ::Vector{Int})::Int
+    out::Int = 0
+    @simd for i = 1:length(differ)
+        @inbounds out += (b&taker[i]) << differ[i]
     end
+    out
 end
 
-function itercontrol(num_bit::Int, poss::Vector{Int}, vals::Vector{Int})
-    remain_poss = setdiff(1:num_bit, poss)
-    subspace(num_bit, remain_poss, bmask(poss[vals.!=0]...))
+function reorder(v::AbstractVector, orders)
+    nbit = length(orders)
+    nbit == length(v) |> log2i || throw(DimensionMismatch("size of array not match length of order"))
+    nv = similar(v)
+    taker, differ = bmask.(orders), (1:nbit).-orders
+
+    for b in basis(nbit)
+        @inbounds nv[b+1] = v[_reorder(b, taker, differ)+1]
+    end
+    nv
 end
 
-################### Test for subspace and itercontrol #################
-import Compat.Test
-@test itercontrol(2, [1], [1]) == [1, 3]
-@test itercontrol(2, [2], [1]) == [2, 3]
-@test subspace(2, [1], 0) == [0, 1]
-@test subspace(2, [2], 1) == [1, 3]
+function reorder(A::Union{Matrix, SparseMatrixCSC}, orders)
+    M, N = size(A)
+    nbit = M|>log2i
+    od = [1+b for b in reordered_basis(nbit, orders)]
+    od = od |> invperm
+    A[od, od]
+end

@@ -5,6 +5,7 @@ using ..Registers
 using ..Blocks
 using ..Blocks: _blockpromote
 using ..CacheServers
+using ..Intrinsics
 
 # import package configs
 import ..Yao: DefaultType
@@ -15,7 +16,7 @@ import ..Yao: DefaultType
 export @const_gate
 
 # Block APIs
-export mat, apply!
+export mat, apply!, parameters, nparameters, dispatch!, datatype, blocks
 
 include("Signal.jl")
 include("Primitive.jl")
@@ -23,34 +24,56 @@ include("Composite.jl")
 include("Measure.jl")
 include("Cache.jl")
 
-export on, on!
+export with, with!
 
-function apply_on!(r::AbstractRegister, block::AbstractBlock, params...; kwargs...)
-    apply!(r, block, params...; kwargs...)
+struct Context{R <: AbstractRegister}
+    r::R
 end
 
-function apply_on!(r::AbstractRegister, lf::Function, params...; kwargs...)
-    apply!(r, lf(nactive(r)), params...; kwargs...)
+import Base: |>
+
+function |>(r::AbstractRegister, block::AbstractBlock)
+    apply!(r, block)
+end
+
+function |>(io::Context, block::AbstractBlock)
+    apply!(io.r, block)
+end
+
+function |>(io::Context, f::Function)
+    io |> f(nqubits(io.r))
 end
 
 """
-    on(register, [params...]) -> f(block)
+    with!(f, register)
 
-Returns a lambda function that takes a block as its argument with
-configurations on a copy of this `register`.
+Provide a writable context for blocks operating this register.
 """
-function on(r::AbstractRegister, params...; kwargs...)
-    x->apply_on!(copy(r), x, params...; kwargs...)
+function with!(f::Function, r::AbstractRegister)
+    f(Context(r))
+    r
+end
+
+function with!(g::AbstractBlock, r::AbstractRegister)
+    apply!(r, g)
+    r
 end
 
 """
-    on!(register, [params...]) -> f(block)
+    with(f, register)
 
-Returns a lambda function that takes a block as its argument with
-configurations on this `register` in place.
+Provide a copy context for blocks operating this register.
 """
-function on!(r::AbstractRegister, params...; kwargs...)
-    x->apply_on!(r, x, params...; kwargs...)
+function with(f::Function, r::AbstractRegister)
+    cr = copy(r)
+    f(Context(cr))
+    cr
+end
+
+function with(g::AbstractBlock, r::AbstractRegister)
+    cr = copy(r)
+    apply!(cr, g)
+    cr
 end
 
 end

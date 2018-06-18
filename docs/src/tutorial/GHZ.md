@@ -7,21 +7,22 @@ using Yao
 ```
 
 Then let's define the oracle, it is a function of the number of qubits.
-The whole oracle looks like this:
+The circuit looks like this:
 
+![ghz](../assets/figures/ghz4.png)
 
 ```@example GHZ
 n = 4
 circuit(n) = chain(
     n,
-    kron(i=>H for i in 1:n),
+    repeat(X, [1, ]),
+    kron(i=>H for i in 2:n),
+    control([2, ], 1=>X),
     control([4, ], 3=>X),
     control([3, ], 1=>X),
     control([4, ], 3=>X),
-    control([2, ], 1=>X),
-    kron(i=>H for i in 2:n),
-    repeat(1=>X),
-);
+    kron(i=>H for i in 1:n),
+)
 ```
 
 Let me explain what happens here. Firstly, we have a `X` gate which is applied to the first
@@ -65,8 +66,9 @@ input it into the oracle. You will then receive this register after
 processing it.
 
 ```@example GHZ
-r = circuit(4) |> on(register(bit"0000"))
-r
+r = with(register(bit"0000")) do r
+  r |> circuit(4)
+end
 ```
 
 Let's check the output:

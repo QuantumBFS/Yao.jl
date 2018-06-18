@@ -83,10 +83,10 @@ end
 end
 
 @testset "control two-bit gate" begin
-    g = ControlBlock{3}((3, ), CNOT, 1)
+    g = ControlBlock{3}((1, ), CNOT, 2)
     @test mat(g) ≈ mat(Toffoli)
-    @test addrs(g) == [1]
-    @test usedbits(g) == [3, 1, 2]
+    @test addrs(g) == [2]
+    @test usedbits(g) == [1, 2, 3]
 end
 
 end # control matrix form

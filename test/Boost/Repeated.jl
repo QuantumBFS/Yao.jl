@@ -7,7 +7,8 @@ using Yao.Boost
 @testset "Repeated" begin
     reg1 = rand_state(3)
     reg2 = rand_state(3, 2)
-    for G in [X, Y, Z]
+    for G in [X, Y, Z, H, rot(X, 0.5), rot(Z, 0.5), I2]
+        println(G)
         rb = RepeatedBlock{3}(G, [1,2])
         res = kron(kron(mat(I2), mat(G)), mat(G))
         @test mat(rb) ≈ res

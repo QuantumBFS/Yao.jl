@@ -9,7 +9,6 @@ docs/site/
 **/*.ipynb_checkpoints
 **/**/*.ipynb_checkpoints
 
-*.dat
-**/*.dat
-**/**/*.dat
+_*.dat
 *.swp
+__pycache__/

@@ -1,3 +1,5 @@
+# This part declares factory functions for constructing composite blocks
+
 function parse_block(n::Int, x::Function)
     x(n)
 end
@@ -25,27 +27,25 @@ chain(::Type{T}, n::Int) where T = ChainBlock{n, T}([])
 chain(n::Int) = chain(DefaultType, n)
 chain() = n -> chain(n)
 
+function chain(n::Int, blocks...)
+    ChainBlock([parse_block(n, each) for each in blocks])
+end
+
+chain(blocks...) = n -> chain(n, blocks...)
+
 function chain(n::Int, blocks)
-    if blocks isa Union{Function, MatrixBlock, Pair}
-        ChainBlock([parse_block(n, blocks)])
-    else
-        ChainBlock(MatrixBlock{n}[parse_block(n, each) for each in blocks])
-    end
+    ChainBlock([parse_block(n, each) for each in blocks])
+end
+
+function chain(n::Int, f::Function)
+    ChainBlock([f(n)])
+end
+
+function chain(blocks::MatrixBlock...)
+    ChainBlock(blocks...)
 end
 
 chain(blocks) = n -> chain(n, blocks)
-
-function chain(blocks::Vector{MatrixBlock{N}}) where N
-    ChainBlock(Vector{MatrixBlock{N}}(blocks))
-end
-
-function chain(n, blocks...)
-    ChainBlock(MatrixBlock{n}[parse_block(n, each) for each in blocks])
-end
-
-function chain(blocks::MatrixBlock{N}...) where N
-    ChainBlock(collect(MatrixBlock{N}, blocks))
-end
 
 # 2.2 kron block
 import Base: kron
@@ -70,10 +70,10 @@ This will automatically generate a block list looks like
 """
 kron(total::Int, block0::Pair, blocks::Union{MatrixBlock, Pair}...) = KronBlock{total}((block0, blocks...))
 function kron(total::Int, blocks::MatrixBlock...)
-    sum(nqubits, blocks) == total || throw(AddressConflictError("Size of blocks does not match roller size."))
+    sum(nqubits, blocks) == total || throw(AddressConflictError("Size of blocks does not match total size."))
     KronBlock{total}(blocks)
 end
-kron(total::Int, g::Base.Generator) = KronBlock{total}(g)
+kron(total::Int, g) = KronBlock{total}(g)
 # NOTE: this is ambiguous
 kron(blocks::Union{MatrixBlock, Pair{Int, <:MatrixBlock}}...) = N->KronBlock{N}(blocks)
 kron(blocks) = N->KronBlock{N}(blocks)
@@ -130,15 +130,52 @@ rollrepeat(n::Int, block::MatrixBlock) = Roller{n}(block)
 rollrepeat(block::MatrixBlock) = n->rollrepeat(n, block)
 
 """
-    roll([n::Int,] block::MatrixBlock) -> Roller{n}
+    roll([n::Int, ], blocks...) -> Roller{n}
 
 Construct a [`Roller`](@ref) block, which is a faster than [`KronBlock`](@ref) to calculate
 similar small blocks tile on the whole address.
 """
 function roll end
 
-roll(blocks::MatrixBlock...) = n->Roller(blocks)
-roll(n, blocks::MatrixBlock...) = Roller{n, blocks|>_blockpromote, typeof(blocks)}(blocks)
+roll(blocks...) = n->roll(n, blocks...)
+roll(itr) = n->roll(n, itr)
+
+roll(n::Int, blocks...) = roll(n, blocks)
+
+function roll(n::Int, blocks::MatrixBlock...)
+    sum(nqubits, blocks) == n || throw(AddressConflictError("Size of blocks does not match total size."))
+    Roller(blocks...)
+end
+
+function roll(n::Int, a::Pair, blocks...)
+    roll(n, (a, blocks...))
+end
+
+function roll(n::Int, itr)
+    first(itr) isa Pair || throw(ArgumentError("Expect a Pair"))
+
+    curr_head = 1
+    list = []
+    for each in itr
+        if each isa MatrixBlock
+            push!(list, each)
+            curr_head += nqubits(each)
+        elseif each isa Pair{Int, <:MatrixBlock}
+            line, b = each
+            k = line - curr_head
+
+            k > 0 && push!(list, kron(k, i=>I2 for i=1:k))
+            push!(list, b)
+            curr_head = line + nqubits(b)
+        end
+    end
+
+    k = n - curr_head + 1
+    k > 0 && push!(list, kron(k, i=>I2 for i=1:k))
+
+    sum(nqubits, list) == n || throw(ErrorException("number of qubits mismatch"))
+    Roller(list...)
+end
 
 # 2.5 repeat
 
@@ -150,7 +187,7 @@ import Base: repeat
 Construct a [`RepeatedBlock`](@ref), if n (the number of qubits) not supplied, using lazy evaluation.
 If addrs not supplied, blocks will fill the qubit space.
 """
-repeat(n::Int, x::MatrixBlock, addrs) = RepeatedBlock{n}(x, addrs)
+repeat(n::Int, x::MatrixBlock, addrs) = RepeatedBlock{n}(x, collect(addrs))
 repeat(n::Int, x::MatrixBlock) = RepeatedBlock{n}(x)
 repeat(x::MatrixBlock, params...) = n->repeat(n, x, params...)
 

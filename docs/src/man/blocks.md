@@ -15,6 +15,6 @@ a quantum circuit into serveral kinds of blocks. The uppermost abstract type for
 ## Blocks
 
 ```@autodocs
-Modules = [Yao.Blocks]
+Modules = [Yao.Blocks, Yao.Blocks.ConstGateTools]
 Order   = [:module, :constant, :type, :macro, :function]
 ```

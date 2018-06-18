@@ -9,26 +9,26 @@ using Yao.Blocks
 @testset "constructor" begin
 
     g = ChainBlock(
-        kron(2, 1=>phase(0.1)),
         kron(2, 1=>X(), Y()),
+        kron(2, 1=>phase(0.1)),
     )
 
     @test g isa ChainBlock{2, ComplexF64} # default type
-    @test g.blocks == [kron(2, 1=>phase(0.1)), kron(2, 1=>X(), Y())]
+    @test g.blocks == [kron(2, 1=>X(), Y()), kron(2, 1=>phase(0.1))]
 end
 
 @testset "matrix" begin
 g = ChainBlock(
-    kron(2, 1=>phase(0.1)),
     kron(2, 1=>X, Y),
+    kron(2, 1=>phase(0.1))
 )
 
 m = mat(kron(2, 1=>phase(0.1))) * mat(kron(2, 1=>X, Y))
 @test mat(g) ≈ m
 
 g = ChainBlock(
-    kron(4, 1=>phase(0.1)),
     kron(4, 1=>X, Y),
+    kron(4, 1=>phase(0.1)),
 )
 
 @test usedbits(g) == [1, 2]
@@ -37,16 +37,16 @@ end
 
 @testset "apply" begin
 g = ChainBlock(
-    kron(2, 1=>phase(0.1)),
     kron(2, 1=>X, Y),
+    kron(2, 1=>phase(0.1)),
 )
 
 reg = rand_state(2)
-@test statevec(g |> on(reg)) ≈ mat(g) * reg
+@test statevec(with(g, reg)) ≈ mat(g) * reg
 end
 
 @testset "iteration" begin
-    test_list = [rot(X), phase(0.1), Y, X]
+    test_list = [X, Y, phase(0.1), rot(X)]
     g = ChainBlock(test_list)
 
     for (src, tg) in zip(g, test_list)
@@ -59,7 +59,7 @@ end
 end
 
 @testset "additional" begin
-    g = ChainBlock(Y, X)
+    g = ChainBlock(X, Y)
     push!(g, Z)
     @test g[3] == Z
 
@@ -69,13 +69,12 @@ end
 
     prepend!(g, [phase(0.1)])
     @test g[1] == phase(0.1)
-    @test g[2] == Y
+    @test g[2] == X
     @test g[end] == rot(Y)
 end
 
 @testset "traits" begin
     # TODO: check traits when primitive blocks' traits are all defined
-
     g = ChainBlock(X, Y)
     @test isunitary(g) == true
     @test isreflexive(g) == false
