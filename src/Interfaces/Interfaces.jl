@@ -38,6 +38,7 @@ end
 
 function |>(io::Context, block::AbstractBlock)
     apply!(io.r, block)
+    io
 end
 
 function |>(io::Context, f::Function)
