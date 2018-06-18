@@ -4,49 +4,66 @@ sys.path.insert(0, "../")
 from plotlib import *
 import fire
 
-def _show_benchres(datafile, savefile, legends):
-    if isinstance(datafile, str):
-        data = np.loadtxt(datafile).reshape([6, len(legends)])
-    else:
-        data = datafile
+def _show_benchres(data, savefile, legends):
+    M = data.shape[1]//2
+    colors = [[0.3+0.7*np.random.random(), 0.5*np.random.random(), 0, 1] for i in range(M)] + [[0, 0.5+0.5*np.random.random(), 0.3+0.7*np.random.random(), 1] for i in range(M)]
     with DataPlt(filename=savefile, figsize=(5,4)) as dp:
-        plt.plot(np.arange(10, 28, 3), data/1e3)
+        #plt.plot(np.arange(10, 28, 3), data/1e3, color=np.array(colors))
+        for i in range(2*M):
+            plt.plot(np.arange(10, 28, 3), data[:,i]/1e3, color=np.array(colors[i]))
         plt.legend(legends)
         plt.yscale('log')
         plt.ylabel(r'$t/ms$')
         plt.xlabel(r'$N$')
         plt.ylim(1e-2, 1e2)
 
+def fbench(token, legends, version=7, ftype='png'):
+    if version == 6:
+        ydata = np.loadtxt('yao/v0.6.3-pre.1/%s-report.dat'%token).reshape([6,-1])
+    else:
+        ydata = np.loadtxt('yao/v0.7.0-alpha.147/%s-report.dat'%token).reshape([6,-1])
+    qdata = np.loadtxt('projectq/0.3.6/%s-report.dat'%token).reshape([6,-1])
+    _show_benchres(np.concatenate([qdata, ydata], axis=1), '../docs/src/assets/benchmarks/%s-bench.%s'%(token, ftype), ['Q-%s'%l for l in legends] + ['Y-%s'%l for l in legends])
+
 class PltBench():
+    def __init__(self):
+        self.ftype='png'
+
     def xyz(self):
-        qdata = np.loadtxt('projectq/xyz-report.dat').reshape([6, 6])
-        ydata = np.loadtxt('yao/xyzcxyz.dat').reshape([6, 6])/1e3
-        _show_benchres(np.concatenate([qdata[:,:3], ydata[:,0:6:2]], axis=1), 'comparexyz.png', ['Q-X', 'Q-Y', 'Q-Z', 'Y-X', 'Y-Y', 'Y-Z'])
+        fbench("xyz", ['X', 'Y', 'Z'], 7, self.ftype)
 
     def cxyz(self):
-        qdata = np.loadtxt('projectq/xyz-report.dat').reshape([6, 6])
-        ydata = np.loadtxt('yao/xyzcxyz.dat').reshape([6, 6])/1e3
-        _show_benchres(np.concatenate([qdata[:,3:], ydata[:,1:6:2]], axis=1), 'comparecxyz.png', ['Q-CX', 'Q-CY', 'Q-CZ', 'Y-CX', 'Y-CY', 'Y-CZ'])
+        fbench("cxyz", ['CX', 'CY', 'CZ'], 7, self.ftype)
 
     def repeatxyz(self):
-        _show_benchres('repeatxyz-report.dat', 'projectq-repeatxyz.png', ['X(2-7)', 'Y(2-7)', 'Z(2-7)'])
-
-    def comparer(self):
-        data = np.loadtxt('xyz-report.dat').reshape([6, 6])
-        datar = np.loadtxt('repeatxyz-report.dat').reshape([6, 3])
-        _show_benchres(np.concatenate([data[:,:1], datar[:,:1]/6], axis=1), 'projectq-comparerepeat.png', ['X(2)', 'X(2-7) (time devided by 6)'])
+        fbench("repeatxyz", ['X(2-7)', 'Y(2-7)', 'Z(2-7)'], 7, self.ftype)
 
     def hgate(self):
-        data = np.loadtxt('h-report.dat').reshape([6, 3])
-        data[:,2]/=6
-        print(data[:,2]/data[:,0])
-        _show_benchres(data, 'projectq-h.png', ['H', 'CH', 'H(2-7) (time / 6)'])
+        qdata = np.loadtxt('projectq/0.3.6/h-report.dat').reshape([6, 3])
+        #ydata = np.loadtxt('yao/v0.6.3-pre.1/cxyz-report.dat').reshape([6, 3])
+        ydata = np.loadtxt('yao/v0.7.0-alpha.147/h-report.dat').reshape([6, 3])
+
+        qdata[:,2]/=6
+        ydata[:,2]/=6
+        _show_benchres(np.concatenate([qdata, ydata], axis=1), '../docs/src/assets/benchmarks/hgate-bench.%s'%self.ftype, ['Q-H', 'Q-CH', 'Q-H(2-7) (time / 6)', 'Y-H', 'Y-CH', 'Y-H(2-7) (time / 6)'])
 
     def toffoli(self):
-        _show_benchres('toffoli-report.dat', 'projectq-toffoli.png', ['toffoli'])
+        fbench("toffoli", ['Toffoli'], 7, self.ftype)
 
     def rot(self):
-        _show_benchres('rot-report.dat', 'projectq-rot.png', ['Rx', 'Ry', 'Rz', 'C-Rx', 'C-Ry', 'C-Rz'])
+        fbench("rot", ['Rx', 'Ry', 'Rz'], 7, self.ftype)
+
+    def crot(self):
+        fbench("crot", ['CRx', 'CRy', 'CRz'], 7, self.ftype)
+
+    def showall(self, ftype='png'):
+        self.ftype = ftype
+        self.xyz()
+        self.repeatxyz()
+        self.hgate()
+        self.toffoli()
+        self.rot()
+        self.crot()
 
 if __name__ == '__main__':
     fire.Fire(PltBench)

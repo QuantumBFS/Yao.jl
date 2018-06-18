@@ -4,6 +4,8 @@ import time, fire
 from contexts import ProjectQContext
 from projectq import ops
 
+import mkl
+mkl.set_num_threads(1)
 
 def qbenchmark(func, num_bit, num_bench=1000):
     with ProjectQContext(num_bit, 'simulate') as cc:
@@ -42,18 +44,17 @@ class BenchMark():
         tl = []
         for nsite, num_bench in zip(NL, [1000, 1000, 1000, 100, 10, 5]):
             print('========== N: %d ============'%nsite)
-            for func in [bG(ops.X), bG(ops.Y), bG(ops.Z), bCG(ops.X), bCG(ops.Y), bCG(ops.Z)]:
+            for func in [bG(ops.X), bG(ops.Y), bG(ops.Z)]:
                 tl.append(qbenchmark(func, nsite, num_bench)*1e6)
         np.savetxt('xyz-report.dat', tl)
-
 
     def cxyz(self):
         tl = []
         for nsite, num_bench in zip(NL, [1000, 1000, 1000, 100, 10, 5]):
             print('========== N: %d ============'%nsite)
-            for func in [bG(ops.X), bG(ops.Y), bG(ops.Z), bCG(ops.X), bCG(ops.Y), bCG(ops.Z)]:
+            for func in [bCG(ops.X), bCG(ops.Y), bCG(ops.Z)]:
                 tl.append(qbenchmark(func, nsite, num_bench)*1e6)
-        np.savetxt('xyz-report.dat', tl)
+        np.savetxt('cxyz-report.dat', tl)
 
     def repeatxyz(self):
         tl = []
@@ -75,9 +76,17 @@ class BenchMark():
         tl = []
         for nsite, num_bench in zip(NL, [1000, 1000, 1000, 100, 10, 5]):
             print('========== N: %d ============'%nsite)
-            for func in [bRot(ops.Rx), bRot(ops.Ry), bRot(ops.Rz), bCRot(ops.Rx), bCRot(ops.Ry), bCRot(ops.Rz)]:
+            for func in [bRot(ops.Rx), bRot(ops.Ry), bRot(ops.Rz)]:
                 tl.append(qbenchmark(func, nsite, num_bench)*1e6)
         np.savetxt('rot-report.dat', tl)
+
+    def crot(self):
+        tl = []
+        for nsite, num_bench in zip(NL, [1000, 1000, 1000, 100, 10, 5]):
+            print('========== N: %d ============'%nsite)
+            for func in [bCRot(ops.Rx), bCRot(ops.Ry), bCRot(ops.Rz)]:
+                tl.append(qbenchmark(func, nsite, num_bench)*1e6)
+        np.savetxt('crot-report.dat', tl)
 
     def toffoli(self):
         tl = []
@@ -86,6 +95,14 @@ class BenchMark():
             for func in [bToffoli()]:
                 tl.append(qbenchmark(func, nsite, num_bench)*1e6)
         np.savetxt('toffoli-report.dat', tl)
+
+    def all(self):
+        self.xyz()
+        self.cxyz()
+        self.repeatxyz()
+        self.hgate()
+        self.rot()
+        self.toffoli()
 
 if __name__ == '__main__':
     fire.Fire(BenchMark)
