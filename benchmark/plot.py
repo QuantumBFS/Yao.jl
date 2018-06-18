@@ -59,6 +59,7 @@ class PltBench():
     def showall(self, ftype='png'):
         self.ftype = ftype
         self.xyz()
+        self.cxyz()
         self.repeatxyz()
         self.hgate()
         self.toffoli()
