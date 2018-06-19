@@ -769,6 +769,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.Daggered",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.Daggered",
+    "category": "type",
+    "text": "Daggered{N, T, BT} <: MatrixBlock{N, T}\n\nDaggered(blk::BT)\nDaggered{N, T, BT}(blk)\n\nDaggered Block.\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.KronBlock",
     "page": "Blocks System",
     "title": "Yao.Blocks.KronBlock",
@@ -814,6 +822,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.Roller",
     "category": "type",
     "text": "Roller{N, T, BT} <: CompositeBlock{N, T}\n\nmap a block type to all lines and use a rolling method to evaluate them.\n\nTODO\n\nfill identity like KronBlock -> To interface.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.RotationGate",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.RotationGate",
+    "category": "type",
+    "text": "RotationGate{T, GT <: PrimitiveBlock{1, Complex{T}}} <: PrimitiveBlock{1, Complex{T}}\n\nRotationGate, with GT both hermitian and isreflexive.\n\n\n\n"
 },
 
 {
@@ -1353,11 +1369,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/luxurysparse/#Yao.LuxurySparse.mulcol!",
+    "page": "LuxurySparse",
+    "title": "Yao.LuxurySparse.mulcol!",
+    "category": "function",
+    "text": "mulcol!(v::Vector, i::Int, f) -> VecOrMat\n\nmultiply col i of v by f inplace.\n\n\n\n"
+},
+
+{
     "location": "man/luxurysparse/#Yao.LuxurySparse.mulrow!",
     "page": "LuxurySparse",
     "title": "Yao.LuxurySparse.mulrow!",
     "category": "function",
-    "text": "mulrow!(v::VecOrMat, i::Int, f) -> VecOrMat\n\nmultiply row i by f.\n\n\n\n"
+    "text": "mulrow!(v::Vector, i::Int, f) -> VecOrMat\n\nmultiply row i of v by f inplace.\n\n\n\n"
 },
 
 {
@@ -1377,11 +1401,27 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/luxurysparse/#Yao.LuxurySparse.swapcols!",
+    "page": "LuxurySparse",
+    "title": "Yao.LuxurySparse.swapcols!",
+    "category": "function",
+    "text": "swapcols!(v::VecOrMat, i::Int, j::Int[, f1, f2]) -> VecOrMat\n\nswap col i and col j of v inplace, with f1, f2 factors applied on i and j (before swap).\n\n\n\n"
+},
+
+{
     "location": "man/luxurysparse/#Yao.LuxurySparse.swaprows!",
     "page": "LuxurySparse",
     "title": "Yao.LuxurySparse.swaprows!",
     "category": "function",
-    "text": "swaprows!(v::VecOrMat, i::Int, j::Int, [f1, f2]) -> VecOrMat\n\nSwap two rows i and j of a matrix/vector, f1 and f2 are two factors applied on i-th and j-th element of input matrix/vector, default is 1.\n\n\n\n"
+    "text": "swaprows!(v::VecOrMat, i::Int, j::Int[, f1, f2]) -> VecOrMat\n\nswap row i and row j of v inplace, with f1, f2 factors applied on i and j (before swap).\n\n\n\n"
+},
+
+{
+    "location": "man/luxurysparse/#Yao.LuxurySparse.u1rows!",
+    "page": "LuxurySparse",
+    "title": "Yao.LuxurySparse.u1rows!",
+    "category": "function",
+    "text": "u1rows!(state::VecOrMat, i::Int, j::Int, a, b, c, d) -> VecOrMat\n\napply u1 on row i and row j of state inplace.\n\n\n\n"
 },
 
 {

@@ -19,11 +19,10 @@ Extensible Framework for Quantum Algorithm Design for Humans.
 end</code></pre><pre><code class="language-none">gaussian_pdf (generic function with 1 method)</code></pre></div><div>\[f(x \left| \mu, \sigma^2\right) = \frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}\]</div><div><pre><code class="language-julia">const n = 6
 const maxiter = 20
 pg = gaussian_pdf(n, 2^5-0.5, 2^4)</code></pre></div><pre><code class="language-julia">fig = plot(0:1&lt;&lt;n-1, pg)</code></pre><p><img src="../../assets/figures/QCBM_1.svg" alt="Gaussian Distribution"/></p><h2><a class="nav-anchor" id="Build-Circuits-1" href="#Build-Circuits-1">Build Circuits</a></h2><h3><a class="nav-anchor" id="Building-Blocks-1" href="#Building-Blocks-1">Building Blocks</a></h3><p>Gates are grouped to become a layer in a circuit, this layer can be <strong>Arbitrary Rotation</strong> or <strong>CNOT entangler</strong>. Which are used as our basic building blocks of <strong>Born Machines</strong>.</p><p><img src="../../assets/figures/differentiable.png" alt="differentiable ciruit"/></p><h4><a class="nav-anchor" id="Arbitrary-Rotation-1" href="#Arbitrary-Rotation-1">Arbitrary Rotation</a></h4><p>Arbitrary Rotation is built with <strong>Rotation Gate on Z</strong>, <strong>Rotation Gate on X</strong> and <strong>Rotation Gate on Z</strong>:</p><div>\[Rz(\theta) \cdot Rx(\theta) \cdot Rz(\theta)\]</div><p>Since our input will be a <span>$|0\dots 0\rangle$</span> state. The first layer of arbitrary rotation can just use <span>$Rx(\theta) \cdot Rz(\theta)$</span> and the last layer of arbitrary rotation could just use <span>$Rz(\theta)\cdot Rx(\theta)$</span></p><p>In <strong>幺</strong>, every Hilbert operator is a <strong>block</strong> type, this includes all <strong>quantum gates</strong> and <strong>quantum oracles</strong>. In general, operators appears in a quantum circuit can be divided into <strong>Composite Blocks</strong> and <strong>Primitive Blocks</strong>.</p><p>We follow the low abstraction principle and thus each block represents a certain approach of calculation. The simplest <strong>Composite Block</strong> is a <strong>Chain Block</strong>, which chains other blocks (oracles) with the same number of qubits together. It is just a simple mathematical composition of operators with same size. e.g.</p><div>\[\text{chain(X, Y, Z)} \iff X \cdot Y \cdot Z\]</div><p>We can construct an arbitrary rotation block by chain <span>$Rz$</span>, <span>$Rx$</span>, <span>$Rz$</span> together.</p><pre><code class="language-julia-repl">julia&gt; chain(Rz(), Rx(), Rz())
-Total: 1, DataType: Complex{Float64}
-chain
-├─ Rot Z gate: 0.0
-├─ Rot X gate: 0.0
-└─ Rot Z gate: 0.0</code></pre><p><code>Rx</code>, <code>Ry</code> and <code>Rz</code> will construct new rotation gate, which are just shorthands for <code>rot(X, 0.0)</code>, etc.</p><p>Then, let&#39;s pile them up vertically with another method called <strong>rollrepeat</strong></p><div><pre><code class="language-julia">layer(x::Symbol) = layer(Val(x))
+ERROR: MethodError: no method matching Rz()
+Closest candidates are:
+  Rz(!Matched::Type{T&lt;:Complex}, !Matched::Any) where T&lt;:Complex at /home/travis/.julia/v0.6/Yao/src/Interfaces/Primitive.jl:71
+  Rz(!Matched::Any) at /home/travis/.julia/v0.6/Yao/src/Interfaces/Primitive.jl:72</code></pre><p><code>Rx</code>, <code>Ry</code> and <code>Rz</code> will construct new rotation gate, which are just shorthands for <code>rot(X, 0.0)</code>, etc.</p><p>Then, let&#39;s pile them up vertically with another method called <strong>rollrepeat</strong></p><div><pre><code class="language-julia">layer(x::Symbol) = layer(Val(x))
 layer(::Val{:first}) = rollrepeat(chain(Rx(), Rz()))</code></pre><pre><code class="language-none">layer (generic function with 2 methods)</code></pre></div><p>In <strong>幺</strong>, the factory method <strong>rollrepeat</strong> will construct a block called <strong>Roller</strong>. It is mathematically equivalent to the kronecker product of all operators in this layer:</p><div>\[rollrepeat(n, U) \iff roll(n, \text{i=&gt;U for i = 1:n}) \iff kron(n, \text{i=&gt;U for i=1:n}) \iff U \otimes \dots \otimes U\]</div><pre><code class="language-julia-repl">julia&gt; roll(4, i=&gt;X for i = 1:4)
 Total: 4, DataType: Complex{Float64}
 roller
@@ -76,41 +75,11 @@ layer(::Val{:mid}) = rollrepeat(chain(Rz(), Rx(), Rz()))</code></pre><pre><code 
 
     circuit
 end</code></pre></div><p>We use the method <code>cache</code> here to tag the entangler block that it should be cached after its first run, because it is actually a constant oracle. Let&#39;s see what will be constructed</p><pre><code class="language-julia-repl">julia&gt; QCBM(4, 1, [1=&gt;2, 2=&gt;3, 3=&gt;4])
-Total: 4, DataType: Complex{Float64}
-chain
-├─ roller
-│  ├─ chain
-│  │  ├─ Rot X gate: 0.0
-│  │  └─ Rot Z gate: 0.0
-│  ├─ chain
-│  │  ├─ Rot X gate: 0.0
-│  │  └─ Rot Z gate: 0.0
-│  ├─ chain
-│  │  ├─ Rot X gate: 0.0
-│  │  └─ Rot Z gate: 0.0
-│  └─ chain
-│     ├─ Rot X gate: 0.0
-│     └─ Rot Z gate: 0.0
-├─ (Cached)chain
-│  ├─ control(1)
-│  │  └─ 2=&gt;X gate
-│  ├─ control(2)
-│  │  └─ 3=&gt;X gate
-│  └─ control(3)
-│     └─ 4=&gt;X gate
-└─ roller
-   ├─ chain
-   │  ├─ Rot Z gate: 0.0
-   │  └─ Rot X gate: 0.0
-   ├─ chain
-   │  ├─ Rot Z gate: 0.0
-   │  └─ Rot X gate: 0.0
-   ├─ chain
-   │  ├─ Rot Z gate: 0.0
-   │  └─ Rot X gate: 0.0
-   └─ chain
-      ├─ Rot Z gate: 0.0
-      └─ Rot X gate: 0.0</code></pre><p>Let&#39;s define a circuit to use later</p><div><pre><code class="language-julia">circuit = QCBM(6, 10, [1=&gt;2, 3=&gt;4, 5=&gt;6, 2=&gt;3, 4=&gt;5, 6=&gt;1])</code></pre></div><h2><a class="nav-anchor" id="MMD-Loss-and-Gradients-1" href="#MMD-Loss-and-Gradients-1">MMD Loss &amp; Gradients</a></h2><p>The MMD loss is describe below:</p><div>\[\begin{aligned}
+ERROR: MethodError: no method matching Rx()
+Closest candidates are:
+  Rx(!Matched::Type{T&lt;:Complex}, !Matched::Any) where T&lt;:Complex at /home/travis/.julia/v0.6/Yao/src/Interfaces/Primitive.jl:71
+  Rx(!Matched::Any) at /home/travis/.julia/v0.6/Yao/src/Interfaces/Primitive.jl:72</code></pre><p>Let&#39;s define a circuit to use later</p><pre><code class="language-">circuit = QCBM(6, 10, [1=&gt;2, 3=&gt;4, 5=&gt;6, 2=&gt;3, 4=&gt;5, 6=&gt;1])
+nothing # hide</code></pre><h2><a class="nav-anchor" id="MMD-Loss-and-Gradients-1" href="#MMD-Loss-and-Gradients-1">MMD Loss &amp; Gradients</a></h2><p>The MMD loss is describe below:</p><div>\[\begin{aligned}
 \mathcal{L} &amp;= \left| \sum_{x} p \theta(x) \phi(x) - \sum_{x} \pi(x) \phi(x) \right|^2\\
             &amp;= \langle K(x, y) \rangle_{x \sim p_{\theta}, y\sim p_{\theta}} - 2 \langle K(x, y) \rangle_{x\sim p_{\theta}, y\sim \pi} + \langle K(x, y) \rangle_{x\sim\pi, y\sim\pi}
 \end{aligned}\]</div><p>We will use a squared exponential kernel here.</p><div><pre><code class="language-julia">struct Kernel
@@ -146,8 +115,7 @@ false
 julia&gt; state(new_register) ≈ state(register(bit&quot;00011&quot;))
 true</code></pre><p>For convenience, we also provide the following interface, which allows you to apply a pre-defined circuit to a register.</p><pre><code class="language-none">with(block, register)
 with!(block, register)</code></pre><pre><code class="language-julia-repl">julia&gt; with(circuit, register(bit&quot;0&quot;^6))
-DefaultRegister{1, Complex{Float64}}
-    active qubits: 6/6</code></pre><p>Now, we define its shorthand</p><pre><code class="language-julia">get_prob(qcbm) = with!(qcbm, register(bit&quot;0&quot;^6)) |&gt; statevec .|&gt; abs2</code></pre><p>We will first iterate through each layer contains rotation gates and allocate an array to store our gradient</p><pre><code class="language-julia">function gradient(n, nlayers, qcbm, kernel, ptrain)
+ERROR: UndefVarError: circuit not defined</code></pre><p>Now, we define its shorthand</p><pre><code class="language-julia">get_prob(qcbm) = with!(qcbm, register(bit&quot;0&quot;^6)) |&gt; statevec .|&gt; abs2</code></pre><p>We will first iterate through each layer contains rotation gates and allocate an array to store our gradient</p><pre><code class="language-julia">function gradient(n, nlayers, qcbm, kernel, ptrain)
     prob = get_prob(qcbm)
     grad = zeros(real(datatype(qcbm)), nparameters(qcbm))
     idx = 0
