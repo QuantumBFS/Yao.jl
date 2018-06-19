@@ -789,7 +789,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.RepeatedBlock",
     "category": "type",
-    "text": "RepeatedBlock{N, T, GT} <: CompositeBlock{N, T}\n\nrepeat the same block on given addrs.\n\n\n\n"
+    "text": "RepeatedBlock{N, C, GT, T} <: CompositeBlock{N, T}\n\nrepeat the same block on given addrs.\n\n\n\n"
 },
 
 {
@@ -921,7 +921,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.cache_type-Tuple{Type{#s24} where #s24<:Yao.Blocks.MatrixBlock}",
+    "location": "man/blocks/#Yao.Blocks.cache_type-Tuple{Type{#s25} where #s25<:Yao.Blocks.MatrixBlock}",
     "page": "Blocks System",
     "title": "Yao.Blocks.cache_type",
     "category": "method",
@@ -1417,7 +1417,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s408,1} where #s408<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s407,1} where #s407<:(AbstractArray{T,2} where T),Array{Int64,1}}",
+    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s409,1} where #s409<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s408,1} where #s408<:(AbstractArray{T,2} where T),Array{Int64,1}}",
     "page": "Boost",
     "title": "Yao.Boost.general_controlled_gates",
     "category": "method",
