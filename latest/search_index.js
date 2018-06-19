@@ -45,7 +45,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
     "title": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
     "category": "section",
-    "text": "First, you have to use this package in Julia.using YaoThen let\'s define the oracle, it is a function of the number of qubits. The circuit looks like this:(Image: ghz)n = 4\ncircuit(n) = chain(\n    n,\n    repeat(X, [1, ]),\n    kron(i=>H for i in 2:n),\n    control([2, ], 1=>X),\n    control([4, ], 3=>X),\n    control([3, ], 1=>X),\n    control([4, ], 3=>X),\n    kron(i=>H for i in 1:n),\n)Let me explain what happens here. Firstly, we have a X gate which is applied to the first qubit. We need decide how we calculate this numerically, Yao offers serveral different approach to this. The simplest (but not the most efficient) one is to use kronecker product which will product X with I on other lines to gather an operator in the whole space and then apply it to the register. The first argument n means the number of qubits.kron(n, 1=>X)Similar with kron, we then need to apply some controled gates.control(n, [2, ], 1=>X)This means there is a X gate on the first qubit that is controled by the second qubit. In fact, you can also create a controled gate with multiple control qubits, likecontrol(n, [2, 3], 1=>X)In the end, we need to apply H gate to all lines, of course, you can do it by kron, but we offer something more efficient called roll, this applies a single gate each time on each qubit without calculating a new large operator, which will be extremely efficient for calculating small gates that tiles on almost every lines.The whole circuit is a chained structure of the above blocks. And we actually store a quantum circuit in a tree structure.circuitAfter we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.r = with(register(bit\"0000\")) do r\n  r |> circuit(4)\nendLet\'s check the output:statevec(r)We have a GHZ state here, try to measure the first qubitmeasure(r, 5)GHZ state will collapse to 0000rangle or 1111rangle due to entanglement!"
+    "text": "First, you have to use this package in Julia.using YaoThen let\'s define the oracle, it is a function of the number of qubits. The circuit looks like this:(Image: ghz)n = 4\ncircuit(n) = chain(\n    n,\n    repeat(X, [1, ]),\n    kron(i=>H for i in 2:n),\n    control([2, ], 1=>X),\n    control([4, ], 3=>X),\n    control([3, ], 1=>X),\n    control([4, ], 3=>X),\n    kron(i=>H for i in 1:n),\n)Let me explain what happens here. Firstly, we have a X gate which is applied to the first qubit. We need decide how we calculate this numerically, Yao offers serveral different approach to this. The simplest (but not the most efficient) one is to use kronecker product which will product X with I on other lines to gather an operator in the whole space and then apply it to the register. The first argument n means the number of qubits.kron(n, 1=>X)Similar with kron, we then need to apply some controled gates.control(n, [2, ], 1=>X)This means there is a X gate on the first qubit that is controled by the second qubit. In fact, you can also create a controled gate with multiple control qubits, likecontrol(n, [2, 3], 1=>X)In the end, we need to apply H gate to all lines, of course, you can do it by kron, but we offer something more efficient called roll, this applies a single gate each time on each qubit without calculating a new large operator, which will be extremely efficient for calculating small gates that tiles on almost every lines.The whole circuit is a chained structure of the above blocks. And we actually store a quantum circuit in a tree structure.circuitAfter we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.r = with(register(bit\"0000\")) do r\n  r |> circuit(4)\nendLet\'s check the output:statevec(r)We have a GHZ state here, try to measure the first qubitmeasure(r, 1000)(Image: GHZ)GHZ state will collapse to 0000rangle or 1111rangle due to entanglement!"
 },
 
 {
@@ -205,7 +205,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Yao",
     "title": "Yao",
     "category": "section",
-    "text": "Modules = [Yao]\nOrder   = [:module, :constant, :type, :macro, :function]"
+    "text": "(Image: Framework-Structure)Modules = [Yao]\nOrder   = [:module, :constant, :type, :macro, :function]"
 },
 
 {
@@ -677,7 +677,23 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Block System",
     "category": "section",
-    "text": "The whole framework is consist of a block system. The whole system characterize a quantum circuit into serveral kinds of blocks. The uppermost abstract type for the whole system is AbstractBlock"
+    "text": "The whole framework is consist of a block system. The whole system characterize a quantum circuit into serveral kinds of blocks. The uppermost abstract type for the whole system is AbstractBlock(Image: Block-System)"
+},
+
+{
+    "location": "man/blocks/#Composite-Blocks-1",
+    "page": "Blocks System",
+    "title": "Composite Blocks",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "man/blocks/#Roller-1",
+    "page": "Blocks System",
+    "title": "Roller",
+    "category": "section",
+    "text": "Roller is a special pattern of quantum circuits. Usually is equivalent to a KronBlock, but we can optimize the computation by rotate the tensor form of a quantum state and apply each small block on it each time.(Image: Block-System)"
 },
 
 {
@@ -1502,6 +1518,46 @@ var documenterSearchIndex = {"docs": [
     "title": "Custom Pretty Printing",
     "category": "section",
     "text": "The whole quantum circuit is represented as a tree in the block system. Therefore, we print a block as a tree. To define your own syntax to print, simply overloads the print_block method. Then it will appears in the block tree syntax automatically.print_block(io::IO, block::MyBlockType)"
+},
+
+{
+    "location": "dev/benchmark/#",
+    "page": "Benchmark with ProjectQ",
+    "title": "Benchmark with ProjectQ",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "dev/benchmark/#Benchmark-with-ProjectQ-1",
+    "page": "Benchmark with ProjectQ",
+    "title": "Benchmark with ProjectQ",
+    "category": "section",
+    "text": "ProjectQ is an open source software framework for quantum computing.(Image: xyz) (Image: repeatedxyz) (Image: rot) (Image: rot) (Image: rot) (Image: rot)Here, we see the reason why we need Block system and multiple dispatch to do structure specific optimization."
+},
+
+{
+    "location": "dev/benchmark/#ProjectQ-Refs-1",
+    "page": "Benchmark with ProjectQ",
+    "title": "ProjectQ Refs",
+    "category": "section",
+    "text": "Github Repo\nDamian S. Steiger, Thomas Häner, and Matthias Troyer \"ProjectQ: An Open Source Software Framework for Quantum Computing\" [arxiv:1612.08091]\nThomas Häner, Damian S. Steiger, Krysta M. Svore, and Matthias Troyer \"A Software Methodology for Compiling Quantum Programs\" [arxiv:1604.01401]"
+},
+
+{
+    "location": "dev/benchmark/#CPU-Information-1",
+    "page": "Benchmark with ProjectQ",
+    "title": "CPU Information",
+    "category": "section",
+    "text": "Architecture:          x86_64\nCPU op-mode(s):        32-bit, 64-bit\nByte Order:            Little Endian\nCPU(s):                48\nOn-line CPU(s) list:   0-47\nThread(s) per core:    2\nCore(s) per socket:    12\nSocket(s):             2\nNUMA node(s):          2\nVendor ID:             GenuineIntel\nCPU family:            6\nModel:                 79\nStepping:              1\nCPU MHz:               2499.921\nBogoMIPS:              4401.40\nVirtualization:        VT-x\nL1d cache:             32K\nL1i cache:             32K\nL2 cache:              256K\nL3 cache:              30720K\nNUMA node0 CPU(s):     0-11,24-35\nNUMA node1 CPU(s):     12-23,36-47"
+},
+
+{
+    "location": "dev/benchmark/#Julia-Version-1",
+    "page": "Benchmark with ProjectQ",
+    "title": "Julia Version",
+    "category": "section",
+    "text": "Julia Version 0.7.0-alpha.147\nCommit 5e3259e (2018-06-16 18:43 UTC)\nPlatform Info:\n  OS: Linux (x86_64-linux-gnu)\n  CPU: Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz\n  WORD_SIZE: 64\n  LIBM: libopenlibm\n  LLVM: libLLVM-6.0.0 (ORCJIT, broadwell)"
 },
 
 ]}
