@@ -32,6 +32,7 @@ makedocs(
         ],
         "Developer Documentation" => Any[
             "dev/extending-blocks.md"
+            "dev/benchmark.md"
         ],
     ],
     html_prettyurls = !("local" in ARGS),
