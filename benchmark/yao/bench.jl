@@ -36,11 +36,11 @@ end
 
 function bench_hgate()
     rollH(nbit) = roll(nbit, I2, fill(H, 6)..., fill(I2,nbit-7)...)
-    bgate([kron(3=>H), control((7,), 3=>H), rollH], "h-report.dat")
+    bgate([repeat(H, [3]), control((7,), 3=>H), rollH], "h-report.dat")
 end
 
 function bench_rot()
-    gates = [kron(3=>rot(G, 0.5)) for G in [X, Y, Z]]
+    gates = [repeat(rot(G, 0.5), [3]) for G in [X, Y, Z]]
     bgate(gates, "rot-report.dat")
 end
 
@@ -64,4 +64,6 @@ function bench_all()
     bench_toffoli()
 end
 
-bench_all()
+#bench_all()
+bench_rot()
+#bench_hgate()
