@@ -12,17 +12,15 @@ alt="Yao Logo" width="210"></img>
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://QuantumBFS.github.io/Yao.jl/stable)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://QuantumBFS.github.io/Yao.jl/latest)
 
-Extensible, Efficient Framework for Quantum Algorithm Design for Humans.
+Extensible, Efficient Quantum Algorithm Design for Humans.
 
 ## Introduction
 
 Yao is an open source framework for
 
 - quantum algorithm design;
-- quantum machine learning;
-- learning quantum computation.
-
-on a classical computer.
+- quantum [software 2.0](https://medium.com/@karpathy/software-2-0-a64152b37c35);
+- quantum computation education.
 
 ## Installation
 
@@ -58,7 +56,7 @@ In Yao, we call these patterns "blocks". If we regard every gate or gate pattern
 Thanks to Julia's duck type and multiple dispatch features, user can
 
 * easily **extend** the block system by realizing specific interfaces
-* quantum circuit blocks can be dispatched to some **specialize method**to push the performance in specific case (e.g. customize the repeat block of H gate).
+* quantum circuit blocks can be dispatched to some **specialize method** to push the performance in specific case (e.g. customize the repeat block of H gate).
 
 
 
