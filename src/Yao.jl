@@ -42,6 +42,7 @@ include("Registers/Registers.jl")
 include("Blocks/Blocks.jl")
 include("Boost/Boost.jl")
 include("Interfaces/Interfaces.jl")
+include("Gallery/Gallery.jl")
 
 @reexport using .Interfaces
 

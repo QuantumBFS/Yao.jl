@@ -30,6 +30,10 @@ end
    include("Interfaces/Interfaces.jl")
 end
 
+@testset "gallery" begin
+   include("Gallery/Gallery.jl")
+end
+
 # @testset "show" begin
 # include("show.jl")
 # end

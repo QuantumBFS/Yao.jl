@@ -16,7 +16,7 @@ import ..Yao: DefaultType
 export @const_gate
 
 # Block APIs
-export mat, apply!, parameters, nparameters, dispatch!, datatype, blocks
+export mat, apply!, parameters, nparameters, dispatch!, datatype, blocks, adjoint
 
 include("Signal.jl")
 include("Primitive.jl")

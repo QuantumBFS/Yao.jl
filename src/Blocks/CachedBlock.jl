@@ -8,7 +8,7 @@ every methods of the block it contains, except [`mat`](@ref)
 and [`apply!`](@ref), it will cache the matrix form whenever
 the program has.
 """
-struct CachedBlock{ST, BT, N, T} <: MatrixBlock{N, T}
+struct CachedBlock{ST, BT, N, T} <: TagBlock{N, T}
     server::ST
     block::BT
     level::Int
@@ -34,7 +34,6 @@ clear!(x::MatrixBlock) = x
 clear!(c::CachedBlock) = (clear!(c.server, c.block); c)
 
 # forward methods
-
 function mat(c::CachedBlock)
     if !iscached(c.server, c.block)
         m = dropzeros!(mat(c.block))
@@ -55,30 +54,13 @@ function apply!(r::AbstractRegister, c::CachedBlock, signal)
         apply!(r, c.block)
     end
 end
-
 apply!(r::AbstractRegister, c::CachedBlock) = (r.state .= mat(c) * r; r)
 
+parent(c::CachedBlock) = c.block
 similar(c::CachedBlock, level::Int) = CachedBlock(c.server, c.block, level)
-
-#############################
-# Direct Inherited Methods
-#############################
-
-dispatch!(c::CachedBlock, params...) = (dispatch!(c.block, params...); c)
-getindex(c::CachedBlock, index...) = getindex(c.block, index...)
-setindex!(c::CachedBlock, val, index...) = setindex!(c.block, val, index...)
-
-start(c::CachedBlock) = start(c.block)
-next(c::CachedBlock, st) = next(c.block, st)
-done(c::CachedBlock, st) = done(c.block, st)
-length(c::CachedBlock) = length(c.block)
-eltype(c::CachedBlock) = eltype(c.block)
-blocks(c::CachedBlock) = blocks(c.block)
-
-# Print
-print_subblocks(io::IO, tree::CachedBlock, depth, charset, active_levels) = print_subblocks(io, tree.block, depth, charset, active_levels)
+copy(c::CachedBlock, level::Int) = CachedBlock(c.server, copy(c.block), level)
 
 function print_block(io::IO, c::CachedBlock)
-    print(io, "(Cached)")
     print_block(io, c.block)
+    print(io, " (Cached)")
 end

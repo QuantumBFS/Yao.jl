@@ -17,8 +17,8 @@ import ..Yao: DefaultType, nqubits, nactive, reorder, invorder
 import ..Registers: focus!, relax!
 import ..Intrinsics: ishermitian, isunitary, isreflexive
 import ..CacheServers: update!, iscached, clear!, pull, iscacheable
-import Base: copy, hash, ==, eltype, show, similar, getindex, setindex!, start, next, done, length
-
+import Base: copy, hash, ==, eltype, show, similar, getindex, setindex!, start, next, done, length, parent
+import Compat: adjoint
 
 # APIs for cache block's matrix
 export update_cache
@@ -28,6 +28,7 @@ export usedbits, addrs, blocks, @const_gate
 export nqubits, nactive, nparameters, mat, datatype, parameters, parameter_type, reorder, invorder
 export apply!, dispatch!
 export ishermitian, isunitary, isreflexive
+export parent, adjoint
 
 include("Core.jl")
 include("MatrixBlock.jl")
