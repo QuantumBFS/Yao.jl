@@ -31,9 +31,9 @@ using Yao.Intrinsics
 end
 
 @testset "phase gate" begin
-    @test phase() isa PhaseGate{Float64}
-    @test shift() isa ShiftGate{Float64}
-    @test phase().theta == 0.0
+    @test phase(0.0) isa PhaseGate{Float64}
+    @test shift(0.0) isa ShiftGate{Float64}
+    @test phase(0.0).theta == 0.0
 end
 
 @testset "chain" begin

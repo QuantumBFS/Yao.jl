@@ -21,6 +21,10 @@ include("CacheFragment.jl")
 include("CachedBlock.jl")
 end
 
+@testset "daggered" begin
+include("Daggered.jl")
+end
+
 @testset "measure" begin
 include("Measure.jl")
 end

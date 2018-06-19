@@ -127,8 +127,8 @@ end
 end
 
 @testset "iteration" begin
-    g = KronBlock{5}(X, 3=>Y, rot(X), rot(Y))
-    for (src, tg) in zip(g, [1=>X, 3=>Y, 4=>rot(X), 5=>rot(Y)])
+    g = KronBlock{5}(X, 3=>Y, rot(X, 0.0), rot(Y, 0.0))
+    for (src, tg) in zip(g, [1=>X, 3=>Y, 4=>rot(X, 0.0), 5=>rot(Y, 0.0)])
         @test src[1] == tg[1]
         @test src[2] == tg[2]
     end
@@ -140,7 +140,7 @@ end
 
 @testset "check traits" begin
     # TODO: define traits for primitive blocks
-    g = KronBlock{5}(X, 3=>Y, rot(X), rot(Y))
+    g = KronBlock{5}(X, 3=>Y, rot(X, 0.0), rot(Y, 0.0))
     addrs(g) === g.addrs
     blocks(g) === g.blocks
     eltype(g) == Tuple{Int, MatrixBlock}

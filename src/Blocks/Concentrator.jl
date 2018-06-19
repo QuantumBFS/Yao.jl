@@ -29,6 +29,8 @@ for FUNC in [:isunitary, :isreflexive, :ishermitian]
     @eval $FUNC(c::Concentrator) = $FUNC(c.block)
 end
 
+==(a::Concentrator{N, T, BT}, b::Concentrator{N, T, BT}) where {N, T, BT} = a.block == b.block && a.usedbits == b.usedbits
+
 function print_block(io::IO, c::Concentrator)
     print(io, "Concentrator: ", c.usedbits)
 end

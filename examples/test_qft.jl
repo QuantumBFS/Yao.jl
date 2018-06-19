@@ -1,7 +1,7 @@
 using Compat.Test
 using Yao
 
-include("fft.jl")
+include("QFT.jl")
 
 num_bit = 5
 ifftblock = IQFT(num_bit)

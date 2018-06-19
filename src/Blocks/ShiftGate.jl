@@ -9,7 +9,7 @@ mutable struct ShiftGate{T} <: PrimitiveBlock{1, Complex{T}}
     theta::T
 end
 
-mat(gate::ShiftGate{T}) where T = Complex{T}[1.0 0.0;0.0 exp(im * gate.theta)]
+mat(gate::ShiftGate{T}) where T = Diagonal(Complex{T}[1.0, exp(im * gate.theta)])
 
 copy(block::ShiftGate{T}) where T = ShiftGate{T}(block.theta)
 dispatch!(block::ShiftGate, theta::Vector) = (block.theta = theta[1]; block)

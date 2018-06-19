@@ -14,6 +14,7 @@ export PermMatrix, pmrand, IMatrix, I, fast_invperm, notdense
 export swaprows!, mulrow!, matvec, mulcol!, swapcols!, u1rows!
 
 include("Core.jl")
+include("elemental.jl")
 include("IMatrix.jl")
 include("PermMatrix.jl")
 

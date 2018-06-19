@@ -26,8 +26,8 @@ Returns a global phase gate.
 """
 function phase end
 
-phase(::Type{T}, theta) where {T <: Complex} = PhaseGate{real(T)}(theta)
-phase(theta=0.0) = phase(DefaultType, theta)
+phase(::Type{T}, theta) where {T <: Complex} = PhaseGate{real(T)}(real(T)(theta))
+phase(theta) = phase(DefaultType, theta)
 
 """
     shift([type=Yao.DefaultType], [theta=0.0]) -> PhaseGate{:shift}
@@ -36,8 +36,8 @@ Returns a phase shift gate.
 """
 function shift end
 
-shift(::Type{T}, theta) where {T <: Complex} = ShiftGate{real(T)}(theta)
-shift(theta=0.0) = shift(DefaultType, theta)
+shift(::Type{T}, theta) where {T <: Complex} = ShiftGate{real(T)}(real(T)(theta))
+shift(theta) = shift(DefaultType, theta)
 
 """
     Rx([type=Yao.DefaultType], [theta=0.0]) -> RotationGate{type, X}
@@ -68,8 +68,8 @@ for (FNAME, NAME) in [
 
     GT = Symbol(join([NAME, "Gate"]))
     @eval begin
-        $FNAME(::Type{T}, theta=0.0) where {T <: Complex} = RotationGate{real(T), $GT{T}}($NAME(T), theta)
-        $FNAME(theta=0.0) = $FNAME(DefaultType, theta)
+        $FNAME(::Type{T}, theta) where {T <: Complex} = RotationGate{real(T), $GT{T}}($NAME(T), real(T)(theta))
+        $FNAME(theta) = $FNAME(DefaultType, theta)
     end
 
 end
@@ -81,8 +81,8 @@ Returns an arbitrary rotation gate on U.
 """
 function rot end
 
-rot(::Type{T}, U::GT, theta=0.0) where {T, GT} = RotationGate{real(T), GT}(U, theta)
-rot(U::MatrixBlock, theta=0.0) = rot(DefaultType, U, theta)
+rot(::Type{T}, U::GT, theta) where {T, GT} = RotationGate{real(T), GT}(U, real(T)(theta))
+rot(U::MatrixBlock, theta) = rot(DefaultType, U, theta)
 
 """
     swap([n], [type], line1, line2) -> Swap

@@ -41,7 +41,7 @@ end
 
     @testset "check parameter dispatch" begin
 
-        g = chain(phase(), phase())
+        g = chain(phase(0.0), phase(0.0))
         dispatch!(g, [1, 2])
         @test parameters(g[1]) ≈ 1
         @test parameters(g[2]) ≈ 2
@@ -62,7 +62,7 @@ end
     end
 
     @testset "check function dispatch" begin
-        g = chain(phase(), phase())
+        g = chain(phase(0.0), phase(0.0))
         dispatch!(+, g, [1, 2])
         @test parameters(g[1]) ≈ 1
         @test parameters(g[2]) ≈ 2
