@@ -11,7 +11,7 @@ import Compat.SparseArrays: SparseMatrixCSC, nnz, nonzeros, dropzeros!
 import Base: getindex, size, similar, copy, show
 
 export PermMatrix, pmrand, IMatrix, I, fast_invperm, notdense
-export swaprows!, mulrow!, matvec, mulcol!, swapcols!
+export swaprows!, mulrow!, matvec, mulcol!, swapcols!, u1rows!
 
 include("Core.jl")
 include("IMatrix.jl")

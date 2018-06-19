@@ -167,3 +167,48 @@ function cxapply!(state::VecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
 end
 
 
+####################### General Apply U1 ########################
+function u1apply!(state::VecOrMat{T}, U1::AbstractMatrix, ibit::Int) where T
+    mask = bmask(ibit)
+    a, c, b, d = U1
+    step = 1<<(ibit-1)
+    step_2 = 1<<ibit
+    for j = 0:step_2:size(state, 1)-step
+        @inbounds @simd for i = j+1:j+step
+            u1rows!(state, i, i+step, a, b, c, d)
+        end
+    end
+    state
+end
+
+function u1apply!(state::VecOrMat{T}, U1::PermMatrix{T}, ibit::Int) where T
+    if U1.perm[1] == 1
+        return u1apply!(state, Diagonal(U1), ibit)
+    end
+    mask = bmask(ibit)
+    b, c = U1.vals
+    step = 1<<(ibit-1)
+    step_2 = 1<<ibit
+    for j = 0:step_2:size(state, 1)-step
+        @inbounds @simd for i = j+1:j+step
+            swaprows!(state, i, i+step, c, b)
+        end
+    end
+    state
+end
+
+function u1apply!(state::VecOrMat{T}, U1::Diagonal{T}, ibit::Int) where T
+    mask = bmask(ibit)
+    a, d = U1.diag
+    step = 1<<(ibit-1)
+    step_2 = 1<<ibit
+    for j = 0:step_2:size(state, 1)-step
+        @inbounds @simd for i = j+1:j+step
+            mulrow!(state, i, a)
+            mulrow!(state, i+step, d)
+        end
+    end
+    state
+end
+
+u1apply!(state::VecOrMat, U1::IMatrix, ibit::Int) = state
