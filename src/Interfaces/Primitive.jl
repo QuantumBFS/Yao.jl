@@ -20,7 +20,7 @@ H = \\frac{1}{\\sqrt{2}} \\begin{pmatrix}
 H
 
 """
-    phase([type=Yao.DefaultType], [theta=0.0]) -> PhaseGate{:global}
+    phase([type=Yao.DefaultType], theta) -> PhaseGate{:global}
 
 Returns a global phase gate.
 """
@@ -30,7 +30,7 @@ phase(::Type{T}, theta) where {T <: Complex} = PhaseGate{real(T)}(real(T)(theta)
 phase(theta) = phase(DefaultType, theta)
 
 """
-    shift([type=Yao.DefaultType], [theta=0.0]) -> PhaseGate{:shift}
+    shift([type=Yao.DefaultType], theta) -> PhaseGate{:shift}
 
 Returns a phase shift gate.
 """
@@ -40,21 +40,21 @@ shift(::Type{T}, theta) where {T <: Complex} = ShiftGate{real(T)}(real(T)(theta)
 shift(theta) = shift(DefaultType, theta)
 
 """
-    Rx([type=Yao.DefaultType], [theta=0.0]) -> RotationGate{type, X}
+    Rx([type=Yao.DefaultType], theta) -> RotationGate{1, type, X}
 
 Returns a rotation X gate.
 """
 function Rx end
 
 """
-    Ry([type=Yao.DefaultType], [theta=0.0]) -> RotationGate{type, Y}
+    Ry([type=Yao.DefaultType], theta) -> RotationGate{1, type, Y}
 
 Returns a rotation Y gate.
 """
 function Ry end
 
 """
-    Rz([type=Yao.DefaultType], [theta=0.0]) -> RotationGate{type, Z}
+    Rz([type=Yao.DefaultType], theta) -> RotationGate{1, type, Z}
 
 Returns a rotation Z gate.
 """
@@ -68,21 +68,20 @@ for (FNAME, NAME) in [
 
     GT = Symbol(join([NAME, "Gate"]))
     @eval begin
-        $FNAME(::Type{T}, theta) where {T <: Complex} = RotationGate{real(T), $GT{T}}($NAME(T), real(T)(theta))
+        $FNAME(::Type{T}, theta) where {T <: Complex} = RotationGate{1, real(T), $GT{T}}($NAME(T), theta)
         $FNAME(theta) = $FNAME(DefaultType, theta)
     end
 
 end
 
 """
-    rot([type=Yao.DefaultType], U, [theta=0.0]) -> RotationGate{type, U}
+    rot([type=Yao.DefaultType], U, theta) -> RotationGate{N, type, U}
 
 Returns an arbitrary rotation gate on U.
 """
 function rot end
 
-rot(::Type{T}, U::GT, theta) where {T, GT} = RotationGate{real(T), GT}(U, real(T)(theta))
-rot(U::MatrixBlock, theta) = rot(DefaultType, U, theta)
+rot(U::GT, theta) where {N, T, GT<:MatrixBlock{N, Complex{T}}} = RotationGate{N, T, GT}(U, T(theta))
 
 """
     swap([n], [type], line1, line2) -> Swap

@@ -5,18 +5,18 @@ export RotationGate
 
 RotationGate, with GT both hermitian and isreflexive.
 """
-mutable struct RotationGate{N, T, GT <: MatrixBlock{N, T}} <: PrimitiveBlock{N, T}
+mutable struct RotationGate{N, T, GT <: MatrixBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
     U::GT
     theta::T
-    function RotationGate{N, T, GT}(U::GT, theta::T) where {N, T, GT <: MatrixBlock{N, T}}
+    function RotationGate{N, T, GT}(U::GT, theta) where {N, T, GT <: MatrixBlock{N, Complex{T}}}
         ishermitian(U) && isreflexive(U) || throw(ArgumentError("Gate type $GT is not hermitian or not isreflexive!"))
-        new{N, T, GT}(U, theta)
+        new{N, T, GT}(U, T(theta))
     end
 end
-RotationGate(U::GT, theta) where {N, T, GT<:MatrixBlock{N, T}} = RotationGate{N, T, GT}(U, T(theta))
+RotationGate(U::GT, theta) where {N, T, GT<:MatrixBlock{N, Complex{T}}} = RotationGate{N, T, GT}(U, theta)
 
 _make_rot_mat(I, U, theta) = I * cos(theta / 2) - im * sin(theta / 2) * U
-mat(R::RotationGate{N, T}) where {N, T} = _make_rot_mat(IMatrix{1<<N, T}(), mat(R.U), R.theta)
+mat(R::RotationGate{N, T}) where {N, T} = _make_rot_mat(IMatrix{1<<N, Complex{T}}(), mat(R.U), R.theta)
 
 copy(R::RotationGate) = RotationGate(R.U, R.theta)
 

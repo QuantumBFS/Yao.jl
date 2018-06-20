@@ -9,3 +9,7 @@ using Compat.SparseArrays
 @testset "QFT" begin
     include("QFT.jl")
 end
+
+@testset "Differential" begin
+    include("Differential.jl")
+end

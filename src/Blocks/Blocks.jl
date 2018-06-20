@@ -25,16 +25,17 @@ export update_cache
 
 # module APIs
 export usedbits, addrs, blocks, @const_gate
-export nqubits, nactive, nparameters, mat, datatype, parameters, parameter_type, reorder, invorder
+export nqubits, nactive, nparameters, mat, datatype, parameters, parameter_type, invorder
 export apply!, dispatch!
 export ishermitian, isunitary, isreflexive
 export parent, adjoint
+export blockfilter, blockfilter!, expect, reorder
 
 include("Core.jl")
 include("MatrixBlock.jl")
 # others
 include("Measure.jl")
 include("IOSyntax.jl")
-include("reorder.jl")
+include("blockoperations.jl")
 
 end
