@@ -31,7 +31,7 @@ end
 end
 
 @testset "gallery" begin
-   include("Gallery/Gallery.jl")
+   include("Zoo/Zoo.jl")
 end
 
 # @testset "show" begin

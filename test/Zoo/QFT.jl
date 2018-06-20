@@ -1,5 +1,5 @@
 using Yao
-using Yao.Gallery
+using Yao.Zoo
 using Compat.Test
 @static if VERSION >= v"0.7-"
     using FFTW
@@ -16,7 +16,6 @@ end
 
     # test ifft
     println(ifftblock)
-    reg1 = copy(reg) |> invorder! |>ifftblock
     reg1 = copy(reg) |>ifftblock
 
     # permute lines (Manually)
@@ -24,8 +23,7 @@ end
     @test reg1|>statevec ≈ kv |> invorder
 
     # test fft
-    reg.state[:] = vec(permutedims(reshape(statevec(reg), fill(2, num_bit)...), collect(num_bit:-1:1)))
-    reg2 = copy(reg) |> fftblock
+    reg2 = copy(reg) |> invorder! |> fftblock
     kv = fft(rv)/sqrt(length(rv))
     @test statevec(reg2) ≈ kv
 end
