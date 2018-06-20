@@ -20,7 +20,7 @@ function clearall!(x::CachedBlock{ST, BT}) where {ST, BT <: CompositeBlock}
     x
 end
 
-function cache(server::AbstractCacheServer, x::MatrixBlock, level::Int; recursive::Bool=false)
+function cache(server::AbstractCacheServer, x::MatrixBlock, level::Int)
     CachedBlock(server, x, level)
 end
 

@@ -1,4 +1,4 @@
-module Gallery
+module Zoo
 
 using ..Yao
 

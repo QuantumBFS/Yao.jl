@@ -35,16 +35,7 @@ end
 
 # Additional Methods for Composite Blocks
 getindex(c::ChainBlock, index) = getindex(c.blocks, index)
-
-function setindex!(c::ChainBlock, val, index)
-    0 < index || throw(BoundsError(c, index))
-
-    @inbounds if index > lastindex(c.blocks)
-        push!(c.blocks, val)
-    else
-        setindex!(c.blocks, val, index)
-    end
-end
+setindex!(c::ChainBlock, val, index) = setindex!(c.blocks, val, index)
 
 import Compat: lastindex
 lastindex(c::ChainBlock) = lastindex(c.blocks)
@@ -63,11 +54,6 @@ usedbits(c::ChainBlock) = unique(vcat([usedbits(b) for b in blocks(c)]...))
 # Additional Methods for Chain
 import Base: push!, append!, prepend!
 push!(c::ChainBlock{N}, val::MatrixBlock{N}) where N = (push!(c.blocks, val); c)
-
-function push!(c::ChainBlock{N, T}, val::Pair{Int, BT}) where {N, T, BT <: MatrixBlock}
-    push!(c.blocks, KronBlock{N}(val))
-    c
-end
 
 function push!(c::ChainBlock{N, T}, val::Function) where {N, T}
     push!(c, val(N))

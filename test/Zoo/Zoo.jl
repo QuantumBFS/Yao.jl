@@ -1,5 +1,5 @@
 using Yao
-using Yao.Gallery
+using Yao.Zoo
 using Compat
 using Compat.Test
 using Compat.LinearAlgebra
