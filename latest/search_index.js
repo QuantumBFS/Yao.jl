@@ -61,7 +61,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Fourier Transform",
     "title": "Quantum Fourier Transform",
     "category": "section",
-    "text": "(Image: ghz)using Yao\n\nfunction QFT(n::Int)\n    circuit = chain(n)\n    for i = 1:n - 1\n        push!(circuit, i=>H)\n        g = chain(\n            control([i, ], j=>shift(-2π/(1<< (j - i + 1))))\n            for j = i+1:n\n        )\n        push!(circuit, g)\n    end\n    push!(circuit, n=>H)\nend\n\nQFT(5)In Yao, factory methods for blocks will be loaded lazily. For example, if you missed the total number of qubits of chain, then it will return a function that requires an input of an integer.If you missed the total number of qubits. It is OK. Just go on, it will be filled when its possible.chain(4, repeat(1=>X), kron(2=>Y))"
+    "text": "(Image: ghz)using Yao\n\n# Control-R(k) gate in block-A\nA(i::Int, j::Int, k::Int) = control([i, ], j=>shift(-2π/(1<<k)))\n# block-B\nB(n::Int, i::Int) = chain(i==j ? kron(i=>H) : A(j, i, j-i+1) for j = i:n)\nQFT(n::Int) = chain(n, B(n, i) for i = 1:n)\n\n# define QFT and IQFT block.\nnum_bit = 5\nqft = QFT(num_bit)\niqft = adjoint(qft)The basic building block - controled phase shift gate is defined asR(k)=beginbmatrix\n1  0\n0  expleft(frac2pi i2^kright)\nendbmatrixNow let\'s check the result using classical fft# if you\'re using lastest julia, you need to add the fft package.\n@static if VERSION >= v\"0.7-\"\n    using FFTW\nend\nusing Compat.Test\n\n@test chain(num_bit, qft, iqft) |> mat ≈ eye(2^num_bit)\n\n# define a register and get its vector representation\nreg = rand_state(num_bit)\nrv = reg |> statevec |> copy\n\n# test fft\nreg_qft = copy(reg) |>invorder! |> qft\nkv = fft(rv)/sqrt(length(rv))\n@test reg_qft |> statevec ≈ kv\n\n# test ifft\nreg_iqft = copy(reg) |>iqft\nkv = ifft(rv)*sqrt(length(rv))\n@test reg_iqft |> statevec ≈ kv |> invorderQFT and IQFT are different from FFT and IFFT in two ways,they are different by a factor of sqrt2^n with n the number of qubits.\nthe little end and big end will exchange after applying QFT or IQFT.In Yao, factory methods for blocks will be loaded lazily. For example, if you missed the total number of qubits of chain, then it will return a function that requires an input of an integer.If you missed the total number of qubits. It is OK. Just go on, it will be filled when its possible.chain(4, repeat(1=>X), kron(2=>Y))"
 },
 
 {
@@ -253,7 +253,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Yao.Interfaces.Rx",
     "category": "function",
-    "text": "Rx([type=Yao.DefaultType], [theta=0.0]) -> RotationGate{type, X}\n\nReturns a rotation X gate.\n\n\n\n"
+    "text": "Rx([type=Yao.DefaultType], theta) -> RotationGate{1, type, X}\n\nReturns a rotation X gate.\n\n\n\n"
 },
 
 {
@@ -261,7 +261,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Yao.Interfaces.Ry",
     "category": "function",
-    "text": "Ry([type=Yao.DefaultType], [theta=0.0]) -> RotationGate{type, Y}\n\nReturns a rotation Y gate.\n\n\n\n"
+    "text": "Ry([type=Yao.DefaultType], theta) -> RotationGate{1, type, Y}\n\nReturns a rotation Y gate.\n\n\n\n"
 },
 
 {
@@ -269,7 +269,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Yao.Interfaces.Rz",
     "category": "function",
-    "text": "Rz([type=Yao.DefaultType], [theta=0.0]) -> RotationGate{type, Z}\n\nReturns a rotation Z gate.\n\n\n\n"
+    "text": "Rz([type=Yao.DefaultType], theta) -> RotationGate{1, type, Z}\n\nReturns a rotation Z gate.\n\n\n\n"
 },
 
 {
@@ -301,7 +301,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Yao.Interfaces.phase",
     "category": "function",
-    "text": "phase([type=Yao.DefaultType], [theta=0.0]) -> PhaseGate{:global}\n\nReturns a global phase gate.\n\n\n\n"
+    "text": "phase([type=Yao.DefaultType], theta) -> PhaseGate{:global}\n\nReturns a global phase gate.\n\n\n\n"
 },
 
 {
@@ -325,7 +325,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Yao.Interfaces.rot",
     "category": "function",
-    "text": "rot([type=Yao.DefaultType], U, [theta=0.0]) -> RotationGate{type, U}\n\nReturns an arbitrary rotation gate on U.\n\n\n\n"
+    "text": "rot([type=Yao.DefaultType], U, theta) -> RotationGate{N, type, U}\n\nReturns an arbitrary rotation gate on U.\n\n\n\n"
 },
 
 {
@@ -333,7 +333,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Yao.Interfaces.shift",
     "category": "function",
-    "text": "shift([type=Yao.DefaultType], [theta=0.0]) -> PhaseGate{:shift}\n\nReturns a phase shift gate.\n\n\n\n"
+    "text": "shift([type=Yao.DefaultType], theta) -> PhaseGate{:shift}\n\nReturns a phase shift gate.\n\n\n\n"
 },
 
 {
@@ -829,7 +829,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.RotationGate",
     "category": "type",
-    "text": "RotationGate{T, GT <: PrimitiveBlock{1, Complex{T}}} <: PrimitiveBlock{1, Complex{T}}\n\nRotationGate, with GT both hermitian and isreflexive.\n\n\n\n"
+    "text": "RotationGate{N, T, GT <: MatrixBlock{N, Complex{T}}} <: MatrixBlock{N, Complex{T}}\n\nRotationGate, with GT both hermitian and isreflexive.\n\n\n\n"
 },
 
 {
@@ -846,6 +846,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.apply!",
     "category": "function",
     "text": "apply!(reg, block, [signal])\n\napply a block to a register reg with or without a cache signal.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.blockfilter-Tuple{Any,Yao.Blocks.AbstractBlock}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.blockfilter",
+    "category": "method",
+    "text": "blockfilter(func, blk::AbstractBlock) -> Vector{AbstractBlock}\nblockfilter!(func, rgs::Vector, blk::AbstractBlock) -> Vector{AbstractBlock}\n\ntree wise filtering for blocks.\n\n\n\n"
 },
 
 {
@@ -878,6 +886,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.dispatch!",
     "category": "method",
     "text": "dispatch!(f, c, params) -> c\n\ndispatch parameters and tweak it according to callback function f(original, parameter)->new\n\ndispatch a vector of parameters to this composite block according to each sub-block\'s number of parameters.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.expect-Tuple{Yao.Blocks.AbstractBlock,Yao.Registers.AbstractRegister}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.expect",
+    "category": "method",
+    "text": "expect(op::AbstractBlock, reg::AbstractRegister{1}) -> Float\nexpect(op::AbstractBlock, reg::AbstractRegister{B}) -> Matrix\n\nexpectation value of an operator.\n\n\n\n"
 },
 
 {
