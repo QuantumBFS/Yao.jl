@@ -1,11 +1,11 @@
 # Benchmark with ProjectQ
-[ProjectQ](https://projectq.ch) is an open source software framework for quantum computing.
+[ProjectQ](https://projectq.ch) is an open source software framework for quantum computing. Here we present the single process benchmark result
 
 ![xyz](../assets/benchmarks/xyz-bench.png)
 ![repeatedxyz](../assets/benchmarks/repeatxyz-bench.png)
-![rot](../assets/benchmarks/cxyz-bench.png)
-![rot](../assets/benchmarks/crot-bench.png)
-![rot](../assets/benchmarks/hgate-bench.png)
+![cxyz](../assets/benchmarks/cxyz-bench.png)
+![crot](../assets/benchmarks/crot-bench.png)
+![hgate](../assets/benchmarks/hgate-bench.png)
 ![rot](../assets/benchmarks/rot-bench.png)
 
 Here, we see the reason why we need `Block` system and multiple dispatch to do structure specific optimization.

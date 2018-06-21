@@ -28,6 +28,15 @@ end
 @testset "measure" begin
 include("Measure.jl")
 end
+
+@testset "functor" begin
+include("Functor.jl")
+end
+
+@testset "sequential" begin
+include("Sequential.jl")
+end
+
 @testset "blockoperations" begin
 include("blockoperations.jl")
 end

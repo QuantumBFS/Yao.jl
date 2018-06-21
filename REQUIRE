@@ -5,3 +5,4 @@ StaticArrays
 MacroTools
 Reexport
 StatsBase
+Lazy

@@ -20,6 +20,7 @@ color(::Type{T}) where {T <: RepeatedBlock} = :cyan
 color(::Type{T}) where {T <: ChainBlock} = :blue
 color(::Type{T}) where {T <: ControlBlock} = :red
 color(::Type{T}) where {T <: Swap} = :magenta
+color(::Type{T}) where {T <: Sequential} = :blue
 
 # Default Charset
 BlockTreeCharSet() = BlockTreeCharSet('├','└','│','─')
@@ -56,7 +57,7 @@ function print_tree(
     isa(io, IOContext) && (nodebuf = IOContext(nodebuf, io))
 
     # print circuit summary
-    if (tree === roottree) && title
+    if (tree === roottree) && title && tree isa MatrixBlock
         println(io, "Total: ", nqubits(tree), ", DataType: ", datatype(tree))
     end
 

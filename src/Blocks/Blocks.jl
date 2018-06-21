@@ -5,6 +5,7 @@ using Compat.Random
 using Compat.Iterators
 using Compat.LinearAlgebra
 using Compat.SparseArrays
+using Lazy: @forward
 
 using ..Intrinsics
 using ..Registers
@@ -13,7 +14,7 @@ using ..CacheServers
 
 # import package APIs
 import ..Yao
-import ..Yao: DefaultType, nqubits, nactive, reorder, invorder
+import ..Yao: DefaultType, nqubits, nactive, invorder
 import ..Registers: focus!, relax!
 import ..Intrinsics: ishermitian, isunitary, isreflexive
 import ..CacheServers: update!, iscached, clear!, pull, iscacheable
@@ -29,12 +30,14 @@ export nqubits, nactive, nparameters, mat, datatype, parameters, parameter_type,
 export apply!, dispatch!
 export ishermitian, isunitary, isreflexive
 export parent, adjoint
-export blockfilter, blockfilter!, expect, reorder
+export blockfilter, blockfilter!, expect
 
 include("Core.jl")
 include("MatrixBlock.jl")
 # others
 include("Measure.jl")
+include("Sequential.jl")
+include("Functor.jl")
 include("IOSyntax.jl")
 include("blockoperations.jl")
 

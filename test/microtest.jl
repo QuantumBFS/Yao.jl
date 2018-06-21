@@ -14,36 +14,36 @@ gate_list = [X, Y, Z, H]
 num_bit = 6
 @testset "Single Qubit" begin
     for gg in gate_list
-        @test mat(KronBlock{num_bit, ComplexF64}([3], [gg])) ≈ hilbertkron(num_bit, [mat(gg)], [3])
+        @test mat(kron(num_bit, 3=>gg)) ≈ hilbertkron(num_bit, [mat(gg)], [3])
     end
 end
 
 @testset "Single Control Gates" begin
     for gg in gate_list
-        @test mat(ControlBlock{6}((4,), gg, 3)) == general_controlled_gates(num_bit, [p1], [4],  [mat(gg)], [3])
+        @test mat(control(num_bit, (4,), 3=>gg)) == general_controlled_gates(num_bit, [p1], [4],  [mat(gg)], [3])
     end
 end
 
 @testset "Multiple Control Gates" begin
     for gg in gate_list
-        @test mat(ControlBlock{6}((4,2), gg, 3)) == general_controlled_gates(num_bit, [p1, p1], [4,2],  [mat(gg)], [3])
+        @test mat(control(6, (4,2), 3=>gg)) == general_controlled_gates(num_bit, [p1, p1], [4,2],  [mat(gg)], [3])
     end
 end
 
 @testset "Rotation Gates" begin
     for gg in gate_list
-        @test mat(KronBlock{num_bit, ComplexF64}([3], [RotationGate(gg, π/8)])) ≈ hilbertkron(num_bit, [rotmat(mat(gg), π/8)], [3])
+        @test mat(kron(num_bit, 3=>rot(gg, π/8))) ≈ hilbertkron(num_bit, [rotmat(mat(gg), π/8)], [3])
     end
 end
 
 @testset "Single-Controlled Rotation Gates" begin
     for gg in gate_list
-        @test mat(ControlBlock{num_bit}((4,), RotationGate(gg, π/8), 3)) ≈ general_controlled_gates(num_bit, [p1], [4], [rotmat(mat(gg), π/8)], [3])
+        @test mat(control(num_bit, (4,), 3=>rot(gg, π/8))) ≈ general_controlled_gates(num_bit, [p1], [4], [rotmat(mat(gg), π/8)], [3])
     end
 end
 
 @testset "Multi-Controlled Rotation Gates" begin
     for gg in gate_list
-        @test mat(ControlBlock{num_bit}((4,2), RotationGate(gg, π/8), 3)) ≈ general_controlled_gates(num_bit, [p1, p1], [4, 2], [rotmat(mat(gg), π/8)], [3])
+        @test mat(control(num_bit, (4,2), 3=>rot(gg, π/8))) ≈ general_controlled_gates(num_bit, [p1, p1], [4, 2], [rotmat(mat(gg), π/8)], [3])
     end
 end
