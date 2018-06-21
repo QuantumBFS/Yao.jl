@@ -6,12 +6,6 @@ using Yao.Blocks
 using Yao.Intrinsics
 using Yao.LuxurySparse
 
-# import Yao: xapply!, yapply!, zapply!, cxapply!, cyapply!, czapply!
-
-# struct Register{N, T<:Complex}
-#     state::Vector{T}
-# end
-
 @testset "xyz" begin
     @test linop2dense(s->xapply!(s, [1]), 1) == mat(X)
     @test linop2dense(s->yapply!(s, [1]), 1) == mat(Y)

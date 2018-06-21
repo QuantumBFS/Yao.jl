@@ -37,7 +37,7 @@ include("MatrixBlock.jl")
 # others
 include("Measure.jl")
 include("Sequential.jl")
-include("Functor.jl")
+include("Function.jl")
 include("IOSyntax.jl")
 include("blockoperations.jl")
 

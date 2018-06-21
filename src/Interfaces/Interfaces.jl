@@ -22,7 +22,7 @@ include("Signal.jl")
 include("Primitive.jl")
 include("Composite.jl")
 include("Measure.jl")
-include("Functor.jl")
+include("Function.jl")
 include("Sequential.jl")
 include("Cache.jl")
 

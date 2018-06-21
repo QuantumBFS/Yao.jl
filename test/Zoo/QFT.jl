@@ -15,7 +15,6 @@ end
     @test Matrix(mat(chain(3, QFT(3) |> adjoint, QFT(3)))) ≈ eye(1<<3)
 
     # test ifft
-    println(ifftblock)
     reg1 = copy(reg) |>ifftblock
 
     # permute lines (Manually)
