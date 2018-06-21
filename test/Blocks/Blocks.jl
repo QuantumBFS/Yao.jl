@@ -29,8 +29,8 @@ end
 include("Measure.jl")
 end
 
-@testset "functor" begin
-include("Functor.jl")
+@testset "function" begin
+include("Function.jl")
 end
 
 @testset "sequential" begin

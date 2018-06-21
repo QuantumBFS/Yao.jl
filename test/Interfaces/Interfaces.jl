@@ -53,9 +53,6 @@ end
     @test control(3, [1, 2], 3=>X) isa ControlBlock
     @test control(5, 1:2, 3=>X) isa ControlBlock
 
-    @test (1=>X) |> control(8, i for i in [2, 3, 6, 7]) isa ControlBlock
-    @test ((1=>X) |> control(i for i in [2, 3, 6, 7]))(8) isa ControlBlock
-
     @test ((1=>X) |> C(2, 3))(4) isa ControlBlock
 end
 
@@ -100,17 +97,16 @@ end
     @test Rz(1) isa RotationGate
 end
 
-@testset "functors" begin
+@testset "functions" begin
     reg = rand_state(3, 2)
-    println(typeof(InvOrder))
-    @test InvOrder isa Functor{:InvOrder}
+    @test InvOrder isa FunctionBlock{:InvOrder}
     @test apply!(copy(reg), InvOrder) == copy(reg) |> invorder!
 
-    @test addbit(3) isa Functor{:AddBit}
+    @test addbit(3) isa FunctionBlock{Tuple{:AddBit, 3}}
     @test apply!(copy(reg), addbit(2)) |> state == kron(zero_state(2) |> state, reg |> state)
 
-    Probs = @functor probs
-    @test Probs isa Functor{:Default}
+    Probs = @fn probs
+    @test Probs isa FunctionBlock{typeof(probs)}
     @test apply!(copy(reg), Probs) == reg |> probs
 end
 
@@ -122,7 +118,6 @@ end
     @test sqs == sequence(kron(5, 3=>X), addbit(3), MEASURE) == sequence((kron(5, 3=>X), addbit(3), MEASURE))
     insert!(sqs, 3, kron(8, 8=>X))
     push!(sqs, Reset)
-    println(sqs)
     reg = register(bit"11111") |> sqs
     @test MEASURE.result[] == 155
     @test reg == zero_state(8)

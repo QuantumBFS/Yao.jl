@@ -8,3 +8,7 @@ using Compat.SparseArrays
     include("Default.jl")
     include("Focus.jl")
 end
+
+@testset "reorder" begin
+include("reorder.jl")
+end

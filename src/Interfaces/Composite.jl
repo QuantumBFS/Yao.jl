@@ -101,10 +101,6 @@ function control(controls, target)
     total->ControlBlock{total}(decode_sign(controls...)..., target.second, target.first)
 end
 
-function control(total::Int, controls)
-    x::Pair->ControlBlock{total}(decode_sign(controls...)..., x.second, x.first)
-end
-
 function control(controls)
     function _control(x::Pair)
         total->ControlBlock{total}(decode_sign(controls...)..., x.second, x.first)

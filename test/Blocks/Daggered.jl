@@ -33,7 +33,6 @@ end
     @test GP isa Daggered
     @test mat(GP) == mat(ConstG)'
     @test adjoint(adjoint(ConstG)) === ConstG
-    println(chain(GP, GP))
 end
 
 @testset "copy dispatch" begin

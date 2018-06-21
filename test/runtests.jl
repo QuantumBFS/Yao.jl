@@ -30,7 +30,7 @@ end
    include("Interfaces/Interfaces.jl")
 end
 
-@testset "gallery" begin
+@testset "zoo" begin
    include("Zoo/Zoo.jl")
 end
 
