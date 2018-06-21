@@ -1,6 +1,26 @@
 #############################################
 #            focus! and relax!
 ##############################################
+"""
+Get the compact shape and order for permutedims.
+"""
+function shapeorder(shape::NTuple, order::Vector{Int})
+    nshape = Int[]
+    norder = Int[]
+    k_pre = -1
+    for k in order
+        if k == k_pre+1
+            nshape[end] *= shape[k]
+        else
+            push!(norder, k)
+            push!(nshape, shape[k])
+        end
+        k_pre = k
+    end
+    invorder = norder |> sortperm
+    nshape[invorder], invorder |> invperm
+end
+
 move_ahead(collection, head)::Vector{Int} = vcat(head..., setdiff(collection, head))
 move_ahead(ndim::Int, head)::Vector{Int} = vcat(head..., setdiff(1:ndim, head))
 

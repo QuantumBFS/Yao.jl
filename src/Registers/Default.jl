@@ -104,26 +104,6 @@ Return true if a register is normalized else false.
 """
 isnormalized(reg::DefaultRegister) = all(sum(copy(reg) |> relax! |> probs, 1) .≈ 1)
 
-"""
-Get the compact shape and order for permutedims.
-"""
-function shapeorder(shape::NTuple, order::Vector{Int})
-    nshape = Int[]
-    norder = Int[]
-    k_pre = -1
-    for k in order
-        if k == k_pre+1
-            nshape[end] *= shape[k]
-        else
-            push!(norder, k)
-            push!(nshape, shape[k])
-        end
-        k_pre = k
-    end
-    invorder = norder |> sortperm
-    nshape[invorder], invorder |> invperm
-end
-
 # we convert state to a vector to use
 # intrincs like gemv, when nremain is
 # 0 and the state is actually a vector
