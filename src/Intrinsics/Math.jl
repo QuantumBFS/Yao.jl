@@ -154,3 +154,5 @@ function reorder(A::Diagonal, orders::Vector{Int})
     end
     Diagonal(diag)
 end
+
+rotmat(m::AbstractMatrix, θ::Real) = expm(-im*θ/2*Matrix(m))
