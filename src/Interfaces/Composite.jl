@@ -9,6 +9,8 @@ function parse_block(n::Int, x::MatrixBlock{N}) where N
     x
 end
 
+parse_block(n::Int, x::AbstractBlock) = x
+
 # 2. composite blocks
 # 2.1 chain block
 export chain

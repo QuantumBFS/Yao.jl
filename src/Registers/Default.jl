@@ -171,3 +171,17 @@ end
 reorder!(orders::Int...) = reg::DefaultRegister -> reorder!(reg, [orders...])
 
 invorder!(reg::DefaultRegister) = reorder!(reg, collect(nqubits(reg):-1:1))
+
+function addbit!(reg::DefaultRegister{B, T}, n::Int) where {B, T}
+    state = zeros(T, size(reg.state, 1)*(1<<n), size(reg.state, 2))
+    state[1:size(reg.state, 1), :] = reg.state
+    reg.state = state
+    reg
+end
+
+function reset!(reg::DefaultRegister)
+    println(reg)
+    reg.state .= 0
+    reg.state[1,:] .= 1
+    reg
+end

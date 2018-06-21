@@ -107,3 +107,10 @@ end
     @test repeat(register(v1 ⊗ v2 ⊗ v3), 2) |> invorder! ≈ repeat(register(v3 ⊗ v2 ⊗ v1), 2)
     @test repeat(register(v1 ⊗ v2 ⊗ v3), 2) |> reorder!(3,2,1) ≈ repeat(register(v3 ⊗ v2 ⊗ v1), 2)
 end
+
+@testset "addbit" begin
+    reg = zero_state(3)
+    @test addbit!(copy(reg), 3) == zero_state(6)
+    reg = rand_state(3, 2)
+    @test addbit!(copy(reg), 2) |> state == kron(zero_state(2) |> state, reg |> state)
+end

@@ -99,3 +99,34 @@ end
     @test Ry(1) isa RotationGate
     @test Rz(1) isa RotationGate
 end
+
+@testset "functors" begin
+    reg = rand_state(3, 2)
+    println(typeof(InvOrder))
+    @test InvOrder isa Functor{:InvOrder}
+    @test apply!(copy(reg), InvOrder) == copy(reg) |> invorder!
+
+    @test addbit(3) isa Functor{:AddBit}
+    @test apply!(copy(reg), addbit(2)) |> state == kron(zero_state(2) |> state, reg |> state)
+
+    Probs = @functor probs
+    @test Probs isa Functor{:Default}
+    @test apply!(copy(reg), Probs) == reg |> probs
+end
+
+@testset "sequence" begin
+    sq = sequence(kron(3=>X), addbit(3), MEASURE)
+    @test sq isa Function
+    sqs = sq(5)
+    @test sqs isa Sequential
+    @test sqs == sequence(kron(5, 3=>X), addbit(3), MEASURE) == sequence((kron(5, 3=>X), addbit(3), MEASURE))
+    insert!(sqs, 3, kron(8, 8=>X))
+    push!(sqs, Reset)
+    println(sqs)
+    reg = register(bit"11111") |> sqs
+    @test MEASURE.result[] == 155
+    @test reg == zero_state(8)
+    reg = register(bit"11111") |> sqs[1:end-1]
+    @test MEASURE.result[] == 155
+    @test reg != zero_state(8)
+end

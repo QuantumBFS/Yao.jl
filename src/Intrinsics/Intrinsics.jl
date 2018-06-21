@@ -6,7 +6,7 @@ using Compat.SparseArrays
 
 using ..LuxurySparse
 import ..LuxurySparse: I
-import ..Yao: nqubits, reorder, invorder
+import ..Yao: nqubits, reorder, invorder, reorder
 
 include("Exceptions.jl")
 
