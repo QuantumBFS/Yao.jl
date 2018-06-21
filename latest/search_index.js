@@ -249,6 +249,22 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/interfaces/#Yao.Interfaces.InvOrder",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.InvOrder",
+    "category": "constant",
+    "text": "A Functor block of inversing the order.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.@functor-Tuple{Any}",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.@functor",
+    "category": "macro",
+    "text": "macro functor([tag,] apply)\n\nTurn a function into a Functor{tag} block, this function take register as input, modify and output the register.\n\n\n\n"
+},
+
+{
     "location": "man/interfaces/#Yao.Interfaces.Rx",
     "page": "Interfaces",
     "title": "Yao.Interfaces.Rx",
@@ -270,6 +286,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Interfaces.Rz",
     "category": "function",
     "text": "Rz([type=Yao.DefaultType], theta) -> RotationGate{1, type, Z}\n\nReturns a rotation Z gate.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.addbit-Tuple{Int64}",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.addbit",
+    "category": "method",
+    "text": "addbit(n::Int) -> Functor{:AddBit}\n\nReturn a Functor block of adding n bits.\n\n\n\n"
 },
 
 {
@@ -326,6 +350,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Interfaces.rot",
     "category": "function",
     "text": "rot([type=Yao.DefaultType], U, theta) -> RotationGate{N, type, U}\n\nReturns an arbitrary rotation gate on U.\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.sequence",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.sequence",
+    "category": "function",
+    "text": "Returns a Sequential block. This factory method can be called lazily if you missed the total number of qubits.\n\nThis is the loose version of sequence, that does not support the mat related interfaces.\n\n\n\n"
 },
 
 {
@@ -777,6 +809,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.Functor",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.Functor",
+    "category": "type",
+    "text": "Functor <: AbstractBlock\n\nfunction block directly applied on register.\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.KronBlock",
     "page": "Blocks System",
     "title": "Yao.Blocks.KronBlock",
@@ -830,6 +870,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.RotationGate",
     "category": "type",
     "text": "RotationGate{N, T, GT <: MatrixBlock{N, Complex{T}}} <: MatrixBlock{N, Complex{T}}\n\nRotationGate, with GT both hermitian and isreflexive.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.Sequential",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.Sequential",
+    "category": "type",
+    "text": "Sequential <: AbstractBlock\n\nsequencial structure that looser than a chain, it does not require qubit consistency and does not have mat method.\n\n\n\n"
 },
 
 {
@@ -1489,7 +1537,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s409,1} where #s409<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s408,1} where #s408<:(AbstractArray{T,2} where T),Array{Int64,1}}",
+    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s432,1} where #s432<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s430,1} where #s430<:(AbstractArray{T,2} where T),Array{Int64,1}}",
     "page": "Boost",
     "title": "Yao.Boost.general_controlled_gates",
     "category": "method",
@@ -1589,7 +1637,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Benchmark with ProjectQ",
     "title": "Benchmark with ProjectQ",
     "category": "section",
-    "text": "ProjectQ is an open source software framework for quantum computing.(Image: xyz) (Image: repeatedxyz) (Image: rot) (Image: rot) (Image: rot) (Image: rot)Here, we see the reason why we need Block system and multiple dispatch to do structure specific optimization."
+    "text": "ProjectQ is an open source software framework for quantum computing. Here we present the single process benchmark result(Image: xyz) (Image: repeatedxyz) (Image: cxyz) (Image: crot) (Image: hgate) (Image: rot)Here, we see the reason why we need Block system and multiple dispatch to do structure specific optimization."
 },
 
 {
