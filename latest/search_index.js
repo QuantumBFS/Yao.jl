@@ -253,15 +253,23 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Yao.Interfaces.InvOrder",
     "category": "constant",
-    "text": "A Functor block of inversing the order.\n\n\n\n"
+    "text": "InvOrder\n\nReturn a FunctionBlock of inversing the order.\n\n\n\n"
 },
 
 {
-    "location": "man/interfaces/#Yao.Interfaces.@functor-Tuple{Any}",
+    "location": "man/interfaces/#Yao.Interfaces.Reset",
     "page": "Interfaces",
-    "title": "Yao.Interfaces.@functor",
+    "title": "Yao.Interfaces.Reset",
+    "category": "constant",
+    "text": "Reset\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.@fn",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.@fn",
     "category": "macro",
-    "text": "macro functor([tag,] apply)\n\nTurn a function into a Functor{tag} block, this function take register as input, modify and output the register.\n\n\n\n"
+    "text": "macro fn([name,] f)\n\nDefine a in-place function on a register inside circuits.\n\n\n\n"
 },
 
 {
@@ -293,7 +301,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Yao.Interfaces.addbit",
     "category": "method",
-    "text": "addbit(n::Int) -> Functor{:AddBit}\n\nReturn a Functor block of adding n bits.\n\n\n\n"
+    "text": "addbit(n::Int) -> FunctionBlock{:AddBit}\n\nReturn a FunctionBlock of adding n bits.\n\n\n\n"
 },
 
 {
@@ -809,11 +817,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.Functor",
+    "location": "man/blocks/#Yao.Blocks.FunctionBlock",
     "page": "Blocks System",
-    "title": "Yao.Blocks.Functor",
+    "title": "Yao.Blocks.FunctionBlock",
     "category": "type",
-    "text": "Functor <: AbstractBlock\n\nfunction block directly applied on register.\n\n\n\n"
+    "text": "FunctionBlock <: AbstractBlock\n\nThis block contains a general function that perform an in-place operation over a register\n\n\n\n"
 },
 
 {
