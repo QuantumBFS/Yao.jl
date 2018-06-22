@@ -27,7 +27,6 @@ export indices_with, bitarray, packbits, controller
 export bdistance
 export onehotvec
 export hypercubic, reordered_basis, Reorderer, reorder, invorder
-export itercontrol, IterControl, controldo
 
 include("Basis.jl")
 
@@ -40,6 +39,12 @@ include("TupleTools.jl")
 import Compat.LinearAlgebra: ishermitian
 export isunitary, isreflexive, ishermitian
 include("OperatorTraits.jl")
+
+# Matrices
+export swaprows!, mulrow!, matvec, mulcol!, swapcols!, u1rows!, unrows!
+export itercontrol, IterControl, controldo, u1apply!, unapply!
+include("elemental.jl")
 include("IterControl.jl")
+include("GeneralApply.jl")
 
 end

@@ -14,6 +14,7 @@ struct BlockTreeCharSet
 end
 
 # Color Traits
+color(::Type{T}) where {T <: PutBlock} = :cyan
 color(::Type{T}) where {T <: Roller} = :cyan
 color(::Type{T}) where {T <: KronBlock} = :cyan
 color(::Type{T}) where {T <: RepeatedBlock} = :cyan

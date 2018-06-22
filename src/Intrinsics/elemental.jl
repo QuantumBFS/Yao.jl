@@ -1,5 +1,3 @@
-################# Matrix Vector Compatible Elementary Functions ###############
-
 @inline function swaprows!(v::Matrix{T}, i::Int, j::Int, f1, f2) where T
     @simd for c = 1:size(v, 2)
         local temp::T
@@ -92,3 +90,13 @@ end
 
 matvec(x::Matrix) = size(x, 2) == 1 ? vec(x) : x
 matvec(x::Vector) = x
+
+@inline function unrows!(state::Vector, inds::AbstractVector, U::AbstractMatrix)
+    state[inds] = U*view(state, inds)
+    state
+end
+
+@inline function unrows!(state::Matrix, inds::AbstractVector, U::AbstractMatrix)
+    state[inds, :] = U*view(state, inds, :)
+    state
+end

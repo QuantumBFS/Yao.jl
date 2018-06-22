@@ -16,12 +16,13 @@ end
 
 Base.length(ic::IterControl{N}) where N = N
 Base.eltype(::Type{IterControl}) = Int
+Base.eltype(ic::IterControl) = Int
 Base.start(::IterControl) = 0
 Base.done(ic::IterControl{N}, state::Int) where N = state == N
 function Base.next(ic::IterControl{N, C}, state::Int) where {N, C}
     res = state
-    for s in 1:C
-        res = lmove(res, ic.masks[s], ic.ks[s])
+    @simd for s in 1:C
+        @inbounds res = lmove(res, ic.masks[s], ic.ks[s])
     end
     res+ic.base, state+1
 end
@@ -53,8 +54,8 @@ end
 
 function controldo(func::Function, ic::IterControl{N, C}) where {N, C}
     for i in 0:N-1
-        for s in 1:C
-            i = lmove(i, ic.masks[s], ic.ks[s])
+        @simd for s in 1:C
+            @inbounds i = lmove(i, ic.masks[s], ic.ks[s])
         end
         func(i+ic.base)
     end
