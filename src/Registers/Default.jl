@@ -160,7 +160,6 @@ function addbit!(reg::DefaultRegister{B, T}, n::Int) where {B, T}
 end
 
 function reset!(reg::DefaultRegister)
-    println(reg)
     reg.state .= 0
     reg.state[1,:] .= 1
     reg

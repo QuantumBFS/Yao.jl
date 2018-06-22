@@ -19,7 +19,6 @@ using Yao.Intrinsics
 
 
     v1, v2, v3 = randn(2), randn(2), randn(2)
-    using Compat.Test
     @test repeat(register(v1 ⊗ v2 ⊗ v3), 2) |> invorder! ≈ repeat(register(v3 ⊗ v2 ⊗ v1), 2)
 
 end

@@ -6,7 +6,6 @@ using Compat.Test
 
 @testset "rotter, collect_rotblocks, num_gradient, opgrad" begin
     c = diff_circuit(4, 3, [1=>3, 2=>4, 2=>3, 4=>1])
-    println(c)
     rots = collect_rotblocks(c)
     @test length(rots) == nparameters(c) == 40
 
