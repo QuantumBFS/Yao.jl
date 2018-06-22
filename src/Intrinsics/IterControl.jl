@@ -11,7 +11,7 @@ end
 
 function IterControl{N}(base::Int, masks, ks) where N
     C=length(ks)
-    IterControl{N, C, masks[1]}(base, SVector{C}(masks), SVector{C}(ks))
+    IterControl{N, C, length(masks)>0 ? first(masks) : -1}(base, SVector{C}(masks), SVector{C}(ks))
 end
 
 Base.length(ic::IterControl{N}) where N = N

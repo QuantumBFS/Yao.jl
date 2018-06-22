@@ -29,7 +29,7 @@ adjoint(blk::PhaseGate) = PhaseGate(-blk.theta)
 adjoint(blk::RepeatedBlock{N}) where N = RepeatedBlock{N}(adjoint(blk.block), blk.addrs)
 adjoint(blk::Concentrator{N}) where N = Concentrator{N}(adjoint(blk.block), blk.usedbits)
 adjoint(blk::Roller) = Roller(map(adjoint, blk.blocks))
-adjoint(blk::ControlBlock{N}) where N = ControlBlock{N}(blk.ctrl_qubits, blk.vals, adjoint(blk.block), blk.addr)
+adjoint(blk::ControlBlock{N}) where N = ControlBlock{N}(blk.ctrl_qubits, blk.vals, adjoint(blk.block), blk.addrs)
 mat(blk::Daggered) = mat(blk.block)'
 
 # take care of hash_key method!

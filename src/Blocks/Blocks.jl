@@ -27,7 +27,7 @@ export update_cache
 # module APIs
 export usedbits, addrs, blocks, @const_gate
 export nqubits, nactive, nparameters, mat, datatype, parameters, parameter_type, invorder
-export apply!, dispatch!
+export apply!, dispatch!, applymatrix
 export ishermitian, isunitary, isreflexive
 export parent, adjoint
 export blockfilter, blockfilter!, expect

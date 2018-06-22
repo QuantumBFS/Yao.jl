@@ -80,6 +80,16 @@ kron(total::Int, g) = KronBlock{total}(g)
 kron(blocks::Union{MatrixBlock, Pair{Int, <:MatrixBlock}}...) = N->KronBlock{N}(blocks)
 kron(blocks) = N->KronBlock{N}(blocks)
 
+export put
+"""
+    put([total::Int, ]pa::Pair) -> PutBlock{total}
+
+put a block at the specific position(s), can be lazy constructed.
+"""
+put(total::Int, pa::Pair{NTuple{M, Int}, <:AbstractBlock}) where M = PutBlock{total}(pa.second, pa.first)
+put(total::Int, pa::Pair{Int, <:AbstractBlock}) = PutBlock{total}(pa.second, (pa.first,))
+put(pa::Pair) = total->put(total, pa)
+
 # 2.3 control block
 
 export C, control
@@ -94,22 +104,22 @@ Constructs a [`ControlBlock`](@ref)
 function control end
 
 function control(total::Int, controls, target)
-    ControlBlock{total}(decode_sign(controls...)..., target.second, target.first)
+    ControlBlock{total}(decode_sign(controls...)..., target.second, (target.first...))
 end
 
 function control(controls, target)
-    total->ControlBlock{total}(decode_sign(controls...)..., target.second, target.first)
+    total->ControlBlock{total}(decode_sign(controls...)..., target.second, (target.first...))
 end
 
 function control(controls)
     function _control(x::Pair)
-        total->ControlBlock{total}(decode_sign(controls...)..., x.second, x.first)
+        total->ControlBlock{total}(decode_sign(controls...)..., x.second, (x.first...))
     end
 end
 
 function C(controls::Int...)
     function _C(x::Pair{I, BT}) where {I, BT <: MatrixBlock}
-        total->ControlBlock{total}(decode_sign(controls...)..., x.second, x.first)
+        total->ControlBlock{total}(decode_sign(controls...)..., x.second, (x.first...))
     end
 end
 

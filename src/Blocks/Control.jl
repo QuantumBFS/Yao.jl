@@ -8,45 +8,41 @@ BT: controlled block type,
 C: number of control bits,
 T: type of matrix.
 """
-mutable struct ControlBlock{N, BT<:AbstractBlock, C, T} <: CompositeBlock{N, T}
+mutable struct ControlBlock{N, BT<:AbstractBlock, C, M, T} <: CompositeBlock{N, T}
     ctrl_qubits::NTuple{C, Int}
     vals::NTuple{C, Int}
     block::BT
-    addr::Int
-    function ControlBlock{N, BT, C, T}(ctrl_qubits, vals, block, addr) where {N, C, T, BT<:AbstractBlock}
-        _assert_addr_safe(N, [[b:b for b in ctrl_qubits]; [addr:addr+nqubits(block)-1]])
-        new{N, BT, C, T}(ctrl_qubits, vals, block, addr)
+    addrs::NTuple{M, Int}
+    function ControlBlock{N, BT, C, M, T}(ctrl_qubits, vals, block, addrs) where {N, C, M, T, BT<:AbstractBlock}
+        _assert_addr_safe(N, [[b:b for b in ctrl_qubits]; [addr:addr for addr in addrs]])
+        new{N, BT, C, M, T}(ctrl_qubits, vals, block, addrs)
     end
 end
 
-function ControlBlock{N}(ctrl_qubits::NTuple{C, Int}, vals::NTuple{C, Int}, block::BT, addr::Int) where {BT<:AbstractBlock, N, C}
-    ControlBlock{N, BT, C, Bool}(ctrl_qubits, vals, block, addr)
+function ControlBlock{N}(ctrl_qubits::NTuple{C}, vals::NTuple{C}, block::BT, addrs::NTuple{M}) where {BT<:AbstractBlock, N, C, M}
+    ControlBlock{N, BT, C, M, Bool}(ctrl_qubits, vals, block, addrs)
 end
 
-function ControlBlock{N}(ctrl_qubits::NTuple{C, Int}, vals::NTuple{C, Int}, block::BT, addr::Int) where {N, M, C, T, BT<:MatrixBlock{M, T}}
-    ControlBlock{N, BT, C, T}(ctrl_qubits, vals, block, addr)
+function ControlBlock{N}(ctrl_qubits::NTuple{C}, vals::NTuple{C}, block::BT, addrs::NTuple{K}) where {N, M, C, K, T, BT<:MatrixBlock{M, T}}
+    M == K || throw(DimensionMismatch("block position not maching its size!"))
+    ControlBlock{N, BT, C, M, T}(ctrl_qubits, vals, block, addrs)
 end
 
-ControlBlock{N}(ctrl_qubits::NTuple{C, Int}, block::AbstractBlock, addr::Int) where {N, C} = ControlBlock{N}(ctrl_qubits, (ones(Int, C)...), block, addr)
+ControlBlock{N}(ctrl_qubits::NTuple{C}, block::AbstractBlock, addrs::NTuple) where {N, C} = ControlBlock{N}(ctrl_qubits, (ones(Int, C)...), block, addrs)
 
-function copy(ctrl::ControlBlock{N, BT, C, T}) where {BT, N, C, T}
-    ControlBlock{N, BT, C, T}(ctrl.ctrl_qubits, ctrl.vals, ctrl.block, ctrl.addr)
+function copy(ctrl::ControlBlock{N, BT, C, M, T}) where {BT, N, C, M, T}
+    ControlBlock{N, BT, C, M, T}(ctrl.ctrl_qubits, ctrl.vals, ctrl.block, ctrl.addrs)
 end
 
 projector(val) = val==0 ? mat(P0) : mat(P1)
 
-general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{Tg}, locs::Vector{Int}) where {Tg<:AbstractMatrix, Tp<:AbstractMatrix} =
-IMatrix(1<<num_bit) - hilbertkron(num_bit, projectors, cbits) + hilbertkron(num_bit, vcat(projectors, gates), vcat(cbits, locs))
-
-general_c1_gates(num_bit::Int, projector::Tp, cbit::Int, gates::Vector{Tg}, locs::Vector{Int}) where {Tg<:AbstractMatrix, Tp<:AbstractMatrix} =
-hilbertkron(num_bit, [mat(I2) - projector], [cbit]) + hilbertkron(num_bit, vcat([projector], gates), vcat([cbit], locs))
-
-mat(c::ControlBlock{N}) where N = general_controlled_gates(N, [(c.vals .|> projector)...], [c.ctrl_qubits...], [mat(c.block)], [c.addr])
-mat(c::ControlBlock{N, BT, 1}) where {N, BT} = general_c1_gates(N, c.vals[1] |> projector, c.ctrl_qubits[1], [mat(c.block)], [c.addr])
+mat(c::ControlBlock{N, BT, C, 1}) where {N, BT, C} = general_controlled_gates(N, [(c.vals .|> projector)...], [c.ctrl_qubits...], [mat(c.block)], [c.addrs...])
+mat(c::ControlBlock{N, BT, 1, 1}) where {N, BT} = general_c1_gates(N, c.vals[1] |> projector, c.ctrl_qubits[1], [mat(c.block)], [c.addrs...])
+apply!(reg::DefaultRegister, c::ControlBlock) = (cunapply!(reg.state |> matvec, c.ctrl_qubits, c.vals, mat(c.block), c.addrs); reg)
 
 blocks(c::ControlBlock) = [c.block]
-addrs(c::ControlBlock) = [c.addr]
-usedbits(c::ControlBlock) = [c.ctrl_qubits..., ((c.addr-1).+usedbits(c.block))...]
+addrs(c::ControlBlock) = c.addrs
+usedbits(c::ControlBlock) = [c.ctrl_qubits..., c.addrs[usedbits(c.block)]...]
 
 #################
 # Dispatch Rules
@@ -64,12 +60,12 @@ function hash(ctrl::ControlBlock, h::UInt)
     end
 
     hashkey = hash(ctrl.block, hashkey)
-    hashkey = hash(ctrl.addr, hashkey)
+    hashkey = hash(ctrl.addrs, hashkey)
     hashkey
 end
 
-function ==(lhs::ControlBlock{N, BT, C, T}, rhs::ControlBlock{N, BT, C, T}) where {BT, N, C, T}
-    (lhs.ctrl_qubits == rhs.ctrl_qubits) && (lhs.block == rhs.block) && (lhs.addr == rhs.addr)
+function ==(lhs::ControlBlock{N, BT, C, M, T}, rhs::ControlBlock{N, BT, C, M, T}) where {BT, N, C, M, T}
+    (lhs.ctrl_qubits == rhs.ctrl_qubits) && (lhs.block == rhs.block) && (lhs.addrs == rhs.addrs)
 end
 
 function print_block(io::IO, x::ControlBlock)

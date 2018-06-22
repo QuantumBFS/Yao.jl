@@ -139,7 +139,7 @@ function print_subblocks(io::IO, tree::ControlBlock, depth, charset, active_leve
     print(io, charset.dash, ' ')
     print_tree(
         io, tree.block;
-        line=tree.addr,
+        line=tree.addrs,
         depth=depth+1,
         active_levels=active_levels,
         charset=charset,

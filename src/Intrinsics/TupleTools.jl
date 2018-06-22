@@ -1,5 +1,5 @@
 # The following is copied from Jutho/TupleTools
-import Base: sort, sortperm, tail
+import Base: sort, sortperm, tail, diff
 
 @inline _deleteat(t::Tuple, i::Int) = i == 1 ? tail(t) : (t[1], _deleteat(tail(t), i-1)...)
 @inline _deleteat(t::Tuple{}, i::Int) = throw(BoundsError(t, i))
@@ -56,3 +56,5 @@ _sortperm(t::Tuple{}, lt=isless, by=identity, rev::Bool=false) = ()
     return (i, ishift(r, i, +1)...)
 end
 @inline _sortperm(t::Tuple{Any}, lt=isless, by=identity, rev::Bool=false) = (1,)
+
+@inline diff(t::NTuple) = t[2:end].-t[1:end-1]

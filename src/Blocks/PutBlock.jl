@@ -30,7 +30,7 @@ dispatch!(f::Function, pb::PutBlock, params...) = dispatch!(f, pb.block, params.
 
 # TODO
 #mat(pb::PutBlock{N}) where N = hilbertkron(N, fill(mat(pb.block), length(pb.addrs)), [pb.addrs...])
-apply!(r::AbstractRegister, pb::PutBlock{N}) where N = (unapply!(r.state |> matvec, mat(pb.block), collect(pb.addrs)); r)
+apply!(r::AbstractRegister, pb::PutBlock) = (unapply!(r.state |> matvec, mat(pb.block), pb.addrs); r)
 
 function hash(pb::PutBlock, h::UInt)
     hashkey = hash(object_id(pb), h)

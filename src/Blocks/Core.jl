@@ -16,6 +16,13 @@ apply a `block` to a register `reg` with or without a cache signal.
 function apply! end
 
 """
+    applymatrix(g::AbstractBlock) -> Matrix
+
+Transform the apply! function of specific block to dense matrix.
+"""
+applymatrix(g::AbstractBlock) = linop2dense(r->apply!(register(r), g) |> statevec, nqubits(g))
+
+"""
     isunitary(x) -> Bool
 
 Test whether this operator is unitary.

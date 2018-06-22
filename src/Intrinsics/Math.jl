@@ -110,6 +110,30 @@ function _wrap_identity(data_list::Vector{T}, num_bit_list::Vector{Int}) where T
     end
 end
 
+"""
+    general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix
+
+Return general multi-controlled gates in hilbert space of `num_bit` qubits,
+
+* `projectors` are often chosen as `P0` and `P1` for inverse-Control and Control at specific position.
+* `cbits` should have the same length as `projectors`, specifing the controling positions.
+* `gates` are a list of controlled single qubit gates.
+* `locs` should have the same length as `gates`, specifing the gates positions.
+"""
+function general_controlled_gates(
+    n::Int,
+    projectors::Vector{<:AbstractMatrix},
+    cbits::Vector{Int},
+    gates::Vector{<:AbstractMatrix},
+    locs::Vector{Int}
+)
+    IMatrix(1<<n) - hilbertkron(n, projectors, cbits) +
+        hilbertkron(n, vcat(projectors, gates), vcat(cbits, locs))
+end
+
+general_c1_gates(num_bit::Int, projector::Tp, cbit::Int, gates::Vector{Tg}, locs::Vector{Int}) where {Tg<:AbstractMatrix, Tp<:AbstractMatrix} =
+hilbertkron(num_bit, [IMatrix(2) - projector], [cbit]) + hilbertkron(num_bit, vcat([projector], gates), vcat([cbit], locs))
+
 import Base: randn
 randn(T::Type{Complex{F}}, n::Int...) where F = randn(F, n...) + im*randn(F, n...)
 
