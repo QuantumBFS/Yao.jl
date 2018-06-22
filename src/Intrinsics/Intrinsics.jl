@@ -3,6 +3,7 @@ module Intrinsics
 using Compat
 using Compat.LinearAlgebra
 using Compat.SparseArrays
+using StaticArrays: SVector, SMatrix
 
 using ..LuxurySparse
 import ..LuxurySparse: I
@@ -26,6 +27,7 @@ export indices_with, bitarray, packbits, controller
 export bdistance
 export onehotvec
 export hypercubic, reordered_basis, Reorderer, reorder, invorder
+export itercontrol, IterControl, controldo
 
 include("Basis.jl")
 
@@ -38,5 +40,6 @@ include("TupleTools.jl")
 import Compat.LinearAlgebra: ishermitian
 export isunitary, isreflexive, ishermitian
 include("OperatorTraits.jl")
+include("IterControl.jl")
 
 end
