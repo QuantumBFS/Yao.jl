@@ -65,5 +65,7 @@ function bench_all()
 end
 
 #bench_all()
-bench_rot()
-#bench_hgate()
+#bench_rot()
+#bench_crot()
+#bench_toffoli()
+bench_hgate()
