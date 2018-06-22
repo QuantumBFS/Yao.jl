@@ -66,6 +66,6 @@ end
 
 #bench_all()
 #bench_rot()
-bench_crot()
-bench_toffoli()
-#bench_hgate()
+#bench_crot()
+#bench_toffoli()
+bench_hgate()
