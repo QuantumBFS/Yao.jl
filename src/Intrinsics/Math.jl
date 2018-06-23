@@ -9,17 +9,16 @@ bit_length(x::Int32)  =  32 - leading_zeros(x)
 """
     log2i(x::Integer) -> Integer
 
-Return log2(x), this integer version of `log2` is fast but only valid for number equal to 2^n.
-Ref: https://stackoverflow.com/questions/21442088
+Compute the base-2 logarithm of a nonnegative integer,
+rounding to zero.  Returns floor(Int, log2(x)) and
+is exact for nonnegative powers of 2.
+
+This value equals the position of the left-most 1-bit
+in the given nonnegative integer x, which is bit_length(x).
+
 """
-function log2i(x::T)::T where T
-    local n::T = 0
-    while x&0x1!=1
-        n += 1
-        x >>= 1
-    end
-    return n
-end
+log2i(x::Int64) = !signbit(x) ? (64 - leading_zeros(x)) : throw(ErrorException("nonnegative expected ($x)"))
+log2i(x::Int32) = !signbit(x) ? (32 - leading_zeros(x)) : throw(ErrorException("nonnegative expected ($x)"))
 
 """
     batch_normalize!(matrix)
