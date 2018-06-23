@@ -1209,7 +1209,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.bit_length-Tuple{Any}",
+    "location": "man/intrinsics/#Yao.Intrinsics.bit_length-Tuple{Int64}",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.bit_length",
     "category": "method",
@@ -1545,7 +1545,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s432,1} where #s432<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s430,1} where #s430<:(AbstractArray{T,2} where T),Array{Int64,1}}",
+    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s431,1} where #s431<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s429,1} where #s429<:(AbstractArray{T,2} where T),Array{Int64,1}}",
     "page": "Boost",
     "title": "Yao.Boost.general_controlled_gates",
     "category": "method",
