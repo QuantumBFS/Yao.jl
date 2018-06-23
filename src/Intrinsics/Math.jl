@@ -3,14 +3,8 @@
 
 Return the number of bits required to represent input integer x.
 """
-function bit_length(x)
-    local n = 0
-    while x!=0
-        n += 1
-        x >>= 1
-    end
-    return n
-end
+bit_length(x::Int64)  =  64 - leading_zeros(x)
+bit_length(x::Int32)  =  32 - leading_zeros(x)
 
 """
     log2i(x::Integer) -> Integer
