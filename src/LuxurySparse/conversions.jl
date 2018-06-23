@@ -63,6 +63,11 @@ PermMatrix(A::AbstractMatrix{T}) where T = PermMatrix{T, Int}(A)
 PermMatrix(A::SparseMatrixCSC{Tv, Ti}) where {Tv, Ti} = PermMatrix{Tv, Ti}(A) # inherit indice type
 PermMatrix{Tv, Ti}(A::Diagonal{Tv}) where {Tv, Ti} = PermMatrix(Vector{Ti}(1:size(A, 1)), A.diag)
 #PermMatrix(A::Diagonal{T}) where T = PermMatrix{T, Int}(A)
+# lazy implementation
+function PermMatrix{Tv, Ti, Vv, Vi}(A::AbstractMatrix) where {Tv, Ti<:Integer, Vv<:AbstractVector{Tv}, Vi<:AbstractVector{Ti}}
+    pm = PermMatrix(PermMatrix{Tv, Ti}(A))
+    PermMatrix(Vi(pm.perm), Vv(pm.vals))
+end
 
 import Base: convert
 convert(T::Type{<:PermMatrix}, m::AbstractMatrix) = m isa T ? m : T(m)

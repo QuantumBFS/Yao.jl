@@ -11,20 +11,24 @@ Optimizations are used to make it much faster than `SparseMatrixCSC`.
 
 [Generalized Permutation Matrix](https://en.wikipedia.org/wiki/Generalized_permutation_matrix)
 """
-struct PermMatrix{Tv, Ti<:Integer} <: AbstractMatrix{Tv}
-    perm::Vector{Ti}   # new orders
-    vals::Vector{Tv}  # multiplied values.
+struct PermMatrix{Tv, Ti<:Integer, Vv<:AbstractVector{Tv}, Vi<:AbstractVector{Ti}} <: AbstractMatrix{Tv}
+    perm::Vi   # new orders
+    vals::Vv   # multiplied values.
 
-    function PermMatrix{Tv, Ti}(perm::Vector{Ti}, vals::Vector{Tv}) where {Tv, Ti<:Integer}
+    function PermMatrix{Tv, Ti, Vv, Vi}(perm::Vi, vals::Vv) where {Tv, Ti<:Integer, Vv<:AbstractVector{Tv}, Vi<:AbstractVector{Ti}}
         if length(perm) != length(vals)
             throw(DimensionMismatch("permutation ($(length(perm))) and multiply ($(length(vals))) length mismatch."))
         end
-        new{Tv, Ti}(perm, vals)
+        new{Tv, Ti, Vv, Vi}(perm, vals)
     end
 end
 
-function PermMatrix(perm::Vector{Ti}, vals::Vector{Tv}) where {Tv, Ti}
-    PermMatrix{Tv,Ti}(perm, vals)
+function PermMatrix{Tv, Ti}(perm, vals) where {Tv, Ti<:Integer}
+    PermMatrix{Tv, Ti, Vector{Tv}, Vector{Ti}}(Vector{Ti}(perm), Vector{Tv}(vals))
+end
+
+function PermMatrix(perm::Vi, vals::Vv) where {Tv, Ti<:Integer, Vv<:AbstractVector{Tv}, Vi<:AbstractVector{Ti}}
+    PermMatrix{Tv,Ti, Vv, Vi}(perm, vals)
 end
 
 ################# Array Functions ##################

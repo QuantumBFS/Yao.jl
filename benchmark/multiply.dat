@@ -1,0 +1,197 @@
+=================== Yao.LuxurySparse.IMatrix{65536,Bool}-Yao.LuxurySparse.IMatrix{65536,Bool} ====================
+BenchmarkTools.Trial: 
+  memory estimate:  0 bytes
+  allocs estimate:  0
+  --------------
+  minimum time:     5.231 ns (0.00% GC)
+  median time:      5.252 ns (0.00% GC)
+  mean time:        5.482 ns (0.00% GC)
+  maximum time:     36.523 ns (0.00% GC)
+  --------------
+  samples:          10000
+  evals/sample:     1000
+=================== Yao.LuxurySparse.IMatrix{65536,Bool}-SparseMatrixCSC{Complex{Float64},Int64} ====================
+BenchmarkTools.Trial: 
+  memory estimate:  0 bytes
+  allocs estimate:  0
+  --------------
+  minimum time:     8.041 ns (0.00% GC)
+  median time:      8.065 ns (0.00% GC)
+  mean time:        8.101 ns (0.00% GC)
+  maximum time:     39.109 ns (0.00% GC)
+  --------------
+  samples:          10000
+  evals/sample:     999
+=================== Yao.LuxurySparse.IMatrix{65536,Bool}-Yao.LuxurySparse.PermMatrix{Complex{Float64},Int64} ====================
+BenchmarkTools.Trial: 
+  memory estimate:  0 bytes
+  allocs estimate:  0
+  --------------
+  minimum time:     13.245 ns (0.00% GC)
+  median time:      13.273 ns (0.00% GC)
+  mean time:        13.627 ns (0.00% GC)
+  maximum time:     44.423 ns (0.00% GC)
+  --------------
+  samples:          10000
+  evals/sample:     998
+=================== Yao.LuxurySparse.IMatrix{65536,Bool}-Diagonal{Complex{Float64}} ====================
+BenchmarkTools.Trial: 
+  memory estimate:  0 bytes
+  allocs estimate:  0
+  --------------
+  minimum time:     13.244 ns (0.00% GC)
+  median time:      13.274 ns (0.00% GC)
+  mean time:        13.581 ns (0.00% GC)
+  maximum time:     44.476 ns (0.00% GC)
+  --------------
+  samples:          10000
+  evals/sample:     998
+0-element BenchmarkTools.BenchmarkGroup:
+  tags: []=================== SparseMatrixCSC{Complex{Float64},Int64}-Yao.LuxurySparse.IMatrix{65536,Bool} ====================
+BenchmarkTools.Trial: 
+  memory estimate:  0 bytes
+  allocs estimate:  0
+  --------------
+  minimum time:     8.034 ns (0.00% GC)
+  median time:      8.061 ns (0.00% GC)
+  mean time:        8.210 ns (0.00% GC)
+  maximum time:     39.077 ns (0.00% GC)
+  --------------
+  samples:          10000
+  evals/sample:     999
+=================== SparseMatrixCSC{Complex{Float64},Int64}-SparseMatrixCSC{Complex{Float64},Int64} ====================
+BenchmarkTools.Trial: 
+  memory estimate:  7.00 MiB
+  allocs estimate:  18
+  --------------
+  minimum time:     5.120 ms (0.00% GC)
+  median time:      5.544 ms (0.00% GC)
+  mean time:        5.732 ms (1.96% GC)
+  maximum time:     9.247 ms (4.37% GC)
+  --------------
+  samples:          871
+  evals/sample:     1
+=================== SparseMatrixCSC{Complex{Float64},Int64}-Yao.LuxurySparse.PermMatrix{Complex{Float64},Int64} ====================
+BenchmarkTools.Trial: 
+  memory estimate:  2.50 MiB
+  allocs estimate:  9
+  --------------
+  minimum time:     2.834 ms (0.00% GC)
+  median time:      2.968 ms (0.00% GC)
+  mean time:        3.153 ms (1.24% GC)
+  maximum time:     8.035 ms (5.59% GC)
+  --------------
+  samples:          1582
+  evals/sample:     1
+=================== SparseMatrixCSC{Complex{Float64},Int64}-Diagonal{Complex{Float64}} ====================
+BenchmarkTools.Trial: 
+  memory estimate:  2.00 MiB
+  allocs estimate:  7
+  --------------
+  minimum time:     864.256 μs (0.00% GC)
+  median time:      959.850 μs (0.00% GC)
+  mean time:        1.047 ms (3.36% GC)
+  maximum time:     2.148 ms (26.58% GC)
+  --------------
+  samples:          4741
+  evals/sample:     1
+0-element BenchmarkTools.BenchmarkGroup:
+  tags: []=================== Yao.LuxurySparse.PermMatrix{Complex{Float64},Int64}-Yao.LuxurySparse.IMatrix{65536,Bool} ====================
+BenchmarkTools.Trial: 
+  memory estimate:  0 bytes
+  allocs estimate:  0
+  --------------
+  minimum time:     13.246 ns (0.00% GC)
+  median time:      13.284 ns (0.00% GC)
+  mean time:        14.215 ns (0.00% GC)
+  maximum time:     48.471 ns (0.00% GC)
+  --------------
+  samples:          10000
+  evals/sample:     998
+=================== Yao.LuxurySparse.PermMatrix{Complex{Float64},Int64}-SparseMatrixCSC{Complex{Float64},Int64} ====================
+BenchmarkTools.Trial: 
+  memory estimate:  2.00 MiB
+  allocs estimate:  7
+  --------------
+  minimum time:     1.185 ms (0.00% GC)
+  median time:      1.295 ms (0.00% GC)
+  mean time:        1.525 ms (2.23% GC)
+  maximum time:     4.994 ms (0.00% GC)
+  --------------
+  samples:          3263
+  evals/sample:     1
+=================== Yao.LuxurySparse.PermMatrix{Complex{Float64},Int64}-Yao.LuxurySparse.PermMatrix{Complex{Float64},Int64} ====================
+BenchmarkTools.Trial: 
+  memory estimate:  1.50 MiB
+  allocs estimate:  9
+  --------------
+  minimum time:     680.798 μs (0.00% GC)
+  median time:      696.071 μs (0.00% GC)
+  mean time:        766.289 μs (3.12% GC)
+  maximum time:     1.991 ms (0.00% GC)
+  --------------
+  samples:          6498
+  evals/sample:     1
+=================== Yao.LuxurySparse.PermMatrix{Complex{Float64},Int64}-Diagonal{Complex{Float64}} ====================
+BenchmarkTools.Trial: 
+  memory estimate:  1.00 MiB
+  allocs estimate:  6
+  --------------
+  minimum time:     479.048 μs (0.00% GC)
+  median time:      494.961 μs (0.00% GC)
+  mean time:        555.647 μs (2.98% GC)
+  maximum time:     2.524 ms (18.19% GC)
+  --------------
+  samples:          8941
+  evals/sample:     1
+0-element BenchmarkTools.BenchmarkGroup:
+  tags: []=================== Diagonal{Complex{Float64}}-Yao.LuxurySparse.IMatrix{65536,Bool} ====================
+BenchmarkTools.Trial: 
+  memory estimate:  0 bytes
+  allocs estimate:  0
+  --------------
+  minimum time:     13.245 ns (0.00% GC)
+  median time:      13.276 ns (0.00% GC)
+  mean time:        13.930 ns (0.00% GC)
+  maximum time:     47.957 ns (0.00% GC)
+  --------------
+  samples:          10000
+  evals/sample:     998
+=================== Diagonal{Complex{Float64}}-SparseMatrixCSC{Complex{Float64},Int64} ====================
+BenchmarkTools.Trial: 
+  memory estimate:  2.00 MiB
+  allocs estimate:  7
+  --------------
+  minimum time:     1.173 ms (0.00% GC)
+  median time:      1.245 ms (0.00% GC)
+  mean time:        1.334 ms (2.59% GC)
+  maximum time:     2.966 ms (0.00% GC)
+  --------------
+  samples:          3729
+  evals/sample:     1
+=================== Diagonal{Complex{Float64}}-Yao.LuxurySparse.PermMatrix{Complex{Float64},Int64} ====================
+BenchmarkTools.Trial: 
+  memory estimate:  1.00 MiB
+  allocs estimate:  3
+  --------------
+  minimum time:     185.858 μs (0.00% GC)
+  median time:      208.471 μs (0.00% GC)
+  mean time:        239.553 μs (7.05% GC)
+  maximum time:     856.575 μs (54.08% GC)
+  --------------
+  samples:          10000
+  evals/sample:     1
+=================== Diagonal{Complex{Float64}}-Diagonal{Complex{Float64}} ====================
+BenchmarkTools.Trial: 
+  memory estimate:  1.00 MiB
+  allocs estimate:  3
+  --------------
+  minimum time:     151.262 μs (0.00% GC)
+  median time:      165.236 μs (0.00% GC)
+  mean time:        195.375 μs (8.39% GC)
+  maximum time:     878.738 μs (56.66% GC)
+  --------------
+  samples:          10000
+  evals/sample:     1
+0-element BenchmarkTools.BenchmarkGroup:
+  tags: []

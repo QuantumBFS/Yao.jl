@@ -11,6 +11,9 @@ using Yao.Blocks: PutBlock
     pb = PutBlock{nbit}(X, (3,))
     rb = repeat(nbit, X, (3,))
     @test apply!(copy(Reg), pb) == apply!(copy(Reg), rb)
+    @test pb |> applymatrix == mat(pb)
+    pb = PutBlock{nbit}(rot(X, 0.3), (3,))
+    @test pb |> applymatrix == mat(pb)
 
     Cb = control(nbit, (3,), 5=>X)
     pb = PutBlock{nbit}(CNOT, (3, 5))

@@ -24,12 +24,13 @@ blocks(pb::PutBlock) = [pb.block]
 addrs(pb::PutBlock) = pb.addrs
 usedbits(pb::PutBlock) = [pb.addrs...]
 copy(x::PutBlock) = typeof(x)(x.block, x.addrs)
+adjoint(blk::PutBlock{N}) where N = PutBlock{N}(adjoint(blk.block), blk.addrs)
 
 dispatch!(pb::PutBlock, params...) = dispatch!(pb.block, params...)
 dispatch!(f::Function, pb::PutBlock, params...) = dispatch!(f, pb.block, params...)
 
 # TODO
-#mat(pb::PutBlock{N}) where N = hilbertkron(N, fill(mat(pb.block), length(pb.addrs)), [pb.addrs...])
+mat(pb::PutBlock{N, 1}) where N = hilbertkron(N, [mat(pb.block)], [pb.addrs...])
 apply!(r::AbstractRegister, pb::PutBlock) = (unapply!(r.state |> matvec, mat(pb.block), pb.addrs); r)
 
 function hash(pb::PutBlock, h::UInt)

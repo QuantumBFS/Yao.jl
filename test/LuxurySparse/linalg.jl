@@ -3,7 +3,7 @@ using Compat.Test
 using Compat.LinearAlgebra
 
 using Yao
-import Yao.LuxurySparse: IMatrix, PermMatrix
+import Yao.LuxurySparse: IMatrix, PermMatrix, notdense
 
 srand(2)
 

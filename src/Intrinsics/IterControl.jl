@@ -3,7 +3,7 @@
 
 N is the size of hilber space, C is the number of shifts.
 """
-struct IterControl{N, C, S}
+struct IterControl{N, C}
     base::Int
     masks::SVector{C, Int}
     ks::SVector{C, Int}
@@ -11,7 +11,7 @@ end
 
 function IterControl{N}(base::Int, masks, ks) where N
     C=length(ks)
-    IterControl{N, C, length(masks)>0 ? first(masks) : -1}(base, SVector{C}(masks), SVector{C}(ks))
+    IterControl{N, C}(base, SVector{C}(masks), SVector{C}(ks))
 end
 
 Base.length(ic::IterControl{N}) where N = N
@@ -28,7 +28,11 @@ function Base.next(ic::IterControl{N, C}, state::Int) where {N, C}
 end
 lmove(b::Int, mask::Int, k::Int)::Int = (b&~mask)<<k + (b&mask)
 
-# the factory of IterControl
+"""
+    itercontrol(num_bit::Int, poss::Vector{Int}, vals::Vector{Int}) -> IterControl
+
+Return the iterator for basis with `poss` controlled to values `vals`, with the total number of bits `num_bit`.
+"""
 function itercontrol(num_bit::Int, poss::Vector{Int}, vals::Vector{Int})
     base = bmask(poss[vals.!=0]...)
     masks, ks = group_shift(num_bit, poss)

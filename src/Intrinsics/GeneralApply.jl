@@ -21,16 +21,32 @@ function unapply!(state::VecOrMat, U::AbstractMatrix, locs::Vector{Int})
 end
 =#
 
-function _unapply!(state::VecOrMat, U::Union{SMatrix, Matrix}, locs_raw::Union{SVector, Vector}, ic::IterControl)
+function _unapply!(state::VecOrMat, U::Union{SMatrix, Matrix, SDiagonal, Diagonal}, locs_raw::Union{SVector, Vector}, ic::IterControl)
     controldo(ic) do i
         unrows!(state, locs_raw+i, U)
     end
     state
 end
 
+function _unapply!(state::VecOrMat, U::Union{PermMatrix, SSparseMatrixCSC, SparseMatrixCSC}, locs_raw::Union{SVector, Vector}, ic::IterControl)
+    work = similar(state, length(locs_raw), size(state,2))
+    controldo(ic) do i
+        unrows!(state, locs_raw+i, U, work)
+    end
+    state
+end
+
+
+"""
+turn a vector/matrix to static vector/matrix (only if its length <= 256).
+"""
+autostatic(A::AbstractVecOrMat) = length(A) > 1<<8 ? A : A |> statify
+
 """
 control-unitary 
 """
+function cunapply! end
+
 function cunapply!(state::VecOrMat, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U::AbstractMatrix, locs::NTuple{M, Int}) where {C, M}
     # reorder a unirary matrix.
     U = all(diff(locs).>0) ? U : reorder(U, collect(locs)|>sortperm)
@@ -39,7 +55,9 @@ function cunapply!(state::VecOrMat, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}
     locked_vals = [cvals..., zeros(Int, M)...]
     locs_raw = [i+1 for i in itercontrol(N, setdiff(1:N, locs), zeros(Int, N-M))]
     ic = itercontrol(N, locked_bits, locked_vals)
-    MM <=16 ? _unapply!(state, SMatrix{MM, MM}(U), SVector{MM}(locs_raw), ic) : _unapply!(state, U, locs_raw, ic)
+    _unapply!(state, U |> autostatic, locs_raw |> autostatic, ic)
 end
+
+cunapply!(state::VecOrMat, cbits::NTuple, cvals::NTuple, U::IMatrix, locs::NTuple) = state
 
 unapply!(state::VecOrMat, U::AbstractMatrix, locs::NTuple) = cunapply!(state, (), (), U, locs)

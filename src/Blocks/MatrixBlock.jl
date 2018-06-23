@@ -50,6 +50,6 @@ Occupied addresses (include control bits and bits occupied by blocks), fall back
 """
 usedbits(block::MatrixBlock{N}) where N = collect(1:N)
 
+include("TagBlock.jl")
 include("Primitive.jl")
 include("Composite.jl")
-include("TagBlock.jl")

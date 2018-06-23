@@ -10,6 +10,7 @@ mutable struct PhaseGate{T} <: PrimitiveBlock{1, Complex{T}}
 end
 
 mat(gate::PhaseGate{T}) where T = exp(im * gate.theta) * IMatrix{2, Complex{T}}()
+adjoint(blk::PhaseGate) = PhaseGate(-blk.theta)
 
 copy(block::PhaseGate{T}) where T = PhaseGate{T}(block.theta)
 dispatch!(block::PhaseGate, theta) = (block.theta = theta; block)

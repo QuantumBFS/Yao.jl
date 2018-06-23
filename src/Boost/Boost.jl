@@ -6,7 +6,7 @@ using ..Intrinsics
 using ..LuxurySparse
 
 import ..Blocks: mat, apply!
-import ..Intrinsics: u1apply!, unapply!, general_controlled_gates, general_c1_gates
+import ..Intrinsics: u1apply!, unapply!, general_controlled_gates, general_c1_gates, unrows!
 
 export xgate, ygate, zgate
 export cxgate, cygate, czgate

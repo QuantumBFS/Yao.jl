@@ -97,6 +97,65 @@ matvec(x::Vector) = x
 end
 
 @inline function unrows!(state::Matrix, inds::AbstractVector, U::AbstractMatrix)
-    state[inds, :] = U*view(state, inds, :)
+    @simd for k in 1:size(state, 2)
+        @inbounds state[inds, k] .= U*view(state, inds, k)
+    end
     state
 end
+
+############# boost unrows! for sparse matrices ################
+@inline unrows!(state::Vector, inds::AbstractVector, U::IMatrix) = state
+
+for MT in [:Matrix, :Vector]
+    @eval @inline function unrows!(state::$MT, inds::AbstractVector, U::Union{Diagonal, SDiagonal})
+        @simd for i in 1:length(U.diag)
+            @inbounds mulrow!(state, inds[i], U.diag[i])
+        end
+        state
+    end
+end
+
+@inline function unrows!(state::Vector, inds::AbstractVector, U::PermMatrix, work::Vector)
+    @simd for i = 1:length(inds)
+        @inbounds work[i] = state[inds[U.perm[i]]] * U.vals[i]
+    end
+    @inbounds state[inds].=work
+    state
+end
+
+@inline function unrows!(state::Matrix, inds::AbstractVector, U::PermMatrix, work::Matrix)
+    for k in 1:size(state, 2)
+        @simd for i = 1:length(inds)
+            @inbounds work[i, k] = state[inds[U.perm[i]], k] * U.vals[i]
+        end
+        @inbounds state[inds, k].=work
+    end
+    state
+end
+
+@inline function unrows!(state::Vector, inds::AbstractVector, A::Union{SSparseMatrixCSC, SparseMatrixCSC}, work::Vector)
+    @inbounds work.=0
+    for col = 1:length(inds)
+        xj = state[inds[col]]
+        @simd for j = A.colptr[col]:(A.colptr[col + 1] - 1)
+            @inbounds work[A.rowval[j]] += A.nzval[j]*xj
+        end
+    end
+    @inbounds state[inds] .= work
+    state
+end
+
+@inline function unrows!(state::Matrix, inds::AbstractVector, A::Union{SSparseMatrixCSC, SparseMatrixCSC}, work::Matrix)
+    @inbounds work.=0
+    for k = 1:size(state, 2)
+        for col = 1:length(inds)
+            xj = state[inds[col],k]
+            @simd for j = A.colptr[col]:(A.colptr[col + 1] - 1)
+                @inbounds work[A.rowval[j], k] += A.nzval[j]*xj
+            end
+        end
+    end
+    @inbounds state[inds] .= work
+    state
+end
+
