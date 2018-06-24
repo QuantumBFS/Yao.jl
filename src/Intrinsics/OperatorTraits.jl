@@ -18,3 +18,5 @@ isreflexive(op) = op * op ≈ IMatrix(size(op, 1))
 check if this operator is hermitian.
 """
 ishermitian(op) = op' ≈ op
+
+isunitary(m::Module)= m == Yao

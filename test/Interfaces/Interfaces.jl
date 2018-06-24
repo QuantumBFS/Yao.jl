@@ -36,6 +36,12 @@ end
     @test phase(0.0).theta == 0.0
 end
 
+@testset "reflect gate" begin
+    psi = rand_state(5)
+    @test reflect(psi) isa ReflectBlock
+    @test reflect(psi |> statevec) isa ReflectBlock
+end
+
 @testset "chain" begin
     @test chain(X, Y, Z) isa ChainBlock
 end

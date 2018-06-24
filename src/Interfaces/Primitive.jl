@@ -1,4 +1,4 @@
-export H, phase, shift, Rx, Ry, Rz, rot, swap, I2
+export H, phase, shift, Rx, Ry, Rz, rot, swap, I2, reflect
 
 include("PauliGates.jl")
 
@@ -94,3 +94,14 @@ swap(n::Int, ::Type{T}, line1::Int, line2::Int) where T = Swap{n, T}(line1, line
 swap(::Type{T}, line1::Int, line2::Int) where T = n -> swap(n, T, line1, line2)
 swap(n::Int, line1::Int, line2::Int) = Swap{n, DefaultType}(line1, line2)
 swap(line1::Int, line2::Int) = n->swap(n, line1, line2)
+
+"""
+    reflect(mirror::DefaultRegister{1}) -> ReflectBlock
+    reflect(mirror::Vector) -> ReflectBlock
+
+Return an ReflectBlock along with state vector mirror as the axis.
+"""
+function reflect end
+
+reflect(mirror::Vector) = ReflectBlock(mirror)
+reflect(mirror::DefaultRegister{1}) = reflect(mirror|>statevec)

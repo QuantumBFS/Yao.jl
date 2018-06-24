@@ -57,8 +57,9 @@ Base.repeat(reg::DefaultRegister{B}, n::Int) where B = DefaultRegister{B*n}(hcat
 # -> zero_state is an easier interface
 zero_state(::Type{T}, n::Int, nbatch::Int=1) where T = register((arr=zeros(T, 1<<n, nbatch); arr[1,:]=1; arr))
 rand_state(::Type{T}, n::Int, nbatch::Int=1) where T = register(randn(T, 1<<n, nbatch) + im*randn(T, 1<<n, nbatch)) |> normalize!
+uniform_state(::Type{T}, n::Int, nbatch::Int=1) where T = register(ones(T, 1<<n, nbatch)./sqrt(1<<n))
 
-for FUNC in [:zero_state, :rand_state]
+for FUNC in [:zero_state, :rand_state, :uniform_state]
     @eval $FUNC(n::Int, nbatch::Int=1) = $FUNC(DefaultType, n, nbatch)
 end
 
