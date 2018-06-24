@@ -128,7 +128,7 @@ end
         @simd for i = 1:length(inds)
             @inbounds work[i, k] = state[inds[U.perm[i]], k] * U.vals[i]
         end
-        @inbounds state[inds, k].=work
+        @inbounds state[inds, k].=work[:, k]
     end
     state
 end
@@ -136,7 +136,7 @@ end
 @inline function unrows!(state::Vector, inds::AbstractVector, A::Union{SSparseMatrixCSC, SparseMatrixCSC}, work::Vector)
     @inbounds work.=0
     for col = 1:length(inds)
-        xj = state[inds[col]]
+        @inbounds xj = state[inds[col]]
         @simd for j = A.colptr[col]:(A.colptr[col + 1] - 1)
             @inbounds work[A.rowval[j]] += A.nzval[j]*xj
         end
@@ -149,13 +149,13 @@ end
     @inbounds work.=0
     for k = 1:size(state, 2)
         for col = 1:length(inds)
-            xj = state[inds[col],k]
+            @inbounds xj = state[inds[col],k]
             @simd for j = A.colptr[col]:(A.colptr[col + 1] - 1)
                 @inbounds work[A.rowval[j], k] += A.nzval[j]*xj
             end
         end
+        @inbounds state[inds,k] .= work[:,k]
     end
-    @inbounds state[inds] .= work
     state
 end
 

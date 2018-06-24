@@ -29,7 +29,7 @@ function _unapply!(state::VecOrMat, U::Union{SMatrix, Matrix, SDiagonal, Diagona
 end
 
 function _unapply!(state::VecOrMat, U::Union{PermMatrix, SSparseMatrixCSC, SparseMatrixCSC}, locs_raw::Union{SVector, Vector}, ic::IterControl)
-    work = similar(state, length(locs_raw), size(state,2))
+    work = ndims(state)==1 ? similar(state, length(locs_raw)) : similar(state, length(locs_raw), size(state,2))
     controldo(ic) do i
         unrows!(state, locs_raw+i, U, work)
     end
