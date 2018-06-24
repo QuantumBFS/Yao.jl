@@ -12,13 +12,24 @@ bit_length(x::Int32)  =  32 - leading_zeros(x)
 Return log2(x), this integer version of `log2` is fast but only valid for number equal to 2^n.
 Ref: https://stackoverflow.com/questions/21442088
 """
-function log2i(x::T)::T where T
-    local n::T = 0
-    while x&0x1!=1
-        n += 1
-        x >>= 1
+function log2i end
+
+# function log2i(x::T)::T where T
+#     local n::T = 0
+#     while x&0x1!=1
+#         n += 1
+#         x >>= 1
+#     end
+#     return n
+# end
+
+for N in [8, 16, 32, 64, 128]
+    T = Symbol(:Int, N)
+    UT = Symbol(:UInt, N)
+    @eval begin
+        log2i(x::$T) = !signbit(x) ? ($(N - 1) - leading_zeros(x)) : throw(ErrorException("nonnegative expected ($x)"))
+        log2i(x::$UT) = $(N - 1) - leading_zeros(x)
     end
-    return n
 end
 
 """
@@ -85,12 +96,12 @@ Return general kronecher product form of gates in Hilbert space of `num_bit` qub
 function hilbertkron(num_bit::Int, ops::Vector{T}, start_locs::Vector{Int}) where T<:AbstractMatrix
     sizes = [op |> nqubits for op in ops]
     start_locs = num_bit - start_locs - sizes + 2
-    
+
     order = sortperm(start_locs)
     sorted_ops = ops[order]
     sorted_start_locs = start_locs[order]
     num_ids = vcat(sorted_start_locs[1]-1, diff(push!(sorted_start_locs, num_bit+1)) .- sizes[order])
-    
+
     _wrap_identity(sorted_ops, num_ids)
 end
 
