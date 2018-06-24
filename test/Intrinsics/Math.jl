@@ -20,6 +20,7 @@ end
 @testset "bit length" begin
 
     @test bit_length(8) == 4
+    @test bit_length(Int32(8)) == 4
 
 end
 

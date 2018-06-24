@@ -14,14 +14,14 @@ Ref: https://stackoverflow.com/questions/21442088
 """
 function log2i end
 
-function log2i(x::T)::T where T
-    local n::T = 0
-    while x&0x1!=1
-        n += 1
-        x >>= 1
-    end
-    return n
-end
+# function log2i(x::T)::T where T
+#     local n::T = 0
+#     while x&0x1!=1
+#         n += 1
+#         x >>= 1
+#     end
+#     return n
+# end
 
 for N in [8, 16, 32, 64, 128]
     T = Symbol(:Int, N)
