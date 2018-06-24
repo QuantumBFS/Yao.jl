@@ -13,7 +13,7 @@ using Yao.LuxurySparse
             UInt8, UInt16, UInt32, UInt64, UInt128,
         ]
         @test log2i(itype(2^5)) == 5
-        @test typeof(log2i(itype(2^5))) == itype
+        @test typeof(log2i(itype(2^5))) == Int64
     end
 end
 
@@ -73,5 +73,3 @@ end
     @test reorder(DC ⊗ DB ⊗ DA, [3,1,2]) ≈ DB ⊗ DA ⊗ DC
     @test invorder(DC ⊗ DB ⊗ DA) ≈ DA ⊗ DB ⊗ DC
 end
-
-
