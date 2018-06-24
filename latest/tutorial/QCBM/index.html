@@ -42,7 +42,7 @@ kron
 ├─ 2=&gt;X gate
 ├─ 3=&gt;X gate
 └─ 4=&gt;X gate</code></pre><p>However, <code>kron</code> is calculated differently comparing to <code>roll</code>. In principal, <strong>Roller</strong> will be able to calculate small blocks with same size with higher efficiency. But for large blocks <strong>Roller</strong> may be slower. In <strong>幺</strong>, we offer you this freedom to choose the most suitable solution.</p><p>all factory methods will <strong>lazy</strong> evaluate <strong>the first arguements</strong>, which is the number of qubits. It will return a lambda function that requires a single interger input. The instance of desired block will only be constructed until all the information is filled.</p><pre><code class="language-julia-repl">julia&gt; rollrepeat(X)
-(::#31) (generic function with 1 method)</code></pre><pre><code class="language-julia-repl">julia&gt; rollrepeat(X)(4)
+(::#33) (generic function with 1 method)</code></pre><pre><code class="language-julia-repl">julia&gt; rollrepeat(X)(4)
 Total: 4, DataType: Complex{Float64}
 roller
 ├─ X gate

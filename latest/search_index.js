@@ -337,6 +337,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s442} where #s442<:Yao.Blocks.AbstractBlock}, Tuple{M}} where M",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.put",
+    "category": "method",
+    "text": "put([total::Int, ]pa::Pair) -> PutBlock{total}\n\nput a block at the specific position(s), can be lazy constructed.\n\n\n\n"
+},
+
+{
     "location": "man/interfaces/#Yao.Interfaces.reflect",
     "page": "Interfaces",
     "title": "Yao.Interfaces.reflect",
@@ -865,6 +873,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.PutBlock",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.PutBlock",
+    "category": "type",
+    "text": "PutBlock{N, C, GT, T} <: CompositeBlock{N, T}\n\nput a block on given addrs.\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.ReflectBlock",
     "page": "Blocks System",
     "title": "Yao.Blocks.ReflectBlock",
@@ -918,6 +934,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.apply!",
     "category": "function",
     "text": "apply!(reg, block, [signal])\n\napply a block to a register reg with or without a cache signal.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.applymatrix-Tuple{Yao.Blocks.AbstractBlock}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.applymatrix",
+    "category": "method",
+    "text": "applymatrix(g::AbstractBlock) -> Matrix\n\nTransform the apply! function of specific block to dense matrix.\n\n\n\n"
 },
 
 {
@@ -1041,7 +1065,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.cache_type-Tuple{Type{#s25} where #s25<:Yao.Blocks.MatrixBlock}",
+    "location": "man/blocks/#Yao.Blocks.cache_type-Tuple{Type{#s18} where #s18<:Yao.Blocks.MatrixBlock}",
     "page": "Blocks System",
     "title": "Yao.Blocks.cache_type",
     "category": "method",
@@ -1177,6 +1201,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/intrinsics/#Yao.Intrinsics.IterControl",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.IterControl",
+    "category": "type",
+    "text": "IterControl{N, C}\n\nN is the size of hilber space, C is the number of shifts.\n\n\n\n"
+},
+
+{
     "location": "man/intrinsics/#Yao.Intrinsics.QubitMismatchError",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.QubitMismatchError",
@@ -1265,11 +1297,27 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/intrinsics/#Yao.Intrinsics.cunapply!",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.cunapply!",
+    "category": "function",
+    "text": "control-unitary \n\n\n\n"
+},
+
+{
     "location": "man/intrinsics/#Yao.Intrinsics.flip-Tuple{Int64,Int64}",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.flip",
     "category": "method",
     "text": "flip(index::Int, mask::Int) -> Int\n\nReturn an Integer with bits at masked position flipped.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.general_controlled_gates-Tuple{Int64,Array{#s17,1} where #s17<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s14,1} where #s14<:(AbstractArray{T,2} where T),Array{Int64,1}}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.general_controlled_gates",
+    "category": "method",
+    "text": "general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix\n\nReturn general multi-controlled gates in hilbert space of num_bit qubits,\n\nprojectors are often chosen as P0 and P1 for inverse-Control and Control at specific position.\ncbits should have the same length as projectors, specifing the controling positions.\ngates are a list of controlled single qubit gates.\nlocs should have the same length as gates, specifing the gates positions.\n\n\n\n"
 },
 
 {
@@ -1302,6 +1350,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Intrinsics.isunitary",
     "category": "method",
     "text": "isunitary(op) -> Bool\n\ncheck if this operator is a unitary operator.\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.itercontrol-Tuple{Int64,Array{Int64,1},Array{Int64,1}}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.itercontrol",
+    "category": "method",
+    "text": "itercontrol(num_bit::Int, poss::Vector{Int}, vals::Vector{Int}) -> IterControl\n\nReturn the iterator for basis with poss controlled to values vals, with the total number of bits num_bit.\n\n\n\n"
 },
 
 {
@@ -1409,6 +1465,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/intrinsics/#Yao.Intrinsics.autostatic-Tuple{Union{AbstractArray{T,1}, AbstractArray{T,2}} where T}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.autostatic",
+    "category": "method",
+    "text": "turn a vector/matrix to static vector/matrix (only if its length <= 256).\n\n\n\n"
+},
+
+{
     "location": "man/intrinsics/#Intrinsics-1",
     "page": "Intrinsics",
     "title": "Intrinsics",
@@ -1449,6 +1513,30 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/luxurysparse/#Yao.LuxurySparse.notdense",
+    "page": "LuxurySparse",
+    "title": "Yao.LuxurySparse.notdense",
+    "category": "function",
+    "text": "notdense(M) -> Bool\n\nReturn true if a matrix is not dense.\n\nNote: It is not exactly same as isparse, e.g. Diagonal, IMatrix and PermMatrix are both notdense but not isparse.\n\n\n\n"
+},
+
+{
+    "location": "man/luxurysparse/#Yao.LuxurySparse.pmrand",
+    "page": "LuxurySparse",
+    "title": "Yao.LuxurySparse.pmrand",
+    "category": "function",
+    "text": "pmrand(T::Type, n::Int) -> PermMatrix\n\nReturn random PermMatrix.\n\n\n\n"
+},
+
+{
+    "location": "man/luxurysparse/#Yao.LuxurySparse.statify",
+    "page": "LuxurySparse",
+    "title": "Yao.LuxurySparse.statify",
+    "category": "function",
+    "text": "statify(A::AbstractMatrix) -> AbastractMatrix\n\ntransform a matrix to a static form.\n\n\n\n"
+},
+
+{
     "location": "man/luxurysparse/#Yao.LuxurySparse.matvec",
     "page": "LuxurySparse",
     "title": "Yao.LuxurySparse.matvec",
@@ -1470,22 +1558,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.LuxurySparse.mulrow!",
     "category": "function",
     "text": "mulrow!(v::Vector, i::Int, f) -> VecOrMat\n\nmultiply row i of v by f inplace.\n\n\n\n"
-},
-
-{
-    "location": "man/luxurysparse/#Yao.LuxurySparse.notdense",
-    "page": "LuxurySparse",
-    "title": "Yao.LuxurySparse.notdense",
-    "category": "function",
-    "text": "notdense(M) -> Bool\n\nReturn true if a matrix is not dense.\n\nNote: It is not exactly same as isparse, e.g. Diagonal, IMatrix and PermMatrix are both notdense but not isparse.\n\n\n\n"
-},
-
-{
-    "location": "man/luxurysparse/#Yao.LuxurySparse.pmrand",
-    "page": "LuxurySparse",
-    "title": "Yao.LuxurySparse.pmrand",
-    "category": "function",
-    "text": "pmrand(T::Type, n::Int) -> PermMatrix\n\nReturn random PermMatrix.\n\n\n\n"
 },
 
 {
@@ -1558,14 +1630,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Boost.czgate",
     "category": "method",
     "text": "czgate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) -> Diagonal\n\nSingle Controlled-Z Gate on single bit.\n\n\n\n"
-},
-
-{
-    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s430,1} where #s430<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s428,1} where #s428<:(AbstractArray{T,2} where T),Array{Int64,1}}",
-    "page": "Boost",
-    "title": "Yao.Boost.general_controlled_gates",
-    "category": "method",
-    "text": "general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix\n\nReturn general multi-controlled gates in hilbert space of num_bit qubits,\n\nprojectors are often chosen as P0 and P1 for inverse-Control and Control at specific position.\ncbits should have the same length as projectors, specifing the controling positions.\ngates are a list of controlled single qubit gates.\nlocs should have the same length as gates, specifing the gates positions.\n\n\n\n"
 },
 
 {
