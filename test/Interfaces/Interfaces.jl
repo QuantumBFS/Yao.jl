@@ -55,6 +55,18 @@ end
     @test kron(X for i=1:4)(4) isa KronBlock
 end
 
+@testset "put" begin
+    # varargs construction
+    @test_throws AddressConflictError put(2, (3,2)=>CNOT)
+    @test put(5, (3,2)=>CNOT) isa PutBlock
+    @test put(5, 3=>X) isa PutBlock
+    println(put(5, (3,2)=>CNOT))
+    # lazy construction
+    @test put(3=>X)(4) isa PutBlock
+    @test_throws MethodError put((3,3)=>X)(4)
+end
+
+
 @testset "control" begin
     @test control(3, [1, 2], 3=>X) isa ControlBlock
     @test control(5, 1:2, 3=>X) isa ControlBlock

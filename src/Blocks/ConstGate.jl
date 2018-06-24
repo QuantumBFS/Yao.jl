@@ -14,4 +14,5 @@ else
 end
 
 cache_key(x::ConstantGate) = 0x1
+
 include("ConstGateGen.jl")

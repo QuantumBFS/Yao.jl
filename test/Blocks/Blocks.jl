@@ -25,6 +25,11 @@ end
 include("Daggered.jl")
 end
 
+
+@testset "putblock" begin
+include("PutBlock.jl")
+end
+
 @testset "measure" begin
 include("Measure.jl")
 end

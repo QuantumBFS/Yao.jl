@@ -23,6 +23,8 @@ import Yao.Blocks: Daggered
     @test mat(adjoint(control(4, 4, 1=>H))) == mat(control(4, 4, 1=>H))
     @test adjoint(control(4, 4, 1=>PhaseGate(0.5))) == control(4, 4, 1=>PhaseGate(-0.5))
     @test mat(adjoint(control(4, 4, 1=>PhaseGate(0.5)))) == mat(control(4, 4, 1=>PhaseGate(-0.5)))
+    @test adjoint(put(4, 1=>PhaseGate(0.5))) == put(4, 1=>PhaseGate(-0.5))
+    @test mat(adjoint(put(4, 1=>PhaseGate(0.5)))) == mat(put(4, 1=>PhaseGate(-0.5)))
 end
 
 @testset "mat, adjoint^2" begin

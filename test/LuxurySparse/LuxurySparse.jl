@@ -19,3 +19,7 @@ end
 @testset "linalg" begin
     include("linalg.jl")
 end
+
+@testset "statify" begin
+include("statify.jl")
+end

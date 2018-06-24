@@ -3,6 +3,7 @@ module Intrinsics
 using Compat
 using Compat.LinearAlgebra
 using Compat.SparseArrays
+using StaticArrays: SVector, SMatrix
 
 using ..LuxurySparse
 import ..LuxurySparse: I
@@ -13,7 +14,7 @@ include("Exceptions.jl")
 # MathUtils
 export batch_normalize!, batch_normalize
 export rolldims2!, rolldims!
-export hilbertkron, linop2dense, rotmat
+export hilbertkron, linop2dense, rotmat, general_controlled_gates, general_c1_gates
 
 include("Math.jl")
 
@@ -38,5 +39,12 @@ include("TupleTools.jl")
 import Compat.LinearAlgebra: ishermitian
 export isunitary, isreflexive, ishermitian
 include("OperatorTraits.jl")
+
+# Matrices
+export swaprows!, mulrow!, matvec, mulcol!, swapcols!, u1rows!, unrows!
+export itercontrol, IterControl, controldo, u1apply!, unapply!, cunapply!
+include("elemental.jl")
+include("IterControl.jl")
+include("GeneralApply.jl")
 
 end

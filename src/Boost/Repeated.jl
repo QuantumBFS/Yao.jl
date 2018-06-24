@@ -5,6 +5,9 @@ for (G, MATFUNC) in zip(GATES, [:xgate, :ygate, :zgate])
     @eval function mat(rb::RepeatedBlock{N, C, GT, MT}) where {N, C, MT, GT <: $GGate}
         $MATFUNC(MT, N, [rb.addrs...])
     end
+    @eval function put(rb::PutBlock{N, 1, GT}) where {N, GT <: $GGate}
+        $MATFUNC(MT, N, [rb.addrs...])
+    end
 end
 
 apply!(r::AbstractRegister{B}, rb::RepeatedBlock{N, 1, <:MatrixBlock{1}}) where {B, N} = (u1apply!(r.state |> matvec, mat(rb.block), rb.addrs...); r)

@@ -33,6 +33,7 @@ dispatch!(rb::RepeatedBlock, params...) = dispatch!(rb.block, params...)
 dispatch!(f::Function, rb::RepeatedBlock, params...) = dispatch!(f, rb.block, params...)
 
 mat(rb::RepeatedBlock{N}) where N = hilbertkron(N, fill(mat(rb.block), length(rb.addrs)), [rb.addrs...])
+adjoint(blk::RepeatedBlock{N}) where N = RepeatedBlock{N}(adjoint(blk.block), blk.addrs)
 
 function hash(rb::RepeatedBlock, h::UInt)
     hashkey = hash(objectid(rb), h)

@@ -3,12 +3,12 @@ function mat(ctrl::ControlBlock{N, <:MatrixBlock{1}}) where N
 end
 
 for (GATE, APPLY, MAT) in zip([:XGate, :YGate, :ZGate], [:cxapply!, :cyapply!, :czapply!], [:cxgate, :cygate, :czgate])
-    @eval function mat(ctrl::ControlBlock{N, <:$GATE, C, T}) where {N, C, T}
-        $MAT(T, N, [ctrl.ctrl_qubits...], [ctrl.vals...], ctrl.addr)
+    @eval function mat(ctrl::ControlBlock{N, <:$GATE, C, 1, T}) where {N, C, T}
+        $MAT(T, N, [ctrl.ctrl_qubits...], [ctrl.vals...], ctrl.addrs...)
     end
-    @eval function apply!(reg::DefaultRegister, ctrl::ControlBlock{N, <:$GATE, 1, T}) where {N, T}
+    @eval function apply!(reg::DefaultRegister, ctrl::ControlBlock{N, <:$GATE, 1, 1, T}) where {N, T}
         state = reg.state |> matvec
-        $APPLY(state, ctrl.ctrl_qubits..., ctrl.vals..., ctrl.addr)
+        $APPLY(state, ctrl.ctrl_qubits..., ctrl.vals..., ctrl.addrs...)
         reg
     end
 end

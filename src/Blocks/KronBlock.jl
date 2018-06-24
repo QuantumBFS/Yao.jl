@@ -134,6 +134,8 @@ function mat(k::KronBlock{N}) where N
     end
 end
 
+adjoint(blk::KronBlock) = typeof(blk)(blk.slots, blk.addrs, map(adjoint, blk.blocks))
+
 function cache_key(x::KronBlock)
     [cache_key(each) for each in x.blocks]
 end

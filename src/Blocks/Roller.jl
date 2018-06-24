@@ -36,6 +36,7 @@ isreflexive(m::Roller) = all(isreflexive, m.blocks)
 
 ⊗ = kron
 mat(m::Roller) = mapreduce(blk->mat(blk), ⊗, m.blocks[end:-1:1])
+adjoint(blk::Roller) = Roller(map(adjoint, blk.blocks))
 
 function apply!(reg::AbstractRegister{B}, m::Roller{N}) where {B, N}
     st = reg.state

@@ -21,3 +21,6 @@ for (NAME, MAT) in SYM_LIST
         @const_gate $NAME = $MAT
     end
 end
+
+adjoint(::PuGate) = Pd
+adjoint(::PdGate) = Pu

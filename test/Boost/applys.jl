@@ -5,6 +5,7 @@ using Yao.Boost
 using Yao.Blocks
 using Yao.Intrinsics
 using Yao.LuxurySparse
+using StaticArrays
 
 @testset "xyz" begin
     @test linop2dense(s->xapply!(s, [1]), 1) == mat(X)
@@ -25,12 +26,10 @@ end
 
 @testset "U1apply!" begin
     ⊗ = kron
-    Ds = randn(ComplexF64, 2, 2)
     Pm = pmrand(ComplexF64, 2)
     Dv = Diagonal(randn(ComplexF64, 2))
     II = mat(I2)
     v = randn(ComplexF64, 1<<4)
-    @test u1apply!(copy(v), Ds, 3) ≈ (II ⊗ Ds ⊗ II ⊗ II)*v ≈ u1apply!(reshape(copy(v), :,1), Ds, 3)
     @test u1apply!(copy(v), Pm, 3) ≈ (II ⊗ Pm ⊗ II ⊗ II)*v ≈ u1apply!(reshape(copy(v), :,1), Pm, 3)
     @test u1apply!(copy(v), Dv, 3) ≈ (II ⊗ Dv ⊗ II ⊗ II)*v ≈ u1apply!(reshape(copy(v), :,1), Dv, 3)
 

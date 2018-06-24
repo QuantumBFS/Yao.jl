@@ -24,6 +24,7 @@ usedbits(c::Concentrator) = c.usedbits
 addrs(c::Concentrator) = [1]
 
 apply!(reg::AbstractRegister, c::Concentrator) = relax!(apply!(focus!(reg, usedbits(c)), c.block), usedbits(c), nbit=nqubits(c))
+adjoint(blk::Concentrator{N}) where N = Concentrator{N}(adjoint(blk.block), blk.usedbits)
 
 for FUNC in [:isunitary, :isreflexive, :ishermitian]
     @eval $FUNC(c::Concentrator) = $FUNC(c.block)

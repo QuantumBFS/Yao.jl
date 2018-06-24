@@ -14,6 +14,7 @@ struct BlockTreeCharSet
 end
 
 # Color Traits
+color(::Type{T}) where {T <: PutBlock} = :cyan
 color(::Type{T}) where {T <: Roller} = :cyan
 color(::Type{T}) where {T <: KronBlock} = :cyan
 color(::Type{T}) where {T <: RepeatedBlock} = :cyan
@@ -138,7 +139,7 @@ function print_subblocks(io::IO, tree::ControlBlock, depth, charset, active_leve
     print(io, charset.dash, ' ')
     print_tree(
         io, tree.block;
-        line=tree.addr,
+        line=tree.addrs,
         depth=depth+1,
         active_levels=active_levels,
         charset=charset,

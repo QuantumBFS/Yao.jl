@@ -3,7 +3,7 @@ using Compat.Test
 using Compat.LinearAlgebra
 
 using Yao
-import Yao.LuxurySparse: IMatrix, PermMatrix, swaprows!, mulrow!, notdense, swapcols!, mulcol!
+import Yao.LuxurySparse: IMatrix, PermMatrix, notdense
 
 srand(2)
 
@@ -71,22 +71,4 @@ end
     # IMatrix
     @test v'*p1 == v'
     @test p1*v == v
-end
-
-@testset "swaprows! & mulrow!" begin
-    a = [1,2,3,5.0]
-    A = Float64.(reshape(1:8, 4,2))
-    @test swaprows!(copy(a), 2, 4) ≈ [1,5,3,2]
-    @test swaprows!(copy(a), 2, 4, 0.1, 0.2) ≈ [1,1,3,0.2]
-    @test swapcols!(copy(a), 2, 4) ≈ [1,5,3,2]
-    @test swapcols!(copy(a), 2, 4, 0.1, 0.2) ≈ [1,1,3,0.2]
-    @test swaprows!(copy(A), 2, 4) ≈ [1 5; 4 8; 3 7; 2 6]
-    @test swaprows!(copy(A), 2, 4, 0.1, 0.2) ≈ [1 5; 0.8 1.6; 3 7; 0.2 0.6]
-    @test swapcols!(copy(A), 2, 1) ≈ [5 1; 6 2; 7 3; 8 4]
-    @test swapcols!(copy(A), 2, 1, 0.1, 0.2) ≈ [0.5 0.2; 0.6 0.4; 0.7 0.6; 0.8 0.8]
-
-    @test mulrow!(copy(a), 2, 0.1) ≈ [1,0.2,3,5]
-    @test mulcol!(copy(a), 2, 0.1) ≈ [1,0.2,3,5]
-    @test mulrow!(copy(A), 2, 0.1) ≈ [1 5; 0.2 0.6; 3 7; 4 8]
-    @test mulcol!(copy(A), 2, 0.1) ≈ [1 0.5; 2 0.6; 3 0.7; 4 0.8]
 end
