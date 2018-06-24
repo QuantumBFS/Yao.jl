@@ -337,6 +337,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/interfaces/#Yao.Interfaces.reflect",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.reflect",
+    "category": "function",
+    "text": "reflect(mirror::DefaultRegister{1}) -> ReflectBlock\nreflect(mirror::Vector) -> ReflectBlock\n\nReturn an ReflectBlock along with state vector mirror as the axis.\n\n\n\n"
+},
+
+{
     "location": "man/interfaces/#Yao.Interfaces.roll",
     "page": "Interfaces",
     "title": "Yao.Interfaces.roll",
@@ -854,6 +862,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.PrimitiveBlock",
     "category": "type",
     "text": "PrimitiveBlock{N, T} <: MatrixBlock{N, T}\n\nabstract type that all primitive block will subtype from. A primitive block is a concrete block who can not be decomposed into other blocks. All composite block can be decomposed into several primitive blocks.\n\nNOTE: subtype for primitive block with parameter should implement hash and == method to enable key value cache.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.ReflectBlock",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.ReflectBlock",
+    "category": "type",
+    "text": "ReflectBlock{N, T} <: PrimitiveBlock{N, T}\n\nHouseholder reflection with respect to some target state, psi angle = 2s anglelangle s-1.\n\n\n\n"
 },
 
 {
@@ -1630,6 +1646,22 @@ var documenterSearchIndex = {"docs": [
     "title": "Custom Pretty Printing",
     "category": "section",
     "text": "The whole quantum circuit is represented as a tree in the block system. Therefore, we print a block as a tree. To define your own syntax to print, simply overloads the print_block method. Then it will appears in the block tree syntax automatically.print_block(io::IO, block::MyBlockType)"
+},
+
+{
+    "location": "dev/extending-blocks/#Adding-Operator-Traits-to-Your-Blocks-1",
+    "page": "Extending Blocks",
+    "title": "Adding Operator Traits to Your Blocks",
+    "category": "section",
+    "text": "A gate G can have following traitsisunitary - G^dagger G = mathbb1\nisreflexive - GG = mathbb1\nishermitian - G^dagger = GIf G is a MatrixBlock, these traits can fall back to using mat method albiet not efficient. If you can know these traits of a gate clearly, you can define them by hand to improve performance.These traits are useful, e.g. a RotationGate defines an SU(2) rotation, which requires its generator both hermitian a reflexive so that R_G(theta) = cosfractheta2 - isinfractheta2 G, so that you can use R_rm X and R_rm CNOT but not R_rm R_X(03)."
+},
+
+{
+    "location": "dev/extending-blocks/#Adding-Tags-to-Your-Blocks-1",
+    "page": "Extending Blocks",
+    "title": "Adding Tags to Your Blocks",
+    "category": "section",
+    "text": "A tag refers toDaggered - G^dagger   We use Base.adjoint(G) to generate a daggered block.\nIf a block is hermitian, do nothing,\nFor many blocks, e.g. Rx(0.3), we can still define some rule like Base.adjoint(r::RotationBlock) = (res = copy(r); res.theta = -r.theta; res),\nif even simple rule does not exist, its mat function will fall back to mat(G)\'.\nCachedBlock - the matrix of this block under current parameter will be stored in cache server for future use.\nG |> cache can be useful when you are trying to compile a block into a reuseable matrix, to use cache, you should define cache_key."
 },
 
 {
