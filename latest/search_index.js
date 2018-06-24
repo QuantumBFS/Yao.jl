@@ -1289,10 +1289,10 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.log2i-Union{Tuple{T}, Tuple{T}} where T",
+    "location": "man/intrinsics/#Yao.Intrinsics.log2i",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.log2i",
-    "category": "method",
+    "category": "function",
     "text": "log2i(x::Integer) -> Integer\n\nReturn log2(x), this integer version of log2 is fast but only valid for number equal to 2^n. Ref: https://stackoverflow.com/questions/21442088\n\n\n\n"
 },
 
@@ -1545,7 +1545,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s431,1} where #s431<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s429,1} where #s429<:(AbstractArray{T,2} where T),Array{Int64,1}}",
+    "location": "man/boost/#Yao.Boost.general_controlled_gates-Tuple{Int64,Array{#s430,1} where #s430<:(AbstractArray{T,2} where T),Array{Int64,1},Array{#s428,1} where #s428<:(AbstractArray{T,2} where T),Array{Int64,1}}",
     "page": "Boost",
     "title": "Yao.Boost.general_controlled_gates",
     "category": "method",
