@@ -13,7 +13,7 @@ using Yao.LuxurySparse
             UInt8, UInt16, UInt32, UInt64, UInt128,
         ]
         @test log2i(itype(2^5)) == 5
-        @test typeof(log2i(itype(2^5))) == Int64
+        @test typeof(log2i(itype(2^5))) == Int
     end
 end
 
