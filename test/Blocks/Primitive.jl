@@ -19,3 +19,7 @@ end
 @testset "Swap Gate" begin
     include("SwapGate.jl")
 end
+
+@testset "ReflectBlock" begin
+    include("ReflectBlock.jl")
+end

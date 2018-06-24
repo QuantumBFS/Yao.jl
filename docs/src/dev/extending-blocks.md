@@ -113,3 +113,30 @@ the block tree syntax automatically.
 ```julia
 print_block(io::IO, block::MyBlockType)
 ```
+
+## Adding Operator Traits to Your Blocks
+A gate `G` can have following traits
+
+* [`isunitary`](@ref) - ``G^\dagger G = \mathbb{1}``
+* [`isreflexive`](@ref) - ``GG = \mathbb{1}``
+* [`ishermitian`](@ref) - ``G^\dagger = G``
+
+If `G` is a [`MatrixBlock`](@ref), these traits can fall back to using [`mat`](@ref) method albiet not efficient.
+If you can know these traits of a gate clearly, you can define them by hand to improve performance.
+
+These traits are useful, e.g. a [`RotationGate`](@ref) defines an SU(2) rotation, which requires its generator both hermitian a reflexive so that ``R_G(\theta) = \cos\frac{\theta}{2} - i\sin\frac{\theta}{2} G``, so that you can use ``R_{\rm X}`` and ``R_{\rm CNOT}`` but not ``R_{\rm R_X(0.3)}``.
+
+## Adding Tags to Your Blocks
+
+A tag refers to
+
+* [`Daggered`](@ref) - ``G^\dagger``
+    We use `Base.adjoint(G)` to generate a daggered block.
+
+    * If a block is hermitian, do nothing,
+    * For many blocks, e.g. `Rx(0.3)`, we can still define some rule like `Base.adjoint(r::RotationBlock) = (res = copy(r); res.theta = -r.theta; res)`,
+    * if even simple rule does not exist, its [`mat`](@ref) function will fall back to `mat(G)'`.
+
+* [`CachedBlock`](@ref) - the matrix of this block under current parameter will be stored in cache server for future use.
+
+    `G |> cache` can be useful when you are trying to compile a block into a reuseable matrix, to use cache, you should define [`cache_key`](@ref).

@@ -10,5 +10,6 @@ export diff_circuit, num_gradient, rotter, cnot_entangler, opgrad, collect_rotbl
 
 include("QFT.jl")
 include("Differential.jl")
+include("Grover.jl")
 
 end
