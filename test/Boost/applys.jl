@@ -5,7 +5,7 @@ using Yao.Boost
 using Yao.Blocks
 using Yao.Intrinsics
 using Yao.LuxurySparse
-using StaticArrays
+using StaticArrays: SVector, SMatrix
 
 @testset "xyz" begin
     @test linop2dense(s->xapply!(s, [1]), 1) == mat(X)

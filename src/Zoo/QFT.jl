@@ -2,36 +2,22 @@
     using FFTW
 end
 
-export QFTCircuit, QFTBlock, breflect, invorder_firstdim
+export QFTCircuit, QFTBlock, invorder_firstdim
 
-CRk(i::Int, j::Int, k::Int) = control([i, ], j=>shift(-2π/(1<<k)))
+CRk(i::Int, j::Int, k::Int) = control([i, ], j=>shift(2π/(1<<k)))
 CRot(n::Int, i::Int) = chain(i==j ? kron(i=>H) : CRk(j, i, j-i+1) for j = i:n)
 QFTCircuit(n::Int) = chain(n, CRot(n, i) for i = 1:n)
 
 struct QFTBlock{N} <: PrimitiveBlock{N,ComplexF64} end
 mat(q::QFTBlock{N}) where N = applymatrix(q)
 
-apply!(reg::DefaultRegister{B}, ::QFTBlock) where B = (reg.state = fft!(invorder_firstdim(reg |> state), 1)/sqrt(1<<nqubits(reg)); reg)
-apply!(reg::DefaultRegister{B}, ::Daggered{N, T, <:QFTBlock}) where {B,N,T} = (reg.state = invorder_firstdim(ifft!(reg|>state, 1)*sqrt(1<<nqubits(reg))); reg)
+apply!(reg::DefaultRegister{B}, ::QFTBlock) where B = (reg.state = ifft!(invorder_firstdim(reg |> state), 1)*sqrt(1<<nqubits(reg)); reg)
+apply!(reg::DefaultRegister{B}, ::Daggered{N, T, <:QFTBlock}) where {B,N,T} = (reg.state = invorder_firstdim(fft!(reg|>state, 1)/sqrt(1<<nqubits(reg))); reg)
 
 # traits
 ishermitian(q::QFTBlock{N}) where N = N==1
 isreflexive(q::QFTBlock{N}) where N = N==1
 isunitary(q::QFTBlock{N}) where N = true
-
-function breflect(num_bit::Int, b::Int)
-    for i in 1:num_bit÷2
-        b = swapbits(b, bmask(i, num_bit-i+1))
-    end
-    b
-end
-
-function breflect(num_bit::Int, b::Int, mask::Vector{Int})
-    @simd for m in mask
-        b = swapbits(b, m)
-    end
-    b
-end
 
 function invorder_firstdim(v::Matrix)
     w = similar(v)
