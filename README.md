@@ -55,8 +55,8 @@ In Yao, we call these patterns "blocks". If we regard every gate or gate pattern
 
 Thanks to Julia's duck type and multiple dispatch features, user can
 
-* easily **extend** the block system by realizing specific interfaces
-* quantum circuit blocks can be dispatched to some **specialize method** to push the performance in specific case (e.g. customize the repeat block of H gate).
+* easily **extend** the block system by overloading specific interfaces
+* quantum circuit blocks can be dispatched to some **special method** to improve the performance in specific case (e.g. customized repeat block of H gate).
 
 
 
