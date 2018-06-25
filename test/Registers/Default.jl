@@ -114,3 +114,15 @@ end
     reg = rand_state(3, 2)
     @test addbit!(copy(reg), 2) |> state == kron(zero_state(2) |> state, reg |> state)
 end
+
+@testset "reg join" begin
+    reg1 = rand_state(6)
+    reg2 = rand_state(6)
+    reg3 = join(reg1, reg2)
+    reg4 = join(focus!(copy(reg1), 1:3), focus!(copy(reg2), 1:2))
+    @test reg4 |> statevec ≈ focus!(copy(reg3), [1,2,3,7,8,4,5,6,9,10,11,12]) |> statevec
+    reg5 = focus!(repeat(reg1, 3), 1:3)
+    reg6 = focus!(repeat(reg2, 3), 1:2)
+    @test (join(reg5, reg6) |> statevec)[:,1] ≈ reg4 |> statevec
+end
+

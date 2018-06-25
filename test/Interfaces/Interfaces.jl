@@ -42,6 +42,14 @@ end
     @test reflect(psi |> statevec) isa ReflectBlock
 end
 
+@testset "matrix gate" begin
+    matrix = randn(4,8)
+    @test matrixgate(matrix) isa GeneralMatrixGate
+    @test matrixgate(matrix) isa GeneralMatrixGate
+    matrix = randn(4,7)
+    @test_throws DimensionMismatch matrixgate(matrix)
+end
+
 @testset "chain" begin
     @test chain(X, Y, Z) isa ChainBlock
 end
@@ -126,6 +134,9 @@ end
     Probs = @fn probs
     @test Probs isa FunctionBlock{typeof(probs)}
     @test apply!(copy(reg), Probs) == reg |> probs
+
+    FB = focus(1,3,2)
+    @test copy(reg) |> FB == focus!(copy(reg), [1,3,2])
 end
 
 @testset "sequence" begin
