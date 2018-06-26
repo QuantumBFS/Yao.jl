@@ -1,9 +1,9 @@
 using Yao
 
 # Control-R(k) gate in block-A
-A(i::Int, j::Int, k::Int) = control([i, ], j=>shift(-2π/(1<<k)))
+A(i::Int, j::Int, k::Int) = control([i, ], j=>shift(2π/(1<<k)))
 # block-B
-B(n::Int, i::Int) = chain(i==j ? kron(i=>H) : A(j, i, j-i+1) for j = i:n)
+B(n::Int, i::Int) = chain(i==j ? put(i=>H) : A(j, i, j-i+1) for j = i:n)
 QFT(n::Int) = chain(n, B(n, i) for i = 1:n)
 
 # define QFT and IQFT block.
@@ -25,11 +25,11 @@ rv = reg |> statevec |> copy
 
 # test fft
 reg_qft = copy(reg) |>invorder! |> qft
-kv = fft(rv)/sqrt(length(rv))
+kv = ifft(rv)*sqrt(length(rv))
 @test reg_qft |> statevec ≈ kv
 
 # test ifft
 reg_iqft = copy(reg) |>iqft
-kv = ifft(rv)*sqrt(length(rv))
+kv = fft(rv)/sqrt(length(rv))
 @test reg_iqft |> statevec ≈ kv |> invorder
 
