@@ -24,6 +24,7 @@ export register, zero_state, rand_state, randn_state, stack, uniform_state
 
 # bit_str
 export @bit_str, asindex
+export DensityMatrix, density_matrix
 
 
 include("BitStr.jl")
@@ -33,6 +34,7 @@ include("Measure.jl")
 include("Default.jl")
 include("Focus.jl")
 
+include("DensityMatrix.jl")
 # NOTE: these two are not implemented
 # include("GPU.jl")
 # include("MPS.jl")

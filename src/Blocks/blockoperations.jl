@@ -21,8 +21,16 @@ blockfilter!(func, rgs::Vector, blk::TagBlock) = func(parent(blk)) ? push!(rgs, 
 #################### Expect and Measure ######################
 """
     expect(op::AbstractBlock, reg::AbstractRegister{1}) -> Float
-    expect(op::AbstractBlock, reg::AbstractRegister{B}) -> Matrix
+    expect(op::AbstractBlock, reg::AbstractRegister{B}) -> Vector
+    expect(op::AbstractBlock, reg::MatrixBlock{1}) -> Float
+    expect(op::AbstractBlock, reg::MatrixBlock{B}) -> Vector
 
 expectation value of an operator.
 """
+function expect end
+
 expect(op::AbstractBlock, reg::AbstractRegister) = (reg |> statevec)'*(copy(reg) |> op |> statevec)
+
+expect(op::MatrixBlock, dm::DensityMatrix) = mapslices(x->sum(mat(op).*x)[], dm.state, [1,2]) |> vec
+expect(op::MatrixBlock, dm::DensityMatrix{1}) = sum(mat(op).*squeeze(dm.state,3))
+
