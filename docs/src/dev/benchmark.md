@@ -8,12 +8,14 @@
 ![hgate](../assets/benchmarks/hgate-bench.png)
 ![rot](../assets/benchmarks/rot-bench.png)
 
-Here, we see the reason why we need `Block` system and multiple dispatch to do structure specific optimization.
+From this benchmark, we see the performance of ProjectQ and Yao.jl are quite similar, both of them are close to the theoretical bound in performance.
 
-#### ProjectQ Refs
-* [Github Repo](https://github.com/ProjectQ-Framework/ProjectQ)
-* Damian S. Steiger, Thomas Häner, and Matthias Troyer "ProjectQ: An Open Source Software Framework for Quantum Computing" [arxiv:1612.08091]
-* Thomas Häner, Damian S. Steiger, Krysta M. Svore, and Matthias Troyer "A Software Methodology for Compiling Quantum Programs" [arxiv:1604.01401]
+ProjectQ is a state of art quantum simulator, it kept the record of 45 qubit quantum circuit simulation for several months: https://arxiv.org/abs/1704.01127 4
+It uses parallisms like SIMD, OpenMP, MPI to speed up calculation.
+
+ProjectQ has C++ backend, while Yao.jl uses pure julia. Yao.jl has significantly less overhead than ProjectQ, which benefits from julia’s jit and multile dispatch.
+
+In some benchmarks, like repeated blocks, Yao.jl can perform much better, this is an algorithmic win. Thanks to julia’s multiple dispatch, we can dispatch any advanced-speciallized algortihm to push the performance for frequently used gates easily, without touching the backend!
 
 ## CPU Information
 
@@ -41,6 +43,12 @@ L3 cache:              30720K
 NUMA node0 CPU(s):     0-11,24-35
 NUMA node1 CPU(s):     12-23,36-47
 ```
+
+#### ProjectQ
+We use ProjectQ v0.3.6 in this benchmark, with python version 3.6.
+* [Github Repo](https://github.com/ProjectQ-Framework/ProjectQ)
+* Damian S. Steiger, Thomas Häner, and Matthias Troyer "ProjectQ: An Open Source Software Framework for Quantum Computing" [arxiv:1612.08091]
+* Thomas Häner, Damian S. Steiger, Krysta M. Svore, and Matthias Troyer "A Software Methodology for Compiling Quantum Programs" [arxiv:1604.01401]
 
 ## Julia Version
 

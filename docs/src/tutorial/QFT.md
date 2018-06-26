@@ -5,7 +5,7 @@
 using Yao
 
 # Control-R(k) gate in block-A
-A(i::Int, j::Int, k::Int) = control([i, ], j=>shift(-2π/(1<<k)))
+A(i::Int, j::Int, k::Int) = control([i, ], j=>shift(2π/(1<<k)))
 # block-B
 B(n::Int, i::Int) = chain(i==j ? kron(i=>H) : A(j, i, j-i+1) for j = i:n)
 QFT(n::Int) = chain(n, B(n, i) for i = 1:n)
@@ -41,19 +41,20 @@ rv = reg |> statevec |> copy
 
 # test fft
 reg_qft = copy(reg) |>invorder! |> qft
-kv = fft(rv)/sqrt(length(rv))
+kv = ifft(rv)*sqrt(length(rv))
 @test reg_qft |> statevec ≈ kv
 
 # test ifft
 reg_iqft = copy(reg) |>iqft
-kv = ifft(rv)*sqrt(length(rv))
+kv = fft(rv)/sqrt(length(rv))
 @test reg_iqft |> statevec ≈ kv |> invorder
 ```
 
-QFT and IQFT are different from FFT and IFFT in two ways,
+QFT and IQFT are different from FFT and IFFT in three ways,
 
 1. they are different by a factor of ``\sqrt{2^n}`` with ``n`` the number of qubits.
 2. the little end and big end will exchange after applying QFT or IQFT.
+3. dur to the convention, QFT is more related to IFFT rather than FFT.
 
 In Yao, factory methods for blocks will be loaded lazily. For example, if you missed the total
 number of qubits of `chain`, then it will return a function that requires an input of an integer.
