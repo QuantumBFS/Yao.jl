@@ -50,48 +50,42 @@ function collect_rotblocks(blk::AbstractBlock)
 end
 
 import Base: gradient
-function _wave_perturbation(circuit::AbstractBlock, reg0::AbstractRegister, gate::RotationGate, diff::Real)
+function _wave_perturbation(circuit::Pair{<:AbstractRegister, <:AbstractBlock}, gate::RotationGate, diff::Real)
+    reg0, block = circuit
     dispatch!(+, gate, diff)
-    psi_pos = copy(reg0) |> circuit
+    psi_pos = copy(reg0) |> block
 
     dispatch!(+, gate, -2*diff)
-    psi_neg = copy(reg0) |> circuit
+    psi_neg = copy(reg0) |> block
 
     dispatch!(+, gate, diff) # set back
     psi_pos, psi_neg
 end
 
 """
-    gradient(gradfunc, circuit::AbstractBlock[, reg0::AbstractRegister=zero_state(nqubits(circuit)),
-                gates::Vector{RotationGate}=collect_rotblocks(circuit)]) -> Vector
-
+    gradient(gradfunc, circuit::Pair{<:AbstractRegister, <:AbstractBlock}, gates::Vector{RotationGate}) -> Vector
 """
-function gradient(gradfunc, circuit::AbstractBlock, reg0::AbstractRegister, gates::Vector{RotationGate}=collect_rotblocks(circuit))
-    map(gate->gradfunc(_wave_perturbation(circuit, reg0, gate, π/2)...), gates)
+function gradient(gradfunc, circuit::Pair{<:AbstractRegister, <:AbstractBlock}, gates::Vector{RotationGate})
+    map(gate->gradfunc(_wave_perturbation(circuit, gate, π/2)...), gates)
 end
 
-gradient(gradfunc, circuit, gates::Vector{RotationGate}=collect_rotblocks(circuit)) = gradient(gradfunc, circuit, zero_state(nqubits(circuit)), gates)
-
 """
-    num_gradient(lossfunc, circuit::AbstractBlock [, δ::Float64=1e-2,
-                        reg0::AbstractRegister=zero_state(nqubits(circuit)),
-                        gates::Vector{RotationGate}=collect_rotblocks(circuit)
-                        ]) -> Vector
+    num_gradient(lossfunc, circuit::Pair{<:AbstractRegister, <:AbstractBlock}, gates::Vector{RotationGate}, δ::Float64=1e-2) -> Vector
+
 Compute gradient numerically.
 """
-function num_gradient(lossfunc, circuit::AbstractBlock, δ::Float64, reg0::AbstractRegister, gates::Vector{RotationGate}=collect_rotblocks(circuit))
+function num_gradient(lossfunc, circuit::Pair{<:AbstractRegister, <:AbstractBlock}, gates::Vector{RotationGate}, δ::Float64=1e-2)
     map(gates) do gate
-        rp, rn = _wave_perturbation(circuit, reg0, gate, δ)
+        rp, rn = _wave_perturbation(circuit, gate, δ)
         (lossfunc(rp) - lossfunc(rn))/2/δ
     end
 end
-num_gradient(lossfunc, circuit) = num_gradient(lossfunc, circuit, 1e-2, zero_state(nqubits(circuit)))
 
 opgradfunc(op) = (reg_pos, reg_neg) -> (expect(op, reg_pos)-expect(op, reg_neg))/2
 
 """
-    opgrad(op::AbstractBlock, circuit::AbstractBlock) -> Vector
+    opgrad(op::AbstractBlock, circuit::Pair{<:AbstractRegister, <:AbstractBlock}, gates::Vector{RotationGate}) -> Vector
 
 get the gradient of an operator, which should be an observable.
 """
-opgrad(op::AbstractBlock, circuit::AbstractBlock, reg0::AbstractRegister, gates::Vector{RotationGate}) = gradient(opgradfunc(op), circuit, reg0, gates)
+opgrad(op::AbstractBlock, circuit::Pair{<:AbstractRegister, <:AbstractBlock}, gates::Vector{RotationGate}) = gradient(opgradfunc(op), circuit, gates)
