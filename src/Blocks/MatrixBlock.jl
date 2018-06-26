@@ -28,8 +28,6 @@ end
 # Parameters
 parameter_type(::MatrixBlock) = Bool
 nparameters(x::MatrixBlock) = length(parameters(x))
-nparameters(::Type{X}) where {X <: MatrixBlock} = 0
-parameters(x::MatrixBlock) = ()
 
 """
     datatype(x) -> DataType

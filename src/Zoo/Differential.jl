@@ -12,9 +12,8 @@ rotter(noleading::Bool=false, notrailing::Bool=false) = noleading ? (notrailing 
 
 Arbitrary rotation unit, support lazy construction.
 """
-#cnot_entangler(n::Int, pairs) = chain(n, control(n, [ctrl], target=>X) for (ctrl, target) in pairs)
-#cnot_entangler(pairs) = n->cnot_entangler(n, pairs)
-cnot_entangler(pairs) = chain(control([ctrl], target=>X) for (ctrl, target) in pairs)
+cnot_entangler(n::Int, pairs) = chain(n, control(n, [ctrl], target=>X) for (ctrl, target) in pairs)
+cnot_entangler(pairs) = n->cnot_entangler(n, pairs)
 
 """
     diff_circuit(n, nlayer, pairs) -> ChainBlock
@@ -31,7 +30,10 @@ function diff_circuit(n, nlayer, pairs)
 
     for i = 1:(nlayer + 1)
         if i!=1  push!(circuit, cnot_entangler(pairs) |> cache) end
-        push!(circuit, rollrepeat(n, rotter(i==1, i==nlayer+1)))
+        #push!(circuit, rollrepeat(n, rotter(i==1, i==nlayer+1)))
+        for j = 1:n
+            push!(circuit, put(n, j=>rotter(i==1, i==nlayer+1)))
+        end
     end
     dispatch!(circuit, rand(nparameters(circuit))*2π)
 end
@@ -92,4 +94,4 @@ opgradfunc(op) = (reg_pos, reg_neg) -> (expect(op, reg_pos)-expect(op, reg_neg))
 
 get the gradient of an operator, which should be an observable.
 """
-opgrad(op::AbstractBlock, circuit::AbstractBlock) = gradient(opgradfunc(op), circuit)
+opgrad(op::AbstractBlock, circuit::AbstractBlock, reg0::AbstractRegister, gates::Vector{RotationGate}) = gradient(opgradfunc(op), circuit, reg0, gates)

@@ -25,4 +25,5 @@ blockfilter!(func, rgs::Vector, blk::TagBlock) = func(parent(blk)) ? push!(rgs, 
 
 expectation value of an operator.
 """
-expect(op::AbstractBlock, reg::AbstractRegister) = (reg |> statevec)'*(copy(reg) |> op |> statevec)
+expect(op::AbstractBlock, reg::AbstractRegister) = sum(conj(reg |> statevec).*(copy(reg) |> op |> statevec), 1) |> vec
+expect(op::AbstractBlock, reg::AbstractRegister{1}) = (reg |> statevec)'*(copy(reg) |> op |> statevec)

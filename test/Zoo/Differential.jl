@@ -10,7 +10,8 @@ using Compat.Test
     @test length(rots) == nparameters(c) == 40
 
     obs = kron(nqubits(c), 2=>X)
-    @test isapprox(opgrad(obs, c),  num_gradient(r->expect(obs, r), c), atol=1e-3)
+    @test mean(opgrad(obs, c, zero_state(4), rots) .|> abs) > 3e-3
+    @test isapprox(opgrad(obs, c, zero_state(4), rots),  num_gradient(r->expect(obs, r), c), atol=1e-3)
 
     @test  rotter(true, true) == Rx(0)
     @test  rotter(false, false) == rotter() == chain(Rz(0), Rx(0), Rz(0))

@@ -41,6 +41,7 @@ state(r::DefaultRegister) = r.state
 statevec(r::DefaultRegister{B}) where B = reshape(r.state, :, B)
 statevec(r::DefaultRegister{1}) = vec(r.state)
 hypercubic(reg::DefaultRegister{B}) where B = reshape(reg.state, ntuple(i->2, Val(nactive(reg)))..., :)
+rank3(reg::DefaultRegister{B}) where B = reshape(reg.state, size(reg.state, 1), :, B)
 copy(r::DefaultRegister{B}) where B = DefaultRegister{B}(copy(state(r)))
 normalize!(r::DefaultRegister) = (batch_normalize!(r.state); r)
 
@@ -75,7 +76,7 @@ function probs(r::DefaultRegister{B}) where B
     if size(r.state, 2) == B
         return r.state .|> abs2
     else
-        probs = reshape(r.state .|> abs2, size(r.state, 1), :, B)
+        probs = r.state .|> abs2 |> rank3
         return squeeze(sum(probs, 2), 2)
     end
 end
@@ -99,8 +100,8 @@ end
 extend!(n::Int) = r->extend!(r, n)
 
 function join(reg1::DefaultRegister{B, T1}, reg2::DefaultRegister{B, T2}) where {B, T1, T2}
-    s1 = reshape(reg1.state, size(reg1.state, 1), :, B)
-    s2 = reshape(reg2.state, size(reg2.state, 1), :, B)
+    s1 = reg1.state |> rank3
+    s2 = reg2.state |> rank3
     T = promote_type(T1, T2)
     state = Array{T,3}(size(s1, 1)*size(s2, 1), size(s1, 2)*size(s2, 2), B)
     for b = 1:B

@@ -27,5 +27,5 @@ struct QubitMismatchError <: Exception
 end
 
 function show(io::IO, e::QubitMismatchError)
-    print(io, msg)
+    print(io, e.msg)
 end

@@ -16,7 +16,7 @@ import ..Yao: DefaultType, nqubits, nactive, reorder, invorder
 import ..Intrinsics: basis, hypercubic
 
 # APIs
-export nqubits, nactive, nremain, nbatch, state, statevec, hypercubic, focus!, relax!, focuspair!, extend!, basis, probs, isnormalized
+export nqubits, nactive, nremain, nbatch, state, statevec, hypercubic, rank3, focus!, relax!, focuspair!, extend!, basis, probs, isnormalized
 export AbstractRegister, Register, Focus, invorder!, reorder!, addbit!, reset!
 
 # factories
