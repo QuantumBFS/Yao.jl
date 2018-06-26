@@ -9,7 +9,7 @@ ga('send', 'pageview');
 </script><link rel="canonical" href="https://quantumbfs.github.io/Yao.jl/latest/tutorial/QFT/index.html"/><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="../../index.html"><img class="logo" src="../../assets/logo.png" alt="Yao.jl logo"/></a><h1>Yao.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../">Home</a></li><li><span class="toctext">Tutorial</span><ul><li><a class="toctext" href="../GHZ/">Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</a></li><li class="current"><a class="toctext" href>Quantum Fourier Transform</a><ul class="internal"></ul></li><li><a class="toctext" href="../QCBM/">Quantum Circuit Born Machine</a></li></ul></li><li><span class="toctext">Manual</span><ul><li><a class="toctext" href="../../man/yao/">Yao</a></li><li><a class="toctext" href="../../man/interfaces/">Interfaces</a></li><li><a class="toctext" href="../../man/registers/">Registers</a></li><li><a class="toctext" href="../../man/blocks/">Blocks System</a></li><li><a class="toctext" href="../../man/cache/">Cache System</a></li><li><a class="toctext" href="../../man/intrinsics/">Intrinsics</a></li><li><a class="toctext" href="../../man/luxurysparse/">LuxurySparse</a></li><li><a class="toctext" href="../../man/boost/">Boost</a></li></ul></li><li><span class="toctext">Developer Documentation</span><ul><li><a class="toctext" href="../../dev/extending-blocks/">Extending Blocks</a></li><li><a class="toctext" href="../../dev/benchmark/">Benchmark with ProjectQ</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Tutorial</li><li><a href>Quantum Fourier Transform</a></li></ul><a class="edit-page" href="https://github.com/QuantumBFS/Yao.jl/blob/master/docs/src/tutorial/QFT.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Quantum Fourier Transform</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Quantum-Fourier-Transform-1" href="#Quantum-Fourier-Transform-1">Quantum Fourier Transform</a></h1><p><img src="../../assets/figures/qft.png" alt="ghz"/></p><div><pre><code class="language-julia">using Yao
 
 # Control-R(k) gate in block-A
-A(i::Int, j::Int, k::Int) = control([i, ], j=&gt;shift(-2π/(1&lt;&lt;k)))
+A(i::Int, j::Int, k::Int) = control([i, ], j=&gt;shift(2π/(1&lt;&lt;k)))
 # block-B
 B(n::Int, i::Int) = chain(i==j ? kron(i=&gt;H) : A(j, i, j-i+1) for j = i:n)
 QFT(n::Int) = chain(n, B(n, i) for i = 1:n)
@@ -24,34 +24,34 @@ chain
 │     └─ 5=&gt;H gate
 ├─ chain
 │  ├─ control(5)
-│  │  └─ (4,)=&gt;Phase Shift Gate:1.5707963267948966
+│  │  └─ (4,)=&gt;Phase Shift Gate:-1.5707963267948966
 │  └─ kron
 │     └─ 4=&gt;H gate
 ├─ chain
 │  ├─ control(5)
-│  │  └─ (3,)=&gt;Phase Shift Gate:0.7853981633974483
+│  │  └─ (3,)=&gt;Phase Shift Gate:-0.7853981633974483
 │  ├─ control(4)
-│  │  └─ (3,)=&gt;Phase Shift Gate:1.5707963267948966
+│  │  └─ (3,)=&gt;Phase Shift Gate:-1.5707963267948966
 │  └─ kron
 │     └─ 3=&gt;H gate
 ├─ chain
 │  ├─ control(5)
-│  │  └─ (2,)=&gt;Phase Shift Gate:0.39269908169872414
+│  │  └─ (2,)=&gt;Phase Shift Gate:-0.39269908169872414
 │  ├─ control(4)
-│  │  └─ (2,)=&gt;Phase Shift Gate:0.7853981633974483
+│  │  └─ (2,)=&gt;Phase Shift Gate:-0.7853981633974483
 │  ├─ control(3)
-│  │  └─ (2,)=&gt;Phase Shift Gate:1.5707963267948966
+│  │  └─ (2,)=&gt;Phase Shift Gate:-1.5707963267948966
 │  └─ kron
 │     └─ 2=&gt;H gate
 └─ chain
    ├─ control(5)
-   │  └─ (1,)=&gt;Phase Shift Gate:0.19634954084936207
+   │  └─ (1,)=&gt;Phase Shift Gate:-0.19634954084936207
    ├─ control(4)
-   │  └─ (1,)=&gt;Phase Shift Gate:0.39269908169872414
+   │  └─ (1,)=&gt;Phase Shift Gate:-0.39269908169872414
    ├─ control(3)
-   │  └─ (1,)=&gt;Phase Shift Gate:0.7853981633974483
+   │  └─ (1,)=&gt;Phase Shift Gate:-0.7853981633974483
    ├─ control(2)
-   │  └─ (1,)=&gt;Phase Shift Gate:1.5707963267948966
+   │  └─ (1,)=&gt;Phase Shift Gate:-1.5707963267948966
    └─ kron
       └─ 1=&gt;H gate</code></pre></div><p>The basic building block - controled phase shift gate is defined as</p><div>\[R(k)=\begin{bmatrix}
 1 &amp; 0\\
@@ -70,10 +70,10 @@ rv = reg |&gt; statevec |&gt; copy
 
 # test fft
 reg_qft = copy(reg) |&gt;invorder! |&gt; qft
-kv = fft(rv)/sqrt(length(rv))
+kv = ifft(rv)*sqrt(length(rv))
 @test reg_qft |&gt; statevec ≈ kv
 
 # test ifft
 reg_iqft = copy(reg) |&gt;iqft
-kv = ifft(rv)*sqrt(length(rv))
-@test reg_iqft |&gt; statevec ≈ kv |&gt; invorder</code></pre><p>QFT and IQFT are different from FFT and IFFT in two ways,</p><ol><li><p>they are different by a factor of <span>$\sqrt{2^n}$</span> with <span>$n$</span> the number of qubits.</p></li><li><p>the little end and big end will exchange after applying QFT or IQFT.</p></li></ol><p>In Yao, factory methods for blocks will be loaded lazily. For example, if you missed the total number of qubits of <code>chain</code>, then it will return a function that requires an input of an integer.</p><p>If you missed the total number of qubits. It is OK. Just go on, it will be filled when its possible.</p><pre><code class="language-julia">chain(4, repeat(1=&gt;X), kron(2=&gt;Y))</code></pre><footer><hr/><a class="previous" href="../GHZ/"><span class="direction">Previous</span><span class="title">Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</span></a><a class="next" href="../QCBM/"><span class="direction">Next</span><span class="title">Quantum Circuit Born Machine</span></a></footer></article></body></html>
+kv = fft(rv)/sqrt(length(rv))
+@test reg_iqft |&gt; statevec ≈ kv |&gt; invorder</code></pre><p>QFT and IQFT are different from FFT and IFFT in three ways,</p><ol><li><p>they are different by a factor of <span>$\sqrt{2^n}$</span> with <span>$n$</span> the number of qubits.</p></li><li><p>the little end and big end will exchange after applying QFT or IQFT.</p></li><li><p>dur to the convention, QFT is more related to IFFT rather than FFT.</p></li></ol><p>In Yao, factory methods for blocks will be loaded lazily. For example, if you missed the total number of qubits of <code>chain</code>, then it will return a function that requires an input of an integer.</p><p>If you missed the total number of qubits. It is OK. Just go on, it will be filled when its possible.</p><pre><code class="language-julia">chain(4, repeat(1=&gt;X), kron(2=&gt;Y))</code></pre><footer><hr/><a class="previous" href="../GHZ/"><span class="direction">Previous</span><span class="title">Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</span></a><a class="next" href="../QCBM/"><span class="direction">Next</span><span class="title">Quantum Circuit Born Machine</span></a></footer></article></body></html>

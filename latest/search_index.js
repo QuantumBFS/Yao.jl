@@ -61,7 +61,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Fourier Transform",
     "title": "Quantum Fourier Transform",
     "category": "section",
-    "text": "(Image: ghz)using Yao\n\n# Control-R(k) gate in block-A\nA(i::Int, j::Int, k::Int) = control([i, ], j=>shift(-2π/(1<<k)))\n# block-B\nB(n::Int, i::Int) = chain(i==j ? kron(i=>H) : A(j, i, j-i+1) for j = i:n)\nQFT(n::Int) = chain(n, B(n, i) for i = 1:n)\n\n# define QFT and IQFT block.\nnum_bit = 5\nqft = QFT(num_bit)\niqft = adjoint(qft)The basic building block - controled phase shift gate is defined asR(k)=beginbmatrix\n1  0\n0  expleft(frac2pi i2^kright)\nendbmatrixNow let\'s check the result using classical fft# if you\'re using lastest julia, you need to add the fft package.\n@static if VERSION >= v\"0.7-\"\n    using FFTW\nend\nusing Compat.Test\n\n@test chain(num_bit, qft, iqft) |> mat ≈ eye(2^num_bit)\n\n# define a register and get its vector representation\nreg = rand_state(num_bit)\nrv = reg |> statevec |> copy\n\n# test fft\nreg_qft = copy(reg) |>invorder! |> qft\nkv = fft(rv)/sqrt(length(rv))\n@test reg_qft |> statevec ≈ kv\n\n# test ifft\nreg_iqft = copy(reg) |>iqft\nkv = ifft(rv)*sqrt(length(rv))\n@test reg_iqft |> statevec ≈ kv |> invorderQFT and IQFT are different from FFT and IFFT in two ways,they are different by a factor of sqrt2^n with n the number of qubits.\nthe little end and big end will exchange after applying QFT or IQFT.In Yao, factory methods for blocks will be loaded lazily. For example, if you missed the total number of qubits of chain, then it will return a function that requires an input of an integer.If you missed the total number of qubits. It is OK. Just go on, it will be filled when its possible.chain(4, repeat(1=>X), kron(2=>Y))"
+    "text": "(Image: ghz)using Yao\n\n# Control-R(k) gate in block-A\nA(i::Int, j::Int, k::Int) = control([i, ], j=>shift(2π/(1<<k)))\n# block-B\nB(n::Int, i::Int) = chain(i==j ? kron(i=>H) : A(j, i, j-i+1) for j = i:n)\nQFT(n::Int) = chain(n, B(n, i) for i = 1:n)\n\n# define QFT and IQFT block.\nnum_bit = 5\nqft = QFT(num_bit)\niqft = adjoint(qft)The basic building block - controled phase shift gate is defined asR(k)=beginbmatrix\n1  0\n0  expleft(frac2pi i2^kright)\nendbmatrixNow let\'s check the result using classical fft# if you\'re using lastest julia, you need to add the fft package.\n@static if VERSION >= v\"0.7-\"\n    using FFTW\nend\nusing Compat.Test\n\n@test chain(num_bit, qft, iqft) |> mat ≈ eye(2^num_bit)\n\n# define a register and get its vector representation\nreg = rand_state(num_bit)\nrv = reg |> statevec |> copy\n\n# test fft\nreg_qft = copy(reg) |>invorder! |> qft\nkv = ifft(rv)*sqrt(length(rv))\n@test reg_qft |> statevec ≈ kv\n\n# test ifft\nreg_iqft = copy(reg) |>iqft\nkv = fft(rv)/sqrt(length(rv))\n@test reg_iqft |> statevec ≈ kv |> invorderQFT and IQFT are different from FFT and IFFT in three ways,they are different by a factor of sqrt2^n with n the number of qubits.\nthe little end and big end will exchange after applying QFT or IQFT.\ndur to the convention, QFT is more related to IFFT rather than FFT.In Yao, factory methods for blocks will be loaded lazily. For example, if you missed the total number of qubits of chain, then it will return a function that requires an input of an integer.If you missed the total number of qubits. It is OK. Just go on, it will be filled when its possible.chain(4, repeat(1=>X), kron(2=>Y))"
 },
 
 {
@@ -1741,15 +1741,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Benchmark with ProjectQ",
     "title": "Benchmark with ProjectQ",
     "category": "section",
-    "text": "ProjectQ is an open source software framework for quantum computing. Here we present the single process benchmark result(Image: xyz) (Image: repeatedxyz) (Image: cxyz) (Image: crot) (Image: hgate) (Image: rot)Here, we see the reason why we need Block system and multiple dispatch to do structure specific optimization."
-},
-
-{
-    "location": "dev/benchmark/#ProjectQ-Refs-1",
-    "page": "Benchmark with ProjectQ",
-    "title": "ProjectQ Refs",
-    "category": "section",
-    "text": "Github Repo\nDamian S. Steiger, Thomas Häner, and Matthias Troyer \"ProjectQ: An Open Source Software Framework for Quantum Computing\" [arxiv:1612.08091]\nThomas Häner, Damian S. Steiger, Krysta M. Svore, and Matthias Troyer \"A Software Methodology for Compiling Quantum Programs\" [arxiv:1604.01401]"
+    "text": "ProjectQ is an open source software framework for quantum computing. Here we present the single process benchmark result(Image: xyz) (Image: repeatedxyz) (Image: cxyz) (Image: crot) (Image: hgate) (Image: rot)From this benchmark, we see the performance of ProjectQ and Yao.jl are quite similar, both of them are close to the theoretical bound in performance.ProjectQ is a state of art quantum simulator, it kept the record of 45 qubit quantum circuit simulation for several months: https://arxiv.org/abs/1704.01127 4 It uses parallisms like SIMD, OpenMP, MPI to speed up calculation.ProjectQ has C++ backend, while Yao.jl uses pure julia. Yao.jl has significantly less overhead than ProjectQ, which benefits from julia’s jit and multile dispatch.In some benchmarks, like repeated blocks, Yao.jl can perform much better, this is an algorithmic win. Thanks to julia’s multiple dispatch, we can dispatch any advanced-speciallized algortihm to push the performance for frequently used gates easily, without touching the backend!"
 },
 
 {
@@ -1758,6 +1750,14 @@ var documenterSearchIndex = {"docs": [
     "title": "CPU Information",
     "category": "section",
     "text": "Architecture:          x86_64\nCPU op-mode(s):        32-bit, 64-bit\nByte Order:            Little Endian\nCPU(s):                48\nOn-line CPU(s) list:   0-47\nThread(s) per core:    2\nCore(s) per socket:    12\nSocket(s):             2\nNUMA node(s):          2\nVendor ID:             GenuineIntel\nCPU family:            6\nModel:                 79\nStepping:              1\nCPU MHz:               2499.921\nBogoMIPS:              4401.40\nVirtualization:        VT-x\nL1d cache:             32K\nL1i cache:             32K\nL2 cache:              256K\nL3 cache:              30720K\nNUMA node0 CPU(s):     0-11,24-35\nNUMA node1 CPU(s):     12-23,36-47"
+},
+
+{
+    "location": "dev/benchmark/#ProjectQ-1",
+    "page": "Benchmark with ProjectQ",
+    "title": "ProjectQ",
+    "category": "section",
+    "text": "We use ProjectQ v0.3.6 in this benchmark, with python version 3.6.Github Repo\nDamian S. Steiger, Thomas Häner, and Matthias Troyer \"ProjectQ: An Open Source Software Framework for Quantum Computing\" [arxiv:1612.08091]\nThomas Häner, Damian S. Steiger, Krysta M. Svore, and Matthias Troyer \"A Software Methodology for Compiling Quantum Programs\" [arxiv:1604.01401]"
 },
 
 {
