@@ -24,6 +24,7 @@ makedocs(
             "man/yao.md",
             "man/interfaces.md",
             "man/registers.md",
+            "man/zoo.md",
             "man/blocks.md",
             "man/cache.md",
             "man/intrinsics.md",

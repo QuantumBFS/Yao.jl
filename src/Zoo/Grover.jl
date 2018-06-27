@@ -40,7 +40,7 @@ num_grover_step(prob::Real) = Int(round(pi/4/sqrt(prob)))-1
 Return an iterator that perform Grover operations step by step.
 An Grover operation consists of applying oracle and Reflection.
 
-If `AUTOSTOP` is true, it will stop when the first maximum of state matches the oracle.
+If `AUTOSTOP` is true, it will stop when the first time the state reaches the sweet spot.
 """
 struct GroverIter{AUTOSTOP, N, T}
     oracle

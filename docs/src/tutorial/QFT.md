@@ -1,11 +1,13 @@
-# Quantum Fourier Transform
+# Quantum Fourier Transformation and Phase Estimation
+
+## Quantum Fourier Transformation
 ![ghz](../assets/figures/qft.png)
 
 ```@example QFT
 using Yao
 
 # Control-R(k) gate in block-A
-A(i::Int, j::Int, k::Int) = control([i, ], j=>shift(-2π/(1<<k)))
+A(i::Int, j::Int, k::Int) = control([i, ], j=>shift(2π/(1<<k)))
 # block-B
 B(n::Int, i::Int) = chain(i==j ? kron(i=>H) : A(j, i, j-i+1) for j = i:n)
 QFT(n::Int) = chain(n, B(n, i) for i = 1:n)
@@ -27,8 +29,8 @@ R(k)=\begin{bmatrix}
 In Yao, factory methods for blocks will be loaded lazily. For example, if you missed the total
 number of qubits of `chain`, then it will return a function that requires an input of an integer.
 So the following two statements are equivalent
-```julia
-control([i, ], j=>shift(-2π/(1<<k)))(nbit) == control(nbit, [i, ], j=>shift(-2π/(1<<k)))
+```@example QFT
+control([4, ], 1=>shift(-2π/(1<<4)))(5) == control(5, [4, ], 1=>shift(-2π/(1<<4)))
 ```
 Both of then will return a `ControlBlock` instance. If you missed the total number of qubits. It is OK. Just go on, it will be filled when its possible.
 
@@ -50,7 +52,7 @@ julia> mat(a.block)
 Similarly, you can use `put` and `chain` to construct `PutBlock` (basic placement of a single gate) and `ChainBlock` (sequential application of `MatrixBlock`s) instances. `Yao.jl` view every component in a circuit as an `AbstractBlock`, these blocks can be integrated to perform higher level functionality.
 
 You can check the result using classical `fft`
-```@example TestQFT
+```@example QFT
 # if you're using lastest julia, you need to add the fft package.
 @static if VERSION >= v"0.7-"
     using FFTW
@@ -65,42 +67,35 @@ rv = reg |> statevec |> copy
 
 # test fft
 reg_qft = apply!(copy(reg) |>invorder!, qft)
-kv = fft(rv)/sqrt(length(rv))
+kv = ifft(rv)*sqrt(length(rv))
 @test reg_qft |> statevec ≈ kv
 
 # test ifft
 reg_iqft = apply!(copy(reg), iqft)
-kv = ifft(rv)*sqrt(length(rv))
+kv = fft(rv)/sqrt(length(rv))
 @test reg_iqft |> statevec ≈ kv |> invorder
 ```
 
-QFT and IQFT are different from FFT and IFFT in two ways,
+QFT and IQFT are different from FFT and IFFT in three ways,
 
 1. they are different by a factor of ``\sqrt{2^n}`` with ``n`` the number of qubits.
 2. the little end and big end will exchange after applying QFT or IQFT.
+3. due to the convention, QFT is more related to IFFT rather than FFT.
 
 
 ## Phase Estimation
+Since we have QFT and IQFT blocks we can then use them to realize phase estimation circuit, what we want to realize is the following circuit
+![phase estimation](../assets/figures/phaseest.png)
+
+In the following simulation, we use equivalent `QFTBlock` in the Yao.`Zoo` module rather than the above chain block,
+it is faster than the above construction because it hides all the simulation details (yes, we are cheating :D) and get the equivalent output.
 
 ```@example PhaseEstimation
-using Compat
-using Compat.Test
 using Yao
 using Yao.Zoo
 using Yao.Blocks
 using Yao.Intrinsics
 
-"""
-    phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::GeneralMatrixGate{N, T}, nshot::Int=1) -> (phase, DefaultRegister)
-
-where,
-    reg1: the output space to store phase ϕ.
-    reg2: the input space with eigenvector of oracle matrix U.
-    U: the oracle gate in the form of a GeneralMatrixGate.
-    nshot: the number of measurements.
-
-reference: https://en.wikipedia.org/wiki/Quantum_phase_estimation_algorithm
-"""
 function phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::GeneralMatrixGate{N}, nshot::Int=1) where {N}
     M = nqubits(reg1)
     iqft = QFTBlock{M}() |> adjoint
@@ -115,33 +110,53 @@ function phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::Gener
     end
 
     # calculation
-    reg1 |> HGates
+    # step1 apply hadamard gates.
+    apply!(reg1, HGates)
+    # join two registers
     reg = join(reg1, reg2)
-    apply!(reg, sequence(control_circuit, focus(1:M...), iqft)
+    # using iqft to read out the phase
+    apply!(reg, sequence(control_circuit, focus(1:M...), iqft))
+    # measure the register (on focused bits), if the phase can be exactly represented by M qubits, only a single shot is needed.
     res = measure(reg, nshot)
+    # inverse the bits in result due to the exchange of big and little ends, so that we can get the correct phase.
     breflect.(M, res)./(1<<M), reg
 end
+```
+Here, `reg1` (``Q_{1-5}``) is used as the output space to store phase ϕ, and `reg2` (``Q_{6-8}``) is the input state which corresponds to an eigenvector of oracle matrix `U`.
+The algorithm detials can be found [here](https://en.wikipedia.org/wiki/Quantum_phase_estimation_algorithm).
 
-"""
-random unitary matrix.
-"""
+In this function, `HGates` corresponds to circuit block in dashed box `A`, `control_circuit` corresponds to block in dashed box `B`.
+`matrixgate` is a factory function for `GeneralMatrixGate`.
+
+Here, the only difficult concept is `focus`, `focus` returns a `FunctionBlock`, that will make focused bits the active bits.
+An operator sees only active bits, and operating active space is more efficient, most importantly, it becomes much easier to integrate blocks.
+However, it has the potential ability to change line orders, for safety consideration, you may also need safer [`Concentrator`](@ref).
+
+```@example PhaseEstimation
+r = rand_state(6)
+apply!(r, focus(4,1,2))  # or equivalently using focus!(r, [4,1,2])
+nactive(r)
+```
+
+Then we will have a check to above function
+
+```@example PhaseEstimation
 rand_unitary(N::Int) = qr(randn(N, N))[1]
 
-######### Test Phase Estimation ##########
-M = 16
+M = 5
 N = 3
 
-# prepair oracle matrix A
-U = rand_unitary(1<<N)
+# prepair oracle matrix U
+V = rand_unitary(1<<N)
 phases = rand(1<<N)
-ϕ = Int(0b111101)/(1<<6)
-phases[3] = ϕ
+ϕ = Int(0b11101)/(1<<M)
+phases[3] = ϕ  # set the phase of the 3rd eigenstate manually.
 signs = exp.(2pi*im.*phases)
-A = U*Diagonal(signs)*U'  # notice it is unitary
+U = V*Diagonal(signs)*V'  # notice U is unitary
 
 # the state with phase ϕ
 psi = U[:,3]
 
-res, reg = phase_estimation(zero_state(M), register(psi), GeneralMatrixGate(A))
+res, reg = phase_estimation(zero_state(M), register(psi), GeneralMatrixGate(U))
 println("Phase is 2π * $(res[]), the exact value is 2π * $ϕ")
 ```
