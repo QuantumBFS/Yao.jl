@@ -34,6 +34,8 @@ end
     iqft = adjoint(qft)
     qftblock = QFTBlock{num_bit}()
     iqftblock = QFTBlock{num_bit}() |> adjoint
+    @test openbox(qftblock) == qft
+    @test openbox(iqftblock) == iqft
     reg = rand_state(num_bit)
 
     @test Matrix(mat(chain(3, QFTBlock{3}() |> adjoint, QFTBlock{3}()))) ≈ eye(1<<3)

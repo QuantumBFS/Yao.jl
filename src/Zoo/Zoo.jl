@@ -10,6 +10,12 @@ import ..Blocks: mat, dispatch!, nparameters, parameters, cache_key, print_block
 import Base: ==, copy, hash
 import ..Intrinsics: ishermitian, isreflexive, isunitary
 
+export openbox
+
+"""
+For a black box, like QFTBlock, you can get its white box (loyal simulation) using this function.
+"""
+function openbox end
 
 include("QFT.jl")
 include("Differential.jl")

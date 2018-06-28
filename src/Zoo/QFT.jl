@@ -19,6 +19,17 @@ ishermitian(q::QFTBlock{N}) where N = N==1
 isreflexive(q::QFTBlock{N}) where N = N==1
 isunitary(q::QFTBlock{N}) where N = true
 
+openbox(q::QFTBlock{N}) where N = QFTCircuit(N)
+openbox(q::Daggered{N,T,<:QFTBlock}) where {N, T} = adjoint(QFTCircuit(N))
+
+function print_block(io::IO, pb::QFTBlock{N}) where N
+    printstyled(io, "QFT(1-$N)"; bold=true, color=:blue)
+end
+
+function print_block(io::IO, pb::Daggered{N, T,<:QFTBlock}) where {N, T}
+    printstyled(io, "IQFT(1-$N)"; bold=true, color=:blue)
+end
+
 function invorder_firstdim(v::Matrix)
     w = similar(v)
     n = size(v, 1) |> log2i
