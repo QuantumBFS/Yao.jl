@@ -45,23 +45,39 @@ var documenterSearchIndex = {"docs": [
     "page": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
     "title": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
     "category": "section",
-    "text": "First, you have to use this package in Julia.using YaoThen let\'s define the oracle, it is a function of the number of qubits. The circuit looks like this:(Image: ghz)n = 4\ncircuit(n) = chain(\n    n,\n    repeat(X, [1, ]),\n    kron(i=>H for i in 2:n),\n    control([2, ], 1=>X),\n    control([4, ], 3=>X),\n    control([3, ], 1=>X),\n    control([4, ], 3=>X),\n    kron(i=>H for i in 1:n),\n)Let me explain what happens here. Firstly, we have a X gate which is applied to the first qubit. We need decide how we calculate this numerically, Yao offers serveral different approach to this. The simplest (but not the most efficient) one is to use kronecker product which will product X with I on other lines to gather an operator in the whole space and then apply it to the register. The first argument n means the number of qubits.kron(n, 1=>X)Similar with kron, we then need to apply some controled gates.control(n, [2, ], 1=>X)This means there is a X gate on the first qubit that is controled by the second qubit. In fact, you can also create a controled gate with multiple control qubits, likecontrol(n, [2, 3], 1=>X)In the end, we need to apply H gate to all lines, of course, you can do it by kron, but we offer something more efficient called roll, this applies a single gate each time on each qubit without calculating a new large operator, which will be extremely efficient for calculating small gates that tiles on almost every lines.The whole circuit is a chained structure of the above blocks. And we actually store a quantum circuit in a tree structure.circuitAfter we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.r = with(register(bit\"0000\")) do r\n  r |> circuit(4)\nendLet\'s check the output:statevec(r)We have a GHZ state here, try to measure the first qubitmeasure(r, 1000)(Image: GHZ)GHZ state will collapse to 0000rangle or 1111rangle due to entanglement!"
+    "text": "First, you have to use this package in Julia.using YaoThen let\'s define the oracle, it is a function of the number of qubits. The circuit looks like this:(Image: ghz)n = 4\ncircuit(n) = chain(\n    n,\n    repeat(X, [1, ]),\n    kron(i=>H for i in 2:n),\n    control([2, ], 1=>X),\n    control([4, ], 3=>X),\n    control([3, ], 1=>X),\n    control([4, ], 3=>X),\n    kron(i=>H for i in 1:n),\n)Let me explain what happens here. Firstly, we have a X gate which is applied to the first qubit. We need decide how we calculate this numerically, Yao offers serveral different approach to this. The simplest (but not the most efficient) one is to use kronecker product which will product X with I on other lines to gather an operator in the whole space and then apply it to the register. The first argument n means the number of qubits.kron(n, 1=>X)Similar with kron, we then need to apply some controled gates.control(n, [2, ], 1=>X)This means there is a X gate on the first qubit that is controled by the second qubit. In fact, you can also create a controled gate with multiple control qubits, likecontrol(n, [2, 3], 1=>X)In the end, we need to apply H gate to all lines, of course, you can do it by kron, but we offer something more efficient called roll, this applies a single gate each time on each qubit without calculating a new large operator, which will be extremely efficient for calculating small gates that tiles on almost every lines.The whole circuit is a chained structure of the above blocks. And we actually store a quantum circuit in a tree structure.circuitAfter we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.r = apply!(register(bit\"0000\"), circuit(4))Let\'s check the output:statevec(r)We have a GHZ state here, try to measure the first qubitmeasure(r, 1000)(Image: GHZ)GHZ state will collapse to 0000rangle or 1111rangle due to entanglement!"
 },
 
 {
     "location": "tutorial/QFT/#",
-    "page": "Quantum Fourier Transform",
-    "title": "Quantum Fourier Transform",
+    "page": "Quantum Fourier Transformation and Phase Estimation",
+    "title": "Quantum Fourier Transformation and Phase Estimation",
     "category": "page",
     "text": ""
 },
 
 {
-    "location": "tutorial/QFT/#Quantum-Fourier-Transform-1",
-    "page": "Quantum Fourier Transform",
-    "title": "Quantum Fourier Transform",
+    "location": "tutorial/QFT/#Quantum-Fourier-Transformation-and-Phase-Estimation-1",
+    "page": "Quantum Fourier Transformation and Phase Estimation",
+    "title": "Quantum Fourier Transformation and Phase Estimation",
     "category": "section",
-    "text": "(Image: ghz)using Yao\n\n# Control-R(k) gate in block-A\nA(i::Int, j::Int, k::Int) = control([i, ], j=>shift(2π/(1<<k)))\n# block-B\nB(n::Int, i::Int) = chain(i==j ? kron(i=>H) : A(j, i, j-i+1) for j = i:n)\nQFT(n::Int) = chain(n, B(n, i) for i = 1:n)\n\n# define QFT and IQFT block.\nnum_bit = 5\nqft = QFT(num_bit)\niqft = adjoint(qft)The basic building block - controled phase shift gate is defined asR(k)=beginbmatrix\n1  0\n0  expleft(frac2pi i2^kright)\nendbmatrixNow let\'s check the result using classical fft# if you\'re using lastest julia, you need to add the fft package.\n@static if VERSION >= v\"0.7-\"\n    using FFTW\nend\nusing Compat.Test\n\n@test chain(num_bit, qft, iqft) |> mat ≈ eye(2^num_bit)\n\n# define a register and get its vector representation\nreg = rand_state(num_bit)\nrv = reg |> statevec |> copy\n\n# test fft\nreg_qft = copy(reg) |>invorder! |> qft\nkv = ifft(rv)*sqrt(length(rv))\n@test reg_qft |> statevec ≈ kv\n\n# test ifft\nreg_iqft = copy(reg) |>iqft\nkv = fft(rv)/sqrt(length(rv))\n@test reg_iqft |> statevec ≈ kv |> invorderQFT and IQFT are different from FFT and IFFT in three ways,they are different by a factor of sqrt2^n with n the number of qubits.\nthe little end and big end will exchange after applying QFT or IQFT.\ndur to the convention, QFT is more related to IFFT rather than FFT.In Yao, factory methods for blocks will be loaded lazily. For example, if you missed the total number of qubits of chain, then it will return a function that requires an input of an integer.If you missed the total number of qubits. It is OK. Just go on, it will be filled when its possible.chain(4, repeat(1=>X), kron(2=>Y))"
+    "text": ""
+},
+
+{
+    "location": "tutorial/QFT/#Quantum-Fourier-Transformation-1",
+    "page": "Quantum Fourier Transformation and Phase Estimation",
+    "title": "Quantum Fourier Transformation",
+    "category": "section",
+    "text": "(Image: ghz)using Yao\n\n# Control-R(k) gate in block-A\nA(i::Int, j::Int, k::Int) = control([i, ], j=>shift(2π/(1<<k)))\n# block-B\nB(n::Int, i::Int) = chain(i==j ? kron(i=>H) : A(j, i, j-i+1) for j = i:n)\nQFT(n::Int) = chain(n, B(n, i) for i = 1:n)\n\n# define QFT and IQFT block.\nnum_bit = 5\nqft = QFT(num_bit)\niqft = adjoint(qft)The basic building block - controled phase shift gate is defined asR(k)=beginbmatrix\n1  0\n0  expleft(frac2pi i2^kright)\nendbmatrixIn Yao, factory methods for blocks will be loaded lazily. For example, if you missed the total number of qubits of chain, then it will return a function that requires an input of an integer. So the following two statements are equivalentcontrol([4, ], 1=>shift(-2π/(1<<4)))(5) == control(5, [4, ], 1=>shift(-2π/(1<<4)))Both of then will return a ControlBlock instance. If you missed the total number of qubits. It is OK. Just go on, it will be filled when its possible.Once you have construct a block, you can inspect its matrix using mat function. Let\'s construct the circuit in dashed box A, and see the matrix of R_4 gatejulia> a = A(4, 1, 4)(5)\nTotal: 5, DataType: Complex{Float64}\ncontrol(4)\n└─ 1=>Phase Shift Gate:-0.39269908169872414\n\n\njulia> mat(a.block)\n2×2 Diagonal{Complex{Float64}}:\n 1.0+0.0im          ⋅         \n     ⋅      0.92388-0.382683imSimilarly, you can use put and chain to construct PutBlock (basic placement of a single gate) and ChainBlock (sequential application of MatrixBlocks) instances. Yao.jl view every component in a circuit as an AbstractBlock, these blocks can be integrated to perform higher level functionality.You can check the result using classical fft# if you\'re using lastest julia, you need to add the fft package.\n@static if VERSION >= v\"0.7-\"\n    using FFTW\nend\nusing Compat.Test\n\n@test chain(num_bit, qft, iqft) |> mat ≈ eye(2^num_bit)\n\n# define a register and get its vector representation\nreg = rand_state(num_bit)\nrv = reg |> statevec |> copy\n\n# test fft\nreg_qft = apply!(copy(reg) |>invorder!, qft)\nkv = ifft(rv)*sqrt(length(rv))\n@test reg_qft |> statevec ≈ kv\n\n# test ifft\nreg_iqft = apply!(copy(reg), iqft)\nkv = fft(rv)/sqrt(length(rv))\n@test reg_iqft |> statevec ≈ kv |> invorderQFT and IQFT are different from FFT and IFFT in three ways,they are different by a factor of sqrt2^n with n the number of qubits.\nthe little end and big end will exchange after applying QFT or IQFT.\ndue to the convention, QFT is more related to IFFT rather than FFT."
+},
+
+{
+    "location": "tutorial/QFT/#Phase-Estimation-1",
+    "page": "Quantum Fourier Transformation and Phase Estimation",
+    "title": "Phase Estimation",
+    "category": "section",
+    "text": "Since we have QFT and IQFT blocks we can then use them to realize phase estimation circuit, what we want to realize is the following circuit (Image: phase estimation)In the following simulation, we use equivalent QFTBlock in the Yao.Zoo module rather than the above chain block, it is faster than the above construction because it hides all the simulation details (yes, we are cheating :D) and get the equivalent output.using Yao\nusing Yao.Zoo\nusing Yao.Blocks\nusing Yao.Intrinsics\n\nfunction phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::GeneralMatrixGate{N}, nshot::Int=1) where {N}\n    M = nqubits(reg1)\n    iqft = QFTBlock{M}() |> adjoint\n    HGates = rollrepeat(M, H)\n\n    control_circuit = chain(M+N)\n    for i = 1:M\n        push!(control_circuit, control(M+N, (i,), (M+1:M+N...,)=>U))\n        if i != M\n            U = matrixgate(mat(U) * mat(U))\n        end\n    end\n\n    # calculation\n    # step1 apply hadamard gates.\n    apply!(reg1, HGates)\n    # join two registers\n    reg = join(reg1, reg2)\n    # using iqft to read out the phase\n    apply!(reg, sequence(control_circuit, focus(1:M...), iqft))\n    # measure the register (on focused bits), if the phase can be exactly represented by M qubits, only a single shot is needed.\n    res = measure(reg, nshot)\n    # inverse the bits in result due to the exchange of big and little ends, so that we can get the correct phase.\n    breflect.(M, res)./(1<<M), reg\nendHere, reg1 (Q_1-5) is used as the output space to store phase ϕ, and reg2 (Q_6-8) is the input state which corresponds to an eigenvector of oracle matrix U. The algorithm detials can be found here.In this function, HGates corresponds to circuit block in dashed box A, control_circuit corresponds to block in dashed box B. matrixgate is a factory function for GeneralMatrixGate.Here, the only difficult concept is focus, focus returns a FunctionBlock, that will make focused bits the active bits. An operator sees only active bits, and operating active space is more efficient, most importantly, it becomes much easier to integrate blocks. However, it has the potential ability to change line orders, for safety consideration, you may also need safer Concentrator.r = rand_state(6)\napply!(r, focus(4,1,2))  # or equivalently using focus!(r, [4,1,2])\nnactive(r)Then we will have a check to above functionrand_unitary(N::Int) = qr(randn(N, N))[1]\n\nM = 5\nN = 3\n\n# prepair oracle matrix U\nV = rand_unitary(1<<N)\nphases = rand(1<<N)\nϕ = Int(0b11101)/(1<<M)\nphases[3] = ϕ  # set the phase of the 3rd eigenstate manually.\nsigns = exp.(2pi*im.*phases)\nU = V*Diagonal(signs)*V\'  # notice U is unitary\n\n# the state with phase ϕ\npsi = U[:,3]\n\nres, reg = phase_estimation(zero_state(M), register(psi), GeneralMatrixGate(U))\nprintln(\"Phase is 2π * $(res[]), the exact value is 2π * $ϕ\")"
 },
 
 {
@@ -109,7 +125,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Circuit Born Machine",
     "title": "Arbitrary Rotation",
     "category": "section",
-    "text": "Arbitrary Rotation is built with Rotation Gate on Z, Rotation Gate on X and Rotation Gate on Z:Rz(theta) cdot Rx(theta) cdot Rz(theta)Since our input will be a 0dots 0rangle state. The first layer of arbitrary rotation can just use Rx(theta) cdot Rz(theta) and the last layer of arbitrary rotation could just use Rz(theta)cdot Rx(theta)In 幺, every Hilbert operator is a block type, this includes all quantum gates and quantum oracles. In general, operators appears in a quantum circuit can be divided into Composite Blocks and Primitive Blocks.We follow the low abstraction principle and thus each block represents a certain approach of calculation. The simplest Composite Block is a Chain Block, which chains other blocks (oracles) with the same number of qubits together. It is just a simple mathematical composition of operators with same size. e.g.textchain(X Y Z) iff X cdot Y cdot ZWe can construct an arbitrary rotation block by chain Rz, Rx, Rz together.chain(Rz(), Rx(), Rz())Rx, Ry and Rz will construct new rotation gate, which are just shorthands for rot(X, 0.0), etc.Then, let\'s pile them up vertically with another method called rollrepeatlayer(x::Symbol) = layer(Val(x))\nlayer(::Val{:first}) = rollrepeat(chain(Rx(), Rz()))In 幺, the factory method rollrepeat will construct a block called Roller. It is mathematically equivalent to the kronecker product of all operators in this layer:rollrepeat(n U) iff roll(n texti=U for i = 1n) iff kron(n texti=U for i=1n) iff U otimes dots otimes Uroll(4, i=>X for i = 1:4)rollrepeat(4, X)kron(4, i=>X for i = 1:4)However, kron is calculated differently comparing to roll. In principal, Roller will be able to calculate small blocks with same size with higher efficiency. But for large blocks Roller may be slower. In 幺, we offer you this freedom to choose the most suitable solution.all factory methods will lazy evaluate the first arguements, which is the number of qubits. It will return a lambda function that requires a single interger input. The instance of desired block will only be constructed until all the information is filled.rollrepeat(X)rollrepeat(X)(4)When you filled all the information in somewhere of the declaration, 幺 will be able to infer the others.chain(4, rollrepeat(X), rollrepeat(Y))We will now define the rest of rotation layerslayer(::Val{:last}) = rollrepeat(chain(Rz(), Rx()))\nlayer(::Val{:mid}) = rollrepeat(chain(Rz(), Rx(), Rz()))"
+    "text": "Arbitrary Rotation is built with Rotation Gate on Z, Rotation Gate on X and Rotation Gate on Z:Rz(theta) cdot Rx(theta) cdot Rz(theta)Since our input will be a 0dots 0rangle state. The first layer of arbitrary rotation can just use Rx(theta) cdot Rz(theta) and the last layer of arbitrary rotation could just use Rz(theta)cdot Rx(theta)In 幺, every Hilbert operator is a block type, this includes all quantum gates and quantum oracles. In general, operators appears in a quantum circuit can be divided into Composite Blocks and Primitive Blocks.We follow the low abstraction principle and thus each block represents a certain approach of calculation. The simplest Composite Block is a Chain Block, which chains other blocks (oracles) with the same number of qubits together. It is just a simple mathematical composition of operators with same size. e.g.textchain(X Y Z) iff X cdot Y cdot ZWe can construct an arbitrary rotation block by chain Rz, Rx, Rz together.chain(Rz(0), Rx(0), Rz(0))Rx, Ry and Rz will construct new rotation gate, which are just shorthands for rot(X, 0.0), etc.Then, let\'s pile them up vertically with another method called rollrepeatlayer(x::Symbol) = layer(Val(x))\nlayer(::Val{:first}) = rollrepeat(chain(Rx(0), Rz(0)))In 幺, the factory method rollrepeat will construct a block called Roller. It is mathematically equivalent to the kronecker product of all operators in this layer:rollrepeat(n U) iff roll(n texti=U for i = 1n) iff kron(n texti=U for i=1n) iff U otimes dots otimes Uroll(4, i=>X for i = 1:4)rollrepeat(4, X)kron(4, i=>X for i = 1:4)However, kron is calculated differently comparing to roll. In principal, Roller will be able to calculate small blocks with same size with higher efficiency. But for large blocks Roller may be slower. In 幺, we offer you this freedom to choose the most suitable solution.all factory methods will lazy evaluate the first arguements, which is the number of qubits. It will return a lambda function that requires a single interger input. The instance of desired block will only be constructed until all the information is filled.rollrepeat(X)rollrepeat(X)(4)When you filled all the information in somewhere of the declaration, 幺 will be able to infer the others.chain(4, rollrepeat(X), rollrepeat(Y))We will now define the rest of rotation layerslayer(::Val{:last}) = rollrepeat(chain(Rz(0), Rx(0)))\nlayer(::Val{:mid}) = rollrepeat(chain(Rz(0), Rx(0), Rz(0)))"
 },
 
 {
@@ -345,7 +361,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s448} where #s448<:Yao.Blocks.AbstractBlock}, Tuple{M}} where M",
+    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s455} where #s455<:Yao.Blocks.AbstractBlock}, Tuple{M}} where M",
     "page": "Interfaces",
     "title": "Yao.Interfaces.put",
     "category": "method",
@@ -365,7 +381,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Yao.Interfaces.roll",
     "category": "function",
-    "text": "roll([n::Int, ], blocks...) -> Roller{n}\n\nConstruct a Roller block, which is a faster than KronBlock to calculate similar small blocks tile on the whole address.\n\n\n\n"
+    "text": "roll([n::Int, ], blocks...,) -> Roller{n}\n\nConstruct a Roller block, which is a faster than KronBlock to calculate similar small blocks tile on the whole address.\n\n\n\n"
 },
 
 {
@@ -453,7 +469,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Base.kron",
     "category": "method",
-    "text": "kron([total::Int, ]block0::Pair, blocks::Union{MatrixBlock, Pair}...) -> KronBlock{total}\n\ncreate a KronBlock with a list of blocks or tuple of heads and blocks. If total is not provided, return a lazy constructor.\n\nExample\n\nkron(4, 1=>X, 3=>Z, Y)\n\nThis will automatically generate a block list looks like\n\n1 -- [X] --\n2 ---------\n3 -- [Z] --\n4 -- [Y] --\n\n\n\n"
+    "text": "kron([total::Int, ]block0::Pair, blocks::Union{MatrixBlock, Pair}...,) -> KronBlock{total}\n\ncreate a KronBlock with a list of blocks or tuple of heads and blocks. If total is not provided, return a lazy constructor.\n\nExample\n\nkron(4, 1=>X, 3=>Z, Y)\n\nThis will automatically generate a block list looks like\n\n1 -- [X] --\n2 ---------\n3 -- [Z] --\n4 -- [Y] --\n\n\n\n"
 },
 
 {
@@ -569,14 +585,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/registers/#Yao.Registers.Focus",
-    "page": "Registers",
-    "title": "Yao.Registers.Focus",
-    "category": "type",
-    "text": "Focus{N} <: AbatractBlock\n\nFocus manager, with N the number of qubits.\n\n\n\n"
-},
-
-{
     "location": "man/registers/#Yao.Registers.@bit_str-Tuple{Any}",
     "page": "Registers",
     "title": "Yao.Registers.@bit_str",
@@ -598,6 +606,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Registers.extend!",
     "category": "method",
     "text": "extend!(r::DefaultRegister, n::Int) -> DefaultRegister\nextend!(n::Int) -> Function\n\nextend the register by n bits in state |0>. i.e. |psi> -> |000> ⊗ |psi>, extended bits have higher indices. If only an integer is provided, then perform lazy evaluation.\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.fidelity",
+    "page": "Registers",
+    "title": "Yao.Registers.fidelity",
+    "category": "function",
+    "text": "fidelity(reg1::DefaultRegister, reg2::DefaultRegister) -> Vector\n\n\n\n"
 },
 
 {
@@ -681,6 +697,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/registers/#Yao.Registers.tracedist",
+    "page": "Registers",
+    "title": "Yao.Registers.tracedist",
+    "category": "function",
+    "text": "tracedist(reg1::DefaultRegister, reg2::DefaultRegister) -> Vector\ntracedist(reg1::DensityMatrix, reg2::DensityMatrix) -> Vector\n\ntrace distance.\n\n\n\n"
+},
+
+{
     "location": "man/registers/#Yao.Registers.QuBitStr",
     "page": "Registers",
     "title": "Yao.Registers.QuBitStr",
@@ -718,6 +742,158 @@ var documenterSearchIndex = {"docs": [
     "title": "Registers",
     "category": "section",
     "text": "Modules = [Yao.Registers]\nOrder   = [:module, :constant, :type, :macro, :function]"
+},
+
+{
+    "location": "man/zoo/#",
+    "page": "Zoo",
+    "title": "Zoo",
+    "category": "page",
+    "text": "CurrentModule = Yao.Zoo"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.GroverIter",
+    "page": "Zoo",
+    "title": "Yao.Zoo.GroverIter",
+    "category": "type",
+    "text": "GroverIter{AUTOSTOP, N, T}\n\nGroverIter{AUTOSTOP}(oracle, ref::ReflectBlock{N, T}, psi::AbstractRegister) -> GroverIter{N, T}\n\nReturn an iterator that perform Grover operations step by step. An Grover operation consists of applying oracle and Reflection.\n\nIf AUTOSTOP is true, it will stop when the first time the state reaches the sweet spot.\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.RotBasis",
+    "page": "Zoo",
+    "title": "Yao.Zoo.RotBasis",
+    "category": "type",
+    "text": "RotBasis{T} <: PrimitiveBlock{1, Complex{T}}\n\nA special rotation block that transform basis to angle θ and ϕ in bloch sphere.\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.cnot_entangler-Tuple{Int64,Any}",
+    "page": "Zoo",
+    "title": "Yao.Zoo.cnot_entangler",
+    "category": "method",
+    "text": "cnot_entangler([n::Int, ] pairs::Vector{Pair}) = ChainBlock\n\nArbitrary rotation unit, support lazy construction.\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.collect_rotblocks-Tuple{Yao.Blocks.AbstractBlock}",
+    "page": "Zoo",
+    "title": "Yao.Zoo.collect_rotblocks",
+    "category": "method",
+    "text": "collect_rotblocks(blk::AbstractBlock) -> Vector{RotationGate}\n\nfilter out all rotation gates, which is differentiable.\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.diff_circuit-Tuple{Any,Any,Any}",
+    "page": "Zoo",
+    "title": "Yao.Zoo.diff_circuit",
+    "category": "method",
+    "text": "diff_circuit(n, nlayer, pairs) -> ChainBlock\n\nA kind of widely used differentiable quantum circuit, angles in the circuit is randomely initialized.\n\nref:     1. Kandala, A., Mezzacapo, A., Temme, K., Takita, M., Chow, J. M., & Gambetta, J. M. (2017).        Hardware-efficient Quantum Optimizer for Small Molecules and Quantum Magnets. Nature Publishing Group, 549(7671), 242–246.        https://doi.org/10.1038/nature23879.\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.inference_oracle-Tuple{Array{Int64,1}}",
+    "page": "Zoo",
+    "title": "Yao.Zoo.inference_oracle",
+    "category": "method",
+    "text": "inference_oracle(locs::Vector{Int}) -> ControlBlock\n\nA simple inference oracle, e.g. inference([-1, -8, 5]) is a control block that flip the bit if values of bits on position [1, 8, 5] match [0, 0, 1].\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.num_gradient",
+    "page": "Zoo",
+    "title": "Yao.Zoo.num_gradient",
+    "category": "function",
+    "text": "num_gradient(lossfunc, rots::Vector{<:RotationGate}, δ::Float64=1e-2) -> Vector\n\nCompute gradient numerically.\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.num_grover_step-Tuple{Real}",
+    "page": "Zoo",
+    "title": "Yao.Zoo.num_grover_step",
+    "category": "method",
+    "text": "num_grover_step(prob::Real) -> Int\n\nReturn number of grover steps to obtain the maximum overlap with target state.\n\nInput parameter prob is the overlap between target state space and initial state psiranlge, which means the probability of obtaining true on initial state.\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.openbox",
+    "page": "Zoo",
+    "title": "Yao.Zoo.openbox",
+    "category": "function",
+    "text": "For a black box, like QFTBlock, you can get its white box (loyal simulation) using this function.\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.opgrad-Tuple{Any,Array{#s455,1} where #s455<:Yao.Blocks.RotationGate}",
+    "page": "Zoo",
+    "title": "Yao.Zoo.opgrad",
+    "category": "method",
+    "text": "opgrad(op_expect, rots::Vector{<:RotationGate}) -> Vector\n\nget the gradient of an operator expectation function.\n\nReferences:     Mitarai, K., Negoro, M., Kitagawa, M., & Fujii, K. (2018). Quantum Circuit Learning, 1–3. Retrieved from http://arxiv.org/abs/1803.00745\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.polar2u-Tuple{Array{T,1} where T}",
+    "page": "Zoo",
+    "title": "Yao.Zoo.polar2u",
+    "category": "method",
+    "text": "polar2u(vec::Array) -> Array\n\ntransform polar angle to su(2) state vector, apply to the first dimension of size 2.\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.randpolar-Tuple{Vararg{Int64,N} where N}",
+    "page": "Zoo",
+    "title": "Yao.Zoo.randpolar",
+    "category": "method",
+    "text": "randpolar(params::Int...) -> Array\n\nrandom polar basis, number of basis\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.rotter",
+    "page": "Zoo",
+    "title": "Yao.Zoo.rotter",
+    "category": "function",
+    "text": "rotter(noleading::Bool=false, notrailing::Bool=false) -> ChainBlock{1, ComplexF64}\n\nArbitrary rotation unit, set parameters notrailing, noleading true to remove trailing and leading Z gates.\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.u2polar-Tuple{Array{T,1} where T}",
+    "page": "Zoo",
+    "title": "Yao.Zoo.u2polar",
+    "category": "method",
+    "text": "u2polar(vec::Array) -> Array\n\ntransform su(2) state vector to polar angle, apply to the first dimension of size 2.\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.perturb-Tuple{Any,Array{#s454,1} where #s454<:Yao.Blocks.RotationGate,Real}",
+    "page": "Zoo",
+    "title": "Yao.Zoo.perturb",
+    "category": "method",
+    "text": "perturb(func, gates::Vector{<:RotationGate}, diff::Real) -> Matrix\n\nperturb every rotation gates, and evaluate losses. The i-th element of first column of resulting Matrix corresponds to Gi(θ+δ), and the second corresponds to Gi(θ-δ).\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.prob_match_oracle-Tuple{Yao.Registers.AbstractRegister,Any}",
+    "page": "Zoo",
+    "title": "Yao.Zoo.prob_match_oracle",
+    "category": "method",
+    "text": "prob_match_oracle(psi, oracle) -> Float64\n\nReturn the probability that psi matches oracle.\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.target_space-Tuple{Int64,Any}",
+    "page": "Zoo",
+    "title": "Yao.Zoo.target_space",
+    "category": "method",
+    "text": "target_space(oracle) -> Vector{Bool}\n\nReturn a mask, that disired subspace of an oracle are masked true.\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Zoo-1",
+    "page": "Zoo",
+    "title": "Zoo",
+    "category": "section",
+    "text": "Modules = [Zoo]\nOrder   = [:module, :constant, :type, :macro, :function]"
 },
 
 {
@@ -893,7 +1069,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.ReflectBlock",
     "category": "type",
-    "text": "ReflectBlock{N, T} <: PrimitiveBlock{N, T}\n\nHouseholder reflection with respect to some target state, psi angle = 2s anglelangle s-1.\n\n\n\n"
+    "text": "ReflectBlock{N, T} <: PrimitiveBlock{N, T}\n\nHouseholder reflection with respect to some target state, psirangle = 2sranglelangle s-1.\n\n\n\n"
 },
 
 {
@@ -985,7 +1161,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.dispatch!-Tuple{Yao.Blocks.CompositeBlock,Any}",
+    "location": "man/blocks/#Yao.Blocks.dispatch!-Tuple{Union{Yao.Blocks.CompositeBlock, Yao.Blocks.Sequential},Any}",
     "page": "Blocks System",
     "title": "Yao.Blocks.dispatch!",
     "category": "method",
@@ -993,11 +1169,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.expect-Tuple{Yao.Blocks.AbstractBlock,Yao.Registers.AbstractRegister}",
+    "location": "man/blocks/#Yao.Blocks.expect",
     "page": "Blocks System",
     "title": "Yao.Blocks.expect",
-    "category": "method",
-    "text": "expect(op::AbstractBlock, reg::AbstractRegister{1}) -> Float\nexpect(op::AbstractBlock, reg::AbstractRegister{B}) -> Matrix\n\nexpectation value of an operator.\n\n\n\n"
+    "category": "function",
+    "text": "expect(op::AbstractBlock, reg::AbstractRegister{B}) -> Vector\nexpect(op::AbstractBlock, dm::DensityMatrix{B}) -> Vector\n\nexpectation value of an operator.\n\n\n\n"
 },
 
 {
@@ -1014,6 +1190,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.nparameters",
     "category": "function",
     "text": "nparameters(x) -> Integer\n\nReturns the number of parameters of x.\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.parameter_type",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.parameter_type",
+    "category": "function",
+    "text": "parameters(block) -> Type\n\nthe type of parameters.\n\n\n\n"
 },
 
 {
@@ -1289,6 +1473,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/intrinsics/#Yao.Intrinsics.breflect",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.breflect",
+    "category": "function",
+    "text": "breflect(num_bit::Int, b::Int[, masks::Vector{Int}]) -> Int\n\nReturn left-right reflected integer.\n\n\n\n"
+},
+
+{
     "location": "man/intrinsics/#Yao.Intrinsics.bsizeof-Tuple{Any}",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.bsizeof",
@@ -1310,6 +1502,22 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Intrinsics.cunapply!",
     "category": "function",
     "text": "control-unitary \n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.fidelity_mix-Tuple{Array{T,2} where T,Array{T,2} where T}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.fidelity_mix",
+    "category": "method",
+    "text": "fidelity_mix(m1::Matrix, m2::Matrix)\n\nFidelity for mixed states.\n\nReference:     http://iopscience.iop.org/article/10.1088/1367-2630/aa6a4b/meta\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.fidelity_pure-Tuple{Array{T,1} where T,Array{T,1} where T}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.fidelity_pure",
+    "category": "method",
+    "text": "fidelity for pure states.\n\n\n\n"
 },
 
 {
