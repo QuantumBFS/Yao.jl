@@ -150,3 +150,16 @@ function relax! end
 Focus register on specified active bits.
 """
 function focus! end
+
+"""
+    fidelity(reg1::DefaultRegister, reg2::DefaultRegister) -> Vector
+"""
+function fidelity end
+
+"""
+    tracedist(reg1::DefaultRegister, reg2::DefaultRegister) -> Vector
+    tracedist(reg1::DensityMatrix, reg2::DensityMatrix) -> Vector
+
+trace distance.
+"""
+function tracedist end

@@ -178,3 +178,19 @@ function reset!(reg::DefaultRegister)
     reg.state[1,:] .= 1
     reg
 end
+
+function fidelity(reg1::DefaultRegister{B}, reg2::DefaultRegister{B}) where B
+    state1 = reg1 |> rank3
+    state2 = reg2 |> rank3
+    size(state1) == size(state2) || throw(DimensionMismatch("Register size not match!"))
+    # 1. pure state
+    if size(state1, 2) == 1
+        return map(b->fidelity_pure(state1[:,1,b], state2[:,1,b]), 1:B)
+    else
+        return map(b->fidelity_mix(state1[:,:,b], state2[:,:,b]), 1:B)
+    end
+end
+
+function tracedist(reg1::DefaultRegister{B}, reg2::DefaultRegister{B}) where B
+    size(reg1.state, 2) == B ? sqrt.(1.-fidelity(reg1, reg2).^2) : throw(MethodError("trace distance for non-pure state is not defined!"))
+end

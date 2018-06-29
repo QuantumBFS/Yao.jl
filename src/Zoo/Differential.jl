@@ -30,10 +30,10 @@ function diff_circuit(n, nlayer, pairs)
 
     for i = 1:(nlayer + 1)
         if i!=1  push!(circuit, cnot_entangler(pairs) |> cache) end
-        #push!(circuit, rollrepeat(n, rotter(i==1, i==nlayer+1)))
-        for j = 1:n
-            push!(circuit, put(n, j=>rotter(i==1, i==nlayer+1)))
-        end
+        push!(circuit, rollrepeat(n, rotter(i==1, i==nlayer+1)))
+        #for j = 1:n
+        #    push!(circuit, put(n, j=>rotter(i==1, i==nlayer+1)))
+        #end
     end
     dispatch!(circuit, rand(nparameters(circuit))*2π)
 end

@@ -43,6 +43,7 @@ Returns the number of parameters of `x`.
 """
 function nparameters end
 nparameters(::Type{X}) where {X <: AbstractBlock} = 0
+nparameters(x::AbstractBlock) = length(parameters(x))
 
 """
     parameters(block) -> Vector
