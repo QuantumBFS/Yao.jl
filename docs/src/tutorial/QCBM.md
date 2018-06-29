@@ -69,7 +69,7 @@ We follow the low abstraction principle and thus each block represents a certain
 We can construct an arbitrary rotation block by chain ``Rz``, ``Rx``, ``Rz`` together.
 
 ```@repl QCBM
-chain(Rz(), Rx(), Rz())
+chain(Rz(0), Rx(0), Rz(0))
 ```
 
 `Rx`, `Ry` and `Rz` will construct new rotation gate, which are just shorthands for `rot(X, 0.0)`, etc.
@@ -78,7 +78,7 @@ Then, let's pile them up vertically with another method called **rollrepeat**
 
 ```@example QCBM
 layer(x::Symbol) = layer(Val(x))
-layer(::Val{:first}) = rollrepeat(chain(Rx(), Rz()))
+layer(::Val{:first}) = rollrepeat(chain(Rx(0), Rz(0)))
 ```
 
 In **幺**, the factory method **rollrepeat** will construct a block called **Roller**. It is mathematically equivalent to the kronecker product of all operators in this layer:
@@ -121,8 +121,8 @@ chain(4, rollrepeat(X), rollrepeat(Y))
 We will now define the rest of rotation layers
 
 ```@example QCBM
-layer(::Val{:last}) = rollrepeat(chain(Rz(), Rx()))
-layer(::Val{:mid}) = rollrepeat(chain(Rz(), Rx(), Rz()))
+layer(::Val{:last}) = rollrepeat(chain(Rz(0), Rx(0)))
+layer(::Val{:mid}) = rollrepeat(chain(Rz(0), Rx(0), Rz(0)))
 ```
 
 #### CNOT Entangler

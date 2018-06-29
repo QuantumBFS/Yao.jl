@@ -29,11 +29,11 @@ chain(::Type{T}, n::Int) where T = ChainBlock{n, T}([])
 chain(n::Int) = chain(DefaultType, n)
 chain() = n -> chain(n)
 
-function chain(n::Int, blocks...)
+function chain(n::Int, blocks...,)
     ChainBlock([parse_block(n, each) for each in blocks])
 end
 
-chain(blocks...) = n -> chain(n, blocks...)
+chain(blocks...,) = n -> chain(n, blocks...,)
 
 function chain(n::Int, blocks)
     ChainBlock([parse_block(n, each) for each in blocks])
@@ -43,8 +43,8 @@ function chain(n::Int, f::Function)
     ChainBlock([f(n)])
 end
 
-function chain(blocks::MatrixBlock...)
-    ChainBlock(blocks...)
+function chain(blocks::MatrixBlock...,)
+    ChainBlock(blocks...,)
 end
 
 chain(blocks) = n -> chain(n, blocks)
@@ -53,7 +53,7 @@ chain(blocks) = n -> chain(n, blocks)
 import Base: kron
 
 """
-    kron([total::Int, ]block0::Pair, blocks::Union{MatrixBlock, Pair}...) -> KronBlock{total}
+    kron([total::Int, ]block0::Pair, blocks::Union{MatrixBlock, Pair}...,) -> KronBlock{total}
 
 create a [`KronBlock`](@ref) with a list of blocks or tuple of heads and blocks.
 If total is not provided, return a lazy constructor.
@@ -70,14 +70,14 @@ This will automatically generate a block list looks like
 4 -- [Y] --
 ```
 """
-kron(total::Int, block0::Pair, blocks::Union{MatrixBlock, Pair}...) = KronBlock{total}((block0, blocks...))
-function kron(total::Int, blocks::MatrixBlock...)
+kron(total::Int, block0::Pair, blocks::Union{MatrixBlock, Pair}...,) = KronBlock{total}((block0, blocks...,))
+function kron(total::Int, blocks::MatrixBlock...,)
     sum(nqubits, blocks) == total || throw(AddressConflictError("Size of blocks does not match total size."))
     KronBlock{total}(blocks)
 end
 kron(total::Int, g) = KronBlock{total}(g)
 # NOTE: this is ambiguous
-kron(blocks::Union{MatrixBlock, Pair{Int, <:MatrixBlock}}...) = N->KronBlock{N}(blocks)
+kron(blocks::Union{MatrixBlock, Pair{Int, <:MatrixBlock}}...,) = N->KronBlock{N}(blocks)
 kron(blocks) = N->KronBlock{N}(blocks)
 
 export put
@@ -94,7 +94,7 @@ put(pa::Pair) = total->put(total, pa)
 
 export C, control
 
-decode_sign(ctrls::Int...) = ctrls .|> abs, ctrls .|> sign .|> (x->(1+x)÷2)
+decode_sign(ctrls::Int...,) = ctrls .|> abs, ctrls .|> sign .|> (x->(1+x)÷2)
 
 """
     control([total], controls, target) -> ControlBlock
@@ -104,22 +104,22 @@ Constructs a [`ControlBlock`](@ref)
 function control end
 
 function control(total::Int, controls, target)
-    ControlBlock{total}(decode_sign(controls...)..., target.second, (target.first...))
+    ControlBlock{total}(decode_sign(controls...,)..., target.second, (target.first...,))
 end
 
 function control(controls, target)
-    total->ControlBlock{total}(decode_sign(controls...)..., target.second, (target.first...))
+    total->ControlBlock{total}(decode_sign(controls...,)..., target.second, (target.first...,))
 end
 
 function control(controls)
     function _control(x::Pair)
-        total->ControlBlock{total}(decode_sign(controls...)..., x.second, (x.first...))
+        total->ControlBlock{total}(decode_sign(controls...,)..., x.second, (x.first...,))
     end
 end
 
-function C(controls::Int...)
+function C(controls::Int...,)
     function _C(x::Pair{I, BT}) where {I, BT <: MatrixBlock}
-        total->ControlBlock{total}(decode_sign(controls...)..., x.second, (x.first...))
+        total->ControlBlock{total}(decode_sign(controls...,)..., x.second, (x.first...,))
     end
 end
 
@@ -138,25 +138,25 @@ rollrepeat(n::Int, block::MatrixBlock) = Roller{n}(block)
 rollrepeat(block::MatrixBlock) = n->rollrepeat(n, block)
 
 """
-    roll([n::Int, ], blocks...) -> Roller{n}
+    roll([n::Int, ], blocks...,) -> Roller{n}
 
 Construct a [`Roller`](@ref) block, which is a faster than [`KronBlock`](@ref) to calculate
 similar small blocks tile on the whole address.
 """
 function roll end
 
-roll(blocks...) = n->roll(n, blocks...)
+roll(blocks...,) = n->roll(n, blocks...,)
 roll(itr) = n->roll(n, itr)
 
-roll(n::Int, blocks...) = roll(n, blocks)
+roll(n::Int, blocks...,) = roll(n, blocks)
 
-function roll(n::Int, blocks::MatrixBlock...)
+function roll(n::Int, blocks::MatrixBlock...,)
     sum(nqubits, blocks) == n || throw(AddressConflictError("Size of blocks does not match total size."))
-    Roller(blocks...)
+    Roller(blocks...,)
 end
 
-function roll(n::Int, a::Pair, blocks...)
-    roll(n, (a, blocks...))
+function roll(n::Int, a::Pair, blocks...,)
+    roll(n, (a, blocks...,))
 end
 
 function roll(n::Int, itr)
@@ -182,7 +182,7 @@ function roll(n::Int, itr)
     k > 0 && push!(list, kron(k, i=>I2 for i=1:k))
 
     sum(nqubits, list) == n || throw(ErrorException("number of qubits mismatch"))
-    Roller(list...)
+    Roller(list...,)
 end
 
 # 2.5 repeat
@@ -195,9 +195,9 @@ import Base: repeat
 Construct a [`RepeatedBlock`](@ref), if n (the number of qubits) not supplied, using lazy evaluation.
 If addrs not supplied, blocks will fill the qubit space.
 """
-repeat(n::Int, x::MatrixBlock, addrs) = RepeatedBlock{n}(x, (addrs...))
+repeat(n::Int, x::MatrixBlock, addrs) = RepeatedBlock{n}(x, (addrs...,))
 repeat(n::Int, x::MatrixBlock) = RepeatedBlock{n}(x)
-repeat(x::MatrixBlock, params...) = n->repeat(n, x, params...)
+repeat(x::MatrixBlock, params...,) = n->repeat(n, x, params...,)
 
 export concentrate
 

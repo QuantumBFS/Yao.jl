@@ -25,6 +25,10 @@ addrs(c::Concentrator) = [1]
 
 apply!(reg::AbstractRegister, c::Concentrator) = relax!(apply!(focus!(reg, usedbits(c)), c.block), usedbits(c), nbit=nqubits(c))
 adjoint(blk::Concentrator{N}) where N = Concentrator{N}(adjoint(blk.block), blk.usedbits)
+function mat(c::Concentrator)
+    c.block isa MatrixBlock || throw(MethodError("Concentrator contains non-MatrixBlock!"))
+    throw(MethodError("It should have a matrix, but we didn't realize it, you can post an issue if you really need it."))
+end
 
 for FUNC in [:isunitary, :isreflexive, :ishermitian]
     @eval $FUNC(c::Concentrator) = $FUNC(c.block)

@@ -1,4 +1,0 @@
-# Feel
-# Imagine
-# Do
-# Share

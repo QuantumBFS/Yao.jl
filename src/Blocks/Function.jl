@@ -15,3 +15,7 @@ end
 
 FunctionBlock(f) = FunctionBlock{typeof(f)}(f)
 apply!(reg::AbstractRegister, f::FunctionBlock) = f.apply!(reg)
+
+function print_block(io::IO, pb::FunctionBlock{FT}) where FT
+    printstyled(io, "function: $FT"; bold=true, color=:green)
+end

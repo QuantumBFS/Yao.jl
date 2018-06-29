@@ -31,7 +31,11 @@ dispatch!(f::Function, pb::PutBlock, params...) = dispatch!(f, pb.block, params.
 
 # TODO
 mat(pb::PutBlock{N, 1}) where N = hilbertkron(N, [mat(pb.block)], [pb.addrs...])
-apply!(r::AbstractRegister, pb::PutBlock) = (unapply!(r.state |> matvec, mat(pb.block), pb.addrs); r)
+function apply!(r::AbstractRegister, pb::PutBlock{N}) where N
+    N == nqubits(r) || throw(QubitMismatchError("Register Size $(nqubits(r)) mismatch with block size $N"))
+    unapply!(r.state |> matvec, mat(pb.block), pb.addrs)
+    r
+end
 
 function hash(pb::PutBlock, h::UInt)
     hashkey = hash(object_id(pb), h)

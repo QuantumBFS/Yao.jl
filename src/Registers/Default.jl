@@ -41,6 +41,7 @@ state(r::DefaultRegister) = r.state
 statevec(r::DefaultRegister{B}) where B = reshape(r.state, :, B)
 statevec(r::DefaultRegister{1}) = vec(r.state)
 hypercubic(reg::DefaultRegister{B}) where B = reshape(reg.state, ntuple(i->2, Val(nactive(reg)))..., :)
+rank3(reg::DefaultRegister{B}) where B = reshape(reg.state, size(reg.state, 1), :, B)
 copy(r::DefaultRegister{B}) where B = DefaultRegister{B}(copy(state(r)))
 normalize!(r::DefaultRegister) = (batch_normalize!(r.state); r)
 
@@ -51,8 +52,8 @@ similar(r::DefaultRegister{B, T}) where {B, T} = DefaultRegister{B}(similar(r.st
 
 stack multiple registers into a batch.
 """
-stack(regs::DefaultRegister...) = DefaultRegister{sum(nbatch, regs)}(hcat((reg.state for reg in regs)...))
-Base.repeat(reg::DefaultRegister{B}, n::Int) where B = DefaultRegister{B*n}(hcat((reg.state for i=1:n)...))
+stack(regs::DefaultRegister...) = DefaultRegister{sum(nbatch, regs)}(hcat((reg.state for reg in regs)...,))
+Base.repeat(reg::DefaultRegister{B}, n::Int) where B = DefaultRegister{B*n}(hcat((reg.state for i=1:n)...,))
 
 # -> zero_state is an easier interface
 zero_state(::Type{T}, n::Int, nbatch::Int=1) where T = register((arr=zeros(T, 1<<n, nbatch); arr[1,:]=1; arr))
@@ -75,7 +76,7 @@ function probs(r::DefaultRegister{B}) where B
     if size(r.state, 2) == B
         return r.state .|> abs2
     else
-        probs = reshape(r.state .|> abs2, size(r.state, 1), :, B)
+        probs = r |> rank3 .|> abs2
         return squeeze(sum(probs, 2), 2)
     end
 end
@@ -99,8 +100,8 @@ end
 extend!(n::Int) = r->extend!(r, n)
 
 function join(reg1::DefaultRegister{B, T1}, reg2::DefaultRegister{B, T2}) where {B, T1, T2}
-    s1 = reshape(reg1.state, size(reg1.state, 1), :, B)
-    s2 = reshape(reg2.state, size(reg2.state, 1), :, B)
+    s1 = reg1 |> rank3
+    s2 = reg2 |> rank3
     T = promote_type(T1, T2)
     state = Array{T,3}(size(s1, 1)*size(s2, 1), size(s1, 2)*size(s2, 2), B)
     for b = 1:B
@@ -176,4 +177,20 @@ function reset!(reg::DefaultRegister)
     reg.state .= 0
     reg.state[1,:] .= 1
     reg
+end
+
+function fidelity(reg1::DefaultRegister{B}, reg2::DefaultRegister{B}) where B
+    state1 = reg1 |> rank3
+    state2 = reg2 |> rank3
+    size(state1) == size(state2) || throw(DimensionMismatch("Register size not match!"))
+    # 1. pure state
+    if size(state1, 2) == 1
+        return map(b->fidelity_pure(state1[:,1,b], state2[:,1,b]), 1:B)
+    else
+        return map(b->fidelity_mix(state1[:,:,b], state2[:,:,b]), 1:B)
+    end
+end
+
+function tracedist(reg1::DefaultRegister{B}, reg2::DefaultRegister{B}) where B
+    size(reg1.state, 2) == B ? sqrt.(1 .- fidelity(reg1, reg2).^2) : throw(MethodError("trace distance for non-pure state is not defined!"))
 end

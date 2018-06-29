@@ -27,7 +27,7 @@ prob_match_oracle(psi::AbstractRegister, oracle) = prob_inspace(psi, target_spac
 
 Return number of grover steps to obtain the maximum overlap with target state.
 
-Input parameter `prob` is the overlap between `target state space` and initial state ``|\psi\ranlge``,
+Input parameter `prob` is the overlap between `target state space` and initial state ``|\\psi\\ranlge``,
 which means the probability of obtaining `true` on initial state.
 """
 num_grover_step(prob::Real) = Int(round(pi/4/sqrt(prob)))-1
@@ -40,7 +40,7 @@ num_grover_step(prob::Real) = Int(round(pi/4/sqrt(prob)))-1
 Return an iterator that perform Grover operations step by step.
 An Grover operation consists of applying oracle and Reflection.
 
-If `AUTOSTOP` is true, it will stop when the first maximum of state matches the oracle.
+If `AUTOSTOP` is true, it will stop when the first time the state reaches the sweet spot.
 """
 struct GroverIter{AUTOSTOP, N, T}
     oracle

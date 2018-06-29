@@ -12,9 +12,8 @@ rotter(noleading::Bool=false, notrailing::Bool=false) = noleading ? (notrailing 
 
 Arbitrary rotation unit, support lazy construction.
 """
-#cnot_entangler(n::Int, pairs) = chain(n, control(n, [ctrl], target=>X) for (ctrl, target) in pairs)
-#cnot_entangler(pairs) = n->cnot_entangler(n, pairs)
-cnot_entangler(pairs) = chain(control([ctrl], target=>X) for (ctrl, target) in pairs)
+cnot_entangler(n::Int, pairs) = chain(n, control(n, [ctrl], target=>X) for (ctrl, target) in pairs)
+cnot_entangler(pairs) = n->cnot_entangler(n, pairs)
 
 """
     diff_circuit(n, nlayer, pairs) -> ChainBlock
@@ -32,6 +31,9 @@ function diff_circuit(n, nlayer, pairs)
     for i = 1:(nlayer + 1)
         if i!=1  push!(circuit, cnot_entangler(pairs) |> cache) end
         push!(circuit, rollrepeat(n, rotter(i==1, i==nlayer+1)))
+        #for j = 1:n
+        #    push!(circuit, put(n, j=>rotter(i==1, i==nlayer+1)))
+        #end
     end
     dispatch!(circuit, rand(nparameters(circuit))*2π)
 end
@@ -47,49 +49,49 @@ function collect_rotblocks(blk::AbstractBlock)
     rots
 end
 
-import Base: gradient
-function _wave_perturbation(circuit::AbstractBlock, reg0::AbstractRegister, gate::RotationGate, diff::Real)
-    dispatch!(+, gate, diff)
-    psi_pos = copy(reg0) |> circuit
+"""
+    perturb(func, gates::Vector{<:RotationGate}, diff::Real) -> Matrix
+    
+perturb every rotation gates, and evaluate losses.
+The i-th element of first column of resulting Matrix corresponds to Gi(θ+δ), and the second corresponds to Gi(θ-δ).
+"""
+function perturb(func, gates::Vector{<:RotationGate}, diff::Real)
+    ng = length(gates)
+    res = Matrix{Float64}(ng, 2)
+    for i in 1:ng
+        gate = gates[i]
+        dispatch!(+, gate, diff)
+        res[i, 1] = func()
 
-    dispatch!(+, gate, -2*diff)
-    psi_neg = copy(reg0) |> circuit
+        dispatch!(+, gate, -2*diff)
+        res[i, 2] = func()
 
-    dispatch!(+, gate, diff) # set back
-    psi_pos, psi_neg
+        dispatch!(+, gate, diff) # set back
+    end
+    res
 end
 
 """
-    gradient(gradfunc, circuit::AbstractBlock[, reg0::AbstractRegister=zero_state(nqubits(circuit)),
-                gates::Vector{RotationGate}=collect_rotblocks(circuit)]) -> Vector
+    num_gradient(lossfunc, rots::Vector{<:RotationGate}, δ::Float64=1e-2) -> Vector
 
-"""
-function gradient(gradfunc, circuit::AbstractBlock, reg0::AbstractRegister, gates::Vector{RotationGate}=collect_rotblocks(circuit))
-    map(gate->gradfunc(_wave_perturbation(circuit, reg0, gate, π/2)...), gates)
-end
-
-gradient(gradfunc, circuit, gates::Vector{RotationGate}=collect_rotblocks(circuit)) = gradient(gradfunc, circuit, zero_state(nqubits(circuit)), gates)
-
-"""
-    num_gradient(lossfunc, circuit::AbstractBlock [, δ::Float64=1e-2,
-                        reg0::AbstractRegister=zero_state(nqubits(circuit)),
-                        gates::Vector{RotationGate}=collect_rotblocks(circuit)
-                        ]) -> Vector
 Compute gradient numerically.
 """
-function num_gradient(lossfunc, circuit::AbstractBlock, δ::Float64, reg0::AbstractRegister, gates::Vector{RotationGate}=collect_rotblocks(circuit))
-    map(gates) do gate
-        rp, rn = _wave_perturbation(circuit, reg0, gate, δ)
-        (lossfunc(rp) - lossfunc(rn))/2/δ
-    end
+function num_gradient(lossfunc, rots::Vector{<:RotationGate}, δ::Float64=1e-2)
+    gperturb = perturb(lossfunc, rots, δ)
+    (gperturb[:,1] - gperturb[:,2])/(2δ)
 end
-num_gradient(lossfunc, circuit) = num_gradient(lossfunc, circuit, 1e-2, zero_state(nqubits(circuit)))
-
-opgradfunc(op) = (reg_pos, reg_neg) -> (expect(op, reg_pos)-expect(op, reg_neg))/2
 
 """
-    opgrad(op::AbstractBlock, circuit::AbstractBlock) -> Vector
+    opgrad(op_expect, rots::Vector{<:RotationGate}) -> Vector
 
-get the gradient of an operator, which should be an observable.
+get the gradient of an operator expectation function.
+
+References:
+    Mitarai, K., Negoro, M., Kitagawa, M., & Fujii, K. (2018). Quantum Circuit Learning, 1–3. Retrieved from http://arxiv.org/abs/1803.00745
 """
-opgrad(op::AbstractBlock, circuit::AbstractBlock) = gradient(opgradfunc(op), circuit)
+function opgrad(op_expect, rots::Vector{<:RotationGate})
+    gperturb = perturb(op_expect, rots, π/2)
+    (gperturb[:,1] - gperturb[:,2])/2
+end
+
+

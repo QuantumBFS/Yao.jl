@@ -18,12 +18,12 @@ end
     reg1 = copy(reg) |>ifftblock
 
     # permute lines (Manually)
-    kv = ifft(reg|>statevec)*sqrt(length(rv))
+    kv = fft(reg|>statevec)/sqrt(length(rv))
     @test reg1|>statevec ≈ kv |> invorder
 
     # test fft
     reg2 = copy(reg) |> invorder! |> fftblock
-    kv = fft(rv)/sqrt(length(rv))
+    kv = ifft(rv)*sqrt(length(rv))
     @test statevec(reg2) ≈ kv
 end
 
@@ -34,6 +34,8 @@ end
     iqft = adjoint(qft)
     qftblock = QFTBlock{num_bit}()
     iqftblock = QFTBlock{num_bit}() |> adjoint
+    @test openbox(qftblock) == qft
+    @test openbox(iqftblock) == iqft
     reg = rand_state(num_bit)
 
     @test Matrix(mat(chain(3, QFTBlock{3}() |> adjoint, QFTBlock{3}()))) ≈ eye(1<<3)

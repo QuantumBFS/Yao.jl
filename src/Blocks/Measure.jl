@@ -33,3 +33,11 @@ function apply!(reg::AbstractRegister, block::MeasureAndRemove)
     block.result = samples
     reg
 end
+
+function print_block(io::IO, pb::MeasureAndRemove)
+    printstyled(io, "measure & remove"; bold=true, color=:red)
+end
+
+function print_block(io::IO, pb::Measure)
+    printstyled(io, "measure"; bold=true, color=:red)
+end

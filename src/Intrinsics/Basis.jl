@@ -126,6 +126,27 @@ function swapbits(b::DInt, mask12::DInt)::DInt
 end
 
 """
+    breflect(num_bit::Int, b::Int[, masks::Vector{Int}]) -> Int
+
+Return left-right reflected integer.
+"""
+function breflect end
+
+function breflect(num_bit::Int, b::DInt)
+    @simd for i in 1:num_bit÷2
+        b = swapbits(b, bmask(i, num_bit-i+1))
+    end
+    b
+end
+
+function breflect(num_bit::Int, b::DInt, masks::Vector{DInt})
+    @simd for m in masks
+        b = swapbits(b, m)
+    end
+    b
+end
+
+"""
     indices_with(num_bit::Int, poss::Vector{Int}, vals::Vector{Int}) -> Vector{Int}
 
 Return indices with specific positions `poss` with value `vals` in a hilbert space of `num_bit` qubits.

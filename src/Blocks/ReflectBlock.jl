@@ -3,7 +3,7 @@ export ReflectBlock
 """
     ReflectBlock{N, T} <: PrimitiveBlock{N, T}
 
-Householder reflection with respect to some target state, ``|\psi\rangle = 2|s\rangle\langle s|-1``.
+Householder reflection with respect to some target state, ``|\\psi\\rangle = 2|s\\rangle\\langle s|-1``.
 """
 struct ReflectBlock{N, T} <: PrimitiveBlock{N, T}
     state :: Vector{T}

@@ -42,6 +42,8 @@ function isreflexive end
 Returns the number of parameters of `x`.
 """
 function nparameters end
+nparameters(::Type{X}) where {X <: AbstractBlock} = 0
+nparameters(x::AbstractBlock) = length(parameters(x))
 
 """
     parameters(block) -> Vector
@@ -49,6 +51,15 @@ function nparameters end
 Returns a list of all parameters in block.
 """
 function parameters end
+parameters(x::AbstractBlock) = ()
+
+"""
+    parameters(block) -> Type
+
+the type of parameters.
+"""
+function parameter_type end
+parameter_type(x::AbstractBlock) = Bool
 
 """
     mat(block) -> Matrix
