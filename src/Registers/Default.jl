@@ -52,8 +52,8 @@ similar(r::DefaultRegister{B, T}) where {B, T} = DefaultRegister{B}(similar(r.st
 
 stack multiple registers into a batch.
 """
-stack(regs::DefaultRegister...) = DefaultRegister{sum(nbatch, regs)}(hcat((reg.state for reg in regs)...))
-Base.repeat(reg::DefaultRegister{B}, n::Int) where B = DefaultRegister{B*n}(hcat((reg.state for i=1:n)...))
+stack(regs::DefaultRegister...) = DefaultRegister{sum(nbatch, regs)}(hcat((reg.state for reg in regs)...,))
+Base.repeat(reg::DefaultRegister{B}, n::Int) where B = DefaultRegister{B*n}(hcat((reg.state for i=1:n)...,))
 
 # -> zero_state is an easier interface
 zero_state(::Type{T}, n::Int, nbatch::Int=1) where T = register((arr=zeros(T, 1<<n, nbatch); arr[1,:]=1; arr))
@@ -76,7 +76,7 @@ function probs(r::DefaultRegister{B}) where B
     if size(r.state, 2) == B
         return r.state .|> abs2
     else
-        probs = r.state .|> abs2 |> rank3
+        probs = r |> rank3 .|> abs2
         return squeeze(sum(probs, 2), 2)
     end
 end
@@ -100,8 +100,8 @@ end
 extend!(n::Int) = r->extend!(r, n)
 
 function join(reg1::DefaultRegister{B, T1}, reg2::DefaultRegister{B, T2}) where {B, T1, T2}
-    s1 = reg1.state |> rank3
-    s2 = reg2.state |> rank3
+    s1 = reg1 |> rank3
+    s2 = reg2 |> rank3
     T = promote_type(T1, T2)
     state = Array{T,3}(size(s1, 1)*size(s2, 1), size(s1, 2)*size(s2, 2), B)
     for b = 1:B
@@ -192,5 +192,5 @@ function fidelity(reg1::DefaultRegister{B}, reg2::DefaultRegister{B}) where B
 end
 
 function tracedist(reg1::DefaultRegister{B}, reg2::DefaultRegister{B}) where B
-    size(reg1.state, 2) == B ? sqrt.(1.-fidelity(reg1, reg2).^2) : throw(MethodError("trace distance for non-pure state is not defined!"))
+    size(reg1.state, 2) == B ? sqrt.(1 .- fidelity(reg1, reg2).^2) : throw(MethodError("trace distance for non-pure state is not defined!"))
 end

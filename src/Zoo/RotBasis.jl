@@ -21,9 +21,9 @@ end
 ==(rb1::RotBasis, rb2::RotBasis) = rb1.theta == rb2.theta && rb1.phi == rb2.phi
 
 copy(block::RotBasis{T}) where T = RotBasis{T}(block.theta, block.phi)
-dispatch!(block::RotBasis, params...) = ((block.theta, block.phi) = params; block)
+dispatch!(block::RotBasis, params) = ((block.theta, block.phi) = params; block)
 
-parameters(rb::RotBasis) = [rb.theta, rb.phi]
+parameters(rb::RotBasis) = (rb.theta, rb.phi)
 nparameters(::Type{<:RotBasis}) = 2
 
 function print_block(io::IO, R::RotBasis)

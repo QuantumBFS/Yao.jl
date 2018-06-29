@@ -6,6 +6,7 @@ using Compat.Iterators
 using Compat.LinearAlgebra
 using Compat.SparseArrays
 using Lazy: @forward
+using DataStructures
 
 using ..Intrinsics
 using ..Registers

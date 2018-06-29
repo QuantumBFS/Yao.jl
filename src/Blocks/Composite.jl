@@ -79,11 +79,7 @@ function dispatch!(x::GeneralComposite, itr)
     count = 0
     for block in Iterators.filter(x->nparameters(x) > 0, blocks(x))
         params = view(itr, count+1:count+nparameters(block))
-        if block isa CompositeBlock
-            dispatch!(block, params)
-        else
-            dispatch!(block, params...)
-        end
+        dispatch!(block, params)
         count += nparameters(block)
     end
     x
@@ -96,11 +92,7 @@ function dispatch!(f::Function, x::GeneralComposite, itr)
     count = 0
     for block in Iterators.filter(x->nparameters(x) > 0, blocks(x))
         params = view(itr, count+1:count+nparameters(block))
-        if block isa CompositeBlock
-            dispatch!(f, block, params)
-        else
-            dispatch!(f, block, params...)
-        end
+        dispatch!(f, block, params)
         count += nparameters(block)
     end
     x
