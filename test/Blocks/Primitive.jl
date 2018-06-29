@@ -23,3 +23,7 @@ end
 @testset "ReflectBlock" begin
     include("ReflectBlock.jl")
 end
+
+@testset "GeneralMatrixGate" begin
+    include("GeneralMatrixGate.jl")
+end
