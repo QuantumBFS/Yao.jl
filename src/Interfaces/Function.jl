@@ -1,4 +1,4 @@
-export @fn, InvOrder, addbit, Reset
+export @fn, InvOrder, addbit, Reset, focus
 
 macro fn(f)
     :(FunctionBlock($(esc(f))))
@@ -35,3 +35,5 @@ const Reset = @fn Reset reset!
 Return a [`FunctionBlock`](@ref) of adding n bits.
 """
 addbit(n::Int) = FunctionBlock{Tuple{:AddBit, n}}(reg->addbit!(reg, n))
+
+focus(locs::Int...,) = FunctionBlock{Tuple{:Focus, locs...,}}(reg->focus!(reg, locs))

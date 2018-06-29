@@ -7,6 +7,7 @@ using Compat.LinearAlgebra
 using Compat.SparseArrays
 using Lazy: @forward
 using CacheServers
+using DataStructures
 
 using ..Intrinsics
 using ..Registers

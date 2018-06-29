@@ -98,6 +98,18 @@ end
 
 extend!(n::Int) = r->extend!(r, n)
 
+function join(reg1::DefaultRegister{B, T1}, reg2::DefaultRegister{B, T2}) where {B, T1, T2}
+    s1 = reshape(reg1.state, size(reg1.state, 1), :, B)
+    s2 = reshape(reg2.state, size(reg2.state, 1), :, B)
+    T = promote_type(T1, T2)
+    state = Array{T,3}(size(s1, 1)*size(s2, 1), size(s1, 2)*size(s2, 2), B)
+    for b = 1:B
+        @inbounds @views state[:,:,b] = kron(s2[:,:,b], s1[:,:,b])
+    end
+    DefaultRegister{B}(reshape(state, size(state, 1), :))
+end
+join(reg1::DefaultRegister{1}, reg2::DefaultRegister{1}) = DefaultRegister{1}(kron(reg2.state, reg1.state))
+
 """
     isnormalized(reg::DefaultRegister) -> Bool
 
@@ -151,7 +163,7 @@ end
 
 reorder!(orders::Int...) = reg::DefaultRegister -> reorder!(reg, [orders...])
 
-invorder!(reg::DefaultRegister) = reorder!(reg, collect(nqubits(reg):-1:1))
+invorder!(reg::DefaultRegister) = reorder!(reg, collect(nactive(reg):-1:1))
 
 function addbit!(reg::DefaultRegister{B, T}, n::Int) where {B, T}
     state = zeros(T, size(reg.state, 1)*(1<<n), size(reg.state, 2))

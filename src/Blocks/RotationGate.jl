@@ -21,8 +21,8 @@ adjoint(blk::RotationGate) = RotationGate(blk.U, -blk.theta)
 
 copy(R::RotationGate) = RotationGate(R.U, R.theta)
 
-function dispatch!(R::RotationGate, theta)
-    R.theta = theta
+function dispatch!(R::RotationGate, itr)
+    R.theta = first(itr)
     R
 end
 
