@@ -41,6 +41,5 @@ include("Sequential.jl")
 include("Function.jl")
 include("IOSyntax.jl")
 include("blockoperations.jl")
-include("dispatch.jl")
 
 end
