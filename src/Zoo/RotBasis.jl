@@ -21,9 +21,9 @@ end
 ==(rb1::RotBasis, rb2::RotBasis) = rb1.theta == rb2.theta && rb1.phi == rb2.phi
 
 copy(block::RotBasis{T}) where T = RotBasis{T}(block.theta, block.phi)
-dispatch!(block::RotBasis, params...) = ((block.theta, block.phi) = params; block)
+dispatch!(block::RotBasis, params) = ((block.theta, block.phi) = params; block)
 
-parameters(rb::RotBasis) = [rb.theta, rb.phi]
+parameters(rb::RotBasis) = (rb.theta, rb.phi)
 nparameters(::Type{<:RotBasis}) = 2
 
 function print_block(io::IO, R::RotBasis)
@@ -33,8 +33,6 @@ end
 function hash(gate::RotBasis, h::UInt)
     hash(hash(gate.theta, gate.phi, objectid(gate)), h)
 end
-
-cache_key(gate::RotBasis) = (gate.theta, gate.phi)
 
 rot_basis(num_bit::Int) = dispatch!(chain(num_bit, put(i=>RotBasis(0.0, 0.0)) for i=1:num_bit), randpolar(num_bit) |> vec)
 

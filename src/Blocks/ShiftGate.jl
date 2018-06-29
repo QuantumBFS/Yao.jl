@@ -13,7 +13,7 @@ mat(gate::ShiftGate{T}) where T = Diagonal(Complex{T}[1.0, exp(im * gate.theta)]
 adjoint(blk::ShiftGate) = ShiftGate(-blk.theta)
 
 copy(block::ShiftGate{T}) where T = ShiftGate{T}(block.theta)
-dispatch!(block::ShiftGate, theta::Vector) = (block.theta = theta[1]; block)
+dispatch!(block::ShiftGate, itr) = (block.theta = first(itr); block)
 
 # Properties
 nparameters(::Type{<:ShiftGate}) = 1

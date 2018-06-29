@@ -6,6 +6,7 @@ using Compat.Iterators
 using Compat.LinearAlgebra
 using Compat.SparseArrays
 using Lazy: @forward
+using DataStructures
 
 using ..Intrinsics
 using ..Registers
@@ -40,5 +41,6 @@ include("Sequential.jl")
 include("Function.jl")
 include("IOSyntax.jl")
 include("blockoperations.jl")
+include("dispatch.jl")
 
 end
