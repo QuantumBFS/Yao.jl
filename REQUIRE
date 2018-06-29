@@ -1,6 +1,7 @@
 julia 0.6
 Compat
 DataStructures
+CacheServers
 StaticArrays
 MacroTools
 Reexport

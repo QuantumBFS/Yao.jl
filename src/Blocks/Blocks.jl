@@ -6,18 +6,20 @@ using Compat.Iterators
 using Compat.LinearAlgebra
 using Compat.SparseArrays
 using Lazy: @forward
+using CacheServers
 
 using ..Intrinsics
 using ..Registers
 using ..LuxurySparse
-using ..CacheServers
+
 
 # import package APIs
 import ..Yao
 import ..Yao: DefaultType, nqubits, nactive, invorder
 import ..Registers: focus!, relax!
 import ..Intrinsics: ishermitian, isunitary, isreflexive
-import ..CacheServers: update!, iscached, clear!, pull, iscacheable
+
+import CacheServers: update!, iscached, clear!, pull, iscacheable
 import Base: copy, hash, ==, eltype, show, similar, getindex, setindex!, start, next, done, length, parent
 import Compat: adjoint
 

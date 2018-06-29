@@ -3,7 +3,7 @@ using Compat.Test
 
 using Yao
 using Yao.Blocks
-using Yao.CacheServers
+using CacheServers
 using Yao.LuxurySparse
 
 s = DefaultServer{MatrixBlock, CacheFragment}()
