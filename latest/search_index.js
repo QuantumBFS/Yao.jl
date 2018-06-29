@@ -329,6 +329,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/interfaces/#Yao.Interfaces.matrixgate-Tuple{AbstractArray{T,2} where T}",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.matrixgate",
+    "category": "method",
+    "text": "matrixgate(matrix::AbstractMatrix) -> GeneralMatrixGate\nmatrixgate(matrix::MatrixBlock) -> GeneralMatrixGate\n\nConstruct a general matrix gate.\n\n\n\n"
+},
+
+{
     "location": "man/interfaces/#Yao.Interfaces.phase",
     "page": "Interfaces",
     "title": "Yao.Interfaces.phase",
@@ -337,7 +345,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s442} where #s442<:Yao.Blocks.AbstractBlock}, Tuple{M}} where M",
+    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s448} where #s448<:Yao.Blocks.AbstractBlock}, Tuple{M}} where M",
     "page": "Interfaces",
     "title": "Yao.Interfaces.put",
     "category": "method",
