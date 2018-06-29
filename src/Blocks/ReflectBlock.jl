@@ -25,5 +25,5 @@ ishermitian(::ReflectBlock) = true
 isunitary(::ReflectBlock) = true
 
 function print_block(io::IO, g::ReflectBlock{N, T}) where {N, T}
-    print("ReflectBlock(N = $N")
+    print("ReflectBlock(N = $N)")
 end

@@ -8,7 +8,7 @@ using StatsBase
 using ..Intrinsics
 
 import Base: length
-import Base: eltype, copy, similar, *
+import Base: eltype, copy, similar, *, join
 import Base: show
 
 # import package APIs

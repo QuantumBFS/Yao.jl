@@ -1,4 +1,4 @@
-export H, phase, shift, Rx, Ry, Rz, rot, swap, I2, reflect
+export H, phase, shift, Rx, Ry, Rz, rot, swap, I2, reflect, matrixgate
 
 include("PauliGates.jl")
 
@@ -105,3 +105,12 @@ function reflect end
 
 reflect(mirror::Vector) = ReflectBlock(mirror)
 reflect(mirror::DefaultRegister{1}) = reflect(mirror|>statevec)
+
+"""
+    matrixgate(matrix::AbstractMatrix) -> GeneralMatrixGate
+    matrixgate(matrix::MatrixBlock) -> GeneralMatrixGate
+
+Construct a general matrix gate.
+"""
+matrixgate(matrix::AbstractMatrix) = GeneralMatrixGate(matrix)
+matrixgate(matrix::MatrixBlock) = GeneralMatrixGate(mat(matrix))

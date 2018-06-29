@@ -12,8 +12,14 @@ method to enable key value cache.
 """
 abstract type PrimitiveBlock{N, T} <: MatrixBlock{N, T} end
 
-function dispatch!(f::Function, x::PrimitiveBlock, params...)
-    dispatch!(x, f.(parameters(x), params)...)
+function dispatch!(x::PrimitiveBlock, params...)
+    dispatch!(x, params)
+end
+
+dispatch!(f::Function, x::PrimitiveBlock, params...) = dispatch!(f, x, params)
+
+function dispatch!(f::Function, x::PrimitiveBlock, itr)
+    dispatch!(x, f.(parameters(x), itr))
     x
 end
 
@@ -26,3 +32,4 @@ include("ShiftGate.jl")
 include("RotationGate.jl")
 include("SwapGate.jl")
 include("ReflectBlock.jl")
+include("GeneralMatrixGate.jl")
