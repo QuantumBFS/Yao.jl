@@ -66,6 +66,7 @@ function focuspair!(locs::Int...)
     f1, r->relax!(r, locs, nbit=nbit)
 end
 
+#=
 """
     Focus{N} <: AbatractBlock
 
@@ -83,3 +84,4 @@ function (f::Focus{N})(::Void) where N
 end
 
 Focus(N::Int) = Focus{N}()
+=#

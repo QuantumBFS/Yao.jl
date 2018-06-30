@@ -16,14 +16,16 @@ import ..Yao: DefaultType, nqubits, nactive, reorder, invorder
 import ..Intrinsics: basis, hypercubic
 
 # APIs
-export nqubits, nactive, nremain, nbatch, state, statevec, hypercubic, focus!, relax!, focuspair!, extend!, basis, probs, isnormalized
-export AbstractRegister, Register, Focus, invorder!, reorder!, addbit!, reset!
+export nqubits, nactive, nremain, nbatch, state, statevec, hypercubic, rank3, focus!, relax!, focuspair!, extend!, basis, probs, isnormalized
+export AbstractRegister, Register, invorder!, reorder!, addbit!, reset!
 
 # factories
 export register, zero_state, rand_state, randn_state, stack, uniform_state
 
 # bit_str
 export @bit_str, asindex
+export DensityMatrix, density_matrix
+export fidelity, tracedist
 
 
 include("BitStr.jl")
@@ -33,6 +35,7 @@ include("Measure.jl")
 include("Default.jl")
 include("Focus.jl")
 
+include("DensityMatrix.jl")
 # NOTE: these two are not implemented
 # include("GPU.jl")
 # include("MPS.jl")

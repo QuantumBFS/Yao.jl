@@ -27,7 +27,9 @@ get an iterator that iterate through all sub-blocks.
 """
 function blocks end
 
-function map!(f::Function, dst::CompositeBlock, itr)
+const GeneralComposite = Union{CompositeBlock, Sequential}
+
+function map!(f::Function, dst::GeneralComposite, itr)
     @assert length(dst) >= length(itr) "composite block should have the same size"
 
     for (di, each) in zip(eachindex(dst), itr)
@@ -36,11 +38,11 @@ function map!(f::Function, dst::CompositeBlock, itr)
     dst
 end
 
-function parameter_type(c::CompositeBlock)
+function parameter_type(c::GeneralComposite)
     promote_type([parameter_type(each) for each in blocks(c)]...)
 end
 
-function nparameters(c::CompositeBlock)
+function nparameters(c::GeneralComposite)
     count = 0
     for each in blocks(c)
         count += nparameters(each)

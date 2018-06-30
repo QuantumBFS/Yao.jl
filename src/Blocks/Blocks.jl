@@ -35,10 +35,10 @@ export parent, adjoint
 export blockfilter, blockfilter!, expect
 
 include("Core.jl")
+include("Sequential.jl")
 include("MatrixBlock.jl")
 # others
 include("Measure.jl")
-include("Sequential.jl")
 include("Function.jl")
 include("IOSyntax.jl")
 include("blockoperations.jl")

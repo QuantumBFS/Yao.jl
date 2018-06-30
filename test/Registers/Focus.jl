@@ -37,9 +37,11 @@ end
     @test copy(reg0) |> f! |> r! == reg0 == copy(reg0) |> focus!(7,3,2) |> relax!(7,3,2)
 end
 
+#=
 @testset "Focus 3" begin
     reg = rand_state(8)
     F = Focus(8)
     @test copy(reg) |> F(3, 1) |> F() |> F(nothing) ≈ reg
     @test copy(reg) |> F(3, 1) |> nactive == 2
 end
+=#

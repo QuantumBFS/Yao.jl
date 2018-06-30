@@ -5,6 +5,7 @@ using Compat.Test
 @testset "RotBasis" begin
     rt = RotBasis(0.5, 0.4)
     crt = chain(rt)
+
     dispatch!(crt, [2., 3.])
     @test nparameters(crt) == 2
 

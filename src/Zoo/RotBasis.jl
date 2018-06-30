@@ -34,6 +34,8 @@ function hash(gate::RotBasis, h::UInt)
     hash(hash(gate.theta, gate.phi, objectid(gate)), h)
 end
 
+cache_key(gate::RotBasis) = (gate.theta, gate.phi)
+
 rot_basis(num_bit::Int) = dispatch!(chain(num_bit, put(i=>RotBasis(0.0, 0.0)) for i=1:num_bit), randpolar(num_bit) |> vec)
 
 """

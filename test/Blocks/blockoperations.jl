@@ -21,3 +21,13 @@ using Yao.LuxurySparse
     @test blockfilter(ishermitian, chain(2, kron(2, X, P0), repeat(2, Rx(0), (1,2)), kron(2, 2=>Rz(0.3)))) == [kron(2, X, P0), X, P0, repeat(2, Rx(0), (1,2)), Rx(0)]
     @test blockfilter(b->ishermitian(b) && b isa PrimitiveBlock, chain(2, kron(2, X, P0), repeat(2, Rx(0), (1,2)), kron(2, 2=>Rz(0.3)))) == [X, P0, Rx(0)]
 end
+
+@testset "density matrix" begin
+    for reg in [rand_state(4), rand_state(4,3)]
+        dm = reg |> density_matrix
+        op = put(4, 3=>X)
+        println(expect(op, dm))
+        println(expect(op, reg))
+        @test expect(op, dm) ≈ expect(op, reg)
+    end
+end

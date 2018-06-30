@@ -22,7 +22,7 @@ include("Math.jl")
 export DInt, Ints, DInts
 export basis, bmask
 export bit_length, log2i, bsizeof, nqubits
-export testall, testany, testval, setbit, flip, neg, swapbits, takebit
+export testall, testany, testval, setbit, flip, neg, swapbits, takebit, breflect
 export indices_with, bitarray, packbits, controller
 export bdistance
 export onehotvec
@@ -43,6 +43,7 @@ include("OperatorTraits.jl")
 # Matrices
 export swaprows!, mulrow!, matvec, mulcol!, swapcols!, u1rows!, unrows!
 export itercontrol, IterControl, controldo, u1apply!, unapply!, cunapply!
+export fidelity_pure, fidelity_mix
 include("elemental.jl")
 include("IterControl.jl")
 include("GeneralApply.jl")

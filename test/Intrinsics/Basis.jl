@@ -50,6 +50,7 @@ end
 @testset "SwapBits" begin
     msk = bmask(2,5)
     @test swapbits(7, msk) == 21
+    @test breflect(7, Int(0b0110001)) == Int(0b1000110) == breflect(7, Int(0b0110001), [bmask(1, 7), bmask(2, 6), bmask(3,5)])
 end
 
 @testset "EasyBasis" begin

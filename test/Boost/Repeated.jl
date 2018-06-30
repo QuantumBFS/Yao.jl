@@ -34,7 +34,7 @@ end
     end
 end
 
-@testset "Un" begin
+@testset "Put" begin
     reg1 = rand_state(5)
     reg2 = rand_state(5, 2)
     for G in [H, rot(X, 0.5), rot(Z, 0.5), I2]
@@ -46,5 +46,19 @@ end
     b2 = control(5, (-5, 1), 3=>rot(X, 0.3))
     @test applymatrix(b1) == mat(b2)
     @test apply!(copy(reg1), b1) == apply!(copy(reg1), b2)
+end
+
+@testset "Un Repeat" begin
+    reg1 = rand_state(5)
+    reg2 = rand_state(5, 2)
+    G = MatrixBlock(kron(2, H, H))
+    @test_throws AddressConflictError repeat(4, G, (1,2))
+    rb = repeat(5, G, (1,4))
+    rb2 = repeat(5, H, (1,2,4,5))
+    MAT = reduce(kron, [mat(H), mat(H), mat(I2), mat(H), mat(H)])
+    @test applymatrix(rb) ≈ MAT
+    @test applymatrix(rb2) ≈ MAT
+    @test mat(rb) ≈ MAT
+    @test mat(rb2) ≈ MAT
 end
 

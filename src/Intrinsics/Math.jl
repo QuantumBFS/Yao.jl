@@ -185,3 +185,20 @@ function reorder(A::Diagonal, orders::Vector{Int})
 end
 
 rotmat(m::AbstractMatrix, θ::Real) = expm(-im*θ/2*Matrix(m))
+
+################### Fidelity ###################
+"""fidelity for pure states."""
+fidelity_pure(v1::Vector, v2::Vector) = abs(v1'*v2)
+
+"""
+    fidelity_mix(m1::Matrix, m2::Matrix)
+
+Fidelity for mixed states.
+
+Reference:
+    http://iopscience.iop.org/article/10.1088/1367-2630/aa6a4b/meta
+"""
+function fidelity_mix(m1::Matrix, m2::Matrix)
+    O = m1'*m2
+    trace(sqrtm(O*O'))
+end
