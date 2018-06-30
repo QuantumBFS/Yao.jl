@@ -27,7 +27,11 @@ end
 
 # Parameters
 parameter_type(::MatrixBlock) = Bool
-nparameters(x::MatrixBlock) = length(parameters(x))
+hasparameter(x::MatrixBlock) = nparameters(x) > 0
+
+function nparameters end
+
+# Trait
 nparameters(::Type{X}) where {X <: MatrixBlock} = 0
 parameters(x::MatrixBlock) = ()
 

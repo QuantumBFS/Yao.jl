@@ -48,13 +48,9 @@ function nparameters(c::CompositeBlock)
     count
 end
 
-# TODO: make this a lazy list
 function parameters(c::CompositeBlock)
-    params = parameter_type(c)[]
-    for each in blocks(c)
-        append!(params, parameters(each))
-    end
-    params
+    itr = Iterators.filter(x->isprimitive(x) && hasparameter(x), BlockTreeIterator(:DFS, c))
+    IterTools.chain((parameters(each) for each in itr)...)
 end
 
 #################
@@ -71,30 +67,30 @@ dispatch parameters and tweak it according to callback function `f(original, par
 dispatch a vector of parameters to this composite block according to
 each sub-block's number of parameters.
 """
-function dispatch!(x::CompositeBlock, itr)
-    @assert nparameters(x) == length(itr) "number of parameters does not match"
+function dispatch!(c::CompositeBlock, itr)
+    @assert nparameters(c) == length(itr) "number of parameters does not match"
 
-    count = 0
-    for block in Iterators.filter(x->nparameters(x) > 0, blocks(x))
-        params = view(itr, count+1:count+nparameters(block))
-        dispatch!(block, params)
-        count += nparameters(block)
+    blkitr = Iterators.filter(x->isprimitive(x) && hasparameter(x), BlockTreeIterator(:DFS, c))
+    pitr = itr
+    for each in blkitr
+        dispatch!(each, take(pitr, nparameters(each)))
+        pitr = drop(pitr, nparameters(each))
     end
-    x
+    c
 end
 
-# TODO: polish this later
-function dispatch!(f::Function, x::CompositeBlock, itr)
-    @assert nparameters(x) == length(itr) "number of parameters does not match"
+function dispatch!(f::Function, c::CompositeBlock, itr)
+    @assert nparameters(c) == length(itr) "number of parameters does not match"
 
-    count = 0
-    for block in Iterators.filter(x->nparameters(x) > 0, blocks(x))
-        params = view(itr, count+1:count+nparameters(block))
-        dispatch!(f, block, params)
-        count += nparameters(block)
+    blkitr = Iterators.filter(x->isprimitive(x) && hasparameter(x), BlockTreeIterator(:DFS, c))
+    pitr = itr
+    for each in blkitr
+        dispatch!(f, each, take(pitr, nparameters(each)))
+        pitr = drop(pitr, nparameters(each))
     end
-    x
+    c
 end
+
 
 ==(lhs::CompositeBlock, rhs::CompositeBlock) = false
 
