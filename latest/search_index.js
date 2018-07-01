@@ -953,6 +953,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.BlockTreeIterator",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.BlockTreeIterator",
+    "category": "type",
+    "text": "BlockTreeIterator{BT}\n\nIterate through the whole block tree with breadth first search.\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.CacheFragment",
     "page": "Blocks System",
     "title": "Yao.Blocks.CacheFragment",
@@ -1161,7 +1169,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.dispatch!-Tuple{Union{Yao.Blocks.CompositeBlock, Yao.Blocks.Sequential},Any}",
+    "location": "man/blocks/#Yao.Blocks.dispatch!-Tuple{Yao.Blocks.CompositeBlock,Any}",
     "page": "Blocks System",
     "title": "Yao.Blocks.dispatch!",
     "category": "method",
