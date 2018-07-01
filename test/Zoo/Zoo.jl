@@ -17,3 +17,7 @@ end
 @testset "RotBasis" begin
     include("RotBasis.jl")
 end
+
+@testset "Grover" begin
+    include("Grover.jl")
+end

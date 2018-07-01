@@ -15,6 +15,6 @@ import Yao.Blocks: ReflectBlock
 
     v0, v1 = vec(reg.state), vec(reg0.state)
     @test mat(rf)*(reg0|>statevec) ≈ apply!(copy(reg0), rf) |> statevec
-    @test rf.state'*v0 ≈ rf.state'*v1
-    @test v0-rf.state'*v0*rf.state ≈ -(v1-rf.state'*v1*rf.state)
+    @test (rf.psi |> statevec)'*v0 ≈ (rf.psi |> statevec)'*v1
+    @test v0-(rf.psi |> statevec)'*v0*(rf.psi |> statevec) ≈ -(v1-(rf.psi |> statevec)'*v1*(rf.psi |> statevec))
 end
