@@ -20,7 +20,7 @@ function apply! end
 
 Transform the apply! function of specific block to dense matrix.
 """
-applymatrix(g::AbstractBlock) = linop2dense(r->apply!(register(r), g) |> statevec, nqubits(g))
+applymatrix(g::AbstractBlock) = linop2dense(r->statevec(apply!(register(r), g)), nqubits(g))
 
 """
     isunitary(x) -> Bool
@@ -90,3 +90,5 @@ else
 end
 
 end
+
+isprimitive(blk::AbstractBlock) = false

@@ -3,15 +3,17 @@
 ## New Features
 * basic density matrix operations,
 * fidelity and trace distance,
-* utilities in Zoo
 
+* utilities in Zoo
     * differential circuits
     * quantum fourier transformation block
     * basis rotation related to measurements
-* Blocks
 
+* Blocks
     * FunctionBlock
     * GeneralMatrixGate
+    * block tree iterator (#110)
+
 * Examples
     * Phase Estimation
     * Qauntum Ciruit GAN
