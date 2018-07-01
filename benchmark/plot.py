@@ -23,7 +23,7 @@ def fbench(token, legends, version=7, ftype='png'):
     else:
         ydata = np.loadtxt('yao/v0.7.0-alpha.147/%s-report.dat'%token).reshape([6,-1])
     qdata = np.loadtxt('projectq/0.3.6/%s-report.dat'%token).reshape([6,-1])
-    _show_benchres(np.concatenate([qdata, ydata], axis=1), '../docs/src/assets/benchmarks/%s-bench.%s'%(token, ftype), ['Q-%s'%l for l in legends] + ['Y-%s'%l for l in legends])
+    _show_benchres(np.concatenate([qdata, ydata], axis=1), '../docs/src/assets/benchmarks/%s-bench.%s'%(token, ftype), ['ProjectQ-%s'%l for l in legends] + ['Yao-%s'%l for l in legends])
 
 class PltBench():
     def __init__(self):
@@ -45,7 +45,7 @@ class PltBench():
 
         qdata[:,2]/=6
         ydata[:,2]/=6
-        _show_benchres(np.concatenate([qdata, ydata], axis=1), '../docs/src/assets/benchmarks/hgate-bench.%s'%self.ftype, ['Q-H', 'Q-CH', 'Q-H(2-7) (time / 6)', 'Y-H', 'Y-CH', 'Y-H(2-7) (time / 6)'])
+        _show_benchres(np.concatenate([qdata, ydata], axis=1), '../docs/src/assets/benchmarks/hgate-bench.%s'%self.ftype, ['ProjectQ-H', 'ProjectQ-CH', 'ProjectQ-H(2-7) (time / 6)', 'Yao-H', 'Yao-CH', 'Yao-H(2-7) (time / 6)'])
 
     def toffoli(self):
         fbench("toffoli", ['Toffoli'], 7, self.ftype)
