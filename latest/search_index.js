@@ -81,6 +81,30 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "tutorial/Grover/#",
+    "page": "Grover Search and Quantum Inference",
+    "title": "Grover Search and Quantum Inference",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "tutorial/Grover/#Grover-Search-and-Quantum-Inference-1",
+    "page": "Grover Search and Quantum Inference",
+    "title": "Grover Search and Quantum Inference",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "tutorial/Grover/#Grover-Search-1",
+    "page": "Grover Search and Quantum Inference",
+    "title": "Grover Search",
+    "category": "section",
+    "text": "(Image: grover)First, we construct the reflection block R(psirangle) = 2psiranglelanglepsi-1, given we know how to construct psirangle=A0rangle. Then it equivalent to construct R(psirangle) = A(20ranglelangle 0-1)A^daggerusing Yao\nusing Yao.Blocks\nusing Compat\nusing Compat.Test\nusing StatsBase\n\n\"\"\"\nA way to construct oracle, e.g. inference_oracle([1,2,-3,5]) will\ninvert the sign when a qubit configuration matches: 1=>1, 2=>1, 3=>0, 5=>1.\n\"\"\"\nfunction inference_oracle(locs::Vector{Int})\n    control(locs[1:end-1], abs(locs[end]) => (locs[end]>0 ? Z : chain(phase(π), Z)))\nend\n\nfunction reflectblock(A::MatrixBlock{N}) where N\n    chain(N, A |> adjoint, inference_oracle(-collect(1:N)), A)\nend\n\nnbit = 12\nA = repeat(nbit, H)\nref = reflectblock(A)\n\n@testset \"test reflect\" begin\n    reg = rand_state(nbit)\n    ref_vec = apply!(zero_state(nbit), A) |> statevec\n    v0 = reg |> statevec\n    @test -2*(ref_vec\'*v0)*ref_vec + v0 ≈ apply!(copy(reg), ref) |> statevec\nendThen we define the oracle and target state# first, construct the oracle with desired state in the range 100-105.\noracle!(reg::DefaultRegister) = (reg.state[100:105,:]*=-1; reg)\n\n# transform it into a function block, so it can be put inside a `Sequential`.\nfb_oracle = FunctionBlock{:Oracle}(reg->oracle!(reg))\n\n\"\"\"\nratio of components in a wavefunction that flip sign under oracle.\n\"\"\"\nfunction prob_match_oracle(psi::DefaultRegister, oracle)\n    fliped_reg = apply!(register(ones(Complex128, 1<<nqubits(psi))), oracle)\n    match_mask = fliped_reg |> statevec |> real .< 0\n    norm(statevec(psi)[match_mask])^2\nend\n\n# uniform state as initial state\npsi0 = apply!(zero_state(nbit), A)\n\n# the number of grover steps that can make it reach first maximum overlap.\nnum_grover_step(prob::Real) = Int(round(pi/4/sqrt(prob)))-1\nniter = num_grover_step(prob_match_oracle(psi0, fb_oracle))\n\n# construct the whole circuit\ngb = sequence(sequence(fb_oracle, ref) for i = 1:niter);Now, let\'s start trainingfor (i, blk) in enumerate(gb)\n    apply!(psi0, blk)\n    overlap = prob_match_oracle(psi0, fb_oracle)\n    println(\"step $i, overlap = $overlap\")\nendThe above is the standard Grover Search algorithm, it can find target state in O(sqrt N) time, with N the size of an unordered database. Similar algorithm can be used in more useful applications, like inference, i.e. get conditional probability distribution p(xy) given p(x y).function rand_circuit(nbit::Int, ngate::Int)\n    circuit = chain(nbit)\n    gate_list = [X, H, Ry(0.3), CNOT]\n    for i = 1:ngate\n        gate = rand(gate_list)\n        push!(circuit, put(nbit, (sample(1:nbit, nqubits(gate),replace=false)...,)=>gate))\n    end\n    circuit\nend\nA = rand_circuit(nbit, 200)\npsi0 = apply!(zero_state(nbit), A)\n\n# now we want to search the subspace with [1,3,5,8,9,11,12]\n# fixed to 1 and [4,6] fixed to 0.\nevidense = [1, 3, -4, 5, -6, 8, 9, 11, 12]\n\n\"\"\"\nDoing Inference, psi is the initial state,\nthe target is to search target space with specific evidense.\ne.g. evidense [1, -3, 6] means the [1, 3, 6]-th bits take value [1, 0, 1].\n\"\"\"\noracle_infer = inference_oracle(evidense)(nqubits(psi0))\n\nniter = num_grover_step(prob_match_oracle(psi0, oracle_infer))\ngb_infer = chain(nbit, chain(oracle_infer, reflectblock(A)) for i = 1:niter);Now, let\'s start trainingfor (i, blk) in enumerate(gb_infer)\n    apply!(psi0, blk)\n    p_target = prob_match_oracle(psi0, oracle_infer)\n    println(\"step $i, overlap^2 = $p_target\")\nendHere is an application, suppose we have constructed some digits and stored it in a wave vector.using Yao.Intrinsics\n\nx1 = [0 1 0; 0 1 0; 0 1 0; 0 1 0; 0 1 0]\nx2 = [1 1 1; 0 0 1; 1 1 1; 1 0 0; 1 1 1]\nx0 = [1 1 1; 1 0 1; 1 0 1; 1 0 1; 1 1 1]\n\nnbit = 15\nv = zeros(1<<nbit)\n\n# they occur with different probabilities.\nfor (x, p) in [(x0, 0.7), (x1, 0.29), (x2,0.01)]\n    v[(x |> vec |> BitArray |> packbits)+1] = sqrt(p)\nendPlot them, you will see these digits(Image: digits)Then we construct the inference circuit. Here, we choose to use reflect to construct a ReflectBlock, instead of constructing it explicitly.rb = reflect(copy(v))\npsi0 = register(v)\n\n# we want to find the digits with the first 5 qubits [1, 0, 1, 1, 1].\nevidense = [1, -2, 3, 4, 5]\noracle_infer = inference_oracle(evidense)(nbit)\n\nniter = num_grover_step(prob_match_oracle(psi0, oracle_infer))\ngb_infer = chain(nbit, chain(oracle_infer, rb) for i = 1:niter)Now, let\'s start trainingfor (i, blk) in enumerate(gb_infer)\n    apply!(psi0, blk)\n    p_target = prob_match_oracle(psi0, oracle_infer)\n    println(\"step $i, overlap^2 = $p_target\")\nendThe result ispl = psi0 |> probs\nconfig = findn(pl.>0.5)[] - 1 |> bitarray(nbit)\nres = reshape(config, 5,3)It is 2 ~(Image: infer)Congratuations! You get state of art quantum inference circuit!"
+},
+
+{
     "location": "tutorial/QCBM/#",
     "page": "Quantum Circuit Born Machine",
     "title": "Quantum Circuit Born Machine",
@@ -757,7 +781,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Zoo",
     "title": "Yao.Zoo.GroverIter",
     "category": "type",
-    "text": "GroverIter{AUTOSTOP, N, T}\n\nGroverIter{AUTOSTOP}(oracle, ref::ReflectBlock{N, T}, psi::AbstractRegister) -> GroverIter{N, T}\n\nReturn an iterator that perform Grover operations step by step. An Grover operation consists of applying oracle and Reflection.\n\nIf AUTOSTOP is true, it will stop when the first time the state reaches the sweet spot.\n\n\n\n"
+    "text": "GroverIter{N, T}\n\nGroverIter(oracle, ref::ReflectBlock{N, T}, psi::DefaultRegister, niter::Int)\n\nan iterator that perform Grover operations step by step. An Grover operation consists of applying oracle and Reflection.\n\n\n\n"
 },
 
 {
@@ -793,11 +817,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/zoo/#Yao.Zoo.groverblock-Union{Tuple{N}, Tuple{T}, Tuple{Yao.Blocks.MatrixBlock{N,T},Yao.Blocks.ReflectBlock{N,T},Int64}, Tuple{Yao.Blocks.MatrixBlock{N,T},Yao.Blocks.ReflectBlock{N,T}}} where T where N",
+    "page": "Zoo",
+    "title": "Yao.Zoo.groverblock",
+    "category": "method",
+    "text": "groverblock(oracle, ref::ReflectBlock{N, T}, niter::Int=-1)\ngroverblock(oracle, psi::DefaultRegister, niter::Int=-1)\n\nReturn a ChainBlock/Sequential as Grover Iteration, the default niter will stop at the first optimal step.\n\n\n\n"
+},
+
+{
     "location": "man/zoo/#Yao.Zoo.inference_oracle-Tuple{Array{Int64,1}}",
     "page": "Zoo",
     "title": "Yao.Zoo.inference_oracle",
     "category": "method",
-    "text": "inference_oracle(locs::Vector{Int}) -> ControlBlock\n\nA simple inference oracle, e.g. inference([-1, -8, 5]) is a control block that flip the bit if values of bits on position [1, 8, 5] match [0, 0, 1].\n\n\n\n"
+    "text": "inference_oracle([nbit::Int,] locs::Vector{Int}) -> ControlBlock\n\nA simple inference oracle, e.g. inference([-1, -8, 5]) is a control block that flip the bit if values of bits on position [1, 8, 5] match [0, 0, 1].\n\n\n\n"
 },
 
 {
@@ -809,11 +841,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/zoo/#Yao.Zoo.num_grover_step-Tuple{Real}",
+    "location": "man/zoo/#Yao.Zoo.num_grover_step-Tuple{Yao.Registers.DefaultRegister,Any}",
     "page": "Zoo",
     "title": "Yao.Zoo.num_grover_step",
     "category": "method",
-    "text": "num_grover_step(prob::Real) -> Int\n\nReturn number of grover steps to obtain the maximum overlap with target state.\n\nInput parameter prob is the overlap between target state space and initial state psiranlge, which means the probability of obtaining true on initial state.\n\n\n\n"
+    "text": "num_grover_step(psi::DefaultRegister, oracle) -> Int\n\nReturn number of grover steps needed to match the oracle.\n\n\n\n"
 },
 
 {
@@ -833,11 +865,27 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/zoo/#Yao.Zoo.perturb-Tuple{Any,Array{#s454,1} where #s454<:Yao.Blocks.RotationGate,Real}",
+    "page": "Zoo",
+    "title": "Yao.Zoo.perturb",
+    "category": "method",
+    "text": "perturb(func, gates::Vector{<:RotationGate}, diff::Real) -> Matrix\n\nperturb every rotation gates, and evaluate losses. The i-th element of first column of resulting Matrix corresponds to Gi(θ+δ), and the second corresponds to Gi(θ-δ).\n\n\n\n"
+},
+
+{
     "location": "man/zoo/#Yao.Zoo.polar2u-Tuple{Array{T,1} where T}",
     "page": "Zoo",
     "title": "Yao.Zoo.polar2u",
     "category": "method",
     "text": "polar2u(vec::Array) -> Array\n\ntransform polar angle to su(2) state vector, apply to the first dimension of size 2.\n\n\n\n"
+},
+
+{
+    "location": "man/zoo/#Yao.Zoo.prob_match_oracle-Tuple{Yao.Registers.DefaultRegister,Any}",
+    "page": "Zoo",
+    "title": "Yao.Zoo.prob_match_oracle",
+    "category": "method",
+    "text": "prob_match_oracle(psi, oracle) -> Float64\n\nReturn the probability that psi matches oracle.\n\n\n\n"
 },
 
 {
@@ -862,22 +910,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Zoo.u2polar",
     "category": "method",
     "text": "u2polar(vec::Array) -> Array\n\ntransform su(2) state vector to polar angle, apply to the first dimension of size 2.\n\n\n\n"
-},
-
-{
-    "location": "man/zoo/#Yao.Zoo.perturb-Tuple{Any,Array{#s454,1} where #s454<:Yao.Blocks.RotationGate,Real}",
-    "page": "Zoo",
-    "title": "Yao.Zoo.perturb",
-    "category": "method",
-    "text": "perturb(func, gates::Vector{<:RotationGate}, diff::Real) -> Matrix\n\nperturb every rotation gates, and evaluate losses. The i-th element of first column of resulting Matrix corresponds to Gi(θ+δ), and the second corresponds to Gi(θ-δ).\n\n\n\n"
-},
-
-{
-    "location": "man/zoo/#Yao.Zoo.prob_match_oracle-Tuple{Yao.Registers.AbstractRegister,Any}",
-    "page": "Zoo",
-    "title": "Yao.Zoo.prob_match_oracle",
-    "category": "method",
-    "text": "prob_match_oracle(psi, oracle) -> Float64\n\nReturn the probability that psi matches oracle.\n\n\n\n"
 },
 
 {

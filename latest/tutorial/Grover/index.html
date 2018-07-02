@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Grover Search and Quantum Inference · Yao.jl</title><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-89508993-1', 'auto');
+ga('send', 'pageview');
+</script><link rel="canonical" href="https://quantumbfs.github.io/Yao.jl/latest/tutorial/Grover/index.html"/><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="../../index.html"><img class="logo" src="../../assets/logo.png" alt="Yao.jl logo"/></a><h1>Yao.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../">Home</a></li><li><span class="toctext">Tutorial</span><ul><li><a class="toctext" href="../GHZ/">Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</a></li><li><a class="toctext" href="../QFT/">Quantum Fourier Transformation and Phase Estimation</a></li><li class="current"><a class="toctext" href>Grover Search and Quantum Inference</a><ul class="internal"><li><a class="toctext" href="#Grover-Search-1">Grover Search</a></li></ul></li><li><a class="toctext" href="../QCBM/">Quantum Circuit Born Machine</a></li></ul></li><li><span class="toctext">Manual</span><ul><li><a class="toctext" href="../../man/yao/">Yao</a></li><li><a class="toctext" href="../../man/interfaces/">Interfaces</a></li><li><a class="toctext" href="../../man/registers/">Registers</a></li><li><a class="toctext" href="../../man/zoo/">Zoo</a></li><li><a class="toctext" href="../../man/blocks/">Blocks System</a></li><li><a class="toctext" href="../../man/cache/">Cache System</a></li><li><a class="toctext" href="../../man/intrinsics/">Intrinsics</a></li><li><a class="toctext" href="../../man/luxurysparse/">LuxurySparse</a></li><li><a class="toctext" href="../../man/boost/">Boost</a></li></ul></li><li><span class="toctext">Developer Documentation</span><ul><li><a class="toctext" href="../../dev/extending-blocks/">Extending Blocks</a></li><li><a class="toctext" href="../../dev/benchmark/">Benchmark with ProjectQ</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Tutorial</li><li><a href>Grover Search and Quantum Inference</a></li></ul><a class="edit-page" href="https://github.com/QuantumBFS/Yao.jl/blob/master/docs/src/tutorial/Grover.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Grover Search and Quantum Inference</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Grover-Search-and-Quantum-Inference-1" href="#Grover-Search-and-Quantum-Inference-1">Grover Search and Quantum Inference</a></h1><h2><a class="nav-anchor" id="Grover-Search-1" href="#Grover-Search-1">Grover Search</a></h2><p><img src="../../assets/figures/grover.png" alt="grover"/></p><p>First, we construct the reflection block <span>$R(|\psi\rangle) = 2|\psi\rangle\langle\psi|-1$</span>, given we know how to construct <span>$|\psi\rangle=A|0\rangle$</span>. Then it equivalent to construct <span>$R(|\psi\rangle) = A(2|0\rangle\langle 0|-1)A^\dagger$</span></p><div><pre><code class="language-julia">using Yao
+using Yao.Blocks
+using Compat
+using Compat.Test
+using StatsBase
+
+&quot;&quot;&quot;
+A way to construct oracle, e.g. inference_oracle([1,2,-3,5]) will
+invert the sign when a qubit configuration matches: 1=&gt;1, 2=&gt;1, 3=&gt;0, 5=&gt;1.
+&quot;&quot;&quot;
+function inference_oracle(locs::Vector{Int})
+    control(locs[1:end-1], abs(locs[end]) =&gt; (locs[end]&gt;0 ? Z : chain(phase(π), Z)))
+end
+
+function reflectblock(A::MatrixBlock{N}) where N
+    chain(N, A |&gt; adjoint, inference_oracle(-collect(1:N)), A)
+end
+
+nbit = 12
+A = repeat(nbit, H)
+ref = reflectblock(A)
+
+@testset &quot;test reflect&quot; begin
+    reg = rand_state(nbit)
+    ref_vec = apply!(zero_state(nbit), A) |&gt; statevec
+    v0 = reg |&gt; statevec
+    @test -2*(ref_vec&#39;*v0)*ref_vec + v0 ≈ apply!(copy(reg), ref) |&gt; statevec
+end</code></pre><pre><code class="language-none">Test Summary: | Pass  Total
+test reflect  |    1      1
+Base.Test.DefaultTestSet(&quot;test reflect&quot;, Any[], 1, false)</code></pre></div><p>Then we define the oracle and target state</p><div><pre><code class="language-julia"># first, construct the oracle with desired state in the range 100-105.
+oracle!(reg::DefaultRegister) = (reg.state[100:105,:]*=-1; reg)
+
+# transform it into a function block, so it can be put inside a `Sequential`.
+fb_oracle = FunctionBlock{:Oracle}(reg-&gt;oracle!(reg))
+
+&quot;&quot;&quot;
+ratio of components in a wavefunction that flip sign under oracle.
+&quot;&quot;&quot;
+function prob_match_oracle(psi::DefaultRegister, oracle)
+    fliped_reg = apply!(register(ones(Complex128, 1&lt;&lt;nqubits(psi))), oracle)
+    match_mask = fliped_reg |&gt; statevec |&gt; real .&lt; 0
+    norm(statevec(psi)[match_mask])^2
+end
+
+# uniform state as initial state
+psi0 = apply!(zero_state(nbit), A)
+
+# the number of grover steps that can make it reach first maximum overlap.
+num_grover_step(prob::Real) = Int(round(pi/4/sqrt(prob)))-1
+niter = num_grover_step(prob_match_oracle(psi0, fb_oracle))
+
+# construct the whole circuit
+gb = sequence(sequence(fb_oracle, ref) for i = 1:niter);</code></pre></div><p>Now, let&#39;s start training</p><div><pre><code class="language-julia">for (i, blk) in enumerate(gb)
+    apply!(psi0, blk)
+    overlap = prob_match_oracle(psi0, fb_oracle)
+    println(&quot;step $i, overlap = $overlap&quot;)
+end</code></pre><pre><code class="language-none">step 1, overlap = 0.01313214562833301
+step 2, overlap = 0.03619369756224663
+step 3, overlap = 0.07010978618384153
+step 4, overlap = 0.11408666758254363
+step 5, overlap = 0.16709514342697387
+step 6, overlap = 0.22789464746611884
+step 7, overlap = 0.29506227870937746
+step 8, overlap = 0.3670261018170988
+step 9, overlap = 0.44210193536698855
+step 10, overlap = 0.518532767034414
+step 11, overlap = 0.5945298732465308
+step 12, overlap = 0.6683146809800716
+step 13, overlap = 0.7381603920041205
+step 14, overlap = 0.8024323954287373
+step 15, overlap = 0.8596265227777784
+step 16, overlap = 0.9084042502960318
+step 17, overlap = 0.947624024645163
+step 18, overlap = 0.9763679788679578
+step 19, overlap = 0.9939634133826709
+step 20, overlap = 0.9999985392841676</code></pre></div><p>The above is the standard Grover Search algorithm, it can find target state in <span>$O(\sqrt N)$</span> time, with <span>$N$</span> the size of an unordered database. Similar algorithm can be used in more useful applications, like inference, i.e. get conditional probability distribution <span>$p(x|y)$</span> given <span>$p(x, y)$</span>.</p><div><pre><code class="language-julia">function rand_circuit(nbit::Int, ngate::Int)
+    circuit = chain(nbit)
+    gate_list = [X, H, Ry(0.3), CNOT]
+    for i = 1:ngate
+        gate = rand(gate_list)
+        push!(circuit, put(nbit, (sample(1:nbit, nqubits(gate),replace=false)...,)=&gt;gate))
+    end
+    circuit
+end
+A = rand_circuit(nbit, 200)
+psi0 = apply!(zero_state(nbit), A)
+
+# now we want to search the subspace with [1,3,5,8,9,11,12]
+# fixed to 1 and [4,6] fixed to 0.
+evidense = [1, 3, -4, 5, -6, 8, 9, 11, 12]
+
+&quot;&quot;&quot;
+Doing Inference, psi is the initial state,
+the target is to search target space with specific evidense.
+e.g. evidense [1, -3, 6] means the [1, 3, 6]-th bits take value [1, 0, 1].
+&quot;&quot;&quot;
+oracle_infer = inference_oracle(evidense)(nqubits(psi0))
+
+niter = num_grover_step(prob_match_oracle(psi0, oracle_infer))
+gb_infer = chain(nbit, chain(oracle_infer, reflectblock(A)) for i = 1:niter);</code></pre></div><p>Now, let&#39;s start training</p><div><pre><code class="language-julia">for (i, blk) in enumerate(gb_infer)
+    apply!(psi0, blk)
+    p_target = prob_match_oracle(psi0, oracle_infer)
+    println(&quot;step $i, overlap^2 = $p_target&quot;)
+end</code></pre><pre><code class="language-none">step 1, overlap^2 = 0.005495344471429434
+step 2, overlap^2 = 0.01521509115101238
+step 3, overlap^2 = 0.02967577694734727
+step 4, overlap^2 = 0.048735984028121945
+step 5, overlap^2 = 0.07220931368398426
+step 6, overlap^2 = 0.09986620920899154
+step 7, overlap^2 = 0.1314362008433613
+step 8, overlap^2 = 0.1666105508241741
+step 9, overlap^2 = 0.20504527267683761
+step 10, overlap^2 = 0.24636449522024273
+step 11, overlap^2 = 0.29016413838742733
+step 12, overlap^2 = 0.3360158649141718
+step 13, overlap^2 = 0.3834712692501108
+step 14, overlap^2 = 0.43206626272703064
+step 15, overlap^2 = 0.4813256120997376
+step 16, overlap^2 = 0.530767587074974
+step 17, overlap^2 = 0.5799086713780144
+step 18, overlap^2 = 0.6282682912852146
+step 19, overlap^2 = 0.6753735153799725
+step 20, overlap^2 = 0.7207636795709809
+step 21, overlap^2 = 0.7639948921425515
+step 22, overlap^2 = 0.804644374780004
+step 23, overlap^2 = 0.8423145971172036
+step 24, overlap^2 = 0.876637164372557
+step 25, overlap^2 = 0.9072764200544572
+step 26, overlap^2 = 0.9339327285036267
+step 27, overlap^2 = 0.9563454051708404
+step 28, overlap^2 = 0.9742952659734601
+step 29, overlap^2 = 0.9876067707994357
+step 30, overlap^2 = 0.9961497401964372
+step 31, overlap^2 = 0.9998406284578046</code></pre></div><p>Here is an application, suppose we have constructed some digits and stored it in a wave vector.</p><div><pre><code class="language-julia">using Yao.Intrinsics
+
+x1 = [0 1 0; 0 1 0; 0 1 0; 0 1 0; 0 1 0]
+x2 = [1 1 1; 0 0 1; 1 1 1; 1 0 0; 1 1 1]
+x0 = [1 1 1; 1 0 1; 1 0 1; 1 0 1; 1 1 1]
+
+nbit = 15
+v = zeros(1&lt;&lt;nbit)
+
+# they occur with different probabilities.
+for (x, p) in [(x0, 0.7), (x1, 0.29), (x2,0.01)]
+    v[(x |&gt; vec |&gt; BitArray |&gt; packbits)+1] = sqrt(p)
+end</code></pre></div><p>Plot them, you will see these digits</p><p><img src="../../assets/figures/digits012.png" alt="digits"/></p><p>Then we construct the inference circuit. Here, we choose to use <code>reflect</code> to construct a <a href="../../man/blocks/#Yao.Blocks.ReflectBlock"><code>ReflectBlock</code></a>, instead of constructing it explicitly.</p><div><pre><code class="language-julia">rb = reflect(copy(v))
+psi0 = register(v)
+
+# we want to find the digits with the first 5 qubits [1, 0, 1, 1, 1].
+evidense = [1, -2, 3, 4, 5]
+oracle_infer = inference_oracle(evidense)(nbit)
+
+niter = num_grover_step(prob_match_oracle(psi0, oracle_infer))
+gb_infer = chain(nbit, chain(oracle_infer, rb) for i = 1:niter)</code></pre><pre><code class="language-none">Total: 15, DataType: Complex{Float64}
+chain
+├─ chain
+│  ├─ control(1, 2, 3, 4)
+│  │  └─ (5,)=&gt;Z gate
+│  └─
+├─ chain
+│  ├─ control(1, 2, 3, 4)
+│  │  └─ (5,)=&gt;Z gate
+│  └─
+├─ chain
+│  ├─ control(1, 2, 3, 4)
+│  │  └─ (5,)=&gt;Z gate
+│  └─
+├─ chain
+│  ├─ control(1, 2, 3, 4)
+│  │  └─ (5,)=&gt;Z gate
+│  └─
+├─ chain
+│  ├─ control(1, 2, 3, 4)
+│  │  └─ (5,)=&gt;Z gate
+│  └─
+├─ chain
+│  ├─ control(1, 2, 3, 4)
+│  │  └─ (5,)=&gt;Z gate
+│  └─
+└─ chain
+   ├─ control(1, 2, 3, 4)
+   │  └─ (5,)=&gt;Z gate
+   └─</code></pre></div><p>Now, let&#39;s start training</p><div><pre><code class="language-julia">for (i, blk) in enumerate(gb_infer)
+    apply!(psi0, blk)
+    p_target = prob_match_oracle(psi0, oracle_infer)
+    println(&quot;step $i, overlap^2 = $p_target&quot;)
+end</code></pre><pre><code class="language-none">step 1, overlap^2 = 0.08761600000000003
+step 2, overlap^2 = 0.23055362560000003
+step 3, overlap^2 = 0.4161715569049601
+step 4, overlap^2 = 0.6150679135961745
+step 5, overlap^2 = 0.7957375127737549
+step 6, overlap^2 = 0.9295622899279725
+step 7, overlap^2 = 0.9953444003575993</code></pre></div><p>The result is</p><div><pre><code class="language-julia">pl = psi0 |&gt; probs
+config = findn(pl.&gt;0.5)[] - 1 |&gt; bitarray(nbit)
+res = reshape(config, 5,3)</code></pre><pre><code class="language-none">5×3 BitArray{2}:
+  true   true   true
+ false  false   true
+  true   true   true
+  true  false  false
+  true   true   true</code></pre></div><p>It is 2 ~</p><p><img src="../../assets/figures/digit2.png" alt="infer"/></p><p>Congratuations! You get state of art quantum inference circuit!</p><footer><hr/><a class="previous" href="../QFT/"><span class="direction">Previous</span><span class="title">Quantum Fourier Transformation and Phase Estimation</span></a><a class="next" href="../QCBM/"><span class="direction">Next</span><span class="title">Quantum Circuit Born Machine</span></a></footer></article></body></html>
