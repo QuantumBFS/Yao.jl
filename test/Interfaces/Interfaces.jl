@@ -140,11 +140,8 @@ end
 end
 
 @testset "sequence" begin
-    sq = sequence(kron(3=>X), addbit(3), MEASURE)
-    @test sq isa Function
-    sqs = sq(5)
-    @test sqs isa Sequential
-    @test sqs == sequence(kron(5, 3=>X), addbit(3), MEASURE) == sequence((kron(5, 3=>X), addbit(3), MEASURE))
+    sqs = sequence(kron(5, 3=>X), addbit(3), MEASURE)
+    @test sqs == sequence((kron(5, 3=>X), addbit(3), MEASURE))
     insert!(sqs, 3, kron(8, 8=>X))
     push!(sqs, Reset)
     reg = register(bit"11111") |> sqs

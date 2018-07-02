@@ -6,20 +6,21 @@ export ReflectBlock
 Householder reflection with respect to some target state, ``|\\psi\\rangle = 2|s\\rangle\\langle s|-1``.
 """
 struct ReflectBlock{N, T} <: PrimitiveBlock{N, T}
-    state :: Vector{T}
+    psi :: DefaultRegister{1, T}
 end
-ReflectBlock(state::Vector{T}) where T = ReflectBlock{log2i(length(state)), T}(state)
-ReflectBlock(psi::DefaultRegister) = ReflectBlock(statevec(psi))
+ReflectBlock(psi::DefaultRegister{1, T}) where T = ReflectBlock{nqubits(psi), T}(psi)
+ReflectBlock(state::Vector{T}) where T = ReflectBlock(register(state))
 
 function apply!(r::DefaultRegister, g::ReflectBlock)
-    r.state[:,:] .= 2.* (g.state'*r.state) .* reshape(g.state, :, 1) - r.state
+    v = g.psi |> state
+    r.state[:,:] .= 2 .* (v'*r.state) .* v - r.state
     r
 end
 
-==(A::ReflectBlock, B::ReflectBlock) = A.state == B.state
-copy(r::ReflectBlock) = ReflectBlock(r.state)
+==(A::ReflectBlock, B::ReflectBlock) = A.psi == B.psi
+copy(r::ReflectBlock) = ReflectBlock(r.psi)
 
-mat(r::ReflectBlock) = 2*r.state*r.state' - IMatrix(length(r.state))
+mat(r::ReflectBlock) = (v = r.psi |> statevec; 2*v*v' - IMatrix(length(v)))
 isreflexive(::ReflectBlock) = true
 ishermitian(::ReflectBlock) = true
 isunitary(::ReflectBlock) = true

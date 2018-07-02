@@ -1,162 +1,172 @@
-# Grover Search and Inference
+# Grover Search and Quantum Inference
 
 ## Grover Search
 ![grover](../assets/figures/grover.png)
 
+First, we construct the reflection block ``R(|\psi\rangle) = 2|\psi\rangle\langle\psi|-1``, given we know how to construct ``|\psi\rangle=A|0\rangle``.
+Then it equivalent to construct $R(|\psi\rangle) = A(2|0\rangle\langle 0|-1)A^\dagger$
 ```@example Grover
 using Yao
-
-# Control-R(k) gate in block-A
-A(i::Int, j::Int, k::Int) = control([i, ], j=>shift(2π/(1<<k)))
-# block-B
-B(n::Int, i::Int) = chain(i==j ? kron(i=>H) : A(j, i, j-i+1) for j = i:n)
-QFT(n::Int) = chain(n, B(n, i) for i = 1:n)
-
-# define QFT and IQFT block.
-num_bit = 5
-qft = QFT(num_bit)
-iqft = adjoint(qft)
-```
-
-The basic building block - controled phase shift gate is defined as
-
-```math
-R(k)=\begin{bmatrix}
-1 & 0\\
-0 & \exp\left(\frac{2\pi i}{2^k}\right)
-\end{bmatrix}
-```
-In Yao, factory methods for blocks will be loaded lazily. For example, if you missed the total
-number of qubits of `chain`, then it will return a function that requires an input of an integer.
-So the following two statements are equivalent
-```@example QFT
-control([4, ], 1=>shift(-2π/(1<<4)))(5) == control(5, [4, ], 1=>shift(-2π/(1<<4)))
-```
-Both of then will return a `ControlBlock` instance. If you missed the total number of qubits. It is OK. Just go on, it will be filled when its possible.
-
-Once you have construct a block, you can inspect its matrix using `mat` function.
-Let's construct the circuit in dashed box A, and see the matrix of ``R_4`` gate
-```julia
-julia> a = A(4, 1, 4)(5)
-Total: 5, DataType: Complex{Float64}
-control(4)
-└─ 1=>Phase Shift Gate:-0.39269908169872414
-
-
-julia> mat(a.block)
-2×2 Diagonal{Complex{Float64}}:
- 1.0+0.0im          ⋅         
-     ⋅      0.92388-0.382683im
-```
-
-Similarly, you can use `put` and `chain` to construct `PutBlock` (basic placement of a single gate) and `ChainBlock` (sequential application of `MatrixBlock`s) instances. `Yao.jl` view every component in a circuit as an `AbstractBlock`, these blocks can be integrated to perform higher level functionality.
-
-You can check the result using classical `fft`
-```@example QFT
-# if you're using lastest julia, you need to add the fft package.
-@static if VERSION >= v"0.7-"
-    using FFTW
-end
-using Compat.Test
-
-@test chain(num_bit, qft, iqft) |> mat ≈ eye(2^num_bit)
-
-# define a register and get its vector representation
-reg = rand_state(num_bit)
-rv = reg |> statevec |> copy
-
-# test fft
-reg_qft = apply!(copy(reg) |>invorder!, qft)
-kv = ifft(rv)*sqrt(length(rv))
-@test reg_qft |> statevec ≈ kv
-
-# test ifft
-reg_iqft = apply!(copy(reg), iqft)
-kv = fft(rv)/sqrt(length(rv))
-@test reg_iqft |> statevec ≈ kv |> invorder
-```
-
-QFT and IQFT are different from FFT and IFFT in three ways,
-
-1. they are different by a factor of ``\sqrt{2^n}`` with ``n`` the number of qubits.
-2. the little end and big end will exchange after applying QFT or IQFT.
-3. due to the convention, QFT is more related to IFFT rather than FFT.
-
-
-## Phase Estimation
-Since we have QFT and IQFT blocks we can then use them to realize phase estimation circuit, what we want to realize is the following circuit
-![phase estimation](../assets/figures/phaseest.png)
-
-In the following simulation, we use equivalent `QFTBlock` in the Yao.`Zoo` module rather than the above chain block,
-it is faster than the above construction because it hides all the simulation details (yes, we are cheating :D) and get the equivalent output.
-
-```@example PhaseEstimation
-using Yao
-using Yao.Zoo
 using Yao.Blocks
+using Compat
+using Compat.Test
+using StatsBase
+
+"""
+A way to construct oracle, e.g. inference_oracle([1,2,-3,5]) will
+invert the sign when a qubit configuration matches: 1=>1, 2=>1, 3=>0, 5=>1.
+"""
+function inference_oracle(locs::Vector{Int})
+    control(locs[1:end-1], abs(locs[end]) => (locs[end]>0 ? Z : chain(phase(π), Z)))
+end
+
+function reflectblock(A::MatrixBlock{N}) where N
+    chain(N, A |> adjoint, inference_oracle(-collect(1:N)), A)
+end
+
+nbit = 12
+A = repeat(nbit, H)
+ref = reflectblock(A)
+
+@testset "test reflect" begin
+    reg = rand_state(nbit)
+    ref_vec = apply!(zero_state(nbit), A) |> statevec
+    v0 = reg |> statevec
+    @test -2*(ref_vec'*v0)*ref_vec + v0 ≈ apply!(copy(reg), ref) |> statevec
+end
+```
+Then we define the oracle and target state
+
+```@example Grover
+# first, construct the oracle with desired state in the range 100-105.
+oracle!(reg::DefaultRegister) = (reg.state[100:105,:]*=-1; reg)
+
+# transform it into a function block, so it can be put inside a `Sequential`.
+fb_oracle = FunctionBlock{:Oracle}(reg->oracle!(reg))
+
+"""
+ratio of components in a wavefunction that flip sign under oracle.
+"""
+function prob_match_oracle(psi::DefaultRegister, oracle)
+    fliped_reg = apply!(register(ones(Complex128, 1<<nqubits(psi))), oracle)
+    match_mask = fliped_reg |> statevec |> real .< 0
+    norm(statevec(psi)[match_mask])^2
+end
+
+# uniform state as initial state
+psi0 = apply!(zero_state(nbit), A)
+
+# the number of grover steps that can make it reach first maximum overlap.
+num_grover_step(prob::Real) = Int(round(pi/4/sqrt(prob)))-1
+niter = num_grover_step(prob_match_oracle(psi0, fb_oracle))
+
+# construct the whole circuit
+gb = sequence(sequence(fb_oracle, ref) for i = 1:niter);
+```
+
+Now, let's start training
+```@example Grover
+for (i, blk) in enumerate(gb)
+    apply!(psi0, blk)
+    overlap = prob_match_oracle(psi0, fb_oracle)
+    println("step $i, overlap = $overlap")
+end
+```
+
+The above is the standard Grover Search algorithm, it can find target state in $O(\sqrt N)$ time, with $N$ the size of an unordered database.
+Similar algorithm can be used in more useful applications, like inference, i.e. get conditional probability distribution $p(x|y)$ given $p(x, y)$.
+
+```@example Grover
+function rand_circuit(nbit::Int, ngate::Int)
+    circuit = chain(nbit)
+    gate_list = [X, H, Ry(0.3), CNOT]
+    for i = 1:ngate
+        gate = rand(gate_list)
+        push!(circuit, put(nbit, (sample(1:nbit, nqubits(gate),replace=false)...,)=>gate))
+    end
+    circuit
+end
+A = rand_circuit(nbit, 200)
+psi0 = apply!(zero_state(nbit), A)
+
+# now we want to search the subspace with [1,3,5,8,9,11,12]
+# fixed to 1 and [4,6] fixed to 0.
+evidense = [1, 3, -4, 5, -6, 8, 9, 11, 12]
+
+"""
+Doing Inference, psi is the initial state,
+the target is to search target space with specific evidense.
+e.g. evidense [1, -3, 6] means the [1, 3, 6]-th bits take value [1, 0, 1].
+"""
+oracle_infer = inference_oracle(evidense)(nqubits(psi0))
+
+niter = num_grover_step(prob_match_oracle(psi0, oracle_infer))
+gb_infer = chain(nbit, chain(oracle_infer, reflectblock(A)) for i = 1:niter);
+```
+
+Now, let's start training
+```@example Grover
+for (i, blk) in enumerate(gb_infer)
+    apply!(psi0, blk)
+    p_target = prob_match_oracle(psi0, oracle_infer)
+    println("step $i, overlap^2 = $p_target")
+end
+```
+
+Here is an application, suppose we have constructed some digits and stored it in a wave vector.
+
+```@example Grover
 using Yao.Intrinsics
 
-function phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::GeneralMatrixGate{N}, nshot::Int=1) where {N}
-    M = nqubits(reg1)
-    iqft = QFTBlock{M}() |> adjoint
-    HGates = rollrepeat(M, H)
+x1 = [0 1 0; 0 1 0; 0 1 0; 0 1 0; 0 1 0]
+x2 = [1 1 1; 0 0 1; 1 1 1; 1 0 0; 1 1 1]
+x0 = [1 1 1; 1 0 1; 1 0 1; 1 0 1; 1 1 1]
 
-    control_circuit = chain(M+N)
-    for i = 1:M
-        push!(control_circuit, control(M+N, (i,), (M+1:M+N...,)=>U))
-        if i != M
-            U = matrixgate(mat(U) * mat(U))
-        end
-    end
+nbit = 15
+v = zeros(1<<nbit)
 
-    # calculation
-    # step1 apply hadamard gates.
-    apply!(reg1, HGates)
-    # join two registers
-    reg = join(reg1, reg2)
-    # using iqft to read out the phase
-    apply!(reg, sequence(control_circuit, focus(1:M...), iqft))
-    # measure the register (on focused bits), if the phase can be exactly represented by M qubits, only a single shot is needed.
-    res = measure(reg, nshot)
-    # inverse the bits in result due to the exchange of big and little ends, so that we can get the correct phase.
-    breflect.(M, res)./(1<<M), reg
+# they occur with different probabilities.
+for (x, p) in [(x0, 0.7), (x1, 0.29), (x2,0.01)]
+    v[(x |> vec |> BitArray |> packbits)+1] = sqrt(p)
 end
 ```
-Here, `reg1` (``Q_{1-5}``) is used as the output space to store phase ϕ, and `reg2` (``Q_{6-8}``) is the input state which corresponds to an eigenvector of oracle matrix `U`.
-The algorithm detials can be found [here](https://en.wikipedia.org/wiki/Quantum_phase_estimation_algorithm).
+Plot them, you will see these digits
 
-In this function, `HGates` corresponds to circuit block in dashed box `A`, `control_circuit` corresponds to block in dashed box `B`.
-`matrixgate` is a factory function for `GeneralMatrixGate`.
+![digits](../assets/figures/digits012.png)
 
-Here, the only difficult concept is `focus`, `focus` returns a `FunctionBlock`, that will make focused bits the active bits.
-An operator sees only active bits, and operating active space is more efficient, most importantly, it becomes much easier to integrate blocks.
-However, it has the potential ability to change line orders, for safety consideration, you may also need safer [`Concentrator`](@ref).
+Then we construct the inference circuit.
+Here, we choose to use `reflect` to construct a [`ReflectBlock`](@ref),
+instead of constructing it explicitly.
+```@example Grover
+rb = reflect(copy(v))
+psi0 = register(v)
 
-```@example PhaseEstimation
-r = rand_state(6)
-apply!(r, focus(4,1,2))  # or equivalently using focus!(r, [4,1,2])
-nactive(r)
+# we want to find the digits with the first 5 qubits [1, 0, 1, 1, 1].
+evidense = [1, -2, 3, 4, 5]
+oracle_infer = inference_oracle(evidense)(nbit)
+
+niter = num_grover_step(prob_match_oracle(psi0, oracle_infer))
+gb_infer = chain(nbit, chain(oracle_infer, rb) for i = 1:niter)
 ```
 
-Then we will have a check to above function
-
-```@example PhaseEstimation
-rand_unitary(N::Int) = qr(randn(N, N))[1]
-
-M = 5
-N = 3
-
-# prepair oracle matrix U
-V = rand_unitary(1<<N)
-phases = rand(1<<N)
-ϕ = Int(0b11101)/(1<<M)
-phases[3] = ϕ  # set the phase of the 3rd eigenstate manually.
-signs = exp.(2pi*im.*phases)
-U = V*Diagonal(signs)*V'  # notice U is unitary
-
-# the state with phase ϕ
-psi = U[:,3]
-
-res, reg = phase_estimation(zero_state(M), register(psi), GeneralMatrixGate(U))
-println("Phase is 2π * $(res[]), the exact value is 2π * $ϕ")
+Now, let's start training
+```@example Grover
+for (i, blk) in enumerate(gb_infer)
+    apply!(psi0, blk)
+    p_target = prob_match_oracle(psi0, oracle_infer)
+    println("step $i, overlap^2 = $p_target")
+end
 ```
+
+The result is
+```@example Grover
+pl = psi0 |> probs
+config = findn(pl.>0.5)[] - 1 |> bitarray(nbit)
+res = reshape(config, 5,3)
+```
+
+It is 2 ~
+
+![infer](../assets/figures/digit2.png)
+
+Congratuations! You get state of art quantum inference circuit!
