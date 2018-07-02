@@ -61,7 +61,7 @@ num_grover_step(prob::Real) = Int(round(pi/4/sqrt(prob)))-1
 niter = num_grover_step(prob_match_oracle(psi0, fb_oracle))
 
 # construct the whole circuit
-gb = sequence(sequence(fb_oracle, ref) for i = 1:niter)
+gb = sequence(sequence(fb_oracle, ref) for i = 1:niter);
 ```
 
 Now, let's start training
@@ -69,7 +69,7 @@ Now, let's start training
 for (i, blk) in enumerate(gb)
     apply!(psi0, blk)
     overlap = prob_match_oracle(psi0, fb_oracle)
-    println("step $(i-1), overlap = $overlap")
+    println("step $i, overlap = $overlap")
 end
 ```
 
@@ -109,8 +109,64 @@ Now, let's start training
 for (i, blk) in enumerate(gb_infer)
     apply!(psi0, blk)
     p_target = prob_match_oracle(psi0, oracle_infer)
-    println("step $(i-1), overlap^2 = $p_target")
+    println("step $i, overlap^2 = $p_target")
 end
 ```
+
+Here is an application, suppose we have constructed some digits and stored it in a wave vector.
+
+```@example Grover
+using Yao.Intrinsics
+
+x1 = [0 1 0; 0 1 0; 0 1 0; 0 1 0; 0 1 0]
+x2 = [1 1 1; 0 0 1; 1 1 1; 1 0 0; 1 1 1]
+x0 = [1 1 1; 1 0 1; 1 0 1; 1 0 1; 1 1 1]
+
+nbit = 15
+v = zeros(1<<nbit)
+
+# they occur with different probabilities.
+for (x, p) in [(x0, 0.7), (x1, 0.29), (x2,0.01)]
+    v[(x |> vec |> BitArray |> packbits)+1] = sqrt(p)
+end
+```
+Plot them, you will see these digits
+
+![digits](../assets/figures/digits012.png)
+
+Then we construct the inference circuit.
+Here, we choose to use `reflect` to construct a [`ReflectBlock`](@ref),
+instead of constructing it explicitly.
+```@example Grover
+rb = reflect(copy(v))
+psi0 = register(v)
+
+# we want to find the digits with the first 5 qubits [1, 0, 1, 1, 1].
+evidense = [1, -2, 3, 4, 5]
+oracle_infer = inference_oracle(evidense)(nbit)
+
+niter = num_grover_step(prob_match_oracle(psi0, oracle_infer))
+gb_infer = chain(nbit, chain(oracle_infer, rb) for i = 1:niter)
+```
+
+Now, let's start training
+```@example Grover
+for (i, blk) in enumerate(gb_infer)
+    apply!(psi0, blk)
+    p_target = prob_match_oracle(psi0, oracle_infer)
+    println("step $i, overlap^2 = $p_target")
+end
+```
+
+The result is
+```@example Grover
+pl = psi0 |> probs
+config = findn(pl.>0.5)[] - 1 |> bitarray(nbit)
+res = reshape(config, 5,3)
+```
+
+It is 2 ~
+
+![infer](../assets/figures/digit2.png)
 
 Congratuations! You get state of art quantum inference circuit!
