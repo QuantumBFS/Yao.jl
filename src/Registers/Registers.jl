@@ -24,7 +24,7 @@ export register, zero_state, rand_state, randn_state, stack, uniform_state
 
 # bit_str
 export @bit_str, asindex
-export DensityMatrix, density_matrix
+export DensityMatrix, density_matrix, ρ
 export fidelity, tracedist
 
 

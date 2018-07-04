@@ -5,6 +5,20 @@ end
 DensityMatrix(state::MT) where {T, MT<:AbstractArray{T, 3}} = DensityMatrix{size(state, 3), T, MT}(state)
 DensityMatrix(state::MT) where {T, MT<:AbstractArray{T, 2}} = (state=state[:,:,1:1]; DensityMatrix{1, T, typeof(state)}(state))
 
+"""
+    density_matrix(register)
+
+Returns the density matrix of this register.
+"""
+function density_matrix end
+
+"""
+    ρ(register)
+
+Returns the density matrix of this register.
+"""
+const ρ = density_matrix
+
 density_matrix(reg::DefaultRegister{1}) = DensityMatrix(reg.state*reg.state')
 
 function density_matrix(reg::DefaultRegister{B}) where B
