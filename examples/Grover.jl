@@ -1,13 +1,13 @@
 using Yao
-using Yao.Zoo: GroverIter, inference_oracle, prob_match_oracle
+using Yao.Zoo: groveriter!, inference_oracle, prob_match_oracle
 
 num_bit = 12
 oracle(reg::DefaultRegister) = (reg.state[100:101,:]*=-1; reg)
 target_state = zeros(1<<num_bit); target_state[100:101] = sqrt(0.5)
 
 # then solve the above problem
-it = GroverIter(oracle, uniform_state(num_bit))
-for (i, psi) in it
+it = groveriter!(uniform_state(num_bit), oracle)
+for (i, psi) in enumerate(it)
     overlap = abs(statevec(psi)'*target_state)
     println("step $(i-1), overlap = $overlap")
 end
@@ -23,8 +23,8 @@ Doing Inference, psi is the initial state, we want to search target space with s
 e.g. evidense [1, -3, 6] means the [1, 3, 6]-th bits take value [1, 0, 1].
 """
 oracle_infer = inference_oracle(evidense)(nqubits(psi))
-it = GroverIter(oracle_infer, psi)
-for (i, psi) in it
+it = groveriter!(psi, oracle_infer)
+for (i, psi) in enumerate(it)
     p_target = prob_match_oracle(psi, oracle_infer)
     println("step $(i-1), overlap^2 = $p_target")
 end

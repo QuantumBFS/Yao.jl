@@ -1,4 +1,4 @@
-export diff_circuit, num_gradient, rotter, cnot_entangler, opgrad, collect_rotblocks
+export diff_circuit, num_gradient, rotter, cnot_entangler, opgrad, collect_rotblocks, perturb
 
 """
     rotter(noleading::Bool=false, notrailing::Bool=false) -> ChainBlock{1, ComplexF64}

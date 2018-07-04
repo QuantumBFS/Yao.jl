@@ -18,6 +18,7 @@ makedocs(
         "Tutorial" => Any[
             "tutorial/GHZ.md",
             "tutorial/QFT.md",
+            "tutorial/Grover.md",
             "tutorial/QCBM.md",
         ],
         "Manual" => Any[
