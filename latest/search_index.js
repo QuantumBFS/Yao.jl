@@ -625,6 +625,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/registers/#Yao.Registers.density_matrix",
+    "page": "Registers",
+    "title": "Yao.Registers.density_matrix",
+    "category": "function",
+    "text": "density_matrix(register)\n\nReturns the density matrix of this register.\n\n\n\n"
+},
+
+{
     "location": "man/registers/#Yao.Registers.extend!-Union{Tuple{B}, Tuple{T}, Tuple{Yao.Registers.DefaultRegister{B,T},Int64}} where T where B",
     "page": "Registers",
     "title": "Yao.Registers.extend!",
@@ -726,6 +734,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Registers.tracedist",
     "category": "function",
     "text": "tracedist(reg1::DefaultRegister, reg2::DefaultRegister) -> Vector\ntracedist(reg1::DensityMatrix, reg2::DensityMatrix) -> Vector\n\ntrace distance.\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.ρ",
+    "page": "Registers",
+    "title": "Yao.Registers.ρ",
+    "category": "function",
+    "text": "ρ(register)\n\nReturns the density matrix of this register.\n\n\n\n"
 },
 
 {
