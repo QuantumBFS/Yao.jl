@@ -109,50 +109,19 @@ gb_infer = chain(nbit, chain(oracle_infer, reflectblock(A)) for i = 1:niter);</c
     apply!(psi0, blk)
     p_target = prob_match_oracle(psi0, oracle_infer)
     println(&quot;step $i, overlap^2 = $p_target&quot;)
-end</code></pre><pre><code class="language-none">step 1, overlap^2 = 0.002778373763652193
-step 2, overlap^2 = 0.007704992371948797
-step 3, overlap^2 = 0.01506447178546724
-step 4, overlap^2 = 0.024820442370685647
-step 5, overlap^2 = 0.03692469133225572
-step 6, overlap^2 = 0.0513174009746513
-step 7, overlap^2 = 0.06792744431379283
-step 8, overlap^2 = 0.08667273657777155
-step 9, overlap^2 = 0.1074606408596011
-step 10, overlap^2 = 0.13018842591730986
-step 11, overlap^2 = 0.1547437738589839
-step 12, overlap^2 = 0.1810053352038438
-step 13, overlap^2 = 0.20884332857631216
-step 14, overlap^2 = 0.23812018206945795
-step 15, overlap^2 = 0.26869121310828004
-step 16, overlap^2 = 0.3004053434530296
-step 17, overlap^2 = 0.3331058458091132
-step 18, overlap^2 = 0.3666311183539226
-step 19, overlap^2 = 0.4008154833529806
-step 20, overlap^2 = 0.4354900059187316
-step 21, overlap^2 = 0.4704833288657822
-step 22, overlap^2 = 0.5056225195368379
-step 23, overlap^2 = 0.5407339244144216
-step 24, overlap^2 = 0.5756440272949978
-step 25, overlap^2 = 0.6101803067845067
-step 26, overlap^2 = 0.6441720888776754
-step 27, overlap^2 = 0.6774513904077585
-step 28, overlap^2 = 0.7098537491984931
-step 29, overlap^2 = 0.7412190368157551
-step 30, overlap^2 = 0.7713922499023981
-step 31, overlap^2 = 0.8002242761856011
-step 32, overlap^2 = 0.8275726313712048
-step 33, overlap^2 = 0.8533021632834068
-step 34, overlap^2 = 0.8772857197700291
-step 35, overlap^2 = 0.8994047770726713
-step 36, overlap^2 = 0.9195500255564053
-step 37, overlap^2 = 0.9376219099044246
-step 38, overlap^2 = 0.9535311211080534
-step 39, overlap^2 = 0.9671990378207842
-step 40, overlap^2 = 0.9785581148952052
-step 41, overlap^2 = 0.9875522171827388
-step 42, overlap^2 = 0.994136896946571
-step 43, overlap^2 = 0.9982796135168527
-step 44, overlap^2 = 0.9999598941026442</code></pre></div><p>Here is an application, suppose we have constructed some digits and stored it in a wave vector.</p><div><pre><code class="language-julia">using Yao.Intrinsics
+end</code></pre><pre><code class="language-none">step 1, overlap^2 = 0.027516364104574125
+step 2, overlap^2 = 0.07518234856530409
+step 3, overlap^2 = 0.14373685297634797
+step 4, overlap^2 = 0.22980901426683548
+step 5, overlap^2 = 0.3291666164442997
+step 6, overlap^2 = 0.43692419100645236
+step 7, overlap^2 = 0.5477832381418135
+step 8, overlap^2 = 0.6562927569092963
+step 9, overlap^2 = 0.7571172739830647
+step 10, overlap^2 = 0.845299191840361
+step 11, overlap^2 = 0.9165025565861457
+step 12, overlap^2 = 0.967226259215181
+step 13, overlap^2 = 0.9949761870870385</code></pre></div><p>Here is an application, suppose we have constructed some digits and stored it in a wave vector.</p><div><pre><code class="language-julia">using Yao.Intrinsics
 
 x1 = [0 1 0; 0 1 0; 0 1 0; 0 1 0; 0 1 0]
 x2 = [1 1 1; 0 0 1; 1 1 1; 1 0 0; 1 1 1]
