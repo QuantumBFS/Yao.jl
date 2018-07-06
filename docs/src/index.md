@@ -19,6 +19,7 @@ future, before quantum computer being used in large-scale.
 Pages = [
     "tutorial/GHZ.md",
     "tutorial/QFT.md",
+    "tutorial/Grover.md",
     "tutorial/QCBM.md",
 ]
 Depth = 1
