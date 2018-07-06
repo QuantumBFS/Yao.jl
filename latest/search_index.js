@@ -21,7 +21,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Tutorial",
     "category": "section",
-    "text": "Pages = [\n    \"tutorial/GHZ.md\",\n    \"tutorial/QFT.md\",\n    \"tutorial/QCBM.md\",\n]\nDepth = 1"
+    "text": "Pages = [\n    \"tutorial/GHZ.md\",\n    \"tutorial/QFT.md\",\n    \"tutorial/Grover.md\",\n    \"tutorial/QCBM.md\",\n]\nDepth = 1"
 },
 
 {
