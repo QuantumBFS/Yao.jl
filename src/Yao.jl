@@ -46,4 +46,12 @@ include("Zoo/Zoo.jl")
 
 @reexport using .Interfaces
 
+function __init__()
+    try
+        info("using CPU")
+    catch e
+        info("using CPU")
+    end
+end
+
 end # module

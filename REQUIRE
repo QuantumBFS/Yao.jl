@@ -8,3 +8,4 @@ Reexport
 StatsBase
 Lazy
 FFTW
+CUDAapi
