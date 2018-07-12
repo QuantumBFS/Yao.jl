@@ -5,7 +5,7 @@ for (G, MATFUNC) in zip(GATES, [:xgate, :ygate, :zgate])
     @eval function mat(rb::RepeatedBlock{N, C, GT, MT}) where {N, C, MT, GT <: $GGate}
         $MATFUNC(MT, N, [rb.addrs...])
     end
-    @eval function put(rb::PutBlock{N, 1, GT}) where {N, GT <: $GGate}
+    @eval function mat(rb::PutBlock{N, 1, GT}) where {N, GT <: $GGate}
         $MATFUNC(MT, N, [rb.addrs...])
     end
 end
