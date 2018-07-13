@@ -17,6 +17,7 @@ RotationGate(U::GT, theta) where {N, T, GT<:MatrixBlock{N, Complex{T}}} = Rotati
 
 _make_rot_mat(I, U, theta) = I * cos(theta / 2) - im * sin(theta / 2) * U
 mat(R::RotationGate{N, T}) where {N, T} = _make_rot_mat(IMatrix{1<<N, Complex{T}}(), mat(R.U), R.theta)
+mat(R::RotationGate{N, T, <:Union{XGate, YGate}}) where {N, T} = _make_rot_mat(IMatrix{1<<N, Complex{T}}(), mat(R.U), R.theta) |> Matrix
 adjoint(blk::RotationGate) = RotationGate(blk.U, -blk.theta)
 
 copy(R::RotationGate) = RotationGate(R.U, R.theta)

@@ -37,10 +37,11 @@ end
 @testset "Put" begin
     reg1 = rand_state(5)
     reg2 = rand_state(5, 2)
-    for G in [H, rot(X, 0.5), rot(Z, 0.5), I2]
+    for G in [H, rot(X, 0.5), rot(Z, 0.5), I2, X, Y, Z]
         rb = put(5, (5,3)=>control(2, (1,), 2=>G))
         res = mat(control(5, (5,), 3=>G))
         @test applymatrix(rb) ≈ res
+        @test applymatrix(put(5, 3=>G)) ≈ mat(put(5, 3=>G))
     end
     b1 = put(5, (5,3,1)=>control(3, (-1, 3), 2=>rot(X, 0.3)))
     b2 = control(5, (-5, 1), 3=>rot(X, 0.3))
