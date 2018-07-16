@@ -42,7 +42,7 @@ function apply!(reg::AbstractRegister{B}, m::Roller{N}) where {B, N}
     st = reg.state
     for block in m.blocks
         K = nqubits(block)
-        st[:] = vec(mat(block) * reshape(st, 1<<K, :))
+        st[:] = vec(mat(block) * reshape(st, 1<<K, :)) # TODO: optimize this?
         rolldims!(Val(K), Val(N), Val(B), statevec(reg))
     end
     reg
