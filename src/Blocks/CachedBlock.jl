@@ -33,6 +33,10 @@ end
 clear!(x::MatrixBlock) = x
 clear!(c::CachedBlock) = (clear!(c.server, c.block); c)
 
+import Compat.SparseArrays: dropzeros!
+
+dropzeros!(A::AbstractArray, trim::Bool=true) = A
+
 # forward methods
 function mat(c::CachedBlock)
     if !iscached(c.server, c.block)

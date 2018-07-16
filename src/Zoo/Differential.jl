@@ -5,7 +5,13 @@ export diff_circuit, num_gradient, rotter, cnot_entangler, opgrad, collect_rotbl
 
 Arbitrary rotation unit, set parameters notrailing, noleading true to remove trailing and leading Z gates.
 """
-rotter(noleading::Bool=false, notrailing::Bool=false) = noleading ? (notrailing ? Rx(0) : chain(Rx(0), Rz(0))) : (notrailing ? chain(Rz(0), Rx(0)) : chain(Rz(0), Rz(0), Rz(0)))
+function rotter(noleading::Bool=false, notrailing::Bool=false)
+    g = chain(1)
+    !noleading && push!(g, Rz(0))
+    push!(g, Rx(0))
+    !notrailing && push!(g, Rz(0))
+    g
+end
 
 """
     cnot_entangler([n::Int, ] pairs::Vector{Pair}) = ChainBlock
@@ -14,6 +20,11 @@ Arbitrary rotation unit, support lazy construction.
 """
 cnot_entangler(n::Int, pairs) = chain(n, control(n, [ctrl], target=>X) for (ctrl, target) in pairs)
 cnot_entangler(pairs) = n->cnot_entangler(n, pairs)
+
+layer(tag::Symbol) = layer(Val(tag))
+layer(::Val{:first}) = n->chain(n, put(i=>cache(rotter(true, false))) for i=1:n)
+layer(::Val{:mid}) = n->chain(n, put(i=>cache(rotter(false, false))) for i=1:n)
+layer(::Val{:last}) = n->chain(n, put(i=>cache(rotter(false, true))) for i=1:n)
 
 """
     diff_circuit(n, nlayer, pairs) -> ChainBlock
@@ -28,13 +39,14 @@ ref:
 function diff_circuit(n, nlayer, pairs)
     circuit = chain(n)
 
-    for i = 1:(nlayer + 1)
-        if i!=1  push!(circuit, cnot_entangler(pairs) |> cache) end
-        push!(circuit, rollrepeat(n, rotter(i==1, i==nlayer+1)))
-        #for j = 1:n
-        #    push!(circuit, put(n, j=>rotter(i==1, i==nlayer+1)))
-        #end
+    push!(circuit, layer(:first))
+    for i = 1:(nlayer - 1)
+        push!(circuit, cache(cnot_entangler(pairs)))
+        push!(circuit, layer(:mid))
     end
+
+    push!(circuit, cache(cnot_entangler(pairs)))
+    push!(circuit, layer(:last))
     dispatch!(circuit, rand(nparameters(circuit))*2π)
 end
 
@@ -51,7 +63,7 @@ end
 
 """
     perturb(func, gates::Vector{<:RotationGate}, diff::Real) -> Matrix
-    
+
 perturb every rotation gates, and evaluate losses.
 The i-th element of first column of resulting Matrix corresponds to Gi(θ+δ), and the second corresponds to Gi(θ-δ).
 """
@@ -93,5 +105,3 @@ function opgrad(op_expect, rots::Vector{<:RotationGate})
     gperturb = perturb(op_expect, rots, π/2)
     (gperturb[:,1] - gperturb[:,2])/2
 end
-
-
