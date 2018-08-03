@@ -33,7 +33,6 @@ end
 include("APIs.jl")
 
 include("LuxurySparse/LuxurySparse.jl")
-include("CacheServers/CacheServers.jl")
 
 include("Intrinsics/Intrinsics.jl")
 include("Registers/Registers.jl")

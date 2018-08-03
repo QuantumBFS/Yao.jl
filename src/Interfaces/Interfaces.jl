@@ -4,7 +4,7 @@ using Reexport
 using ..Registers
 using ..Blocks
 using ..Blocks: _blockpromote
-using ..CacheServers
+using CacheServers
 using ..Intrinsics
 
 # import package configs
