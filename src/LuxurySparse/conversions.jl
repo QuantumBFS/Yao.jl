@@ -53,8 +53,15 @@ PermMatrix(X::IMatrix{N, T}) where {N, T} = PermMatrix{T, Int}(X)
 
 PermMatrix{Tv, Ti}(A::PermMatrix) where {Tv, Ti} = PermMatrix(Vector{Ti}(A.perm), Vector{Tv}(A.vals))
 
+function _findnz(A::AbstractMatrix)
+    I = findall(!iszero, A)
+    getindex.(I, 1), getindex.(I, 2), A[I]
+end
+
+_findnz(A::AbstractSparseArray) = findnz(A)
+
 function PermMatrix{Tv, Ti}(A::AbstractMatrix) where {Tv, Ti}
-    i,j,v = findnz(A)
+    i, j, v = _findnz(A)
     j == collect(1:size(A, 2)) || throw(ArgumentError("This is not a PermMatrix"))
     order = invperm(i)
     PermMatrix{Tv, Ti}(Vector{Ti}(order), Vector{Tv}(v[order]))

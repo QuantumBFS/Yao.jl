@@ -4,6 +4,7 @@ using ..Registers
 using ..Blocks
 using ..Intrinsics
 using ..LuxurySparse
+using LinearAlgebra
 
 import ..Blocks: mat, apply!
 import ..Intrinsics: u1apply!, unapply!, general_controlled_gates, general_c1_gates, unrows!

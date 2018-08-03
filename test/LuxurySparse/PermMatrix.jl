@@ -4,7 +4,7 @@ using Compat.Random
 using Yao
 import Yao.LuxurySparse: PermMatrix, pmrand
 
-srand(2)
+Random.seed!(2)
 p1 = PermMatrix([1,4,2,3],[0.1, 0.2, 0.4im, 0.5])
 p2 = PermMatrix([2,1,4,3],[0.1, 0.2, 0.4, 0.5])
 #p3 = PermMatrix([4,1,2,3],[0.5, 0.4im, 0.3, 0.2])

@@ -13,7 +13,7 @@ inference_oracle(nbit::Int, locs::Vector{Int}) = inference_oracle(locs)(nbit)
 
 Return a mask, that disired subspace of an oracle are masked true.
 """
-target_space(num_bit::Int, oracle) = (register(ones(Complex128, 1<<num_bit)) |> oracle |> statevec |> real) .< 0
+target_space(num_bit::Int, oracle) = (register(ones(ComplexF64, 1<<num_bit)) |> oracle |> statevec |> real) .< 0
 prob_inspace(psi::DefaultRegister, ts) = norm(statevec(psi)[ts])^2
 
 """

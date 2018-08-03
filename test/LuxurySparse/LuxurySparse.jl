@@ -7,7 +7,6 @@ using Compat.SparseArrays
     include("IMatrix.jl")
 end
 
-
 @testset "PermMatrix" begin
     include("PermMatrix.jl")
 end

@@ -5,7 +5,7 @@ using Compat.Random
 using Yao
 import Yao.LuxurySparse: IMatrix, PermMatrix
 
-srand(2)
+Random.seed!(2)
 
 p1 = IMatrix{4}()
 sp = sprand(ComplexF64, 4,4, 0.5)

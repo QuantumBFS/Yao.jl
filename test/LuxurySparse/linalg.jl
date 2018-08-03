@@ -5,7 +5,7 @@ using Compat.LinearAlgebra
 using Yao
 import Yao.LuxurySparse: IMatrix, PermMatrix, notdense
 
-srand(2)
+Random.seed!(2)
 
 p1 = IMatrix{4}()
 sp = sprand(ComplexF64, 4,4, 0.5)
@@ -21,7 +21,7 @@ dv = Diagonal(v)
     @test diag(p1) == diag(Matrix(p1))
     @test logdet(p1) == 0
     @test inv(pm) == inv(Matrix(pm))
-    
+
     for m in [pm, sp, p1, dv]
         @test m |> notdense
         @test m' |> notdense
@@ -59,7 +59,7 @@ end
 
 @testset "mul-vector" begin
     # permutation multiply
-    lres = RowVector(conj(v))*pm  #! v' not realized!
+    lres = transpose(conj(v))*pm  #! v' not realized!
     rres = pm*v
     flres = v' * Matrix(pm)
     frres = Matrix(pm) * v

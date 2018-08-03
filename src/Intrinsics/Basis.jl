@@ -212,8 +212,6 @@ Base.eltype(::Reorderer) = Int
 Base.eltype(::Type{Reorderer}) = Int
 Base.length(::Reorderer{N}) where N = 1<<N
 Base.size(::Reorderer{N}) where N = 1<<N
-Base.iteratoreltype(::Type{Reorderer}) = Int
-Base.iteratorsize(::Type{Reorderer}) = 1<<N
 
 @inline function _reorder(b::Int, taker::Vector{Int}, differ::Vector{Int})::Int
     out::Int = 0

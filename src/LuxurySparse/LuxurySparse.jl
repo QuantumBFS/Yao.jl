@@ -8,7 +8,7 @@ using StaticArrays: SVector, SMatrix
 
 import Compat: copyto!
 import Compat.LinearAlgebra: ishermitian
-import Compat.SparseArrays: SparseMatrixCSC, nnz, nonzeros, dropzeros!
+import Compat.SparseArrays: SparseMatrixCSC, nnz, nonzeros, dropzeros!, findnz
 import Base: getindex, size, similar, copy, show
 
 export PermMatrix, pmrand, IMatrix, I, fast_invperm, notdense
