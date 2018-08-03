@@ -18,10 +18,6 @@ end
 include("Blocks/Blocks.jl")
 end
 
-@testset "cache" begin
-include("CacheServers/CacheServers.jl")
-end
-
 @testset "boost" begin
 include("Boost/Boost.jl")
 end

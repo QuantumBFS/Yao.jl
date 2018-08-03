@@ -2,7 +2,7 @@ using Compat
 using Compat.Test
 
 using Yao.Blocks
-using Yao.CacheServers
+using CacheServers
 using Yao.LuxurySparse
 
 @testset "constructor" begin
