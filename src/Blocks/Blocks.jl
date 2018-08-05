@@ -7,6 +7,8 @@ using Compat.LinearAlgebra
 using Compat.SparseArrays
 using Lazy: @forward
 using DataStructures
+using LinearMaps
+using Expokit: expmv
 import IterTools
 
 using ..Intrinsics
