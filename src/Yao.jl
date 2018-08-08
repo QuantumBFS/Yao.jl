@@ -16,7 +16,7 @@ Extensible Framework for Quantum Algorithm Design for Humans.
 """
 const 幺 = Yao
 
-using Compat, MacroTools, Reexport, LuxurySparse
+using MacroTools, Reexport, LuxurySparse
 using Random, LinearAlgebra, SparseArrays
 
 PKGNAME = "Yao"

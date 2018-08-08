@@ -1,5 +1,4 @@
-using Compat
-using Compat.Test
+using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao
 using Yao.Blocks
@@ -18,4 +17,3 @@ import Yao.Blocks: GeneralMatrixGate
     reg = rand_state(2)
     @test copy(reg) |> mg |> statevec == mg.matrix * reg.state |> vec
 end
-

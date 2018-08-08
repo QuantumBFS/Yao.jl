@@ -1,4 +1,5 @@
-using Compat.Test
+using Test, Random, LinearAlgebra, SparseArrays
+
 using Yao
 using Yao.Intrinsics
 using Yao.Blocks
@@ -62,4 +63,3 @@ end
     @test mat(rb) ≈ MAT
     @test mat(rb2) ≈ MAT
 end
-

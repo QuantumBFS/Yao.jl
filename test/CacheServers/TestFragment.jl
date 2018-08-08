@@ -1,4 +1,4 @@
-using Compat
+using Test, Random, LinearAlgebra, SparseArrays
 import Yao.CacheServers: iscached, update!, pull, clear!
 
 struct Scalar{T}

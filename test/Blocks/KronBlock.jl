@@ -1,8 +1,4 @@
-using Compat
-using Compat.Test
-using Compat.Random
-using Compat.LinearAlgebra
-using Compat.SparseArrays
+using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao
 using Yao.Blocks

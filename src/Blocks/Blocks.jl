@@ -1,13 +1,8 @@
 module Blocks
 
-using Compat
-using Compat.Random
-using Compat.Iterators
-using Compat.LinearAlgebra
-using Compat.SparseArrays
+using Random, Iterators, LinearAlgebra, SparseArrays
 using Lazy: @forward
-using DataStructures
-using CacheServers
+using DataStructures, CacheServers
 import IterTools
 
 using ..Intrinsics
@@ -20,8 +15,7 @@ import ..Yao: DefaultType, nqubits, nactive, invorder
 import ..Registers: focus!, relax!
 import ..Intrinsics: ishermitian, isunitary, isreflexive
 import CacheServers: update!, iscached, clear!, pull, iscacheable
-import Base: copy, hash, ==, eltype, show, similar, getindex, setindex!, start, next, done, length, parent
-import Compat: adjoint
+import Base: copy, hash, ==, eltype, show, similar, getindex, setindex!, start, next, done, length, parent, adjoint, lastindex
 
 # APIs for cache block's matrix
 export update_cache

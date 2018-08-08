@@ -1,5 +1,5 @@
-using Compat
-using Compat.Test
+using Test, Random, LinearAlgebra, SparseArrays
+
 using Yao
 using Yao.Blocks
 using Yao.LuxurySparse
@@ -14,10 +14,10 @@ using Yao.Boost
 end
 
 @testset "controlled gates" begin
-    @test cxgate(ComplexF64, 2, [2], [1], 1) == [1 0 0 0; 0 1 0 0; 0 0 0 1; 0 0 1 0] == controlled_U1(2, Matrix(mat(X)), [2], [1], 1) 
-    @test cxgate(ComplexF64, 2, [2], [0], 1) == [0 1 0 0; 1 0 0 0; 0 0 1 0; 0 0 0 1] == controlled_U1(2, Matrix(mat(X)), [2], [0], 1) 
-    @test controlled_U1(3, mat(Z), [3], [1], 2) == czgate(ComplexF64, 3, [3], [1], 2) 
-    @test czgate(ComplexF64, 2, [1], [1], 2) == [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 -1] == controlled_U1(2, mat(Z), [2], [1], 1) 
+    @test cxgate(ComplexF64, 2, [2], [1], 1) == [1 0 0 0; 0 1 0 0; 0 0 0 1; 0 0 1 0] == controlled_U1(2, Matrix(mat(X)), [2], [1], 1)
+    @test cxgate(ComplexF64, 2, [2], [0], 1) == [0 1 0 0; 1 0 0 0; 0 0 1 0; 0 0 0 1] == controlled_U1(2, Matrix(mat(X)), [2], [0], 1)
+    @test controlled_U1(3, mat(Z), [3], [1], 2) == czgate(ComplexF64, 3, [3], [1], 2)
+    @test czgate(ComplexF64, 2, [1], [1], 2) == [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 -1] == controlled_U1(2, mat(Z), [2], [1], 1)
     @test general_controlled_gates(12, [mat(P1)], [7], [mat(Z)], [3]) == czgate(ComplexF64, 12, [7], [1], 3)
     @test cxgate(ComplexF64, 2, [2], [1], 1) == [1 0 0 0; 0 1 0 0; 0 0 0 1; 0 0 1 0]
     @test general_controlled_gates(12, [mat(P1)], [7], [mat(X)], [3]) == cxgate(ComplexF64, 12, [7], [1], 3)

@@ -1,5 +1,4 @@
 module Zoo
-using Compat
 
 using LuxurySparse
 using ..Yao

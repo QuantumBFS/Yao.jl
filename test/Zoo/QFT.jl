@@ -1,9 +1,8 @@
+using Test, Random, LinearAlgebra, SparseArrays
+
 using Yao
 using Yao.Zoo
-using Compat.Test
-@static if VERSION >= v"0.7-"
-    using FFTW
-end
+using FFTW
 
 @testset "QFT" begin
     num_bit = 5

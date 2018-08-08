@@ -1,5 +1,5 @@
-using Compat
-using Compat.Test
+using Test, Random, LinearAlgebra, SparseArrays
+
 using Yao
 using Yao.Intrinsics
 using Yao.Intrinsics: group_shift, itercontrol, controldo, IterControl, lmove
@@ -37,5 +37,3 @@ end
     @test (rrr=copy(V); controldo(x->swaprows!(rrr, x+1, x-3), it); rrr) ≈ res
     @test (rrr=copy(V); controldo(x->mulrow!(rrr, x+1, -1), itercontrol(nbit, [3,7, 6], [1, 1, 1])); rrr) ≈ mat(control(nbit, (3,7), 6=>Z)) * V
 end
-
-

@@ -1,8 +1,6 @@
 module Intrinsics
 
-using Compat
-using Compat.LinearAlgebra
-using Compat.SparseArrays
+using LinearAlgebra, SparseArrays
 using StaticArrays: SVector, SMatrix
 
 using LuxurySparse
@@ -35,7 +33,7 @@ include("MacroTools.jl")
 
 include("TupleTools.jl")
 
-import Compat.LinearAlgebra: ishermitian
+import LinearAlgebra: ishermitian
 export isunitary, isreflexive, ishermitian
 include("OperatorTraits.jl")
 

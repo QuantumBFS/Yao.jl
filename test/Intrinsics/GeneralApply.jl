@@ -1,5 +1,5 @@
-using Compat
-using Compat.Test
+using Test, Random, LinearAlgebra, SparseArrays
+
 using StaticArrays: SVector, SMatrix
 using Yao
 using Yao.Intrinsics
@@ -27,8 +27,7 @@ end
     # control U2
     u2 = kron(u1, u1)
     @test cunapply!(copy(v), (1,), (1,), u2, (3,4)) ≈ general_controlled_gates(5, [mat(P1)], [1], [u2], [3]) * v
-    
+
     # multi-control U2
     @test cunapply!(copy(v), (5, 1), (1, 0), u2, (3,4)) ≈ general_controlled_gates(5, [mat(P1), mat(P0)], [5, 1], [u2], [3]) * v
 end
-

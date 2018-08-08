@@ -1,6 +1,5 @@
 module ConstGateTools
 
-using Compat
 using MacroTools, LuxurySparse
 
 using ..Registers

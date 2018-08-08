@@ -1,8 +1,9 @@
+using Test, Random, LinearAlgebra, SparseArrays
+
+
 using Yao
 using Yao.Zoo
 using Yao.Blocks
-using Compat
-using Compat.Test
 
 @testset "rotter, collect_rotblocks, num_gradient, opgrad" begin
     c = diff_circuit(4, 3, [1=>3, 2=>4, 2=>3, 4=>1])

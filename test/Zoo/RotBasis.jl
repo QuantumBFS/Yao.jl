@@ -1,6 +1,7 @@
+using Test, Random, LinearAlgebra, SparseArrays
+
 using Yao
 using Yao.Zoo
-using Compat.Test
 
 @testset "RotBasis" begin
     rt = RotBasis(0.5, 0.4)

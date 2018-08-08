@@ -17,7 +17,7 @@ blocks(c::Sequential) = c.blocks
 addrs(c::Sequential) = ones(Int, blocks(c)|>length)
 
 
-@forward Sequential.blocks Base.getindex, Compat.lastindex, Base.setindex!, Base.start, Base.next, Base.done, Base.length, Base.eltype, Base.eachindex, Base.insert!
+@forward Sequential.blocks Base.getindex, lastindex, Base.setindex!, Base.start, Base.next, Base.done, Base.length, Base.eltype, Base.eachindex, Base.insert!
 
 # Additional Methods for Chain
 import Base: push!, append!, prepend!

@@ -1,5 +1,4 @@
-using Compat
-using Compat.Test
+using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao.Blocks
 using Yao.CacheServers

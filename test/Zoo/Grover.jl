@@ -1,10 +1,10 @@
+using Test, Random, LinearAlgebra, SparseArrays
+
 using Yao
 using Yao.Zoo
 import Yao.Zoo: _num_grover_step
 using Yao.Blocks
 using Yao.Intrinsics
-using Compat
-using Compat.Test
 
 function GroverSearch(oracle, num_bit::Int; psi::DefaultRegister = uniform_state(num_bit))
     it = groveriter!(psi, oracle)

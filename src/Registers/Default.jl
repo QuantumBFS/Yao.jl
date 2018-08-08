@@ -12,7 +12,7 @@ mutable struct DefaultRegister{B, T} <: AbstractRegister{B, T}
 
     function DefaultRegister{B, T}(raw::Matrix{T}) where {B, T}
         ispow2(size(raw, 1)) && ispow2(size(raw, 2) ÷ B) ||
-            throw(Compat.InexactError(:DefaultRegister, DefaultRegister, raw))
+            throw(InexactError(:DefaultRegister, DefaultRegister, raw))
         new{B, T}(raw)
     end
 
