@@ -205,13 +205,15 @@ end
 """Reordered Basis"""
 reordered_basis(nbit::Int, orders::Vector{Int}) = Reorderer{nbit}(orders, bmask.(orders), (1:nbit).-orders)
 
-Base.start(ro::Reorderer)::Int = 0
-Base.done(ro::Reorderer{N}, state::Int) where N = state == 1<<N
-function Base.next(ro::Reorderer, state::Int)::Tuple{Int, Int}
-    _reorder(state, ro.taker, ro.differ), state+1
+function Base.iterate(it::Reorderer{N}, state=0) where N
+    if state == 1<<N
+        nothing
+    else
+        _reorder(state, it.taker, it.differ), state+1
+    end
 end
+
 Base.eltype(::Reorderer) = Int
-Base.eltype(::Type{Reorderer}) = Int
 Base.length(::Reorderer{N}) where N = 1<<N
 Base.size(::Reorderer{N}) where N = 1<<N
 
