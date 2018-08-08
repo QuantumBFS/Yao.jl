@@ -19,3 +19,7 @@ end
 @testset "reorder" begin
 include("reorder.jl")
 end
+
+@testset "elementary" begin
+include("elementary.jl")
+end

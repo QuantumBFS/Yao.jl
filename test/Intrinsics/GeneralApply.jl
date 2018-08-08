@@ -1,4 +1,4 @@
-using Test, Random, LinearAlgebra, SparseArrays
+using Test, Random, LinearAlgebra, SparseArrays, LuxurySparse
 
 using StaticArrays: SVector, SMatrix
 using Yao
@@ -10,7 +10,7 @@ using Yao.Blocks: P0, P1
     ⊗ = kron
     u1 = randn(ComplexF64, 2, 2)
     v = randn(ComplexF64, 1<<4)
-    II = eye(2)
+    II = IMatrix(2)
 
     @test u1apply!(copy(v), u1, 3) ≈ (II ⊗ u1 ⊗ II ⊗ II)*v ≈ u1apply!(reshape(copy(v), :,1), u1, 3)
     @test unapply!(copy(v), u1, (3,)) == u1apply!(copy(v), u1, 3)

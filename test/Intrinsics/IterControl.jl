@@ -10,7 +10,7 @@ using Yao.LuxurySparse
     @test group_shift(5, [2,3]) == ([1], [2])
     @test group_shift(5, [1,3,5]) == ([0, 3, 15], [1, 1, 1])
 
-    @test lmove(5, 1, 2) |> bin == "10001"
+    @test string(lmove(5, 1, 2), base=2) == "10001"
 end
 
 @testset "iterator interface" begin
