@@ -6,10 +6,6 @@ using Compat.SparseArrays
 include("Intrinsics/Intrinsics.jl")
 end
 
-@testset "luxury sparse" begin
-include("LuxurySparse/LuxurySparse.jl")
-end
-
 @testset "register" begin
 include("Registers/Registers.jl")
 end
