@@ -22,7 +22,7 @@ using Yao.Zoo
 
     # rotate to the same direction for measurements.
     dispatch!(rb, vec(angles))
-    @test state(psi |> rb) ≈ [1, 0]
+    @test state(apply!(psi, rb)) ≈ [1, 0]
 
     @test nparameters(rot_basis(3)) == 6
 end

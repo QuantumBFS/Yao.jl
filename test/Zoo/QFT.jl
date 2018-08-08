@@ -14,15 +14,15 @@ using FFTW
     @test Matrix(mat(chain(3, QFTCircuit(3) |> adjoint, QFTCircuit(3)))) ≈ IMatrix(1<<3)
 
     # test ifft
-    reg1 = copy(reg) |>ifftblock
+    reg1 = apply!(copy(reg), ifftblock)
 
     # permute lines (Manually)
-    kv = fft(reg|>statevec)/sqrt(length(rv))
-    @test reg1|>statevec ≈ kv |> invorder
+    kv = fft(statevec(reg))/sqrt(length(rv))
+    @test statevec(reg1) ≈ invorder(kv)
 
     # test fft
-    reg2 = copy(reg) |> invorder! |> fftblock
-    kv = ifft(rv)*sqrt(length(rv))
+    reg2 = apply!(invorder!(copy(reg)), fftblock)
+    kv = ifft(rv) * sqrt(length(rv))
     @test statevec(reg2) ≈ kv
 end
 
@@ -40,8 +40,8 @@ end
     @test Matrix(mat(chain(3, QFTBlock{3}() |> adjoint, QFTBlock{3}()))) ≈ IMatrix(1<<3)
 
     # permute lines (Manually)
-    @test copy(reg) |>iqft ≈ copy(reg) |> (QFTBlock{num_bit}()|>adjoint)
+    @test apply!(copy(reg), iqft) ≈ apply!(copy(reg), QFTBlock{num_bit}() |> adjoint)
 
     # test fft
-    @test copy(reg) |> qft ≈ copy(reg) |> qftblock
+    @test apply!(copy(reg), qft) ≈ apply!(copy(reg), qftblock)
 end

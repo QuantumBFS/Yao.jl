@@ -8,14 +8,14 @@ using Yao.Intrinsics
 
 function GroverSearch(oracle, num_bit::Int; psi::DefaultRegister = uniform_state(num_bit))
     it = groveriter(psi, oracle)
-    psi = last(it)
+    for l_psi in it psi = l_psi end
     return (it.niter, psi)
 end
 
 function inference(psi::DefaultRegister, evidense::Vector{Int}, num_iter::Int)
     oracle = inference_oracle(evidense)(nqubits(psi))
     it = groveriter(psi, oracle)
-    psi = last(it)
+    for l_psi in it psi = l_psi end
     it.niter, psi
 end
 
@@ -46,7 +46,7 @@ end
     func_or = FunctionBlock{:Oracle}(reg->apply!(reg, or))
     gb = groverblock(or, psi)
     gb2 = groverblock(func_or, psi)
-    @test apply!(copy(psi), gb) == (for psi in groveriter(copy(psi), func_or) end; psi)
+    @test apply!(copy(psi), gb) == (for l_psi in groveriter(copy(psi), func_or) psi = l_psi end; psi)
     @test apply!(copy(psi), gb) == apply!(copy(psi), gb2)
 end
 

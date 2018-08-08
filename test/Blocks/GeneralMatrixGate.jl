@@ -15,5 +15,5 @@ import Yao.Blocks: GeneralMatrixGate
     @test_throws DimensionMismatch GeneralMatrixGate(randn(3,3))
 
     reg = rand_state(2)
-    @test copy(reg) |> mg |> statevec == mg.matrix * reg.state |> vec
+    @test apply!(copy(reg), mg) |> statevec == mg.matrix * reg.state |> vec
 end

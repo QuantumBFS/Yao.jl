@@ -26,8 +26,8 @@ color(::Type{T}) where {T <: Sequential} = :blue
 # Default Charset
 BlockTreeCharSet() = BlockTreeCharSet('├','└','│','─')
 
-_charwidth(c::Char) = charwidth(c)
-_charwidth(s) = sum(map(charwidth, collect(s)))
+_charwidth(c::Char) = textwidth(c)
+_charwidth(s) = sum(map(textwidth, collect(s)))
 
 function print_prefix(io, depth, charset, active_levels)
     for current_depth in 0:(depth-1)

@@ -1,4 +1,4 @@
-export num_grover_step, inference_oracle, GroverIter, groverblock, groveriter!, prob_match_oracle
+export num_grover_step, inference_oracle, GroverIter, groverblock, groveriter, prob_match_oracle
 
 """
     inference_oracle([nbit::Int,] locs::Vector{Int}) -> ControlBlock
@@ -13,7 +13,12 @@ inference_oracle(nbit::Int, locs::Vector{Int}) = inference_oracle(locs)(nbit)
 
 Return a mask, that disired subspace of an oracle are masked true.
 """
-target_space(num_bit::Int, oracle) = (register(ones(ComplexF64, 1<<num_bit)) |> oracle |> statevec |> real) .< 0
+function target_space(nbit::Int, oracle)
+    r = register(ones(ComplexF64, 1<<nbit))
+    apply!(r, oracle)
+    real(statevec(r)) .< 0
+end
+
 prob_inspace(psi::DefaultRegister, ts) = norm(statevec(psi)[ts])^2
 
 """

@@ -13,14 +13,14 @@ ReflectBlock(state::Vector{T}) where T = ReflectBlock(register(state))
 
 function apply!(r::DefaultRegister, g::ReflectBlock)
     v = state(g.psi)
-    @. r.state[:,:] =  2 * ($(v') * $(r.state)) * v - $(r.state)
+    r.state[:, :] .= 2 .* (v' * r.state) .* v - r.state
     r
 end
 
 ==(A::ReflectBlock, B::ReflectBlock) = A.psi == B.psi
 copy(r::ReflectBlock) = ReflectBlock(r.psi)
 
-mat(r::ReflectBlock) = (v = r.psi |> statevec; 2 * v * v' - IMatrix(length(v)))
+mat(r::ReflectBlock) = (v = statevec(r.psi); 2 * v * v' - IMatrix(length(v)))
 isreflexive(::ReflectBlock) = true
 ishermitian(::ReflectBlock) = true
 isunitary(::ReflectBlock) = true
