@@ -142,8 +142,8 @@ hilbertkron(num_bit, [IMatrix(2) - projector], [cbit]) + hilbertkron(num_bit, vc
 import Base: randn
 randn(T::Type{Complex{F}}, n::Int...) where F = randn(F, n...) + im*randn(F, n...)
 
-rotate_matrix(gate::AbstractMatrix, θ::Real) = exp(-0.5im*θ*Matrix(gate))
-linop2dense(applyfunc!::Function, num_bit::Int) = applyfunc!(eye(ComplexF64, 1<<num_bit))
+rotate_matrix(gate::AbstractMatrix, θ::Real) = exp(-0.5im * θ * Matrix(gate))
+linop2dense(applyfunc!::Function, num_bit::Int) = applyfunc!(Matrix{ComplexF64}(I, 1<<num_bit, 1<<num_bit))
 hypercubic(A::Array) = reshape(A, fill(2, size(A) |> prod |> log2i)...)
 
 #################### Reorder ######################

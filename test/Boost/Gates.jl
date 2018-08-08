@@ -44,7 +44,7 @@ end
         (zgate, mat(Z)),
         #(hgate, (elem = 1 / sqrt(2); [elem elem; elem -elem])),
     ]
-        @test full(gate(ComplexF64, 1, 1)) == MAT
+        @test Matrix(gate(ComplexF64, 1, 1)) == MAT
         @test hilbertkron(4, [MAT, MAT, MAT], [3,2,1]) == gate(ComplexF64, 4, 1:3)
     end
     #@test toffoligate(3, 2, 3, 1) == TOFFOLI_MAT
