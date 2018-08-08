@@ -28,7 +28,8 @@ function ControlBlock{N}(ctrl_qubits::NTuple{C}, vals::NTuple{C}, block::BT, add
     ControlBlock{N, BT, C, M, T}(ctrl_qubits, vals, block, addrs)
 end
 
-ControlBlock{N}(ctrl_qubits::NTuple{C}, block::AbstractBlock, addrs::NTuple) where {N, C} = ControlBlock{N}(ctrl_qubits, (ones(Int, C)...), block, addrs)
+ControlBlock{N}(ctrl_qubits::NTuple{C}, block::AbstractBlock, addrs::NTuple) where {N, C} =
+    ControlBlock{N}(ctrl_qubits, (ones(Int, C)..., ), block, addrs)
 
 function copy(ctrl::ControlBlock{N, BT, C, M, T}) where {BT, N, C, M, T}
     ControlBlock{N, BT, C, M, T}(ctrl.ctrl_qubits, ctrl.vals, ctrl.block, ctrl.addrs)

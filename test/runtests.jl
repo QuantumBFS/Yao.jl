@@ -1,13 +1,7 @@
-using Compat.Test
-using Compat.LinearAlgebra
-using Compat.SparseArrays
+using Test, Random, LinearAlgebra, SparseArrays
 
 @testset "utils" begin
 include("Intrinsics/Intrinsics.jl")
-end
-
-@testset "luxury sparse" begin
-include("LuxurySparse/LuxurySparse.jl")
 end
 
 @testset "register" begin
@@ -18,9 +12,9 @@ end
 include("Blocks/Blocks.jl")
 end
 
-@testset "cache" begin
-include("CacheServers/CacheServers.jl")
-end
+# @testset "cache" begin
+# include("CacheServers/CacheServers.jl")
+# end
 
 @testset "boost" begin
 include("Boost/Boost.jl")

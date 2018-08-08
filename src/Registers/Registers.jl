@@ -1,9 +1,6 @@
 module Registers
 
-using Compat
-using Compat.Random
-using Compat.LinearAlgebra
-using Compat.SparseArrays
+using Random, LinearAlgebra, SparseArrays
 using StatsBase
 using ..Intrinsics
 

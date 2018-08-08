@@ -4,7 +4,7 @@ os:
   - linux
   - osx
 julia:
-  - 0.6
+  - 0.7
   - nightly
 notifications:
   email: false
@@ -30,11 +30,10 @@ matrix:
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("Yao"); Pkg.test("Yao"; coverage=true)'
 after_success:
   # push coverage results to Coveralls
-  - julia -e 'cd(Pkg.dir("Yao")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
+  - julia -e 'using Pkg; cd(Pkg.dir("Yao")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
   # push coverage results to Codecov
-  - julia -e 'cd(Pkg.dir("Yao")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  - julia -e 'using Pkg; cd(Pkg.dir("Yao")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
   # add Documenter
-  - julia -e 'using Compat.Pkg; Pkg.add("Documenter")'
+  - julia -e 'using Pkg; Pkg.add("Documenter")'
   # push documents to gh-pages
-  - julia -e 'using Compat.Pkg; cd(Pkg.dir("Yao")); include(joinpath("docs", "make.jl"))'
-
+  - julia -e 'using Pkg; cd(Pkg.dir("Yao")); include(joinpath("docs", "make.jl"))'

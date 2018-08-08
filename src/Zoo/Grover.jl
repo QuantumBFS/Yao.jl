@@ -1,4 +1,4 @@
-export num_grover_step, inference_oracle, GroverIter, groverblock, groveriter!, prob_match_oracle
+export num_grover_step, inference_oracle, GroverIter, groverblock, groveriter, prob_match_oracle
 
 """
     inference_oracle([nbit::Int,] locs::Vector{Int}) -> ControlBlock
@@ -13,7 +13,12 @@ inference_oracle(nbit::Int, locs::Vector{Int}) = inference_oracle(locs)(nbit)
 
 Return a mask, that disired subspace of an oracle are masked true.
 """
-target_space(num_bit::Int, oracle) = (register(ones(Complex128, 1<<num_bit)) |> oracle |> statevec |> real) .< 0
+function target_space(nbit::Int, oracle)
+    r = register(ones(ComplexF64, 1<<nbit))
+    apply!(r, oracle)
+    real(statevec(r)) .< 0
+end
+
 prob_inspace(psi::DefaultRegister, ts) = norm(statevec(psi)[ts])^2
 
 """
@@ -46,14 +51,21 @@ struct GroverIter{N, T}
     ref::ReflectBlock{N, T}
     niter::Int
 end
-groveriter!(psi::DefaultRegister, oracle, ref::ReflectBlock{N, T}, niter::Int) where {N, T} = GroverIter{N, T}(psi, oracle, ref, niter)
-groveriter!(psi::DefaultRegister, oracle, niter::Int) = groveriter!(psi, oracle, ReflectBlock(psi |> copy), niter)
-groveriter!(psi::DefaultRegister, oracle) = groveriter!(psi, oracle, ReflectBlock(psi |> copy), num_grover_step(psi, oracle))
 
-Base.next(iter::GroverIter, state::Int) = apply!(iter.psi |> iter.oracle, iter.ref), state+1
-Base.start(iter::GroverIter) = 1
-Base.done(iter::GroverIter, state::Int) = iter.niter+1 == state
-Base.length(iter::GroverIter) = iter.niter
+groveriter(psi::DefaultRegister, oracle, ref::ReflectBlock{N, T}, niter::Int) where {N, T} = GroverIter{N, T}(psi, oracle, ref, niter)
+groveriter(psi::DefaultRegister, oracle, niter::Int) = groveriter(psi, oracle, ReflectBlock(psi |> copy), niter)
+groveriter(psi::DefaultRegister, oracle) = groveriter(psi, oracle, ReflectBlock(psi |> copy), num_grover_step(psi, oracle))
+
+function Base.iterate(it::GroverIter, st=1)
+    if it.niter + 1 == st
+        nothing
+    else
+        apply!(it.psi, it.oracle)
+        apply!(it.psi, it.ref), st+1
+    end
+end
+
+Base.length(it::GroverIter) = it.niter
 
 """
     groverblock(oracle, ref::ReflectBlock{N, T}, niter::Int=-1)

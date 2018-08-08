@@ -1,5 +1,5 @@
-using Compat
-using Compat.Test
+using Test, Random, LinearAlgebra, SparseArrays, LuxurySparse
+
 using StaticArrays: SVector, SMatrix
 using Yao
 using Yao.Intrinsics
@@ -10,7 +10,7 @@ using Yao.Blocks: P0, P1
     ⊗ = kron
     u1 = randn(ComplexF64, 2, 2)
     v = randn(ComplexF64, 1<<4)
-    II = eye(2)
+    II = IMatrix(2)
 
     @test u1apply!(copy(v), u1, 3) ≈ (II ⊗ u1 ⊗ II ⊗ II)*v ≈ u1apply!(reshape(copy(v), :,1), u1, 3)
     @test unapply!(copy(v), u1, (3,)) == u1apply!(copy(v), u1, 3)
@@ -27,8 +27,7 @@ end
     # control U2
     u2 = kron(u1, u1)
     @test cunapply!(copy(v), (1,), (1,), u2, (3,4)) ≈ general_controlled_gates(5, [mat(P1)], [1], [u2], [3]) * v
-    
+
     # multi-control U2
     @test cunapply!(copy(v), (5, 1), (1, 0), u2, (3,4)) ≈ general_controlled_gates(5, [mat(P1), mat(P0)], [5, 1], [u2], [3]) * v
 end
-

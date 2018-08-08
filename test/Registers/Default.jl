@@ -1,7 +1,4 @@
-using Compat
-using Compat.Test
-using Compat.LinearAlgebra
-using Compat.SparseArrays
+using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao.Registers
 using Yao.Intrinsics
@@ -125,4 +122,3 @@ end
     reg6 = focus!(repeat(reg2, 3), 1:2)
     @test (join(reg5, reg6) |> statevec)[:,1] ≈ reg4 |> statevec
 end
-

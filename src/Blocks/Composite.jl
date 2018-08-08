@@ -1,5 +1,5 @@
 # composite blocks are iterables
-import Base: start, next, done, eltype, length
+import Base: iterate, eltype, length
 
 # composite blocks are indexable
 import Base: getindex, setindex!, map!, eachindex
@@ -52,7 +52,7 @@ end
 
 function parameters(c::CompositeBlock)
     itr = Iterators.filter(x->isprimitive(x) && hasparameter(x), BlockTreeIterator(:DFS, c))
-    IterTools.chain((parameters(each) for each in itr)...)
+    Iterators.flatten(parameters(each) for each in itr)
 end
 
 #################
@@ -75,8 +75,8 @@ function dispatch!(c::CompositeBlock, itr)
     blkitr = Iterators.filter(x->isprimitive(x) && hasparameter(x), BlockTreeIterator(:DFS, c))
     pitr = itr
     for each in blkitr
-        dispatch!(each, take(pitr, nparameters(each)))
-        pitr = drop(pitr, nparameters(each))
+        dispatch!(each, Iterators.take(pitr, nparameters(each)))
+        pitr = Iterators.drop(pitr, nparameters(each))
     end
     c
 end
@@ -87,8 +87,8 @@ function dispatch!(f::Function, c::CompositeBlock, itr)
     blkitr = Iterators.filter(x->isprimitive(x) && hasparameter(x), BlockTreeIterator(:DFS, c))
     pitr = itr
     for each in blkitr
-        dispatch!(f, each, take(pitr, nparameters(each)))
-        pitr = drop(pitr, nparameters(each))
+        dispatch!(f, each, Iterators.take(pitr, nparameters(each)))
+        pitr = Iterators.drop(pitr, nparameters(each))
     end
     c
 end

@@ -1,8 +1,4 @@
-using Compat
-using Compat.Test
-using Compat.Random
-using Compat.LinearAlgebra
-using Compat.SparseArrays
+using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao
 using Yao.Blocks
@@ -64,8 +60,8 @@ function random_dense_kron(n)
     blocks = [i=>rand(GateSet) for i in addrs]
     g = KronBlock{n}(blocks...)
     sorted_blocks = sort(blocks, by=x->x[1])
-    t = mapreduce(x->mat(x[2]), kron, IMatrix(1), reverse(sorted_blocks))
-    mat(g) ≈ t || Compat.@info(g)
+    t = mapreduce(x->mat(x[2]), kron, reverse(sorted_blocks), init=IMatrix(1))
+    mat(g) ≈ t || @info(g)
 end
 
     for i = 2:8
@@ -86,8 +82,8 @@ function rand_kron_test(n)
     mats = map(x->x.second, reverse(sorted))
 
     g = KronBlock{n}(seq...)
-    t = reduce(kron, IMatrix(1), mats)
-    mat(g) ≈ t || Compat.@info(g)
+    t = reduce(kron, mats, init=IMatrix(1))
+    mat(g) ≈ t || @info(g)
 end
 
 for i = 4:8

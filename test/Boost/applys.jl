@@ -1,5 +1,5 @@
-using Compat
-using Compat.Test
+using Test, Random, LinearAlgebra, SparseArrays
+
 using Yao
 using Yao.Boost
 using Yao.Blocks

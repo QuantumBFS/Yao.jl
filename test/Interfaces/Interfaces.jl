@@ -1,34 +1,31 @@
-using Compat
-using Compat.Test
-using Compat.LinearAlgebra
-using Compat.SparseArrays
+using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao
 using Yao.Blocks
 using Yao.Intrinsics
 
-@testset "with context" begin
-    r = register(bit"00000")
-    with!(r) do r
-        r |> chain(repeat(X), kron(3=>Y))
-        r |> roll(1=>phase(0.1))
-    end
-    @test statevec(r) != statevec(register(bit"000000"))
-
-    r = register(bit"0000")
-    with(r) do r
-        r |> chain(4, repeat(X))
-    end
-
-    @test statevec(r) ≈ statevec(register(bit"0000"))
-
-    r = register(bit"0000")
-    with(repeat(4, X), r)
-    @test statevec(r) ≈ statevec(register(bit"0000"))
-
-    with!(repeat(4, X), r)
-    @test statevec(r) ≈ statevec(register(bit"1111"))
-end
+# @testset "with context" begin
+#     r = register(bit"00000")
+#     with!(r) do r
+#         r |> chain(repeat(X), kron(3=>Y))
+#         r |> roll(1=>phase(0.1))
+#     end
+#     @test statevec(r) != statevec(register(bit"000000"))
+#
+#     r = register(bit"0000")
+#     with(r) do r
+#         r |> chain(4, repeat(X))
+#     end
+#
+#     @test statevec(r) ≈ statevec(register(bit"0000"))
+#
+#     r = register(bit"0000")
+#     with(repeat(4, X), r)
+#     @test statevec(r) ≈ statevec(register(bit"0000"))
+#
+#     with!(repeat(4, X), r)
+#     @test statevec(r) ≈ statevec(register(bit"1111"))
+# end
 
 @testset "phase gate" begin
     @test phase(0.0) isa PhaseGate{Float64}
@@ -136,7 +133,7 @@ end
     @test apply!(copy(reg), Probs) == reg |> probs
 
     FB = focus(1,3,2)
-    @test copy(reg) |> FB == focus!(copy(reg), [1,3,2])
+    @test apply!(copy(reg), FB) == focus!(copy(reg), [1,3,2])
 end
 
 @testset "sequence" begin
@@ -144,10 +141,10 @@ end
     @test sqs == sequence((kron(5, 3=>X), addbit(3), MEASURE))
     insert!(sqs, 3, kron(8, 8=>X))
     push!(sqs, Reset)
-    reg = register(bit"11111") |> sqs
+    reg = apply!(register(bit"11111"), sqs)
     @test MEASURE.result[] == 155
     @test reg == zero_state(8)
-    reg = register(bit"11111") |> sqs[1:end-1]
+    reg = apply!(register(bit"11111"), sqs[1:end-1])
     @test MEASURE.result[] == 155
     @test reg != zero_state(8)
 end

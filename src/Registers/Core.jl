@@ -111,7 +111,7 @@ function kron(lhs::RT, rhs::AbstractRegister{B}) where {B, RT <: AbstractRegiste
     register(RT, kron(state(rhs), state(lhs)), Int(B))
 end
 
-import Base: normalize!
+import LinearAlgebra: normalize!
 
 """
     normalize!(r::AbstractRegister) -> AbstractRegister

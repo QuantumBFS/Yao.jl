@@ -51,13 +51,13 @@ end
 
 """
     perturb(func, gates::Vector{<:RotationGate}, diff::Real) -> Matrix
-    
+
 perturb every rotation gates, and evaluate losses.
 The i-th element of first column of resulting Matrix corresponds to Gi(θ+δ), and the second corresponds to Gi(θ-δ).
 """
 function perturb(func, gates::Vector{<:RotationGate}, diff::Real)
     ng = length(gates)
-    res = Matrix{Float64}(ng, 2)
+    res = Matrix{Float64}(undef, ng, 2)
     for i in 1:ng
         gate = gates[i]
         dispatch!(+, gate, diff)
@@ -93,5 +93,3 @@ function opgrad(op_expect, rots::Vector{<:RotationGate})
     gperturb = perturb(op_expect, rots, π/2)
     (gperturb[:,1] - gperturb[:,2])/2
 end
-
-

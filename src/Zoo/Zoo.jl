@@ -1,8 +1,7 @@
 module Zoo
-using Compat
 
+using LuxurySparse, LinearAlgebra
 using ..Yao
-using ..LuxurySparse
 using ..Intrinsics
 using ..Registers
 using ..Blocks

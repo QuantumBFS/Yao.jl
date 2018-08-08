@@ -24,7 +24,7 @@ If an integer is supplied, it returns a function mapping a Vector/Int to bitarra
 """
 function bitarray(v::Vector{T}, num_bit::Int)::BitArray{2} where T<:Number
     #ba = BitArray{2}(0, 0)
-    ba = BitArray(0, 0)
+    ba = BitArray(undef, 0, 0)
     ba.len = 64*length(v)
     ba.chunks = UInt64.(v)
     ba.dims = (64, length(v))
@@ -33,7 +33,7 @@ end
 
 function bitarray(v::Vector{T})::BitArray{2} where T<:Union{UInt64, Int64}
     #ba = BitArray{2}(0, 0)
-    ba = BitArray(0, 0)
+    ba = BitArray(undef, 0, 0)
     ba.len = 64*length(v)
     ba.chunks = reinterpret(UInt64, v)
     ba.dims = (64, length(v))
@@ -48,7 +48,9 @@ bitarray(nbit::Int) = x->bitarray(x, nbit)
 
 pack bits to integers, usually take a BitArray as input.
 """
-packbits(arr::AbstractArray) = slicedim(sum(mapslices(x -> x .* (1 .<< (0:size(arr, 1)-1)), arr, 1), 1), 1, 1)
+packbits(arr::AbstractVector) = _packbits(arr)[]
+packbits(arr::AbstractArray) = _packbits(arr)
+_packbits(arr) = selectdim(sum(mapslices(x -> x .* (1 .<< (0:size(arr, 1)-1)), arr, dims=1), dims=1), 1, 1)
 
 ########## Bit-Wise Operations ##############
 """
@@ -203,17 +205,17 @@ end
 """Reordered Basis"""
 reordered_basis(nbit::Int, orders::Vector{Int}) = Reorderer{nbit}(orders, bmask.(orders), (1:nbit).-orders)
 
-Base.start(ro::Reorderer)::Int = 0
-Base.done(ro::Reorderer{N}, state::Int) where N = state == 1<<N
-function Base.next(ro::Reorderer, state::Int)::Tuple{Int, Int}
-    _reorder(state, ro.taker, ro.differ), state+1
+function Base.iterate(it::Reorderer{N}, state=0) where N
+    if state == 1<<N
+        nothing
+    else
+        _reorder(state, it.taker, it.differ), state+1
+    end
 end
+
 Base.eltype(::Reorderer) = Int
-Base.eltype(::Type{Reorderer}) = Int
 Base.length(::Reorderer{N}) where N = 1<<N
 Base.size(::Reorderer{N}) where N = 1<<N
-Base.iteratoreltype(::Type{Reorderer}) = Int
-Base.iteratorsize(::Type{Reorderer}) = 1<<N
 
 @inline function _reorder(b::Int, taker::Vector{Int}, differ::Vector{Int})::Int
     out::Int = 0

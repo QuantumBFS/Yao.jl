@@ -58,8 +58,8 @@ function polar2u(polar::Vector)
     [cos(theta/2)*exp(-im*phi/2), sin(theta/2)*exp(im*phi/2)]
 end
 
-u2polar(arr::Array) = mapslices(u2polar, arr, [1])
-polar2u(arr::Array) = mapslices(polar2u, arr, [1])
+u2polar(arr::Array) = mapslices(u2polar, arr, dims=[1])
+polar2u(arr::Array) = mapslices(polar2u, arr, dims=[1])
 
 """
     randpolar(params::Int...) -> Array

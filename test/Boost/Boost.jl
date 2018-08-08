@@ -1,5 +1,4 @@
-using Compat
-using Compat.Test
+using Test, Random, LinearAlgebra, SparseArrays
 
 @testset "control" begin
 include("Control.jl")

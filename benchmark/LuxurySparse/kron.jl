@@ -6,7 +6,7 @@ id = IMatrix(1<<8)
 v = randn(1<<8) + im*randn(1<<8)
 Dv = Diagonal(v)
 
-#sp = sprand(Complex128, 1<<8, 1<<8, 0.03)
+#sp = sprand(ComplexF64, 1<<8, 1<<8, 0.03)
 #pm = PermuteMultiply(randperm(1<<8), randn(1<<8))
 sp = SparseMatrixCSC(Dv)
 ds = rand(ComplexF64, 1<<4,1<<4)

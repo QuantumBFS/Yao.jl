@@ -38,7 +38,7 @@ function apply!(r::AbstractRegister, pb::PutBlock{N}) where N
 end
 
 function hash(pb::PutBlock, h::UInt)
-    hashkey = hash(object_id(pb), h)
+    hashkey = hash(objectid(pb), h)
     hashkey = hash(pb.block, hashkey)
     hashkey = hash(pb.addrs, hashkey)
     hashkey

@@ -1,7 +1,4 @@
-using Compat
-using Compat.Test
-using Compat.LinearAlgebra
-using Compat.SparseArrays
+using Test, Random, LinearAlgebra, SparseArrays
 
 
 @testset "default register" begin
