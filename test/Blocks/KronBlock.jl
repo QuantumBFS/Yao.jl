@@ -61,7 +61,7 @@ function random_dense_kron(n)
     g = KronBlock{n}(blocks...)
     sorted_blocks = sort(blocks, by=x->x[1])
     t = mapreduce(x->mat(x[2]), kron, IMatrix(1), reverse(sorted_blocks))
-    mat(g) ≈ t || Compat.@info(g)
+    mat(g) ≈ t || @info(g)
 end
 
     for i = 2:8
@@ -83,7 +83,7 @@ function rand_kron_test(n)
 
     g = KronBlock{n}(seq...)
     t = reduce(kron, IMatrix(1), mats)
-    mat(g) ≈ t || Compat.@info(g)
+    mat(g) ≈ t || @info(g)
 end
 
 for i = 4:8

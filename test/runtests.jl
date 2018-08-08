@@ -1,6 +1,4 @@
-using Compat.Test
-using Compat.LinearAlgebra
-using Compat.SparseArrays
+using Test, Random, LinearAlgebra, SparseArrays
 
 @testset "utils" begin
 include("Intrinsics/Intrinsics.jl")
