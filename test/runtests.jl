@@ -1,9 +1,22 @@
+using Test, Random, LinearAlgebra, SparseArrays
+
+
+using Yao
 using QuAlgorithmZoo
-@static if VERSION < v"0.7.0-DEV.2005"
-    using Base.Test
-else
-    using Test
+
+
+@testset "QFT" begin
+    include("QFT.jl")
 end
 
-# write your own tests here
-@test 1 == 2
+@testset "Differential" begin
+    include("Differential.jl")
+end
+
+@testset "RotBasis" begin
+    include("RotBasis.jl")
+end
+
+@testset "Grover" begin
+    include("Grover.jl")
+end
