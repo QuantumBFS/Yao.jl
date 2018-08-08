@@ -1,10 +1,9 @@
 module ConstGateTools
 
 using Compat
-using MacroTools
+using MacroTools, LuxurySparse
 
 using ..Registers
-using ..LuxurySparse
 
 import ..Yao
 import ..Blocks

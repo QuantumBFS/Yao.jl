@@ -3,7 +3,7 @@ module Boost
 using ..Registers
 using ..Blocks
 using ..Intrinsics
-using ..LuxurySparse
+using LuxurySparse
 using LinearAlgebra
 
 import ..Blocks: mat, apply!

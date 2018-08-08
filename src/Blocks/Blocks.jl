@@ -12,7 +12,7 @@ import IterTools
 
 using ..Intrinsics
 using ..Registers
-using ..LuxurySparse
+using LuxurySparse
 
 # import package APIs
 import ..Yao

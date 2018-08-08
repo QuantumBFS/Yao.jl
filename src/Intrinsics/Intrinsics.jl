@@ -5,8 +5,7 @@ using Compat.LinearAlgebra
 using Compat.SparseArrays
 using StaticArrays: SVector, SMatrix
 
-using ..LuxurySparse
-import ..LuxurySparse: I
+using LuxurySparse
 import ..Yao: nqubits, reorder, invorder, reorder
 
 include("Exceptions.jl")

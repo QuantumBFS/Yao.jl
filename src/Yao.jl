@@ -16,10 +16,8 @@ Extensible Framework for Quantum Algorithm Design for Humans.
 """
 const 幺 = Yao
 
-using Compat, MacroTools, Reexport
-using Compat.Random
-using Compat.LinearAlgebra
-using Compat.SparseArrays
+using Compat, MacroTools, Reexport, LuxurySparse
+using Random, LinearAlgebra, SparseArrays
 
 PKGNAME = "Yao"
 ENVNAME = join([PKGNAME, "DefaultType"])
@@ -31,8 +29,6 @@ else
 end
 
 include("APIs.jl")
-
-include("LuxurySparse/LuxurySparse.jl")
 
 include("Intrinsics/Intrinsics.jl")
 include("Registers/Registers.jl")

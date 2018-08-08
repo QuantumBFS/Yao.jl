@@ -1,8 +1,8 @@
 module Zoo
 using Compat
 
+using LuxurySparse
 using ..Yao
-using ..LuxurySparse
 using ..Intrinsics
 using ..Registers
 using ..Blocks
