@@ -65,6 +65,11 @@ git-tree-sha1 = "ed0787e62dc46b8d8c7c3db54391d71e0da5fefd"
 uuid = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
 version = "1.0.0"
 
+[[Iterators]]
+git-tree-sha1 = "6b5a31f893d8453ce65da5e8c25b9e125d1cdfa5"
+uuid = "a4bce56a-f44e-563f-a45f-5312daf41243"
+version = "0.3.1"
+
 [[JSON]]
 deps = ["Dates", "Distributed", "Mmap", "Pkg", "Sockets", "Test", "Unicode"]
 git-tree-sha1 = "fec8e4d433072731466d37ed0061b3ba7f70eeb9"
