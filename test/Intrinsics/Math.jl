@@ -1,7 +1,7 @@
 using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao.Intrinsics
-using Yao.LuxurySparse
+using LuxurySparse
 
 @testset "log2i" begin
 
@@ -38,7 +38,7 @@ end
 
 @testset "hilbertkron" begin
     A,B,C,D = [randn(2,2) for i = 1:4]
-    II = speye(2)
+    II = IMatrix(2)
     ⊗ = kron
     @test hilbertkron(4, [A, B], [3, 1]) ≈ II ⊗ A ⊗ II ⊗ B
     @test hilbertkron(4, [A ⊗ B, C], [3, 1]) ≈ A ⊗ B ⊗ II ⊗ C

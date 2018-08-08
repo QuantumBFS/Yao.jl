@@ -95,7 +95,7 @@ Return general kronecher product form of gates in Hilbert space of `num_bit` qub
 """
 function hilbertkron(num_bit::Int, ops::Vector{T}, start_locs::Vector{Int}) where T<:AbstractMatrix
     sizes = [op |> nqubits for op in ops]
-    start_locs = num_bit - start_locs - sizes + 2
+    start_locs = num_bit .- start_locs .- sizes .+ 2
 
     order = sortperm(start_locs)
     sorted_ops = ops[order]
@@ -110,7 +110,7 @@ function _wrap_identity(data_list::Vector{T}, num_bit_list::Vector{Int}) where T
     length(num_bit_list) == length(data_list) + 1 || throw(ArgumentError())
 
     ⊗ = kron
-    reduce(IMatrix(1 << num_bit_list[1]), zip(data_list, num_bit_list[2:end])) do x, y
+    reduce(zip(data_list, num_bit_list[2:end]); init=IMatrix(1 << num_bit_list[1])) do x, y
         x ⊗ y[1] ⊗ IMatrix(1<<y[2])
     end
 end
