@@ -1,6 +1,6 @@
 module Zoo
 
-using LuxurySparse
+using LuxurySparse, LinearAlgebra
 using ..Yao
 using ..Intrinsics
 using ..Registers

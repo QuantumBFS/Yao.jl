@@ -7,15 +7,15 @@ using Yao.Blocks
 using Yao.Intrinsics
 
 function GroverSearch(oracle, num_bit::Int; psi::DefaultRegister = uniform_state(num_bit))
-    it = groveriter!(psi, oracle)
-    for psi in it end
+    it = groveriter(psi, oracle)
+    psi = last(it)
     return (it.niter, psi)
 end
 
 function inference(psi::DefaultRegister, evidense::Vector{Int}, num_iter::Int)
     oracle = inference_oracle(evidense)(nqubits(psi))
-    it = groveriter!(psi, oracle)
-    for psi in it end
+    it = groveriter(psi, oracle)
+    psi = last(it)
     it.niter, psi
 end
 
@@ -46,7 +46,7 @@ end
     func_or = FunctionBlock{:Oracle}(reg->apply!(reg, or))
     gb = groverblock(or, psi)
     gb2 = groverblock(func_or, psi)
-    @test apply!(copy(psi), gb) == (for psi in groveriter!(copy(psi), func_or) end; psi)
+    @test apply!(copy(psi), gb) == (for psi in groveriter(copy(psi), func_or) end; psi)
     @test apply!(copy(psi), gb) == apply!(copy(psi), gb2)
 end
 
@@ -61,12 +61,12 @@ end
     basis = collect(UInt, 0:1<<num_bit-1)
     subinds = indices_with(num_bit, abs.(evidense), Int.(evidense.>0))
 
-    v_desired = statevec(psi0)[subinds+1]
+    v_desired = statevec(psi0)[subinds .+ 1]
     p = norm(v_desired)^2
     v_desired[:] ./= sqrt(p)
 
     # search the subspace
     num_iter = _num_grover_step(p)
     niter, psi = inference(psi0, evidense, num_iter)
-    @test isapprox((psi.state[subinds+1]'*v_desired) |> abs2, 1, atol=1e-2)
+    @test isapprox((psi.state[subinds .+ 1]'*v_desired) |> abs2, 1, atol=1e-2)
 end

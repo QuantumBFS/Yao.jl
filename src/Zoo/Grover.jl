@@ -46,19 +46,21 @@ struct GroverIter{N, T}
     ref::ReflectBlock{N, T}
     niter::Int
 end
-groveriter!(psi::DefaultRegister, oracle, ref::ReflectBlock{N, T}, niter::Int) where {N, T} = GroverIter{N, T}(psi, oracle, ref, niter)
-groveriter!(psi::DefaultRegister, oracle, niter::Int) = groveriter!(psi, oracle, ReflectBlock(psi |> copy), niter)
-groveriter!(psi::DefaultRegister, oracle) = groveriter!(psi, oracle, ReflectBlock(psi |> copy), num_grover_step(psi, oracle))
+
+groveriter(psi::DefaultRegister, oracle, ref::ReflectBlock{N, T}, niter::Int) where {N, T} = GroverIter{N, T}(psi, oracle, ref, niter)
+groveriter(psi::DefaultRegister, oracle, niter::Int) = groveriter(psi, oracle, ReflectBlock(psi |> copy), niter)
+groveriter(psi::DefaultRegister, oracle) = groveriter(psi, oracle, ReflectBlock(psi |> copy), num_grover_step(psi, oracle))
 
 function Base.iterate(it::GroverIter, st=1)
     if it.niter + 1 == st
         nothing
     else
-        apply!(iter.psi |> iter.oracle, iter.ref), state+1
+        apply!(it.psi, it.oracle)
+        apply!(it.psi, it.ref), st+1
     end
 end
 
-Base.length(iter::GroverIter) = iter.niter
+Base.length(it::GroverIter) = it.niter
 
 """
     groverblock(oracle, ref::ReflectBlock{N, T}, niter::Int=-1)

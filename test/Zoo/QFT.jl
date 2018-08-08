@@ -1,4 +1,4 @@
-using Test, Random, LinearAlgebra, SparseArrays
+using Test, Random, LinearAlgebra, SparseArrays, LuxurySparse
 
 using Yao
 using Yao.Zoo
@@ -11,7 +11,7 @@ using FFTW
     reg = rand_state(num_bit)
     rv = copy(statevec(reg))
 
-    @test Matrix(mat(chain(3, QFTCircuit(3) |> adjoint, QFTCircuit(3)))) ≈ eye(1<<3)
+    @test Matrix(mat(chain(3, QFTCircuit(3) |> adjoint, QFTCircuit(3)))) ≈ IMatrix(1<<3)
 
     # test ifft
     reg1 = copy(reg) |>ifftblock
@@ -37,7 +37,7 @@ end
     @test openbox(iqftblock) == iqft
     reg = rand_state(num_bit)
 
-    @test Matrix(mat(chain(3, QFTBlock{3}() |> adjoint, QFTBlock{3}()))) ≈ eye(1<<3)
+    @test Matrix(mat(chain(3, QFTBlock{3}() |> adjoint, QFTBlock{3}()))) ≈ IMatrix(1<<3)
 
     # permute lines (Manually)
     @test copy(reg) |>iqft ≈ copy(reg) |> (QFTBlock{num_bit}()|>adjoint)
