@@ -50,9 +50,14 @@ groveriter!(psi::DefaultRegister, oracle, ref::ReflectBlock{N, T}, niter::Int) w
 groveriter!(psi::DefaultRegister, oracle, niter::Int) = groveriter!(psi, oracle, ReflectBlock(psi |> copy), niter)
 groveriter!(psi::DefaultRegister, oracle) = groveriter!(psi, oracle, ReflectBlock(psi |> copy), num_grover_step(psi, oracle))
 
-Base.next(iter::GroverIter, state::Int) = apply!(iter.psi |> iter.oracle, iter.ref), state+1
-Base.start(iter::GroverIter) = 1
-Base.done(iter::GroverIter, state::Int) = iter.niter+1 == state
+function Base.iterate(it::GroverIter, st=1)
+    if it.niter + 1 == st
+        nothing
+    else
+        apply!(iter.psi |> iter.oracle, iter.ref), state+1
+    end
+end
+
 Base.length(iter::GroverIter) = iter.niter
 
 """

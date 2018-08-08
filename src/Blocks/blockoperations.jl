@@ -34,9 +34,14 @@ end
 BlockTreeIterator(Algorithm::Symbol, root::BT) where BT = BlockTreeIterator{Algorithm, BT}(root)
 
 ## Breadth First Search
-function start(itr::BlockTreeIterator{:BFS})
-    q = Queue(AbstractBlock)
-    enqueue!(q, itr.root)
+function iterate(it::BlockTreeIterator{:BFS}, st = (q = Queue(AbstractBlock); enqueue!(q, itr.root)) )
+    if isempty(st)
+        nothing
+    else
+        node = dequeue!(st)
+        enqueue_parent!(st, node)
+        node, st
+    end
 end
 
 function enqueue_parent!(queue::Queue, blk::AbstractBlock)
@@ -50,31 +55,15 @@ function enqueue_parent!(queue::Queue, blk::PrimitiveBlock)
     queue
 end
 
-function next(itr::BlockTreeIterator{:BFS}, st::Queue)
-    node = dequeue!(st)
-    enqueue_parent!(st, node)
-    node, st
-end
-
-function done(itr::BlockTreeIterator{:BFS}, st::Queue)
-    isempty(st)
-end
-
 # Depth First Search
-
-function start(itr::BlockTreeIterator{:DFS})
-    s = AbstractBlock[]
-    push!(s, itr.root)
-end
-
-function next(itr::BlockTreeIterator{:DFS}, st)
-    node = pop!(st)
-    append!(st, Iterators.reverse(blocks(node)))
-    node, st
-end
-
-function done(itr::BlockTreeIterator{:DFS}, st)
-    isempty(st)
+function iterate(it::BlockTreeIterator{:DFS}, st = AbstractBlock[it.root])
+    if isempty(st)
+        nothing
+    else
+        node = pop!(st)
+        append!(st, Iterators.reverse(blocks(node)))
+        node, st
+    end
 end
 
 #################### Expect and Measure ######################
@@ -85,8 +74,9 @@ end
 expectation value of an operator.
 """
 function expect end
-expect(op::AbstractBlock, reg::AbstractRegister) = sum(conj(reg |> statevec).*(copy(reg) |> op |> statevec), 1) |> vec
+
+expect(op::AbstractBlock, reg::AbstractRegister) = sum(conj(reg |> statevec) .* (copy(reg) |> op |> statevec), dims=1) |> vec
 expect(op::AbstractBlock, reg::AbstractRegister{1}) = (reg |> statevec)'*(copy(reg) |> op |> statevec)
 
-expect(op::MatrixBlock, dm::DensityMatrix) = mapslices(x->sum(mat(op).*x)[], dm.state, [1,2]) |> vec
-expect(op::MatrixBlock, dm::DensityMatrix{1}) = sum(mat(op).*squeeze(dm.state,3))
+expect(op::MatrixBlock, dm::DensityMatrix) = mapslices(x->sum(mat(op).*x)[], dm.state, dims=[1,2]) |> vec
+expect(op::MatrixBlock, dm::DensityMatrix{1}) = sum(mat(op).*dropdims(dm.state, dims=3))

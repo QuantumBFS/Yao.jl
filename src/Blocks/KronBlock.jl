@@ -104,13 +104,14 @@ function _insert_new!(k::KronBlock, val, addr)
 end
 
 # Iterator Protocol
-
-start(k::KronBlock) = 1
-function next(k::KronBlock, st)
-    (k.addrs[st], k.blocks[st]), st + 1
+function iterate(k::KronBlock, st = 1)
+    if st > length(k)
+        nothing
+    else
+        (k.addrs[st], k.blocks[st]), st + 1
+    end
 end
 
-done(k::KronBlock, st) = st > length(k)
 eltype(k::KronBlock) = Tuple{Int, MatrixBlock}
 length(k::KronBlock) = length(k.blocks)
 isunitary(k::KronBlock) = all(isunitary, k.blocks)

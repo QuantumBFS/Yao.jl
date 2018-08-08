@@ -60,7 +60,7 @@ function random_dense_kron(n)
     blocks = [i=>rand(GateSet) for i in addrs]
     g = KronBlock{n}(blocks...)
     sorted_blocks = sort(blocks, by=x->x[1])
-    t = mapreduce(x->mat(x[2]), kron, IMatrix(1), reverse(sorted_blocks))
+    t = mapreduce(x->mat(x[2]), kron, reverse(sorted_blocks), init=IMatrix(1))
     mat(g) ≈ t || @info(g)
 end
 
@@ -82,7 +82,7 @@ function rand_kron_test(n)
     mats = map(x->x.second, reverse(sorted))
 
     g = KronBlock{n}(seq...)
-    t = reduce(kron, IMatrix(1), mats)
+    t = reduce(kron, mats, init=IMatrix(1))
     mat(g) ≈ t || @info(g)
 end
 

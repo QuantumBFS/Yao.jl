@@ -17,7 +17,7 @@ blocks(c::Sequential) = c.blocks
 addrs(c::Sequential) = ones(Int, blocks(c)|>length)
 
 
-@forward Sequential.blocks Base.getindex, lastindex, Base.setindex!, Base.start, Base.next, Base.done, Base.length, Base.eltype, Base.eachindex, Base.insert!
+@forward Sequential.blocks Base.getindex, lastindex, Base.setindex!, Base.iterate, Base.length, Base.eltype, Base.eachindex, Base.insert!
 
 # Additional Methods for Chain
 import Base: push!, append!, prepend!
@@ -51,12 +51,14 @@ end
 
 function print_subblocks(io::IO, tree::Sequential, depth, charset, active_levels)
     c = blocks(tree)
-    st = start(c)
-    while !done(c, st)
-        child, st = next(c, st)
+    it_result = iterate(c)
+    while it_result !== nothing
+        child, st = it_result
         child_active_levels = active_levels
         print_prefix(io, depth, charset, active_levels)
-        if done(c, st)
+
+        it_result = iterate(tree, st)
+        if it_result === nothing
             print(io, charset.terminator)
         else
             print(io, charset.mid)

@@ -9,7 +9,7 @@ import Yao.Blocks: GeneralMatrixGate
     mg = GeneralMatrixGate(randn(4,4))
     mg2 = copy(mg)
     @test mg2 == mg
-    mg2.matrix[:,2] = 10
+    mg2.matrix[:, 2] .= 10
     @test mg2 != mg
     @test nqubits(mg) == 2
     @test_throws DimensionMismatch GeneralMatrixGate(randn(3,3))

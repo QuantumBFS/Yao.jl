@@ -85,12 +85,15 @@ print_subblocks(io::IO, tree, depth, charset, active_levels) = nothing
 
 function print_subblocks(io::IO, tree::CompositeBlock, depth, charset, active_levels)
     c = blocks(tree)
-    st = start(c)
-    while !done(c, st)
-        child, st = next(c, st)
+    it_result = iterate(c)
+    while it_result !== nothing
+        child, st = it_result
         child_active_levels = active_levels
         print_prefix(io, depth, charset, active_levels)
-        if done(c, st)
+
+
+        it_result = iterate(c, st)
+        if it_result === nothing
             print(io, charset.terminator)
         else
             print(io, charset.mid)
@@ -109,12 +112,14 @@ function print_subblocks(io::IO, tree::CompositeBlock, depth, charset, active_le
 end
 
 function print_subblocks(io::IO, tree::KronBlock, depth, charset, active_levels)
-    st = start(tree)
-    while !done(tree, st)
-        (line, child), st = next(tree, st)
+    it_result = iterate(tree)
+    while it_result !== nothing
+        (line, child), st = it_result
         child_active_levels = active_levels
         print_prefix(io, depth, charset, active_levels)
-        if done(tree, st)
+
+        it_result = iterate(tree, st)
+        if it_result === nothing
             print(io, charset.terminator)
         else
             print(io, charset.mid)

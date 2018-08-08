@@ -1,9 +1,8 @@
 module Blocks
 
-using Random, Iterators, LinearAlgebra, SparseArrays
+using Random, LinearAlgebra, SparseArrays
 using Lazy: @forward
 using DataStructures, CacheServers
-import IterTools
 
 using ..Intrinsics
 using ..Registers
@@ -15,7 +14,8 @@ import ..Yao: DefaultType, nqubits, nactive, invorder
 import ..Registers: focus!, relax!
 import ..Intrinsics: ishermitian, isunitary, isreflexive
 import CacheServers: update!, iscached, clear!, pull, iscacheable
-import Base: copy, hash, ==, eltype, show, similar, getindex, setindex!, start, next, done, length, parent, adjoint, lastindex
+export clear! # TODO: rm this later
+import Base: copy, hash, ==, eltype, show, similar, getindex, setindex!, iterate, length, parent, adjoint, lastindex
 
 # APIs for cache block's matrix
 export update_cache
