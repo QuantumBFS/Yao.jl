@@ -92,7 +92,7 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[LuxurySparse]]
 deps = ["Compat", "LinearAlgebra", "Random", "SparseArrays", "StaticArrays"]
-git-tree-sha1 = "15a2e2b351ed64182531aab35fa6df4b70282e22"
+git-tree-sha1 = "880207021d9216382cc7896ea46caa7f0442829a"
 repo-rev = "master"
 repo-url = "https://github.com/QuantumBFS/LuxurySparse.jl.git"
 uuid = "72cad168-9621-11e8-1b1e-73228c0c6ca7"
