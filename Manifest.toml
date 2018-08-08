@@ -92,19 +92,17 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[LuxurySparse]]
 deps = ["Compat", "LinearAlgebra", "Random", "SparseArrays", "StaticArrays"]
-git-tree-sha1 = "880207021d9216382cc7896ea46caa7f0442829a"
+git-tree-sha1 = "bb89598fcc9393872909cf4f55ecfa578a7288e3"
 repo-rev = "master"
-repo-url = "https://github.com/QuantumBFS/LuxurySparse.jl.git"
+repo-url = "LuxurySparse"
 uuid = "72cad168-9621-11e8-1b1e-73228c0c6ca7"
 version = "0.1.0"
 
 [[MacroTools]]
 deps = ["Compat"]
-git-tree-sha1 = "7b849e9c197ffc52cc3308eab69998c02e5322e1"
-repo-rev = "roger-fix-0.7"
-repo-url = "MacroTools"
+git-tree-sha1 = "24a61ca45b377c33fabfa4314535ced135a6c5d0"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.4.3+"
+version = "0.4.3"
 
 [[Markdown]]
 deps = ["Base64"]
