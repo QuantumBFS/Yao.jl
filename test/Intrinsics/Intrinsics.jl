@@ -1,6 +1,4 @@
-using Compat.Test
-using Compat.LinearAlgebra
-using Compat.SparseArrays
+using Test, Random, LinearAlgebra, SparseArrays
 
 @testset "math utils" begin
 include("Math.jl")
@@ -20,4 +18,8 @@ end
 
 @testset "reorder" begin
 include("reorder.jl")
+end
+
+@testset "elementary" begin
+include("elementary.jl")
 end

@@ -1,4 +1,5 @@
-using Compat.Test
+using Test, Random, LinearAlgebra, SparseArrays
+
 using Yao
 using Yao.Intrinsics
 using Yao.Blocks
@@ -52,7 +53,7 @@ end
 @testset "Un Repeat" begin
     reg1 = rand_state(5)
     reg2 = rand_state(5, 2)
-    G = MatrixBlock(kron(2, H, H))
+    G = kron(2, H, H)
     @test_throws AddressConflictError repeat(4, G, (1,2))
     rb = repeat(5, G, (1,4))
     rb2 = repeat(5, H, (1,2,4,5))
@@ -62,4 +63,3 @@ end
     @test mat(rb) ≈ MAT
     @test mat(rb2) ≈ MAT
 end
-

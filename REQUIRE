@@ -8,5 +8,5 @@ Reexport
 StatsBase
 Lazy
 FFTW
-https://github.com/GiggleLiu/Expokit.jl.git
+https://github.com/acroy/Expokit.jl.git
 LinearMaps

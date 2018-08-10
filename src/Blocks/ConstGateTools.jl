@@ -1,10 +1,8 @@
 module ConstGateTools
 
-using Compat
-using MacroTools
+using MacroTools, LuxurySparse
 
 using ..Registers
-using ..LuxurySparse
 
 import ..Yao
 import ..Blocks
@@ -57,37 +55,29 @@ gatetype_name(name) = Symbol(name, "Gate")
 function define_struct(const_binding, name)
 
     msg = "$(string(name)) is already defined, check if your desired name is available."
-    # check if this symbol is used.
-@static if VERSION < v"0.7-"
-    if isdefined(name)
-        return :(
-            Compat.@warn($msg); false
-        )
+    gt_name = gatetype_name(name)
+
+    quote
+        # check if this symbol is used.
+        if @isdefined $(name)
+            @warn $msg
+            false
+        else
+            @eval Yao.Blocks begin
+                export $name, $gt_name
+                # define a new constant gate type
+                N = log2i(size($(const_binding), 1))
+                struct $gt_name{T} <: ConstantGate{N, T} end
+
+                # define binding
+                const $(name) = $(gt_name){$DefaultType}()
+            end
+
+            # printings
+            $(define_printing(name))
+            true
+        end
     end
-else
-    if @isdefined(name)
-        return :(
-            Compat.@warn($msg); false
-        )
-    end
-end
-
-gt_name = gatetype_name(name)
-
-quote
-    @eval begin
-        # define a new constant gate type
-        N = log2i(size($(const_binding), 1))
-        struct $gt_name{T} <: ConstantGate{N, T} end
-
-        # define binding
-        const $(esc(name)) = $(esc(gt_name)){$DefaultType}()
-    end
-
-    # printings
-    $(define_printing(name))
-    true
-end
 
 end # define_struct
 
@@ -96,8 +86,8 @@ function define_printing(name)
     msg = string(name)
 
     quote
-        @eval begin
-            function $(esc(:(Yao.Blocks.print_block)))(io::IO, ::$(esc(gt_name)))
+        @eval Yao.Blocks begin
+            function print_block(io::IO, ::$(gt_name))
                 print(io, $(msg), " gate")
             end
         end
@@ -110,10 +100,10 @@ function define_property_trait(f, property, name, const_name)
     property_name = :(Blocks.$property)
 
     quote
-        @eval begin
+        @eval Yao.Blocks begin
             const $flag = $(f(const_name))
-            $(esc(property_name))(::Type{GT}) where {GT <: $(esc(gt_name))} = $flag
-            $(esc(property_name))(::GT) where {GT <: $(esc(gt_name))} = $flag
+            $(property_name)(::Type{GT}) where {GT <: $(gt_name)} = $flag
+            $(property_name)(::GT) where {GT <: $(gt_name)} = $flag
         end
     end
 end
@@ -130,13 +120,13 @@ function define_matrix_methods(name, binding, elt)
     gt_name = gatetype_name(name)
 
     quote
-        @eval begin
-            $(esc(:(Yao.Blocks.mat)))(::Type{$(esc(gt_name)){$elt}}) = $(binding)
-            $(esc(:(Yao.Blocks.mat)))(::Type{$(esc(gt_name))}) = $(esc(:mat))($(esc(gt_name)){$DefaultType})
-            $(esc(:(Yao.Blocks.mat)))(::GT) where {GT <: $(esc(gt_name))} = $(esc(:mat))(GT)
+        @eval Yao.Blocks begin
+            mat(::Type{$(gt_name){$elt}}) = $(binding)
+            mat(::Type{$(gt_name)}) = mat($(gt_name){$DefaultType})
+            mat(::GT) where {GT <: $(gt_name)} = mat(GT)
 
-            function $(esc(:(Yao.Blocks.mat)))(::Type{$(esc(gt_name)){T}}) where {T <: Complex}
-                src = mat($(esc(gt_name)){$elt})
+            function mat(::Type{$(gt_name){T}}) where {T <: Complex}
+                src = mat($(gt_name){$elt})
                 dest = similar(src, T)
                 copyto!(dest, src)
                 dest
@@ -149,10 +139,18 @@ function define_callables(name)
     gt_name = gatetype_name(name)
 
     quote
-        @eval begin
+        @eval Yao.Blocks begin
             # factory methods
-            (::$(esc(gt_name)))() = $(esc(gt_name)){$DefaultType}()
-            (::$(esc(gt_name)))(::Type{T}) where {T <: Complex} = $(esc(gt_name)){T}()
+            (::$(gt_name))() = $(gt_name){$DefaultType}()
+            (::$(gt_name))(::Type{T}) where {T <: Complex} = $(gt_name){T}()
+
+            # forward to apply! if the first arg is a register
+            (gate::$(gt_name))(r::AbstractRegister, params...) = Blocks.apply!(r, gate, params...)
+
+            # define shortcuts
+            (gate::$(gt_name))(itr) = RangedBlock(gate, itr)
+            # TODO: use Repeated instead
+            (gate::$(gt_name))(n::Int, itr) = KronBlock{n}(i=>$name for i in itr)
         end
     end
 end
@@ -167,22 +165,18 @@ end
 
 # Entries
 
-@static if VERSION < v"0.7-"
-    constant_name(name) = esc(gensym(Symbol("Const", "_", name)))
-else
-    constant_name(name) = gensym(Symbol("Const", "_", name))
-end
+constant_name(name) = gensym(Symbol("Const", "_", name))
 
 function bind_constant(const_binding, name, t, ex)
     quote
-        @eval begin
-            const $(const_binding) = similar($(esc(ex)), $t)
+        @eval Yao.Blocks begin
+            const $(const_binding) = similar($(ex), $t)
 
             if size($(const_binding), 1) != size($(const_binding), 2)
                 throw(DimensionMismatch("Quantum Gates must be square matrix."))
             end
 
-            copyto!($(const_binding), $(esc(ex)))
+            copyto!($(const_binding), $(ex))
         end
     end
 end
@@ -206,11 +200,11 @@ function define_gate(name, ex)
     gt_name = gatetype_name(name)
 
     quote
-        $(bind_constant(const_binding, name, :DefaultType, ex))
+        $(bind_constant(const_binding, name, DefaultType, ex))
         is_successed = $(define_struct(const_binding, name))
 
         if is_successed
-            $(define_methods(name, const_binding, :DefaultType))
+            $(define_methods(name, const_binding, DefaultType))
         end
     end
 end
@@ -220,13 +214,13 @@ function define_typed_binding(name, t)
     gt_name = gatetype_name(name)
 
     quote
-        if $(!isdefined(name))
+        if @isdefined $(name)
             throw($(UndefVarError(name)))
         end
 
-        @eval begin
-            const $(const_binding) = mat($(esc(gt_name)){$t})
-            $(esc(:(Yao.Blocks.mat)))(::Type{$(esc(gt_name)){$t}}) = $(const_binding)
+        @eval Yao.Blocks begin
+            const $(const_binding) = mat($(gt_name){$t})
+            mat(::Type{$(gt_name){$t}}) = $(const_binding)
         end
     end
 end

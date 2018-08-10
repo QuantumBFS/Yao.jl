@@ -12,8 +12,8 @@ dispatch!(c::TagBlock, params...) = (dispatch!(parent(c), params...); c)
 getindex(c::TagBlock, index...) = getindex(parent(c), index...)
 setindex!(c::TagBlock, val, index...) = setindex!(parent(c), val, index...)
 
-next(c::TagBlock, st) = next(parent(c), st)
-done(c::TagBlock, st) = done(parent(c), st)
+iterate(c::TagBlock) = iterate(parent(c))
+iterate(c::TagBlock, st) = iterate(parent(c), st)
 
 # Print
 print_subblocks(io::IO, tree::TagBlock, depth, charset, active_levels) = print_subblocks(io, parent(tree), depth, charset, active_levels)

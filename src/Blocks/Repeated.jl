@@ -17,7 +17,7 @@ mutable struct RepeatedBlock{N, C, GT<:MatrixBlock, T} <: CompositeBlock{N, T}
 end
 
 function RepeatedBlock{N}(block::GT) where {N, M, T, GT <: MatrixBlock{M, T}}
-    RepeatedBlock{N, N, GT, T}(block, (1:M:N-M+1...))
+    RepeatedBlock{N, N, GT, T}(block, (1:M:N-M+1..., ))
 end
 
 function RepeatedBlock{N}(block::GT, addrs::NTuple) where {N, M, T, GT <: MatrixBlock{M, T}}

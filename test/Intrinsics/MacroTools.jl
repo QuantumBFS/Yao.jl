@@ -1,5 +1,4 @@
-using Compat.Test
-using Compat.Iterators
+using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao
 using Yao.Intrinsics

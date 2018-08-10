@@ -39,13 +39,10 @@ getindex(c::ChainBlock, index::Union{UnitRange, Vector}) = ChainBlock(getindex(c
 setindex!(c::ChainBlock, val, index) = setindex!(c.blocks, val, index)
 adjoint(blk::ChainBlock) = typeof(blk)(map(adjoint, blocks(blk) |> reverse))
 
-import Compat: lastindex
 lastindex(c::ChainBlock) = lastindex(c.blocks)
 
 ## Iterate contained blocks
-start(c::ChainBlock) = start(c.blocks)
-next(c::ChainBlock, st) = next(c.blocks, st)
-done(c::ChainBlock, st) = done(c.blocks, st)
+iterate(c::ChainBlock, st=1) = iterate(c.blocks, st)
 length(c::ChainBlock) = length(c.blocks)
 eltype(c::ChainBlock) = eltype(c.blocks)
 eachindex(c::ChainBlock) = eachindex(c.blocks)

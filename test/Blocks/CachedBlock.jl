@@ -1,19 +1,17 @@
-using Compat
-using Compat.Test
+using Test, Random, LinearAlgebra, SparseArrays, CacheServers
 
 using Yao
 using Yao.Blocks
-using Yao.CacheServers
 using Yao.LuxurySparse
 
-s = DefaultServer{MatrixBlock, CacheFragment}()
+test_server = DefaultServer{MatrixBlock, CacheFragment}()
 
 @testset "constructor" begin
-    @test CachedBlock(s, X, 2) isa CachedBlock{DefaultServer{MatrixBlock, CacheFragment}, XGate{ComplexF64}, 1, ComplexF64}
+    @test CachedBlock(test_server, X, 2) isa CachedBlock{DefaultServer{MatrixBlock, CacheFragment}, XGate{ComplexF64}, 1, ComplexF64}
 end
 
 @testset "methods" begin
-    g = CachedBlock(s, X, 3)
+    g = CachedBlock(test_server, X, 3)
     @test_throws KeyError pull(g)
 
     update_cache(g)
@@ -36,7 +34,7 @@ end
 
 @testset "direct inherited methods" begin
     g = kron(4, 1=>X, 3=>Y)
-    g = CachedBlock(s, g, 2)
+    g = CachedBlock(test_server, g, 2)
 
     @test g[1] isa XGate
     @test g[3] isa YGate
@@ -45,14 +43,12 @@ end
     @test g[4] isa ZGate
 
     g = chain(X, Y)
-    g = CachedBlock(s, g, 2)
+    g = CachedBlock(test_server, g, 2)
 
     @test g[1] isa XGate
     @test g[2] isa YGate
 
-    @test start(g) == start(g.block)
-    @test next(g, start(g)) == next(g.block, start(g.block))
-    @test done(g, start(g)) == done(g.block, start(g.block))
+    @test iterate(g) == iterate(g.block)
     @test length(g) == length(g.block)
 
     @test eltype(g) == eltype(g.block)

@@ -19,8 +19,8 @@ Y Gate on multiple bits.
 """
 function ygate(::Type{MT}, num_bit::Int, bits::Ints) where MT<:Complex
     mask = bmask(bits...)
-    order = Vector{Int}(1<<num_bit)
-    vals = Vector{MT}(1<<num_bit)
+    order = Vector{Int}(undef, 1<<num_bit)
+    vals = Vector{MT}(undef, 1<<num_bit)
     factor = MT(-im)^length(bits)
     for b = basis(num_bit)
         i = b+1
@@ -63,8 +63,8 @@ Single Controlled-Y Gate on single bit.
 function cygate(::Type{MT}, num_bit::Int, cbits, cvals, b2::Int) where MT<:Complex
     c = controller(cbits, cvals)
     mask2 = bmask(b2)
-    order = Vector{Int}(1<<num_bit)
-    vals = Vector{MT}(1<<num_bit)
+    order = Vector{Int}(undef, 1<<num_bit)
+    vals = Vector{MT}(undef, 1<<num_bit)
     @simd for b = 0:1<<num_bit-1
         i = b+1
         if b |> c
@@ -102,8 +102,8 @@ function controlled_U1 end
 
 # general multi-control single-gate
 function controlled_U1(num_bit::Int, gate::PermMatrix{T}, cbits::Vector{Int}, cvals::Vector{Int}, b2::Int) where {T}
-    vals = Vector{T}(1<<num_bit)
-    order = Vector{Int}(1<<num_bit)
+    vals = Vector{T}(undef, 1<<num_bit)
+    order = Vector{Int}(undef, 1<<num_bit)
     mask = bmask(cbits...)
     onemask = bmask(cbits[cvals.==1]...)
     mask2 = bmask(b2)
@@ -126,7 +126,7 @@ function controlled_U1(num_bit::Int, gate::Diagonal{T}, cbits::Vector{Int}, cval
 
     a, b = gate.diag
     ######### LW's version ###########
-    vals = Vector{T}(1<<num_bit)
+    vals = Vector{T}(undef, 1<<num_bit)
     @simd for i in basis(num_bit)
         if testval(i, mask, onemask)
             @inbounds vals[i+1] = gate.diag[1+takebit(i, b2)]

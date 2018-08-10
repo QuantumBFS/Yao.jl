@@ -3,7 +3,7 @@ using BenchmarkTools
 
 for nbit in 1:5:
     n=1<<nbit
-    const v = randn(Complex128, 1<<16)
+    const v = randn(ComplexF64, 1<<16)
     const un = randn(n,n)
     const sun = SMatrix{n,n}(u4)
     const inds =  randperm(n) +18

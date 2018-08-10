@@ -1,9 +1,8 @@
+using Test, Random, LinearAlgebra, SparseArrays, LuxurySparse
+
 using Yao
 using Yao.Zoo
-using Compat.Test
-@static if VERSION >= v"0.7-"
-    using FFTW
-end
+using FFTW
 
 @testset "QFT" begin
     num_bit = 5
@@ -12,18 +11,18 @@ end
     reg = rand_state(num_bit)
     rv = copy(statevec(reg))
 
-    @test Matrix(mat(chain(3, QFTCircuit(3) |> adjoint, QFTCircuit(3)))) ≈ eye(1<<3)
+    @test Matrix(mat(chain(3, QFTCircuit(3) |> adjoint, QFTCircuit(3)))) ≈ IMatrix(1<<3)
 
     # test ifft
-    reg1 = copy(reg) |>ifftblock
+    reg1 = apply!(copy(reg), ifftblock)
 
     # permute lines (Manually)
-    kv = fft(reg|>statevec)/sqrt(length(rv))
-    @test reg1|>statevec ≈ kv |> invorder
+    kv = fft(statevec(reg))/sqrt(length(rv))
+    @test statevec(reg1) ≈ invorder(kv)
 
     # test fft
-    reg2 = copy(reg) |> invorder! |> fftblock
-    kv = ifft(rv)*sqrt(length(rv))
+    reg2 = apply!(invorder!(copy(reg)), fftblock)
+    kv = ifft(rv) * sqrt(length(rv))
     @test statevec(reg2) ≈ kv
 end
 
@@ -38,11 +37,11 @@ end
     @test openbox(iqftblock) == iqft
     reg = rand_state(num_bit)
 
-    @test Matrix(mat(chain(3, QFTBlock{3}() |> adjoint, QFTBlock{3}()))) ≈ eye(1<<3)
+    @test Matrix(mat(chain(3, QFTBlock{3}() |> adjoint, QFTBlock{3}()))) ≈ IMatrix(1<<3)
 
     # permute lines (Manually)
-    @test copy(reg) |>iqft ≈ copy(reg) |> (QFTBlock{num_bit}()|>adjoint)
+    @test apply!(copy(reg), iqft) ≈ apply!(copy(reg), QFTBlock{num_bit}() |> adjoint)
 
     # test fft
-    @test copy(reg) |> qft ≈ copy(reg) |> qftblock
+    @test apply!(copy(reg), qft) ≈ apply!(copy(reg), qftblock)
 end

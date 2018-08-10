@@ -95,7 +95,7 @@ Return general kronecher product form of gates in Hilbert space of `num_bit` qub
 """
 function hilbertkron(num_bit::Int, ops::Vector{T}, start_locs::Vector{Int}) where T<:AbstractMatrix
     sizes = [op |> nqubits for op in ops]
-    start_locs = num_bit - start_locs - sizes + 2
+    start_locs = num_bit .- start_locs .- sizes .+ 2
 
     order = sortperm(start_locs)
     sorted_ops = ops[order]
@@ -110,7 +110,7 @@ function _wrap_identity(data_list::Vector{T}, num_bit_list::Vector{Int}) where T
     length(num_bit_list) == length(data_list) + 1 || throw(ArgumentError())
 
     ⊗ = kron
-    reduce(IMatrix(1 << num_bit_list[1]), zip(data_list, num_bit_list[2:end])) do x, y
+    reduce(zip(data_list, num_bit_list[2:end]); init=IMatrix(1 << num_bit_list[1])) do x, y
         x ⊗ y[1] ⊗ IMatrix(1<<y[2])
     end
 end
@@ -142,8 +142,8 @@ hilbertkron(num_bit, [IMatrix(2) - projector], [cbit]) + hilbertkron(num_bit, vc
 import Base: randn
 randn(T::Type{Complex{F}}, n::Int...) where F = randn(F, n...) + im*randn(F, n...)
 
-rotate_matrix(gate::AbstractMatrix, θ::Real) = expm(-0.5im*θ*Matrix(gate))
-linop2dense(applyfunc!::Function, num_bit::Int) = applyfunc!(eye(ComplexF64, 1<<num_bit))
+rotate_matrix(gate::AbstractMatrix, θ::Real) = exp(-0.5im * θ * Matrix(gate))
+linop2dense(applyfunc!::Function, num_bit::Int) = applyfunc!(Matrix{ComplexF64}(I, 1<<num_bit, 1<<num_bit))
 hypercubic(A::Array) = reshape(A, fill(2, size(A) |> prod |> log2i)...)
 
 #################### Reorder ######################
@@ -184,7 +184,7 @@ function reorder(A::Diagonal, orders::Vector{Int})
     Diagonal(diag)
 end
 
-rotmat(m::AbstractMatrix, θ::Real) = expm(-im*θ/2*Matrix(m))
+rotmat(m::AbstractMatrix, θ::Real) = exp(-im*θ/2*Matrix(m))
 
 ################### Fidelity ###################
 """fidelity for pure states."""

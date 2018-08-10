@@ -1,12 +1,9 @@
 module Intrinsics
 
-using Compat
-using Compat.LinearAlgebra
-using Compat.SparseArrays
+using LinearAlgebra, SparseArrays
 using StaticArrays: SVector, SMatrix
 
-using ..LuxurySparse
-import ..LuxurySparse: I
+using LuxurySparse
 import ..Yao: nqubits, reorder, invorder, reorder
 
 include("Exceptions.jl")
@@ -36,7 +33,7 @@ include("MacroTools.jl")
 
 include("TupleTools.jl")
 
-import Compat.LinearAlgebra: ishermitian
+import LinearAlgebra: ishermitian
 export isunitary, isreflexive, ishermitian
 include("OperatorTraits.jl")
 
@@ -44,7 +41,7 @@ include("OperatorTraits.jl")
 export swaprows!, mulrow!, matvec, mulcol!, swapcols!, u1rows!, unrows!
 export itercontrol, IterControl, controldo, u1apply!, unapply!, cunapply!
 export fidelity_pure, fidelity_mix
-include("elemental.jl")
+include("elementary.jl")
 include("IterControl.jl")
 include("GeneralApply.jl")
 

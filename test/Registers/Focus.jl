@@ -1,7 +1,4 @@
-using Compat
-using Compat.Test
-using Compat.LinearAlgebra
-using Compat.SparseArrays
+using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao.Registers
 using Yao.Intrinsics
@@ -13,7 +10,7 @@ using Yao.Intrinsics
     @test relax!(relax!(focus!(focus!(copy(reg0), [1,4,2]), 2), 2, nbit=3), [1,4,2]) == reg0
 
     reg = focus!(copy(reg0), 2:3)
-    @test reg |> probs ≈ hcat([sum(abs2.(reshape(reg.state[i,:], :, 3)), 1)[1,:] for i in 1:4]...)'
+    @test reg |> probs ≈ hcat([sum(abs2.(reshape(reg.state[i,:], :, 3)), dims=1)[1,:] for i in 1:4]...)'
     @test size(state(reg)) == (2^2, 2^3*3)
     @test nactive(reg) == 2
     @test nremain(reg) == 3
@@ -23,7 +20,7 @@ end
 @testset "Focus 2" begin
     reg0 = rand_state(8)
     reg = focus!(copy(reg0), 7)
-    @test reg |> probs ≈ sum(abs2.(reg.state), 2)[:,1]
+    @test reg |> probs ≈ sum(abs2.(reg.state), dims=2)[:,1]
     @test nactive(reg) == 1
 
     reg0 = rand_state(10)

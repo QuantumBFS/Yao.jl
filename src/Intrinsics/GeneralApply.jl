@@ -40,10 +40,10 @@ end
 """
 turn a vector/matrix to static vector/matrix (only if its length <= 256).
 """
-autostatic(A::AbstractVecOrMat) = length(A) > 1<<8 ? A : A |> statify
+autostatic(A::AbstractVecOrMat) = length(A) > 1<<8 ? A : A |> staticize
 
 """
-control-unitary 
+control-unitary
 """
 function cunapply! end
 

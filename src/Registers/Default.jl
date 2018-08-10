@@ -12,7 +12,7 @@ mutable struct DefaultRegister{B, T} <: AbstractRegister{B, T}
 
     function DefaultRegister{B, T}(raw::Matrix{T}) where {B, T}
         ispow2(size(raw, 1)) && ispow2(size(raw, 2) ÷ B) ||
-            throw(Compat.InexactError(:DefaultRegister, DefaultRegister, raw))
+            throw(InexactError(:DefaultRegister, DefaultRegister, raw))
         new{B, T}(raw)
     end
 
@@ -56,7 +56,7 @@ stack(regs::DefaultRegister...) = DefaultRegister{sum(nbatch, regs)}(hcat((reg.s
 Base.repeat(reg::DefaultRegister{B}, n::Int) where B = DefaultRegister{B*n}(hcat((reg.state for i=1:n)...,))
 
 # -> zero_state is an easier interface
-zero_state(::Type{T}, n::Int, nbatch::Int=1) where T = register((arr=zeros(T, 1<<n, nbatch); arr[1,:]=1; arr))
+zero_state(::Type{T}, n::Int, nbatch::Int=1) where T = register((arr=zeros(T, 1<<n, nbatch); arr[1,:] .= 1; arr))
 rand_state(::Type{T}, n::Int, nbatch::Int=1) where T = register(randn(T, 1<<n, nbatch) + im*randn(T, 1<<n, nbatch)) |> normalize!
 uniform_state(::Type{T}, n::Int, nbatch::Int=1) where T = register(ones(T, 1<<n, nbatch)./sqrt(1<<n))
 
@@ -68,7 +68,7 @@ function probs(r::DefaultRegister{1})
     if size(r.state, 2) == 1
         return vec(r.state .|> abs2)
     else
-        return squeeze(sum(r.state .|> abs2, 2), 2)
+        return dropdims(sum(r.state .|> abs2, dims=2), dims=2)
     end
 end
 
@@ -77,7 +77,7 @@ function probs(r::DefaultRegister{B}) where B
         return r.state .|> abs2
     else
         probs = r |> rank3 .|> abs2
-        return squeeze(sum(probs, 2), 2)
+        return dropdims(sum(probs, dims=2), dims=2)
     end
 end
 
@@ -103,7 +103,7 @@ function join(reg1::DefaultRegister{B, T1}, reg2::DefaultRegister{B, T2}) where 
     s1 = reg1 |> rank3
     s2 = reg2 |> rank3
     T = promote_type(T1, T2)
-    state = Array{T,3}(size(s1, 1)*size(s2, 1), size(s1, 2)*size(s2, 2), B)
+    state = Array{T,3}(undef, size(s1, 1)*size(s2, 1), size(s1, 2)*size(s2, 2), B)
     for b = 1:B
         @inbounds @views state[:,:,b] = kron(s2[:,:,b], s1[:,:,b])
     end
@@ -116,7 +116,7 @@ join(reg1::DefaultRegister{1}, reg2::DefaultRegister{1}) = DefaultRegister{1}(kr
 
 Return true if a register is normalized else false.
 """
-isnormalized(reg::DefaultRegister) = all(sum(copy(reg) |> relax! |> probs, 1) .≈ 1)
+isnormalized(reg::DefaultRegister) = all(sum(copy(reg) |> relax! |> probs, dims=1) .≈ 1)
 
 # we convert state to a vector to use
 # intrincs like gemv, when nremain is

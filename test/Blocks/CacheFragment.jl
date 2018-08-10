@@ -1,8 +1,6 @@
-using Compat
-using Compat.Test
+using Test, Random, LinearAlgebra, SparseArrays, CacheServers
 
 using Yao.Blocks
-using Yao.CacheServers
 using Yao.LuxurySparse
 
 @testset "constructor" begin

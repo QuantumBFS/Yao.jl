@@ -1,5 +1,4 @@
-using Compat
-using Compat.Test
+using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao.Registers
 import Yao.Registers: fidelity, tracedist

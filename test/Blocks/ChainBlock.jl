@@ -1,7 +1,4 @@
-using Compat
-using Compat.Test
-using Compat.LinearAlgebra
-using Compat.SparseArrays
+using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao
 using Yao.Blocks
@@ -42,7 +39,7 @@ g = ChainBlock(
 )
 
 reg = rand_state(2)
-@test statevec(with(g, reg)) ≈ mat(g) * reg
+@test statevec(apply!(copy(reg), g)) ≈ mat(g) * reg
 end
 
 @testset "iteration" begin

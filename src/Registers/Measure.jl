@@ -4,7 +4,7 @@ using StatsBase
 _measure(pl::Vector, ntimes::Int) = sample(0:length(pl)-1, Weights(pl), ntimes)
 function _measure(pl::Matrix, ntimes::Int)
     B = size(pl, 1)
-    res = Matrix{Int}(ntimes, B)
+    res = Matrix{Int}(undef, ntimes, B)
     @simd for ib=1:B
         @inbounds res[:,ib] = _measure(pl[:,ib], ntimes)
     end
@@ -27,7 +27,7 @@ function measure_remove!(reg::AbstractRegister{B}) where B
     state = reshape(reg.state, size(reg.state,1),:,B)
     nstate = similar(reg.state, 1<<nremain(reg), B)
     pl = reg |> probs
-    res = Vector{Int}(B)
+    res = Vector{Int}(undef, B)
     @simd for ib = 1:B
         @inbounds ires = _measure(pl[:, ib], 1)[]
         @inbounds nstate[:,ib] = view(state, ires+1,:,ib)./sqrt(pl[ires+1, ib])

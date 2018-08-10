@@ -14,18 +14,21 @@ function IterControl{N}(base::Int, masks, ks) where N
     IterControl{N, C}(base, SVector{C, Int}(masks), SVector{C, Int}(ks))
 end
 
-Base.length(ic::IterControl{N}) where N = N
-Base.eltype(::Type{IterControl}) = Int
-Base.eltype(ic::IterControl) = Int
-Base.start(::IterControl) = 0
-Base.done(ic::IterControl{N}, state::Int) where N = state == N
-function Base.next(ic::IterControl{N, C}, state::Int) where {N, C}
-    res = state
-    @simd for s in 1:C
-        @inbounds res = lmove(res, ic.masks[s], ic.ks[s])
+function Base.iterate(ic::IterControl{N, C}, state = 0) where {N, C}
+    if state == N
+        nothing
+    else
+        res = state
+        @simd for s in 1:C
+            @inbounds res = lmove(res, ic.masks[s], ic.ks[s])
+        end
+
+        res+ic.base, state+1
     end
-    res+ic.base, state+1
 end
+
+Base.length(ic::IterControl{N}) where N = N
+Base.eltype(ic::IterControl) = Int
 lmove(b::Int, mask::Int, k::Int)::Int = (b&~mask)<<k + (b&mask)
 
 """
