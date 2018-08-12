@@ -15,7 +15,7 @@ mutable struct TimeEvolution{N, T, GT <: MatrixBlock{N, Complex{T}}} <: Primitiv
 end
 TimeEvolution(H::GT, t) where {N, T, GT<:MatrixBlock{N, Complex{T}}} = TimeEvolution{N, T, GT}(H, t)
 
-mat(te::TimeEvolution{N, T}) where {N, T} = expm(Matrix(-im*te.t*mat(te.H)))
+mat(te::TimeEvolution{N, T}) where {N, T} = exp(Matrix(-im*te.t*mat(te.H)))
 
 function apply!(reg::DefaultRegister, te::TimeEvolution{N, T}) where {N, T}
     st = state(reg)

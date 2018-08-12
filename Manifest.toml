@@ -27,9 +27,9 @@ version = "1.0.1"
 
 [[Conda]]
 deps = ["Compat", "JSON", "VersionParsing"]
-git-tree-sha1 = "b76a441539d66a18ba34df28d34dc5b9202164a3"
+git-tree-sha1 = "a47f9a2c7b80095e6a935536795635522fe27f5d"
 uuid = "8f4d0f93-b110-5947-807f-2305c1781a2d"
-version = "1.0.0"
+version = "1.0.1"
 
 [[DataStructures]]
 deps = ["InteractiveUtils", "REPL", "Random", "Serialization", "Test"]
@@ -49,15 +49,29 @@ uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 deps = ["LinearAlgebra", "Random", "Serialization", "Sockets"]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
+[[Expokit]]
+deps = ["Compat", "LinearAlgebra", "SparseArrays"]
+git-tree-sha1 = "986325ee4ca00a9ef39c5ed6349359d48e9ab495"
+repo-rev = "master"
+repo-url = "Expokit"
+uuid = "a1e7a1ef-7a5d-5822-a38c-be74e1bb89f4"
+version = "0.1.0+"
+
 [[FFTW]]
-deps = ["AbstractFFTs", "BinaryProvider", "Compat", "Conda", "Libdl", "LinearAlgebra", "Reexport", "Test"]
-git-tree-sha1 = "60346335ad3aa60bfbdc358c6d1468bffbcff071"
+deps = ["AbstractFFTs", "BinaryProvider", "Compat", "Conda", "Libdl", "LinearAlgebra", "Pkg", "Reexport", "Test"]
+git-tree-sha1 = "29cda58afbf62f35b1a094882ad6c745a47b2eaa"
 uuid = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
-version = "0.2.3"
+version = "0.2.4"
 
 [[InteractiveUtils]]
 deps = ["LinearAlgebra", "Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+
+[[IterTools]]
+deps = ["Pkg", "SparseArrays", "Test"]
+git-tree-sha1 = "ed0787e62dc46b8d8c7c3db54391d71e0da5fefd"
+uuid = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
+version = "1.0.0"
 
 [[JSON]]
 deps = ["Dates", "Distributed", "Mmap", "Pkg", "Sockets", "Test", "Unicode"]
@@ -66,10 +80,10 @@ uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.19.0"
 
 [[Lazy]]
-deps = ["Compat", "MacroTools"]
-git-tree-sha1 = "1dea2ef59fab543a5b1ce066b678dcdd70d21abf"
+deps = ["Compat", "MacroTools", "Test"]
+git-tree-sha1 = "6b8b57bed0c4fc6198d81301cce7b2f09ebd55af"
 uuid = "50d2b5c4-7a5e-59d5-8109-a42b560f39c0"
-version = "0.12.1"
+version = "0.13.0"
 
 [[LibGit2]]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
@@ -81,22 +95,28 @@ uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 deps = ["Libdl"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
+[[LinearMaps]]
+deps = ["LinearAlgebra", "SparseArrays", "Test"]
+git-tree-sha1 = "3685dd10180eb53fc5a40fcb3def3d4506dc8ba5"
+uuid = "7a12625a-238d-50fd-b39a-03d52299707e"
+version = "2.1.0"
+
 [[Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[LuxurySparse]]
 deps = ["Compat", "LinearAlgebra", "Random", "SparseArrays", "StaticArrays"]
-git-tree-sha1 = "bb89598fcc9393872909cf4f55ecfa578a7288e3"
-repo-rev = "master"
-repo-url = "https://github.com/QuantumBFS/LuxurySparse.jl.git"
+git-tree-sha1 = "7782ee7ea646541a66e62b095b1036a635c0c07a"
+repo-rev = "coo"
+repo-url = "LuxurySparse"
 uuid = "72cad168-9621-11e8-1b1e-73228c0c6ca7"
 version = "0.1.0"
 
 [[MacroTools]]
 deps = ["Compat"]
-git-tree-sha1 = "24a61ca45b377c33fabfa4314535ced135a6c5d0"
+git-tree-sha1 = "c443e1c8d58a4e9f61b708ad0a88286c7042145b"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.4.3"
+version = "0.4.4"
 
 [[Markdown]]
 deps = ["Base64"]
@@ -158,9 +178,9 @@ uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[StaticArrays]]
 deps = ["InteractiveUtils", "LinearAlgebra", "Random", "Statistics", "Test"]
-git-tree-sha1 = "d998a83bc2cd507e12b08203e7523f2e60ac9ee6"
+git-tree-sha1 = "d432c79bef174a830304f8601427a4357dfdbfb7"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "0.8.2"
+version = "0.8.3"
 
 [[Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
