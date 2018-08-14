@@ -12,3 +12,5 @@ docs/site/
 _*.dat
 *.swp
 __pycache__/
+
+Manifest.toml
