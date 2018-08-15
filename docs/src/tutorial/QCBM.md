@@ -230,40 +230,6 @@ Firstly, you have to define a quantum register. Each run of a QCBM's input is a 
 r = register(bit"0000")
 ```
 
-We provide two method to apply a block to a register:
-
-    with(f, register)
-
-This method declares a context that has no side-effect, which means rather than apply a block directly to a register, it will copy the register first and then apply the block to this copy.
-
-    with!(f, register)
-
-This method declares a context that will have side-effect, which means the block will be applied to the register directly.
-
-In side the context you should use a pip `|>` to apply a block, which will looks like this:
-
-```@example QCBM
-our_register = register(bit"0"^5)
-
-new_register = with(our_register) do r
-    r |> kron(1=>X)
-    r |> kron(2=>X)
-end
-```
-
-```@repl QCBM
-state(new_register) ≈ state(our_register)
-state(new_register) ≈ state(register(bit"00011"))
-```
-
-For convenience, we also provide the following interface, which allows you to apply a pre-defined circuit to a register.
-
-    with(block, register)
-    with!(block, register)
-
-```@repl QCBM
-with(circuit, register(bit"0"^6))
-```
 
 Now, we define its shorthand
 
@@ -329,6 +295,8 @@ Stochastic Optimization. International Conference on Learning
 Representations, 1–13.
 
 ```julia
+using LinearAlgebra
+
 mutable struct Adam
     lr::AbstractFloat
     gclip::AbstractFloat
@@ -346,13 +314,13 @@ function update!(w, g, p::Adam)
     gclip!(g, p.gclip)
     if p.fstm===nothing; p.fstm=zeros(w); p.scndm=zeros(w); end
     p.t += 1
-    BLAS.scale!(p.beta1, p.fstm)
+    lmul!(p.beta1, p.fstm)
     BLAS.axpy!(1-p.beta1, g, p.fstm)
-    BLAS.scale!(p.beta2, p.scndm)
+    lmul!(p.beta2, p.scndm)
     BLAS.axpy!(1-p.beta2, g .* g, p.scndm)
     fstm_corrected = p.fstm / (1 - p.beta1 ^ p.t)
     scndm_corrected = p.scndm / (1 - p.beta2 ^ p.t)
-    BLAS.axpy!(-p.lr, (fstm_corrected ./ (sqrt.(scndm_corrected) + p.eps)), w)
+    BLAS.axpy!(-p.lr, @.(fstm_corrected / (sqrt(scndm_corrected) + p.eps)), w)
 end
 
 function gclip!(g, gclip)
