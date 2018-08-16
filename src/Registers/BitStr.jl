@@ -5,7 +5,7 @@ import Base: repeat
 
 String literal for qubits.
 """
-struct QuBitStr
+struct QuBitStr <: AbstractString
     val::UInt
     len::Int
 end
@@ -38,11 +38,19 @@ function bitstring2int(str::String)
 end
 
 
-import Base: *
-(*)(lhs::QuBitStr, rhs::QuBitStr) = QuBitStr(bin(lhs.val, lhs.len) * bin(rhs.val, rhs.len))
+import Base: *, repeat
+(*)(lhs::QuBitStr, rhs::QuBitStr) = QuBitStr(string(lhs.val, base=2, pad=lhs.len) * bin(rhs.val, base=2, pad=rhs.len))
+
+function repeat(s::QuBitStr, n::Integer)
+    val = s.val
+    for i in 1:n-1
+        val += s.val << (s.len * i)
+    end
+    QuBitStr(val, n * s.len)
+end
 
 function show(io::IO, bitstr::QuBitStr)
-    print(io, "QuBitStr(", bitstr.val, ", ", bitstr.len, ")")
+    print(io, string(bitstr.val, base=2, pad=bitstr.len))
 end
 
 function register(::Type{T}, bits::QuBitStr, nbatch::Int) where T

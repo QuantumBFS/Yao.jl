@@ -1,0 +1,11 @@
+julia 0.7
+
+CacheServers
+DataStructures
+FFTW
+Lazy
+LuxurySparse
+MacroTools
+Reexport
+StaticArrays
+StatsBase
