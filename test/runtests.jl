@@ -12,10 +12,6 @@ end
 include("Blocks/Blocks.jl")
 end
 
-# @testset "cache" begin
-# include("CacheServers/CacheServers.jl")
-# end
-
 @testset "boost" begin
 include("Boost/Boost.jl")
 end
@@ -23,11 +19,3 @@ end
 @testset "interface" begin
    include("Interfaces/Interfaces.jl")
 end
-
-@testset "zoo" begin
-   include("Zoo/Zoo.jl")
-end
-
-# @testset "show" begin
-# include("show.jl")
-# end
