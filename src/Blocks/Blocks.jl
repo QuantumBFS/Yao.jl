@@ -2,6 +2,9 @@ module Blocks
 
 using Random, LinearAlgebra, SparseArrays
 using Lazy: @forward
+using LinearMaps
+using Expokit: expmv
+import IterTools
 using DataStructures, CacheServers
 
 using ..Intrinsics

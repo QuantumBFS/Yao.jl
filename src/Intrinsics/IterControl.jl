@@ -1,7 +1,7 @@
 """
     IterControl{N, C}
 
-N is the size of hilber space, C is the number of shifts.
+N is the size of hilbert space, C is the number of shifts.
 """
 struct IterControl{N, C}
     base::Int
