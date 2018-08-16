@@ -4,5 +4,4 @@ authors = ["Roger-luo <hiroger@qq.com>"]
 version = "0.1.0"
 
 [deps]
-LuxurySparse = "72cad168-9621-11e8-1b1e-73228c0c6ca7"
 Yao = "1bc31baa-972f-11e8-31dd-c182aaa973df"
