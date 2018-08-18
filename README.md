@@ -24,13 +24,7 @@ Yao is an open source framework for
 
 ## Installation
 
-The package is registered. In Julia **v0.6**, you can use this command to install
-
-```julia
-julia> Pkg.add("Yao")
-```
-
-In **v0.7+**/**v1.0+**, please type `]` in the REPL to use the package mode, then type this command. Please notice that we might not be stable on **v0.7+** at the moment.
+In **v0.7+**/**v1.0+**, please type `]` in the REPL to use the package mode, then type this command:
 
 ```julia
 pkg> add Yao
