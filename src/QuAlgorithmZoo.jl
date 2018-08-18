@@ -1,13 +1,13 @@
 module QuAlgorithmZoo
 
 using LuxurySparse, LinearAlgebra
-using ..Yao
-using ..Intrinsics
-using ..Registers
-using ..Blocks
-import ..Blocks: mat, dispatch!, nparameters, parameters, cache_key, print_block, _make_rot_mat, apply!
+using Yao
+using Yao.Intrinsics
+using Yao.Registers
+using Yao.Blocks
+import Yao.Blocks: mat, dispatch!, nparameters, parameters, cache_key, print_block, _make_rot_mat, apply!
 import Base: ==, copy, hash
-import ..Intrinsics: ishermitian, isreflexive, isunitary
+import Yao.Intrinsics: ishermitian, isreflexive, isunitary
 
 export openbox
 
