@@ -236,7 +236,7 @@ r = register(bit"0000")
 
 #----------------------
 
-circuit = QCBM(6, 10, [1=>2, 3=>4, 5=>6, 2=>3, 4=>5, 6=>1])
+circuit = QCBM(6, 10, [1=>2, 3=>4, 5=>6, 2=>3, 4=>5, 6=>1]);
 
 # Now, we define its shorthand
 
@@ -367,4 +367,5 @@ plot(1:50, his, xlabel="iteration", ylabel="loss")
 #----------------------
 
 p = get_prob(circuit)
-plot(0:1<<n-1, p, pg, xlabel="x", ylabel="p")
+p = plot(0:1<<n-1, p, xlabel="x", ylabel="p")
+plot!(p, 0:1<<n-1, pg)
