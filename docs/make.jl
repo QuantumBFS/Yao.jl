@@ -1,8 +1,8 @@
 using Pkg
 
-# pkg"""
-# add Documenter Literate
-# """
+pkg"""
+add Documenter Literate
+"""
 
 using Documenter, Literate, QuAlgorithmZoo
 
