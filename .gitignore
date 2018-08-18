@@ -4,6 +4,7 @@
 
 docs/build/
 docs/site/
+docs/src/tutorial/
 
 *.ipynb_checkpoints
 **/*.ipynb_checkpoints
