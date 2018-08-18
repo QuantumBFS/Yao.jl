@@ -1,7 +1,7 @@
 using Pkg
 
 pkg"""
-add Documenter Literate Plots
+add Documenter Literate Plots Yao
 """
 
 using Documenter, Literate, QuAlgorithmZoo
