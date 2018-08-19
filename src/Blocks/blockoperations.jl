@@ -18,6 +18,14 @@ end
 blockfilter!(func, rgs::Vector, blk::PrimitiveBlock) = func(blk) ? push!(rgs, blk) : rgs
 blockfilter!(func, rgs::Vector, blk::TagBlock) = func(parent(blk)) ? push!(rgs, parent(blk)) : rgs
 
+export traverse
+
+"""
+    traverse(blk; algorithm=:DFS) -> BlockTreeIterator
+
+Returns an iterator that traverse through the block tree.
+"""
+traverse(root; algorithm=:DFS) = BlockTreeIterator(algorithm, root)
 
 # TODO: add depth
 export BlockTreeIterator
