@@ -51,7 +51,7 @@ function nparameters(c::GeneralComposite)
 end
 
 function parameters(c::CompositeBlock)
-    itr = Iterators.filter(x->isprimitive(x) && hasparameter(x), BlockTreeIterator(:DFS, c))
+    itr = Iterators.filter(x->isprimitive(x) && hasparameter(x), traverse(c))
     Iterators.flatten(parameters(each) for each in itr)
 end
 
@@ -72,7 +72,7 @@ each sub-block's number of parameters.
 function dispatch!(c::CompositeBlock, itr)
     @assert nparameters(c) == length(itr) "number of parameters does not match"
 
-    blkitr = Iterators.filter(x->isprimitive(x) && hasparameter(x), BlockTreeIterator(:DFS, c))
+    blkitr = Iterators.filter(x->isprimitive(x) && hasparameter(x), traverse(c))
     pitr = itr
     for each in blkitr
         dispatch!(each, Iterators.take(pitr, nparameters(each)))
@@ -84,7 +84,7 @@ end
 function dispatch!(f::Function, c::CompositeBlock, itr)
     @assert nparameters(c) == length(itr) "number of parameters does not match"
 
-    blkitr = Iterators.filter(x->isprimitive(x) && hasparameter(x), BlockTreeIterator(:DFS, c))
+    blkitr = Iterators.filter(x->isprimitive(x) && hasparameter(x), traverse(c))
     pitr = itr
     for each in blkitr
         dispatch!(f, each, Iterators.take(pitr, nparameters(each)))
