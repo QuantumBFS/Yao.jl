@@ -1,4 +1,4 @@
-export measure, measure!, measure_remove!
+export measure, measure!, measure_remove!, select!
 using StatsBase
 
 _measure(pl::Vector, ntimes::Int) = sample(0:length(pl)-1, Weights(pl), ntimes)
@@ -47,4 +47,9 @@ function measure!(reg::AbstractRegister{B}) where B
     end
     reg.state = reshape(nstate, size(state, 1), :)
     reg, res
+end
+
+function select!(reg::AbstractRegister{B}, b::Integer) where B
+    reg.state = reg.state[b+1:b+1, :]
+    reg
 end

@@ -10,6 +10,7 @@ using Yao.Intrinsics
     @test takebit(ind, 2) == 0
     @test takebit.([ind, 2], 2) == [0,1]
     @test takebit.(ind, [3,2]) == [1,0]
+    @test takebit.(ind, [3,2], [2,3]) == [1, 2]
 
     # flip
     @test flip(ind, bmask(1)) == 13
@@ -61,4 +62,11 @@ end
 
 @testset "State Utilities" begin
     @test onehotvec(ComplexF64, 2, 2) == [0, 0, 1, 0]
+end
+
+@testset "bint & bfloat" begin
+    @test bint(5) == 5
+    @test bint_r(3, nbit=4) == 12
+    @test bfloat(3) == 0.75
+    @test bfloat_r(3, nbit=4) == 0.75/4
 end

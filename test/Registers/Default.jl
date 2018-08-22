@@ -18,6 +18,11 @@ using Yao.Intrinsics
     reg = zero_state(5, 3)
     @test all(state(reg)[1, :] .== 1)
 
+    # product state initializer
+    reg = product_state(5, 2, 3)
+    @test all(state(reg)[3, :] .== 1)
+    @test reg'*reg ≈ ones(3, 3)
+
     # rand state initializer
     reg = rand_state(5, 3)
     @test reg |> probs ≈ abs2.(reg.state)
@@ -121,4 +126,12 @@ end
     reg5 = focus!(repeat(reg1, 3), 1:3)
     reg6 = focus!(repeat(reg2, 3), 1:2)
     @test (join(reg5, reg6) |> statevec)[:,1] ≈ reg4 |> statevec
+end
+
+@testset "select" begin
+    reg = product_state(4, 6, 2)
+    # println(focus!(reg, [1,3]))
+    select!(focus!(reg, [2,3]), 0b11) |> relax!
+
+    @test reg'*reg ≈ [1 1; 1 1]
 end

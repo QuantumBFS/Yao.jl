@@ -17,7 +17,7 @@ export nqubits, nactive, nremain, nbatch, state, statevec, hypercubic, rank3, fo
 export AbstractRegister, Register, invorder!, reorder!, addbit!, reset!
 
 # factories
-export register, zero_state, rand_state, randn_state, stack, uniform_state
+export register, zero_state, product_state, rand_state, randn_state, stack, uniform_state
 
 # bit_str
 export @bit_str, asindex

@@ -136,14 +136,28 @@ function general_controlled_gates(
         hilbertkron(n, vcat(projectors, gates), vcat(cbits, locs))
 end
 
+"""
+    general_c1_gates(num_bit::Int, projector::AbstractMatrix, cbit::Int, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix
+
+general (low performance) construction method for control gate on different lines.
+"""
 general_c1_gates(num_bit::Int, projector::Tp, cbit::Int, gates::Vector{Tg}, locs::Vector{Int}) where {Tg<:AbstractMatrix, Tp<:AbstractMatrix} =
 hilbertkron(num_bit, [IMatrix(2) - projector], [cbit]) + hilbertkron(num_bit, vcat([projector], gates), vcat([cbit], locs))
 
-import Base: randn
-randn(T::Type{Complex{F}}, n::Int...) where F = randn(F, n...) + im*randn(F, n...)
-
 rotate_matrix(gate::AbstractMatrix, θ::Real) = exp(-0.5im * θ * Matrix(gate))
+
+"""
+    linop2dense(applyfunc!::Function, num_bit::Int) -> Matrix
+
+get the dense matrix representation given matrix*matrix function.
+"""
 linop2dense(applyfunc!::Function, num_bit::Int) = applyfunc!(Matrix{ComplexF64}(I, 1<<num_bit, 1<<num_bit))
+
+"""
+    hypercubic(A::Union{Array, DefaultRegister}) -> Array
+
+get the hypercubic representation for an array or a regiseter.
+"""
 hypercubic(A::Array) = reshape(A, fill(2, size(A) |> prod |> log2i)...)
 
 #################### Reorder ######################

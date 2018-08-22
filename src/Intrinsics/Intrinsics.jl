@@ -21,6 +21,7 @@ export basis, bmask
 export bit_length, log2i, bsizeof, nqubits
 export testall, testany, testval, setbit, flip, neg, swapbits, takebit, breflect
 export indices_with, bitarray, packbits, controller
+export bint, bfloat, bint_r, bfloat_r
 export bdistance
 export onehotvec
 export hypercubic, reordered_basis, Reorderer, reorder, invorder

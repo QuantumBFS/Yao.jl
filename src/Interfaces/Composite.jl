@@ -202,8 +202,8 @@ repeat(x::MatrixBlock, params...,) = n->repeat(n, x, params...,)
 export concentrate
 
 """
-    concentrate(nbit::Int, block::AbstractBlock, addrs::Vector{Int}) -> Concentrator{nbit}
+    concentrate(nbit::Int, block::AbstractBlock, addrs) -> Concentrator{nbit}
 
 concentrate blocks on serveral addrs.
 """
-concentrate(nbit::Int, block::AbstractBlock, addrs::Vector{Int}) = Concentrator{nbit}(block, addrs)
+concentrate(nbit::Int, block::AbstractBlock, addrs) = Concentrator{nbit}(block, [addrs...])
