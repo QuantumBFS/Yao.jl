@@ -1,4 +1,4 @@
-export measure, measure!, measure_remove!, select!
+export measure, measure!, measure_remove!, select!, select
 using StatsBase
 
 _measure(pl::Vector, ntimes::Int) = sample(0:length(pl)-1, Weights(pl), ntimes)
@@ -49,7 +49,23 @@ function measure!(reg::AbstractRegister{B}) where B
     reg, res
 end
 
+"""
+    select!(reg::AbstractRegister, b::Integer) -> AbstractRegister
+
+select specific component of qubit, the inplace version.
+
+e.g.
+`select!(reg, 0b110)` will select the subspace with (focused) configuration `110`.
+After selection, the focused qubit space is 0, so you may want call `relax!` manually.
+"""
 function select!(reg::AbstractRegister{B}, b::Integer) where B
     reg.state = reg.state[b+1:b+1, :]
     reg
 end
+
+"""
+    select(reg::AbstractRegister, b::Integer) -> AbstractRegister
+
+the non-inplace version of [`select!`](@ref) function.
+"""
+select(reg::DefaultRegister{B}, b::Integer) where B = DefaultRegister{B}(reg.state[b+1:b+1, :])

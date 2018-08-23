@@ -131,7 +131,9 @@ end
 @testset "select" begin
     reg = product_state(4, 6, 2)
     # println(focus!(reg, [1,3]))
-    select!(focus!(reg, [2,3]), 0b11) |> relax!
+    r1 = select!(focus!(copy(reg), [2,3]), 0b11) |> relax!
+    r2= select(focus!(copy(reg), [2,3]), 0b11) |> relax!
 
-    @test reg'*reg ≈ [1 1; 1 1]
+    @test r1'*r1 ≈ [1 1; 1 1]
+    @test r1 ≈ r2
 end

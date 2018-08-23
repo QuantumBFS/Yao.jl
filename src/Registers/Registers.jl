@@ -27,9 +27,9 @@ export fidelity, tracedist
 
 include("BitStr.jl")
 include("Core.jl")
-include("Measure.jl")
 
 include("Default.jl")
+include("Measure.jl")
 include("Focus.jl")
 
 include("DensityMatrix.jl")
