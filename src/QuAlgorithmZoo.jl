@@ -5,7 +5,7 @@ using Yao
 using Yao.Intrinsics
 using Yao.Registers
 using Yao.Blocks
-import Yao.Blocks: mat, dispatch!, nparameters, parameters, cache_key, print_block, _make_rot_mat, apply!
+import Yao.Blocks: mat, dispatch!, nparameters, parameters, cache_key, print_block, _make_rot_mat, apply!, PrimitiveBlock
 import Base: ==, copy, hash
 import Yao.Intrinsics: ishermitian, isreflexive, isunitary
 

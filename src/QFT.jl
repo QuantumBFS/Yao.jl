@@ -11,8 +11,8 @@ QFTCircuit(n::Int) = chain(n, CRot(n, i) for i = 1:n)
 struct QFTBlock{N} <: PrimitiveBlock{N,ComplexF64} end
 mat(q::QFTBlock{N}) where N = applymatrix(q)
 
-apply!(reg::DefaultRegister{B}, ::QFTBlock) where B = (reg.state = ifft!(invorder_firstdim(reg |> state), 1)*sqrt(1<<nqubits(reg)); reg)
-apply!(reg::DefaultRegister{B}, ::Daggered{N, T, <:QFTBlock}) where {B,N,T} = (reg.state = invorder_firstdim(fft!(reg|>state, 1)/sqrt(1<<nqubits(reg))); reg)
+apply!(reg::DefaultRegister{B}, ::QFTBlock) where B = (reg.state = ifft!(invorder_firstdim(reg |> state), 1)*sqrt(1<<nactive(reg)); reg)
+apply!(reg::DefaultRegister{B}, ::Daggered{N, T, <:QFTBlock}) where {B,N,T} = (reg.state = invorder_firstdim(fft!(reg|>state, 1)/sqrt(1<<nactive(reg))); reg)
 
 # traits
 ishermitian(q::QFTBlock{N}) where N = N==1

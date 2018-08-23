@@ -44,4 +44,7 @@ end
 
     # test fft
     @test apply!(copy(reg), qft) ≈ apply!(copy(reg), qftblock)
+
+    # regression test for nactive
+    @test apply!(focus!(copy(reg), 1:3), QFTBlock{3}()) |> isnormalized
 end
