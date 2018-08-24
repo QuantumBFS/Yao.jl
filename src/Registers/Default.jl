@@ -132,6 +132,7 @@ function join(reg1::DefaultRegister{B, T1}, reg2::DefaultRegister{B, T2}) where 
     DefaultRegister{B}(reshape(state, size(state, 1), :))
 end
 join(reg1::DefaultRegister{1}, reg2::DefaultRegister{1}) = DefaultRegister{1}(kron(reg2.state, reg1.state))
+⊗(reg::AbstractRegister, reg2::AbstractRegister) = join(reg, reg2)
 
 """
     isnormalized(reg::DefaultRegister) -> Bool

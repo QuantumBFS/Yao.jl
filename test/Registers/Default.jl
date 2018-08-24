@@ -122,6 +122,7 @@ end
     reg2 = rand_state(6)
     reg3 = join(reg1, reg2)
     reg4 = join(focus!(copy(reg1), 1:3), focus!(copy(reg2), 1:2))
+    @test reg3 == reg1 ⊗ reg2
     @test reg4 |> statevec ≈ focus!(copy(reg3), [1,2,3,7,8,4,5,6,9,10,11,12]) |> statevec
     reg5 = focus!(repeat(reg1, 3), 1:3)
     reg6 = focus!(repeat(reg2, 3), 1:2)
