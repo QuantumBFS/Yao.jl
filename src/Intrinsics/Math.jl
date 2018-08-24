@@ -216,3 +216,22 @@ function fidelity_mix(m1::Matrix, m2::Matrix)
     O = m1'*m2
     trace(sqrtm(O*O'))
 end
+
+"""
+    rand_unitary(N::Int) -> Matrix
+
+Random unitary matrix.
+"""
+function rand_unitary(N::Int)
+    qr(randn(ComplexF64, N, N)).Q |> Matrix
+end
+
+"""
+    rand_hermitian(N::Int) -> Matrix
+
+Random hermitian matrix.
+"""
+function rand_hermitian(N::Int)
+    A = randn(ComplexF64, N, N)
+    A + A'
+end

@@ -71,3 +71,10 @@ end
     @test reorder(DC ⊗ DB ⊗ DA, [3,1,2]) ≈ DB ⊗ DA ⊗ DC
     @test invorder(DC ⊗ DB ⊗ DA) ≈ DA ⊗ DB ⊗ DC
 end
+
+@testset "random matrices" begin
+    mat = rand_unitary(8)
+    @test isunitary(mat)
+    mat = rand_hermitian(8)
+    @test ishermitian(mat)
+end

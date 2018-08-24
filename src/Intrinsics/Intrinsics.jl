@@ -12,6 +12,7 @@ include("Exceptions.jl")
 export batch_normalize!, batch_normalize
 export rolldims2!, rolldims!
 export hilbertkron, linop2dense, rotmat, general_controlled_gates, general_c1_gates
+export rand_unitary, rand_hermitian
 
 include("Math.jl")
 
