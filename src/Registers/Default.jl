@@ -84,7 +84,7 @@ uniform_state(::Type{T}, n::Int, nbatch::Int=1) where T = register(ones(T, 1<<n,
 for FUNC in [:zero_state, :rand_state, :uniform_state]
     @eval $FUNC(n::Int, nbatch::Int=1) = $FUNC(DefaultType, n, nbatch)
 end
-product_state(n::Int, config::Int, nbatch::Int=1) = product_state(DefaultType, n, config, nbatch)
+product_state(n::Int, config::Integer, nbatch::Int=1) = product_state(DefaultType, n, config, nbatch)
 
 function probs(r::DefaultRegister{1})
     if size(r.state, 2) == 1

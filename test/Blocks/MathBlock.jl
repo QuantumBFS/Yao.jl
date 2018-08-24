@@ -9,6 +9,7 @@ using Yao.Blocks: MathBlock, isunitary
 return a peridoc shift function.
 """
 pshift(n::Int) = (b::Int, nbit::Int) -> mod(b+n, 1<<nbit)
+pshift(n::Float64) = (b::Float64, nbit::Int) -> mod(b+n, 1)
 
 @testset "math" begin
     nbit = 5
@@ -17,4 +18,7 @@ pshift(n::Int) = (b::Int, nbit::Int) -> mod(b+n, 1<<nbit)
     @test apply!(zero_state(nbit), ab) == product_state(nbit, 3)
     @test apply!(zero_state(nbit), mb) == product_state(nbit, 1<<nbit-3)
     @test isunitary(ab)
+    af = MathBlock{:AddFloat, nbit, :bfloat}(pshift(0.5))
+    @test isunitary(af)
+    @test apply!(zero_state(nbit), af) == product_state(nbit, 1)
 end

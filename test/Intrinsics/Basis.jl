@@ -69,4 +69,6 @@ end
     @test bint_r(3, nbit=4) == 12
     @test bfloat(3) == 0.75
     @test bfloat_r(3, nbit=4) == 0.75/4
+    @test bint_r(0.75, nbit=3) == 6
+    @test bint(0.75, nbit=3) == 3
 end

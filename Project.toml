@@ -4,6 +4,7 @@ authors = ["Roger-luo <hiroger@qq.com>", "GiggleLiu <cacate0129@gmail.com>"]
 version = "0.2.0"
 
 [deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 CacheServers = "a921213e-d44a-5460-ac04-5d720a99ba71"
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"

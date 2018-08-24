@@ -133,7 +133,9 @@ end
     # println(focus!(reg, [1,3]))
     r1 = select!(focus!(copy(reg), [2,3]), 0b11) |> relax!
     r2= select(focus!(copy(reg), [2,3]), 0b11) |> relax!
+    r3= copy(reg) |> focus!(2,3) |> select!(0b11) |> relax!
 
     @test r1'*r1 ≈ [1 1; 1 1]
     @test r1 ≈ r2
+    @test r3 ≈ r2
 end

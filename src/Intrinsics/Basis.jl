@@ -77,6 +77,7 @@ end
 integer view, with little end qubit 1.
 """
 bint(b::Int; nbit=nothing) = b
+bint(x::Float64; nbit::Int) = breflect(nbit,bint_r(x, nbit=nbit))
 
 """
     bint_r(b::Int; nbit::Int) -> Int
@@ -84,6 +85,7 @@ bint(b::Int; nbit=nothing) = b
 integer read in inverse order.
 """
 bint_r(b::Int; nbit::Int) = breflect(nbit, b)
+bint_r(x::Float64; nbit::Int) = Int(round(x * (1<<nbit)))
 
 ########## Bit-Wise Operations ##############
 """
