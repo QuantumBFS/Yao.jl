@@ -6,7 +6,7 @@ using Yao.LuxurySparse
 using Yao.Intrinsics
 using Yao.Boost
 
-⊗ = kron
+Yao.:⊗(A, B) = kron(A, B)
 
 @testset "gate utils" begin
     @test hilbertkron(4, [mat(X), mat(Y)], [3,2]) == IMatrix(2) ⊗ mat(X) ⊗ mat(Y) ⊗ IMatrix(2)

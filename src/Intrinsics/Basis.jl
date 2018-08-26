@@ -52,6 +52,41 @@ packbits(arr::AbstractVector) = _packbits(arr)[]
 packbits(arr::AbstractArray) = _packbits(arr)
 _packbits(arr) = selectdim(sum(mapslices(x -> x .* (1 .<< (0:size(arr, 1)-1)), arr, dims=1), dims=1), 1, 1)
 
+# different view points of qubits
+"""
+    bfloat(b::Int; nbit::Int=bit_length(b)) -> Float64
+
+float view, with big end qubit 1.
+"""
+function bfloat(b::Int; nbit::Int=bit_length(b))
+    breflect(nbit, b) / (1<<nbit)
+end
+
+"""
+    bfloat_r(b::Int; nbit::Int) -> Float64
+
+float view, with bits read in inverse order.
+"""
+function bfloat_r(b::Int; nbit::Int)
+    b / (1<<nbit)
+end
+
+"""
+    bint(b::Int; nbit=nothing) -> Int
+
+integer view, with little end qubit 1.
+"""
+bint(b::Int; nbit=nothing) = b
+bint(x::Float64; nbit::Int) = breflect(nbit,bint_r(x, nbit=nbit))
+
+"""
+    bint_r(b::Int; nbit::Int) -> Int
+
+integer read in inverse order.
+"""
+bint_r(b::Int; nbit::Int) = breflect(nbit, b)
+bint_r(x::Float64; nbit::Int) = Int(round(x * (1<<nbit)))
+
 ########## Bit-Wise Operations ##############
 """
     bmask(ibit::Int...) -> Int
@@ -66,11 +101,18 @@ bmask(ibit::Int...)::DInt = sum([one(DInt) << (b-1) for b in ibit])
 bmask(bits::UnitRange{Int})::DInt = ((one(DInt) << (bits.stop - bits.start + 1)) - one(DInt)) << (bits.start-1)
 
 """
-    takebit(index::Int, ibit::Int) -> Int
+    takebit(index::Int, bits::Int...) -> Int
 
-Return a bit at specific position.
+Return a bit(s) at specific position.
 """
 takebit(index::DInt, ibit::Int)::DInt = (index >> (ibit-1)) & one(DInt)
+@inline function takebit(index::DInt, bits::Int...)::DInt
+    res = DInt(0)
+    for (i, ibit) in enumerate(bits)
+        res += takebit(index, ibit) << (i-1)
+    end
+    res
+end
 
 """
     testany(index::Int, mask::Int) -> Bool

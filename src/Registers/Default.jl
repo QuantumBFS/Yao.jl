@@ -55,14 +55,36 @@ stack multiple registers into a batch.
 stack(regs::DefaultRegister...) = DefaultRegister{sum(nbatch, regs)}(hcat((reg.state for reg in regs)...,))
 Base.repeat(reg::DefaultRegister{B}, n::Int) where B = DefaultRegister{B*n}(hcat((reg.state for i=1:n)...,))
 
-# -> zero_state is an easier interface
-zero_state(::Type{T}, n::Int, nbatch::Int=1) where T = register((arr=zeros(T, 1<<n, nbatch); arr[1,:] .= 1; arr))
+"""
+    product_state(::Type{T}, n::Int, config::Int, nbatch::Int=1) -> DefaultRegister
+
+a product state on given configuration `config`, e.g. product_state(ComplexF64, 5, 0) will give a zero state on a 5 qubit register.
+"""
+product_state(::Type{T}, n::Int, config::Integer, nbatch::Int=1) where T = register((arr=zeros(T, 1<<n, nbatch); arr[config+1,:] .= 1; arr))
+
+"""
+    zero_state(::Type{T}, n::Int, nbatch::Int=1) -> DefaultRegister
+"""
+zero_state(::Type{T}, n::Int, nbatch::Int=1) where T = product_state(T, n, 0, nbatch)
+
+"""
+    rand_state(::Type{T}, n::Int, nbatch::Int=1) -> DefaultRegister
+
+here, random complex numbers are generated using `randn(ComplexF64)`.
+"""
 rand_state(::Type{T}, n::Int, nbatch::Int=1) where T = register(randn(T, 1<<n, nbatch) + im*randn(T, 1<<n, nbatch)) |> normalize!
+
+"""
+    uniform_state(::Type{T}, n::Int, nbatch::Int=1) -> DefaultRegister
+
+uniform state, the state after applying H gates on |0> state.
+"""
 uniform_state(::Type{T}, n::Int, nbatch::Int=1) where T = register(ones(T, 1<<n, nbatch)./sqrt(1<<n))
 
 for FUNC in [:zero_state, :rand_state, :uniform_state]
     @eval $FUNC(n::Int, nbatch::Int=1) = $FUNC(DefaultType, n, nbatch)
 end
+product_state(n::Int, config::Integer, nbatch::Int=1) = product_state(DefaultType, n, config, nbatch)
 
 function probs(r::DefaultRegister{1})
     if size(r.state, 2) == 1
@@ -110,6 +132,7 @@ function join(reg1::DefaultRegister{B, T1}, reg2::DefaultRegister{B, T2}) where 
     DefaultRegister{B}(reshape(state, size(state, 1), :))
 end
 join(reg1::DefaultRegister{1}, reg2::DefaultRegister{1}) = DefaultRegister{1}(kron(reg2.state, reg1.state))
+⊗(reg::AbstractRegister, reg2::AbstractRegister) = join(reg, reg2)
 
 """
     isnormalized(reg::DefaultRegister) -> Bool
@@ -121,14 +144,14 @@ isnormalized(reg::DefaultRegister) = all(sum(copy(reg) |> relax! |> probs, dims=
 # we convert state to a vector to use
 # intrincs like gemv, when nremain is
 # 0 and the state is actually a vector
-function *(op, r::DefaultRegister{1})
+function *(op::AbstractMatrix, r::DefaultRegister{1})
     if nremain(r) == 0
         return op * vec(r.state)
     end
     op * r.state
 end
 
-function *(op, r::DefaultRegister)
+function *(op::AbstractMatrix, r::DefaultRegister)
     op * r.state
 end
 
@@ -194,3 +217,16 @@ end
 function tracedist(reg1::DefaultRegister{B}, reg2::DefaultRegister{B}) where B
     size(reg1.state, 2) == B ? sqrt.(1 .- fidelity(reg1, reg2).^2) : throw(MethodError("trace distance for non-pure state is not defined!"))
 end
+
+################### Bra ##################
+Base.adjoint(reg::DefaultRegister{B, T}) where {B, T} = Adjoint{T, typeof(reg)}(reg)
+
+function Base.show(io::IO, c::Adjoint{T, <:DefaultRegister}) where T
+    print("$(parent(c)) (Daggered)")
+end
+Base.show(io::IO, mime::MIME"text/plain", c::Adjoint{T, <:DefaultRegister}) where T = Base.show(io, c)
+
+state(bra::Adjoint{T, <:DefaultRegister}) where T = Adjoint(parent(bra).state)
+
+LinearAlgebra.:*(bra::Adjoint{T, <:DefaultRegister{B1, T}}, ket::DefaultRegister{B2, T}) where {T, B1, B2} = state(bra) * state(ket)
+LinearAlgebra.:*(bra::Adjoint{T, <:DefaultRegister{B1, T}}, ket::DefaultRegister{1, T}) where {T, B1, B2} = state(bra) * state(ket)

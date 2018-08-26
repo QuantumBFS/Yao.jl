@@ -14,10 +14,10 @@ import ..Intrinsics: basis, hypercubic
 
 # APIs
 export nqubits, nactive, nremain, nbatch, state, statevec, hypercubic, rank3, focus!, relax!, focuspair!, extend!, basis, probs, isnormalized
-export AbstractRegister, Register, invorder!, reorder!, addbit!, reset!
+export AbstractRegister, Register, invorder!, reorder!, addbit!, reset!, ⊗
 
 # factories
-export register, zero_state, rand_state, randn_state, stack, uniform_state
+export register, zero_state, product_state, rand_state, randn_state, stack, uniform_state
 
 # bit_str
 export @bit_str, asindex
@@ -27,9 +27,9 @@ export fidelity, tracedist
 
 include("BitStr.jl")
 include("Core.jl")
-include("Measure.jl")
 
 include("Default.jl")
+include("Measure.jl")
 include("Focus.jl")
 
 include("DensityMatrix.jl")
