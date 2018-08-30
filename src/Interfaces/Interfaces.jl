@@ -18,6 +18,9 @@ export @const_gate
 # Block APIs
 export mat, apply!, parameters, nparameters, dispatch!, datatype, blocks, adjoint
 
+# Candies
+export ⊗
+
 include("Signal.jl")
 include("Primitive.jl")
 include("Composite.jl")
@@ -25,5 +28,6 @@ include("Measure.jl")
 include("Function.jl")
 include("Sequential.jl")
 include("Cache.jl")
+include("Candies.jl")
 
 end

@@ -71,7 +71,7 @@ an general initializer for input raw state array.
 
 init register type `RT` with `InitMethod` type (e.g `Val{:zero}`) with
 element type `T` and total number qubits `n` with `nbatch`. This will be
-auto-binded to some shortcuts like `zero_state`, `rand_state`, `randn_state`.
+auto-binded to some shortcuts like `zero_state`, `rand_state`.
 """
 abstract type AbstractRegister{B, T} end
 
