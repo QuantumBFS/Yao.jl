@@ -1,4 +1,5 @@
 export ChainBlock
+import Base: push!, append!, prepend!, insert!
 
 """
     ChainBlock{N, T} <: CompositeBlock{N, T}
@@ -36,7 +37,8 @@ end
 # Additional Methods for Composite Blocks
 getindex(c::ChainBlock, index) = getindex(c.blocks, index)
 getindex(c::ChainBlock, index::Union{UnitRange, Vector}) = ChainBlock(getindex(c.blocks, index))
-setindex!(c::ChainBlock, val, index) = setindex!(c.blocks, val, index)
+setindex!(c::ChainBlock{N}, val::MatrixBlock{N}, index::Integer) where N = setindex!(c.blocks, val, index)
+insert!(c::ChainBlock{N}, index::Integer, val::MatrixBlock{N}) where N = (insert!(c.blocks, index, val); c)
 adjoint(blk::ChainBlock) = typeof(blk)(map(adjoint, blocks(blk) |> reverse))
 
 lastindex(c::ChainBlock) = lastindex(c.blocks)
@@ -51,15 +53,27 @@ addrs(c::ChainBlock) = ones(Int, blocks(c)|>length)
 usedbits(c::ChainBlock) = unique(vcat([usedbits(b) for b in blocks(c)]...))
 
 # Additional Methods for Chain
-import Base: push!, append!, prepend!
 push!(c::ChainBlock{N}, val::MatrixBlock{N}) where N = (push!(c.blocks, val); c)
 
 function push!(c::ChainBlock{N, T}, val::Function) where {N, T}
     push!(c, val(N))
 end
 
-append!(c::ChainBlock, list) = (append!(c.blocks, list); c)
-prepend!(c::ChainBlock, list) = (prepend!(c.blocks, list); c)
+# append!(c::ChainBlock, list) = (append!(c.blocks, list); c)
+# prepend!(c::ChainBlock, list) = (prepend!(c.blocks, list); c)
+function append!(c::ChainBlock, list)
+    for blk in list
+        push!(c, blk)
+    end
+    c
+end
+
+function prepend!(c::ChainBlock, list)
+    for blk in list[end:-1:1]
+        insert!(c, 1, blk)
+    end
+    c
+end
 
 mat(c::ChainBlock) = prod(x->mat(x), reverse(c.blocks))
 

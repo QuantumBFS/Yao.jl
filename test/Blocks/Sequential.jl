@@ -50,6 +50,8 @@ end
     @test g[1] == phase(0.1)
     @test g[2] == X
     @test g[end] == rot(Y, 0.0)
+    gg = insert!(g, 4, Z)
+    @test gg[4] == Z
 end
 
 @testset "traits" begin

@@ -48,9 +48,7 @@ function ==(lhs::PutBlock{N, C, GT, T}, rhs::PutBlock{N, C, GT, T}) where {N, T,
     (lhs.block == rhs.block) && (lhs.addrs == rhs.addrs)
 end
 
-function cache_key(pb::PutBlock)
-    cache_key(pb.block)
-end
+cache_key(pb::PutBlock) = cache_key(pb.block)
 
 function print_block(io::IO, pb::PutBlock{N}) where N
     printstyled(io, "put on ("; bold=true, color=color(PutBlock))

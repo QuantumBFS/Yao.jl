@@ -103,7 +103,7 @@ Constructs a [`ControlBlock`](@ref)
 """
 function control end
 
-function control(total::Int, controls, target)
+function control(total::Int, controls, target::Pair)
     ControlBlock{total}(decode_sign(controls...,)..., target.second, (target.first...,))
 end
 
