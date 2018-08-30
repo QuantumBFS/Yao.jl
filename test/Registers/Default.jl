@@ -1,5 +1,6 @@
 using Test, Random, LinearAlgebra, SparseArrays
 
+using Yao
 using Yao.Registers
 using Yao.Intrinsics
 
@@ -104,7 +105,6 @@ end
     @test stack(reg, reg) |> nbatch == 2
     @test repeat(reg, 5) |> nbatch == 5
 
-    ⊗ = kron
     v1, v2, v3 = randn(2), randn(2), randn(2)
     @test repeat(register(v1 ⊗ v2 ⊗ v3), 2) |> invorder! ≈ repeat(register(v3 ⊗ v2 ⊗ v1), 2)
     @test repeat(register(v1 ⊗ v2 ⊗ v3), 2) |> reorder!(3,2,1) ≈ repeat(register(v3 ⊗ v2 ⊗ v1), 2)
@@ -122,7 +122,6 @@ end
     reg2 = rand_state(6)
     reg3 = join(reg1, reg2)
     reg4 = join(focus!(copy(reg1), 1:3), focus!(copy(reg2), 1:2))
-    @test reg3 == reg1 ⊗ reg2
     @test reg4 |> statevec ≈ focus!(copy(reg3), [1,2,3,7,8,4,5,6,9,10,11,12]) |> statevec
     reg5 = focus!(repeat(reg1, 3), 1:3)
     reg6 = focus!(repeat(reg2, 3), 1:2)

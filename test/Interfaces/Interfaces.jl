@@ -148,3 +148,7 @@ end
     @test MEASURE.result[] == 155
     @test reg != zero_state(8)
 end
+
+@testset "Eye Candies" begin
+    include("Candies.jl")
+end
