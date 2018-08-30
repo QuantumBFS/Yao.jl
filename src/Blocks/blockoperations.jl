@@ -84,7 +84,7 @@ expectation value of an operator.
 function expect end
 
 expect(op::AbstractBlock, reg::AbstractRegister) = sum(conj(reg |> statevec) .* (apply!(copy(reg), op) |> statevec), dims=1) |> vec
-expect(op::AbstractBlock, reg::AbstractRegister{1}) = (reg |> statevec)'*(apply!(copy(reg), op) |> statevec)
+expect(op::AbstractBlock, reg::AbstractRegister{1}) = reg'*apply!(copy(reg), op)
 
 expect(op::MatrixBlock, dm::DensityMatrix) = mapslices(x->sum(mat(op).*x)[], dm.state, dims=[1,2]) |> vec
 expect(op::MatrixBlock, dm::DensityMatrix{1}) = sum(mat(op).*dropdims(dm.state, dims=3))
