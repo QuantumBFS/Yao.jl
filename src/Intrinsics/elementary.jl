@@ -98,7 +98,7 @@ end
 
 @inline function unrows!(state::Matrix, inds::AbstractVector, U::AbstractMatrix)
     @inbounds @simd for k in 1:size(state, 2)
-        state[inds, k] .= U*view(state, inds, k)
+        state[inds, k] = U*view(state, inds, k)
     end
     state
 end
@@ -115,38 +115,38 @@ for MT in [:Matrix, :Vector]
     end
 end
 
-@inline function unrows!(state::Vector, inds::AbstractVector, U::PermMatrix, work::Vector)
+@inline function unrows!(state::Vector, inds::AbstractVector, U::Union{SPermMatrix, PermMatrix}, work::Vector)
     @inbounds @simd for i = 1:length(inds)
         work[i] = state[inds[U.perm[i]]] * U.vals[i]
     end
-    @inbounds state[inds].=work
+    @inbounds state[inds] = work
     state
 end
 
-@inline function unrows!(state::Matrix, inds::AbstractVector, U::PermMatrix, work::Matrix)
+@inline function unrows!(state::Matrix, inds::AbstractVector, U::{SPermMatrix, PermMatrix}, work::Matrix)
     @inbounds for k in 1:size(state, 2)
         @inbounds @simd for i = 1:length(inds)
             work[i, k] = state[inds[U.perm[i]], k] * U.vals[i]
         end
-        state[inds, k].=work[:, k]
+        state[inds, k] = view(work, :, k)
     end
     state
 end
 
 @inline function unrows!(state::Vector, inds::AbstractVector, A::Union{SSparseMatrixCSC, SparseMatrixCSC}, work::Vector)
-    work.=0
+    work .= 0
     @inbounds for col = 1:length(inds)
         xj = state[inds[col]]
         @inbounds @simd for j = A.colptr[col]:(A.colptr[col + 1] - 1)
             work[A.rowval[j]] += A.nzval[j]*xj
         end
     end
-    state[inds] .= work
+    state[inds] = work
     state
 end
 
 @inline function unrows!(state::Matrix, inds::AbstractVector, A::Union{SSparseMatrixCSC, SparseMatrixCSC}, work::Matrix)
-    work.=0
+    work .= 0
     @inbounds for k = 1:size(state, 2)
         @inbounds for col = 1:length(inds)
             xj = state[inds[col],k]
@@ -154,7 +154,7 @@ end
                 work[A.rowval[j], k] += A.nzval[j]*xj
             end
         end
-        state[inds,k] .= work[:,k]
+        state[inds,k] = view(work, :, k)
     end
     state
 end

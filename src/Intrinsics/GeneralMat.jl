@@ -1,31 +1,7 @@
-struct SparseMatrixCOO{Tv, Ti} <: AbstractSparseMatrix{Tv, Ti}
-    is::Vector{Ti}
-    js::Vector{Ti}
-    vs::Vector{Tv}
-    m::Int
-    n::Int
-
-    function SparseMatrixCOO{Tv, Ti}(is::Vector{Ti}, js::Vector{Ti}, vs::Vector{Tv}, m::Int, n::Int) where {Ti, Tv}
-        length(is) == length(js) == length(vs) || throw(ArgumentError("Input row, col, data should be equal size."))
-        new{Tv, Ti}(is, js, vs, m, n)
-    end
-end
-
-SparseMatrixCOO(is::Vector{Ti}, js::Vector{Ti}, vs::Vector{Tv}, m, n) where {Ti, Tv} = SparseMatrixCOO{Tv, Ti}(is, js, vs, m, n)
-
-SparseMatrixCSC(coo::SparseMatrixCOO) = sparse(coo.is, coo.js, coo.vs, coo.m, coo.n)
-
-function emptycoo(::Type{T}, N::Int, nnz::Int) where T
-    is = Vector{Int}(nnz)
-    js = Vector{Int}(nnz)
-    vs = Vector{T}(nnz)
-    SparseMatrixCOO(is, js, vs, N, N)
-end
-
 function u1mat(nbit::Int, U1::AbstractMatrix{T}, ibit::Int) where T
     mask = bmask(ibit)
     N = 1<<nbit
-    coo = emptycoo(T, 2*N)
+    coo = allocated_coo(T, 2*N)
     a, c, b, d = U1
     step = 1<<(ibit-1)
     step_2 = 1<<ibit
@@ -39,7 +15,7 @@ end
 
 function _unmat(nbit::Int, U::Union{SMatrix, Matrix}, locs_raw::Union{SVector, Vector}, ic::IterControl)
     nr = size(U, 1)
-    coo = emptycoo(T, nr*N)
+    coo = allocated_coo(T, nr*N)
     controldo(ic) do i
         unij!(coo, locs_raw+i, U)
     end
@@ -64,7 +40,7 @@ function _unmat(nbit::Int, U::PermMatrix, locs_raw::Union{SVector, Vector}, ic::
 end
 
 function _unmat(nbit::Int, U::Union{SSparseMatrixCSC, SparseMatrixCSC}, locs_raw::Union{SVector, Vector}, ic::IterControl)
-    coo = emptycoo(T, N, N÷size(U, 1)*length(U.nzval))
+    coo = allocated_coo(T, N, N÷size(U, 1)*length(U.nzval))
     controldo(ic) do i
         unij!(coo, locs_raw+i, U)
     end
