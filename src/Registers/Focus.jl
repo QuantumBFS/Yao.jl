@@ -56,15 +56,13 @@ focus!(locs::Int...) = r->focus!(r, locs)
 relax!(locs::Int...; nbit::Int=-1) = r->relax!(r, locs, nbit=nbit>0 ? nbit : nqubits(r))
 
 """
-    focuspair(locs::Int...) -> NTuple{2, Function}
-
-Return focus! and relax! function for specific lines.
+    focus!(func, reg::DefaultRegister, locs) -> DefaultRegister
 """
-function focuspair!(locs::Int...)
-    local nbit::Int
-    f1 = r->(nbit = nqubits(r); focus!(r, locs))
-    f1, r->relax!(r, locs, nbit=nbit)
+function focus!(func, reg::DefaultRegister, locs)
+    nbit = nqubits(reg)
+    relax!(func(reg |> focus!(locs...)), locs, nbit=nbit)
 end
+
 
 #=
 """

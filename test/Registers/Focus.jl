@@ -3,6 +3,22 @@ using Test, Random, LinearAlgebra, SparseArrays
 using Yao.Registers
 using Yao.Intrinsics
 
+
+Ints = Union{Vector{Int}, UnitRange{Int}, Int}
+function naive_focus!(reg::DefaultRegister{B}, bits::Ints) where B
+    nbit = nqubits(reg)
+    norder = vcat(bits, setdiff(1:nbit, bits), nbit+1)
+    @views reg.state = reshape(permutedims(reshape(reg.state, fill(2, nbit)...,B), norder), :, (1<<(nbit-length(bits)))*B)
+    reg
+end
+
+function naive_relax!(reg::DefaultRegister{B}, bits::Ints) where B
+    nbit = nqubits(reg)
+    norder = vcat(bits, setdiff(1:nbit, bits), nbit+1) |> invperm
+    @views reg.state = reshape(permutedims(reshape(reg.state, fill(2, nbit)...,B), norder), :, B)
+    reg
+end
+
 @testset "Focus 1" begin
     # conanical shape
     reg0 = rand_state(5, 3)
@@ -29,9 +45,12 @@ end
     @test nactive(reg) == 8
     @test reg0  == relax!(reg, 1:8) == relax!(reg)
 
-    f!, r! = focuspair!(5,3,2)
-    @test copy(reg0) |> f! == naive_focus!(copy(reg0), [5,3,2]) == copy(reg0) |> focus!(5,3,2)
-    @test copy(reg0) |> f! |> r! == reg0 == copy(reg0) |> focus!(7,3,2) |> relax!(7,3,2)
+    reg1 = focus!(copy(reg0), [5,3,2]) do reg
+        @test nactive(reg) == 3
+        reg
+    end
+    @test reg1 == reg0
+    @test reg0 == copy(reg0) |> focus!(7,3,2) |> relax!(7,3,2)
 end
 
 #=
