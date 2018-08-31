@@ -1,111 +1,12 @@
-"""
-    swaprows!(v::VecOrMat, i::Int, j::Int[, f1, f2]) -> VecOrMat
-
-swap row i and row j of v inplace, with f1, f2 factors applied on i and j (before swap).
-"""
-function swaprows! end
-
-"""
-    swapcols!(v::VecOrMat, i::Int, j::Int[, f1, f2]) -> VecOrMat
-
-swap col i and col j of v inplace, with f1, f2 factors applied on i and j (before swap).
-"""
-function swapcols! end
-
-"""
-    u1rows!(state::VecOrMat, i::Int, j::Int, a, b, c, d) -> VecOrMat
-
-apply u1 on row i and row j of state inplace.
-"""
-function u1rows! end
-
-"""
-    mulcol!(v::Vector, i::Int, f) -> VecOrMat
-
-multiply col i of v by f inplace.
-"""
-function mulcol! end
-
-"""
-    mulrow!(v::Vector, i::Int, f) -> VecOrMat
-
-multiply row i of v by f inplace.
-"""
-function mulrow! end
-
-
-"""
-    matvec(x::VecOrMat) -> MatOrVec
-
-Return vector if a matrix is a column vector, else untouched.
-"""
-function matvec end
-
-@inline function swaprows!(v::Matrix{T}, i::Int, j::Int, f1, f2) where T
-    @inbounds @simd for c = 1:size(v, 2)
-        local temp::T
-        temp = v[i, c]
-        v[i, c] = v[j, c]*f2
-        v[j, c] = temp*f1
-    end
-    v
+@inline @inbounds function u1ij!(mat::AbstractMatrix, i::Int, j::Int, a, b, c, d)
+    mat[i, i] = a
+    mat[i, j] = b
+    mat[j, i] = c
+    mat[j, j] = d
+    mat
 end
 
-@inline function swaprows!(v::Matrix{T}, i::Int, j::Int) where T
-    @inbounds @simd for c = 1:size(v, 2)
-        local temp::T
-        temp = v[i, c]
-        v[i, c] = v[j, c]
-        v[j, c] = temp
-    end
-    v
-end
-
-@inline function swapcols!(v::Matrix{T}, i::Int, j::Int, f1, f2) where T
-    @inbounds @simd for c = 1:size(v, 1)
-        local temp::T
-        temp = v[c, i]
-        v[c, i] = v[c, j]*f2
-        v[c, j] = temp*f1
-    end
-    v
-end
-
-@inline function swapcols!(v::Matrix{T}, i::Int, j::Int) where T
-    @inbounds @simd for c = 1:size(v, 1)
-        local temp::T
-        temp = v[c, i]
-        v[c, i] = v[c, j]
-        v[c, j] = temp
-    end
-    v
-end
-
-@inline swapcols!(v::Vector, args...) = swaprows!(v, args...)
-
-@inline @inbounds function swaprows!(v::Vector, i::Int, j::Int, f1, f2)
-    temp = v[i]
-    v[i] = v[j]*f2
-    v[j] = temp*f1
-    v
-end
-
-@inline @inbounds function swaprows!(v::Vector, i::Int, j::Int)
-    temp = v[i]
-    v[i] = v[j]
-    v[j] = temp
-    v
-end
-
-@inline @inbounds function u1rows!(state::Vector, i::Int, j::Int, a, b, c, d)
-    w = state[i]
-    v = state[j]
-    state[i] = a*w+b*v
-    state[j] = c*w+d*v
-    state
-end
-
-@inline function u1rows!(state::Matrix, i::Int,j::Int, a, b, c, d)
+@inline function u1ij!(coo::NTuple{3, Vector}, i::Int,j::Int, a, b, c, d)
     @inbounds @simd for col = 1:size(state, 2)
         w = state[i, col]
         v = state[j, col]
@@ -158,7 +59,7 @@ for MT in [:Matrix, :Vector]
     end
 end
 
-@inline function unrows!(state::Vector, inds::AbstractVector, U::Union{PermMatrix, SPermMatrix}, work::Vector)
+@inline function unrows!(state::Vector, inds::AbstractVector, U::PermMatrix, work::Vector)
     @inbounds @simd for i = 1:length(inds)
         work[i] = state[inds[U.perm[i]]] * U.vals[i]
     end
@@ -166,7 +67,7 @@ end
     state
 end
 
-@inline function unrows!(state::Matrix, inds::AbstractVector, U::Union{PermMatrix, SPermMatrix}, work::Matrix)
+@inline function unrows!(state::Matrix, inds::AbstractVector, U::PermMatrix, work::Matrix)
     @inbounds for k in 1:size(state, 2)
         @inbounds @simd for i = 1:length(inds)
             work[i, k] = state[inds[U.perm[i]], k] * U.vals[i]
