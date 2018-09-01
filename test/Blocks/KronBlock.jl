@@ -4,7 +4,7 @@ using Yao
 using Yao.Blocks
 using Yao.Intrinsics
 
-import Yao.LuxurySparse: IMatrix
+import LuxurySparse: IMatrix
 
 @testset "constructor" begin
 # TODO: custom error exception

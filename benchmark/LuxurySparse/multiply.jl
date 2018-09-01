@@ -1,7 +1,7 @@
 using Compat
 using BenchmarkTools
 using Yao
-using Yao.LuxurySparse
+using LuxurySparse
 
 n=16
 Id = IMatrix(1<<n)

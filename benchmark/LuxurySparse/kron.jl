@@ -1,6 +1,6 @@
 using Compat
 using BenchmarkTools
-using Yao.LuxurySparse
+using LuxurySparse
 
 id = IMatrix(1<<8)
 v = randn(1<<8) + im*randn(1<<8)

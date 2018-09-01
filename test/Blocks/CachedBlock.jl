@@ -2,7 +2,7 @@ using Test, Random, LinearAlgebra, SparseArrays, CacheServers
 
 using Yao
 using Yao.Blocks
-using Yao.LuxurySparse
+using LuxurySparse
 
 test_server = DefaultServer{MatrixBlock, CacheFragment}()
 

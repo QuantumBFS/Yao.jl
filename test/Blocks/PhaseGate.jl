@@ -1,7 +1,7 @@
 using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao
-using Yao.LuxurySparse
+using LuxurySparse
 using Yao.Blocks
 
 @testset "constructor" begin

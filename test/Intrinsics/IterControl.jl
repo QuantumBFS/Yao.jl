@@ -3,7 +3,7 @@ using Test, Random, LinearAlgebra, SparseArrays
 using Yao
 using Yao.Intrinsics
 using Yao.Intrinsics: group_shift, itercontrol, controldo, IterControl, lmove
-using Yao.LuxurySparse
+using LuxurySparse
 
 @testset "private functions: group_shift and lmove" begin
     @test group_shift(5, [1,2,5]) == ([0, 15], [2, 1])

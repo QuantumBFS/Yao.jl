@@ -2,7 +2,7 @@ using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao
 using Yao.Blocks
-using Yao.LuxurySparse
+using LuxurySparse
 import Yao.Blocks: ControlBlock
 
 @testset "copy" begin

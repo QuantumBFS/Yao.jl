@@ -1,17 +1,43 @@
+#using Pkg
+#Pkg.activate(".")
+using LuxurySparse
+
+using Yao
 using Yao.Intrinsics
+using Random
+using StaticArrays
 using BenchmarkTools
 
-for nbit in 1:5:
-    n=1<<nbit
-    const v = randn(ComplexF64, 1<<16)
-    const un = randn(n,n)
-    const sun = SMatrix{n,n}(u4)
-    const inds =  randperm(n) +18
-    const sinds = SVector{n}(inds4)
+for ng in [1,2]
+    n=1<<ng
+    v = randn(ComplexF64, 1<<16)
+    un = randn(n,n)
+    sun = SMatrix{n,n}(un)
+    inds =  randperm(n) .+18
+    sinds = SVector{n}(inds)
 
-    if nbit==1
-        @benchmark u1rows!($v, $(inds[1]), $(inds[2]), $(un[1]), $(un[3]), $(un[2]), $(un[4]))
+    if ng==1
+        println("u1rows(1)")
+        display(@benchmark u1rows!($v, $(inds[1]), $(inds[2]), $(un[1]), $(un[3]), $(un[2]), $(un[4])))
     end
-    @benchmark unrows!($v, $inds, $un)
-    @benchmark unrows!($v, $sinds, $sun)
+    println("unrows($ng)")
+    display(@benchmark unrows!($v, $inds, $un))
+    println("unrows-static($ng)")
+    display(@benchmark unrows!($v, $sinds, $sun))
+end
+
+
+println("PERMUTETION")
+for ng in [1,2]
+    n=1<<ng
+    v = randn(ComplexF64, 1<<16)
+    un = pmrand(n)
+    sun = un |> staticize
+    inds =  randperm(n) .+18
+    sinds = SVector{n}(inds)
+
+    println("unrows($ng)")
+    display(@benchmark unrows!($v, $inds, $un))
+    println("unrows-static($ng)")
+    display(@benchmark unrows!($v, $sinds, $sun))
 end

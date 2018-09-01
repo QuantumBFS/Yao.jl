@@ -1,7 +1,7 @@
 using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao
-using Yao.LuxurySparse
+using LuxurySparse
 using StaticArrays: SMatrix, SVector
 import Yao.Intrinsics: swaprows!, mulrow!, notdense, swapcols!, mulcol!, u1rows!, unrows!
 
