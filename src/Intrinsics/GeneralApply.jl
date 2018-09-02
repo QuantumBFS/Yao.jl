@@ -21,14 +21,14 @@ function unapply!(state::VecOrMat, U::AbstractMatrix, locs::Vector{Int})
 end
 =#
 
-function _unapply!(state::VecOrMat, U::Union{SMatrix, Matrix, SDiagonal, Diagonal}, locs_raw::Union{SVector, Vector}, ic::IterControl)
+function _unapply!(state::VecOrMat, U::AbstractMatrix, locs_raw::Union{SVector, Vector}, ic::IterControl)
     controldo(ic) do i
         unrows!(state, locs_raw+i, U)
     end
     state
 end
 
-function _unapply!(state::VecOrMat, U::Union{PermMatrix, SSparseMatrixCSC, SparseMatrixCSC}, locs_raw::Union{SVector, Vector}, ic::IterControl)
+function _unapply!(state::VecOrMat, U::Union{SSparseMatrixCSC, SparseMatrixCSC}, locs_raw::Union{SVector, Vector}, ic::IterControl)
     work = ndims(state)==1 ? similar(state, length(locs_raw)) : similar(state, length(locs_raw), size(state,2))
     controldo(ic) do i
         unrows!(state, locs_raw+i, U, work)

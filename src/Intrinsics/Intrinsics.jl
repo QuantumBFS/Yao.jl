@@ -1,7 +1,8 @@
 module Intrinsics
 
 using LinearAlgebra, SparseArrays
-using StaticArrays: SVector, SMatrix
+using StaticArrays: SVector, SMatrix, SDiagonal
+using Base.Cartesian
 
 using LuxurySparse
 import ..Yao: nqubits, reorder, invorder, reorder

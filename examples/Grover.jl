@@ -1,5 +1,5 @@
 using Yao
-using Yao.Zoo: groveriter!, inference_oracle, prob_match_oracle
+using QuAlgorithmZoo: groveriter!, inference_oracle, prob_match_oracle
 
 num_bit = 12
 oracle(reg::DefaultRegister) = (reg.state[100:101,:]*=-1; reg)
