@@ -3,7 +3,7 @@ using Test, Random, LinearAlgebra, SparseArrays
 using Yao
 using LuxurySparse
 using StaticArrays: SMatrix, SVector
-import Yao.Intrinsics: swaprows!, mulrow!, notdense, swapcols!, mulcol!, u1rows!, unrows!
+import Yao.Intrinsics: swaprows!, mulrow!, swapcols!, mulcol!, u1rows!, unrows!
 
 @testset "swaprows! & mulrow!" begin
     a = [1,2,3,5.0]

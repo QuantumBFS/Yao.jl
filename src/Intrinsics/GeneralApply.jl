@@ -21,14 +21,14 @@ function unapply!(state::VecOrMat, U::AbstractMatrix, locs::Vector{Int})
 end
 =#
 
-function _unapply!(state::VecOrMat, U::AbstractMatrix, locs_raw::Union{SVector, Vector}, ic::IterControl)
+function _unapply!(state::VecOrMat, U::AbstractMatrix, locs_raw::SDVector, ic::IterControl)
     controldo(ic) do i
         unrows!(state, locs_raw+i, U)
     end
     state
 end
 
-function _unapply!(state::VecOrMat, U::Union{SSparseMatrixCSC, SparseMatrixCSC}, locs_raw::Union{SVector, Vector}, ic::IterControl)
+function _unapply!(state::VecOrMat, U::SDSparseMatrixCSC, locs_raw::SDVector, ic::IterControl)
     work = ndims(state)==1 ? similar(state, length(locs_raw)) : similar(state, length(locs_raw), size(state,2))
     controldo(ic) do i
         unrows!(state, locs_raw+i, U, work)
@@ -47,10 +47,10 @@ control-unitary
 """
 function cunapply! end
 
-function cunapply!(state::VecOrMat, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U::AbstractMatrix, locs::NTuple{M, Int}) where {C, M}
+function cunapply!(state::VecOrMat, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::AbstractMatrix, locs::NTuple{M, Int}) where {C, M}
     # reorder a unirary matrix.
-    U = all(diff(locs).>0) ? U : reorder(U, collect(locs)|>sortperm)
-    N, MM = nqubits(state), size(U, 1)
+    U = all(diff(locs).>0) ? U0 : reorder(U0, collect(locs)|>sortperm)
+    N, MM = nqubits(state), size(U0, 1)
     locked_bits = [cbits..., locs...]
     locked_vals = [cvals..., zeros(Int, M)...]
     locs_raw = [i+1 for i in itercontrol(N, setdiff(1:N, locs), zeros(Int, N-M))]

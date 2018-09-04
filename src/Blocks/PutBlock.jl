@@ -30,7 +30,9 @@ dispatch!(pb::PutBlock, params...) = dispatch!(pb.block, params...)
 dispatch!(f::Function, pb::PutBlock, params...) = dispatch!(f, pb.block, params...)
 
 # TODO
-mat(pb::PutBlock{N, 1}) where N = hilbertkron(N, [mat(pb.block)], [pb.addrs...])
+mat(pb::PutBlock{N, 1}) where N = u1mat(N, mat(pb.block), pb.addrs...)
+mat(pb::PutBlock{N, C}) where {N, C} = unmat(N, mat(pb.block), pb.addrs)
+#mat(pb::PutBlock{N, 1}) where N = hilbertkron(N, [mat(pb.block)], [pb.addrs...])
 function apply!(r::AbstractRegister, pb::PutBlock{N}) where N
     N == nactive(r) || throw(QubitMismatchError("register Size $(nactive(r)) mismatch with block size $N"))
     unapply!(r.state |> matvec, mat(pb.block), pb.addrs)

@@ -37,7 +37,8 @@ end
 
 projector(val) = val==0 ? mat(P0) : mat(P1)
 
-mat(c::ControlBlock{N, BT, C, 1}) where {N, BT, C} = general_controlled_gates(N, [(c.vals .|> projector)...], [c.ctrl_qubits...], [mat(c.block)], [c.addrs...])
+#mat(c::ControlBlock{N, BT, C, 1}) where {N, BT, C} = general_controlled_gates(N, [(c.vals .|> projector)...], [c.ctrl_qubits...], [mat(c.block)], [c.addrs...])
+mat(c::ControlBlock{N, BT, C}) where {N, BT, C} = cunmat(N, c.ctrl_qubits, c.vals, mat(c.block), c.addrs)
 apply!(reg::DefaultRegister, c::ControlBlock) = (cunapply!(reg.state |> matvec, c.ctrl_qubits, c.vals, mat(c.block), c.addrs); reg)
 adjoint(blk::ControlBlock{N}) where N = ControlBlock{N}(blk.ctrl_qubits, blk.vals, adjoint(blk.block), blk.addrs)
 

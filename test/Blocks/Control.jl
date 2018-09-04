@@ -17,7 +17,6 @@ end
 
 @testset "matrix" begin
 
-⊗ = kron
 U = mat(X)
 
 @testset "single control" begin
@@ -93,7 +92,10 @@ end
     println(g)
     g = ControlBlock{3}((2, ), CNOT, (3,1))
     g2 = PutBlock{3}(Toffoli, (2,3,1))
-    @test applymatrix(g) == applymatrix(g2)
+    g3 = ControlBlock{3}((3,2), X, (1,))
+    @test applymatrix(g) == applymatrix(g2) == applymatrix(g3)
+    @test mat(g) == mat(g2)
+    @test mat(g) == mat(g3)
 end
 
 end # control matrix form

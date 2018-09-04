@@ -18,7 +18,7 @@ randmat(::Type{Val{:CSC}}, n) = SparseMatrixCSC(pmrand(ComplexF64, n))
 
 vs = [vreg, mreg]
 
-for m in [:Diag]#[:Dense, :Perm, :Diag]
+for m in [:Diag, :Dense, :Perm, :Diag]
     for v in [1,2]
         token = "$m * $(v ==1 ? "Vec" : "Mat")"
         for ng in [1,2]

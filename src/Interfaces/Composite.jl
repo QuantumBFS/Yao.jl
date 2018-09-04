@@ -70,15 +70,16 @@ This will automatically generate a block list looks like
 4 -- [Y] --
 ```
 """
-kron(total::Int, block0::Pair, blocks::Union{MatrixBlock, Pair}...,) = KronBlock{total}((block0, blocks...,))
+kron(total::Int, blocks::Pair{Int, <:MatrixBlock}...,) = KronBlock{total}(blocks...,)
 function kron(total::Int, blocks::MatrixBlock...,)
     sum(nqubits, blocks) == total || throw(AddressConflictError("Size of blocks does not match total size."))
-    KronBlock{total}(blocks)
+    KronBlock(blocks)
 end
-kron(total::Int, g) = KronBlock{total}(g)
-# NOTE: this is ambiguous
-kron(blocks::Union{MatrixBlock, Pair{Int, <:MatrixBlock}}...,) = N->KronBlock{N}(blocks)
-kron(blocks) = N->KronBlock{N}(blocks)
+kron(total::Int, blocks::Base.Generator) = kron(total, blocks...)
+
+kron(blocks::MatrixBlock...,) = N->kron(N, blocks...)
+kron(blocks::Pair{Int, <:MatrixBlock}...,) = N->kron(N, blocks...)
+kron(blocks::Base.Generator) = N->kron(N, blocks)
 
 export put
 """

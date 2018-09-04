@@ -6,17 +6,17 @@ using Yao.Blocks
 @testset "constructor" begin
 
     g = Sequential(
-        kron(2, 1=>X(), Y()),
+        kron(2, X, Y),
         kron(2, 1=>phase(0.1)),
     )
 
     @test g isa Sequential
-    @test g.blocks == [kron(2, 1=>X(), Y()), kron(2, 1=>phase(0.1))]
+    @test g.blocks == [kron(2, X, Y), kron(2, 1=>phase(0.1))]
 end
 
 @testset "apply" begin
 g = Sequential(
-    kron(2, 1=>X, Y),
+    kron(2, X, Y),
     kron(2, 1=>phase(0.1)),
 )
 

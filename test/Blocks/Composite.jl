@@ -20,8 +20,9 @@ using Yao
 using Yao.Blocks
 
 @testset "map" begin
-    dst = ChainBlock(X, Y, Z)
-    src = KronBlock{5}(X, Y, Z)
+    dst = ChainBlock(put(5, 1=>X), put(5, 2=>Y), put(5, 1=>Z))
+    @test_throws MethodError KronBlock{5}(X, Y, Z)
+    src = KronBlock(X, Y, Z)
     map!(x->kron(5, 1=>Z), dst, blocks(src))
 
     for each in dst

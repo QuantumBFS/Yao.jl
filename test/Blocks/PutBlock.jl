@@ -9,14 +9,19 @@ using Yao.Blocks: PutBlock
 
     pb = PutBlock{nbit}(X, (3,))
     rb = repeat(nbit, X, (3,))
-    @test apply!(copy(Reg), pb) == apply!(copy(Reg), rb)
-    @test pb |> applymatrix == mat(pb)
+    @test apply!(copy(Reg), pb) ≈ apply!(copy(Reg), rb)
+    @test pb |> applymatrix ≈ mat(pb)
     pb = PutBlock{nbit}(rot(X, 0.3), (3,))
-    @test pb |> applymatrix == mat(pb)
+    @test pb |> applymatrix ≈ mat(pb)
+
+    pb = PutBlock{nbit}(rot(CNOT, 0.3), (6, 3))
+    @test pb |> applymatrix ≈ mat(pb)
+    pb = PutBlock{nbit}(matrixgate(mat(rot(CNOT, 0.3))|>Matrix), (6, 3))
+    @test pb |> applymatrix ≈ mat(pb)
 
     Cb = control(nbit, (3,), 5=>X)
     pb = PutBlock{nbit}(CNOT, (3, 5))
-    @test apply!(copy(Reg), Cb) == apply!(copy(Reg), pb)
+    @test apply!(copy(Reg), Cb) ≈ apply!(copy(Reg), pb)
 end
 
 @testset "dispatch!" begin

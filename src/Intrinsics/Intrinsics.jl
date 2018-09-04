@@ -42,10 +42,12 @@ include("OperatorTraits.jl")
 
 # Matrices
 export swaprows!, mulrow!, matvec, mulcol!, swapcols!, u1rows!, unrows!
+export u1mat, unmat, cunmat, setcol!, getcol, unij!
 export itercontrol, IterControl, controldo, u1apply!, unapply!, cunapply!
 export fidelity_pure, fidelity_mix
 include("elementary.jl")
 include("IterControl.jl")
 include("GeneralApply.jl")
+include("GeneralMat.jl")
 
 end
