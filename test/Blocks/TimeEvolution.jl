@@ -10,7 +10,6 @@ using Yao.Intrinsics
 @testset "Time Evolution" begin
     hami = kron(3, 1=>X)
     te = TimeEvolution(hami, 0.2)
-    sp = sprand(4,4,0.5)
 
     @test applymatrix(te) ≈ mat(te)
     @test applymatrix(adjoint(te)) ≈ applymatrix(te)'

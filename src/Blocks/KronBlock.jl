@@ -102,8 +102,10 @@ end
 
 eltype(k::KronBlock) = Tuple{Int, MatrixBlock}
 length(k::KronBlock) = length(k.blocks)
-isunitary(k::KronBlock) = all(isunitary, k.blocks)
+
+# these requirements are definitely to strong, since there are freedom of factors, but we have to do this naive check for efficiency
 ishermitian(k::KronBlock) = all(ishermitian, k.blocks)
+isunitary(k::KronBlock) = all(isunitary, k.blocks)
 isreflexive(k::KronBlock) = all(isreflexive, k.blocks)
 
 ###############
