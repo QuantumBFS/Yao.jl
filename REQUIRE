@@ -1,11 +1,18 @@
 julia 0.7
 
 CacheServers
+Compat
 DataStructures
+Expokit
 FFTW
+IterTools
 Lazy
+LinearAlgebra
+LinearMaps
 LuxurySparse
 MacroTools
+Random
 Reexport
+SparseArrays
 StaticArrays
 StatsBase
