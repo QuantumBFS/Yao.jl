@@ -4,8 +4,9 @@ CacheServers
 DataStructures
 FFTW
 Lazy
-LuxurySparse
+LuxurySparse 0.2.0-
 MacroTools
 Reexport
 StaticArrays
 StatsBase
+LinearMaps
