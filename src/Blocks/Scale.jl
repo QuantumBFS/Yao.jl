@@ -12,6 +12,7 @@ struct Scale{N, T, X, BT} <: TagBlock{N, T}
 end
 Scale{X}(blk::BT) where {X, N, T, BT<:MatrixBlock{N, T}} = Scale{X, N, T, BT}(blk)
 
+==(b1::Scale{X}, b2::Scale{X}) where X = parent(b1) == parent(b2)
 scale(blk::Scale{X}, x::Number) where X = Scale{X*x}(parent(blk))
 scale(blk::MatrixBlock, x::Number) = Scale{x}(blk)
 getscale(blk::Scale{X}) where X = X

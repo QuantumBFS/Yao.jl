@@ -5,7 +5,7 @@ using Yao.Blocks
 
 @testset "constructor" begin
 @test isa(RotationGate(X, 0.1), PrimitiveBlock{1, ComplexF64})
-@test isa(RotationGate(X(ComplexF32), 0.1f0), PrimitiveBlock{1, ComplexF32})
+@test isa(RotationGate(XGate{ComplexF32}(), 0.1f0), PrimitiveBlock{1, ComplexF32})
 @test isa(RotationGate(X, 0.1), RotationGate{1, Float64, XGate{ComplexF64}})
 @test isa(RotationGate(control(2, (2,), 1=>X), 0.1), RotationGate{2, Float64})
 @test_throws TypeError RotationGate{1, Float32, XGate{ComplexF64}} # will not accept non-real type
@@ -17,8 +17,8 @@ for (DIRECTION, MAT) in [
     (X, [cos(theta/2) -im*sin(theta/2); -im*sin(theta/2) cos(theta/2)]),
     (Y, [cos(theta/2) -sin(theta/2); sin(theta/2) cos(theta/2)]),
     (Z, [exp(-im*theta/2) 0;0 exp(im*theta/2)]),
-    (CNOT, exp(-mat(CNOT)/2*theta*im)),
-    (control(2, (1,), 2=>X), exp(-mat(CNOT)/2*theta*im))
+    (CNOT, exp(-mat(CNOT)/2*theta*im |> Matrix)),
+    (control(2, (1,), 2=>X), exp(-mat(CNOT)/2*theta*im |> Matrix))
 ]
     @test mat(RotationGate(DIRECTION, theta)) ≈ MAT
 end

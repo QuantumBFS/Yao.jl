@@ -115,7 +115,7 @@ end
 
 @testset "gate" begin
     @test X isa XGate{ComplexF64}
-    @test X(ComplexF32) isa XGate{ComplexF32}
+    @test XGate{ComplexF32}() isa XGate{ComplexF32}
     @test Rx(1) isa RotationGate
     @test Ry(1) isa RotationGate
     @test Rz(1) isa RotationGate

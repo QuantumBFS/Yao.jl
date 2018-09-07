@@ -6,6 +6,7 @@ import Yao.Blocks: Scale, Neg, Im, _Im
 
 @testset "neg" begin
     @test -X isa Neg
+    @test -X == -X
     @test -(-X) isa XGate
     @test 2*X isa Scale
     @test getscale(2*X) == 2
