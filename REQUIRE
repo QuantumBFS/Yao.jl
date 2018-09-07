@@ -10,9 +10,7 @@ Lazy
 LinearMaps
 LuxurySparse
 MacroTools
-Random
 Reexport
-SparseArrays
 StaticArrays
 StatsBase
 LinearMaps
