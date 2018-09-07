@@ -17,6 +17,7 @@ end
 color(::Type{T}) where {T <: PutBlock} = :cyan
 color(::Type{T}) where {T <: Roller} = :cyan
 color(::Type{T}) where {T <: KronBlock} = :cyan
+color(::Type{T}) where {T <: PauliString} = :cyan
 color(::Type{T}) where {T <: RepeatedBlock} = :cyan
 color(::Type{T}) where {T <: ChainBlock} = :blue
 color(::Type{T}) where {T <: ControlBlock} = :red

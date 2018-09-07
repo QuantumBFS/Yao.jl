@@ -1,4 +1,5 @@
 using Test, Random, LinearAlgebra, SparseArrays
+using LuxurySparse
 
 using Yao
 using Yao.Intrinsics
@@ -62,4 +63,11 @@ end
     @test applymatrix(rb2) ≈ MAT
     @test mat(rb) ≈ MAT
     @test mat(rb2) ≈ MAT
+end
+
+@testset "empty repeat" begin
+    rb = repeat(5, X, ())
+    @test mat(rb) == IMatrix{1<<5}()
+    reg = rand_state(5)
+    @test apply!(copy(reg), rb) == reg
 end

@@ -18,13 +18,13 @@ import ..Registers: focus!, relax!
 import ..Intrinsics: ishermitian, isunitary, isreflexive
 import CacheServers: update!, iscached, clear!, pull, iscacheable
 export clear! # TODO: rm this later
-import Base: copy, hash, ==, eltype, show, similar, getindex, setindex!, iterate, length, parent, adjoint, lastindex
+import Base: copy, hash, ==, eltype, show, similar, getindex, setindex!, iterate, length, parent, adjoint, lastindex, push!, append!, prepend!, insert!, +, -, *, /
 
 # APIs for cache block's matrix
 export update_cache
 
 # module APIs
-export usedbits, addrs, blocks, @const_gate
+export usedbits, addrs, blocks, @const_gate, tokenof
 export nqubits, nactive, nparameters, mat, datatype, parameters, parameter_type, invorder, hasparameter, isprimitive
 export apply!, dispatch!, applymatrix
 export ishermitian, isunitary, isreflexive
@@ -38,6 +38,8 @@ include("MatrixBlock.jl")
 include("Measure.jl")
 include("Function.jl")
 include("IOSyntax.jl")
+
+include("pauligroup.jl")
 include("blockoperations.jl")
 
 end

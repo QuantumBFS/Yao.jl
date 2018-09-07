@@ -10,7 +10,7 @@ mutable struct PutBlock{N, C, GT<:MatrixBlock, T} <: CompositeBlock{N, T}
     addrs::NTuple{C, Int}
 
     function PutBlock{N, C, GT, T}(block::GT, addrs::NTuple{C, Int}) where {N, C, T, GT<:MatrixBlock{C, T}}
-        _assert_addr_safe(N, [i:i for i in addrs])
+        _assert_addr_safe(N, [addrs...])
         length(addrs) == C || throw(ArgumentError("Repeat number mismatch!"))
         new{N, C, GT, T}(block, addrs)
     end

@@ -1,5 +1,4 @@
 export ChainBlock
-import Base: push!, append!, prepend!, insert!
 
 """
     ChainBlock{N, T} <: CompositeBlock{N, T}
@@ -49,7 +48,7 @@ length(c::ChainBlock) = length(c.blocks)
 eltype(c::ChainBlock) = eltype(c.blocks)
 eachindex(c::ChainBlock) = eachindex(c.blocks)
 blocks(c::ChainBlock) = c.blocks
-addrs(c::ChainBlock) = ones(Int, blocks(c)|>length)
+addrs(c::ChainBlock) = collect(1:length(c))
 usedbits(c::ChainBlock) = unique(vcat([usedbits(b) for b in blocks(c)]...))
 
 # Additional Methods for Chain

@@ -22,3 +22,4 @@ cache_key(tb::TagBlock) = cache_key(parent(tb))
 
 include("BlockCache.jl")
 include("Daggered.jl")
+include("Scale.jl")

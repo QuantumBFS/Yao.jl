@@ -6,7 +6,7 @@ using Yao.Blocks
 @testset "constructor" begin
 
     g = ChainBlock(
-        kron(2, 1=>X(), 2=>Y()),
+        kron(2, 1=>X, 2=>Y),
         kron(2, 1=>phase(0.1)),
     )
 

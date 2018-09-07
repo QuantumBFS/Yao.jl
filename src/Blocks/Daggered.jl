@@ -1,6 +1,6 @@
 export Daggered
 """
-    Daggered{N, T, BT} <: MatrixBlock{N, T}
+    Daggered{N, T, BT} <: TagBlock{N, T}
 
     Daggered(blk::BT)
     Daggered{N, T, BT}(blk)
@@ -16,7 +16,8 @@ parent(blk::Daggered) = blk.block
 
 adjoint(blk::MatrixBlock) = ishermitian(blk) ? blk : Daggered(blk)
 adjoint(blk::Daggered) = blk.block
-adjoint(blk::CachedBlock) = CachedBlock(blk.server, adjoint(blk.block), blk.level)
+# sometimes, using daggered cached blocks can be inefficient, we leave this problem to users.
+# adjoint(blk::CachedBlock) = CachedBlock(blk.server, adjoint(blk.block), blk.level)
 
 mat(blk::Daggered) = mat(blk.block)'
 

@@ -10,7 +10,7 @@ mutable struct RepeatedBlock{N, C, GT<:MatrixBlock, T} <: CompositeBlock{N, T}
     addrs::NTuple{C, Int}
 
     function RepeatedBlock{N, C, GT, T}(block, addrs) where {N, M, C, T, GT<:MatrixBlock{M, T}}
-        _assert_addr_safe(N, [i:i+M-1 for i in addrs])
+        _assert_addr_safe(N, UnitRange{Int}[i:i+M-1 for i in addrs])
         length(addrs) == C || throw(ArgumentError("Repeat number mismatch!"))
         new{N, C, GT, T}(block, addrs)
     end
@@ -37,6 +37,8 @@ ishermitian(rb::RepeatedBlock) = ishermitian(rb.block)
 reflexive(rb::RepeatedBlock) = reflexive(rb.block)
 
 mat(rb::RepeatedBlock{N}) where N = hilbertkron(N, fill(mat(rb.block), length(rb.addrs)), [rb.addrs...])
+mat(rb::RepeatedBlock{N, 0, GT, T}) where {N, GT, T} = IMatrix{1<<N, T}()
+
 adjoint(blk::RepeatedBlock{N}) where N = RepeatedBlock{N}(adjoint(blk.block), blk.addrs)
 function apply!(reg::AbstractRegister, rp::RepeatedBlock{N}) where N
     m  = mat(rp.block)
@@ -45,6 +47,8 @@ function apply!(reg::AbstractRegister, rp::RepeatedBlock{N}) where N
     end
     reg
 end
+
+apply!(reg::AbstractRegister, rp::RepeatedBlock{N, 0}) where N = reg
 
 function hash(rb::RepeatedBlock, h::UInt)
     hashkey = hash(objectid(rb), h)

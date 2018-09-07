@@ -39,6 +39,9 @@ end
 g = RotationGate(X, 0.1)
 reg = rand_state(1)
 @test mat(g) * state(reg) ≈ state(apply!(reg, g))
+
+rb = rot(CNOT, 0.5)
+@test applymatrix(rb) ≈ mat(rb)
 end
 
 @testset "hash & compare" begin

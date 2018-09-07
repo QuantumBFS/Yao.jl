@@ -2,6 +2,7 @@ module Registers
 
 using Random, LinearAlgebra, SparseArrays
 using StatsBase
+using Lazy
 using ..Intrinsics
 
 import Base: length

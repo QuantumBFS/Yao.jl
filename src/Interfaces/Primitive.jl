@@ -1,4 +1,4 @@
-export H, phase, shift, Rx, Ry, Rz, rot, swap, I2, reflect, matrixgate
+export H, phase, shift, Rx, Ry, Rz, rot, swap, I2, reflect, matrixgate, PauliGate
 
 include("PauliGates.jl")
 
@@ -68,7 +68,7 @@ for (FNAME, NAME) in [
 
     GT = Symbol(join([NAME, "Gate"]))
     @eval begin
-        $FNAME(::Type{T}, theta) where {T <: Complex} = RotationGate{1, real(T), $GT{T}}($NAME(T), theta)
+        $FNAME(::Type{T}, theta) where {T <: Complex} = RotationGate{1, real(T), $GT{T}}($GT{T}(), theta)
         $FNAME(theta) = $FNAME(DefaultType, theta)
     end
 

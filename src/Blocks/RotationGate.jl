@@ -20,6 +20,13 @@ mat(R::RotationGate{N, T}) where {N, T} = _make_rot_mat(IMatrix{1<<N, Complex{T}
 mat(R::RotationGate{N, T, <:Union{XGate, YGate}}) where {N, T} = _make_rot_mat(IMatrix{1<<N, Complex{T}}(), mat(R.U), R.theta) |> Matrix
 adjoint(blk::RotationGate) = RotationGate(blk.U, -blk.theta)
 
+function apply!(reg::DefaultRegister, rb::RotationGate)
+    v0 = copy(reg.state)
+    apply!(reg, rb.U)
+    reg.state = -im*sin(rb.theta/2)*reg.state + cos(rb.theta/2)*v0
+    reg
+end
+
 copy(R::RotationGate) = RotationGate(R.U, R.theta)
 
 function dispatch!(R::RotationGate, itr)

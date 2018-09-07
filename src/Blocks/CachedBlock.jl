@@ -1,7 +1,7 @@
 export CachedBlock, update_cache
 
 """
-    CachedBlock{ST, BT, N, T} <: MatrixBlock{N, T}
+    CachedBlock{ST, BT, N, T} <: TagBlock{N, T}
 
 A label type that tags an instance of type `BT`. It forwards
 every methods of the block it contains, except [`mat`](@ref)
