@@ -1,7 +1,7 @@
 using Test, Random, LinearAlgebra, SparseArrays, CacheServers
 
 using Yao.Blocks
-using Yao.LuxurySparse
+using LuxurySparse
 
 @testset "constructor" begin
     @test CacheFragment(X) isa CacheFragment{XGate{ComplexF64}, UInt8, Any}

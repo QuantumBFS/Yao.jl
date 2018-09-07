@@ -17,11 +17,12 @@ blocks(c::Sequential) = c.blocks
 addrs(c::Sequential) = ones(Int, blocks(c)|>length)
 
 
-@forward Sequential.blocks Base.getindex, lastindex, Base.setindex!, Base.iterate, Base.length, Base.eltype, Base.eachindex, Base.insert!
+@forward Sequential.blocks Base.getindex, lastindex, Base.setindex!, Base.iterate, Base.length, Base.eltype, Base.eachindex
 
 # Additional Methods for Chain
-import Base: push!, append!, prepend!
+import Base: push!, append!, prepend!, insert!
 push!(c::Sequential, val::AbstractBlock) = (push!(c.blocks, val); c)
+insert!(c::Sequential, i::Integer, val::AbstractBlock) = (insert!(c.blocks, i, val); c)
 append!(c::Sequential, list) = (append!(c.blocks, list); c)
 prepend!(c::Sequential, list) = (prepend!(c.blocks, list); c)
 Base.getindex(c::Sequential, index::Union{UnitRange, Vector}) = Sequential(getindex(c.blocks, index))

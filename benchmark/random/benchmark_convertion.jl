@@ -1,7 +1,7 @@
 using BenchmarkTools
 
 using Yao
-using Yao.LuxurySparse
+using LuxurySparse
 
 Id = IMatrix{1<<16}()
 Pm = pmrand(ComplexF64, 1<<16)

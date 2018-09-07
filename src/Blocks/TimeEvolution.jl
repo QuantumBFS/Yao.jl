@@ -9,7 +9,8 @@ mutable struct TimeEvolution{N, T, GT <: MatrixBlock{N, Complex{T}}} <: Primitiv
     H::GT
     t::T
     function TimeEvolution{N, T, GT}(H::GT, t) where {N, T, GT <: MatrixBlock{N, Complex{T}}}
-        ishermitian(H) || throw(ArgumentError("Gate type $GT is not hermitian!"))
+        # we ignore hermitian check here for efficiency!
+        #ishermitian(H) || throw(ArgumentError("Gate type $GT is not hermitian!"))
         new{N, T, GT}(H, T(t))
     end
 end

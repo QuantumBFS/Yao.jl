@@ -2,7 +2,7 @@ using Test, Random, LinearAlgebra, SparseArrays, CacheServers
 
 using Yao
 using Yao.Blocks
-using Yao.LuxurySparse
+using LuxurySparse
 
 test_server = DefaultServer{MatrixBlock, CacheFragment}()
 
@@ -53,4 +53,9 @@ end
 
     @test eltype(g) == eltype(g.block)
     @test blocks(g) == blocks(g.block)
+
+    gg = chain(g, g)
+    cgg = CachedBlock(test_server, gg, 2)
+    @test cgg isa CachedBlock
+    @test parent(cgg)[1] == g
 end

@@ -134,14 +134,14 @@ end
 matvec(x::Matrix) = size(x, 2) == 1 ? vec(x) : x
 matvec(x::Vector) = x
 
-@inline function unrows!(state::Vector, inds::AbstractVector, U::AbstractMatrix)
+@inline function unrows!(state::Vector, inds::AbstractVector, U::SDMatrix)
     @inbounds state[inds] = U*view(state, inds)
     state
 end
 
-@inline function unrows!(state::Matrix, inds::AbstractVector, U::AbstractMatrix)
+@inline function unrows!(state::Matrix, inds::AbstractVector, U::SDMatrix)
     @inbounds @simd for k in 1:size(state, 2)
-        state[inds, k] .= U*view(state, inds, k)
+        state[inds, k] = U*view(state, inds, k)
     end
     state
 end
@@ -149,47 +149,48 @@ end
 ############# boost unrows! for sparse matrices ################
 @inline unrows!(state::Vector, inds::AbstractVector, U::IMatrix) = state
 
-for MT in [:Matrix, :Vector]
-    @eval @inline function unrows!(state::$MT, inds::AbstractVector, U::Union{Diagonal, SDiagonal})
-        @inbounds @simd for i in 1:length(U.diag)
-            mulrow!(state, inds[i], U.diag[i])
-        end
-        state
-    end
-end
-
-@inline function unrows!(state::Vector, inds::AbstractVector, U::PermMatrix, work::Vector)
-    @inbounds @simd for i = 1:length(inds)
-        work[i] = state[inds[U.perm[i]]] * U.vals[i]
-    end
-    @inbounds state[inds].=work
-    state
-end
-
-@inline function unrows!(state::Matrix, inds::AbstractVector, U::PermMatrix, work::Matrix)
-    @inbounds for k in 1:size(state, 2)
-        @inbounds @simd for i = 1:length(inds)
-            work[i, k] = state[inds[U.perm[i]], k] * U.vals[i]
-        end
-        state[inds, k].=work[:, k]
+@inline function unrows!(state::Vector, inds::AbstractVector, U::SDDiagonal)
+    @simd for i in 1:length(U.diag)
+        @inbounds state[inds[i]] *= U.diag[i]
     end
     state
 end
 
-@inline function unrows!(state::Vector, inds::AbstractVector, A::Union{SSparseMatrixCSC, SparseMatrixCSC}, work::Vector)
-    work.=0
+@inline function unrows!(state::Matrix, inds::AbstractVector, U::SDDiagonal)
+    for j in 1:size(state, 2)
+        @simd for i in 1:length(U.diag)
+            @inbounds state[inds[i],j] *= U.diag[i]
+        end
+    end
+    state
+end
+
+@inline function unrows!(state::Vector, inds::AbstractVector, U::SDPermMatrix)
+    @inbounds state[inds] = state[inds[U.perm]] .* U.vals
+    state
+end
+
+@inline function unrows!(state::Matrix, inds::AbstractVector, U::SDPermMatrix)
+    @inbounds @simd for k in 1:size(state, 2)
+        state[inds, k] = state[inds[U.perm], k] .* U.vals
+    end
+    state
+end
+
+@inline function unrows!(state::Vector, inds::AbstractVector, A::SDSparseMatrixCSC, work::Vector)
+    work .= 0
     @inbounds for col = 1:length(inds)
         xj = state[inds[col]]
         @inbounds @simd for j = A.colptr[col]:(A.colptr[col + 1] - 1)
             work[A.rowval[j]] += A.nzval[j]*xj
         end
     end
-    state[inds] .= work
+    state[inds] = work
     state
 end
 
-@inline function unrows!(state::Matrix, inds::AbstractVector, A::Union{SSparseMatrixCSC, SparseMatrixCSC}, work::Matrix)
-    work.=0
+@inline function unrows!(state::Matrix, inds::AbstractVector, A::SDSparseMatrixCSC, work::Matrix)
+    work .= 0
     @inbounds for k = 1:size(state, 2)
         @inbounds for col = 1:length(inds)
             xj = state[inds[col],k]
@@ -197,7 +198,7 @@ end
                 work[A.rowval[j], k] += A.nzval[j]*xj
             end
         end
-        state[inds,k] .= work[:,k]
+        state[inds,k] = view(work, :, k)
     end
     state
 end

@@ -2,7 +2,7 @@ using Yao
 using BenchmarkTools
 
 using Yao.Intrinsics
-using Yao.LuxurySparse
+using LuxurySparse
 import Yao.Intrinsics: basis
 
 include("swap.jl")

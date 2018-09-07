@@ -58,18 +58,14 @@ _packbits(arr) = selectdim(sum(mapslices(x -> x .* (1 .<< (0:size(arr, 1)-1)), a
 
 float view, with big end qubit 1.
 """
-function bfloat(b::Int; nbit::Int=bit_length(b))
-    breflect(nbit, b) / (1<<nbit)
-end
+bfloat(b::Int; nbit::Int=bit_length(b)) = breflect(nbit, b) / (1<<nbit)
 
 """
     bfloat_r(b::Int; nbit::Int) -> Float64
 
 float view, with bits read in inverse order.
 """
-function bfloat_r(b::Int; nbit::Int)
-    b / (1<<nbit)
-end
+bfloat_r(b::Int; nbit::Int) = b / (1<<nbit)
 
 """
     bint(b::Int; nbit=nothing) -> Int
@@ -161,7 +157,7 @@ neg(index::DInt, num_bit::Int)::DInt = bmask(1:num_bit) ⊻ index
 
 Return an integer with bits at `i` and `j` flipped.
 """
-function swapbits(b::DInt, mask12::DInt)::DInt
+@inline function swapbits(b::DInt, mask12::DInt)::DInt
     bm = b&mask12
     if bm!=0 && bm!=mask12
         b ⊻= mask12
@@ -176,14 +172,14 @@ Return left-right reflected integer.
 """
 function breflect end
 
-function breflect(num_bit::Int, b::DInt)
+@inline function breflect(num_bit::Int, b::DInt)
     @simd for i in 1:num_bit÷2
         b = swapbits(b, bmask(i, num_bit-i+1))
     end
     b
 end
 
-function breflect(num_bit::Int, b::DInt, masks::Vector{DInt})
+@inline function breflect(num_bit::Int, b::DInt, masks::Vector{DInt})
     @simd for m in masks
         b = swapbits(b, m)
     end
@@ -234,7 +230,7 @@ Return a function that test whether a basis at `cbits` takes specific value `cva
 function controller(cbits, cvals)
     do_mask = bmask(cbits...)
     onepos = cvals.==1
-    onemask = any(onepos) ? bmask(cbits[onepos]...) : 0
+    onemask = any(onepos) ? bmask(cbits[onepos]...) : DInt(0)
     return b->testval(b, do_mask, onemask)
 end
 

@@ -4,11 +4,10 @@ using Yao
 using Yao.Blocks
 using Yao.Intrinsics
 
-import Yao.LuxurySparse: IMatrix
+import LuxurySparse: IMatrix
 
 @testset "constructor" begin
 # TODO: custom error exception
-@test_throws MethodError KronBlock{2}(1=>X, [2, Y])
 @test_throws AddressConflictError KronBlock{5}(4=>CNOT, 5=>X)
 end
 
@@ -20,7 +19,6 @@ GateSet = [
     rot(X, 0.1), rot(Y, 0.4), rot(Z, 0.2)
 ]
 
-⊗ = kron
 U = mat(X)
 U2 = mat(CNOT)
 id = IMatrix(2)
@@ -46,7 +44,9 @@ end
 @testset "case 2" begin
     m = mat(X) ⊗ mat(Y) ⊗ mat(Z)
     g = KronBlock{3}(1=>Z, 2=>Y, 3=>X)
+    g1 = KronBlock(Z, Y, X)
     @test m == mat(g)
+    @test m == mat(g1)
 
     m = id ⊗ m
     g = KronBlock{4}(1=>Z, 2=>Y, 3=>X)
@@ -95,7 +95,7 @@ end
 end # check mat
 
 @testset "allocation" begin
-    g = KronBlock{4}(X, phase(0.1))
+    g = KronBlock{4}(1=>X, 2=>phase(0.1))
     # deep copy
     cg = deepcopy(g)
     cg[2].theta = 0.2
@@ -113,7 +113,7 @@ end
 
 @testset "insertion" begin
 
-    g = KronBlock{4}(X, phase(0.1))
+    g = KronBlock{4}(1=>X, 2=>phase(0.1))
     g[4] = rot(X, 0.2)
     @test g[4].theta == 0.2
 
@@ -123,7 +123,7 @@ end
 end
 
 @testset "iteration" begin
-    g = KronBlock{5}(X, 3=>Y, rot(X, 0.0), rot(Y, 0.0))
+    g = KronBlock{5}(1=>X, 3=>Y, 4=>rot(X, 0.0), 5=>rot(Y, 0.0))
     for (src, tg) in zip(g, [1=>X, 3=>Y, 4=>rot(X, 0.0), 5=>rot(Y, 0.0)])
         @test src[1] == tg[1]
         @test src[2] == tg[2]
@@ -136,7 +136,7 @@ end
 
 @testset "check traits" begin
     # TODO: define traits for primitive blocks
-    g = KronBlock{5}(X, 3=>Y, rot(X, 0.0), rot(Y, 0.0))
+    g = KronBlock{5}(1=>X, 3=>Y, 4=>rot(X, 0.0), 5=>rot(Y, 0.0))
     addrs(g) === g.addrs
     blocks(g) === g.blocks
     eltype(g) == Tuple{Int, MatrixBlock}

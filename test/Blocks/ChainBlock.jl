@@ -6,25 +6,25 @@ using Yao.Blocks
 @testset "constructor" begin
 
     g = ChainBlock(
-        kron(2, 1=>X(), Y()),
+        kron(2, 1=>X(), 2=>Y()),
         kron(2, 1=>phase(0.1)),
     )
 
     @test g isa ChainBlock{2, ComplexF64} # default type
-    @test g.blocks == [kron(2, 1=>X(), Y()), kron(2, 1=>phase(0.1))]
+    @test g.blocks == [kron(2, X, Y), kron(2, 1=>phase(0.1))]
 end
 
 @testset "matrix" begin
 g = ChainBlock(
-    kron(2, 1=>X, Y),
+    kron(2, 1=>X, 2=>Y),
     kron(2, 1=>phase(0.1))
 )
 
-m = mat(kron(2, 1=>phase(0.1))) * mat(kron(2, 1=>X, Y))
+m = mat(kron(2, 1=>phase(0.1))) * mat(kron(2, X, Y))
 @test mat(g) ≈ m
 
 g = ChainBlock(
-    kron(4, 1=>X, Y),
+    kron(4, 1=>X, 2=>Y),
     kron(4, 1=>phase(0.1)),
 )
 
@@ -34,7 +34,7 @@ end
 
 @testset "apply" begin
 g = ChainBlock(
-    kron(2, 1=>X, Y),
+    kron(2, X, Y),
     kron(2, 1=>phase(0.1)),
 )
 

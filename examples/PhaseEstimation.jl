@@ -1,7 +1,7 @@
 using Compat
 using Compat.Test
 using Yao
-using Yao.Zoo
+using QuAlgorithmZoo
 using Yao.Blocks
 using Yao.Intrinsics
 

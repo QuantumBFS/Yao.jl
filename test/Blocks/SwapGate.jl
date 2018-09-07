@@ -1,7 +1,7 @@
 using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao.Blocks
-using Yao.LuxurySparse
+using LuxurySparse
 using Yao.Intrinsics
 import Yao.Blocks: swapapply!
 
