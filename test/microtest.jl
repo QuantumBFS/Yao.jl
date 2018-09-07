@@ -4,7 +4,7 @@ using Yao
 using Yao.Blocks
 using Yao.Intrinsics
 using Yao.Boost
-using Yao.LuxurySparse
+using LuxurySparse
 
 ####################### Controlled Gates #######################
 p0 = mat(P0)

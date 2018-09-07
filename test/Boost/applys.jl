@@ -4,7 +4,7 @@ using Yao
 using Yao.Boost
 using Yao.Blocks
 using Yao.Intrinsics
-using Yao.LuxurySparse
+using LuxurySparse
 using StaticArrays: SVector, SMatrix
 
 @testset "xyz" begin

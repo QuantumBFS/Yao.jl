@@ -18,5 +18,7 @@ iterate(c::TagBlock, st) = iterate(parent(c), st)
 # Print
 print_subblocks(io::IO, tree::TagBlock, depth, charset, active_levels) = print_subblocks(io, parent(tree), depth, charset, active_levels)
 
+cache_key(tb::TagBlock) = cache_key(parent(tb))
+
 include("BlockCache.jl")
 include("Daggered.jl")

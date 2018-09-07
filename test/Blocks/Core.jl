@@ -11,7 +11,7 @@ for (i, each) in enumerate(parameters(g))
     @test each ≈ i * 0.1
 end
 
-g = kron(5, 3=>g, X, phase(0.4))
+g = kron(5, 3=>g, 4=>X, 5=>phase(0.4))
 @test nparameters(g) == 4
 
 for (i, each) in enumerate(parameters(g))
@@ -47,7 +47,7 @@ end
             each ≈ i
         end
 
-        g = kron(4, 1=>phase(0.2), X, phase(0.3))
+        g = kron(4, 1=>phase(0.2), 2=>X, 3=>phase(0.3))
         dispatch!(g, 1:2)
 
         @test parameters(g[1]) ≈ 1

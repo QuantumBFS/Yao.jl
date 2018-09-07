@@ -32,6 +32,10 @@ copy(x::RepeatedBlock) = typeof(x)(block, copy(x.addrs))
 dispatch!(rb::RepeatedBlock, params...) = dispatch!(rb.block, params...)
 dispatch!(f::Function, rb::RepeatedBlock, params...) = dispatch!(f, rb.block, params...)
 
+isunitary(rb::RepeatedBlock) = isunitary(rb.block)
+ishermitian(rb::RepeatedBlock) = ishermitian(rb.block)
+reflexive(rb::RepeatedBlock) = reflexive(rb.block)
+
 mat(rb::RepeatedBlock{N}) where N = hilbertkron(N, fill(mat(rb.block), length(rb.addrs)), [rb.addrs...])
 adjoint(blk::RepeatedBlock{N}) where N = RepeatedBlock{N}(adjoint(blk.block), blk.addrs)
 function apply!(reg::AbstractRegister, rp::RepeatedBlock{N}) where N

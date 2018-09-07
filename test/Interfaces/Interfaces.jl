@@ -55,7 +55,7 @@ end
     # varargs construction
     @test kron(2, X, X) isa KronBlock
     # lazy construction
-    @test kron(X, Y)(4) isa KronBlock
+    @test kron(X, Y)(2) isa KronBlock
     # lazy construction (iterator)
     @test kron(X for i=1:4)(4) isa KronBlock
 end

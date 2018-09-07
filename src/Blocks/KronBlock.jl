@@ -2,20 +2,20 @@ export KronBlock
 
 
 """
-    KronBlock{N, T} <: CompositeBlock
+    KronBlock{N, T, MT<:MatrixBlock} <: CompositeBlock{N, T}
 
 composite block that combine blocks by kronecker product.
 """
-struct KronBlock{N, T} <: CompositeBlock{N, T}
+struct KronBlock{N, T, MT<:MatrixBlock} <: CompositeBlock{N, T}
     slots::Vector{Int}
     addrs::Vector{Int}
-    blocks::Vector{MatrixBlock}
+    blocks::Vector{MT}
 
-    function KronBlock{N, T}(slots::Vector{Int}, addrs::Vector{Int}, blocks::Vector) where {N, T}
-        new{N, T}(slots, addrs, blocks)
+    function KronBlock{N, T}(slots::Vector{Int}, addrs::Vector{Int}, blocks::Vector{MT}) where {N, T, MT<:MatrixBlock}
+        new{N, T, MT}(slots, addrs, blocks)
     end
 
-    function KronBlock{N, T}(addrs::Vector, blocks::Vector{MatrixBlock}) where {N, T}
+    function KronBlock{N, T}(addrs::Vector{Int}, blocks::Vector{MT}) where {N, T, MT<:MatrixBlock}
         perm = sortperm(addrs)
         permute!(addrs, perm)
         permute!(blocks, perm)
@@ -25,44 +25,32 @@ struct KronBlock{N, T} <: CompositeBlock{N, T}
         for (i, each) in enumerate(addrs)
             slots[each] = i
         end
-        new{N, T}(slots, addrs, blocks)
+        new{N, T, MT}(slots, addrs, blocks)
     end
 
-    function KronBlock{N}(addrs::Vector, blocks::Vector{MatrixBlock}) where N
+    function KronBlock{N}(addrs::Vector{Int}, blocks::Vector{<:MatrixBlock}) where N
         T = promote_type([datatype(each) for each in blocks]...)
         KronBlock{N, T}(addrs, blocks)
     end
 
-    function KronBlock{N}(args...) where N
-        KronBlock{N}(args)
-    end
-
-    function KronBlock{N}(arg::T) where {N, MT <: MatrixBlock, T <: Union{Pair{Int, MT}, MT}}
-        KronBlock{N}([arg])
-    end
-
-    function KronBlock{N}(itr) where N
-        curr_head = 1
+    function KronBlock{N}(itr::Union{Tuple{Int, <:MatrixBlock}, Pair{Int,<:MatrixBlock}}...) where N
         blocks = MatrixBlock[]
         addrs = Int[]
 
-        for each in itr
-            if isa(each, MatrixBlock)
-                push!(blocks, each)
-                push!(addrs, curr_head)
-                curr_head += nqubits(each)
-            elseif isa(each, Union{Tuple, Pair})
-                curr_head, block = each
-                push!(addrs, curr_head)
-                push!(blocks, block)
-                curr_head += nqubits(block)
-            else
-                throw(MethodError(KronBlock, itr))
-            end
+        for (addr, block) in itr
+            push!(addrs, addr)
+            push!(blocks, block)
         end
-
         KronBlock{N}(addrs, blocks)
     end
+
+    function KronBlock(itr::MatrixBlock...)
+        N = length(itr)
+        KronBlock{N}(collect(1:N), collect(itr))
+    end
+
+    KronBlock{N}(args::Union{Tuple, Vector{<:Pair}}) where N = KronBlock{N}(args...)
+    KronBlock(args::Union{Tuple, Vector{<:MatrixBlock}}) where N = KronBlock(args...)
 end
 
 function copy(k::KronBlock{N, T}) where {N, T}
@@ -114,8 +102,10 @@ end
 
 eltype(k::KronBlock) = Tuple{Int, MatrixBlock}
 length(k::KronBlock) = length(k.blocks)
-isunitary(k::KronBlock) = all(isunitary, k.blocks)
+
+# these requirements are definitely to strong, since there are freedom of factors, but we have to do this naive check for efficiency
 ishermitian(k::KronBlock) = all(ishermitian, k.blocks)
+isunitary(k::KronBlock) = all(isunitary, k.blocks)
 isreflexive(k::KronBlock) = all(isreflexive, k.blocks)
 
 ###############
@@ -135,7 +125,7 @@ function mat(k::KronBlock{N}) where N
     end
 end
 
-adjoint(blk::KronBlock) = typeof(blk)(blk.slots, blk.addrs, map(adjoint, blk.blocks))
+adjoint(blk::KronBlock{N, T}) where {N, T} = KronBlock{N, T}(blk.slots, blk.addrs, map(adjoint, blk.blocks))
 
 function cache_key(x::KronBlock)
     [cache_key(each) for each in x.blocks]

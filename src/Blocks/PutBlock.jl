@@ -30,7 +30,9 @@ dispatch!(pb::PutBlock, params...) = dispatch!(pb.block, params...)
 dispatch!(f::Function, pb::PutBlock, params...) = dispatch!(f, pb.block, params...)
 
 # TODO
-mat(pb::PutBlock{N, 1}) where N = hilbertkron(N, [mat(pb.block)], [pb.addrs...])
+mat(pb::PutBlock{N, 1}) where N = u1mat(N, mat(pb.block), pb.addrs...)
+mat(pb::PutBlock{N, C}) where {N, C} = unmat(N, mat(pb.block), pb.addrs)
+#mat(pb::PutBlock{N, 1}) where N = hilbertkron(N, [mat(pb.block)], [pb.addrs...])
 function apply!(r::AbstractRegister, pb::PutBlock{N}) where N
     N == nactive(r) || throw(QubitMismatchError("register Size $(nactive(r)) mismatch with block size $N"))
     unapply!(r.state |> matvec, mat(pb.block), pb.addrs)
@@ -48,9 +50,7 @@ function ==(lhs::PutBlock{N, C, GT, T}, rhs::PutBlock{N, C, GT, T}) where {N, T,
     (lhs.block == rhs.block) && (lhs.addrs == rhs.addrs)
 end
 
-function cache_key(pb::PutBlock)
-    cache_key(pb.block)
-end
+cache_key(pb::PutBlock) = cache_key(pb.block)
 
 function print_block(io::IO, pb::PutBlock{N}) where N
     printstyled(io, "put on ("; bold=true, color=color(PutBlock))

@@ -78,21 +78,6 @@ end
     @test (reg1 + reg2 - reg1) == reg2
 end
 
-Ints = Union{Vector{Int}, UnitRange{Int}, Int}
-function naive_focus!(reg::DefaultRegister{B}, bits::Ints) where B
-    nbit = nqubits(reg)
-    norder = vcat(bits, setdiff(1:nbit, bits), nbit+1)
-    @views reg.state = reshape(permutedims(reshape(reg.state, fill(2, nbit)...,B), norder), :, (1<<(nbit-length(bits)))*B)
-    reg
-end
-
-function naive_relax!(reg::DefaultRegister{B}, bits::Ints) where B
-    nbit = nqubits(reg)
-    norder = vcat(bits, setdiff(1:nbit, bits), nbit+1) |> invperm
-    @views reg.state = reshape(permutedims(reshape(reg.state, fill(2, nbit)...,B), norder), :, B)
-    reg
-end
-
 @testset "Focus 1" begin
     # conanical shape
     reg = rand_state(3, 5)

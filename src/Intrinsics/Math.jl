@@ -161,7 +161,7 @@ get the hypercubic representation for an array or a regiseter.
 hypercubic(A::Array) = reshape(A, fill(2, size(A) |> prod |> log2i)...)
 
 #################### Reorder ######################
-function reorder(A::Matrix)
+function invorder(A::Matrix)
     M, N = size(A)
     m, n = M |> log2i, N |> log2i
     A = A |> hypercubic

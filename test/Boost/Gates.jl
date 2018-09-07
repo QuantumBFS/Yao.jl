@@ -2,7 +2,7 @@ using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao
 using Yao.Blocks
-using Yao.LuxurySparse
+using LuxurySparse
 using Yao.Intrinsics
 using Yao.Boost
 

@@ -7,7 +7,6 @@ Expokit
 FFTW
 IterTools
 Lazy
-LinearAlgebra
 LinearMaps
 LuxurySparse
 MacroTools
@@ -16,3 +15,4 @@ Reexport
 SparseArrays
 StaticArrays
 StatsBase
+LinearMaps

@@ -28,7 +28,7 @@ function Base.iterate(ic::IterControl{N, C}, state = 0) where {N, C}
 end
 
 Base.length(ic::IterControl{N}) where N = N
-Base.eltype(ic::IterControl) = Int
+Base.eltype(::Type{IterControl}) = Int
 lmove(b::Int, mask::Int, k::Int)::Int = (b&~mask)<<k + (b&mask)
 
 """

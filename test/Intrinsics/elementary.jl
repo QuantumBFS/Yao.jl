@@ -1,9 +1,9 @@
 using Test, Random, LinearAlgebra, SparseArrays
 
 using Yao
-using Yao.LuxurySparse
+using LuxurySparse
 using StaticArrays: SMatrix, SVector
-import Yao.Intrinsics: swaprows!, mulrow!, notdense, swapcols!, mulcol!, u1rows!, unrows!
+import Yao.Intrinsics: swaprows!, mulrow!, swapcols!, mulcol!, u1rows!, unrows!
 
 @testset "swaprows! & mulrow!" begin
     a = [1,2,3,5.0]
@@ -65,14 +65,11 @@ end
     N, M = 6, 2
     v = randn(ComplexF64, 1<<N)
     pm = pmrand(ComplexF64, 1<<M)
-    work = zero(pm.vals)
     inds = [1, 3, 8, 2]
     sinds = SVector{1<<M}(inds)
     spm = pm |> staticize
-    unrows!(v, inds, spm, work)
-    # TODO: this use views?
-    # @test 0 == @allocated unrows!(v, inds, spm, work)
-    @test unrows!(copy(v), sinds, spm, work) ≈ unrows!(copy(v), inds, pm |> Matrix)
+    unrows!(v, inds, spm)
+    @test unrows!(copy(v), sinds, spm) ≈ unrows!(copy(v), inds, pm |> Matrix)
 end
 
 @testset "csc unrows!" begin
@@ -85,5 +82,5 @@ end
     unrows!(v, sinds, sA, work)
     # TODO: this use views?
     # @test 0 == @allocated unrows!(v, sinds, sA, work)
-    @test unrows!(copy(v), sinds, sA, work) ≈ unrows!(copy(v), inds, A)
+    @test unrows!(copy(v), sinds, sA, work) ≈ unrows!(copy(v), inds, A |> Matrix)
 end

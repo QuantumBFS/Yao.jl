@@ -3,7 +3,7 @@ using Test, Random, LinearAlgebra, SparseArrays
 using Yao
 using Yao.Blocks
 using Yao.Intrinsics
-using Yao.LuxurySparse
+using LuxurySparse
 
 @testset "blockfilter expect" begin
     ghz = (register(bit"0000") + register(bit"1111")) |> normalize!

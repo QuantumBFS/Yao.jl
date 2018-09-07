@@ -225,7 +225,8 @@ function Base.show(io::IO, c::Adjoint{T, <:DefaultRegister}) where T
 end
 Base.show(io::IO, mime::MIME"text/plain", c::Adjoint{T, <:DefaultRegister}) where T = Base.show(io, c)
 
-state(bra::Adjoint{T, <:DefaultRegister}) where T = Adjoint(parent(bra).state)
+state(bra::Adjoint{T, <:DefaultRegister}) where T = Adjoint(parent(bra) |> state)
+statevec(bra::Adjoint{T, <:DefaultRegister}) where T = Adjoint(parent(bra) |> statevec)
 
-LinearAlgebra.:*(bra::Adjoint{T, <:DefaultRegister{B1, T}}, ket::DefaultRegister{B2, T}) where {T, B1, B2} = state(bra) * state(ket)
-LinearAlgebra.:*(bra::Adjoint{T, <:DefaultRegister{B1, T}}, ket::DefaultRegister{1, T}) where {T, B1, B2} = state(bra) * state(ket)
+LinearAlgebra.:*(bra::Adjoint{T, <:DefaultRegister{B1, T}}, ket::DefaultRegister{B2, T}) where {T, B1, B2} = statevec(bra) * statevec(ket)
+LinearAlgebra.:*(bra::Adjoint{T, <:DefaultRegister{B1, T}}, ket::DefaultRegister{1, T}) where {T, B1, B2} = statevec(bra) * statevec(ket)
