@@ -15,5 +15,5 @@ copy(r::GeneralMatrixGate) = GeneralMatrixGate(copy(r.matrix))
 mat(r::GeneralMatrixGate) = r.matrix
 
 function print_block(io::IO, g::GeneralMatrixGate{M, N, T, MT}) where {M,N,T, MT}
-    print("GeneralMatrixGate(2^$M × 2^$N; $MT)")
+    print(io, "GeneralMatrixGate(2^$M × 2^$N; $MT)")
 end

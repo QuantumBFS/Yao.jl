@@ -221,7 +221,7 @@ end
 Base.adjoint(reg::DefaultRegister{B, T}) where {B, T} = Adjoint{T, typeof(reg)}(reg)
 
 function Base.show(io::IO, c::Adjoint{T, <:DefaultRegister}) where T
-    print("$(parent(c)) (Daggered)")
+    print(io, "$(parent(c)) (Daggered)")
 end
 Base.show(io::IO, mime::MIME"text/plain", c::Adjoint{T, <:DefaultRegister}) where T = Base.show(io, c)
 

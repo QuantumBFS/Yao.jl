@@ -22,6 +22,8 @@ import Yao.Blocks: Scale, Neg, Im, _Im
     @test -Im(X) == -im*X == _Im(X)
     @test -Im(X) isa _Im
     @test -Im(X)' isa Im
+    @test im*X*(im*X) isa Neg
+    @test im*X*(-im*X) isa Pos
     println(X, -X, 1im*X, -1im*X, 2*X)
 end
 

@@ -97,11 +97,11 @@ for op in [:+, :-]
 end
 -(reg::RT) where RT<:AbstractRegister = RT(-state(reg))
 for op in [:*, :/]
-    @eval function ($op)(lhs::RT, rhs::Real) where {RT <: AbstractRegister}
+    @eval function ($op)(lhs::RT, rhs::Number) where {RT <: AbstractRegister}
         RT(($op)(state(lhs), rhs))
     end
     if op == :*
-        @eval function ($op)(lhs::Real, rhs::RT) where {RT <: AbstractRegister}
+        @eval function ($op)(lhs::Number, rhs::RT) where {RT <: AbstractRegister}
             RT(($op)(lhs, state(rhs)))
         end
     end

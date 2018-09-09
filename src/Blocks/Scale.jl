@@ -1,4 +1,4 @@
-export Scale, Neg, Im, _Im, scale, getscale
+export Scale, Pos, Neg, Im, _Im, scale, getscale
 """
     Scale{X, N, T, BT} <: TagBlock{N, T}
 
@@ -13,6 +13,8 @@ end
 Scale{X}(blk::BT) where {X, N, T, BT<:MatrixBlock{N, T}} = Scale{X, N, T, BT}(blk)
 
 ==(b1::Scale{X}, b2::Scale{X}) where X = parent(b1) == parent(b2)
+==(b1::Scale{1}, b2::MatrixBlock) where X = parent(b1) == b2
+==(b1::MatrixBlock, b2::Scale{1}) where X = b1 == parent(b2)
 scale(blk::Scale{X}, x::Number) where X = Scale{X*x}(parent(blk))
 scale(blk::MatrixBlock, x::Number) = Scale{x}(blk)
 getscale(blk::Scale{X}) where X = X
@@ -50,11 +52,17 @@ function print_block(io::IO, c::Scale{X}) where X
 end
 
 """
+    Pos{N, T, BT} = Scale{1+0im, N, T, BT}
+
+(Pos)itive is doing nothing on Block.
+"""
+const Pos{N, T, BT} = Scale{1+0im, N, T, BT}
+"""
     Neg{N, T, BT} = Scale{-1, N, T, BT}
 
 (Neg)ative of Block.
 """
-const Neg{N, T, BT} = Scale{-1, N, T, BT}
+const Neg{N, T, BT} = Scale{-1+0im, N, T, BT}
 """
     Im{N, T, BT} = Scale{1im, N, T, BT}
 
@@ -67,8 +75,12 @@ Im{N, T, BT} = Scale{1im, N, T, BT}
 Mulitply (-Im)aginary unit on Block.
 """
 const _Im{N, T, BT} = Scale{-1im, N, T, BT}
--(blk::MatrixBlock) = (-1)*blk
+-(blk::MatrixBlock) = (-1+0im)*blk
 -(blk::Neg) = blk.block
+
+function print_block(io::IO, c::Pos)
+    print_block(io, c.block)
+end
 
 function print_block(io::IO, c::Neg)
     print(io, "-")
@@ -84,4 +96,3 @@ function print_block(io::IO, c::_Im)
     print(io, "-i")
     print_block(io, c.block)
 end
-
