@@ -19,7 +19,7 @@ measure active qubits for `n` times.
 measure(reg::AbstractRegister, nshot::Int=1) = _measure(reg |> probs, nshot)
 
 """
-    measure_remove!(register)
+    measure_remove!(register) -> Int
 
 measure the active qubits of this register and remove them.
 """
@@ -34,19 +34,24 @@ function measure_remove!(reg::AbstractRegister{B}) where B
         @inbounds res[ib] = ires
     end
     reg.state = reshape(nstate,1,:)
-    reg, res
+    res
 end
 
+"""
+    measure!(reg::AbstractRegister) -> Int
+
+measure and collapse to result state.
+"""
 function measure!(reg::AbstractRegister{B}) where B
     state = reshape(reg.state, size(reg.state,1),:,B)
     nstate = zero(state)
-    nreg, res = measure_remove!(reg)
-    _nstate = reshape(nreg.state, :, B)
+    res = measure_remove!(reg)
+    _nstate = reshape(reg.state, :, B)
     @simd for ib in 1:B
         @inbounds nstate[res[ib]+1, :, ib] = view(_nstate, :,ib)
     end
     reg.state = reshape(nstate, size(state, 1), :)
-    reg, res
+    res
 end
 
 """

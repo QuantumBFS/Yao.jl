@@ -70,7 +70,8 @@ end
     # conanical shape
     reg = rand_state(3, 5)
     @test copy(reg) |> extend!(2) |> nactive == 5
-    @test copy(reg) |> extend!(2) |> focus!(4,5) |> measure_remove! |> first |> relax! ≈ reg
+    reg2 = copy(reg) |> extend!(2) |> focus!(4,5)
+    @test (reg2 |> measure_remove!; reg2) |> relax! ≈ reg
 end
 
 @testset "stack repeat" begin
