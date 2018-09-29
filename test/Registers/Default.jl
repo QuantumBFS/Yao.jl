@@ -66,6 +66,21 @@ end
     @test state(creg) !== state(reg)
 end
 
+<<<<<<< HEAD
+=======
+@testset "Math Operations" begin
+    nbit = 5
+    reg1 = zero_state(5)
+    reg2 = register(bit"00100")
+    @test reg1!=reg2
+    @test statevec(reg2) == onehotvec(ComplexF64, nbit, 4)
+    reg3 = reg1 + reg2
+    @test statevec(reg3) == onehotvec(ComplexF64, nbit, 4) + onehotvec(ComplexF64, nbit, 0)
+    @test statevec(reg3 |> normalize!) == (onehotvec(ComplexF64, nbit, 4) + onehotvec(ComplexF64, nbit, 0))/sqrt(2)
+    @test (reg1 + reg2 - reg1) == reg2
+end
+
+>>>>>>> master
 @testset "Focus 1" begin
     # conanical shape
     reg = rand_state(3, 5)

@@ -1,5 +1,9 @@
 using Documenter
+<<<<<<< HEAD
 using Yao, Yao.Blocks, LuxurySparse, Yao.CacheServers, Yao.Intrinsics, Yao.Registers, Yao.Interfaces
+=======
+using Yao, Yao.Blocks, LuxurySparse, CacheServers, Yao.Intrinsics, Yao.Registers, Yao.Interfaces
+>>>>>>> master
 
 # TODO: use Literate to process examples
 # using Literate
@@ -7,7 +11,7 @@ using Yao, Yao.Blocks, LuxurySparse, Yao.CacheServers, Yao.Intrinsics, Yao.Regis
 
 # make documents
 makedocs(
-    modules = [Yao, Yao.Blocks, LuxurySparse, Yao.CacheServers, Yao.Intrinsics, Yao.Registers, Yao.Interfaces],
+    modules = [Yao, Yao.Blocks, LuxurySparse, CacheServers, Yao.Intrinsics, Yao.Registers, Yao.Interfaces],
     clean = false,
     format = :html,
     sitename = "Yao.jl",
@@ -25,11 +29,9 @@ makedocs(
             "man/yao.md",
             "man/interfaces.md",
             "man/registers.md",
-            "man/zoo.md",
             "man/blocks.md",
             "man/cache.md",
             "man/intrinsics.md",
-            "man/luxurysparse.md",
             "man/boost.md",
         ],
         "Developer Documentation" => Any[

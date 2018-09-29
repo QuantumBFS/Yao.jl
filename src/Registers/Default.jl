@@ -217,16 +217,16 @@ function tracedist(reg1::DefaultRegister{B}, reg2::DefaultRegister{B}) where B
     size(reg1.state, 2) == B ? sqrt.(1 .- fidelity(reg1, reg2).^2) : throw(MethodError("trace distance for non-pure state is not defined!"))
 end
 
-################### Bra ##################
+################### ConjRegister ##################
+const ConjRegister{B, T, RT} = Adjoint{T, RT<:AbstractRegister{B, T}}
 Base.adjoint(reg::DefaultRegister{B, T}) where {B, T} = Adjoint{T, typeof(reg)}(reg)
 
-function Base.show(io::IO, c::Adjoint{T, <:DefaultRegister}) where T
+function Base.show(io::IO, c::ConjRegister)
     print(io, "$(parent(c)) (Daggered)")
 end
-Base.show(io::IO, mime::MIME"text/plain", c::Adjoint{T, <:DefaultRegister}) where T = Base.show(io, c)
+Base.show(io::IO, mime::MIME"text/plain", c::ConjRegister{<:Any, T}) where T = Base.show(io, c)
 
-state(bra::Adjoint{T, <:DefaultRegister}) where T = Adjoint(parent(bra) |> state)
-statevec(bra::Adjoint{T, <:DefaultRegister}) where T = Adjoint(parent(bra) |> statevec)
+state(bra::ConjRegister) where T = Adjoint(parent(bra) |> state)
+statevec(bra::ConjRegister) where T = Adjoint(parent(bra) |> statevec)
 
-LinearAlgebra.:*(bra::Adjoint{T, <:DefaultRegister{B1, T}}, ket::DefaultRegister{B2, T}) where {T, B1, B2} = statevec(bra) * statevec(ket)
-LinearAlgebra.:*(bra::Adjoint{T, <:DefaultRegister{B1, T}}, ket::DefaultRegister{1, T}) where {T, B1, B2} = statevec(bra) * statevec(ket)
+LinearAlgebra.:*(bra::ConjRegister, ket::DefaultRegister) = state(bra) * state(ket)

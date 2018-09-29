@@ -1,12 +1,14 @@
 # Benchmark with ProjectQ
 [ProjectQ](https://projectq.ch) is an open source software framework for quantum computing. Here we present the single process benchmark result
 
-![xyz](../assets/benchmarks/xyz-bench.png)
-![repeatedxyz](../assets/benchmarks/repeatxyz-bench.png)
-![cxyz](../assets/benchmarks/cxyz-bench.png)
-![crot](../assets/benchmarks/crot-bench.png)
-![hgate](../assets/benchmarks/hgate-bench.png)
-![rot](../assets/benchmarks/rot-bench.png)
+```@raw html
+<img src="../assets/benchmarks/xyz-bench.png"    alt="xyz" height="200">
+<img src="../assets/benchmarks/repeatxyz-bench.png" alt="xyz" height="200">
+<img src="../assets/benchmarks/cxyz-bench.png"      alt="xyz" height="200">
+<img src="../assets/benchmarks/crot-bench.png"      alt="xyz" height="200">
+<img src="../assets/benchmarks/hgate-bench.png"     alt="xyz" height="200">
+<img src="../assets/benchmarks/rot-bench.png"       alt="xyz" height="200">
+```
 
 From this benchmark, we see the performance of ProjectQ and Yao.jl are quite similar, both of them are close to the theoretical bound in performance.
 
