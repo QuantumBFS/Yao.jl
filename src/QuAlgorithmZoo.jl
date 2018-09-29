@@ -16,10 +16,13 @@ For a black box, like QFTBlock, you can get its white box (loyal simulation) usi
 """
 function openbox end
 
+include("Miscellaneous.jl")
 include("QFT.jl")
 include("Differential.jl")
 include("RotBasis.jl")
 include("Grover.jl")
+include("PhaseEstimation.jl")
+include("HHL.jl")
 
 
 end # module
