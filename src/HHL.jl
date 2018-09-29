@@ -45,7 +45,7 @@ end
 project to aiming state |1>|00>|u>, and return |u> vector.
 """
 function hhlproject!(all_bit::DefaultRegister, n_reg::Int)
-    all_bit |> focus!(1:(n_reg+1)...) |> select!(1) |> relaxedvec
+    all_bit |> focus!(1:(n_reg+1)...) |> select!(1) |> state |> vec
 end
 
 """
