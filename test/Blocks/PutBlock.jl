@@ -28,12 +28,12 @@ end
     nbit = 6
     pb = PutBlock{nbit}(rot(CNOT, 0.5), (3, 4))
     dispatch!(pb, 0.1)
-    @test collect(parameters(pb)) == [0.1]
+    @test collect(parameters(pb))[] ≈ 0.1
     dispatch!(+, pb, 0.1)
-    @test collect(parameters(pb)) == [0.2]
+    @test collect(parameters(pb))[] ≈ 0.2
     @test addrs(pb) == (3,4)
     @test usedbits(pb) == [3,4]
-    @test blocks(copy(pb))[] === pb.block
+    @test block(copy(pb)) === pb.block
     @test hash(copy(pb)) != hash(pb)
     @test copy(pb) == pb
     println(pb)

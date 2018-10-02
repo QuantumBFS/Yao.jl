@@ -1,7 +1,7 @@
 export TimeEvolution
 
 """
-    TimeEvolution{N, T, GT <: MatrixBlock{N, Complex{T}}} <: MatrixBlock{N, Complex{T}}
+    TimeEvolution{N, T, GT <: MatrixBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
 
 TimeEvolution, with GT hermitian
 """

@@ -1,12 +1,12 @@
 export Concentrator
 
 """
-    Concentrator{N} <: AbstractBlock
+    Concentrator{N, T, BT <: AbstractBlock} <: NonParametricContainer{N, T}
 
 concentrates serveral lines together in the circuit, and expose
 it to other blocks.
 """
-struct Concentrator{N, T, BT <: AbstractBlock} <: CompositeBlock{N, T}
+struct Concentrator{N, T, BT <: AbstractBlock} <: NonParametricContainer{N, T}
     block::BT
     usedbits::Vector{Int}
 end
@@ -16,7 +16,6 @@ function Concentrator{N}(block::BT, usedbits::Vector{Int}) where {N, M, T, BT<:M
     Concentrator{N, T, BT}(block, usedbits)
 end
 
-blocks(c::Concentrator) = [c.block]
 nqubits(::Concentrator{N}) where N = N
 eltype(::Concentrator{N, T}) where {N, T}= T
 nactive(c::Concentrator) = length(c.usedbits)

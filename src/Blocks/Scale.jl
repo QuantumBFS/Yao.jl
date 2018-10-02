@@ -19,8 +19,6 @@ scale(blk::Scale{X}, x::Number) where X = Scale{X*x}(parent(blk))
 scale(blk::MatrixBlock, x::Number) = Scale{x}(blk)
 getscale(blk::Scale{X}) where X = X
 
-parent(blk::Scale) = blk.block
-
 # since adjoint can propagate, this way is better
 adjoint(blk::Scale{X}) where X = Scale{X'}(adjoint(blk.block))
 

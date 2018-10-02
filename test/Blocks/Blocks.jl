@@ -9,27 +9,6 @@ end
 include("MatrixBlock.jl")
 end
 
-@testset "concentrator" begin
-include("Concentrator.jl")
-end
-
-@testset "cache" begin
-include("CacheFragment.jl")
-include("CachedBlock.jl")
-end
-
-@testset "daggered" begin
-include("Daggered.jl")
-end
-
-@testset "scale" begin
-include("Scale.jl")
-end
-
-@testset "putblock" begin
-include("PutBlock.jl")
-end
-
 @testset "measure" begin
 include("Measure.jl")
 end

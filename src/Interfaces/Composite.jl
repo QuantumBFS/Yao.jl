@@ -93,7 +93,7 @@ put(pa::Pair) = total->put(total, pa)
 
 # 2.3 control block
 
-export C, control
+export C, control, cnot
 
 decode_sign(ctrls::Int...,) = ctrls .|> abs, ctrls .|> sign .|> (x->(1+x)÷2)
 
@@ -123,6 +123,9 @@ function C(controls::Int...,)
         total->ControlBlock{total}(decode_sign(controls...,)..., x.second, (x.first...,))
     end
 end
+
+cnot(nbit::Int, cbit::Int, ibit::Int) = control(nbit, cbit, ibit=>X)
+cnot(cbit::Int, ibit::Int) = nbit->cnot(nbit, cbit, ibit)
 
 # 2.4 roller
 

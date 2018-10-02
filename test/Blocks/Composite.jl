@@ -8,10 +8,6 @@ end
     include("KronBlock.jl")
 end
 
-@testset "control block" begin
-    include("Control.jl")
-end
-
 @testset "roller block" begin
     include("Roller.jl")
 end
@@ -34,13 +30,9 @@ end
     @test nparameters(ChainBlock(X, Y, Z)) == 0
     @test nparameters(ChainBlock(phase(0.1), X, phase(0.2))) == 2
     @test nparameters(KronBlock{5}(1=>X, 4=>rot(X, 0.2))) == 1
-    @test nparameters(ControlBlock{5}((1, 2), phase(0.1), (4,))) == 1
-end
 
-@testset "parameters" begin
-    collect(parameters(ChainBlock(phase(0.1), shift(0.2)))) ≈ [0.1, 0.2]
-    collect(parameters(ChainBlock(kron(4, 1=>phase(0.1), 3=>rot(X, 0.2))))) ≈ [0.1, 0.2]
-    collect(parameters(ControlBlock{5}((1, 2), phase(0.1), (4, )))) ≈ [0.1]
+    @test collect(parameters(ChainBlock(phase(0.1), shift(0.2)))) ≈ [0.1, 0.2]
+    @test collect(parameters(ChainBlock(kron(4, 1=>phase(0.1), 3=>rot(X, 0.2))))) ≈ [0.1, 0.2]
 end
 
 @testset "dispatch" begin

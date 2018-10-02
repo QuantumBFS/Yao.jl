@@ -96,11 +96,7 @@ end
 
 ==(lhs::CompositeBlock, rhs::CompositeBlock) = false
 
-include("PutBlock.jl")
 include("ChainBlock.jl")
 include("KronBlock.jl")
-include("Control.jl")
 include("Roller.jl")
-include("Repeated.jl")
-include("Concentrator.jl")
 include("PauliString.jl")

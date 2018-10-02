@@ -38,8 +38,9 @@ register(raw::Matrix) = DefaultRegister{size(raw, 2)}(raw)
 nqubits(r::DefaultRegister{B}) where B = log2i(length(r.state) ÷ B)
 nactive(r::DefaultRegister) = state(r) |> nqubits
 state(r::DefaultRegister) = r.state
-statevec(r::DefaultRegister{B}) where B = reshape(r.state, :, B)
-statevec(r::DefaultRegister{1}) = vec(r.state)
+relaxedvec(r::DefaultRegister{B}) where B = reshape(r.state, :, B)
+relaxedvec(r::DefaultRegister{1}) = vec(r.state)
+statevec(r::DefaultRegister) = size(r.state, 2) == 1 ? dropdims(r.state, dims=2) : r.state
 hypercubic(reg::DefaultRegister{B}) where B = reshape(reg.state, ntuple(i->2, Val(nactive(reg)))..., :)
 rank3(reg::DefaultRegister{B}) where B = reshape(reg.state, size(reg.state, 1), :, B)
 copy(r::DefaultRegister{B}) where B = DefaultRegister{B}(copy(state(r)))
@@ -143,16 +144,7 @@ isnormalized(reg::DefaultRegister) = all(sum(copy(reg) |> relax! |> probs, dims=
 # we convert state to a vector to use
 # intrincs like gemv, when nremain is
 # 0 and the state is actually a vector
-function *(op::AbstractMatrix, r::DefaultRegister{1})
-    if nremain(r) == 0
-        return op * vec(r.state)
-    end
-    op * r.state
-end
-
-function *(op::AbstractMatrix, r::DefaultRegister)
-    op * r.state
-end
+*(op::AbstractMatrix, r::AbstractRegister) = op * statevec(r)
 
 import Base: summary
 @static if VERSION < v"0.7-"
@@ -218,7 +210,7 @@ function tracedist(reg1::DefaultRegister{B}, reg2::DefaultRegister{B}) where B
 end
 
 ################### ConjRegister ##################
-const ConjRegister{B, T, RT} = Adjoint{T, RT<:AbstractRegister{B, T}}
+const ConjRegister{B, T, RT} = Adjoint{T, RT} where RT<:AbstractRegister{B, T}
 Base.adjoint(reg::DefaultRegister{B, T}) where {B, T} = Adjoint{T, typeof(reg)}(reg)
 
 function Base.show(io::IO, c::ConjRegister)
@@ -228,5 +220,6 @@ Base.show(io::IO, mime::MIME"text/plain", c::ConjRegister{<:Any, T}) where T = B
 
 state(bra::ConjRegister) where T = Adjoint(parent(bra) |> state)
 statevec(bra::ConjRegister) where T = Adjoint(parent(bra) |> statevec)
+relaxedvec(bra::ConjRegister) where T = Adjoint(parent(bra) |> relaxedvec)
 
-LinearAlgebra.:*(bra::ConjRegister, ket::DefaultRegister) = state(bra) * state(ket)
+*(bra::ConjRegister, ket::DefaultRegister) = statevec(bra) * statevec(ket)

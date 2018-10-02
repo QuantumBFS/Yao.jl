@@ -66,21 +66,6 @@ end
     @test state(creg) !== state(reg)
 end
 
-<<<<<<< HEAD
-=======
-@testset "Math Operations" begin
-    nbit = 5
-    reg1 = zero_state(5)
-    reg2 = register(bit"00100")
-    @test reg1!=reg2
-    @test statevec(reg2) == onehotvec(ComplexF64, nbit, 4)
-    reg3 = reg1 + reg2
-    @test statevec(reg3) == onehotvec(ComplexF64, nbit, 4) + onehotvec(ComplexF64, nbit, 0)
-    @test statevec(reg3 |> normalize!) == (onehotvec(ComplexF64, nbit, 4) + onehotvec(ComplexF64, nbit, 0))/sqrt(2)
-    @test (reg1 + reg2 - reg1) == reg2
-end
-
->>>>>>> master
 @testset "Focus 1" begin
     # conanical shape
     reg = rand_state(3, 5)
@@ -111,10 +96,10 @@ end
     reg2 = rand_state(6)
     reg3 = join(reg1, reg2)
     reg4 = join(focus!(copy(reg1), 1:3), focus!(copy(reg2), 1:2))
-    @test reg4 |> statevec ≈ focus!(copy(reg3), [1,2,3,7,8,4,5,6,9,10,11,12]) |> statevec
+    @test reg4 |> relaxedvec ≈ focus!(copy(reg3), [1,2,3,7,8,4,5,6,9,10,11,12]) |> relaxedvec
     reg5 = focus!(repeat(reg1, 3), 1:3)
     reg6 = focus!(repeat(reg2, 3), 1:2)
-    @test (join(reg5, reg6) |> statevec)[:,1] ≈ reg4 |> statevec
+    @test (join(reg5, reg6) |> relaxedvec)[:,1] ≈ reg4 |> relaxedvec
 end
 
 @testset "select" begin

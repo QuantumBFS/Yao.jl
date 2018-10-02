@@ -1,11 +1,11 @@
 export PutBlock
 
 """
-    PutBlock{N, C, GT, T} <: CompositeBlock{N, T}
+    PutBlock{N, C, GT, T} <: NonParametricContainer{N, T}
 
 put a block on given addrs.
 """
-mutable struct PutBlock{N, C, GT<:MatrixBlock, T} <: CompositeBlock{N, T}
+mutable struct PutBlock{N, C, GT<:MatrixBlock, T} <: NonParametricContainer{N, T}
     block::GT
     addrs::NTuple{C, Int}
 
@@ -20,14 +20,10 @@ function PutBlock{N}(block::GT, addrs::NTuple) where {N, C, T, GT <: MatrixBlock
     PutBlock{N, C, GT, T}(block, addrs)
 end
 
-blocks(pb::PutBlock) = [pb.block]
 addrs(pb::PutBlock) = pb.addrs
 usedbits(pb::PutBlock) = [pb.addrs...]
 copy(x::PutBlock) = typeof(x)(x.block, x.addrs)
 adjoint(blk::PutBlock{N}) where N = PutBlock{N}(adjoint(blk.block), blk.addrs)
-
-dispatch!(pb::PutBlock, params...) = dispatch!(pb.block, params...)
-dispatch!(f::Function, pb::PutBlock, params...) = dispatch!(f, pb.block, params...)
 
 # TODO
 mat(pb::PutBlock{N, 1}) where N = u1mat(N, mat(pb.block), pb.addrs...)

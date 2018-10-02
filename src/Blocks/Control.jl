@@ -1,14 +1,14 @@
 export ControlBlock
 
 """
-    ControlBlock{BT, N, C, B, T} <: CompositeBlock{N, T}
+    ControlBlock{BT, N, C, B, T} <: NonParametricContainer{N, T}
 
 N: number of qubits,
 BT: controlled block type,
 C: number of control bits,
 T: type of matrix.
 """
-mutable struct ControlBlock{N, BT<:AbstractBlock, C, M, T} <: CompositeBlock{N, T}
+mutable struct ControlBlock{N, BT<:AbstractBlock, C, M, T} <: NonParametricContainer{N, T}
     ctrl_qubits::NTuple{C, Int}
     vals::NTuple{C, Int}
     block::BT
@@ -42,7 +42,6 @@ mat(c::ControlBlock{N, BT, C}) where {N, BT, C} = cunmat(N, c.ctrl_qubits, c.val
 apply!(reg::DefaultRegister, c::ControlBlock) = (cunapply!(reg.state |> matvec, c.ctrl_qubits, c.vals, mat(c.block), c.addrs); reg)
 adjoint(blk::ControlBlock{N}) where N = ControlBlock{N}(blk.ctrl_qubits, blk.vals, adjoint(blk.block), blk.addrs)
 
-blocks(c::ControlBlock) = [c.block]
 addrs(c::ControlBlock) = c.addrs
 usedbits(c::ControlBlock) = [c.ctrl_qubits..., c.addrs[usedbits(c.block)]...]
 
@@ -51,8 +50,6 @@ usedbits(c::ControlBlock) = [c.ctrl_qubits..., c.addrs[usedbits(c.block)]...]
 #################
 
 # NOTE: ControlBlock will forward parameters directly without loop
-dispatch!(ctrl::ControlBlock, params...) = dispatch!(ctrl.block, params...)
-dispatch!(f::Function, ctrl::ControlBlock, params...) = dispatch!(f, ctrl.block, params...)
 cache_key(ctrl::ControlBlock) = cache_key(ctrl.block)
 
 function hash(ctrl::ControlBlock, h::UInt)
