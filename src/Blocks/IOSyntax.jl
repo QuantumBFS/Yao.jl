@@ -40,8 +40,6 @@ function print_prefix(io, depth, charset, active_levels)
     end
 end
 
-blocks(x::PrimitiveBlock) = ()
-
 print_tree(io::IO, tree::PrimitiveBlock, maxdepth=5) = print_block(io, tree)
 print_tree(io::IO, tree::CachedBlock{ST, BT}, maxdepth=5) where {ST, BT <: PrimitiveBlock} = print_block(io, tree)
 print_tree(io::IO, tree::AbstractMeasure, maxdepth=5) = print_block(io, tree)
@@ -85,7 +83,7 @@ print_tree(tree, args...; kwargs...) = print_tree(STDOUT::IO, tree, args...; kwa
 print_subblocks(io::IO, tree, depth, charset, active_levels) = nothing
 
 function print_subblocks(io::IO, tree::CompositeBlock, depth, charset, active_levels)
-    c = blocks(tree)
+    c = subblocks(tree)
     it_result = iterate(c)
     while it_result !== nothing
         child, st = it_result

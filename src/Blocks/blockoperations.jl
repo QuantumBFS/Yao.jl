@@ -9,14 +9,17 @@ blockfilter(func, blk::AbstractBlock) = blockfilter!(func, Vector{AbstractBlock}
 
 function blockfilter!(func, rgs::Vector, blk::CompositeBlock)
     if func(blk) push!(rgs, blk) end
-    for block in blocks(blk)
+    for block in subblocks(blk)
         blockfilter!(func, rgs, block)
     end
     rgs
 end
 
 blockfilter!(func, rgs::Vector, blk::PrimitiveBlock) = func(blk) ? push!(rgs, blk) : rgs
-blockfilter!(func, rgs::Vector, blk::AbstractContainer) = func(block(blk)) ? push!(rgs, parent(blk)) : rgs
+function blockfilter!(func, rgs::Vector, blk::AbstractContainer)
+    func(blk) && push!(rgs, blk)
+    func(block(blk)) ? push!(rgs, block(blk)) : rgs
+end
 
 export traverse
 
@@ -58,7 +61,7 @@ function enqueue_parent!(queue::Queue, blk::AbstractContainer)
 end
 
 function enqueue_parent!(queue::Queue, blk::CompositeBlock)
-    for each in blocks(blk)
+    for each in subblocks(blk)
         enqueue!(queue, each)
     end
     queue
@@ -74,7 +77,7 @@ function iterate(it::BlockTreeIterator{:DFS}, st = AbstractBlock[it.root])
         nothing
     else
         node = pop!(st)
-        append!(st, Iterators.reverse(blocks(node)))
+        append!(st, Iterators.reverse(subblocks(node)))
         node, st
     end
 end

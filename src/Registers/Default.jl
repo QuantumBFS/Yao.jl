@@ -7,22 +7,18 @@ export DefaultRegister
 Default type for a quantum register. It contains a dense array that represents
 a batched quantum state with batch size `B` of type `T`.
 """
-mutable struct DefaultRegister{B, T} <: AbstractRegister{B, T}
-    state::Matrix{T} # this stores a batched state
+mutable struct DefaultRegister{B, T, MT<:AbstractMatrix{T}} <: AbstractRegister{B, T}
+    state::MT # this stores a batched state
 
-    function DefaultRegister{B, T}(raw::Matrix{T}) where {B, T}
-        ispow2(size(raw, 1)) && ispow2(size(raw, 2) ÷ B) ||
-            throw(InexactError(:DefaultRegister, DefaultRegister, raw))
-        new{B, T}(raw)
+    function DefaultRegister{B}(raw::MT) where {B, T, MT<:AbstractMatrix{T}}
+        new{B, T, MT}(raw)
     end
 
     # copy method
-    function DefaultRegister(r::DefaultRegister{B, T}) where {B, T}
-        new{B, T}(copy(r.state))
+    function DefaultRegister(r::DefaultRegister{B}) where B
+        DefaultRegister{B}(copy(r.state))
     end
 end
-
-DefaultRegister{B}(raw::Matrix{T}) where {B, T} = DefaultRegister{B, T}(raw)
 
 # register without batch
 """
@@ -30,8 +26,12 @@ DefaultRegister{B}(raw::Matrix{T}) where {B, T} = DefaultRegister{B, T}(raw)
 
 Returns a [`DefaultRegister`](@ref) from a raw dense array (`Vector` or `Matrix`).
 """
-register(raw::Vector) = DefaultRegister{1}(reshape(raw, :, 1))
-register(raw::Matrix) = DefaultRegister{size(raw, 2)}(raw)
+function register(raw::AbstractMatrix; B=size(raw,2))
+    ispow2(size(raw, 1)) && ispow2(size(raw, 2) ÷ B) ||
+        throw(InexactError(:DefaultRegister, DefaultRegister, raw))
+    DefaultRegister{B}(raw)
+end
+register(raw::AbstractVector) = register(reshape(raw, :, 1))
 
 # Required Properties
 
@@ -40,7 +40,7 @@ nactive(r::DefaultRegister) = state(r) |> nqubits
 state(r::DefaultRegister) = r.state
 relaxedvec(r::DefaultRegister{B}) where B = reshape(r.state, :, B)
 relaxedvec(r::DefaultRegister{1}) = vec(r.state)
-statevec(r::DefaultRegister) = size(r.state, 2) == 1 ? dropdims(r.state, dims=2) : r.state
+statevec(r::DefaultRegister) = r.state |> matvec
 hypercubic(reg::DefaultRegister{B}) where B = reshape(reg.state, ntuple(i->2, Val(nactive(reg)))..., :)
 rank3(reg::DefaultRegister{B}) where B = reshape(reg.state, size(reg.state, 1), :, B)
 copy(r::DefaultRegister{B}) where B = DefaultRegister{B}(copy(state(r)))

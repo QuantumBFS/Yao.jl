@@ -14,6 +14,7 @@ abstract supertype which container blocks will inherit from.
 
 """
 abstract type AbstractContainer{N, T} <: MatrixBlock{N, T} end
+subblocks(c::AbstractContainer) = (c |> block,)
 
 """
     NonParametricContainer{N, T} <: AbstractContainer{N, T}

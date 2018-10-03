@@ -25,7 +25,8 @@ export update_cache
 
 # module APIs
 export usedbits, addrs, blocks, block, @const_gate, tokenof
-export nqubits, nactive, nparameters, mat, datatype, parameters, parameter_type, invorder, hasparameter, isprimitive
+export nqubits, nactive, mat, datatype, invorder, hasparameter
+export iparameters, niparameters, setiparameters, nparameters, parameters, parameter_type
 export apply!, dispatch!, applymatrix
 export ishermitian, isunitary, isreflexive
 export parent, adjoint

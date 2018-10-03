@@ -29,5 +29,6 @@ include("Function.jl")
 include("Sequential.jl")
 include("Cache.jl")
 include("Candies.jl")
+include("DeprecationWarnings.jl")
 
 end

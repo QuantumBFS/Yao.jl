@@ -69,8 +69,8 @@ end
 
 # some useful interface
 addrs(k::KronBlock) = k.addrs
-blocks(k::KronBlock) = k.blocks
-usedbits(k::KronBlock) = vcat([(i-1).+usedbits(b) for (i, b) in zip(addrs(k), blocks(k))]...)
+subblocks(k::KronBlock) = k.blocks
+usedbits(k::KronBlock) = vcat([(i-1).+usedbits(b) for (i, b) in zip(addrs(k), subblocks(k))]...)
 
 function getindex(k::KronBlock, addr)
     index = k.slots[addr]
@@ -112,7 +112,7 @@ isreflexive(k::KronBlock) = all(isreflexive, k.blocks)
 eachindex(k::KronBlock) = k.addrs
 
 function mat(k::KronBlock{N}) where N
-    sizes = [nqubits(op) for op in blocks(k)]
+    sizes = [nqubits(op) for op in subblocks(k)]
     start_locs = @. N - $(addrs(k)) - sizes + 1
 
     order = sortperm(start_locs)
@@ -120,7 +120,7 @@ function mat(k::KronBlock{N}) where N
     num_bit_list = vcat(diff(push!(sorted_start_locs, N)) .- sizes[order])
 
     ⊗ = kron
-    reduce(zip(blocks(k)[order], num_bit_list), init=IMatrix(1 << sorted_start_locs[1])) do x, y
+    reduce(zip(subblocks(k)[order], num_bit_list), init=IMatrix(1 << sorted_start_locs[1])) do x, y
         x ⊗ mat(y[1]) ⊗ IMatrix(1<<y[2])
     end
 end

@@ -39,7 +39,7 @@ getindex(c::ChainBlock, index) = getindex(c.blocks, index)
 getindex(c::ChainBlock, index::Union{UnitRange, Vector}) = ChainBlock(getindex(c.blocks, index))
 setindex!(c::ChainBlock{N}, val::MatrixBlock{N}, index::Integer) where N = setindex!(c.blocks, val, index)
 insert!(c::ChainBlock{N}, index::Integer, val::MatrixBlock{N}) where N = (insert!(c.blocks, index, val); c)
-adjoint(blk::ChainBlock) = typeof(blk)(map(adjoint, blocks(blk) |> reverse))
+adjoint(blk::ChainBlock) = typeof(blk)(map(adjoint, subblocks(blk) |> reverse))
 
 lastindex(c::ChainBlock) = lastindex(c.blocks)
 
@@ -48,9 +48,9 @@ iterate(c::ChainBlock, st=1) = iterate(c.blocks, st)
 length(c::ChainBlock) = length(c.blocks)
 eltype(c::ChainBlock) = eltype(c.blocks)
 eachindex(c::ChainBlock) = eachindex(c.blocks)
-blocks(c::ChainBlock) = c.blocks
+subblocks(c::ChainBlock) = c.blocks
 addrs(c::ChainBlock) = ones(Int, length(c))
-usedbits(c::ChainBlock) = unique(vcat([usedbits(b) for b in blocks(c)]...))
+usedbits(c::ChainBlock) = unique(vcat([usedbits(b) for b in subblocks(c)]...))
 
 # Additional Methods for Chain
 push!(c::ChainBlock{N}, val::MatrixBlock{N}) where N = (push!(c.blocks, val); c)

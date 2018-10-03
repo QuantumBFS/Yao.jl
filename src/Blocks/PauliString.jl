@@ -9,7 +9,7 @@ isreflexive(::PauliString) = true
 isunitary(::PauliString) = true
 copy(ps::PauliString) = PauliString(copy(ps.blocks))
 
-blocks(ps::PauliString) = ps.blocks
+subblocks(ps::PauliString) = ps.blocks
 addrs(ps::PauliString{N}) where N = collect(1:N)
 usedbits(ps::PauliString) = findall(x->!(x isa I2Gate), ps.blocks)
 
