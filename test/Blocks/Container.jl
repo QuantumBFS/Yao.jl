@@ -32,10 +32,10 @@ end
     g = chain(control(5, 2, 3=>Rx(0.3)), put(5, 1=>Ry(0.6)))
     params = [-0.2, 0.4]
     dispatch!(g, params)
-    @test g[1].theta == -0.2
-    @test g[2].theta == 0.4
+    @test g[1].block.theta == -0.2
+    @test g[2].block.theta == 0.4
 
     dispatch!(+, g, [1, 1])
-    @test g[1].theta == 0.8
-    @test g[2].theta == 1.4
+    @test g[1].block.theta == 0.8
+    @test g[2].block.theta == 1.4
 end

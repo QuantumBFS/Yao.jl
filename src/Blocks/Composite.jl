@@ -31,49 +31,6 @@ function map!(f::Function, dst::GeneralComposite, itr)
     dst
 end
 
-function parameter_type(c::GeneralComposite)
-    promote_type([parameter_type(each) for each in subblocks(c)]...)
-end
-
-#################
-# Dispatch Rules
-#################
-
-# TODO: optimize for blocks full of parameters
-
-"""
-    dispatch!(f, c, params) -> c
-
-dispatch parameters and tweak it according to callback function `f(original, parameter)->new`
-
-dispatch a vector of parameters to this composite block according to
-each sub-block's number of parameters.
-"""
-function dispatch!(c::CompositeBlock, itr)
-    @assert nparameters(c) == length(itr) "number of parameters does not match"
-
-    blkitr = Iterators.filter(x->x isa PrimitiveBlock && hasparameter(x), traverse(c))
-    pitr = itr
-    for each in blkitr
-        dispatch!(each, Iterators.take(pitr, nparameters(each)))
-        pitr = Iterators.drop(pitr, nparameters(each))
-    end
-    c
-end
-
-function dispatch!(f::Function, c::CompositeBlock, itr)
-    @assert nparameters(c) == length(itr) "number of parameters does not match"
-
-    blkitr = Iterators.filter(x->x isa PrimitiveBlock && hasparameter(x), traverse(c))
-    pitr = itr
-    for each in blkitr
-        dispatch!(f, each, Iterators.take(pitr, nparameters(each)))
-        pitr = Iterators.drop(pitr, nparameters(each))
-    end
-    c
-end
-
-
 ==(lhs::CompositeBlock, rhs::CompositeBlock) = false
 
 include("ChainBlock.jl")

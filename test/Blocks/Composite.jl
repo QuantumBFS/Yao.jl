@@ -19,7 +19,7 @@ using Yao.Blocks
     dst = ChainBlock(put(5, 1=>X), put(5, 2=>Y), put(5, 1=>Z))
     @test_throws MethodError KronBlock{5}(X, Y, Z)
     src = KronBlock(X, Y, Z)
-    map!(x->kron(5, 1=>Z), dst, blocks(src))
+    map!(x->kron(5, 1=>Z), dst, subblocks(src))
 
     for each in dst
         @test isa(each, KronBlock)
@@ -40,12 +40,12 @@ end
     params = rand(3)
     dispatch!(g, params)
 
-    for (each, p) in zip(blocks(g), params)
+    for (each, p) in zip(subblocks(g), params)
         @test each.theta == p
     end
 
     dispatch!(+, g, [1, 1, 1])
-    for (each, p) in zip(blocks(g), params)
+    for (each, p) in zip(subblocks(g), params)
         @test each.theta == p + 1
     end
 

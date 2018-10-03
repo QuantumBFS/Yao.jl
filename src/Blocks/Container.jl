@@ -37,12 +37,6 @@ set the block of a container.
 """
 function setblock end
 
-################# Interface for non-parametric containers #################
-parameters(np::NonParametricContainer) = parameters(np |> block)
-nparameters(np::NonParametricContainer) = nparameters(np |> block)
-dispatch!(c::NonParametricContainer, params) = (dispatch!(c |> block, params); c)
-dispatch!(f::Function, c::NonParametricContainer, itr) = (dispatch!(f, c |> block, itr); c)
-
 print_subblocks(io::IO, tree::AbstractContainer, depth, charset, active_levels) = print_subblocks(io, block(tree), depth, charset, active_levels)
 
 include("PutBlock.jl")

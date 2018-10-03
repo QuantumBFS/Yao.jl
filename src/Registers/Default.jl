@@ -10,8 +10,11 @@ a batched quantum state with batch size `B` of type `T`.
 mutable struct DefaultRegister{B, T, MT<:AbstractMatrix{T}} <: AbstractRegister{B, T}
     state::MT # this stores a batched state
 
-    function DefaultRegister{B}(raw::MT) where {B, T, MT<:AbstractMatrix{T}}
+    function DefaultRegister{B, T, MT}(raw::MT) where {B, T, MT<:AbstractMatrix{T}}
         new{B, T, MT}(raw)
+    end
+    function DefaultRegister{B}(raw::MT) where {B, T, MT<:AbstractMatrix{T}}
+        DefaultRegister{B, T, MT}(raw)
     end
 
     # copy method

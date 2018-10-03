@@ -32,14 +32,10 @@ end
 
 copy(R::RotationGate) = RotationGate(R.block, R.theta)
 
-function dispatch!(R::RotationGate, itr)
-    R.theta = first(itr)
-    R
-end
-
-# Properties
-nparameters(::Type{<:RotationGate}) = 1
-parameters(x::RotationGate) = x.theta
+# parametric interface
+niparameters(::Type{<:RotationGate}) = 1
+iparameters(x::RotationGate) = x.theta
+setiparameters!(r::RotationGate, params) = (r.theta = first(params); r)
 
 ==(lhs::RotationGate{TA, GTA}, rhs::RotationGate{TB, GTB}) where {TA, TB, GTA, GTB} = false
 ==(lhs::RotationGate{TA, GT}, rhs::RotationGate{TB, GT}) where {TA, TB, GT} = lhs.theta == rhs.theta

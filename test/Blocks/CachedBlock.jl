@@ -52,7 +52,7 @@ end
     @test length(g) == length(g.block)
 
     @test eltype(g) == eltype(g.block)
-    @test blocks(g) == blocks(g.block)
+    @test subblocks(g) == (g.block,)
 
     gg = chain(g, g)
     cgg = CachedBlock(test_server, gg, 2)

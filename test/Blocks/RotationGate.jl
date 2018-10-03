@@ -32,7 +32,7 @@ cg = copy(g)
 @test cg !== g # shallow copy (not recursive)
 cg.theta = 1.0
 @test g.theta == 0.1
-@test dispatch!(g, 1.0).theta == 1.0
+@test dispatch!(g, [1.0]).theta == 1.0
 end
 
 @testset "apply" begin

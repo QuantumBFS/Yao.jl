@@ -40,6 +40,6 @@ end
     pg = adjoint(PhaseGate(0.4))
     cpg = copy(pg)
     @test pg == cpg
-    dispatch!(pg, 0.8)
+    dispatch!(pg, [0.8])
     @test pg != cpg
 end

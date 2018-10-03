@@ -7,7 +7,7 @@ using Yao.Intrinsics
 @testset "Constructors" begin
     test_data = zeros(ComplexF32, 2^5, 3)
     reg = register(test_data)
-    @test typeof(reg) == DefaultRegister{3, ComplexF32}
+    @test typeof(reg) == DefaultRegister{3, ComplexF32, Matrix{ComplexF32}}
     @test nqubits(reg) == 5
     @test nbatch(reg) == 3
     @test state(reg) === test_data
@@ -40,7 +40,7 @@ end
 @testset "Constructors B=1" begin
     test_data = zeros(ComplexF32, 2^5)
     reg = register(test_data)
-    @test typeof(reg) == DefaultRegister{1, ComplexF32}
+    @test typeof(reg) == DefaultRegister{1, ComplexF32, Matrix{ComplexF32}}
     @test eltype(reg) == ComplexF32
     @test nqubits(reg) == 5
     @test nbatch(reg) == 1

@@ -138,7 +138,7 @@ end
     # TODO: define traits for primitive blocks
     g = KronBlock{5}(1=>X, 3=>Y, 4=>rot(X, 0.0), 5=>rot(Y, 0.0))
     addrs(g) === g.addrs
-    blocks(g) === g.blocks
+    subblocks(g) === g.blocks
     eltype(g) == Tuple{Int, MatrixBlock}
 
     @test isunitary(g) == true

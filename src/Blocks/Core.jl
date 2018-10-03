@@ -3,8 +3,15 @@ export AbstractBlock
 """
     AbstractBlock
 
-abstract type that all block will subtype from. `N` is the number of
-qubits.
+abstract type that all block will subtype from. `N` is the number of qubits.
+
+Required interfaces
+    * `apply!` or (and) `mat`
+
+Interfaces for parametric blocks.
+
+    * iparameters
+    * setiparameters
 """
 abstract type AbstractBlock end
 
@@ -49,8 +56,7 @@ function isreflexive end
 
 Returns the number of parameters of `x`.
 """
-function npiarameters end
-niparameters(::Type{X}) where {X <: AbstractBlock} = 0
+function niparameters end
 niparameters(x::AbstractBlock) = length(iparameters(x))
 
 """
@@ -68,6 +74,7 @@ set intrinsics parameter for block.
 """
 function setiparameters end
 setiparameters!(r::AbstractBlock, params) = r
+setiparameters!(func::Function, r::AbstractBlock, params) = setiparameters!(r, func.(r |> iparameters, params))
 
 """
     parameter_type(block) -> Type
@@ -75,7 +82,10 @@ setiparameters!(r::AbstractBlock, params) = r
 the type of iparameters.
 """
 function parameter_type end
-parameter_type(x::AbstractBlock) = Bool
+function parameter_type(c::AbstractBlock)
+    promote_type(eltype(c |> iparameters), [parameter_type(each) for each in subblocks(c)]...)
+end
+
 
 """
     mat(block) -> Matrix
@@ -91,6 +101,20 @@ function mat end
 dispatch (using pop!) parameters to this block.
 """
 function dispatch! end
+function dispatch!(r::AbstractBlock, params)
+    setiparameters!(r, (popfirst!(params) for i=1:niparameters(r)))
+    for blk in subblocks(r)
+        dispatch!(blk, params)
+    end
+    r
+end
+function dispatch!(func::Function, r::AbstractBlock, params)
+    setiparameters!(func, r, (popfirst!(params) for i=1:niparameters(r)))
+    for blk in subblocks(r)
+        dispatch!(func, blk, params)
+    end
+    r
+end
 
 """
     print_block(io, block)
@@ -107,7 +131,7 @@ end
 number of parameters, including parameters in sublocks.
 """
 function nparameters(c::AbstractBlock)
-    count = 0
+    count = niparameters(c)
     for each in subblocks(c)
         count += nparameters(each)
     end
@@ -120,8 +144,9 @@ end
 get all parameters including sublocks.
 """
 function parameters(c::AbstractBlock, output=Float64[])
+    append!(output, iparameters(c))
     for blk in subblocks(c)
-        append!(output, iparameters(blk))
+        append!(output, parameters(blk))
     end
     output
 end

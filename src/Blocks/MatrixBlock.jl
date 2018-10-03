@@ -25,16 +25,6 @@ function apply!(reg::AbstractRegister, b::MatrixBlock)
     reg
 end
 
-# Parameters
-parameter_type(::MatrixBlock) = Bool
-hasparameter(x::MatrixBlock) = nparameters(x) > 0
-
-function nparameters end
-
-# Trait
-nparameters(::Type{X}) where {X <: MatrixBlock} = 0
-parameters(x::MatrixBlock) = ()
-
 """
     datatype(x) -> DataType
 

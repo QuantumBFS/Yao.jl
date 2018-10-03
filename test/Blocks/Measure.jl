@@ -12,13 +12,13 @@ import Yao.Blocks: measure!, measure_remove!, Measure, MeasureAndRemove
     state_array[1] = 1/sqrt(2); state_array[end] = 1/sqrt(2);
     reg = register(state_array)
 
-    s, samples = measure!(reg) # measure first qubit
+    samples = measure!(reg) # measure first qubit
     # we will get
     # |0000> or |1111>
     if samples[1] == 0
-        @test state(s)[1] ≈ 1
+        @test state(reg)[1] ≈ 1
     else
-        @test state(s)[end] ≈ 1
+        @test state(reg)[end] ≈ 1
     end
 end
 
@@ -28,7 +28,7 @@ end
     reg2 = copy(reg)
     pre = nothing
     for i in 1:5
-        reg2, res = measure!(reg2)
+        res = measure!(reg2)
         @test reg2 |> isnormalized
         @test nactive(reg2) == nactive(reg)
         if pre!=nothing

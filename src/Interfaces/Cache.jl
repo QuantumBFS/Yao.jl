@@ -13,7 +13,7 @@ function clearall!(x::CachedBlock)
 end
 
 function clearall!(x::CachedBlock{ST, BT}) where {ST, BT <: CompositeBlock}
-    for each in blocks(x.block)
+    for each in subblocks(x.block)
         clearall!(each)
     end
     clear!(x)
