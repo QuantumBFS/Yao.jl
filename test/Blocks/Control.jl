@@ -13,6 +13,8 @@ import Yao.Blocks: ControlBlock
     cg = copy(g)
     cg.block.theta = 0.2
     @test g.block.theta == 0.2
+    blk = Rx(0.3)
+    @test chsubblocks(cg, [blk]) |> subblocks |> first == blk
 end
 
 @testset "matrix" begin

@@ -25,5 +25,8 @@ import Yao.Blocks: Scale, Neg, Im, _Im
     @test im*X*(im*X) isa Neg
     @test im*X*(-im*X) isa Pos
     println(X, -X, 1im*X, -1im*X, 2*X)
+
+    blk = kron(4, 2=>Rx(0.3))
+    @test first(chsubblocks(-X, [blk]) |> subblocks) == blk
 end
 

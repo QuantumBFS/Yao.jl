@@ -21,6 +21,7 @@ end
 
 iscached(c::CachedBlock) = iscached(c.server, c.block)
 iscacheable(c::CachedBlock) = iscacheable(c.server, c.block)
+chblock(cb::CachedBlock, blk::MatrixBlock) = CachedBlock(cb.server, blk, cb.level)
 
 function update_cache(c::CachedBlock)
     if !iscached(c.server, c.block)

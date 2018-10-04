@@ -24,6 +24,7 @@ addrs(pb::PutBlock) = pb.addrs
 usedbits(pb::PutBlock) = [pb.addrs...]
 copy(x::PutBlock) = typeof(x)(x.block, x.addrs)
 adjoint(blk::PutBlock{N}) where N = PutBlock{N}(adjoint(blk.block), blk.addrs)
+chblock(pb::PutBlock{N, C}, blk::MatrixBlock{C}) where {N, C} = PutBlock{N}(blk, pb.addrs)
 
 # TODO
 mat(pb::PutBlock{N, 1}) where N = u1mat(N, mat(pb.block), pb.addrs...)

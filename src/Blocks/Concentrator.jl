@@ -21,6 +21,7 @@ eltype(::Concentrator{N, T}) where {N, T}= T
 nactive(c::Concentrator) = length(c.usedbits)
 usedbits(c::Concentrator) = c.usedbits
 addrs(c::Concentrator) = [1]
+chblock(pb::Concentrator{N}, blk::AbstractBlock) where N = Concentrator{N}(blk, pb |> usedbits)
 
 apply!(reg::AbstractRegister, c::Concentrator) = relax!(apply!(focus!(reg, usedbits(c)), c.block), usedbits(c), nbit=nqubits(c))
 adjoint(blk::Concentrator{N}) where N = Concentrator{N}(adjoint(blk.block), blk.usedbits)

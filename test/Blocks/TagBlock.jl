@@ -1,3 +1,6 @@
+using Test
+using Yao, Yao.Blocks
+
 @testset "cache" begin
 include("CacheFragment.jl")
 include("CachedBlock.jl")

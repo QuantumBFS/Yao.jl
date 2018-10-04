@@ -4,11 +4,12 @@ using Yao
 using Yao.Blocks
 
 @testset "constructor" begin
-@test isa(RotationGate(X, 0.1), PrimitiveBlock{1, ComplexF64})
-@test isa(RotationGate(XGate{ComplexF32}(), 0.1f0), PrimitiveBlock{1, ComplexF32})
-@test isa(RotationGate(X, 0.1), RotationGate{1, Float64, XGate{ComplexF64}})
-@test isa(RotationGate(control(2, (2,), 1=>X), 0.1), RotationGate{2, Float64})
-@test_throws TypeError RotationGate{1, Float32, XGate{ComplexF64}} # will not accept non-real type
+    @test isa(RotationGate(X, 0.1), PrimitiveBlock{1, ComplexF64})
+    @test isa(RotationGate(XGate{ComplexF32}(), 0.1f0), PrimitiveBlock{1, ComplexF32})
+    @test isa(RotationGate(X, 0.1), RotationGate{1, Float64, XGate{ComplexF64}})
+    @test isa(RotationGate(control(2, (2,), 1=>X), 0.1), RotationGate{2, Float64})
+    @test_throws TypeError RotationGate{1, Float32, XGate{ComplexF64}} # will not accept non-real type
+    @test chsubblocks(RotationGate(X, 0.1), ()) |> subblocks == ()
 end
 
 @testset "matrix" begin

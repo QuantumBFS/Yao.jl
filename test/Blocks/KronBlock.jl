@@ -33,6 +33,8 @@ id = IMatrix(2)
     @test m == mat(g)
     @test addrs(g) == [2]
     @test usedbits(g) == [2]
+    blks = [Rx(0.3)]
+    @test chsubblocks(g, blks) |> subblocks == blks
 
     m = U2 ⊗ id ⊗ U ⊗ id
     g = KronBlock{5}(4=>CNOT, 2=>X)

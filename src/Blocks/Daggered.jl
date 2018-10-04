@@ -11,6 +11,7 @@ struct Daggered{N, T, BT} <: TagBlock{N, T}
     block::BT
 end
 Daggered(blk::BT) where {N, T, BT<:MatrixBlock{N, T}} = Daggered{N, T, BT}(blk)
+chblock(pb::Daggered, blk::MatrixBlock) = Daggered(blk)
 
 adjoint(blk::MatrixBlock) = ishermitian(blk) ? blk : Daggered(blk)
 adjoint(blk::Daggered) = blk.block

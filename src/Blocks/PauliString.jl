@@ -12,6 +12,7 @@ copy(ps::PauliString) = PauliString(copy(ps.blocks))
 subblocks(ps::PauliString) = ps.blocks
 addrs(ps::PauliString{N}) where N = collect(1:N)
 usedbits(ps::PauliString) = findall(x->!(x isa I2Gate), ps.blocks)
+chsubblocks(pb::PauliString, blocks) = PauliString(blocks)
 
 @forward PauliString.blocks getindex, lastindex, Base.setindex!, Base.iterate, Base.length, Base.eltype, Base.eachindex
 getindex(ps::PauliString, index::Union{UnitRange, Vector}) = PauliString(getindex(ps.blocks, index))

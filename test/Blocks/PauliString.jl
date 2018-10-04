@@ -11,6 +11,7 @@ using Yao.Blocks: cache_key
     reg = rand_state(5)
     @test copy(reg) |> ps ≈ copy(reg) |> kr
     @test mat(ps) ≈ mat(kr)
+    @test chsubblocks(ps, [X, Z, Z]) |> subblocks == [X,Z,Z]
 
     ps[3] = I2
     kr[3] = I2

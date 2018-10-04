@@ -71,6 +71,7 @@ end
 addrs(k::KronBlock) = k.addrs
 subblocks(k::KronBlock) = k.blocks
 usedbits(k::KronBlock) = vcat([(i-1).+usedbits(b) for (i, b) in zip(addrs(k), subblocks(k))]...)
+chsubblocks(pb::KronBlock{N}, blocks) where N = KronBlock{N}(pb.addrs, blocks)
 
 function getindex(k::KronBlock, addr)
     index = k.slots[addr]

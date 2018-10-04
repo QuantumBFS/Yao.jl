@@ -12,6 +12,8 @@ using Yao.Blocks
 
     @test g isa ChainBlock{2, ComplexF64} # default type
     @test g.blocks == [kron(2, X, Y), kron(2, 1=>phase(0.1))]
+    blks = [X, Y, Rx(0.3)]
+    @test chsubblocks(g, blks) |> subblocks == blks
 end
 
 @testset "matrix" begin

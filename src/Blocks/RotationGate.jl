@@ -15,7 +15,6 @@ mutable struct RotationGate{N, T, GT <: MatrixBlock{N, Complex{T}}} <: Primitive
 end
 RotationGate(block::GT, theta) where {N, T, GT<:MatrixBlock{N, Complex{T}}} = RotationGate{N, T, GT}(block, theta)
 
-# block(rt::RotationGate) = rt.block
 # setblock!(rt::RotationGate{<:Any, <:Any, GT}, blk::GT) where GT = (rt.block = blk; rt)
 
 _make_rot_mat(I, block, theta) = I * cos(theta / 2) - im * sin(theta / 2) * block

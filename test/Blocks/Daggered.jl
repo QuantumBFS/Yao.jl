@@ -34,6 +34,8 @@ end
     @test GP isa Daggered
     @test mat(GP) == mat(ConstG)'
     @test adjoint(adjoint(ConstG)) === ConstG
+    blk = kron(4, 3=>Rx(0.3))
+    @test chsubblocks(GP, [blk]) |> subblocks |> first == blk
 end
 
 @testset "copy dispatch" begin

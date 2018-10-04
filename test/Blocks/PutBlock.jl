@@ -22,6 +22,9 @@ using Yao.Blocks: PutBlock
     Cb = control(nbit, (3,), 5=>X)
     pb = PutBlock{nbit}(CNOT, (3, 5))
     @test apply!(copy(Reg), Cb) ≈ apply!(copy(Reg), pb)
+
+    blks = [control(2, 1, 2=>Z)]
+    @test (chsubblocks(pb, blks) |> subblocks .== blks) |> all
 end
 
 @testset "dispatch!" begin

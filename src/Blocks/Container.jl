@@ -1,7 +1,7 @@
 # Additional APIs
 export AbstractContainer, NonParametricContainer
 # Interface for Containers
-export block, setblock!
+export block, chblock
 
 """
     ContainerBlock{N, T} <: MatrixBlock{N, T}
@@ -15,6 +15,7 @@ abstract supertype which container blocks will inherit from.
 """
 abstract type AbstractContainer{N, T} <: MatrixBlock{N, T} end
 subblocks(c::AbstractContainer) = (c |> block,)
+chsubblocks(pb::AbstractContainer, blk) = chblock(pb, blk |> first)
 
 """
     NonParametricContainer{N, T} <: AbstractContainer{N, T}
@@ -31,11 +32,11 @@ get an iterator that iterate through all sub-blocks.
 function block end
 
 """
-    setblock!(container, blk)
+    chblock(block, blk)
 
 set the block of a container.
 """
-function setblock end
+function chblock end
 
 print_subblocks(io::IO, tree::AbstractContainer, depth, charset, active_levels) = print_subblocks(io, block(tree), depth, charset, active_levels)
 
@@ -48,5 +49,4 @@ include("TagBlock.jl")
 ########## common interfaces are defined here! ##############
 for BLOCKTYPE in (:PutBlock, :ControlBlock, :RepeatedBlock, :Concentrator, :Daggered, :CachedBlock, :Scale)
     @eval block(dg::$BLOCKTYPE) = dg.block
-    @eval setblock!(pb::$BLOCKTYPE, blk::AbstractBlock) = (pb.block = blk; pb)
 end

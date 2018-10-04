@@ -26,8 +26,9 @@ mat(blk::Scale{X}) where X = X*mat(blk.block)
 apply!(reg::AbstractRegister, blk::Scale{X}) where X = X*apply!(reg, blk.block)
 
 # take care of hash_key method!
-similar(c::Scale{X}, level::Int) where X = Scale{X}(similar(c.block))
-copy(c::Scale{X}, level::Int) where X = Scale{X}(copy(c.block))
+similar(c::Scale{X}) where X = Scale{X}(similar(c.block))
+copy(c::Scale{X}) where X = Scale{X}(copy(c.block))
+chblock(pb::Scale{N, T, X}, blk::MatrixBlock) where {N, T, X} = Scale{X}(blk)
 
 *(x::Number, blk::MatrixBlock) = scale(blk, x)
 *(x::Number, blk::Scale{X}) where X = scale(blk, x)

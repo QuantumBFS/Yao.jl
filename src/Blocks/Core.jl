@@ -24,6 +24,13 @@ function subblocks end
 subblocks(blk::AbstractBlock) = ()
 
 """
+    chsubblocks(pb::AbstractBlock, blks) -> AbstractBlock
+
+Change `subblocks` of target block.
+"""
+chsubblocks(pb::AbstractBlock, blks) = length(blks)==0 ? pb : throws(ArgumentError("size of blocks not match!"))
+
+"""
     apply!(reg, block, [signal])
 
 apply a `block` to a register `reg` with or without a cache signal.

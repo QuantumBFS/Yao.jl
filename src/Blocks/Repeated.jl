@@ -24,9 +24,11 @@ function RepeatedBlock{N}(block::GT, addrs::NTuple) where {N, M, T, GT <: Matrix
     RepeatedBlock{N, length(addrs), GT, T}(block, addrs)
 end
 
+==(A::RepeatedBlock, B::RepeatedBlock) = A.addrs == B.addrs && A.block == B.block
 addrs(rb::RepeatedBlock) = rb.addrs
 usedbits(rb::RepeatedBlock) = vcat([i.+(0:nqubits(rb.block)-1) for i in addrs(rb)]...)
-copy(x::RepeatedBlock) = typeof(x)(block, copy(x.addrs))
+copy(x::RepeatedBlock) = typeof(x)(x.block, x.addrs)
+chblock(pb::RepeatedBlock{N}, blk::AbstractBlock) where N = RepeatedBlock{N}(blk, pb.addrs)
 
 isunitary(rb::RepeatedBlock) = isunitary(rb.block)
 ishermitian(rb::RepeatedBlock) = ishermitian(rb.block)
