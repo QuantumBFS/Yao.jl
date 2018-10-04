@@ -1,7 +1,7 @@
 name = "Yao"
 uuid = "5a1af4f6-c801-11e8-08ea-1bad16a356b2"
 authors = ["Roger-luo <hiroger@qq.com>"]
-version = "0.3.0"
+version = "0.3.0-DEV"
 
 [deps]
 CacheServers = "a921213e-d44a-5460-ac04-5d720a99ba71"
@@ -18,6 +18,6 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
-[extra]
+[extras]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
