@@ -22,6 +22,8 @@ Yao is an open source framework for
 - quantum [software 2.0](https://medium.com/@karpathy/software-2-0-a64152b37c35);
 - quantum computation education.
 
+We are in an early-release beta. Expect some adventures and rough edges.
+
 ## Installation
 
 In **v0.7+**/**v1.0+**, please type `]` in the REPL to use the package mode, then type this command:
