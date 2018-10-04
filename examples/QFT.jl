@@ -32,4 +32,3 @@ kv = ifft(rv)*sqrt(length(rv))
 reg_iqft = copy(reg) |>iqft
 kv = fft(rv)/sqrt(length(rv))
 @test reg_iqft |> statevec ≈ kv |> invorder
-

@@ -1,4 +1,3 @@
-using Compat
 using BenchmarkTools
 using Yao
 using LuxurySparse
