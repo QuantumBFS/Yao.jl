@@ -25,5 +25,5 @@ copy(c::Daggered, level::Int) = Daggered(copy(c.block))
 
 function print_block(io::IO, c::Daggered)
     print_block(io, c.block)
-    print(io, " (Daggered)")
+    print(io, " [†]")
 end

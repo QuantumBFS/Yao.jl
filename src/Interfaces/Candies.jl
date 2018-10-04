@@ -3,4 +3,5 @@
 ⊗(A::AbstractArray, B::AbstractArray) = kron(A, B)
 
 # apply!
-Base.:(|>)(reg::AbstractRegister, circuit::AbstractBlock) = apply!(reg, circuit)
+using LinearAlgebra: Adjoint
+Base.:(|>)(reg::AbstractRegister, circuit::Union{AbstractBlock, Adjoint{<:Any, <:AbstractBlock}}) = apply!(reg, circuit)

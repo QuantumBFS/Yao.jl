@@ -27,7 +27,7 @@ export update_cache
 export usedbits, addrs, subblocks, block, @const_gate, tokenof
 export nqubits, nactive, mat, datatype, invorder
 export iparameters, niparameters, setiparameters, nparameters, parameters, parameter_type
-export apply!, dispatch!, applymatrix
+export apply!, dispatch!, dispatch!!, applymatrix
 export ishermitian, isunitary, isreflexive
 export parent, adjoint
 export blockfilter, blockfilter!, expect

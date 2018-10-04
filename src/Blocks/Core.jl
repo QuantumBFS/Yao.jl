@@ -95,23 +95,24 @@ Returns the matrix form of this block.
 function mat end
 
 """
-    dispatch!(block, params)
-    dispatch!(block, params...)
+    dispatch!([func::Function], block::AbstractBlock, params)
+    dispatch!!([func::Function], block::AbstractBlock, params)
 
-dispatch (using pop!) parameters to this block.
+dispatch parameters to this block, `dispatch!!` will pop! out all params.
 """
-function dispatch! end
-function dispatch!(r::AbstractBlock, params)
+dispatch!(block::AbstractBlock, params) = dispatch!!(block, params |> collect)
+dispatch!(func::Function, block::AbstractBlock, params) = dispatch!!(func, block, params |> collect)
+function dispatch!!(r::AbstractBlock, params)
     setiparameters!(r, (popfirst!(params) for i=1:niparameters(r)))
     for blk in subblocks(r)
-        dispatch!(blk, params)
+        dispatch!!(blk, params)
     end
     r
 end
-function dispatch!(func::Function, r::AbstractBlock, params)
+function dispatch!!(func::Function, r::AbstractBlock, params)
     setiparameters!(func, r, (popfirst!(params) for i=1:niparameters(r)))
     for blk in subblocks(r)
-        dispatch!(func, blk, params)
+        dispatch!!(func, blk, params)
     end
     r
 end

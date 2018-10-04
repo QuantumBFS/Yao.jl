@@ -5,7 +5,7 @@ import Base: iterate, eltype, length
 import Base: getindex, setindex!, map!, eachindex
 
 # Additional APIs
-export blocks, CompositeBlock
+export CompositeBlock
 
 
 """
