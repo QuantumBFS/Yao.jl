@@ -81,14 +81,6 @@ function dispatch! end
 
 define the style to print this block
 """
-function print_block(io::IO, block)
-
-@static if VERSION < v"0.7-"
-    print(io, summary(block))
-else
-    summary(io, block)
-end
-
-end
+print_block(io::IO, block) = summary(io, block)
 
 isprimitive(blk::AbstractBlock) = false

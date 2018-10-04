@@ -154,26 +154,13 @@ function *(op::AbstractMatrix, r::DefaultRegister)
     op * r.state
 end
 
-import Base: summary
-@static if VERSION < v"0.7-"
-    function summary(r::DefaultRegister{B, T}) where {B, T}
-        "DefaultRegister{$B, $T}\n"
-    end
+function Base.summary(io::IO, r::DefaultRegister{B, T}) where {B, T}
+    println(io, "DefaultRegister{", B, ", ", T, "}")
+end
 
-    function show(io::IO, r::DefaultRegister{B, T}) where {B, T}
-        print(io, summary(r))
-        print(io, "    active qubits: ", nactive(r), "/", nqubits(r))
-    end
-
-else
-    function summary(io::IO, r::DefaultRegister{B, T}) where {B, T}
-        println(io, "DefaultRegister{", B, ", ", T, "}")
-    end
-
-    function show(io::IO, r::DefaultRegister{B, T}) where {B, T}
-        summary(io, r)
-        print(io, "    active qubits: ", nactive(r), "/", nqubits(r))
-    end
+function Base.show(io::IO, r::DefaultRegister{B, T}) where {B, T}
+    summary(io, r)
+    print(io, "    active qubits: ", nactive(r), "/", nqubits(r))
 end
 
 ############## Reordering #################

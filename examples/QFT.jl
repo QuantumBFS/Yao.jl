@@ -1,4 +1,4 @@
-using Yao
+using Yao, FFTW, Test
 
 # Control-R(k) gate in block-A
 A(i::Int, j::Int, k::Int) = control([i, ], j=>shift(2π/(1<<k)))
@@ -10,12 +10,6 @@ QFT(n::Int) = chain(n, B(n, i) for i = 1:n)
 num_bit = 5
 qft = QFT(num_bit)
 iqft = adjoint(qft)
-
-# if you're using lastest julia, you need to add the fft package.
-@static if VERSION >= v"0.7-"
-    using FFTW
-end
-using Compat.Test
 
 @test chain(num_bit, qft, iqft) |> mat ≈ eye(2^num_bit)
 
@@ -32,4 +26,3 @@ kv = ifft(rv)*sqrt(length(rv))
 reg_iqft = copy(reg) |>iqft
 kv = fft(rv)/sqrt(length(rv))
 @test reg_iqft |> statevec ≈ kv |> invorder
-

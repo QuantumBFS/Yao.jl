@@ -1,12 +1,6 @@
 export measure, measure!, measure_remove!, select, select!
 using StatsBase
 
-@static if VERSION < v"0.7+"
-    # select is deprecated
-    # we can be a pirate anyway
-    import Base: select, select!
-end
-
 _measure(pl::Vector, ntimes::Int) = sample(0:length(pl)-1, Weights(pl), ntimes)
 function _measure(pl::Matrix, ntimes::Int)
     B = size(pl, 1)
