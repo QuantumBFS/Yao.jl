@@ -1,5 +1,5 @@
 using Documenter
-using Yao, Yao.Blocks, LuxurySparse, CacheServers, Yao.Intrinsics, Yao.Registers, Yao.Interfaces
+using Yao, Yao.Blocks, Yao.Intrinsics, Yao.Registers, Yao.Interfaces
 
 # TODO: use Literate to process examples
 # using Literate
@@ -7,7 +7,7 @@ using Yao, Yao.Blocks, LuxurySparse, CacheServers, Yao.Intrinsics, Yao.Registers
 
 # make documents
 makedocs(
-    modules = [Yao, Yao.Blocks, LuxurySparse, CacheServers, Yao.Intrinsics, Yao.Registers, Yao.Interfaces],
+    modules = [Yao, Yao.Blocks, Yao.Intrinsics, Yao.Registers, Yao.Interfaces],
     clean = false,
     format = :html,
     sitename = "Yao.jl",
@@ -26,7 +26,6 @@ makedocs(
             "man/interfaces.md",
             "man/registers.md",
             "man/blocks.md",
-            "man/cache.md",
             "man/intrinsics.md",
             "man/boost.md",
         ],

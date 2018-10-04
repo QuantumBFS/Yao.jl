@@ -15,7 +15,7 @@ QFT(n::Int) = chain(n, B(n, i) for i = 1:n)
 # define QFT and IQFT block.
 num_bit = 5
 qft = QFT(num_bit)
-iqft = adjoint(qft)
+iqft = qft'   # get the hermitian conjugate
 ```
 
 The basic building block - controled phase shift gate is defined as
@@ -54,12 +54,11 @@ Similarly, you can use `put` and `chain` to construct `PutBlock` (basic placemen
 You can check the result using classical `fft`
 ```@example QFT
 # if you're using lastest julia, you need to add the fft package.
-@static if VERSION >= v"0.7-"
-    using FFTW
-end
-using Compat.Test
+using FFTW: fft, ifft
+using LinearAlgebra: I
+using Test
 
-@test chain(num_bit, qft, iqft) |> mat ≈ eye(2^num_bit)
+@test chain(num_bit, qft, iqft) |> mat ≈ I
 
 # define a register and get its vector representation
 reg = rand_state(num_bit)
@@ -90,15 +89,14 @@ Since we have QFT and IQFT blocks we can then use them to realize phase estimati
 In the following simulation, we use equivalent `QFTBlock` in the Yao.`Zoo` module rather than the above chain block,
 it is faster than the above construction because it hides all the simulation details (yes, we are cheating :D) and get the equivalent output.
 
-```@example PhaseEstimation
+```@example QFT
 using Yao
-using Yao.Zoo
 using Yao.Blocks
 using Yao.Intrinsics
 
 function phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::GeneralMatrixGate{N}, nshot::Int=1) where {N}
     M = nqubits(reg1)
-    iqft = QFTBlock{M}() |> adjoint
+    iqft = QFT(M) |> adjoint
     HGates = rollrepeat(M, H)
 
     control_circuit = chain(M+N)
@@ -132,7 +130,7 @@ Here, the only difficult concept is `focus`, `focus` returns a `FunctionBlock`, 
 An operator sees only active bits, and operating active space is more efficient, most importantly, it becomes much easier to integrate blocks.
 However, it has the potential ability to change line orders, for safety consideration, you may also need safer [`Concentrator`](@ref).
 
-```@example PhaseEstimation
+```@example QFT
 r = rand_state(6)
 apply!(r, focus(4,1,2))  # or equivalently using focus!(r, [4,1,2])
 nactive(r)
@@ -140,8 +138,9 @@ nactive(r)
 
 Then we will have a check to above function
 
-```@example PhaseEstimation
-rand_unitary(N::Int) = qr(randn(N, N))[1]
+```@example QFT
+using LinearAlgebra: qr, Diagonal
+rand_unitary(N::Int) = qr(randn(N, N)).Q
 
 M = 5
 N = 3
