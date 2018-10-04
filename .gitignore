@@ -13,5 +13,5 @@ _*.dat
 *.swp
 __pycache__/
 
+Project.toml
 Manifest.toml
-_deprecated/
