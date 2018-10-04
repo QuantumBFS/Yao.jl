@@ -234,7 +234,7 @@ r = register(bit"0000")
 Now, we define its shorthand
 
 ```julia
-get_prob(qcbm) = with!(qcbm, register(bit"0"^6)) |> statevec .|> abs2
+get_prob(qcbm) = apply!(register(bit"0"^6), qcbm) |> statevec .|> abs2
 ```
 
 We will first iterate through each layer contains rotation gates and allocate an array to store our gradient

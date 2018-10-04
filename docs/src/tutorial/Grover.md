@@ -8,8 +8,7 @@ Then it equivalent to construct $R(|\psi\rangle) = A(2|0\rangle\langle 0|-1)A^\d
 ```@example Grover
 using Yao
 using Yao.Blocks
-using Compat
-using Compat.Test
+using Test, LinearAlgebra
 using StatsBase
 
 """
@@ -48,7 +47,7 @@ fb_oracle = FunctionBlock{:Oracle}(reg->oracle!(reg))
 ratio of components in a wavefunction that flip sign under oracle.
 """
 function prob_match_oracle(psi::DefaultRegister, oracle)
-    fliped_reg = apply!(register(ones(Complex128, 1<<nqubits(psi))), oracle)
+    fliped_reg = apply!(register(ones(ComplexF64, 1<<nqubits(psi))), oracle)
     match_mask = fliped_reg |> statevec |> real .< 0
     norm(statevec(psi)[match_mask])^2
 end
@@ -161,7 +160,7 @@ end
 The result is
 ```@example Grover
 pl = psi0 |> probs
-config = findn(pl.>0.5)[] - 1 |> bitarray(nbit)
+config = findfirst(pi->pi>0.5, pl) - 1 |> bitarray(nbit)
 res = reshape(config, 5,3)
 ```
 

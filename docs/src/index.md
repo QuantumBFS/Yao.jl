@@ -32,9 +32,7 @@ Pages = [
     "man/interfaces.md",
     "man/registers.md",
     "man/blocks.md",
-    "man/cache.md",
     "man/intrinsics.md",
-    "man/luxurysparse.md",
 ]
 Depth = 1
 ```
