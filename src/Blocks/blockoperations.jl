@@ -18,7 +18,7 @@ end
 blockfilter!(func, rgs::Vector, blk::PrimitiveBlock) = func(blk) ? push!(rgs, blk) : rgs
 function blockfilter!(func, rgs::Vector, blk::AbstractContainer)
     func(blk) && push!(rgs, blk)
-    func(block(blk)) ? push!(rgs, block(blk)) : rgs
+    blockfilter!(func, rgs, block(blk))
 end
 
 export traverse
