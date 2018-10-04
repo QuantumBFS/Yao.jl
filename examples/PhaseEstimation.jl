@@ -1,5 +1,4 @@
-using Compat
-using Compat.Test
+using Test
 using Yao
 using QuAlgorithmZoo
 using Yao.Blocks
@@ -59,4 +58,3 @@ psi = U[:,3]
 
 res, reg = phase_estimation(zero_state(M), register(psi), GeneralMatrixGate(A))
 println("Phase is 2π * $(res[]), the exact value is 2π * $ϕ")
-
