@@ -30,7 +30,7 @@ function diff_circuit(n, nlayer, pairs)
 
     for i = 1:(nlayer + 1)
         if i!=1  push!(circuit, cnot_entangler(pairs) |> cache) end
-        push!(circuit, rollrepeat(n, rotter(i==1, i==nlayer+1)))
+        push!(circuit, chain(n, [put(n, j=>rotter(i==1, i==nlayer+1)) for j=1:n]))
         #for j = 1:n
         #    push!(circuit, put(n, j=>rotter(i==1, i==nlayer+1)))
         #end
@@ -45,7 +45,7 @@ filter out all rotation gates, which is differentiable.
 """
 function collect_rotblocks(blk::AbstractBlock)
     rots = blockfilter!(x->x isa RotationGate, Vector{RotationGate}([]), blk)
-    nparameters(blk)==length(rots) || warn("some parameters in this circuit are not differentiable!")
+    nparameters(blk)==length(rots) || @warn "some parameters in this circuit are not differentiable!"
     rots
 end
 
@@ -60,13 +60,13 @@ function perturb(func, gates::Vector{<:RotationGate}, diff::Real)
     res = Matrix{Float64}(undef, ng, 2)
     for i in 1:ng
         gate = gates[i]
-        dispatch!(+, gate, diff)
+        setiparameters!(+, gate, diff)
         res[i, 1] = func()
 
-        dispatch!(+, gate, -2*diff)
+        setiparameters!(+, gate, -2*diff)
         res[i, 2] = func()
 
-        dispatch!(+, gate, diff) # set back
+        setiparameters!(+, gate, diff) # set back
     end
     res
 end

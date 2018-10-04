@@ -23,8 +23,12 @@ end
 copy(block::RotBasis{T}) where T = RotBasis{T}(block.theta, block.phi)
 dispatch!(block::RotBasis, params) = ((block.theta, block.phi) = params; block)
 
-parameters(rb::RotBasis) = (rb.theta, rb.phi)
-nparameters(::Type{<:RotBasis}) = 2
+iparameters(rb::RotBasis) = (rb.theta, rb.phi)
+function setiparameters!(rb::RotBasis, params)
+    rb.theta, rb.phi = params
+    rb
+end
+niparameters(::Type{<:RotBasis}) = 2
 
 function print_block(io::IO, R::RotBasis)
     print(io, "RotBasis($(R.theta), $(R.phi))")

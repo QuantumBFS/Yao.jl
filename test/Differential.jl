@@ -1,7 +1,7 @@
 using Test, Random, LinearAlgebra, SparseArrays
 
 
-using QuAlgorithmZoo, Yao.Blocks
+using Yao, QuAlgorithmZoo, Yao.Blocks
 
 @testset "rotter, collect_rotblocks, num_gradient, opgrad" begin
     c = diff_circuit(4, 3, [1=>3, 2=>4, 2=>3, 4=>1])
