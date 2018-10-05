@@ -31,8 +31,6 @@ set the block of a container.
 """
 function chblock end
 
-print_subblocks(io::IO, tree::AbstractContainer, depth, charset, active_levels) = print_subblocks(io, block(tree), depth, charset, active_levels)
-
 include("PutBlock.jl")
 include("Control.jl")
 include("Repeated.jl")

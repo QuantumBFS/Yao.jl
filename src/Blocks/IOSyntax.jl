@@ -82,7 +82,7 @@ print_tree(tree, args...; kwargs...) = print_tree(STDOUT::IO, tree, args...; kwa
 
 print_subblocks(io::IO, tree, depth, charset, active_levels) = nothing
 
-function print_subblocks(io::IO, tree::CompositeBlock, depth, charset, active_levels)
+function print_subblocks(io::IO, tree::AbstractBlock, depth, charset, active_levels)
     c = subblocks(tree)
     it_result = iterate(c)
     while it_result !== nothing

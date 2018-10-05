@@ -2,7 +2,7 @@ module Registers
 
 using Random, LinearAlgebra, SparseArrays
 using StatsBase
-using Lazy
+using MacroTools: @forward
 using ..Intrinsics
 
 import Base: length
