@@ -134,9 +134,16 @@ normalize!(r::AbstractRegister) = throw(MethodError(:normalize!, r))
 """
     statevec(r::AbstractRegister) -> AbstractArray
 
-Return the raveled state (vector) form of this register.
+Return a state matrix/vector by droping the last dimension of size 1.
 """
 function statevec end
+
+"""
+    relaxedvec(r::AbstractRegister) -> AbstractArray
+
+Activate all qubits, and return a matrix (vector) for B≠1 (B=1).
+"""
+function relaxedvec end
 
 """
     hypercubic(r::AbstractRegister) -> AbstractArray

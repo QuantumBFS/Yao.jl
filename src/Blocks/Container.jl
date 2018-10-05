@@ -27,7 +27,7 @@ function block end
 """
     chblock(block, blk)
 
-set the block of a container.
+change the block of a container.
 """
 function chblock end
 
