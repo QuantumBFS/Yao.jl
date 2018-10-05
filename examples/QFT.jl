@@ -1,4 +1,6 @@
-using Yao, FFTW, Test
+using Yao
+using FFTW, Test
+using LinearAlgebra: I
 
 # Control-R(k) gate in block-A
 A(i::Int, j::Int, k::Int) = control([i, ], j=>shift(2π/(1<<k)))
@@ -9,9 +11,9 @@ QFT(n::Int) = chain(n, B(n, i) for i = 1:n)
 # define QFT and IQFT block.
 num_bit = 5
 qft = QFT(num_bit)
-iqft = adjoint(qft)
+iqft = qft'
 
-@test chain(num_bit, qft, iqft) |> mat ≈ eye(2^num_bit)
+@test chain(num_bit, qft, iqft) |> mat ≈ I
 
 # define a register and get its vector representation
 reg = rand_state(num_bit)

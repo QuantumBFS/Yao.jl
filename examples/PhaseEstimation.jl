@@ -1,8 +1,7 @@
-using Test
-using Yao
-using QuAlgorithmZoo
+include("QFT.jl")
 using Yao.Blocks
 using Yao.Intrinsics
+using LinearAlgebra: qr, Diagonal
 
 """
     phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::GeneralMatrixGate{N, T}, nshot::Int=1) -> (phase, DefaultRegister)
@@ -17,7 +16,7 @@ reference: https://en.wikipedia.org/wiki/Quantum_phase_estimation_algorithm
 """
 function phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::GeneralMatrixGate{N}, nshot::Int=1) where {N}
     M = nqubits(reg1)
-    iqft = QFTBlock{M}() |> adjoint
+    iqft = QFT(M)'
     HGates = rollrepeat(M, H)
 
     control_circuit = chain(M+N)
@@ -39,7 +38,7 @@ end
 """
 random unitary matrix.
 """
-rand_unitary(N::Int) = qr(randn(N, N))[1]
+rand_unitary(N::Int) = qr(randn(N, N)).Q
 
 ######### Test Phase Estimation ##########
 M = 16
@@ -51,10 +50,10 @@ phases = rand(1<<N)
 ϕ = Int(0b111101)/(1<<6)
 phases[3] = ϕ
 signs = exp.(2pi*im.*phases)
-A = U*Diagonal(signs)*U'  # notice it is unitary
+MAT = U*Diagonal(signs)*U'  # notice it is unitary
 
 # the state with phase ϕ
 psi = U[:,3]
 
-res, reg = phase_estimation(zero_state(M), register(psi), GeneralMatrixGate(A))
+res, reg = phase_estimation(zero_state(M), register(psi), GeneralMatrixGate(MAT))
 println("Phase is 2π * $(res[]), the exact value is 2π * $ϕ")
