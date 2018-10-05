@@ -14,4 +14,5 @@ _*.dat
 __pycache__/
 
 Manifest.toml
-_deprecated/
+
+_local/
