@@ -1,33 +1,8 @@
 # Examples
 
-Learn **Yao** by examples.
+See the documents for detail
 
-To open the jupyter notebook, please install `IJulia`:
-
-In v0.6, please type
-
-```julia
-julia> Pkg.add("IJulia")
-```
-
-In v0.7, please type `]` to pkg mode, and use this command
-
-```julia
-pkg> add IJulia
-```
-
-Then, use IJulia to open notebook service.
-
-```julia
-julia> using IJulia
-
-julia> IJulia.notebook()
-```
-
-Or just open it from command line
-
-```sh
-jupyter-notebook xxxx.ipynb
-```
-
-### Quantum Circuit Born Machine
+* [Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit](https://quantumbfs.github.io/Yao.jl/latest/tutorial/GHZ/)
+* [Quantum Fourier Transformation and Phase Estimation](https://quantumbfs.github.io/Yao.jl/latest/tutorial/QFT/)
+* [Grover Search and Quantum Inference](https://quantumbfs.github.io/Yao.jl/latest/tutorial/Grover/)
+* [Quantum Circuit Born Machine](https://quantumbfs.github.io/Yao.jl/latest/tutorial/QCBM/)
