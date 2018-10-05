@@ -1,11 +1,11 @@
 export RepeatedBlock
 
 """
-    RepeatedBlock{N, C, GT, T} <: NonParametricContainer{N, T}
+    RepeatedBlock{N, C, GT, T} <: AbstractContainer{N, T}
 
 repeat the same block on given addrs.
 """
-mutable struct RepeatedBlock{N, C, GT<:MatrixBlock, T} <: NonParametricContainer{N, T}
+mutable struct RepeatedBlock{N, C, GT<:MatrixBlock, T} <: AbstractContainer{N, T}
     block::GT
     addrs::NTuple{C, Int}
 

@@ -1,5 +1,5 @@
 export TagBlock
-abstract type TagBlock{N, T} <: NonParametricContainer{N, T} end
+abstract type TagBlock{N, T} <: AbstractContainer{N, T} end
 
 for METHOD in (:ishermitian, :isreflexive, :isunitary, :nqubits, :usedbits,
                :datatype, :length, :eltype, :blocks, :start, :nactive)

@@ -1,14 +1,14 @@
 export ControlBlock
 
 """
-    ControlBlock{BT, N, C, B, T} <: NonParametricContainer{N, T}
+    ControlBlock{BT, N, C, B, T} <: AbstractContainer{N, T}
 
 N: number of qubits,
 BT: controlled block type,
 C: number of control bits,
 T: type of matrix.
 """
-mutable struct ControlBlock{N, BT<:AbstractBlock, C, M, T} <: NonParametricContainer{N, T}
+mutable struct ControlBlock{N, BT<:AbstractBlock, C, M, T} <: AbstractContainer{N, T}
     ctrl_qubits::NTuple{C, Int}
     vals::NTuple{C, Int}
     block::BT

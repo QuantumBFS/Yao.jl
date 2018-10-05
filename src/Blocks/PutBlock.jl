@@ -1,11 +1,11 @@
 export PutBlock
 
 """
-    PutBlock{N, C, GT, T} <: NonParametricContainer{N, T}
+    PutBlock{N, C, GT, T} <: AbstractContainer{N, T}
 
 put a block on given addrs.
 """
-mutable struct PutBlock{N, C, GT<:MatrixBlock, T} <: NonParametricContainer{N, T}
+mutable struct PutBlock{N, C, GT<:MatrixBlock, T} <: AbstractContainer{N, T}
     block::GT
     addrs::NTuple{C, Int}
 

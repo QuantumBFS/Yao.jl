@@ -1,5 +1,5 @@
 # Additional APIs
-export AbstractContainer, NonParametricContainer
+export AbstractContainer
 # Interface for Containers
 export block, chblock
 
@@ -16,13 +16,6 @@ abstract supertype which container blocks will inherit from.
 abstract type AbstractContainer{N, T} <: MatrixBlock{N, T} end
 subblocks(c::AbstractContainer) = (c |> block,)
 chsubblocks(pb::AbstractContainer, blk) = chblock(pb, blk |> first)
-
-"""
-    NonParametricContainer{N, T} <: AbstractContainer{N, T}
-
-Simple container with no extra parameters.
-"""
-abstract type NonParametricContainer{N, T} <: AbstractContainer{N, T} end
 
 """
     block(container)
