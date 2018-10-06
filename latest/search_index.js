@@ -377,6 +377,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/interfaces/#Yao.Interfaces.paulistring",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.paulistring",
+    "category": "function",
+    "text": "paulistring([n], blocks::PauliGate...) -> PauliString\npaulistring([n], blocks::Pair{Int, PauliGate}...) -> PauliString\n\nReturns a PauliString. This factory method can be called lazily if you missed the total number of qubits.\n\nThis krons several pauli gates, either dict (more flexible) like input and chain like input are allowed. i.e. paulistring(3, X, Y, Z) is equivalent to paulistring(3, 1=>X, 2=>Y, 3=>Z)\n\n\n\n\n\n"
+},
+
+{
     "location": "man/interfaces/#Yao.Interfaces.phase",
     "page": "Interfaces",
     "title": "Yao.Interfaces.phase",
@@ -385,7 +393,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{M}, Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s267} where #s267<:AbstractBlock}} where M",
+    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{M}, Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s277} where #s277<:AbstractBlock}} where M",
     "page": "Interfaces",
     "title": "Yao.Interfaces.put",
     "category": "method",
@@ -449,6 +457,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/interfaces/#Yao.Interfaces.timeevolve",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.timeevolve",
+    "category": "function",
+    "text": "timeevolve([block::MatrixBlock], t::Real) -> TimeEvolution\n\nMake a time machine! If block is not provided, it will become lazy.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/interfaces/#Yao.Blocks.XGate",
     "page": "Interfaces",
     "title": "Yao.Blocks.XGate",
@@ -473,11 +489,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Pair{Int64,#s267} where #s267<:MatrixBlock,N} where N}",
+    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Pair{Int64,#s277} where #s277<:MatrixBlock,N} where N}",
     "page": "Interfaces",
     "title": "Base.kron",
     "category": "method",
-    "text": "kron([total::Int, ]block0::Pair, blocks::Union{MatrixBlock, Pair}...,) -> KronBlock{total}\n\ncreate a KronBlock with a list of blocks or tuple of heads and blocks. If total is not provided, return a lazy constructor.\n\nExample\n\nkron(4, 1=>X, 3=>Z, Y)\n\nThis will automatically generate a block list looks like\n\n1 -- [X] --\n2 ---------\n3 -- [Z] --\n4 -- [Y] --\n\n\n\n\n\n"
+    "text": "kron([total::Int, ]block0::Pair, blocks::Union{MatrixBlock, Pair}...,) -> KronBlock{total}\n\ncreate a KronBlock with a list of blocks or tuple of heads and blocks. If total is not provided, return a lazy constructor.\n\nExample\n\nkron(4, 1=>X, 3=>Z, 4=>Y)\n\nThis will automatically generate a block list looks like\n\n1 -- [X] --\n2 ---------\n3 -- [Z] --\n4 -- [Y] --\n\n\n\n\n\n"
 },
 
 {
@@ -617,7 +633,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/registers/#Yao.Registers.extend!-Union{Tuple{T}, Tuple{B}, Tuple{DefaultRegister{B,T},Int64}} where T where B",
+    "location": "man/registers/#Yao.Registers.extend!-Union{Tuple{T}, Tuple{B}, Tuple{DefaultRegister{B,T,MT} where MT<:AbstractArray{T,2},Int64}} where T where B",
     "page": "Registers",
     "title": "Yao.Registers.extend!",
     "category": "method",
@@ -665,11 +681,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/registers/#Yao.Registers.measure!-Union{Tuple{AbstractRegister{B,T} where T}, Tuple{B}} where B",
+    "page": "Registers",
+    "title": "Yao.Registers.measure!",
+    "category": "method",
+    "text": "measure!(reg::AbstractRegister) -> Int\n\nmeasure and collapse to result state.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/registers/#Yao.Registers.measure_remove!-Union{Tuple{AbstractRegister{B,T} where T}, Tuple{B}} where B",
     "page": "Registers",
     "title": "Yao.Registers.measure_remove!",
     "category": "method",
-    "text": "measure_remove!(register)\n\nmeasure the active qubits of this register and remove them.\n\n\n\n\n\n"
+    "text": "measure_remove!(register) -> Int\n\nmeasure the active qubits of this register and remove them.\n\n\n\n\n\n"
 },
 
 {
@@ -697,7 +721,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/registers/#Yao.Registers.register-Tuple{Array{T,1} where T}",
+    "location": "man/registers/#Yao.Registers.register-Tuple{AbstractArray{T,2} where T}",
     "page": "Registers",
     "title": "Yao.Registers.register",
     "category": "method",
@@ -713,6 +737,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/registers/#Yao.Registers.relaxedvec",
+    "page": "Registers",
+    "title": "Yao.Registers.relaxedvec",
+    "category": "function",
+    "text": "relaxedvec(r::AbstractRegister) -> AbstractArray\n\nActivate all qubits, and return a matrix (vector) for B>1 (B=1).\n\n\n\n\n\n"
+},
+
+{
     "location": "man/registers/#Yao.Registers.select!-Union{Tuple{B}, Tuple{AbstractRegister{B,T} where T,Any}} where B",
     "page": "Registers",
     "title": "Yao.Registers.select!",
@@ -721,7 +753,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/registers/#Yao.Registers.select-Union{Tuple{B}, Tuple{DefaultRegister{B,T} where T,Any}} where B",
+    "location": "man/registers/#Yao.Registers.select-Union{Tuple{B}, Tuple{DefaultRegister{B,T,MT} where MT<:AbstractArray{T,2} where T,Any}} where B",
     "page": "Registers",
     "title": "Yao.Registers.select",
     "category": "method",
@@ -741,7 +773,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Registers",
     "title": "Yao.Registers.statevec",
     "category": "function",
-    "text": "statevec(r::AbstractRegister) -> AbstractArray\n\nReturn the raveled state (vector) form of this register.\n\n\n\n\n\n"
+    "text": "statevec(r::AbstractRegister) -> AbstractArray\n\nReturn a state matrix/vector by droping the last dimension of size 1.\n\n\n\n\n\n"
 },
 
 {
@@ -861,7 +893,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.AbstractBlock",
     "category": "type",
-    "text": "AbstractBlock\n\nabstract type that all block will subtype from. N is the number of qubits.\n\n\n\n\n\n"
+    "text": "AbstractBlock\n\nabstract type that all block will subtype from. N is the number of qubits.\n\nRequired interfaces     * apply! or (and) mat\n\nInterfaces for parametric blocks.\n\n* iparameters\n* setiparameters\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.AbstractContainer",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.AbstractContainer",
+    "category": "type",
+    "text": "ContainerBlock{N, T} <: MatrixBlock{N, T}\n\nabstract supertype which container blocks will inherit from.\n\nextended APIs\n\nblock: the block contained by this ContainerBlock\n\n\n\n\n\n"
 },
 
 {
@@ -893,7 +933,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.CachedBlock",
     "category": "type",
-    "text": "CachedBlock{ST, BT, N, T} <: MatrixBlock{N, T}\n\nA label type that tags an instance of type BT. It forwards every methods of the block it contains, except mat and apply!, it will cache the matrix form whenever the program has.\n\n\n\n\n\n"
+    "text": "CachedBlock{ST, BT, N, T} <: TagBlock{N, T}\n\nA label type that tags an instance of type BT. It forwards every methods of the block it contains, except mat and apply!, it will cache the matrix form whenever the program has.\n\n\n\n\n\n"
 },
 
 {
@@ -917,7 +957,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.Concentrator",
     "category": "type",
-    "text": "Concentrator{N} <: AbstractBlock\n\nconcentrates serveral lines together in the circuit, and expose it to other blocks.\n\n\n\n\n\n"
+    "text": "Concentrator{N, T, BT <: AbstractBlock} <: AbstractContainer{N, T}\n\nconcentrates serveral lines together in the circuit, and expose it to other blocks.\n\n\n\n\n\n"
 },
 
 {
@@ -933,7 +973,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.ControlBlock",
     "category": "type",
-    "text": "ControlBlock{BT, N, C, B, T} <: CompositeBlock{N, T}\n\nN: number of qubits, BT: controlled block type, C: number of control bits, T: type of matrix.\n\n\n\n\n\n"
+    "text": "ControlBlock{BT, N, C, B, T} <: AbstractContainer{N, T}\n\nN: number of qubits, BT: controlled block type, C: number of control bits, T: type of matrix.\n\n\n\n\n\n"
 },
 
 {
@@ -941,7 +981,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.Daggered",
     "category": "type",
-    "text": "Daggered{N, T, BT} <: MatrixBlock{N, T}\n\nDaggered(blk::BT)\nDaggered{N, T, BT}(blk)\n\nDaggered Block.\n\n\n\n\n\n"
+    "text": "Daggered{N, T, BT} <: TagBlock{N, T}\n\nDaggered(blk::BT)\nDaggered{N, T, BT}(blk)\n\nDaggered Block.\n\n\n\n\n\n"
 },
 
 {
@@ -950,6 +990,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.FunctionBlock",
     "category": "type",
     "text": "FunctionBlock <: AbstractBlock\n\nThis block contains a general function that perform an in-place operation over a register\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.Im",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.Im",
+    "category": "type",
+    "text": "Im{N, T, BT} = Scale{1im, N, T, BT}\n\nMulitply (Im)aginary unit on Block.\n\n\n\n\n\n"
 },
 
 {
@@ -977,11 +1025,27 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.Neg",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.Neg",
+    "category": "type",
+    "text": "Neg{N, T, BT} = Scale{-1, N, T, BT}\n\n(Neg)ative of Block.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.PhaseGate",
     "page": "Blocks System",
     "title": "Yao.Blocks.PhaseGate",
     "category": "type",
     "text": "PhiGate\n\nGlobal phase gate.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.Pos",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.Pos",
+    "category": "type",
+    "text": "Pos{N, T, BT} = Scale{1+0im, N, T, BT}\n\n(Pos)itive is doing nothing on Block.\n\n\n\n\n\n"
 },
 
 {
@@ -997,7 +1061,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.PutBlock",
     "category": "type",
-    "text": "PutBlock{N, C, GT, T} <: CompositeBlock{N, T}\n\nput a block on given addrs.\n\n\n\n\n\n"
+    "text": "PutBlock{N, C, GT, T} <: AbstractContainer{N, T}\n\nput a block on given addrs.\n\n\n\n\n\n"
 },
 
 {
@@ -1013,7 +1077,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.RepeatedBlock",
     "category": "type",
-    "text": "RepeatedBlock{N, C, GT, T} <: CompositeBlock{N, T}\n\nrepeat the same block on given addrs.\n\n\n\n\n\n"
+    "text": "RepeatedBlock{N, C, GT, T} <: AbstractContainer{N, T}\n\nrepeat the same block on given addrs.\n\n\n\n\n\n"
 },
 
 {
@@ -1029,7 +1093,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.RotationGate",
     "category": "type",
-    "text": "RotationGate{N, T, GT <: MatrixBlock{N, Complex{T}}} <: MatrixBlock{N, Complex{T}}\n\nRotationGate, with GT both hermitian and isreflexive.\n\n\n\n\n\n"
+    "text": "RotationGate{N, T, GT <: MatrixBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}\n\nRotationGate, with GT both hermitian and isreflexive.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.Scale",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.Scale",
+    "category": "type",
+    "text": "Scale{X, N, T, BT} <: TagBlock{N, T}\n\nScale{X}(blk::MatrixBlock)\nScale{X, N, T, BT}(blk::MatrixBlock)\n\nScale Block, by a factor of X, notice X is static!\n\n\n\n\n\n"
 },
 
 {
@@ -1053,7 +1125,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.TimeEvolution",
     "category": "type",
-    "text": "TimeEvolution{N, T, GT <: MatrixBlock{N, Complex{T}}} <: MatrixBlock{N, Complex{T}}\n\nTimeEvolution, with GT hermitian\n\n\n\n\n\n"
+    "text": "TimeEvolution{N, T, GT <: MatrixBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}\n\nTimeEvolution, with GT hermitian\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks._Im",
+    "page": "Blocks System",
+    "title": "Yao.Blocks._Im",
+    "category": "type",
+    "text": "_Im{N, T, BT} = Scale{-1im, N, T, BT}\n\nMulitply (-Im)aginary unit on Block.\n\n\n\n\n\n"
 },
 
 {
@@ -1073,6 +1153,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.block",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.block",
+    "category": "function",
+    "text": "block(container)\n\nget an iterator that iterate through all sub-blocks.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.blockfilter-Tuple{Any,AbstractBlock}",
     "page": "Blocks System",
     "title": "Yao.Blocks.blockfilter",
@@ -1081,11 +1169,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.blocks",
+    "location": "man/blocks/#Yao.Blocks.chblock",
     "page": "Blocks System",
-    "title": "Yao.Blocks.blocks",
+    "title": "Yao.Blocks.chblock",
     "category": "function",
-    "text": "blocks(composite_block)\n\nget an iterator that iterate through all sub-blocks.\n\n\n\n\n\n"
+    "text": "chblock(block, blk)\n\nchange the block of a container.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.chsubblocks-Tuple{AbstractBlock,Any}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.chsubblocks",
+    "category": "method",
+    "text": "chsubblocks(pb::AbstractBlock, blks) -> AbstractBlock\n\nChange subblocks of target block.\n\n\n\n\n\n"
 },
 
 {
@@ -1097,19 +1193,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.dispatch!",
-    "page": "Blocks System",
-    "title": "Yao.Blocks.dispatch!",
-    "category": "function",
-    "text": "dispatch!(block, params)\ndispatch!(block, params...)\n\ndispatch parameters to this block.\n\n\n\n\n\n"
-},
-
-{
-    "location": "man/blocks/#Yao.Blocks.dispatch!-Tuple{CompositeBlock,Any}",
+    "location": "man/blocks/#Yao.Blocks.dispatch!-Tuple{AbstractBlock,Any}",
     "page": "Blocks System",
     "title": "Yao.Blocks.dispatch!",
     "category": "method",
-    "text": "dispatch!(f, c, params) -> c\n\ndispatch parameters and tweak it according to callback function f(original, parameter)->new\n\ndispatch a vector of parameters to this composite block according to each sub-block\'s number of parameters.\n\n\n\n\n\n"
+    "text": "dispatch!([func::Function], block::AbstractBlock, params)\ndispatch!!([func::Function], block::AbstractBlock, params)\n\ndispatch parameters to this block, dispatch!! will pop! out all params.\n\n\n\n\n\n"
 },
 
 {
@@ -1121,6 +1209,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.iparameters",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.iparameters",
+    "category": "function",
+    "text": "iparameters(block) -> Vector\n\nReturns a list of all intrinsic (not from sublocks) parameters in block.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.mat",
     "page": "Blocks System",
     "title": "Yao.Blocks.mat",
@@ -1129,11 +1225,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.nparameters",
+    "location": "man/blocks/#Yao.Blocks.niparameters",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.niparameters",
+    "category": "function",
+    "text": "niparameters(x) -> Integer\n\nReturns the number of parameters of x.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.nparameters-Tuple{AbstractBlock}",
     "page": "Blocks System",
     "title": "Yao.Blocks.nparameters",
-    "category": "function",
-    "text": "nparameters(x) -> Integer\n\nReturns the number of parameters of x.\n\n\n\n\n\n"
+    "category": "method",
+    "text": "nparameters(c::AbstractBlock) -> Int\n\nnumber of parameters, including parameters in sublocks.\n\n\n\n\n\n"
 },
 
 {
@@ -1141,7 +1245,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.parameter_type",
     "category": "function",
-    "text": "parameters(block) -> Type\n\nthe type of parameters.\n\n\n\n\n\n"
+    "text": "parameter_type(block) -> Type\n\nthe type of iparameters.\n\n\n\n\n\n"
 },
 
 {
@@ -1149,7 +1253,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.parameters",
     "category": "function",
-    "text": "parameters(block) -> Vector\n\nReturns a list of all parameters in block.\n\n\n\n\n\n"
+    "text": "parameters(c::AbstractBlock, output=Float64[]) -> Vector\n\nget all parameters including sublocks.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.subblocks",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.subblocks",
+    "category": "function",
+    "text": "subblocks(blk::AbstractBlock) -> Tuple\n\nreturn a tuple of all sub-blocks in this block.\n\n\n\n\n\n"
 },
 
 {
@@ -1222,6 +1334,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.print_block",
     "category": "method",
     "text": "print_block(io, block)\n\ndefine the style to print this block\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.setiparameters",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.setiparameters",
+    "category": "function",
+    "text": "setparameters!([elementwisefunction], r::AbstractBlock, params) -> AbstractBlock\n\nset intrinsics parameter for block.\n\n\n\n\n\n"
 },
 
 {
@@ -1517,7 +1637,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.log2i",
     "category": "function",
-    "text": "log2i(x::Integer) -> Integer\n\nReturn log2(x), this integer version of log2 is fast but only valid for number equal to 2^n. Ref: https://stackoverflow.com/questions/21442088\n\n\n\n\n\n"
+    "text": "log2i(x::Integer) -> Integer\n\nReturn log2(x), this integer version of log2 is fast but only valid for number equal to 2^n.\n\n\n\n\n\n"
 },
 
 {
@@ -1533,7 +1653,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.mulcol!",
     "category": "function",
-    "text": "mulcol!(v::Vector, i::Int, f) -> VecOrMat\n\nmultiply col i of v by f inplace.\n\n\n\n\n\n"
+    "text": "mulcol!(v::AbstractVector, i::Int, f) -> VecOrMat\n\nmultiply col i of v by f inplace.\n\n\n\n\n\n"
 },
 
 {
@@ -1541,7 +1661,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.mulrow!",
     "category": "function",
-    "text": "mulrow!(v::Vector, i::Int, f) -> VecOrMat\n\nmultiply row i of v by f inplace.\n\n\n\n\n\n"
+    "text": "mulrow!(v::AbstractVector, i::Int, f) -> VecOrMat\n\nmultiply row i of v by f inplace.\n\n\n\n\n\n"
 },
 
 {
