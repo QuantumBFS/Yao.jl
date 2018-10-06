@@ -13,14 +13,13 @@ Sequential(blocks::AbstractBlock...) = Sequential(collect(blocks))
 
 copy(c::Sequential) = Sequential(copy(c.blocks))
 similar(c::Sequential) = Sequential(empty!(similar(c.blocks)))
-blocks(c::Sequential) = c.blocks
-addrs(c::Sequential) = ones(Int, blocks(c)|>length)
+subblocks(c::Sequential) = c.blocks
+addrs(c::Sequential) = ones(Int, subblocks(c)|>length)
 
 
 @forward Sequential.blocks Base.getindex, lastindex, Base.setindex!, Base.iterate, Base.length, Base.eltype, Base.eachindex
 
 # Additional Methods for Chain
-import Base: push!, append!, prepend!, insert!
 push!(c::Sequential, val::AbstractBlock) = (push!(c.blocks, val); c)
 insert!(c::Sequential, i::Integer, val::AbstractBlock) = (insert!(c.blocks, i, val); c)
 append!(c::Sequential, list) = (append!(c.blocks, list); c)
@@ -51,7 +50,7 @@ function print_block(io::IO, x::Sequential)
 end
 
 function print_subblocks(io::IO, tree::Sequential, depth, charset, active_levels)
-    c = blocks(tree)
+    c = subblocks(tree)
     it_result = iterate(c)
     while it_result !== nothing
         child, st = it_result

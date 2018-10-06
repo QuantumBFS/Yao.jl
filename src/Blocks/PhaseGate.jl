@@ -13,11 +13,11 @@ mat(gate::PhaseGate{T}) where T = exp(im * gate.theta) * IMatrix{2, Complex{T}}(
 adjoint(blk::PhaseGate) = PhaseGate(-blk.theta)
 
 copy(block::PhaseGate{T}) where T = PhaseGate{T}(block.theta)
-dispatch!(block::PhaseGate, itr) = (block.theta = first(itr); block)
 
-# Properties
-nparameters(::Type{<:PhaseGate}) = 1
-parameters(x::PhaseGate) = x.theta
+# parametric interface
+niparameters(::Type{<:PhaseGate}) = 1
+iparameters(x::PhaseGate) = x.theta
+setiparameters!(r::PhaseGate, params) = (r.theta = first(params); r)
 
 ==(lhs::PhaseGate, rhs::PhaseGate) = lhs.theta == rhs.theta
 

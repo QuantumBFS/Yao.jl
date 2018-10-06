@@ -25,16 +25,6 @@ function apply!(reg::AbstractRegister, b::MatrixBlock)
     reg
 end
 
-# Parameters
-parameter_type(::MatrixBlock) = Bool
-hasparameter(x::MatrixBlock) = nparameters(x) > 0
-
-function nparameters end
-
-# Trait
-nparameters(::Type{X}) where {X <: MatrixBlock} = 0
-parameters(x::MatrixBlock) = ()
-
 """
     datatype(x) -> DataType
 
@@ -54,6 +44,6 @@ Occupied addresses (include control bits and bits occupied by blocks), fall back
 """
 usedbits(block::MatrixBlock{N}) where N = collect(1:N)
 
-include("TagBlock.jl")
 include("Primitive.jl")
+include("Container.jl")
 include("Composite.jl")

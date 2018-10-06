@@ -1,16 +1,16 @@
 export RepeatedBlock
 
 """
-    RepeatedBlock{N, C, GT, T} <: CompositeBlock{N, T}
+    RepeatedBlock{N, C, GT, T} <: AbstractContainer{N, T}
 
 repeat the same block on given addrs.
 """
-mutable struct RepeatedBlock{N, C, GT<:MatrixBlock, T} <: CompositeBlock{N, T}
+mutable struct RepeatedBlock{N, C, GT<:MatrixBlock, T} <: AbstractContainer{N, T}
     block::GT
     addrs::NTuple{C, Int}
 
     function RepeatedBlock{N, C, GT, T}(block, addrs) where {N, M, C, T, GT<:MatrixBlock{M, T}}
-        _assert_addr_safe(N, [i:i+M-1 for i in addrs])
+        _assert_addr_safe(N, UnitRange{Int}[i:i+M-1 for i in addrs])
         length(addrs) == C || throw(ArgumentError("Repeat number mismatch!"))
         new{N, C, GT, T}(block, addrs)
     end
@@ -24,19 +24,19 @@ function RepeatedBlock{N}(block::GT, addrs::NTuple) where {N, M, T, GT <: Matrix
     RepeatedBlock{N, length(addrs), GT, T}(block, addrs)
 end
 
-blocks(rb::RepeatedBlock) = [rb.block]
+==(A::RepeatedBlock, B::RepeatedBlock) = A.addrs == B.addrs && A.block == B.block
 addrs(rb::RepeatedBlock) = rb.addrs
 usedbits(rb::RepeatedBlock) = vcat([i.+(0:nqubits(rb.block)-1) for i in addrs(rb)]...)
-copy(x::RepeatedBlock) = typeof(x)(block, copy(x.addrs))
-
-dispatch!(rb::RepeatedBlock, params...) = dispatch!(rb.block, params...)
-dispatch!(f::Function, rb::RepeatedBlock, params...) = dispatch!(f, rb.block, params...)
+copy(x::RepeatedBlock) = typeof(x)(x.block, x.addrs)
+chblock(pb::RepeatedBlock{N}, blk::AbstractBlock) where N = RepeatedBlock{N}(blk, pb.addrs)
 
 isunitary(rb::RepeatedBlock) = isunitary(rb.block)
 ishermitian(rb::RepeatedBlock) = ishermitian(rb.block)
 reflexive(rb::RepeatedBlock) = reflexive(rb.block)
 
 mat(rb::RepeatedBlock{N}) where N = hilbertkron(N, fill(mat(rb.block), length(rb.addrs)), [rb.addrs...])
+mat(rb::RepeatedBlock{N, 0, GT, T}) where {N, GT, T} = IMatrix{1<<N, T}()
+
 adjoint(blk::RepeatedBlock{N}) where N = RepeatedBlock{N}(adjoint(blk.block), blk.addrs)
 function apply!(reg::AbstractRegister, rp::RepeatedBlock{N}) where N
     m  = mat(rp.block)
@@ -45,6 +45,8 @@ function apply!(reg::AbstractRegister, rp::RepeatedBlock{N}) where N
     end
     reg
 end
+
+apply!(reg::AbstractRegister, rp::RepeatedBlock{N, 0}) where N = reg
 
 function hash(rb::RepeatedBlock, h::UInt)
     hashkey = hash(objectid(rb), h)

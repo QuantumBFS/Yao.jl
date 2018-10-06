@@ -28,11 +28,12 @@ end
 
 copy(m::Roller) = typeof(m)(m.blocks)
 
-blocks(m::Roller) = m.blocks
+subblocks(m::Roller) = m.blocks
 addrs(m::Roller) = cumsum([[1]; [nqubits(b) for b in m.blocks[1:end-1]]])
 isunitary(m::Roller) = all(isunitary, m.blocks)
 ishermitian(m::Roller) = all(ishermitian, m.blocks)
 isreflexive(m::Roller) = all(isreflexive, m.blocks)
+chsubblocks(pb::Roller, blocks) where N = Roller((blocks...,))
 
 ⊗ = kron
 mat(m::Roller) = mapreduce(blk->mat(blk), ⊗, m.blocks[end:-1:1])

@@ -7,7 +7,11 @@ using LuxurySparse
 test_server = DefaultServer{MatrixBlock, CacheFragment}()
 
 @testset "constructor" begin
-    @test CachedBlock(test_server, X, 2) isa CachedBlock{DefaultServer{MatrixBlock, CacheFragment}, XGate{ComplexF64}, 1, ComplexF64}
+    c = CachedBlock(test_server, X, 2)
+    @test c isa CachedBlock{DefaultServer{MatrixBlock, CacheFragment}, XGate{ComplexF64}, 1, ComplexF64}
+
+    blk = kron(4, 2=>Rx(0.3))
+    @test first(chsubblocks(c, [blk]) |> subblocks) == blk
 end
 
 @testset "methods" begin
@@ -52,7 +56,7 @@ end
     @test length(g) == length(g.block)
 
     @test eltype(g) == eltype(g.block)
-    @test blocks(g) == blocks(g.block)
+    @test subblocks(g) == (g.block,)
 
     gg = chain(g, g)
     cgg = CachedBlock(test_server, gg, 2)

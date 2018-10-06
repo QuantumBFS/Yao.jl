@@ -9,14 +9,17 @@ blockfilter(func, blk::AbstractBlock) = blockfilter!(func, Vector{AbstractBlock}
 
 function blockfilter!(func, rgs::Vector, blk::CompositeBlock)
     if func(blk) push!(rgs, blk) end
-    for block in blocks(blk)
+    for block in subblocks(blk)
         blockfilter!(func, rgs, block)
     end
     rgs
 end
 
 blockfilter!(func, rgs::Vector, blk::PrimitiveBlock) = func(blk) ? push!(rgs, blk) : rgs
-blockfilter!(func, rgs::Vector, blk::TagBlock) = func(parent(blk)) ? push!(rgs, parent(blk)) : rgs
+function blockfilter!(func, rgs::Vector, blk::AbstractContainer)
+    func(blk) && push!(rgs, blk)
+    blockfilter!(func, rgs, block(blk))
+end
 
 export traverse
 
@@ -52,14 +55,19 @@ function iterate(it::BlockTreeIterator{:BFS}, st = (q = Queue(AbstractBlock); en
     end
 end
 
-function enqueue_parent!(queue::Queue, blk::AbstractBlock)
-    for each in blocks(blk)
+function enqueue_parent!(queue::Queue, blk::AbstractContainer)
+    enqueue!(queue, blk |> block)
+    queue
+end
+
+function enqueue_parent!(queue::Queue, blk::CompositeBlock)
+    for each in subblocks(blk)
         enqueue!(queue, each)
     end
     queue
 end
 
-function enqueue_parent!(queue::Queue, blk::PrimitiveBlock)
+function enqueue_parent!(queue::Queue, blk::AbstractBlock)
     queue
 end
 
@@ -69,7 +77,7 @@ function iterate(it::BlockTreeIterator{:DFS}, st = AbstractBlock[it.root])
         nothing
     else
         node = pop!(st)
-        append!(st, Iterators.reverse(blocks(node)))
+        append!(st, Iterators.reverse(subblocks(node)))
         node, st
     end
 end
@@ -83,8 +91,9 @@ expectation value of an operator.
 """
 function expect end
 
-expect(op::AbstractBlock, reg::AbstractRegister) = sum(conj(reg |> statevec) .* (apply!(copy(reg), op) |> statevec), dims=1) |> vec
-expect(op::AbstractBlock, reg::AbstractRegister{1}) = reg'*apply!(copy(reg), op)
+#expect(op::AbstractBlock, reg::AbstractRegister) = sum(conj(reg |> statevec) .* (apply!(copy(reg), op) |> statevec), dims=1) |> vec
+#expect(op::AbstractBlock, reg::AbstractRegister{1}) = reg'*apply!(copy(reg), op)
+expect(op::AbstractBlock, reg::AbstractRegister) = reg'*apply!(copy(reg), op)
 
 expect(op::MatrixBlock, dm::DensityMatrix) = mapslices(x->sum(mat(op).*x)[], dm.state, dims=[1,2]) |> vec
 expect(op::MatrixBlock, dm::DensityMatrix{1}) = sum(mat(op).*dropdims(dm.state, dims=3))

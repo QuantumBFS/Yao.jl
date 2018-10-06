@@ -15,6 +15,8 @@ using Yao.Intrinsics
     g.blocks[1].theta = 0.2
     @test src.theta == 0.1
     @test g.blocks[2].theta == 0.1
+    blks = [X, Y, kron(3, 2=>Rx(0.3))]
+    @test all(chsubblocks(g, blks) |> subblocks .== blks)
 end
 
 @testset "copy" begin

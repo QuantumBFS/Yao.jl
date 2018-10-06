@@ -3,10 +3,32 @@ export AbstractBlock
 """
     AbstractBlock
 
-abstract type that all block will subtype from. `N` is the number of
-qubits.
+abstract type that all block will subtype from. `N` is the number of qubits.
+
+Required interfaces
+    * `apply!` or (and) `mat`
+
+Interfaces for parametric blocks.
+
+    * iparameters
+    * setiparameters
 """
 abstract type AbstractBlock end
+
+"""
+    subblocks(blk::AbstractBlock) -> Tuple
+
+return a tuple of all sub-blocks in this block.
+"""
+function subblocks end
+subblocks(blk::AbstractBlock) = ()
+
+"""
+    chsubblocks(pb::AbstractBlock, blks) -> AbstractBlock
+
+Change `subblocks` of target block.
+"""
+chsubblocks(pb::AbstractBlock, blks) = length(blks)==0 ? pb : throws(ArgumentError("size of blocks not match!"))
 
 """
     apply!(reg, block, [signal])
@@ -37,29 +59,40 @@ Test whether this operator is reflexive.
 function isreflexive end
 
 """
-    nparameters(x) -> Integer
+    niparameters(x) -> Integer
 
 Returns the number of parameters of `x`.
 """
-function nparameters end
-nparameters(::Type{X}) where {X <: AbstractBlock} = 0
-nparameters(x::AbstractBlock) = length(parameters(x))
+function niparameters end
+niparameters(x::AbstractBlock) = length(iparameters(x))
 
 """
-    parameters(block) -> Vector
+    iparameters(block) -> Vector
 
-Returns a list of all parameters in block.
+Returns a list of all intrinsic (not from sublocks) parameters in block.
 """
-function parameters end
-parameters(x::AbstractBlock) = ()
+function iparameters end
+iparameters(x::AbstractBlock) = ()
 
 """
-    parameters(block) -> Type
+    setparameters!([elementwisefunction], r::AbstractBlock, params) -> AbstractBlock
 
-the type of parameters.
+set intrinsics parameter for block.
+"""
+function setiparameters end
+setiparameters!(r::AbstractBlock, params) = r
+setiparameters!(func::Function, r::AbstractBlock, params) = setiparameters!(r, func.(r |> iparameters, params))
+
+"""
+    parameter_type(block) -> Type
+
+the type of iparameters.
 """
 function parameter_type end
-parameter_type(x::AbstractBlock) = Bool
+function parameter_type(c::AbstractBlock)
+    promote_type(eltype(c |> iparameters), [parameter_type(each) for each in subblocks(c)]...)
+end
+
 
 """
     mat(block) -> Matrix
@@ -69,12 +102,27 @@ Returns the matrix form of this block.
 function mat end
 
 """
-    dispatch!(block, params)
-    dispatch!(block, params...)
+    dispatch!([func::Function], block::AbstractBlock, params)
+    dispatch!!([func::Function], block::AbstractBlock, params)
 
-dispatch parameters to this block.
+dispatch parameters to this block, `dispatch!!` will pop! out all params.
 """
-function dispatch! end
+dispatch!(block::AbstractBlock, params) = dispatch!!(block, params |> collect)
+dispatch!(func::Function, block::AbstractBlock, params) = dispatch!!(func, block, params |> collect)
+function dispatch!!(r::AbstractBlock, params)
+    setiparameters!(r, (popfirst!(params) for i=1:niparameters(r)))
+    for blk in subblocks(r)
+        dispatch!!(blk, params)
+    end
+    r
+end
+function dispatch!!(func::Function, r::AbstractBlock, params)
+    setiparameters!(func, r, (popfirst!(params) for i=1:niparameters(r)))
+    for blk in subblocks(r)
+        dispatch!!(func, blk, params)
+    end
+    r
+end
 
 """
     print_block(io, block)
@@ -82,13 +130,31 @@ function dispatch! end
 define the style to print this block
 """
 function print_block(io::IO, block)
-
-@static if VERSION < v"0.7-"
-    print(io, summary(block))
-else
     summary(io, block)
 end
 
+"""
+    nparameters(c::AbstractBlock) -> Int
+
+number of parameters, including parameters in sublocks.
+"""
+function nparameters(c::AbstractBlock)
+    count = niparameters(c)
+    for each in subblocks(c)
+        count += nparameters(each)
+    end
+    count
 end
 
-isprimitive(blk::AbstractBlock) = false
+"""
+    parameters(c::AbstractBlock, output=Float64[]) -> Vector
+
+get all parameters including sublocks.
+"""
+function parameters(c::AbstractBlock, output=Float64[])
+    append!(output, iparameters(c))
+    for blk in subblocks(c)
+        append!(output, parameters(blk))
+    end
+    output
+end

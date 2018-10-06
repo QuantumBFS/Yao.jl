@@ -37,37 +37,37 @@ end
 
         g = chain(phase(0.0), phase(0.0))
         dispatch!(g, [1, 2])
-        @test parameters(g[1]) ≈ 1
-        @test parameters(g[2]) ≈ 2
+        @test parameters(g[1]) ≈ [1]
+        @test parameters(g[2]) ≈ [2]
 
         g = rollrepeat(4, g)
-        dispatch!(g, 1:8)
+        dispatch!(g, [1:8...])
 
         for (i, each) in enumerate(parameters(g))
             each ≈ i
         end
 
         g = kron(4, 1=>phase(0.2), 2=>X, 3=>phase(0.3))
-        dispatch!(g, 1:2)
+        dispatch!(g, [1:2...])
 
-        @test parameters(g[1]) ≈ 1
-        @test parameters(g[3]) ≈ 2
+        @test parameters(g[1]) ≈ [1]
+        @test parameters(g[3]) ≈ [2]
 
     end
 
     @testset "check function dispatch" begin
         g = chain(phase(0.0), phase(0.0))
         dispatch!(+, g, [1, 2])
-        @test parameters(g[1]) ≈ 1
-        @test parameters(g[2]) ≈ 2
+        @test parameters(g[1]) ≈ [1]
+        @test parameters(g[2]) ≈ [2]
 
         dispatch!(*, g, [0.1, 0.1])
-        @test parameters(g[1]) ≈ 0.1
-        @test parameters(g[2]) ≈ 0.2
+        @test parameters(g[1]) ≈ [0.1]
+        @test parameters(g[2]) ≈ [0.2]
 
         dispatch!(-, g, [0.1, 0.2])
-        @test parameters(g[1]) ≈ 0.0
-        @test parameters(g[2]) ≈ 0.0
+        @test parameters(g[1]) ≈ [0.0]
+        @test parameters(g[2]) ≈ [0.0]
     end
 
 end

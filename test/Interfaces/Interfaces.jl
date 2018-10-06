@@ -3,6 +3,7 @@ using Test, Random, LinearAlgebra, SparseArrays
 using Yao
 using Yao.Blocks
 using Yao.Intrinsics
+using StaticArrays: SVector
 
 # @testset "with context" begin
 #     r = register(bit"00000")
@@ -114,7 +115,7 @@ end
 
 @testset "gate" begin
     @test X isa XGate{ComplexF64}
-    @test X(ComplexF32) isa XGate{ComplexF32}
+    @test XGate{ComplexF32}() isa XGate{ComplexF32}
     @test Rx(1) isa RotationGate
     @test Ry(1) isa RotationGate
     @test Rz(1) isa RotationGate
@@ -147,6 +148,19 @@ end
     reg = apply!(register(bit"11111"), sqs[1:end-1])
     @test MEASURE.result[] == 155
     @test reg != zero_state(8)
+end
+
+@testset "paulistring" begin
+    @test paulistring(2, X, X) isa PauliString
+    @test_throws QubitMismatchError paulistring(3, X, X)
+    @test paulistring(SVector{2, PauliGate{ComplexF64}}([X, X]))(2) isa PauliString
+    @test paulistring(1=>Y)(3) == paulistring(Y, I2, I2)(3)
+    @test paulistring(3) == paulistring(I2, I2, I2)(3)
+end
+
+@testset "timeevolve" begin
+    @test timeevolve(X, 0.3) isa TimeEvolution
+    @test X |> timeevolve(0.3) isa TimeEvolution
 end
 
 @testset "Eye Candies" begin

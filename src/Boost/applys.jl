@@ -1,4 +1,4 @@
-function xapply!(state::VecOrMat{T}, bits::Ints) where T
+function xapply!(state::AbstractVecOrMat{T}, bits::Ints) where T
     if length(bits) == 0
         return state
     end
@@ -16,7 +16,7 @@ function xapply!(state::VecOrMat{T}, bits::Ints) where T
     state
 end
 
-function yapply!(state::VecOrMat{T}, bits::Ints) where T
+function yapply!(state::AbstractVecOrMat{T}, bits::Ints) where T
     if length(bits) == 0
         return state
     end
@@ -42,7 +42,7 @@ function yapply!(state::VecOrMat{T}, bits::Ints) where T
     state
 end
 
-function zapply!(state::VecOrMat{T}, bits::Ints) where T
+function zapply!(state::AbstractVecOrMat{T}, bits::Ints) where T
     mask = bmask(bits...)
     for b in basis(state)
         if count_ones(b&mask)%2==1
@@ -52,7 +52,7 @@ function zapply!(state::VecOrMat{T}, bits::Ints) where T
     state
 end
 
-function zapply!(state::VecOrMat{T}, bit::Int) where T
+function zapply!(state::AbstractVecOrMat{T}, bit::Int) where T
     mask = bmask(bit)
     @simd for b in basis(state)
         if testany(b, mask)
@@ -64,7 +64,7 @@ end
 
 ################### Multi Controlled Version ####################
 
-function czapply!(state::VecOrMat{T}, cbits, cvals, b2::Int) where T
+function czapply!(state::AbstractVecOrMat{T}, cbits, cvals, b2::Int) where T
     c = controller([cbits..., b2[1]], [cvals..., 1])
     @simd for b = basis(state)
         if b |> c
@@ -74,7 +74,7 @@ function czapply!(state::VecOrMat{T}, cbits, cvals, b2::Int) where T
     state
 end
 
-function cyapply!(state::VecOrMat{T}, cbits, cvals, b2::Int) where T
+function cyapply!(state::AbstractVecOrMat{T}, cbits, cvals, b2::Int) where T
     c = controller([cbits..., b2[1]], [cvals..., 0])
     mask2 = bmask(b2...)
     @simd for b = basis(state)
@@ -89,7 +89,7 @@ function cyapply!(state::VecOrMat{T}, cbits, cvals, b2::Int) where T
 end
 
 
-function cxapply!(state::VecOrMat{T}, cbits, cvals, b2) where T
+function cxapply!(state::AbstractVecOrMat{T}, cbits, cvals, b2) where T
     c = controller([cbits..., b2[1]], [cvals..., 0])
     mask2 = bmask(b2...)
 
@@ -106,7 +106,7 @@ end
 
 ################### Single Controlled Version ####################
 
-function czapply!(state::VecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
+function czapply!(state::AbstractVecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
     mask2 = bmask(b2)
     step = 1<<(cbit-1)
     step_2 = 1<<cbit
@@ -121,7 +121,7 @@ function czapply!(state::VecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
     state
 end
 
-function cyapply!(state::VecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
+function cyapply!(state::AbstractVecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
     mask2 = bmask(b2)
     mask = bmask(cbit, b2)
 
@@ -146,7 +146,7 @@ function cyapply!(state::VecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
     state
 end
 
-function cxapply!(state::VecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
+function cxapply!(state::AbstractVecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
     mask2 = bmask(b2)
     mask = bmask(cbit, b2)
 
@@ -168,7 +168,7 @@ end
 
 
 ####################### General Apply U1 ########################
-function u1apply!(state::VecOrMat{T}, U1::PermMatrix{T}, ibit::Int) where T
+function u1apply!(state::AbstractVecOrMat{T}, U1::PermMatrix{T}, ibit::Int) where T
     if U1.perm[1] == 1
         return u1apply!(state, Diagonal(U1), ibit)
     end
@@ -184,7 +184,7 @@ function u1apply!(state::VecOrMat{T}, U1::PermMatrix{T}, ibit::Int) where T
     state
 end
 
-function u1apply!(state::VecOrMat{T}, U1::Diagonal{T}, ibit::Int) where T
+function u1apply!(state::AbstractVecOrMat{T}, U1::Diagonal{T}, ibit::Int) where T
     mask = bmask(ibit)
     a, d = U1.diag
     step = 1<<(ibit-1)
@@ -198,4 +198,4 @@ function u1apply!(state::VecOrMat{T}, U1::Diagonal{T}, ibit::Int) where T
     state
 end
 
-u1apply!(state::VecOrMat, U1::IMatrix, ibit::Int) = state
+u1apply!(state::AbstractVecOrMat, U1::IMatrix, ibit::Int) = state

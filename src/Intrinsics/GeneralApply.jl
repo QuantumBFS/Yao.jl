@@ -1,4 +1,4 @@
-function u1apply!(state::VecOrMat{T}, U1::AbstractMatrix, ibit::Int) where T
+function u1apply!(state::AbstractVecOrMat{T}, U1::AbstractMatrix, ibit::Int) where T
     mask = bmask(ibit)
     a, c, b, d = U1
     step = 1<<(ibit-1)
@@ -21,14 +21,14 @@ function unapply!(state::VecOrMat, U::AbstractMatrix, locs::Vector{Int})
 end
 =#
 
-function _unapply!(state::VecOrMat, U::AbstractMatrix, locs_raw::SDVector, ic::IterControl)
+function _unapply!(state::AbstractVecOrMat, U::AbstractMatrix, locs_raw::SDVector, ic::IterControl)
     controldo(ic) do i
         unrows!(state, locs_raw+i, U)
     end
     state
 end
 
-function _unapply!(state::VecOrMat, U::SDSparseMatrixCSC, locs_raw::SDVector, ic::IterControl)
+function _unapply!(state::AbstractVecOrMat, U::SDSparseMatrixCSC, locs_raw::SDVector, ic::IterControl)
     work = ndims(state)==1 ? similar(state, length(locs_raw)) : similar(state, length(locs_raw), size(state,2))
     controldo(ic) do i
         unrows!(state, locs_raw+i, U, work)
@@ -47,7 +47,7 @@ control-unitary
 """
 function cunapply! end
 
-function cunapply!(state::VecOrMat, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::AbstractMatrix, locs::NTuple{M, Int}) where {C, M}
+function cunapply!(state::AbstractVecOrMat, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::AbstractMatrix, locs::NTuple{M, Int}) where {C, M}
     # reorder a unirary matrix.
     U = all(diff(locs).>0) ? U0 : reorder(U0, collect(locs)|>sortperm)
     N, MM = nqubits(state), size(U0, 1)
@@ -58,6 +58,6 @@ function cunapply!(state::VecOrMat, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}
     _unapply!(state, U |> autostatic, locs_raw |> autostatic, ic)
 end
 
-cunapply!(state::VecOrMat, cbits::NTuple, cvals::NTuple, U::IMatrix, locs::NTuple) = state
+cunapply!(state::AbstractVecOrMat, cbits::NTuple, cvals::NTuple, U::IMatrix, locs::NTuple) = state
 
-unapply!(state::VecOrMat, U::AbstractMatrix, locs::NTuple) = cunapply!(state, (), (), U, locs)
+unapply!(state::AbstractVecOrMat, U::AbstractMatrix, locs::NTuple) = cunapply!(state, (), (), U, locs)

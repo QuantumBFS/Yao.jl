@@ -18,7 +18,7 @@ mutable struct Measure <: AbstractMeasure
 end
 
 function apply!(reg::AbstractRegister, block::Measure)
-    _, samples = measure!(reg)
+    samples = measure!(reg)
     block.result = samples
     reg
 end
@@ -29,7 +29,7 @@ mutable struct MeasureAndRemove <: AbstractMeasure
 end
 
 function apply!(reg::AbstractRegister, block::MeasureAndRemove)
-    reg, samples = measure_remove!(reg)
+    samples = measure_remove!(reg)
     block.result = samples
     reg
 end

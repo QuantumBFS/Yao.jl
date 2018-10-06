@@ -21,10 +21,12 @@ function u1ij! end
 set specific col of a CSC matrix
 """
 @inline function setcol!(csc::SparseMatrixCSC, icol::Int, rowval::AbstractVector, nzval)
-    @inbounds S = csc.colptr[icol]
-    @inbounds E = csc.colptr[icol+1]-1
-    @inbounds csc.rowval[S:E] = rowval
-    @inbounds csc.nzval[S:E] = nzval
+    @inbounds begin
+        S = csc.colptr[icol]
+        E = csc.colptr[icol+1]-1
+        csc.rowval[S:E] = rowval
+        csc.nzval[S:E] = nzval
+    end
     csc
 end
 
@@ -34,9 +36,11 @@ end
 get specific col of a CSC matrix, returns a slice of (rowval, nzval)
 """
 @inline function getcol(csc::SDSparseMatrixCSC, icol::Int)
-    @inbounds S = csc.colptr[icol]
-    @inbounds E = csc.colptr[icol+1]-1
-    @inbounds view(csc.rowval, S:E), view(csc.nzval, S:E)
+    @inbounds begin
+        S = csc.colptr[icol]
+        E = csc.colptr[icol+1]-1
+        view(csc.rowval, S:E), view(csc.nzval, S:E)
+    end
 end
 
 @inline function reorderU_iterator(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::AbstractMatrix, locs::NTuple{M, Int}) where {C, M}
@@ -77,15 +81,17 @@ function u1mat(nbit::Int, U1::SDMatrix, ibit::Int)
 end
 
 @inline function u1ij!(csc::SparseMatrixCSC, i::Int,j::Int, a, b, c, d)
-    csc.rowval[2*i-1] = i
-    csc.rowval[2*i] = j
-    csc.rowval[2*j-1] = i
-    csc.rowval[2*j] = j
+    @inbounds begin
+        csc.rowval[2*i-1] = i
+        csc.rowval[2*i] = j
+        csc.rowval[2*j-1] = i
+        csc.rowval[2*j] = j
 
-    csc.nzval[2*i-1] = a
-    csc.nzval[2*i] = c
-    csc.nzval[2*j-1] = b
-    csc.nzval[2*j] = d
+        csc.nzval[2*i-1] = a
+        csc.nzval[2*i] = c
+        csc.nzval[2*j-1] = b
+        csc.nzval[2*j] = d
+    end
     csc
 end
 

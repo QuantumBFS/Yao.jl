@@ -1,7 +1,7 @@
 export CachedBlock, update_cache
 
 """
-    CachedBlock{ST, BT, N, T} <: MatrixBlock{N, T}
+    CachedBlock{ST, BT, N, T} <: TagBlock{N, T}
 
 A label type that tags an instance of type `BT`. It forwards
 every methods of the block it contains, except [`mat`](@ref)
@@ -21,6 +21,7 @@ end
 
 iscached(c::CachedBlock) = iscached(c.server, c.block)
 iscacheable(c::CachedBlock) = iscacheable(c.server, c.block)
+chblock(cb::CachedBlock, blk::MatrixBlock) = CachedBlock(cb.server, blk, cb.level)
 
 function update_cache(c::CachedBlock)
     if !iscached(c.server, c.block)
@@ -56,7 +57,6 @@ function apply!(r::AbstractRegister, c::CachedBlock, signal)
 end
 apply!(r::AbstractRegister, c::CachedBlock) = (r.state .= mat(c) * r; r)
 
-parent(c::CachedBlock) = c.block
 similar(c::CachedBlock, level::Int) = CachedBlock(c.server, c.block, level)
 copy(c::CachedBlock, level::Int) = CachedBlock(c.server, copy(c.block), level)
 

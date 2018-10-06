@@ -5,7 +5,7 @@ struct Swap{N, T} <: PrimitiveBlock{N, T}
     addr2::Int
 
     function Swap{N, T}(addr1::Int, addr2::Int) where {N, T}
-        _assert_addr_inbounds(N, [addr1:addr1, addr2:addr2])
+        _assert_addr_inbounds(N, [addr1, addr2])
         new{N, T}(addr1, addr2)
     end
 end

@@ -13,11 +13,11 @@ mat(gate::ShiftGate{T}) where T = Diagonal(Complex{T}[1.0, exp(im * gate.theta)]
 adjoint(blk::ShiftGate) = ShiftGate(-blk.theta)
 
 copy(block::ShiftGate{T}) where T = ShiftGate{T}(block.theta)
-dispatch!(block::ShiftGate, itr) = (block.theta = first(itr); block)
 
-# Properties
-nparameters(::Type{<:ShiftGate}) = 1
-parameters(x::ShiftGate) = x.theta
+# parametric interface
+niparameters(::Type{<:ShiftGate}) = 1
+iparameters(x::ShiftGate) = x.theta
+setiparameters!(r::ShiftGate, params) = (r.theta = first(params); r)
 
 ==(lhs::ShiftGate, rhs::ShiftGate) = lhs.theta == rhs.theta
 

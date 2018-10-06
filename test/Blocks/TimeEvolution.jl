@@ -18,7 +18,7 @@ using Yao.Intrinsics
     @test hash1 != hash(te)
 
     # dispatch
-    dispatch!(cte, 2.0)
+    dispatch!(cte, [2.0])
     @test cte != te
     @test cte.t == 2.0
     @test hash1 != hash(cte)
