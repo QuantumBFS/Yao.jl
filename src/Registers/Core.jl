@@ -141,7 +141,7 @@ function statevec end
 """
     relaxedvec(r::AbstractRegister) -> AbstractArray
 
-Activate all qubits, and return a matrix (vector) for B≠1 (B=1).
+Activate all qubits, and return a matrix (vector) for B>1 (B=1).
 """
 function relaxedvec end
 
