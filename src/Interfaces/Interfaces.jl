@@ -9,6 +9,7 @@ using ..Intrinsics
 
 # import package configs
 import ..Yao: DefaultType
+import ..Blocks: autodiff, expect, blockfilter
 
 @reexport using ..Registers
 
@@ -17,6 +18,7 @@ export @const_gate
 
 # Block APIs
 export mat, apply!, parameters, nparameters, dispatch!, datatype, adjoint, subblocks
+export autodiff, expect, blockfilter
 
 # Candies
 export ⊗

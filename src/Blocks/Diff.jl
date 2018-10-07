@@ -27,7 +27,6 @@ mutable struct Diff{N, T, GT<:Rotor{N, T}, RT<:AbstractRegister} <: TagBlock{N, 
     Diff(block::Rotor{N, T}) where {N, T} = Diff(block, zero_state(N))
 end
 block(df::Diff) = df.block
-# setblock!(df::Diff, blk::AbstractBlock) = (df.block = blk; df)
 chblock(cb::Diff, blk::Rotor) = Diff(blk)
 
 @forward Diff.block mat
@@ -43,7 +42,6 @@ function apply!(δ::AbstractRegister, adf::Daggered{<:Any, <:Any, <:Diff})
 end
 
 function print_block(io::IO, df::Diff)
-    print(io, "[∂] ")
-    print(io, parent(df))
+    printstyled(io, "[∂] "; bold=true, color=:yellow)
+    print_block(io, parent(df))
 end
-

@@ -46,7 +46,7 @@ function *(g2::MatrixBlock{N}, g1::Scale{X1, N}) where {X1, N}
 end
 
 function print_block(io::IO, c::Scale{X}) where X
-    print(io, "$X*")
+    print(io, "[$X] ")
     print_block(io, c.block)
 end
 
@@ -78,20 +78,21 @@ const _Im{N, T, BT} = Scale{-1im, N, T, BT}
 -(blk::Neg) = blk.block
 
 function print_block(io::IO, c::Pos)
+    print(io, "[+] ")
     print_block(io, c.block)
 end
 
 function print_block(io::IO, c::Neg)
-    print(io, "-")
+    print(io, "[-] ")
     print_block(io, c.block)
 end
 
 function print_block(io::IO, c::Im)
-    print(io, "i")
+    print(io, "[i] ")
     print_block(io, c.block)
 end
 
 function print_block(io::IO, c::_Im)
-    print(io, "-i")
+    print(io, "[-i] ")
     print_block(io, c.block)
 end
