@@ -101,7 +101,7 @@ cache_key(x::NewPrimitive) = x.theta
 
 Composite blocks are blocks that are able to contain other blocks. To define a new composite block
 you only need to define your new type as a subtype of [`CompositeBlock`](@ref), and define a new method
-called [`blocks`](@ref) which will provide an iterator that iterates the blocks contained by this composite
+called [`subblocks`](@ref) which will provide an iterator that iterates the blocks contained by this composite
 block.
 
 ## Custom Pretty Printing
