@@ -18,7 +18,7 @@ export @const_gate
 
 # Block APIs
 export mat, apply!, parameters, nparameters, dispatch!, datatype, adjoint, subblocks
-export expect, blockfilter, gradient, scale
+export expect, blockfilter, gradient, scale, backward
 
 # Candies
 export ⊗

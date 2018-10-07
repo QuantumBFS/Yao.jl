@@ -70,18 +70,18 @@ end
 
     c = chain(put(4, 1=>Rx(0.5))) |> autodiff(:QC)
     nd = numdiff(c[1].block) do
-        expect(put(4, 1=>Z), zero_state(4) |> c)  # return loss please
+        expect(put(4, 1=>Z), zero_state(4) |> c) |> real # return loss please
     end
 
     ed = exactdiff(c[1].block) do
-        expect(put(4, 1=>Z), zero_state(4) |> c)
+        expect(put(4, 1=>Z), zero_state(4) |> c) |> real
     end
     @test isapprox(nd, ed, atol=1e-4)
 
     reg = rand_state(4)
     c = chain(put(4, 1=>Rx(0.5)), control(4, 1, 2=>Ry(0.5)), kron(4, 2=>Rz(0.3), 3=>Rx(0.7))) |> autodiff(:QC)
     dbs = collect(c, QDiff)
-    loss1z() = expect(kron(4, 1=>Z, 2=>X), copy(reg) |> c)  # return loss please
+    loss1z() = expect(kron(4, 1=>Z, 2=>X), copy(reg) |> c) |> real  # return loss please
     nd = numdiff.(loss1z, dbs)
     ed = exactdiff.(loss1z, dbs)
     gd = gradient(c)
