@@ -45,6 +45,7 @@ statevec(r::DefaultRegister) = r.state |> matvec
 hypercubic(reg::DefaultRegister{B}) where B = reshape(reg.state, ntuple(i->2, Val(nactive(reg)))..., :)
 rank3(reg::DefaultRegister{B}) where B = reshape(reg.state, size(reg.state, 1), :, B)
 copy(r::DefaultRegister{B}) where B = DefaultRegister{B}(copy(state(r)))
+copyto!(reg1::RT, reg2::RT) where {RT<:AbstractRegister} = (copyto!(reg1.state, reg2.state); reg1)
 normalize!(r::DefaultRegister) = (batch_normalize!(r.state); r)
 
 similar(r::DefaultRegister{B, T}) where {B, T} = DefaultRegister{B}(similar(r.state))
@@ -224,3 +225,10 @@ statevec(bra::ConjRegister) where T = Adjoint(parent(bra) |> statevec)
 relaxedvec(bra::ConjRegister) where T = Adjoint(parent(bra) |> relaxedvec)
 
 *(bra::ConjRegister, ket::DefaultRegister) = statevec(bra) * statevec(ket)
+
+################ Broadcasting ###################
+function broadcastable(reg::DefaultRegister{B}) where B
+    st = reg |> rank3
+    Tuple(register(view(st, :, :, i)) for i = 1:B)
+end
+broadcastable(reg::DefaultRegister{1}) = Ref{reg}

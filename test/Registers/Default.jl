@@ -35,6 +35,12 @@ using Yao.Intrinsics
     creg = copy(reg)
     @test state(creg) == state(reg)
     @test state(creg) !== state(reg)
+
+    reg = rand_state(5,3)
+    reg2 = similar(reg)
+    @test !(reg2 ≈ reg)
+    copyto!(reg2, reg)
+    @test reg2 == reg
 end
 
 @testset "Constructors B=1" begin
@@ -112,4 +118,20 @@ end
     @test r1'*r1 ≈ [1 1; 1 1]
     @test r1 ≈ r2
     @test r3 ≈ r2
+end
+
+@testset "broadcast register" begin
+    reg = rand_state(5,3)
+    c = put(5, 2=>X)
+    ra = copy(reg)
+    rb = copy(reg)
+    @test all(ra .|> Ref(c) .≈ rb .|> Ref(c))
+    @test typeof.(reg)[1] <: DefaultRegister{<:Any, <:Any, <:SubArray}
+end
+
+@testset "measure and reset" begin
+    reg = rand_state(4)
+    res = measure_reset!(reg, (4,))
+    result = measure(reg, 10)
+    @test all(result .< 8)
 end

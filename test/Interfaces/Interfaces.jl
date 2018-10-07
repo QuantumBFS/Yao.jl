@@ -97,6 +97,7 @@ end
 @testset "measure" begin
     @test MEASURE isa Measure
     @test MEASURE_REMOVE isa MeasureAndRemove
+    @test MEASURE_RESET isa MeasureAndReset
 end
 
 @testset "concentrate" begin

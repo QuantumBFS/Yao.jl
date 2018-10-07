@@ -1,4 +1,4 @@
-export measure, measure!, measure_remove!, select, select!
+export measure, measure!, measure_remove!, measure_reset!, select, select!
 using StatsBase
 
 @static if VERSION < v"0.7+"
@@ -57,6 +57,32 @@ function measure!(reg::AbstractRegister{B}) where B
         @inbounds nstate[res[ib]+1, :, ib] = view(_nstate, :,ib)
     end
     reg.state = reshape(nstate, size(state, 1), :)
+    res
+end
+
+"""
+    measure_and_reset!(reg::AbstractRegister, [mbits]; val=0) -> Int
+
+measure and set the register to specific value.
+"""
+function measure_reset!(reg::AbstractRegister{B}; val::Int=0) where B
+    state = reshape(reg.state, size(reg.state,1),:,B)
+    nstate = zero(state)
+    res = measure_remove!(reg)
+    _nstate = reshape(reg.state, :, B)
+    @simd for ib in 1:B
+        @inbounds nstate[val+1, :, ib] = view(_nstate, :,ib)
+    end
+    reg.state = reshape(nstate, size(state, 1), :)
+    res
+end
+
+function measure_reset!(reg::AbstractRegister, mbits; val::Int=0) where {B, T, C}
+    local res
+    focus!(reg, mbits) do reg_focused
+        res = measure_reset!(reg_focused, val=val)
+        reg_focused
+    end
     res
 end
 
