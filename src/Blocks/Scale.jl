@@ -17,6 +17,7 @@ Scale{X}(blk::BT) where {X, N, T, BT<:MatrixBlock{N, T}} = Scale{X, N, T, BT}(bl
 ==(b1::MatrixBlock, b2::Scale{1}) where X = b1 == parent(b2)
 scale(blk::Scale{X}, x::Number) where X = Scale{X*x}(parent(blk))
 scale(blk::MatrixBlock, x::Number) = Scale{x}(blk)
+scale(x::Number) = blk -> scale(blk, x)
 getscale(blk::Scale{X}) where X = X
 
 # since adjoint can propagate, this way is better
@@ -46,7 +47,7 @@ function *(g2::MatrixBlock{N}, g1::Scale{X1, N}) where {X1, N}
 end
 
 function print_block(io::IO, c::Scale{X}) where X
-    print(io, "[$X] ")
+    printstyled(io, "[$X] "; bold=true, color=:yellow)
     print_block(io, c.block)
 end
 
@@ -78,21 +79,21 @@ const _Im{N, T, BT} = Scale{-1im, N, T, BT}
 -(blk::Neg) = blk.block
 
 function print_block(io::IO, c::Pos)
-    print(io, "[+] ")
+    printstyled(io, "[+] "; bold=true, color=:yellow)
     print_block(io, c.block)
 end
 
 function print_block(io::IO, c::Neg)
-    print(io, "[-] ")
+    printstyled(io, "[-] "; bold=true, color=:yellow)
     print_block(io, c.block)
 end
 
 function print_block(io::IO, c::Im)
-    print(io, "[i] ")
+    printstyled(io, "[i] "; bold=true, color=:yellow)
     print_block(io, c.block)
 end
 
 function print_block(io::IO, c::_Im)
-    print(io, "[-i] ")
+    printstyled(io, "[-i] "; bold=true, color=:yellow)
     print_block(io, c.block)
 end

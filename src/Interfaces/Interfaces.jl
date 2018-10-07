@@ -9,7 +9,7 @@ using ..Intrinsics
 
 # import package configs
 import ..Yao: DefaultType
-import ..Blocks: autodiff, expect, blockfilter
+import ..Blocks: expect, blockfilter, gradient, scale
 
 @reexport using ..Registers
 
@@ -18,7 +18,7 @@ export @const_gate
 
 # Block APIs
 export mat, apply!, parameters, nparameters, dispatch!, datatype, adjoint, subblocks
-export autodiff, expect, blockfilter
+export expect, blockfilter, gradient, scale
 
 # Candies
 export ⊗
@@ -29,7 +29,7 @@ include("Composite.jl")
 include("Measure.jl")
 include("Function.jl")
 include("Sequential.jl")
-include("Cache.jl")
+include("TagBlock.jl")
 include("Candies.jl")
 
 end

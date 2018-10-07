@@ -166,3 +166,7 @@ end
 @testset "Eye Candies" begin
     include("Candies.jl")
 end
+
+@testset "TagBlock" begin
+    include("TagBlock.jl")
+end
