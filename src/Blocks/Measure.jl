@@ -12,16 +12,54 @@ abstract type AbstractMeasure <: AbstractBlock end
 #####################
 abstract type AbstractMeasure <: AbstractBlock end
 
+"""
+    Measure <: AbstractMeasure
+    Measure() -> Measure
+
+Measure block, collapse a state and store measured value, e.g.
+
+# Examples
+```julia-repl
+julia> m = Measure();
+
+julia> reg = product_state(4, 7)
+DefaultRegister{1, Complex{Float64}}
+    active qubits: 4/4
+
+julia> reg |> m
+DefaultRegister{1, Complex{Float64}}
+    active qubits: 4/4
+
+julia> m.result
+1-element Array{Int64,1}:
+ 7
+```
+
+Note:
+`Measure` returns a vector here, the length corresponds to batch dimension of registers.
+"""
 mutable struct Measure <: AbstractMeasure
     result::Vector{Int}
     Measure() = new()
 end
 
+"""
+    MeasureAndRemove <: AbstractMeasure
+    MeasureAndRemove() -> MeasureAndRemove
+
+Measure and remove block, remove measured qubits and store measured value.
+"""
 mutable struct MeasureAndRemove <: AbstractMeasure
     result::Vector{Int}
     MeasureAndRemove() = new()
 end
 
+"""
+    MeasureAndReset <: AbstractMeasure
+    MeasureAndReset([val=0]) -> MeasureAndReset
+
+Measure and reset block, reset measured qubits to `val` and store measured value.
+"""
 mutable struct MeasureAndReset <: AbstractMeasure
     val::Int
     result::Vector{Int}
@@ -36,7 +74,8 @@ for (BT, FUNC) in zip((:Measure, :MeasureAndRemove, :MeasureAndReset), (:measure
         block.result = samples
         reg
     end
+    EXTRA = BT == :MeasureAndReset ? :(" -> $(pb.val)") : :("")
     @eval function print_block(io::IO, pb::$BT)
-        printstyled(io, "$BT"; bold=true, color=:red)
+        printstyled(io, string($BT)*$EXTRA; bold=true, color=:red)
     end
 end
