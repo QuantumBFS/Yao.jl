@@ -18,8 +18,9 @@ cache_key(tb::TagBlock) = cache_key(parent(tb))
 include("BlockCache.jl")
 include("Daggered.jl")
 include("Scale.jl")
+include("Diff.jl")
 
 ########## common interfaces are defined here! ##############
-for BLOCKTYPE in (:Daggered, :CachedBlock, :Scale)
+for BLOCKTYPE in (:Daggered, :CachedBlock, :Scale, :Diff)
     @eval parent(dg::$BLOCKTYPE) = dg.block
 end

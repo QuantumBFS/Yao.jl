@@ -19,7 +19,7 @@ include("Math.jl")
 
 # Basis
 export DInt, Ints, DInts
-export basis, bmask
+export basis, bmask, baddrs
 export bit_length, log2i, bsizeof, nqubits
 export testall, testany, testval, setbit, flip, neg, swapbits, takebit, breflect
 export indices_with, bitarray, packbits, controller

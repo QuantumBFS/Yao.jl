@@ -70,6 +70,11 @@ end
     @test g[1] == phase(0.1)
     @test g[2] == X
     @test g[end] == rot(Y, 0.0)
+    first = popfirst!(g)
+    last = pop!(g)
+    @test first == phase(0.1)
+    @test last == rot(Y, 0.0)
+    @test g == chain(1, [X, Y, Z, rot(X, 0.0)])
 end
 
 @testset "traits" begin

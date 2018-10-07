@@ -17,7 +17,7 @@ import ..Registers: focus!, relax!
 import ..Intrinsics: ishermitian, isunitary, isreflexive
 import CacheServers: update!, iscached, clear!, pull, iscacheable
 export clear! # TODO: rm this later
-import Base: copy, hash, ==, eltype, show, similar, getindex, setindex!, iterate, length, parent, adjoint, lastindex, push!, append!, prepend!, insert!, +, -, *, /
+import Base: copy, hash, ==, eltype, show, similar, getindex, setindex!, iterate, length, parent, adjoint, lastindex, push!, append!, prepend!, insert!, +, -, *, /, pop!, popfirst!
 
 # APIs for cache block's matrix
 export update_cache

@@ -1,4 +1,4 @@
-export RotationGate
+export RotationGate, Rotor, generator
 
 """
     RotationGate{N, T, GT <: MatrixBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}

@@ -97,3 +97,50 @@ expect(op::AbstractBlock, reg::AbstractRegister) = reg'*apply!(copy(reg), op)
 
 expect(op::MatrixBlock, dm::DensityMatrix) = mapslices(x->sum(mat(op).*x)[], dm.state, dims=[1,2]) |> vec
 expect(op::MatrixBlock, dm::DensityMatrix{1}) = sum(mat(op).*dropdims(dm.state, dims=3))
+
+################### AutoDiff Circuit ###################
+export autodiff, gradient, loss_expect!, loss_Z1!
+"""
+    gradient(U::AbstractBlock, δ::AbstractRegister)
+
+get the (part) gradient ∂f/∂ψ*⋅∂ψ*/∂θ, given ∂f/∂ψ*.
+"""
+function gradient(U::AbstractBlock, δ::AbstractRegister)
+    δ |> U'
+    local grad = Float64[]
+    blockfilter(U) do x
+        x isa Diff && push!(grad, x.grad)
+        false
+    end
+    grad
+end
+
+autodiff(block::Rotor{N}) where N = Diff(block)
+# control, repeat, kron, roller and Diff can not propagate.
+autodiff(block::AbstractBlock) = block
+function autodiff(blk::Union{ChainBlock, Roller, Sequential})
+    chsubblocks(blk, autodiff.(subblocks(blk)))
+end
+
+"""
+    loss_expect(circuit::AbstractBlock, op::AbstractBlock) -> Function
+
+Return function "loss!(ψ, θ) -> Vector"
+"""
+function loss_expect!(circuit::AbstractBlock, op::AbstractBlock)
+    N = nqubits(circuit)
+    function loss!(ψ::AbstractRegister, θ::Vector)
+        params = parameters(circuit)
+        dispatch!(circuit, θ)
+        ψ |> circuit
+        dispatch!!(circuit, params)
+        expect(op, ψ)
+    end
+end
+
+"""
+    loss_Z1!(circuit::AbstractBlock; ibit::Int=1) -> Function
+
+Return the loss function f = <Zi> (means measuring the ibit-th bit in computation basis).
+"""
+loss_Z1!(circuit::AbstractBlock; ibit::Int=1) = loss_expect!(circuit, put(nqubits(circuit), ibit=>Z))
