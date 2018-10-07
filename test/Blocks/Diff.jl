@@ -1,6 +1,6 @@
 using Yao
 using Yao.Blocks
-using LinearAlgebra, Test, BenchmarkTools
+using LinearAlgebra, Test
 
 @testset "Constrcut" begin
     reg = rand_state(4)
