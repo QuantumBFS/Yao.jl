@@ -9,7 +9,7 @@ using ..Intrinsics
 
 # import package configs
 import ..Yao: DefaultType
-import ..Blocks: expect, blockfilter, gradient, scale
+import ..Blocks: expect, blockfilter, gradient, scale, backward
 
 @reexport using ..Registers
 

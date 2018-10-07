@@ -27,11 +27,11 @@ Return the loss function f = <Zi> (means measuring the ibit-th bit in computatio
 loss_Z1!(circuit::AbstractBlock; ibit::Int=1) = loss_expect!(circuit, put(nqubits(circuit), ibit=>Z))
 
 @testset "diff adjoint" begin
-    c = put(4, 3=>Rx(0.5)) |> autodiff
+    c = put(4, 3=>Rx(0.5)) |> autodiff(:BP)
     cad = c'
     @test mat(cad) == mat(c)'
 
-    circuit = chain(4, repeat(4, H, 1:4), put(4, 3=>Rz(0.5)) |> autodiff, control(2, 1=>X), put(4, 4=>Ry(0.2)) |> autodiff)
+    circuit = chain(4, repeat(4, H, 1:4), put(4, 3=>Rz(0.5)) |> autodiff(:BP), control(2, 1=>X), put(4, 4=>Ry(0.2)) |> autodiff(:BP))
     op = put(4, 3=>Y)
     loss! = loss_expect!(circuit, op)
     θ = [0.1, 0.2]
@@ -41,7 +41,8 @@ loss_Z1!(circuit::AbstractBlock; ibit::Int=1) = loss_expect!(circuit, put(nqubit
 
     # get gradient
     δ = ψ |> op
-    g1 = gradient(circuit, δ)
+    backward(circuit, δ)
+    g1 = gradient(circuit)
 
     g2 = zero(θ)
     η = 0.01
@@ -59,7 +60,34 @@ end
     @test generator(put(4, 1=>Rx(0.1))) == put(4, 1=>X)
     @test generator(Rx(0.1)) == X
     circuit = chain(put(4, 1=>Rx(0.1)), control(4, 2, 1=>Ry(0.3)))
-    c2 = circuit |> autodiff
+    c2 = circuit |> autodiff(:BP)
     @test c2[1] isa Diff
     @test !(c2[2] isa Diff)
 end
+
+@testset "numdiff & exactdiff" begin
+    @test collect(sequence([X, Y, Z]), XGate) == sequence([X])
+
+    c = chain(put(4, 1=>Rx(0.5))) |> autodiff(:QC)
+    nd = numdiff(c[1].block) do
+        expect(put(4, 1=>Z), zero_state(4) |> c)  # return loss please
+    end
+
+    ed = exactdiff(c[1].block) do
+        expect(put(4, 1=>Z), zero_state(4) |> c)
+    end
+    @test isapprox(nd, ed, atol=1e-4)
+
+    reg = rand_state(4)
+    c = chain(put(4, 1=>Rx(0.5)), control(4, 1, 2=>Ry(0.5)), kron(4, 2=>Rz(0.3), 3=>Rx(0.7))) |> autodiff(:QC)
+    dbs = collect(c, QDiff)
+    loss1z() = expect(kron(4, 1=>Z, 2=>X), copy(reg) |> c)  # return loss please
+    nd = numdiff.(loss1z, dbs)
+    ed = exactdiff.(loss1z, dbs)
+    gd = gradient(c)
+    @test gradient(c, :QC) == gd
+    @test gradient(c, :BP) == []
+    @test isapprox(nd, ed, atol=1e-4)
+    @test ed == gd
+end
+

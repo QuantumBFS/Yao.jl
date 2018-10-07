@@ -11,7 +11,7 @@ generator(rot::RotationGate) = rot.block
 generator(rot::PutBlock{N, C, GT}) where {N, C, GT<:RotationGate} = PutBlock{N}(generator(rot|>block), rot |> addrs)
 
 """
-    Diff{N, T, GT<:Rotor{N, T}, RT<:AbstractRegister} <: AbstractContainer{N, Complex{T}}
+    Diff{N, T, GT<:Rotor{N, T}, RT<:AbstractRegister} <: TagBlock{N, Complex{T}}
     Diff(block, [output::AbstractRegister]) -> Diff
 
 Mark a block as differentiable.
@@ -26,7 +26,6 @@ mutable struct Diff{N, T, GT<:Rotor{N, T}, RT<:AbstractRegister} <: TagBlock{N, 
     Diff(block::Rotor{N, T}, output::RT) where {N, T, RT} = new{N, T, typeof(block), RT}(block, output, T(0))
     Diff(block::Rotor{N, T}) where {N, T} = Diff(block, zero_state(N))
 end
-block(df::Diff) = df.block
 chblock(cb::Diff, blk::Rotor) = Diff(blk)
 
 @forward Diff.block mat
