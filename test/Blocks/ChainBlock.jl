@@ -17,6 +17,7 @@ using Yao.Blocks
     @test g |> parameters == [0.1]
     @test dispatch!(g, :random) |> parameters != [0.1]
     @test dispatch!(g, :zero) |> parameters == [0.0]
+    @test dispatch!(+, g, :random) |> parameters != [0.0]
 end
 
 @testset "matrix" begin

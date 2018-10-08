@@ -82,11 +82,21 @@ iparameters(x::AbstractBlock) = ()
 set intrinsics parameter for block, input `params` can be numbers or :random or :zero.
 """
 function setiparameters end
-setiparameters!(r::AbstractBlock, params::Number...) = r
 setiparameters!(func::Function, r::AbstractBlock, params::Number...) = setiparameters!(r, func.(r |> iparameters, params)...)
-setiparameters!(r::AbstractBlock, params::Symbol) = setiparameters!(r, Val(params))
-setiparameters!(r::AbstractBlock, ::Val{:random}) = niparameters(r) == 0 ? r : setiparameters!(r, rand(niparameters(r))...)
-setiparameters!(r::AbstractBlock, ::Val{:zero}) = niparameters(r) == 0 ? r : setiparameters!(r, zeros(niparameters(r))...)
+setiparameters!(r::AbstractBlock, params::Number...) = r
+
+setiparameters!(func::Function, r::AbstractBlock, params::Symbol) = setiparameters!(func, r, render_params(r, params)...)
+setiparameters!(r::AbstractBlock, params::Symbol) = setiparameters!(r, render_params(r, params)...)
+
+"""
+    render_params(r::AbstractBlock, raw_parameters) -> Iterable
+
+More elegant way of rendering parameters for symbols.
+"""
+render_params(r::AbstractBlock, params) = params
+render_params(r::AbstractBlock, params::Symbol) = render_params(r, Val(params))
+render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i=1:niparameters(r))
+render_params(r::AbstractBlock, ::Val{:zero}) = (0 for i=1:niparameters(r))
 
 """
     parameter_type(block) -> Type

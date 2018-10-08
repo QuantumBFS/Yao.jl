@@ -18,7 +18,6 @@ copy(block::ShiftGate{T}) where T = ShiftGate{T}(block.theta)
 niparameters(::Type{<:ShiftGate}) = 1
 iparameters(x::ShiftGate) = x.theta
 setiparameters!(r::ShiftGate, param::Real) = (r.theta = param; r)
-setiparameters!(r::ShiftGate, ::Val{:random}) = setiparameters!(r, rand()*2π)
 
 ==(lhs::ShiftGate, rhs::ShiftGate) = lhs.theta == rhs.theta
 
