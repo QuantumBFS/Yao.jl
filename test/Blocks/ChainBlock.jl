@@ -14,6 +14,9 @@ using Yao.Blocks
     @test g.blocks == [kron(2, X, Y), kron(2, 1=>phase(0.1))]
     blks = [X, Y, Rx(0.3)]
     @test chsubblocks(g, blks) |> subblocks == blks
+    @test g |> parameters == [0.1]
+    @test dispatch!(g, :random) |> parameters != [0.1]
+    @test dispatch!(g, :zero) |> parameters == [0.0]
 end
 
 @testset "matrix" begin

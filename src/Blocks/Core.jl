@@ -75,13 +75,18 @@ function iparameters end
 iparameters(x::AbstractBlock) = ()
 
 """
-    setparameters!([elementwisefunction], r::AbstractBlock, params) -> AbstractBlock
+    setparameters!([elementwisefunction], r::AbstractBlock, params::Number...) -> AbstractBlock
+    setparameters!([elementwisefunction], r::AbstractBlock, :random) -> AbstractBlock
+    setparameters!([elementwisefunction], r::AbstractBlock, :zero) -> AbstractBlock
 
-set intrinsics parameter for block.
+set intrinsics parameter for block, input `params` can be numbers or :random or :zero.
 """
 function setiparameters end
-setiparameters!(r::AbstractBlock, params) = r
-setiparameters!(func::Function, r::AbstractBlock, params) = setiparameters!(r, func.(r |> iparameters, params))
+setiparameters!(r::AbstractBlock, params::Number...) = r
+setiparameters!(func::Function, r::AbstractBlock, params::Number...) = setiparameters!(r, func.(r |> iparameters, params)...)
+setiparameters!(r::AbstractBlock, params::Symbol) = setiparameters!(r, Val(params))
+setiparameters!(r::AbstractBlock, ::Val{:random}) = niparameters(r) == 0 ? r : setiparameters!(r, rand(niparameters(r))...)
+setiparameters!(r::AbstractBlock, ::Val{:zero}) = niparameters(r) == 0 ? r : setiparameters!(r, zeros(niparameters(r))...)
 
 """
     parameter_type(block) -> Type
@@ -102,25 +107,48 @@ Returns the matrix form of this block.
 function mat end
 
 """
-    dispatch!([func::Function], block::AbstractBlock, params)
-    dispatch!!([func::Function], block::AbstractBlock, params)
+    dispatch!([func::Function], block::AbstractBlock, params) -> AbstractBlock
+    dispatch!([func::Function], block::AbstractBlock, :random) -> AbstractBlock
+    dispatch!([func::Function], block::AbstractBlock, :zero) -> AbstractBlock
 
-dispatch parameters to this block, `dispatch!!` will pop! out all params.
+dispatch! parameters into this circuit, here `params` is an iterable.
+
+If instead of iterable, a symbol `:random` or `:zero` is provided,
+random numbers (its behavior is specified by `setiparameters!`) or 0s will be broadcasted into circuits.
+
+using `dispatch!!` is more efficient, but will pop! out all params inplace.
 """
 dispatch!(block::AbstractBlock, params) = dispatch!!(block, params |> collect)
 dispatch!(func::Function, block::AbstractBlock, params) = dispatch!!(func, block, params |> collect)
+"""
+    dispatch!!([func::Function], block::AbstractBlock, params) -> AbstractBlock
+
+Similar to `dispatch!`, but will pop! out params inplace, it can not more efficient.
+"""
 function dispatch!!(r::AbstractBlock, params)
-    setiparameters!(r, (popfirst!(params) for i=1:niparameters(r)))
+    setiparameters!(r, (popfirst!(params) for i=1:niparameters(r))...)
     for blk in subblocks(r)
         dispatch!!(blk, params)
     end
     r
 end
 function dispatch!!(func::Function, r::AbstractBlock, params)
-    setiparameters!(func, r, (popfirst!(params) for i=1:niparameters(r)))
+    setiparameters!(func, r, (popfirst!(params) for i=1:niparameters(r))...)
     for blk in subblocks(r)
         dispatch!!(func, blk, params)
     end
+    r
+end
+
+function dispatch!(func::Function, r::AbstractBlock, params::Symbol)
+    setiparameters!(func, r, params)
+    dispatch!.(func, r |> subblocks, params)
+    r
+end
+
+function dispatch!(r::AbstractBlock, params::Symbol)
+    setiparameters!(r, params)
+    dispatch!.(r |> subblocks, params)
     r
 end
 

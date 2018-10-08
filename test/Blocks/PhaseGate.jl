@@ -8,6 +8,9 @@ using Yao.Blocks
 @test isa(PhaseGate{Float64}(0.1), PrimitiveBlock{1, ComplexF64})
 @test isa(PhaseGate{Float32}(0.1f0), PrimitiveBlock{1, ComplexF32})
 @test_throws TypeError PhaseGate{ComplexF32} # will not accept non-real type
+@test setiparameters!(PhaseGate(0.0), 0.5).theta == 0.5
+@test setiparameters!(PhaseGate(0.0), :random).theta != 0.0
+@test setiparameters!(PhaseGate(2.0), :zero).theta == 0.0
 end
 
 @testset "matrix" begin

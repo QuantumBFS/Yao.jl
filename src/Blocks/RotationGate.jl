@@ -32,7 +32,8 @@ copy(R::RotationGate) = RotationGate(R.block, R.theta)
 # parametric interface
 niparameters(::Type{<:RotationGate}) = 1
 iparameters(x::RotationGate) = x.theta
-setiparameters!(r::RotationGate, params) = (r.theta = first(params); r)
+setiparameters!(r::RotationGate, param::Real) = (r.theta = param; r)
+setiparameters!(r::RotationGate, ::Val{:random}) = setiparameters!(r, rand()*2π)
 
 ==(lhs::RotationGate{TA, GTA}, rhs::RotationGate{TB, GTB}) where {TA, TB, GTA, GTB} = false
 ==(lhs::RotationGate{TA, GT}, rhs::RotationGate{TB, GT}) where {TA, TB, GT} = lhs.theta == rhs.theta

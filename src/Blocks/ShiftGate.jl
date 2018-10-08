@@ -17,7 +17,8 @@ copy(block::ShiftGate{T}) where T = ShiftGate{T}(block.theta)
 # parametric interface
 niparameters(::Type{<:ShiftGate}) = 1
 iparameters(x::ShiftGate) = x.theta
-setiparameters!(r::ShiftGate, params) = (r.theta = first(params); r)
+setiparameters!(r::ShiftGate, param::Real) = (r.theta = param; r)
+setiparameters!(r::ShiftGate, ::Val{:random}) = setiparameters!(r, rand()*2π)
 
 ==(lhs::ShiftGate, rhs::ShiftGate) = lhs.theta == rhs.theta
 

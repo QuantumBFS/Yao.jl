@@ -22,4 +22,7 @@ using Yao.Intrinsics
     @test cte != te
     @test cte.t == 2.0
     @test hash1 != hash(cte)
+    @test setiparameters!(cte, 0.5).t == 0.5
+    @test setiparameters!(cte, :random).t != 0.5
+    @test setiparameters!(cte, :zero).t == 0.0
 end
