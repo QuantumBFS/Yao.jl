@@ -5,7 +5,7 @@ export diff_circuit, num_gradient, rotter, cnot_entangler, opgrad, collect_rotbl
 
 Arbitrary rotation unit, set parameters notrailing, noleading true to remove trailing and leading Z gates.
 """
-rotter(noleading::Bool=false, notrailing::Bool=false) = noleading ? (notrailing ? Rx(0) : chain(Rx(0), Rz(0))) : (notrailing ? chain(Rz(0), Rx(0)) : chain(Rz(0), Rz(0), Rz(0)))
+rotter(noleading::Bool=false, notrailing::Bool=false) = noleading ? (notrailing ? Rx(0) : chain(Rx(0), Rz(0))) : (notrailing ? chain(Rz(0), Rx(0)) : chain(Rz(0), Rx(0), Rz(0)))
 
 """
     cnot_entangler([n::Int, ] pairs::Vector{Pair}) = ChainBlock
