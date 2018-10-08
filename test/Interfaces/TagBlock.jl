@@ -41,7 +41,7 @@ loss_Z1!(circuit::AbstractBlock; ibit::Int=1) = loss_expect!(circuit, put(nqubit
 
     # get gradient
     δ = ψ |> op
-    backward(circuit, δ)
+    backward!(δ, circuit)
     g1 = gradient(circuit)
 
     g2 = zero(θ)
@@ -61,8 +61,8 @@ end
     @test generator(Rx(0.1)) == X
     circuit = chain(put(4, 1=>Rx(0.1)), control(4, 2, 1=>Ry(0.3)))
     c2 = circuit |> autodiff(:BP)
-    @test c2[1] isa Diff
-    @test !(c2[2] isa Diff)
+    @test c2[1] isa BPDiff
+    @test !(c2[2] isa BPDiff)
 end
 
 @testset "numdiff & exactdiff" begin

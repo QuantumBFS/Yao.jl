@@ -10,7 +10,7 @@ autodiff(mode::Symbol) = block->autodiff(mode, block)
 autodiff(mode::Symbol, block::AbstractBlock) = autodiff(Val(mode), block)
 
 # for BP
-autodiff(::Val{:BP}, block::Rotor{N}) where N = Diff(block)
+autodiff(::Val{:BP}, block::Rotor{N}) where N = BPDiff(block)
 autodiff(::Val{:BP}, block::AbstractBlock) = block
 # Sequential, Roller and ChainBlock can propagate.
 function autodiff(mode::Val{:BP}, blk::Union{ChainBlock, Roller, Sequential})
@@ -25,7 +25,7 @@ function autodiff(mode::Val{:QC}, blk::AbstractBlock)
     chsubblocks(blk, autodiff.(mode, subblocks(blk)))
 end
 
-@inline function _perturb(func, gate::QDiff, δ::Real)
+@inline function _perturb(func, gate::AbstractDiff, δ::Real)
     setiparameters!(+, gate |> parent, δ)
     r1 = func()
     setiparameters!(-, gate |> parent, 2δ)
@@ -34,12 +34,12 @@ end
     r1, r2
 end
 
-@inline function numdiff(loss, diffblock::QDiff; δ::Real=1e-2)
+@inline function numdiff(loss, diffblock::AbstractDiff; δ::Real=1e-2)
     r1, r2 = _perturb(loss, diffblock, δ)
     diffblock.grad = (r2 - r1)/2δ
 end
 
-@inline function exactdiff(loss, diffblock::QDiff)
+@inline function exactdiff(loss, diffblock::AbstractDiff)
     r1, r2 = _perturb(loss, diffblock, π/2)
     diffblock.grad = (r2 - r1)/2
 end

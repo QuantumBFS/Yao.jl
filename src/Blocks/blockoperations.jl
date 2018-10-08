@@ -104,21 +104,21 @@ expect(op::MatrixBlock, dm::DensityMatrix) = mapslices(x->sum(mat(op).*x)[], dm.
 expect(op::MatrixBlock, dm::DensityMatrix{1}) = sum(mat(op).*dropdims(dm.state, dims=3))
 
 ################### AutoDiff Circuit ###################
-export gradient, backward
+export gradient, backward!
 """
-    backward(circuit::MatrixBlock, δ::AbstractRegister) -> AbstractRegister
+    backward!(circuit::MatrixBlock, δ::AbstractRegister) -> AbstractRegister
 
 back propagate and calculate the gradient ∂f/∂θ = 2*Re(∂f/∂ψ*⋅∂ψ*/∂θ), given ∂f/∂ψ*.
 
 Note:
 Here, the input circuit should be a matrix block, otherwise the back propagate may not apply (like Measure operations).
 """
-backward(circuit::MatrixBlock, δ::AbstractRegister) = δ |> circuit'
+backward!(δ::AbstractRegister, circuit::MatrixBlock) = δ |> circuit'
 
 """
     gradient(circuit::AbstractBlock, mode::Symbol=:ANY) -> Vector
 
-collect all gradients in a circuit, mode can be :BP, :QC or :ANY, they will collect `grad` from Diff and QDiff respectively.
+collect all gradients in a circuit, mode can be :BP/:QC/:ANY, they will collect `grad` from BPDiff/QDiff/AbstractDiff respectively.
 """
 gradient(circuit::AbstractBlock, mode::Symbol=:ANY) = gradient!(circuit, Float64[], Val(mode))
 
@@ -129,6 +129,6 @@ function gradient!(circuit::AbstractBlock, grad, mode::Val)
     grad
 end
 
-gradient!(circuit::Diff, grad, mode::Val{:BP}) = push!(grad, circuit.grad)
+gradient!(circuit::BPDiff, grad, mode::Val{:BP}) = push!(grad, circuit.grad)
 gradient!(circuit::QDiff, grad, mode::Val{:QC}) = push!(grad, circuit.grad)
-gradient!(circuit::Union{QDiff, Diff}, grad, mode::Val{:ANY}) = push!(grad, circuit.grad)
+gradient!(circuit::AbstractDiff, grad, mode::Val{:ANY}) = push!(grad, circuit.grad)

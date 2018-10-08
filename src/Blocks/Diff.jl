@@ -1,4 +1,4 @@
-export Rotor, generator, Diff
+export Rotor, generator, AbstractDiff, BPDiff, QDiff
 
 ############# General Rotor ############
 const Rotor{N, T} = Union{RotationGate{N, T}, PutBlock{N, <:Any, <:RotationGate, <:Complex{T}}}
@@ -10,37 +10,62 @@ Return the generator of rotation block.
 generator(rot::RotationGate) = rot.block
 generator(rot::PutBlock{N, C, GT}) where {N, C, GT<:RotationGate} = PutBlock{N}(generator(rot|>block), rot |> addrs)
 
+abstract type AbstractDiff{N, T} <: TagBlock{N, T} end
+
+#################### The Basic Diff #################
 """
-    Diff{N, T, GT<:Rotor{N, T}, RT<:AbstractRegister} <: TagBlock{N, Complex{T}}
-    Diff(block, [output::AbstractRegister]) -> Diff
+    QDiff{N, T, GT<:RotationGate{N, T}} <: TagBlock{N, Complex{T}}
+    QDiff(block) -> QDiff
+
+Mark a block as quantum differentiable.
+"""
+mutable struct QDiff{N, T, GT<:RotationGate{N, T}} <: AbstractDiff{N, Complex{T}}
+    block::GT
+    grad::T
+    QDiff(block::RotationGate{N, T}) where {N, T} = new{N, T, typeof(block)}(block, T(0))
+end
+chblock(cb::QDiff, blk::RotationGate) = QDiff(blk)
+
+@forward QDiff.block mat, apply!
+adjoint(df::QDiff) = QDiff(parent(df)')
+
+function print_block(io::IO, df::QDiff)
+    printstyled(io, "[̂∂] "; bold=true, color=:yellow)
+    print(io, parent(df))
+end
+
+#################### The Back Propagation Diff #################
+"""
+    BPDiff{N, T, GT<:Rotor{N, T}, RT<:AbstractRegister} <: TagBlock{N, Complex{T}}
+    BPDiff(block, [output::AbstractRegister]) -> BPDiff
 
 Mark a block as differentiable.
 
 Warning:
-    please don't use the `adjoint` after `Diff`! `adjoint` is reserved for special purpose! (back propagation)
+    please don't use the `adjoint` after `BPDiff`! `adjoint` is reserved for special purpose! (back propagation)
 """
-mutable struct Diff{N, T, GT<:Rotor{N, T}, RT<:AbstractRegister} <: TagBlock{N, Complex{T}}
+mutable struct BPDiff{N, T, GT<:Rotor{N, T}, RT<:AbstractRegister} <: AbstractDiff{N, Complex{T}}
     block::GT
     output::RT
     grad::T
-    Diff(block::Rotor{N, T}, output::RT) where {N, T, RT} = new{N, T, typeof(block), RT}(block, output, T(0))
-    Diff(block::Rotor{N, T}) where {N, T} = Diff(block, zero_state(N))
+    BPDiff(block::Rotor{N, T}, output::RT) where {N, T, RT} = new{N, T, typeof(block), RT}(block, output, T(0))
+    BPDiff(block::Rotor{N, T}) where {N, T} = BPDiff(block, zero_state(N))
 end
-chblock(cb::Diff, blk::Rotor) = Diff(blk)
+chblock(cb::BPDiff, blk::Rotor) = BPDiff(blk)
 
-@forward Diff.block mat
-function apply!(reg::AbstractRegister, df::Diff)
+@forward BPDiff.block mat
+function apply!(reg::AbstractRegister, df::BPDiff)
     apply!(reg, parent(df))
     df.output = copy(reg)
     reg
 end
-function apply!(δ::AbstractRegister, adf::Daggered{<:Any, <:Any, <:Diff})
+function apply!(δ::AbstractRegister, adf::Daggered{<:Any, <:Any, <:BPDiff})
     df = adf |> parent
     df.grad = ((df.output |> generator(parent(df)))' * δ * 0.5im |> real)*2
     apply!(δ, parent(df)')
 end
 
-function print_block(io::IO, df::Diff)
+function print_block(io::IO, df::BPDiff)
     printstyled(io, "[∂] "; bold=true, color=:yellow)
     print_block(io, parent(df))
 end

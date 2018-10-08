@@ -20,9 +20,8 @@ include("BlockCache.jl")
 include("Daggered.jl")
 include("Scale.jl")
 include("Diff.jl")
-include("QDiff.jl")
 
 ########## common interfaces are defined here! ##############
-for BLOCKTYPE in (:Daggered, :CachedBlock, :Scale, :Diff, :QDiff)
+for BLOCKTYPE in (:Daggered, :CachedBlock, :Scale, :BPDiff, :QDiff)
     @eval parent(dg::$BLOCKTYPE) = dg.block
 end

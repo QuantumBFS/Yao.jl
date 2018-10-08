@@ -17,14 +17,14 @@ op = put(4, 3=>Y);  # loss is defined as its expectation.
 ψ = rand_state(4);
 ψ |> circuit;
 δ = ψ |> op;     # ∂f/∂ψ*
-backward(circuit, δ);    # classical back propagation!
+backward!(δ, circuit);    # classical back propagation!
 ```
 Here, the loss is `L = <ψ|op|ψ>`, `δ = ∂f/∂ψ*` is the error to be back propagated.
 The gradient is related to $δ$ as
 $$\frac{\partial f}{\partial\theta} = 2\Re[\frac{\partial f}{\partial\psi^*}\frac{\partial \psi^*}{\partial\theta}]$$
 
-In face, `backward(circuit, δ)` on wave function is equivalent to calculating `δ |> circuit'` (`apply!(reg, Daggered{N, T, <:Diff})`).
-This function is overloaded so that gradientis for parameters are also calculated and stored in `Diff` block at the same time.
+In face, `backward!(δ, circuit)` on wave function is equivalent to calculating `δ |> circuit'` (`apply!(reg, Daggered{N, T, <:BPDiff})`).
+This function is overloaded so that gradientis for parameters are also calculated and stored in [`BPDiff`](@ref) block at the same time.
 
 Finally, we use `gradient` to collect gradients in the ciruits.
 ```@repl Diff
@@ -48,7 +48,7 @@ One may find the derivation of both schemes in [this post](https://giggleliu.git
 Realizable quantum circuit gradient finding algorithms have complexity $O(M^2)$.
 
 ### Example: Practical quantum differenciation
-We use `QDiff` block to mark differentiable circuits
+We use [`QDiff`](@ref) block to mark differentiable circuits
 ```@repl QDiff
 using Yao, Yao.Blocks
 c = chain(put(4, 1=>Rx(0.5)), control(4, 1, 2=>Ry(0.5)), kron(4, 2=>Rz(0.3), 3=>Rx(0.7))) |> autodiff(:QC)  # automatically mark differentiable blocks
@@ -58,7 +58,7 @@ Blocks marked by `[̂∂]` will be differentiated.
 ```@repl QDiff
 dbs = collect(c, QDiff)  # collect all QDiff blocks
 ```
-Here, we recommend collect `QDiff` blocks into a sequence using `collect` API for future calculations.
+Here, we recommend collect [`QDiff`](@ref) blocks into a sequence using `collect` API for future calculations.
 Then, we can get the gradient one by one, using `exactdiff`
 ```@repl QDiff
 ed = exactdiff(dbs[1]) do   # the exact differentiation with respect to first QDiff block.
@@ -80,3 +80,7 @@ We can also get all gradients using broadcasting
 loss1z() = expect(kron(4, 1=>Z, 2=>X), zero_state(4) |> c) |> real;  # return loss
 ed = exactdiff.(loss1z, dbs)   # using broadcast to get all gradients.
 ```
+
+!!! note
+
+    Since BP is not implemented for `QDiff` blocks, the memory consumption is much less since we don't cache intermediate results anymore.

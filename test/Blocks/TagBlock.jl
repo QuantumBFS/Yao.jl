@@ -16,5 +16,4 @@ end
 
 @testset "diff" begin
 include("Diff.jl")
-include("QDiff.jl")
 end
