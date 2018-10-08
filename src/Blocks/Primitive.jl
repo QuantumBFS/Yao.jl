@@ -24,4 +24,4 @@ include("ReflectBlock.jl")
 include("GeneralMatrixGate.jl")
 include("MathBlock.jl")
 
-render_params!(r::Union{RotationGate, ShiftGate, PhaseGate}, ::Val{:random}) = rand()*2π
+render_params(r::Union{RotationGate, ShiftGate, PhaseGate}, ::Val{:random}) = rand()*2π
