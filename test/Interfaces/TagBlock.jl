@@ -26,18 +26,18 @@ Return the loss function f = <Zi> (means measuring the ibit-th bit in computatio
 """
 loss_Z1!(circuit::AbstractBlock; ibit::Int=1) = loss_expect!(circuit, put(nqubits(circuit), ibit=>Z))
 
-@testset "diff adjoint" begin
+@testset "BP diff" begin
     c = put(4, 3=>Rx(0.5)) |> autodiff(:BP)
     cad = c'
     @test mat(cad) == mat(c)'
 
     circuit = chain(4, repeat(4, H, 1:4), put(4, 3=>Rz(0.5)) |> autodiff(:BP), control(2, 1=>X), put(4, 4=>Ry(0.2)) |> autodiff(:BP))
     op = put(4, 3=>Y)
-    loss! = loss_expect!(circuit, op)
     θ = [0.1, 0.2]
+    dispatch!(circuit, θ)
+    loss! = loss_expect!(circuit, op)
     ψ0 = rand_state(4)
-    ψ = copy(ψ0)
-    loss = loss!(ψ, θ)
+    ψ = copy(ψ0) |> circuit
 
     # get gradient
     δ = ψ |> op
@@ -53,10 +53,12 @@ loss_Z1!(circuit::AbstractBlock; ibit::Int=1) = loss_expect!(circuit, put(nqubit
         θ2[i] += 0.5η
         g2[i] = (loss!(copy(ψ0), θ2) - loss!(copy(ψ0), θ1))/η |> real
     end
+    g3 = exactdiff.(() -> real(expect(op, copy(ψ0) |> circuit)), collect(circuit, BPDiff))
     @test isapprox.(g1, g2, atol=1e-5) |> all
+    @test isapprox.(g2, g3, atol=1e-5) |> all
 end
 
-@testset "autodiff" begin
+@testset "constructor" begin
     @test generator(put(4, 1=>Rx(0.1))) == put(4, 1=>X)
     @test generator(Rx(0.1)) == X
     circuit = chain(put(4, 1=>Rx(0.1)), control(4, 2, 1=>Ry(0.3)))

@@ -25,12 +25,21 @@ function autodiff(mode::Val{:QC}, blk::AbstractBlock)
     chsubblocks(blk, autodiff.(mode, subblocks(blk)))
 end
 
-@inline function _perturb(func, gate::AbstractDiff, δ::Real)
-    setiparameters!(+, gate |> parent, δ)
+@inline function _perturb(func, gate::AbstractDiff{<:RotationGate}, δ::Real)
+    setiparameters!(-, gate |> parent, δ)
     r1 = func()
-    setiparameters!(-, gate |> parent, 2δ)
+    setiparameters!(+, gate |> parent, 2δ)
     r2 = func()
-    setiparameters!(+, gate |> parent, δ)
+    setiparameters!(-, gate |> parent, δ)
+    r1, r2
+end
+
+@inline function _perturb(func, gate::AbstractDiff{<:Rotor}, δ::Real)  # for put
+    dispatch!(-, gate |> parent, [δ])
+    r1 = func()
+    dispatch!(+, gate |> parent, [2δ])
+    r2 = func()
+    dispatch!(-, gate |> parent, [δ])
     r1, r2
 end
 

@@ -10,16 +10,17 @@ Return the generator of rotation block.
 generator(rot::RotationGate) = rot.block
 generator(rot::PutBlock{N, C, GT}) where {N, C, GT<:RotationGate} = PutBlock{N}(generator(rot|>block), rot |> addrs)
 
-abstract type AbstractDiff{N, T} <: TagBlock{N, T} end
+abstract type AbstractDiff{GT, N, T} <: TagBlock{N, T} end
+adjoint(df::AbstractDiff) = Daggered(df)
 
 #################### The Basic Diff #################
 """
-    QDiff{GT, N, T} <: AbstractDiff{N, Complex{T}}
+    QDiff{GT, N, T} <: AbstractDiff{GT, N, Complex{T}}
     QDiff(block) -> QDiff
 
 Mark a block as quantum differentiable.
 """
-mutable struct QDiff{GT, N, T} <: AbstractDiff{N, Complex{T}}
+mutable struct QDiff{GT, N, T} <: AbstractDiff{GT, N, Complex{T}}
     block::GT
     grad::T
     QDiff(block::RotationGate{N, T}) where {N, T} = new{typeof(block), N, T}(block, T(0))
@@ -36,7 +37,7 @@ end
 
 #################### The Back Propagation Diff #################
 """
-    BPDiff{GT, N, T, PT, RT<:AbstractRegister} <: AbstractDiff{N, Complex{T}}
+    BPDiff{GT, N, T, PT, RT<:AbstractRegister} <: AbstractDiff{GT, N, Complex{T}}
     BPDiff(block, [output::AbstractRegister, grad]) -> BPDiff
 
 Mark a block as differentiable, here `GT`, `PT` and `RT` are gate type, parameter type and register type respectively.
@@ -44,7 +45,7 @@ Mark a block as differentiable, here `GT`, `PT` and `RT` are gate type, paramete
 Warning:
     please don't use the `adjoint` after `BPDiff`! `adjoint` is reserved for special purpose! (back propagation)
 """
-mutable struct BPDiff{GT, N, T, PT, RT<:AbstractRegister} <: AbstractDiff{N, T}
+mutable struct BPDiff{GT, N, T, PT, RT<:AbstractRegister} <: AbstractDiff{GT, N, T}
     block::GT
     output::RT
     grad::PT
