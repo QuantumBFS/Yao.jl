@@ -393,7 +393,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{M}, Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s277} where #s277<:AbstractBlock}} where M",
+    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{M}, Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s280} where #s280<:AbstractBlock}} where M",
     "page": "Interfaces",
     "title": "Yao.Interfaces.put",
     "category": "method",
@@ -489,7 +489,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Pair{Int64,#s277} where #s277<:MatrixBlock,N} where N}",
+    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Pair{Int64,#s280} where #s280<:MatrixBlock,N} where N}",
     "page": "Interfaces",
     "title": "Base.kron",
     "category": "method",
@@ -697,11 +697,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/registers/#Yao.Registers.measure_reset!-Union{Tuple{AbstractRegister{B,T} where T}, Tuple{B}} where B",
+    "page": "Registers",
+    "title": "Yao.Registers.measure_reset!",
+    "category": "method",
+    "text": "measure_and_reset!(reg::AbstractRegister, [mbits]; val=0) -> Int\n\nmeasure and set the register to specific value.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/registers/#Yao.Registers.product_state-Union{Tuple{T}, Tuple{Type{T},Int64,Integer}, Tuple{Type{T},Int64,Integer,Int64}} where T",
     "page": "Registers",
     "title": "Yao.Registers.product_state",
     "category": "method",
-    "text": "product_state(::Type{T}, n::Int, config::Int, nbatch::Int=1) -> DefaultRegister\n\na product state on given configuration config, e.g. product_state(ComplexF64, 5, 0) will give a zero state on a 5 qubit register.\n\n\n\n\n\n"
+    "text": "product_state([::Type{T}], n::Int, config::Int, nbatch::Int=1) -> DefaultRegister\n\na product state on given configuration config, e.g. product_state(ComplexF64, 5, 0) will give a zero state on a 5 qubit register.\n\n\n\n\n\n"
 },
 
 {
@@ -709,7 +717,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Registers",
     "title": "Yao.Registers.rand_state",
     "category": "method",
-    "text": "rand_state(::Type{T}, n::Int, nbatch::Int=1) -> DefaultRegister\n\nhere, random complex numbers are generated using randn(ComplexF64).\n\n\n\n\n\n"
+    "text": "rand_state([::Type{T}], n::Int, nbatch::Int=1) -> DefaultRegister\n\nhere, random complex numbers are generated using randn(ComplexF64).\n\n\n\n\n\n"
 },
 
 {
@@ -789,7 +797,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Registers",
     "title": "Yao.Registers.uniform_state",
     "category": "method",
-    "text": "uniform_state(::Type{T}, n::Int, nbatch::Int=1) -> DefaultRegister\n\nuniform state, the state after applying H gates on |0> state.\n\n\n\n\n\n"
+    "text": "uniform_state([::Type{T}], n::Int, nbatch::Int=1) -> DefaultRegister\n\nuniform state, the state after applying H gates on |0> state.\n\n\n\n\n\n"
 },
 
 {
@@ -797,7 +805,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Registers",
     "title": "Yao.Registers.zero_state",
     "category": "method",
-    "text": "zero_state(::Type{T}, n::Int, nbatch::Int=1) -> DefaultRegister\n\n\n\n\n\n"
+    "text": "zero_state([::Type{T}], n::Int, nbatch::Int=1) -> DefaultRegister\n\n\n\n\n\n"
 },
 
 {
@@ -1022,6 +1030,30 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.MatrixBlock",
     "category": "type",
     "text": "MatrixBlock{N, T} <: AbstractBlock\n\nabstract type that all block with a matrix form will subtype from.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.Measure",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.Measure",
+    "category": "type",
+    "text": "Measure <: AbstractMeasure\nMeasure() -> Measure\n\nMeasure block, collapse a state and store measured value, e.g.\n\nExamples\n\njulia> m = Measure();\n\njulia> reg = product_state(4, 7)\nDefaultRegister{1, Complex{Float64}}\n    active qubits: 4/4\n\njulia> reg |> m\nDefaultRegister{1, Complex{Float64}}\n    active qubits: 4/4\n\njulia> m.result\n1-element Array{Int64,1}:\n 7\n\nNote: Measure returns a vector here, the length corresponds to batch dimension of registers.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.MeasureAndRemove",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.MeasureAndRemove",
+    "category": "type",
+    "text": "MeasureAndRemove <: AbstractMeasure\nMeasureAndRemove() -> MeasureAndRemove\n\nMeasure and remove block, remove measured qubits and store measured value.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.MeasureAndReset",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.MeasureAndReset",
+    "category": "type",
+    "text": "MeasureAndReset <: AbstractMeasure\nMeasureAndReset([val=0]) -> MeasureAndReset\n\nMeasure and reset block, reset measured qubits to val and store measured value.\n\n\n\n\n\n"
 },
 
 {
