@@ -26,7 +26,7 @@ Return the loss function f = <Zi> (means measuring the ibit-th bit in computatio
 """
 loss_Z1!(circuit::AbstractBlock; ibit::Int=1) = loss_expect!(circuit, put(nqubits(circuit), ibit=>Z))
 
-@testset "diff adjoint" begin
+@testset "back propagate" begin
     c = put(4, 3=>Rx(0.5)) |> autodiff(:BP)
     cad = c'
     @test mat(cad) == mat(c)'
@@ -53,10 +53,11 @@ loss_Z1!(circuit::AbstractBlock; ibit::Int=1) = loss_expect!(circuit, put(nqubit
         θ2[i] += 0.5η
         g2[i] = (loss!(copy(ψ0), θ2) - loss!(copy(ψ0), θ1))/η |> real
     end
-    @test isapprox.(g1, g2, atol=1e-5) |> all
+    println(g1,g2)
+    @test isapprox.(g1, g2, atol=1e-4) |> all
 end
 
-@testset "autodiff" begin
+@testset "constructor" begin
     @test generator(put(4, 1=>Rx(0.1))) == put(4, 1=>X)
     @test generator(Rx(0.1)) == X
     circuit = chain(put(4, 1=>Rx(0.1)), control(4, 2, 1=>Ry(0.3)))
@@ -90,4 +91,3 @@ end
     @test isapprox(nd, ed, atol=1e-4)
     @test ed == gd
 end
-

@@ -26,11 +26,11 @@ function autodiff(mode::Val{:QC}, blk::AbstractBlock)
 end
 
 @inline function _perturb(func, gate::AbstractDiff, δ::Real)
-    setiparameters!(+, gate |> parent, δ)
+    setiparameters!(-, gate |> parent, δ)
     r1 = func()
-    setiparameters!(-, gate |> parent, 2δ)
+    setiparameters!(+, gate |> parent, 2δ)
     r2 = func()
-    setiparameters!(+, gate |> parent, δ)
+    setiparameters!(-, gate |> parent, δ)
     r1, r2
 end
 
