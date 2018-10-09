@@ -113,7 +113,7 @@ back propagate and calculate the gradient ∂f/∂θ = 2*Re(∂f/∂ψ*⋅∂ψ*
 Note:
 Here, the input circuit should be a matrix block, otherwise the back propagate may not apply (like Measure operations).
 """
-backward!(δ::AbstractRegister, circuit::MatrixBlock) = δ |> circuit'
+backward!(δ::AbstractRegister, circuit::MatrixBlock) = apply!(δ, circuit')
 
 """
     gradient(circuit::AbstractBlock, mode::Symbol=:ANY) -> Vector
@@ -130,6 +130,6 @@ function gradient!(circuit::AbstractBlock, grad, mode::Val)
     grad
 end
 
-gradient!(circuit::BPDiff, grad, mode::Val{:BP}) = push!(grad, circuit.grad)
+gradient!(circuit::BPDiff, grad, mode::Val{:BP}) = append!(grad, circuit.grad)
 gradient!(circuit::QDiff, grad, mode::Val{:QC}) = push!(grad, circuit.grad)
-gradient!(circuit::AbstractDiff, grad, mode::Val{:ANY}) = push!(grad, circuit.grad)
+gradient!(circuit::AbstractDiff, grad, mode::Val{:ANY}) = append!(grad, circuit.grad)
