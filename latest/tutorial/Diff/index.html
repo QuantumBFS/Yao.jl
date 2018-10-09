@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Differentiatiable Quantum Circuits · Yao.jl</title><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-89508993-1', 'auto');
+ga('send', 'pageview');
+</script><link rel="canonical" href="https://quantumbfs.github.io/Yao.jl/latest/tutorial/Diff/index.html"/><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="../../index.html"><img class="logo" src="../../assets/logo.png" alt="Yao.jl logo"/></a><h1>Yao.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../">Home</a></li><li><span class="toctext">Tutorial</span><ul><li><a class="toctext" href="../GHZ/">Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</a></li><li><a class="toctext" href="../QFT/">Quantum Fourier Transformation and Phase Estimation</a></li><li><a class="toctext" href="../Grover/">Grover Search and Quantum Inference</a></li><li class="current"><a class="toctext" href>Differentiatiable Quantum Circuits</a><ul class="internal"><li><a class="toctext" href="#Classical-back-propagation-1">Classical back propagation</a></li><li><a class="toctext" href="#Quantum-circuit-differentiation-1">Quantum circuit differentiation</a></li></ul></li><li><a class="toctext" href="../QCBM/">Quantum Circuit Born Machine</a></li></ul></li><li><span class="toctext">Manual</span><ul><li><a class="toctext" href="../../man/yao/">Yao</a></li><li><a class="toctext" href="../../man/interfaces/">Interfaces</a></li><li><a class="toctext" href="../../man/registers/">Registers</a></li><li><a class="toctext" href="../../man/blocks/">Blocks System</a></li><li><a class="toctext" href="../../man/intrinsics/">Intrinsics</a></li><li><a class="toctext" href="../../man/boost/">Boost</a></li></ul></li><li><span class="toctext">Developer Documentation</span><ul><li><a class="toctext" href="../../dev/extending-blocks/">Extending Blocks</a></li><li><a class="toctext" href="../../dev/benchmark/">Benchmark with ProjectQ</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Tutorial</li><li><a href>Differentiatiable Quantum Circuits</a></li></ul><a class="edit-page" href="https://github.com/QuantumBFS/Yao.jl/blob/master/docs/src/tutorial/Diff.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Differentiatiable Quantum Circuits</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Differentiatiable-Quantum-Circuits-1" href="#Differentiatiable-Quantum-Circuits-1">Differentiatiable Quantum Circuits</a></h1><h2><a class="nav-anchor" id="Classical-back-propagation-1" href="#Classical-back-propagation-1">Classical back propagation</a></h2><p>Back propagation has <span>$O(M)$</span> complexity in obtaining gradients, with <span>$M$</span> the number of circuit parameters. We can use <code>autodiff(:BP)</code> to mark differentiable units in a circuit. Let&#39;s see an example.</p><h3><a class="nav-anchor" id="Example:-Classical-back-propagation-1" href="#Example:-Classical-back-propagation-1">Example: Classical back propagation</a></h3><pre><code class="language-julia-repl">julia&gt; using Yao
+
+julia&gt; circuit = chain(4, repeat(4, H, 1:4), put(4, 3=&gt;Rz(0.5)), control(2, 1=&gt;X), put(4, 4=&gt;Ry(0.2)))
+Total: 4, DataType: Complex{Float64}
+chain
+├─ repeat on (1, 2, 3, 4)
+│  └─ H gate
+├─ put on (3)
+│  └─ Rot Z gate: 0.5
+├─ control(2)
+│  └─ (1,)=&gt;X gate
+└─ put on (4)
+   └─ Rot Y gate: 0.2
+
+julia&gt; circuit = circuit |&gt; autodiff(:BP)
+Total: 4, DataType: Complex{Float64}
+chain
+├─ repeat on (1, 2, 3, 4)
+│  └─ H gate
+├─ [∂] put on (3)
+│  └─ Rot Z gate: 0.5
+├─ control(2)
+│  └─ (1,)=&gt;X gate
+└─ [∂] put on (4)
+   └─ Rot Y gate: 0.2</code></pre><p>From the output, we can see parameters of blocks marked by <code>[∂]</code> will be differentiated automatically.</p><pre><code class="language-julia-repl">julia&gt; op = put(4, 3=&gt;Y);  # loss is defined as its expectation.
+
+julia&gt; ψ = rand_state(4);
+
+julia&gt; ψ |&gt; circuit;
+
+julia&gt; δ = ψ |&gt; op;     # ∂f/∂ψ*
+
+julia&gt; backward!(δ, circuit);    # classical back propagation!</code></pre><p>Here, the loss is <code>L = &lt;ψ|op|ψ&gt;</code>, <code>δ = ∂f/∂ψ*</code> is the error to be back propagated. The gradient is related to <span>$δ$</span> as <span>$\frac{\partial f}{\partial\theta} = 2\Re[\frac{\partial f}{\partial\psi^*}\frac{\partial \psi^*}{\partial\theta}]$</span></p><p>In face, <code>backward!(δ, circuit)</code> on wave function is equivalent to calculating <code>δ |&gt; circuit&#39;</code> (<code>apply!(reg, Daggered{&lt;:BPDiff})</code>). This function is overloaded so that gradientis for parameters are also calculated and stored in <a href="../../man/blocks/#Yao.Blocks.BPDiff"><code>BPDiff</code></a> block at the same time.</p><p>Finally, we use <code>gradient</code> to collect gradients in the ciruits.</p><pre><code class="language-julia-repl">julia&gt; g1 = gradient(circuit)  # collect gradient
+2-element Array{Float64,1}:
+ 0.1281408007616687
+ 0.0</code></pre><div class="admonition note"><div class="admonition-title">Note</div><div class="admonition-text"><p>In real quantum devices, gradients can not be back propagated, this is why we need the following section.</p></div></div><h2><a class="nav-anchor" id="Quantum-circuit-differentiation-1" href="#Quantum-circuit-differentiation-1">Quantum circuit differentiation</a></h2><p>Experimental applicable differentiation strategies are based on the following two papers</p><ul><li><a href="https://arxiv.org/abs/1803.00745">Quantum Circuit Learning</a>, Kosuke Mitarai, Makoto Negoro, Masahiro Kitagawa, Keisuke Fujii</li><li><a href="https://arxiv.org/abs/1804.04168">Differentiable Learning of Quantum Circuit Born Machine</a>, Jin-Guo Liu, Lei Wang</li></ul><p>The former differentiation scheme is for observables, and the latter is for V-statistics. One may find the derivation of both schemes in <a href="https://giggleliu.github.io/2018/04/16/circuitgrad.html">this post</a>.</p><p>Realizable quantum circuit gradient finding algorithms have complexity <span>$O(M^2)$</span>.</p><h3><a class="nav-anchor" id="Example:-Practical-quantum-differenciation-1" href="#Example:-Practical-quantum-differenciation-1">Example: Practical quantum differenciation</a></h3><p>We use <a href="../../man/blocks/#Yao.Blocks.QDiff"><code>QDiff</code></a> block to mark differentiable circuits</p><pre><code class="language-julia-repl">julia&gt; using Yao, Yao.Blocks
+
+julia&gt; c = chain(put(4, 1=&gt;Rx(0.5)), control(4, 1, 2=&gt;Ry(0.5)), kron(4, 2=&gt;Rz(0.3), 3=&gt;Rx(0.7))) |&gt; autodiff(:QC)  # automatically mark differentiable blocks
+Total: 4, DataType: Complex{Float64}
+chain
+├─ put on (1)
+│  └─ [̂∂] Rot X gate: 0.5
+├─ control(1)
+│  └─ (2,)=&gt;Rot Y gate: 0.5
+└─ kron
+   ├─ 2=&gt;[̂∂] Rot Z gate: 0.3
+   └─ 3=&gt;[̂∂] Rot X gate: 0.7</code></pre><p>Blocks marked by <code>[̂∂]</code> will be differentiated.</p><pre><code class="language-julia-repl">julia&gt; dbs = collect(c, QDiff)  # collect all QDiff blocks
+Sequence
+├─ [̂∂] Rot X gate: 0.5
+├─ [̂∂] Rot Z gate: 0.3
+└─ [̂∂] Rot X gate: 0.7</code></pre><p>Here, we recommend collect <a href="../../man/blocks/#Yao.Blocks.QDiff"><code>QDiff</code></a> blocks into a sequence using <code>collect</code> API for future calculations. Then, we can get the gradient one by one, using <code>exactdiff</code></p><pre><code class="language-julia-repl">julia&gt; ed = exactdiff(dbs[1]) do   # the exact differentiation with respect to first QDiff block.
+           expect(put(4, 1=&gt;Z), zero_state(4) |&gt; c) |&gt; real
+       end
+0.4794255386042028</code></pre><p>Here, contents in the do-block returns the loss, it must be the expectation value of an observable.</p><p>For results checking, we get the numeric gradient use <code>numdiff</code></p><pre><code class="language-julia-repl">julia&gt; ed = numdiff(dbs[1]) do    # compare with numerical differentiation
+          expect(put(4, 1=&gt;Z), zero_state(4) |&gt; c) |&gt; real
+       end
+0.4794175482185137</code></pre><p>This numerical differentiation scheme is always applicable (even the loss is not an observable), but with numeric errors introduced by finite step size.</p><p>We can also get all gradients using broadcasting</p><pre><code class="language-julia-repl">julia&gt; loss1z() = expect(kron(4, 1=&gt;Z, 2=&gt;X), zero_state(4) |&gt; c) |&gt; real;  # return loss
+
+julia&gt; ed = exactdiff.(loss1z, dbs)   # using broadcast to get all gradients.
+3-element Array{Float64,1}:
+  0.109791495292767
+ -0.008672047291031427
+  0.0</code></pre><div class="admonition note"><div class="admonition-title">Note</div><div class="admonition-text"><p>Since BP is not implemented for <code>QDiff</code> blocks, the memory consumption is much less since we don&#39;t cache intermediate results anymore.</p></div></div><footer><hr/><a class="previous" href="../Grover/"><span class="direction">Previous</span><span class="title">Grover Search and Quantum Inference</span></a><a class="next" href="../QCBM/"><span class="direction">Next</span><span class="title">Quantum Circuit Born Machine</span></a></footer></article></body></html>

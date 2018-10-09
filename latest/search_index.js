@@ -21,7 +21,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Tutorial",
     "category": "section",
-    "text": "Pages = [\n    \"tutorial/GHZ.md\",\n    \"tutorial/QFT.md\",\n    \"tutorial/Grover.md\",\n    \"tutorial/QCBM.md\",\n]\nDepth = 1"
+    "text": "Pages = [\n    \"tutorial/GHZ.md\",\n    \"tutorial/QFT.md\",\n    \"tutorial/Grover.md\",\n    \"tutorial/Diff.md\",\n    \"tutorial/QCBM.md\",\n]\nDepth = 1"
 },
 
 {
@@ -102,6 +102,54 @@ var documenterSearchIndex = {"docs": [
     "title": "Grover Search",
     "category": "section",
     "text": "(Image: grover)First, we construct the reflection block R(psirangle) = 2psiranglelanglepsi-1, given we know how to construct psirangle=A0rangle. Then it equivalent to construct R(psirangle) = A(20ranglelangle 0-1)A^daggerusing Yao\nusing Yao.Blocks\nusing Test, LinearAlgebra\nusing StatsBase\n\n\"\"\"\nA way to construct oracle, e.g. inference_oracle([1,2,-3,5]) will\ninvert the sign when a qubit configuration matches: 1=>1, 2=>1, 3=>0, 5=>1.\n\"\"\"\nfunction inference_oracle(locs::Vector{Int})\n    control(locs[1:end-1], abs(locs[end]) => (locs[end]>0 ? Z : chain(phase(π), Z)))\nend\n\nfunction reflectblock(A::MatrixBlock{N}) where N\n    chain(N, A |> adjoint, inference_oracle(-collect(1:N)), A)\nend\n\nnbit = 12\nA = repeat(nbit, H)\nref = reflectblock(A)\n\n@testset \"test reflect\" begin\n    reg = rand_state(nbit)\n    ref_vec = apply!(zero_state(nbit), A) |> statevec\n    v0 = reg |> statevec\n    @test -2*(ref_vec\'*v0)*ref_vec + v0 ≈ apply!(copy(reg), ref) |> statevec\nendThen we define the oracle and target state# first, construct the oracle with desired state in the range 100-105.\noracle!(reg::DefaultRegister) = (reg.state[100:105,:]*=-1; reg)\n\n# transform it into a function block, so it can be put inside a `Sequential`.\nfb_oracle = FunctionBlock{:Oracle}(reg->oracle!(reg))\n\n\"\"\"\nratio of components in a wavefunction that flip sign under oracle.\n\"\"\"\nfunction prob_match_oracle(psi::DefaultRegister, oracle)\n    fliped_reg = apply!(register(ones(ComplexF64, 1<<nqubits(psi))), oracle)\n    match_mask = fliped_reg |> statevec |> real .< 0\n    norm(statevec(psi)[match_mask])^2\nend\n\n# uniform state as initial state\npsi0 = apply!(zero_state(nbit), A)\n\n# the number of grover steps that can make it reach first maximum overlap.\nnum_grover_step(prob::Real) = Int(round(pi/4/sqrt(prob)))-1\nniter = num_grover_step(prob_match_oracle(psi0, fb_oracle))\n\n# construct the whole circuit\ngb = sequence(sequence(fb_oracle, ref) for i = 1:niter);Now, let\'s start trainingfor (i, blk) in enumerate(gb)\n    apply!(psi0, blk)\n    overlap = prob_match_oracle(psi0, fb_oracle)\n    println(\"step $i, overlap = $overlap\")\nendThe above is the standard Grover Search algorithm, it can find target state in O(sqrt N) time, with N the size of an unordered database. Similar algorithm can be used in more useful applications, like inference, i.e. get conditional probability distribution p(xy) given p(x y).function rand_circuit(nbit::Int, ngate::Int)\n    circuit = chain(nbit)\n    gate_list = [X, H, Ry(0.3), CNOT]\n    for i = 1:ngate\n        gate = rand(gate_list)\n        push!(circuit, put(nbit, (sample(1:nbit, nqubits(gate),replace=false)...,)=>gate))\n    end\n    circuit\nend\nA = rand_circuit(nbit, 200)\npsi0 = apply!(zero_state(nbit), A)\n\n# now we want to search the subspace with [1,3,5,8,9,11,12]\n# fixed to 1 and [4,6] fixed to 0.\nevidense = [1, 3, -4, 5, -6, 8, 9, 11, 12]\n\n\"\"\"\nDoing Inference, psi is the initial state,\nthe target is to search target space with specific evidense.\ne.g. evidense [1, -3, 6] means the [1, 3, 6]-th bits take value [1, 0, 1].\n\"\"\"\noracle_infer = inference_oracle(evidense)(nqubits(psi0))\n\nniter = num_grover_step(prob_match_oracle(psi0, oracle_infer))\ngb_infer = chain(nbit, chain(oracle_infer, reflectblock(A)) for i = 1:niter);Now, let\'s start trainingfor (i, blk) in enumerate(gb_infer)\n    apply!(psi0, blk)\n    p_target = prob_match_oracle(psi0, oracle_infer)\n    println(\"step $i, overlap^2 = $p_target\")\nendHere is an application, suppose we have constructed some digits and stored it in a wave vector.using Yao.Intrinsics\n\nx1 = [0 1 0; 0 1 0; 0 1 0; 0 1 0; 0 1 0]\nx2 = [1 1 1; 0 0 1; 1 1 1; 1 0 0; 1 1 1]\nx0 = [1 1 1; 1 0 1; 1 0 1; 1 0 1; 1 1 1]\n\nnbit = 15\nv = zeros(1<<nbit)\n\n# they occur with different probabilities.\nfor (x, p) in [(x0, 0.7), (x1, 0.29), (x2,0.01)]\n    v[(x |> vec |> BitArray |> packbits)+1] = sqrt(p)\nendPlot them, you will see these digits(Image: digits)Then we construct the inference circuit. Here, we choose to use reflect to construct a ReflectBlock, instead of constructing it explicitly.rb = reflect(copy(v))\npsi0 = register(v)\n\n# we want to find the digits with the first 5 qubits [1, 0, 1, 1, 1].\nevidense = [1, -2, 3, 4, 5]\noracle_infer = inference_oracle(evidense)(nbit)\n\nniter = num_grover_step(prob_match_oracle(psi0, oracle_infer))\ngb_infer = chain(nbit, chain(oracle_infer, rb) for i = 1:niter)Now, let\'s start trainingfor (i, blk) in enumerate(gb_infer)\n    apply!(psi0, blk)\n    p_target = prob_match_oracle(psi0, oracle_infer)\n    println(\"step $i, overlap^2 = $p_target\")\nendThe result ispl = psi0 |> probs\nconfig = findfirst(pi->pi>0.5, pl) - 1 |> bitarray(nbit)\nres = reshape(config, 5,3)It is 2 ~(Image: infer)Congratuations! You get state of art quantum inference circuit!"
+},
+
+{
+    "location": "tutorial/Diff/#",
+    "page": "Differentiatiable Quantum Circuits",
+    "title": "Differentiatiable Quantum Circuits",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "tutorial/Diff/#Differentiatiable-Quantum-Circuits-1",
+    "page": "Differentiatiable Quantum Circuits",
+    "title": "Differentiatiable Quantum Circuits",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "tutorial/Diff/#Classical-back-propagation-1",
+    "page": "Differentiatiable Quantum Circuits",
+    "title": "Classical back propagation",
+    "category": "section",
+    "text": "Back propagation has O(M) complexity in obtaining gradients, with M the number of circuit parameters. We can use autodiff(:BP) to mark differentiable units in a circuit. Let\'s see an example."
+},
+
+{
+    "location": "tutorial/Diff/#Example:-Classical-back-propagation-1",
+    "page": "Differentiatiable Quantum Circuits",
+    "title": "Example: Classical back propagation",
+    "category": "section",
+    "text": "using Yao\ncircuit = chain(4, repeat(4, H, 1:4), put(4, 3=>Rz(0.5)), control(2, 1=>X), put(4, 4=>Ry(0.2)))\ncircuit = circuit |> autodiff(:BP)From the output, we can see parameters of blocks marked by [∂] will be differentiated automatically.op = put(4, 3=>Y);  # loss is defined as its expectation.\nψ = rand_state(4);\nψ |> circuit;\nδ = ψ |> op;     # ∂f/∂ψ*\nbackward!(δ, circuit);    # classical back propagation!Here, the loss is L = <ψ|op|ψ>, δ = ∂f/∂ψ* is the error to be back propagated. The gradient is related to δ as fracpartial fpartialtheta = 2Refracpartial fpartialpsi^*fracpartial psi^*partialthetaIn face, backward!(δ, circuit) on wave function is equivalent to calculating δ |> circuit\' (apply!(reg, Daggered{<:BPDiff})). This function is overloaded so that gradientis for parameters are also calculated and stored in BPDiff block at the same time.Finally, we use gradient to collect gradients in the ciruits.g1 = gradient(circuit)  # collect gradientnote: Note\nIn real quantum devices, gradients can not be back propagated, this is why we need the following section."
+},
+
+{
+    "location": "tutorial/Diff/#Quantum-circuit-differentiation-1",
+    "page": "Differentiatiable Quantum Circuits",
+    "title": "Quantum circuit differentiation",
+    "category": "section",
+    "text": "Experimental applicable differentiation strategies are based on the following two papersQuantum Circuit Learning, Kosuke Mitarai, Makoto Negoro, Masahiro Kitagawa, Keisuke Fujii\nDifferentiable Learning of Quantum Circuit Born Machine, Jin-Guo Liu, Lei WangThe former differentiation scheme is for observables, and the latter is for V-statistics. One may find the derivation of both schemes in this post.Realizable quantum circuit gradient finding algorithms have complexity O(M^2)."
+},
+
+{
+    "location": "tutorial/Diff/#Example:-Practical-quantum-differenciation-1",
+    "page": "Differentiatiable Quantum Circuits",
+    "title": "Example: Practical quantum differenciation",
+    "category": "section",
+    "text": "We use QDiff block to mark differentiable circuitsusing Yao, Yao.Blocks\nc = chain(put(4, 1=>Rx(0.5)), control(4, 1, 2=>Ry(0.5)), kron(4, 2=>Rz(0.3), 3=>Rx(0.7))) |> autodiff(:QC)  # automatically mark differentiable blocksBlocks marked by [̂∂] will be differentiated.dbs = collect(c, QDiff)  # collect all QDiff blocksHere, we recommend collect QDiff blocks into a sequence using collect API for future calculations. Then, we can get the gradient one by one, using exactdiffed = exactdiff(dbs[1]) do   # the exact differentiation with respect to first QDiff block.\n    expect(put(4, 1=>Z), zero_state(4) |> c) |> real\nendHere, contents in the do-block returns the loss, it must be the expectation value of an observable.For results checking, we get the numeric gradient use numdiffed = numdiff(dbs[1]) do    # compare with numerical differentiation\n   expect(put(4, 1=>Z), zero_state(4) |> c) |> real\nendThis numerical differentiation scheme is always applicable (even the loss is not an observable), but with numeric errors introduced by finite step size.We can also get all gradients using broadcastingloss1z() = expect(kron(4, 1=>Z, 2=>X), zero_state(4) |> c) |> real;  # return loss\ned = exactdiff.(loss1z, dbs)   # using broadcast to get all gradients.note: Note\nSince BP is not implemented for QDiff blocks, the memory consumption is much less since we don\'t cache intermediate results anymore."
 },
 
 {
@@ -345,6 +393,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/interfaces/#Yao.Interfaces.autodiff",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.autodiff",
+    "category": "function",
+    "text": "autodiff(block::AbstractBlock) -> AbstractBlock\n\nautomatically mark differentiable items in a block tree as differentiable.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/interfaces/#Yao.Interfaces.chain",
     "page": "Interfaces",
     "title": "Yao.Interfaces.chain",
@@ -393,7 +449,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{M}, Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s280} where #s280<:AbstractBlock}} where M",
+    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{M}, Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s294} where #s294<:AbstractBlock}} where M",
     "page": "Interfaces",
     "title": "Yao.Interfaces.put",
     "category": "method",
@@ -489,7 +545,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Pair{Int64,#s280} where #s280<:MatrixBlock,N} where N}",
+    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Pair{Int64,#s294} where #s294<:MatrixBlock,N} where N}",
     "page": "Interfaces",
     "title": "Base.kron",
     "category": "method",
@@ -921,6 +977,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.BPDiff",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.BPDiff",
+    "category": "type",
+    "text": "BPDiff{GT, N, T, PT, RT<:AbstractRegister} <: AbstractDiff{N, Complex{T}}\nBPDiff(block, [output::AbstractRegister, grad]) -> BPDiff\n\nMark a block as differentiable, here GT, PT and RT are gate type, parameter type and register type respectively.\n\nWarning:     please don\'t use the adjoint after BPDiff! adjoint is reserved for special purpose! (back propagation)\n\n\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.BlockTreeIterator",
     "page": "Blocks System",
     "title": "Yao.Blocks.BlockTreeIterator",
@@ -1001,14 +1065,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.Im",
-    "page": "Blocks System",
-    "title": "Yao.Blocks.Im",
-    "category": "type",
-    "text": "Im{N, T, BT} = Scale{1im, N, T, BT}\n\nMulitply (Im)aginary unit on Block.\n\n\n\n\n\n"
-},
-
-{
     "location": "man/blocks/#Yao.Blocks.KronBlock",
     "page": "Blocks System",
     "title": "Yao.Blocks.KronBlock",
@@ -1057,27 +1113,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.Neg",
-    "page": "Blocks System",
-    "title": "Yao.Blocks.Neg",
-    "category": "type",
-    "text": "Neg{N, T, BT} = Scale{-1, N, T, BT}\n\n(Neg)ative of Block.\n\n\n\n\n\n"
-},
-
-{
     "location": "man/blocks/#Yao.Blocks.PhaseGate",
     "page": "Blocks System",
     "title": "Yao.Blocks.PhaseGate",
     "category": "type",
     "text": "PhiGate\n\nGlobal phase gate.\n\n\n\n\n\n"
-},
-
-{
-    "location": "man/blocks/#Yao.Blocks.Pos",
-    "page": "Blocks System",
-    "title": "Yao.Blocks.Pos",
-    "category": "type",
-    "text": "Pos{N, T, BT} = Scale{1+0im, N, T, BT}\n\n(Pos)itive is doing nothing on Block.\n\n\n\n\n\n"
 },
 
 {
@@ -1094,6 +1134,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.PutBlock",
     "category": "type",
     "text": "PutBlock{N, C, GT, T} <: AbstractContainer{N, T}\n\nput a block on given addrs.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.QDiff",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.QDiff",
+    "category": "type",
+    "text": "QDiff{GT, N, T} <: AbstractDiff{N, Complex{T}}\nQDiff(block) -> QDiff\n\nMark a block as quantum differentiable.\n\n\n\n\n\n"
 },
 
 {
@@ -1161,14 +1209,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks._Im",
-    "page": "Blocks System",
-    "title": "Yao.Blocks._Im",
-    "category": "type",
-    "text": "_Im{N, T, BT} = Scale{-1im, N, T, BT}\n\nMulitply (-Im)aginary unit on Block.\n\n\n\n\n\n"
-},
-
-{
     "location": "man/blocks/#Yao.Blocks.apply!",
     "page": "Blocks System",
     "title": "Yao.Blocks.apply!",
@@ -1182,6 +1222,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.applymatrix",
     "category": "method",
     "text": "applymatrix(g::AbstractBlock) -> Matrix\n\nTransform the apply! function of specific block to dense matrix.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.backward!-Tuple{AbstractRegister,MatrixBlock}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.backward!",
+    "category": "method",
+    "text": "backward!(circuit::MatrixBlock, δ::AbstractRegister) -> AbstractRegister\n\nback propagate and calculate the gradient ∂f/∂θ = 2Re(∂f/∂ψ⋅∂ψ/∂θ), given ∂f/∂ψ.\n\nNote: Here, the input circuit should be a matrix block, otherwise the back propagate may not apply (like Measure operations).\n\n\n\n\n\n"
 },
 
 {
@@ -1225,11 +1273,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.dispatch!!-Tuple{AbstractBlock,Any}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.dispatch!!",
+    "category": "method",
+    "text": "dispatch!!([func::Function], block::AbstractBlock, params) -> AbstractBlock\n\nSimilar to dispatch!, but will pop! out params inplace, it can not more efficient.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.dispatch!-Tuple{AbstractBlock,Any}",
     "page": "Blocks System",
     "title": "Yao.Blocks.dispatch!",
     "category": "method",
-    "text": "dispatch!([func::Function], block::AbstractBlock, params)\ndispatch!!([func::Function], block::AbstractBlock, params)\n\ndispatch parameters to this block, dispatch!! will pop! out all params.\n\n\n\n\n\n"
+    "text": "dispatch!([func::Function], block::AbstractBlock, params) -> AbstractBlock\ndispatch!([func::Function], block::AbstractBlock, :random) -> AbstractBlock\ndispatch!([func::Function], block::AbstractBlock, :zero) -> AbstractBlock\n\ndispatch! parameters into this circuit, here params is an iterable.\n\nIf instead of iterable, a symbol :random or :zero is provided, random numbers (its behavior is specified by setiparameters!) or 0s will be broadcasted into circuits.\n\nusing dispatch!! is more efficient, but will pop! out all params inplace.\n\n\n\n\n\n"
 },
 
 {
@@ -1238,6 +1294,30 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.expect",
     "category": "function",
     "text": "expect(op::AbstractBlock, reg::AbstractRegister{B}) -> Vector\nexpect(op::AbstractBlock, dm::DensityMatrix{B}) -> Vector\n\nexpectation value of an operator.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.generator-Tuple{RotationGate}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.generator",
+    "category": "method",
+    "text": "generator(rot::Rotor) -> MatrixBlock\n\nReturn the generator of rotation block.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.gradient",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.gradient",
+    "category": "function",
+    "text": "gradient(circuit::AbstractBlock, mode::Symbol=:ANY) -> Vector\n\ncollect all gradients in a circuit, mode can be :BP/:QC/:ANY, they will collect grad from BPDiff/QDiff/AbstractDiff respectively.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.iparameter_type-Tuple{AbstractBlock}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.iparameter_type",
+    "category": "method",
+    "text": "iparameter_type(block::AbstractBlock) -> Type\n\nelement type of iparameters(block).\n\n\n\n\n\n"
 },
 
 {
@@ -1285,7 +1365,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.parameters",
     "category": "function",
-    "text": "parameters(c::AbstractBlock, output=Float64[]) -> Vector\n\nget all parameters including sublocks.\n\n\n\n\n\n"
+    "text": "parameters(c::AbstractBlock, [output]) -> Vector\n\nget all parameters including sublocks.\n\n\n\n\n\n"
 },
 
 {
@@ -1369,11 +1449,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.render_params-Tuple{AbstractBlock,Any}",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.render_params",
+    "category": "method",
+    "text": "render_params(r::AbstractBlock, raw_parameters) -> Iterable\n\nMore elegant way of rendering parameters for symbols.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.setiparameters",
     "page": "Blocks System",
     "title": "Yao.Blocks.setiparameters",
     "category": "function",
-    "text": "setparameters!([elementwisefunction], r::AbstractBlock, params) -> AbstractBlock\n\nset intrinsics parameter for block.\n\n\n\n\n\n"
+    "text": "setparameters!([elementwisefunction], r::AbstractBlock, params::Number...) -> AbstractBlock\nsetparameters!([elementwisefunction], r::AbstractBlock, :random) -> AbstractBlock\nsetparameters!([elementwisefunction], r::AbstractBlock, :zero) -> AbstractBlock\n\nset intrinsics parameter for block, input params can be numbers or :random or :zero.\n\n\n\n\n\n"
 },
 
 {
@@ -1430,6 +1518,14 @@ var documenterSearchIndex = {"docs": [
     "title": "LinearAlgebra.ishermitian",
     "category": "method",
     "text": "ishermitian(op) -> Bool\n\ncheck if this operator is hermitian.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.baddrs-Tuple{Int64}",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.baddrs",
+    "category": "method",
+    "text": "baddrs(b::DInt) -> Vector\n\nget the locations of nonzeros bits, i.e. the inverse operation of bmask.\n\n\n\n\n\n"
 },
 
 {
@@ -1981,7 +2077,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Extending Blocks",
     "title": "Extending Composite Blocks",
     "category": "section",
-    "text": "Composite blocks are blocks that are able to contain other blocks. To define a new composite block you only need to define your new type as a subtype of CompositeBlock, and define a new method called blocks which will provide an iterator that iterates the blocks contained by this composite block."
+    "text": "Composite blocks are blocks that are able to contain other blocks. To define a new composite block you only need to define your new type as a subtype of CompositeBlock, and define a new method called subblocks which will provide an iterator that iterates the blocks contained by this composite block."
 },
 
 {
