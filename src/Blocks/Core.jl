@@ -89,6 +89,13 @@ setiparameters!(func::Function, r::AbstractBlock, params::Symbol) = setiparamete
 setiparameters!(r::AbstractBlock, params::Symbol) = setiparameters!(r, render_params(r, params)...)
 
 """
+    iparameter_type(block::AbstractBlock) -> Type
+    
+element type of `iparameters(block)`.
+"""
+iparameter_type(block::AbstractBlock) = eltype(iparameters(block))
+
+"""
     render_params(r::AbstractBlock, raw_parameters) -> Iterable
 
 More elegant way of rendering parameters for symbols.
@@ -105,7 +112,7 @@ the type of iparameters.
 """
 function parameter_type end
 function parameter_type(c::AbstractBlock)
-    promote_type(eltype(c |> iparameters), [parameter_type(each) for each in subblocks(c)]...)
+    promote_type(c |> iparameter_type, [parameter_type(each) for each in subblocks(c)]...)
 end
 
 
@@ -185,11 +192,11 @@ function nparameters(c::AbstractBlock)
 end
 
 """
-    parameters(c::AbstractBlock, output=Float64[]) -> Vector
+    parameters(c::AbstractBlock, [output]) -> Vector
 
 get all parameters including sublocks.
 """
-function parameters(c::AbstractBlock, output=Float64[])
+function parameters(c::AbstractBlock, output=parameter_type(c)[])
     append!(output, iparameters(c))
     for blk in subblocks(c)
         append!(output, parameters(blk))

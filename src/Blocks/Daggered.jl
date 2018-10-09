@@ -7,10 +7,10 @@ export Daggered
 
 Daggered Block.
 """
-struct Daggered{N, T, BT} <: TagBlock{N, T}
+struct Daggered{BT, N, T} <: TagBlock{N, T}
     block::BT
 end
-Daggered(blk::BT) where {N, T, BT<:MatrixBlock{N, T}} = Daggered{N, T, BT}(blk)
+Daggered(blk::BT) where {N, T, BT<:MatrixBlock{N, T}} = Daggered{BT, N, T}(blk)
 chblock(pb::Daggered, blk::MatrixBlock) = Daggered(blk)
 
 adjoint(blk::MatrixBlock) = ishermitian(blk) ? blk : Daggered(blk)

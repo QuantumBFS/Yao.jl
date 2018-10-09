@@ -23,7 +23,7 @@ Here, the loss is `L = <ψ|op|ψ>`, `δ = ∂f/∂ψ*` is the error to be back p
 The gradient is related to $δ$ as
 $$\frac{\partial f}{\partial\theta} = 2\Re[\frac{\partial f}{\partial\psi^*}\frac{\partial \psi^*}{\partial\theta}]$$
 
-In face, `backward!(δ, circuit)` on wave function is equivalent to calculating `δ |> circuit'` (`apply!(reg, Daggered{N, T, <:BPDiff})`).
+In face, `backward!(δ, circuit)` on wave function is equivalent to calculating `δ |> circuit'` (`apply!(reg, Daggered{<:BPDiff})`).
 This function is overloaded so that gradientis for parameters are also calculated and stored in [`BPDiff`](@ref) block at the same time.
 
 Finally, we use `gradient` to collect gradients in the ciruits.

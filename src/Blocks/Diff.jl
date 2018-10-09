@@ -14,15 +14,15 @@ abstract type AbstractDiff{N, T} <: TagBlock{N, T} end
 
 #################### The Basic Diff #################
 """
-    QDiff{N, T, GT<:RotationGate{N, T}} <: TagBlock{N, Complex{T}}
+    QDiff{GT, N, T} <: AbstractDiff{N, Complex{T}}
     QDiff(block) -> QDiff
 
 Mark a block as quantum differentiable.
 """
-mutable struct QDiff{N, T, GT<:RotationGate{N, T}} <: AbstractDiff{N, Complex{T}}
+mutable struct QDiff{GT, N, T} <: AbstractDiff{N, Complex{T}}
     block::GT
     grad::T
-    QDiff(block::RotationGate{N, T}) where {N, T} = new{N, T, typeof(block)}(block, T(0))
+    QDiff(block::RotationGate{N, T}) where {N, T} = new{typeof(block), N, T}(block, T(0))
 end
 chblock(cb::QDiff, blk::RotationGate) = QDiff(blk)
 
@@ -36,22 +36,25 @@ end
 
 #################### The Back Propagation Diff #################
 """
-    BPDiff{N, T, GT<:Rotor{N, T}, RT<:AbstractRegister} <: TagBlock{N, Complex{T}}
-    BPDiff(block, [output::AbstractRegister]) -> BPDiff
+    BPDiff{GT, N, T, PT, RT<:AbstractRegister} <: AbstractDiff{N, Complex{T}}
+    BPDiff(block, [output::AbstractRegister, grad]) -> BPDiff
 
-Mark a block as differentiable.
+Mark a block as differentiable, here `GT`, `PT` and `RT` are gate type, parameter type and register type respectively.
 
 Warning:
     please don't use the `adjoint` after `BPDiff`! `adjoint` is reserved for special purpose! (back propagation)
 """
-mutable struct BPDiff{N, T, GT<:Rotor{N, T}, RT<:AbstractRegister} <: AbstractDiff{N, Complex{T}}
+mutable struct BPDiff{GT, N, T, PT, RT<:AbstractRegister} <: AbstractDiff{N, T}
     block::GT
     output::RT
-    grad::T
-    BPDiff(block::Rotor{N, T}, output::RT) where {N, T, RT} = new{N, T, typeof(block), RT}(block, output, T(0))
-    BPDiff(block::Rotor{N, T}) where {N, T} = BPDiff(block, zero_state(N))
+    grad::PT
+    BPDiff(block::MatrixBlock{N, T}, output::RT, grad::PT) where {N, T, PT, RT} = new{typeof(block), N, T, typeof(grad), RT}(block, output, grad)
 end
-chblock(cb::BPDiff, blk::Rotor) = BPDiff(blk)
+BPDiff(block::MatrixBlock, output::AbstractRegister) = BPDiff(block, output, zeros(iparameter_type(block), niparameters(block)))
+BPDiff(block::MatrixBlock{N, T}) where {N, T} = BPDiff(block, zero_state(N))
+BPDiff(block::Rotor{N, T}, output::AbstractRegister) where {N, T} = BPDiff(block, output, T(0))
+
+chblock(cb::BPDiff, blk::MatrixBlock) = BPDiff(blk)
 
 @forward BPDiff.block mat
 function apply!(reg::AbstractRegister, df::BPDiff)
@@ -59,7 +62,8 @@ function apply!(reg::AbstractRegister, df::BPDiff)
     df.output = copy(reg)
     reg
 end
-function apply!(δ::AbstractRegister, adf::Daggered{<:Any, <:Any, <:BPDiff})
+
+function apply!(δ::AbstractRegister, adf::Daggered{<:BPDiff{<:Rotor}})
     df = adf |> parent
     df.grad = ((df.output |> generator(parent(df)))' * δ * 0.5im |> real)*2
     apply!(δ, parent(df)')

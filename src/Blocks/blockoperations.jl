@@ -120,8 +120,9 @@ backward!(δ::AbstractRegister, circuit::MatrixBlock) = δ |> circuit'
 
 collect all gradients in a circuit, mode can be :BP/:QC/:ANY, they will collect `grad` from BPDiff/QDiff/AbstractDiff respectively.
 """
-gradient(circuit::AbstractBlock, mode::Symbol=:ANY) = gradient!(circuit, Float64[], Val(mode))
+gradient(circuit::AbstractBlock, mode::Symbol=:ANY) = gradient!(circuit, parameter_type(circuit)[], mode)
 
+gradient!(circuit::AbstractBlock, grad, mode::Symbol) = gradient!(circuit, grad, Val(mode))
 function gradient!(circuit::AbstractBlock, grad, mode::Val)
     for block in subblocks(circuit)
         gradient!(block, grad, mode)
