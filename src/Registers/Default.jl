@@ -45,6 +45,7 @@ statevec(r::DefaultRegister) = r.state |> matvec
 hypercubic(reg::DefaultRegister{B}) where B = reshape(reg.state, ntuple(i->2, Val(nactive(reg)))..., :)
 rank3(reg::DefaultRegister{B}) where B = reshape(reg.state, size(reg.state, 1), :, B)
 copy(r::DefaultRegister{B}) where B = DefaultRegister{B}(copy(state(r)))
+copyto!(reg1::RT, reg2::RT) where {RT<:AbstractRegister} = (copyto!(reg1.state, reg2.state); reg1)
 normalize!(r::DefaultRegister) = (batch_normalize!(r.state); r)
 
 similar(r::DefaultRegister{B, T}) where {B, T} = DefaultRegister{B}(similar(r.state))
@@ -58,26 +59,26 @@ stack(regs::DefaultRegister...) = DefaultRegister{sum(nbatch, regs)}(hcat((reg.s
 Base.repeat(reg::DefaultRegister{B}, n::Int) where B = DefaultRegister{B*n}(hcat((reg.state for i=1:n)...,))
 
 """
-    product_state(::Type{T}, n::Int, config::Int, nbatch::Int=1) -> DefaultRegister
+    product_state([::Type{T}], n::Int, config::Int, nbatch::Int=1) -> DefaultRegister
 
 a product state on given configuration `config`, e.g. product_state(ComplexF64, 5, 0) will give a zero state on a 5 qubit register.
 """
 product_state(::Type{T}, n::Int, config::Integer, nbatch::Int=1) where T = register((arr=zeros(T, 1<<n, nbatch); arr[config+1,:] .= 1; arr))
 
 """
-    zero_state(::Type{T}, n::Int, nbatch::Int=1) -> DefaultRegister
+    zero_state([::Type{T}], n::Int, nbatch::Int=1) -> DefaultRegister
 """
 zero_state(::Type{T}, n::Int, nbatch::Int=1) where T = product_state(T, n, 0, nbatch)
 
 """
-    rand_state(::Type{T}, n::Int, nbatch::Int=1) -> DefaultRegister
+    rand_state([::Type{T}], n::Int, nbatch::Int=1) -> DefaultRegister
 
 here, random complex numbers are generated using `randn(ComplexF64)`.
 """
 rand_state(::Type{T}, n::Int, nbatch::Int=1) where T = register(randn(T, 1<<n, nbatch) + im*randn(T, 1<<n, nbatch)) |> normalize!
 
 """
-    uniform_state(::Type{T}, n::Int, nbatch::Int=1) -> DefaultRegister
+    uniform_state([::Type{T}], n::Int, nbatch::Int=1) -> DefaultRegister
 
 uniform state, the state after applying H gates on |0> state.
 """
@@ -224,3 +225,10 @@ statevec(bra::ConjRegister) where T = Adjoint(parent(bra) |> statevec)
 relaxedvec(bra::ConjRegister) where T = Adjoint(parent(bra) |> relaxedvec)
 
 *(bra::ConjRegister, ket::DefaultRegister) = statevec(bra) * statevec(ket)
+
+################ Broadcasting ###################
+function broadcastable(reg::DefaultRegister{B}) where B
+    st = reg |> rank3
+    Tuple(register(view(st, :, :, i)) for i = 1:B)
+end
+broadcastable(reg::DefaultRegister{1}) = Ref{reg}

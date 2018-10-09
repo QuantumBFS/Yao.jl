@@ -5,8 +5,8 @@ using StatsBase
 using MacroTools: @forward
 using ..Intrinsics
 
-import Base: length
-import Base: eltype, copy, similar, *, join
+import Base: length, broadcastable
+import Base: eltype, copy, similar, *, join, copyto!
 import Base: show
 
 # import package APIs

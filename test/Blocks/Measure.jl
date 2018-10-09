@@ -60,3 +60,12 @@ end
     @test nactive(reg2) == 0
     @test reg2 |> isnormalized
 end
+
+@testset "measure and reset" begin
+    reg = rand_state(4)
+    mb = MeasureAndReset(3)
+    reg |> mb
+    @test all(measure(reg, 10) .== 3)
+    @test length(mb.result) == 1
+end
+
