@@ -52,6 +52,7 @@ subblocks(c::ChainBlock) = c.blocks
 addrs(c::ChainBlock) = ones(Int, length(c))
 usedbits(c::ChainBlock) = unique(vcat([usedbits(b) for b in subblocks(c)]...))
 chsubblocks(pb::ChainBlock, blocks) = ChainBlock(blocks)
+@forward ChainBlock.blocks popfirst!, pop!
 
 # Additional Methods for Chain
 push!(c::ChainBlock{N}, val::MatrixBlock{N}) where N = (push!(c.blocks, val); c)

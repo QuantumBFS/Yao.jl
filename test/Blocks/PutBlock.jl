@@ -25,6 +25,11 @@ using Yao.Blocks: PutBlock
 
     blks = [control(2, 1, 2=>Z)]
     @test (chsubblocks(pb, blks) |> subblocks .== blks) |> all
+
+    pb = PutBlock{nbit}(Rx(0.1), (3,))
+    @test setiparameters!(copy(pb)) == pb
+    @test setiparameters!(copy(pb), :random) == pb
+    @test setiparameters!(copy(pb), :zero) == pb
 end
 
 @testset "dispatch!" begin

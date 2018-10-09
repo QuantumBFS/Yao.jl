@@ -75,13 +75,35 @@ function iparameters end
 iparameters(x::AbstractBlock) = ()
 
 """
-    setparameters!([elementwisefunction], r::AbstractBlock, params) -> AbstractBlock
+    setparameters!([elementwisefunction], r::AbstractBlock, params::Number...) -> AbstractBlock
+    setparameters!([elementwisefunction], r::AbstractBlock, :random) -> AbstractBlock
+    setparameters!([elementwisefunction], r::AbstractBlock, :zero) -> AbstractBlock
 
-set intrinsics parameter for block.
+set intrinsics parameter for block, input `params` can be numbers or :random or :zero.
 """
 function setiparameters end
-setiparameters!(r::AbstractBlock, params) = r
-setiparameters!(func::Function, r::AbstractBlock, params) = setiparameters!(r, func.(r |> iparameters, params))
+setiparameters!(func::Function, r::AbstractBlock, params::Number...) = setiparameters!(r, func.(r |> iparameters, params)...)
+setiparameters!(r::AbstractBlock, params::Number...) = r
+
+setiparameters!(func::Function, r::AbstractBlock, params::Symbol) = setiparameters!(func, r, render_params(r, params)...)
+setiparameters!(r::AbstractBlock, params::Symbol) = setiparameters!(r, render_params(r, params)...)
+
+"""
+    iparameter_type(block::AbstractBlock) -> Type
+    
+element type of `iparameters(block)`.
+"""
+iparameter_type(block::AbstractBlock) = eltype(iparameters(block))
+
+"""
+    render_params(r::AbstractBlock, raw_parameters) -> Iterable
+
+More elegant way of rendering parameters for symbols.
+"""
+render_params(r::AbstractBlock, params) = params
+render_params(r::AbstractBlock, params::Symbol) = render_params(r, Val(params))
+render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i=1:niparameters(r))
+render_params(r::AbstractBlock, ::Val{:zero}) = (0 for i=1:niparameters(r))
 
 """
     parameter_type(block) -> Type
@@ -90,7 +112,7 @@ the type of iparameters.
 """
 function parameter_type end
 function parameter_type(c::AbstractBlock)
-    promote_type(eltype(c |> iparameters), [parameter_type(each) for each in subblocks(c)]...)
+    promote_type(c |> iparameter_type, [parameter_type(each) for each in subblocks(c)]...)
 end
 
 
@@ -102,25 +124,48 @@ Returns the matrix form of this block.
 function mat end
 
 """
-    dispatch!([func::Function], block::AbstractBlock, params)
-    dispatch!!([func::Function], block::AbstractBlock, params)
+    dispatch!([func::Function], block::AbstractBlock, params) -> AbstractBlock
+    dispatch!([func::Function], block::AbstractBlock, :random) -> AbstractBlock
+    dispatch!([func::Function], block::AbstractBlock, :zero) -> AbstractBlock
 
-dispatch parameters to this block, `dispatch!!` will pop! out all params.
+dispatch! parameters into this circuit, here `params` is an iterable.
+
+If instead of iterable, a symbol `:random` or `:zero` is provided,
+random numbers (its behavior is specified by `setiparameters!`) or 0s will be broadcasted into circuits.
+
+using `dispatch!!` is more efficient, but will pop! out all params inplace.
 """
 dispatch!(block::AbstractBlock, params) = dispatch!!(block, params |> collect)
 dispatch!(func::Function, block::AbstractBlock, params) = dispatch!!(func, block, params |> collect)
+"""
+    dispatch!!([func::Function], block::AbstractBlock, params) -> AbstractBlock
+
+Similar to `dispatch!`, but will pop! out params inplace, it can not more efficient.
+"""
 function dispatch!!(r::AbstractBlock, params)
-    setiparameters!(r, (popfirst!(params) for i=1:niparameters(r)))
+    setiparameters!(r, (popfirst!(params) for i=1:niparameters(r))...)
     for blk in subblocks(r)
         dispatch!!(blk, params)
     end
     r
 end
 function dispatch!!(func::Function, r::AbstractBlock, params)
-    setiparameters!(func, r, (popfirst!(params) for i=1:niparameters(r)))
+    setiparameters!(func, r, (popfirst!(params) for i=1:niparameters(r))...)
     for blk in subblocks(r)
         dispatch!!(func, blk, params)
     end
+    r
+end
+
+function dispatch!(func::Function, r::AbstractBlock, params::Symbol)
+    setiparameters!(func, r, params)
+    dispatch!.(func, r |> subblocks, params)
+    r
+end
+
+function dispatch!(r::AbstractBlock, params::Symbol)
+    setiparameters!(r, params)
+    dispatch!.(r |> subblocks, params)
     r
 end
 
@@ -147,11 +192,11 @@ function nparameters(c::AbstractBlock)
 end
 
 """
-    parameters(c::AbstractBlock, output=Float64[]) -> Vector
+    parameters(c::AbstractBlock, [output]) -> Vector
 
 get all parameters including sublocks.
 """
-function parameters(c::AbstractBlock, output=Float64[])
+function parameters(c::AbstractBlock, output=parameter_type(c)[])
     append!(output, iparameters(c))
     for blk in subblocks(c)
         append!(output, parameters(blk))

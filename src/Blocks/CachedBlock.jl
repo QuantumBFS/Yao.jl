@@ -61,6 +61,6 @@ similar(c::CachedBlock, level::Int) = CachedBlock(c.server, c.block, level)
 copy(c::CachedBlock, level::Int) = CachedBlock(c.server, copy(c.block), level)
 
 function print_block(io::IO, c::CachedBlock)
+    printstyled(io, "[↺] "; bold=true, color=:yellow)
     print_block(io, c.block)
-    print(io, " (Cached)")
 end

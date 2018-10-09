@@ -17,7 +17,7 @@ copy(block::PhaseGate{T}) where T = PhaseGate{T}(block.theta)
 # parametric interface
 niparameters(::Type{<:PhaseGate}) = 1
 iparameters(x::PhaseGate) = x.theta
-setiparameters!(r::PhaseGate, params) = (r.theta = first(params); r)
+setiparameters!(r::PhaseGate, param::Real) = (r.theta = param; r)
 
 ==(lhs::PhaseGate, rhs::PhaseGate) = lhs.theta == rhs.theta
 

@@ -10,6 +10,9 @@ using Yao.Blocks
     @test isa(RotationGate(control(2, (2,), 1=>X), 0.1), RotationGate{2, Float64})
     @test_throws TypeError RotationGate{1, Float32, XGate{ComplexF64}} # will not accept non-real type
     @test chsubblocks(RotationGate(X, 0.1), ()) |> subblocks == ()
+    @test setiparameters!(RotationGate(X, 0.0), 0.5).theta == 0.5
+    @test setiparameters!(RotationGate(X, 0.0), :random).theta != 0.0
+    @test setiparameters!(RotationGate(X, 2.0), :zero).theta == 0.0
 end
 
 @testset "matrix" begin

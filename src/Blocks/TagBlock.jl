@@ -14,12 +14,14 @@ iterate(c::TagBlock) = iterate(parent(c))
 iterate(c::TagBlock, st) = iterate(parent(c), st)
 
 cache_key(tb::TagBlock) = cache_key(parent(tb))
+block(tb::TagBlock) = parent(tb)
 
 include("BlockCache.jl")
 include("Daggered.jl")
 include("Scale.jl")
+include("Diff.jl")
 
 ########## common interfaces are defined here! ##############
-for BLOCKTYPE in (:Daggered, :CachedBlock, :Scale)
+for BLOCKTYPE in (:Daggered, :CachedBlock, :Scale, :BPDiff, :QDiff)
     @eval parent(dg::$BLOCKTYPE) = dg.block
 end

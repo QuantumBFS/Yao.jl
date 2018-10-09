@@ -110,6 +110,10 @@ function print_subblocks(io::IO, tree::AbstractBlock, depth, charset, active_lev
     end
 end
 
+function print_subblocks(io::IO, tree::TagBlock, depth, charset, active_levels)
+    print_subblocks(io, tree |> parent, depth, charset, active_levels)
+end
+
 function print_subblocks(io::IO, tree::KronBlock, depth, charset, active_levels)
     it_result = iterate(tree)
     while it_result !== nothing

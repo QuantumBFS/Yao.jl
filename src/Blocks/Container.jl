@@ -38,6 +38,6 @@ include("Concentrator.jl")
 include("TagBlock.jl")
 
 ########## common interfaces are defined here! ##############
-for BLOCKTYPE in (:PutBlock, :ControlBlock, :RepeatedBlock, :Concentrator, :Daggered, :CachedBlock, :Scale)
+for BLOCKTYPE in (:PutBlock, :ControlBlock, :RepeatedBlock, :Concentrator)
     @eval block(dg::$BLOCKTYPE) = dg.block
 end

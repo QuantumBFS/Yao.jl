@@ -7,7 +7,7 @@ tree wise filtering for blocks.
 """
 blockfilter(func, blk::AbstractBlock) = blockfilter!(func, Vector{AbstractBlock}([]), blk)
 
-function blockfilter!(func, rgs::Vector, blk::CompositeBlock)
+function blockfilter!(func, rgs::Vector, blk::AbstractBlock)
     if func(blk) push!(rgs, blk) end
     for block in subblocks(blk)
         blockfilter!(func, rgs, block)
@@ -19,6 +19,11 @@ blockfilter!(func, rgs::Vector, blk::PrimitiveBlock) = func(blk) ? push!(rgs, bl
 function blockfilter!(func, rgs::Vector, blk::AbstractContainer)
     func(blk) && push!(rgs, blk)
     blockfilter!(func, rgs, block(blk))
+end
+
+import Base: collect
+function collect(circuit::AbstractBlock, ::Type{BT}) where BT<:AbstractBlock
+    Sequential(blockfilter!(x->x isa BT, Vector{BT}([]), circuit))
 end
 
 export traverse
@@ -97,3 +102,34 @@ expect(op::AbstractBlock, reg::AbstractRegister) = reg'*apply!(copy(reg), op)
 
 expect(op::MatrixBlock, dm::DensityMatrix) = mapslices(x->sum(mat(op).*x)[], dm.state, dims=[1,2]) |> vec
 expect(op::MatrixBlock, dm::DensityMatrix{1}) = sum(mat(op).*dropdims(dm.state, dims=3))
+
+################### AutoDiff Circuit ###################
+export gradient, backward!
+"""
+    backward!(circuit::MatrixBlock, δ::AbstractRegister) -> AbstractRegister
+
+back propagate and calculate the gradient ∂f/∂θ = 2*Re(∂f/∂ψ*⋅∂ψ*/∂θ), given ∂f/∂ψ*.
+
+Note:
+Here, the input circuit should be a matrix block, otherwise the back propagate may not apply (like Measure operations).
+"""
+backward!(δ::AbstractRegister, circuit::MatrixBlock) = apply!(δ, circuit')
+
+"""
+    gradient(circuit::AbstractBlock, mode::Symbol=:ANY) -> Vector
+
+collect all gradients in a circuit, mode can be :BP/:QC/:ANY, they will collect `grad` from BPDiff/QDiff/AbstractDiff respectively.
+"""
+gradient(circuit::AbstractBlock, mode::Symbol=:ANY) = gradient!(circuit, parameter_type(circuit)[], mode)
+
+gradient!(circuit::AbstractBlock, grad, mode::Symbol) = gradient!(circuit, grad, Val(mode))
+function gradient!(circuit::AbstractBlock, grad, mode::Val)
+    for block in subblocks(circuit)
+        gradient!(block, grad, mode)
+    end
+    grad
+end
+
+gradient!(circuit::BPDiff, grad, mode::Val{:BP}) = append!(grad, circuit.grad)
+gradient!(circuit::QDiff, grad, mode::Val{:QC}) = push!(grad, circuit.grad)
+gradient!(circuit::AbstractDiff, grad, mode::Val{:ANY}) = append!(grad, circuit.grad)

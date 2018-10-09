@@ -17,7 +17,7 @@ subblocks(c::Sequential) = c.blocks
 addrs(c::Sequential) = ones(Int, subblocks(c)|>length)
 
 
-@forward Sequential.blocks Base.getindex, lastindex, Base.setindex!, Base.iterate, Base.length, Base.eltype, Base.eachindex
+@forward Sequential.blocks Base.getindex, lastindex, Base.setindex!, Base.iterate, Base.length, Base.eltype, Base.eachindex, pop!, popfirst!
 
 # Additional Methods for Chain
 push!(c::Sequential, val::AbstractBlock) = (push!(c.blocks, val); c)

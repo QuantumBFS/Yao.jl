@@ -17,7 +17,7 @@ import ..Registers: focus!, relax!
 import ..Intrinsics: ishermitian, isunitary, isreflexive
 import CacheServers: update!, iscached, clear!, pull, iscacheable
 export clear! # TODO: rm this later
-import Base: copy, hash, ==, eltype, show, similar, getindex, setindex!, iterate, length, parent, adjoint, lastindex, push!, append!, prepend!, insert!, +, -, *, /
+import Base: copy, hash, ==, eltype, show, similar, getindex, setindex!, iterate, length, parent, adjoint, lastindex, push!, append!, prepend!, insert!, +, -, *, /, pop!, popfirst!
 
 # APIs for cache block's matrix
 export update_cache
@@ -25,7 +25,7 @@ export update_cache
 # module APIs
 export usedbits, addrs, subblocks, block, chblock, chsubblocks, @const_gate, tokenof
 export nqubits, nactive, mat, datatype, invorder
-export iparameters, niparameters, setiparameters!, nparameters, parameters, parameter_type
+export iparameters, niparameters, setiparameters!, nparameters, parameters, parameter_type, iparameter_type
 export apply!, dispatch!, dispatch!!, applymatrix
 export ishermitian, isunitary, isreflexive
 export parent, adjoint

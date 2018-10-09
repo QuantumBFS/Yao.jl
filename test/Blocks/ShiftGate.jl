@@ -7,6 +7,9 @@ using Yao.Blocks
 @testset "constructor" begin
 @test ShiftGate(0.1) isa ShiftGate{Float64}
 @test_throws TypeError ShiftGate{ComplexF32} # will not accept non-real type
+@test setiparameters!(ShiftGate(0.0), 0.5).theta == 0.5
+@test setiparameters!(ShiftGate(0.0), :random).theta != 0.0
+@test setiparameters!(ShiftGate(2.0), :zero).theta == 0.0
 end
 
 @testset "matrix" begin
@@ -35,8 +38,6 @@ end
 @testset "traits" begin
 g = ShiftGate{Float64}(0.1)
 @test nqubits(g) == 1
-@test ninput(g) == 1
-@test noutput(g) == 1
 @test isreflexive(g) == false
 @test isunitary(g) == true
 @test ishermitian(g) == false

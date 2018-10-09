@@ -35,7 +35,7 @@ copy(te::TimeEvolution) = TimeEvolution(te.H, te.t)
 # parametric interface
 niparameters(::Type{<:TimeEvolution}) = 1
 iparameters(x::TimeEvolution) = x.t
-setiparameters!(r::TimeEvolution, params) = (r.t = first(params); r)
+setiparameters!(r::TimeEvolution, param::Real) = (r.t = param; r)
 
 ==(lhs::TimeEvolution{TA, GTA}, rhs::TimeEvolution{TB, GTB}) where {TA, TB, GTA, GTB} = false
 ==(lhs::TimeEvolution{TA, GT}, rhs::TimeEvolution{TB, GT}) where {TA, TB, GT} = lhs.t == rhs.t

@@ -13,3 +13,7 @@ end
 @testset "scale" begin
 include("Scale.jl")
 end
+
+@testset "diff" begin
+include("Diff.jl")
+end
