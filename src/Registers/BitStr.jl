@@ -32,6 +32,10 @@ function bitstring2int(str::String)
     for (k, each) in enumerate(reverse(str))
         if each == '1'
             val += 0x01 << (k - 1)
+        elseif each == '0'
+            continue
+        else
+            throw(InexactError(:bitstring2int, QuBitStr, str))
         end
     end
     val
