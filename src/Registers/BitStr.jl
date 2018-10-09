@@ -1,30 +1,30 @@
 import Base: repeat
 
 """
-    QuBitStr
+    BitStr
 
 String literal for qubits.
 """
-struct QuBitStr <: AbstractString
+struct BitStr <: AbstractString
     val::UInt
     len::Int
 end
 
-QuBitStr(str::String) = QuBitStr(bitstring2int(str), length(str))
+BitStr(str::String) = BitStr(bitstring2int(str), length(str))
 
 # use system interface
-asindex(bits::QuBitStr) = bits.val + 1
-length(bits::QuBitStr) = bits.len
+asindex(bits::BitStr) = bits.val + 1
+length(bits::BitStr) = bits.len
 
 """
-    @bit_str -> QuBitStr
+    @bit_str -> BitStr
 
 Construct a bit string. such as `bit"0000"`. The bit strings also supports string concat. Just use
 it like normal strings.
 """
 macro bit_str(str)
     @assert length(str) < 64 "we do not support large integer at the moment"
-    QuBitStr(str)
+    BitStr(str)
 end
 
 function bitstring2int(str::String)
@@ -35,7 +35,7 @@ function bitstring2int(str::String)
         elseif each == '0'
             continue
         else
-            throw(InexactError(:bitstring2int, QuBitStr, str))
+            throw(InexactError(:bitstring2int, BitStr, str))
         end
     end
     val
@@ -43,21 +43,21 @@ end
 
 
 import Base: *, repeat
-(*)(lhs::QuBitStr, rhs::QuBitStr) = QuBitStr(string(lhs.val, base=2, pad=lhs.len) * bin(rhs.val, base=2, pad=rhs.len))
+(*)(lhs::BitStr, rhs::BitStr) = BitStr(string(lhs.val, base=2, pad=lhs.len) * bin(rhs.val, base=2, pad=rhs.len))
 
-function repeat(s::QuBitStr, n::Integer)
+function repeat(s::BitStr, n::Integer)
     val = s.val
     for i in 1:n-1
         val += s.val << (s.len * i)
     end
-    QuBitStr(val, n * s.len)
+    BitStr(val, n * s.len)
 end
 
-function show(io::IO, bitstr::QuBitStr)
+function show(io::IO, bitstr::BitStr)
     print(io, string(bitstr.val, base=2, pad=bitstr.len))
 end
 
-function register(::Type{T}, bits::QuBitStr, nbatch::Int) where T
+function register(::Type{T}, bits::BitStr, nbatch::Int) where T
     st = zeros(T, 1 << length(bits), nbatch)
     st[asindex(bits), :] .= 1
     register(st)
@@ -73,4 +73,4 @@ using Yao
 register(bit"0000")
 ```
 """
-register(bits::QuBitStr, nbatch::Int=1) = register(DefaultType, bits, nbatch)
+register(bits::BitStr, nbatch::Int=1) = register(DefaultType, bits, nbatch)
