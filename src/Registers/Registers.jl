@@ -2,10 +2,11 @@ module Registers
 
 using Random, LinearAlgebra, SparseArrays
 using StatsBase
+using MacroTools: @forward
 using ..Intrinsics
 
-import Base: length
-import Base: eltype, copy, similar, *, join
+import Base: length, broadcastable
+import Base: eltype, copy, similar, *, join, copyto!
 import Base: show
 
 # import package APIs
@@ -13,8 +14,8 @@ import ..Yao: DefaultType, nqubits, nactive, reorder, invorder
 import ..Intrinsics: basis, hypercubic
 
 # APIs
-export nqubits, nactive, nremain, nbatch, state, statevec, hypercubic, rank3, focus!, relax!, extend!, basis, probs, isnormalized
-export AbstractRegister, Register, invorder!, reorder!, addbit!, reset!
+export nqubits, nactive, nremain, nbatch, state, relaxedvec, statevec, hypercubic, rank3, focus!, relax!, extend!, basis, probs, isnormalized
+export AbstractRegister, Register, invorder!, reorder!, addbit!, reset!, ConjRegister
 
 # factories
 export register, zero_state, product_state, rand_state, stack, uniform_state

@@ -60,7 +60,7 @@ If total is not provided, return a lazy constructor.
 
 ## Example
 ```@example
-kron(4, 1=>X, 3=>Z, Y)
+kron(4, 1=>X, 3=>Z, 4=>Y)
 ```
 This will automatically generate a block list looks like
 ```
@@ -93,7 +93,7 @@ put(pa::Pair) = total->put(total, pa)
 
 # 2.3 control block
 
-export C, control
+export C, control, cnot
 
 decode_sign(ctrls::Int...,) = ctrls .|> abs, ctrls .|> sign .|> (x->(1+x)÷2)
 
@@ -123,6 +123,9 @@ function C(controls::Int...,)
         total->ControlBlock{total}(decode_sign(controls...,)..., x.second, (x.first...,))
     end
 end
+
+cnot(nbit::Int, cbit::Int, ibit::Int) = control(nbit, cbit, ibit=>X)
+cnot(cbit::Int, ibit::Int) = nbit->cnot(nbit, cbit, ibit)
 
 # 2.4 roller
 
@@ -208,3 +211,41 @@ export concentrate
 concentrate blocks on serveral addrs.
 """
 concentrate(nbit::Int, block::AbstractBlock, addrs) = Concentrator{nbit}(block, [addrs...])
+
+export paulistring
+
+"""
+    paulistring([n], blocks::PauliGate...) -> PauliString
+    paulistring([n], blocks::Pair{Int, PauliGate}...) -> PauliString
+
+Returns a `PauliString`. This factory method can be called lazily if you
+missed the total number of qubits.
+
+This krons several pauli gates, either dict (more flexible) like input and chain like input are allowed.
+i.e. paulistring(3, X, Y, Z) is equivalent to paulistring(3, 1=>X, 2=>Y, 3=>Z)
+"""
+function paulistring end
+paulistring(nbit::Int, blocks::AbstractVector{<:PauliGate}) = nbit == length(blocks) ? PauliString(blocks) : throw(QubitMismatchError("paulistring parameter n should match the number of pauli gates!"))
+paulistring(nbit::Int, blocks::PauliGate...,) = paulistring(nbit, PauliGate{promote_type([datatype(b) for b in blocks]...)}[blocks...])
+paulistring(nbit::Int) = paulistring(nbit, PauliGate{ComplexF64}[I2 for i=1:nbit])
+
+function paulistring(nbit::Int, pairs::Pair{Int, <:PauliGate}...,)
+    blocks = PauliGate{promote_type([datatype(b.second) for b in pairs]...)}[I2 for i=1:nbit]
+    for pair in pairs
+        blocks[pair.first] = pair.second
+    end
+    paulistring(nbit, blocks)
+end
+
+paulistring(blocks...,) = N->paulistring(N, blocks...,)
+
+
+export timeevolve
+"""
+    timeevolve([block::MatrixBlock], t::Real) -> TimeEvolution
+
+Make a time machine! If block is not provided, it will become lazy.
+"""
+function timeevolve end
+timeevolve(block::MatrixBlock, t::Real) = TimeEvolution(block, t)
+timeevolve(t::Real) = block -> TimeEvolution(block, t)

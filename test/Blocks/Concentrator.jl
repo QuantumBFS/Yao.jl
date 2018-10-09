@@ -14,6 +14,8 @@ using Yao.Blocks
     @test isunitary(c) == true
     @test isreflexive(c) == true
     @test ishermitian(c) == true
+    blk = kron(4, 2=>Rx(0.3))
+    @test chsubblocks(c, [blk]) |> subblocks |> first == blk
 
     @test apply!(copy(reg), c) == apply!(copy(reg), kron(10, 3=>X))
 end

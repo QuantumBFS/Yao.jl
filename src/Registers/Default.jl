@@ -7,22 +7,19 @@ export DefaultRegister
 Default type for a quantum register. It contains a dense array that represents
 a batched quantum state with batch size `B` of type `T`.
 """
-mutable struct DefaultRegister{B, T} <: AbstractRegister{B, T}
-    state::Matrix{T} # this stores a batched state
-
-    function DefaultRegister{B, T}(raw::Matrix{T}) where {B, T}
-        ispow2(size(raw, 1)) && ispow2(size(raw, 2) ÷ B) ||
-            throw(InexactError(:DefaultRegister, DefaultRegister, raw))
-        new{B, T}(raw)
-    end
-
-    # copy method
-    function DefaultRegister(r::DefaultRegister{B, T}) where {B, T}
-        new{B, T}(copy(r.state))
-    end
+mutable struct DefaultRegister{B, T, MT<:AbstractMatrix{T}} <: AbstractRegister{B, T}
+    state::MT # this stores a batched state
 end
 
-DefaultRegister{B}(raw::Matrix{T}) where {B, T} = DefaultRegister{B, T}(raw)
+function DefaultRegister{B}(raw::MT) where {B, T, MT<:AbstractMatrix{T}}
+    DefaultRegister{B, T, MT}(raw)
+end
+
+# copy method
+function DefaultRegister(r::DefaultRegister{B}) where B
+    DefaultRegister{B}(copy(r.state))
+end
+
 
 # register without batch
 """
@@ -30,19 +27,25 @@ DefaultRegister{B}(raw::Matrix{T}) where {B, T} = DefaultRegister{B, T}(raw)
 
 Returns a [`DefaultRegister`](@ref) from a raw dense array (`Vector` or `Matrix`).
 """
-register(raw::Vector) = DefaultRegister{1}(reshape(raw, :, 1))
-register(raw::Matrix) = DefaultRegister{size(raw, 2)}(raw)
+function register(raw::AbstractMatrix; B=size(raw,2))
+    ispow2(size(raw, 1)) && ispow2(size(raw, 2) ÷ B) ||
+        throw(InexactError(:DefaultRegister, DefaultRegister, raw))
+    DefaultRegister{B}(raw)
+end
+register(raw::AbstractVector) = register(reshape(raw, :, 1))
 
 # Required Properties
 
 nqubits(r::DefaultRegister{B}) where B = log2i(length(r.state) ÷ B)
 nactive(r::DefaultRegister) = state(r) |> nqubits
 state(r::DefaultRegister) = r.state
-statevec(r::DefaultRegister{B}) where B = reshape(r.state, :, B)
-statevec(r::DefaultRegister{1}) = vec(r.state)
+relaxedvec(r::DefaultRegister{B}) where B = reshape(r.state, :, B)
+relaxedvec(r::DefaultRegister{1}) = vec(r.state)
+statevec(r::DefaultRegister) = r.state |> matvec
 hypercubic(reg::DefaultRegister{B}) where B = reshape(reg.state, ntuple(i->2, Val(nactive(reg)))..., :)
 rank3(reg::DefaultRegister{B}) where B = reshape(reg.state, size(reg.state, 1), :, B)
 copy(r::DefaultRegister{B}) where B = DefaultRegister{B}(copy(state(r)))
+copyto!(reg1::RT, reg2::RT) where {RT<:AbstractRegister} = (copyto!(reg1.state, reg2.state); reg1)
 normalize!(r::DefaultRegister) = (batch_normalize!(r.state); r)
 
 similar(r::DefaultRegister{B, T}) where {B, T} = DefaultRegister{B}(similar(r.state))
@@ -56,26 +59,26 @@ stack(regs::DefaultRegister...) = DefaultRegister{sum(nbatch, regs)}(hcat((reg.s
 Base.repeat(reg::DefaultRegister{B}, n::Int) where B = DefaultRegister{B*n}(hcat((reg.state for i=1:n)...,))
 
 """
-    product_state(::Type{T}, n::Int, config::Int, nbatch::Int=1) -> DefaultRegister
+    product_state([::Type{T}], n::Int, config::Int, nbatch::Int=1) -> DefaultRegister
 
 a product state on given configuration `config`, e.g. product_state(ComplexF64, 5, 0) will give a zero state on a 5 qubit register.
 """
 product_state(::Type{T}, n::Int, config::Integer, nbatch::Int=1) where T = register((arr=zeros(T, 1<<n, nbatch); arr[config+1,:] .= 1; arr))
 
 """
-    zero_state(::Type{T}, n::Int, nbatch::Int=1) -> DefaultRegister
+    zero_state([::Type{T}], n::Int, nbatch::Int=1) -> DefaultRegister
 """
 zero_state(::Type{T}, n::Int, nbatch::Int=1) where T = product_state(T, n, 0, nbatch)
 
 """
-    rand_state(::Type{T}, n::Int, nbatch::Int=1) -> DefaultRegister
+    rand_state([::Type{T}], n::Int, nbatch::Int=1) -> DefaultRegister
 
 here, random complex numbers are generated using `randn(ComplexF64)`.
 """
 rand_state(::Type{T}, n::Int, nbatch::Int=1) where T = register(randn(T, 1<<n, nbatch) + im*randn(T, 1<<n, nbatch)) |> normalize!
 
 """
-    uniform_state(::Type{T}, n::Int, nbatch::Int=1) -> DefaultRegister
+    uniform_state([::Type{T}], n::Int, nbatch::Int=1) -> DefaultRegister
 
 uniform state, the state after applying H gates on |0> state.
 """
@@ -143,16 +146,7 @@ isnormalized(reg::DefaultRegister) = all(sum(copy(reg) |> relax! |> probs, dims=
 # we convert state to a vector to use
 # intrincs like gemv, when nremain is
 # 0 and the state is actually a vector
-function *(op::AbstractMatrix, r::DefaultRegister{1})
-    if nremain(r) == 0
-        return op * vec(r.state)
-    end
-    op * r.state
-end
-
-function *(op::AbstractMatrix, r::DefaultRegister)
-    op * r.state
-end
+*(op::AbstractMatrix, r::AbstractRegister) = op * statevec(r)
 
 function Base.summary(io::IO, r::DefaultRegister{B, T}) where {B, T}
     println(io, "DefaultRegister{", B, ", ", T, "}")
@@ -204,16 +198,24 @@ function tracedist(reg1::DefaultRegister{B}, reg2::DefaultRegister{B}) where B
     size(reg1.state, 2) == B ? sqrt.(1 .- fidelity(reg1, reg2).^2) : throw(MethodError("trace distance for non-pure state is not defined!"))
 end
 
-################### Bra ##################
+################### ConjRegister ##################
+const ConjRegister{B, T, RT} = Adjoint{T, RT} where RT<:AbstractRegister{B, T}
 Base.adjoint(reg::DefaultRegister{B, T}) where {B, T} = Adjoint{T, typeof(reg)}(reg)
 
-function Base.show(io::IO, c::Adjoint{T, <:DefaultRegister}) where T
-    print("$(parent(c)) (Daggered)")
+function Base.show(io::IO, c::ConjRegister)
+    print(io, "$(parent(c)) (Daggered)")
 end
-Base.show(io::IO, mime::MIME"text/plain", c::Adjoint{T, <:DefaultRegister}) where T = Base.show(io, c)
+Base.show(io::IO, mime::MIME"text/plain", c::ConjRegister{<:Any, T}) where T = Base.show(io, c)
 
-state(bra::Adjoint{T, <:DefaultRegister}) where T = Adjoint(parent(bra) |> state)
-statevec(bra::Adjoint{T, <:DefaultRegister}) where T = Adjoint(parent(bra) |> statevec)
+state(bra::ConjRegister) where T = Adjoint(parent(bra) |> state)
+statevec(bra::ConjRegister) where T = Adjoint(parent(bra) |> statevec)
+relaxedvec(bra::ConjRegister) where T = Adjoint(parent(bra) |> relaxedvec)
 
-LinearAlgebra.:*(bra::Adjoint{T, <:DefaultRegister{B1, T}}, ket::DefaultRegister{B2, T}) where {T, B1, B2} = statevec(bra) * statevec(ket)
-LinearAlgebra.:*(bra::Adjoint{T, <:DefaultRegister{B1, T}}, ket::DefaultRegister{1, T}) where {T, B1, B2} = statevec(bra) * statevec(ket)
+*(bra::ConjRegister, ket::DefaultRegister) = statevec(bra) * statevec(ket)
+
+################ Broadcasting ###################
+function broadcastable(reg::DefaultRegister{B}) where B
+    st = reg |> rank3
+    Tuple(register(view(st, :, :, i)) for i = 1:B)
+end
+broadcastable(reg::DefaultRegister{1}) = Ref{reg}

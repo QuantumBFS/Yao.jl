@@ -11,6 +11,7 @@ using Yao.Intrinsics
     @test takebit.([ind, 2], 2) == [0,1]
     @test takebit.(ind, [3,2]) == [1,0]
     @test takebit.(ind, [3,2], [2,3]) == [1, 2]
+    @test bmask(baddrs(13)...) == 13
 
     # flip
     @test flip(ind, bmask(1)) == 13

@@ -19,11 +19,13 @@ using LuxurySparse
 end
 
 @testset "density matrix" begin
-    for reg in [rand_state(4), rand_state(4,3)]
-        dm = reg |> density_matrix
-        op = put(4, 3=>X)
-        # println(expect(op, dm))
-        # println(expect(op, reg))
-        @test expect(op, dm) ≈ expect(op, reg)
-    end
+    reg = rand_state(4)
+    dm = reg |> density_matrix
+    op = put(4, 3=>X)
+    @test expect(op, dm) ≈ expect(op, reg)
+
+    reg = rand_state(4, 3)
+    dm = reg |> density_matrix
+    op = put(4, 3=>X)
+    @test expect(op, dm) ≈ expect(op, reg) |> diag
 end

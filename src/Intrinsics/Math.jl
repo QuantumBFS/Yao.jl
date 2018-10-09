@@ -10,7 +10,6 @@ bit_length(x::Int32)  =  32 - leading_zeros(x)
     log2i(x::Integer) -> Integer
 
 Return log2(x), this integer version of `log2` is fast but only valid for number equal to 2^n.
-Ref: https://stackoverflow.com/questions/21442088
 """
 function log2i end
 

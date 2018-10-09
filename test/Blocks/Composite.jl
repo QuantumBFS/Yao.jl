@@ -8,10 +8,6 @@ end
     include("KronBlock.jl")
 end
 
-@testset "control block" begin
-    include("Control.jl")
-end
-
 @testset "roller block" begin
     include("Roller.jl")
 end
@@ -23,7 +19,7 @@ using Yao.Blocks
     dst = ChainBlock(put(5, 1=>X), put(5, 2=>Y), put(5, 1=>Z))
     @test_throws MethodError KronBlock{5}(X, Y, Z)
     src = KronBlock(X, Y, Z)
-    map!(x->kron(5, 1=>Z), dst, blocks(src))
+    map!(x->kron(5, 1=>Z), dst, subblocks(src))
 
     for each in dst
         @test isa(each, KronBlock)
@@ -34,13 +30,9 @@ end
     @test nparameters(ChainBlock(X, Y, Z)) == 0
     @test nparameters(ChainBlock(phase(0.1), X, phase(0.2))) == 2
     @test nparameters(KronBlock{5}(1=>X, 4=>rot(X, 0.2))) == 1
-    @test nparameters(ControlBlock{5}((1, 2), phase(0.1), (4,))) == 1
-end
 
-@testset "parameters" begin
-    collect(parameters(ChainBlock(phase(0.1), shift(0.2)))) ≈ [0.1, 0.2]
-    collect(parameters(ChainBlock(kron(4, 1=>phase(0.1), 3=>rot(X, 0.2))))) ≈ [0.1, 0.2]
-    collect(parameters(ControlBlock{5}((1, 2), phase(0.1), (4, )))) ≈ [0.1]
+    @test collect(parameters(ChainBlock(phase(0.1), shift(0.2)))) ≈ [0.1, 0.2]
+    @test collect(parameters(ChainBlock(kron(4, 1=>phase(0.1), 3=>rot(X, 0.2))))) ≈ [0.1, 0.2]
 end
 
 @testset "dispatch" begin
@@ -48,12 +40,12 @@ end
     params = rand(3)
     dispatch!(g, params)
 
-    for (each, p) in zip(blocks(g), params)
+    for (each, p) in zip(subblocks(g), params)
         @test each.theta == p
     end
 
     dispatch!(+, g, [1, 1, 1])
-    for (each, p) in zip(blocks(g), params)
+    for (each, p) in zip(subblocks(g), params)
         @test each.theta == p + 1
     end
 

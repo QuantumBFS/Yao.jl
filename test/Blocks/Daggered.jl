@@ -34,12 +34,14 @@ end
     @test GP isa Daggered
     @test mat(GP) == mat(ConstG)'
     @test adjoint(adjoint(ConstG)) === ConstG
+    blk = kron(4, 3=>Rx(0.3))
+    @test chsubblocks(GP, [blk]) |> subblocks |> first == blk
 end
 
 @testset "copy dispatch" begin
     pg = adjoint(PhaseGate(0.4))
     cpg = copy(pg)
     @test pg == cpg
-    dispatch!(pg, 0.8)
+    dispatch!(pg, [0.8])
     @test pg != cpg
 end

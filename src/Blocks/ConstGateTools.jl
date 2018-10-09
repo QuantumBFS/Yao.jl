@@ -90,6 +90,7 @@ function define_printing(name)
             function print_block(io::IO, ::$(gt_name))
                 print(io, $(msg), " gate")
             end
+            #tokenof(::Type{<:$(gt_name)}) = $(msg)
         end
     end
 end
@@ -135,6 +136,7 @@ function define_matrix_methods(name, binding, elt)
     end
 end
 
+#=
 function define_callables(name)
     gt_name = gatetype_name(name)
 
@@ -154,10 +156,11 @@ function define_callables(name)
         end
     end
 end
+=#
 
 function define_methods(name, binding, t)
     quote
-        $(define_callables(name))
+        #$(define_callables(name))
         $(define_matrix_methods(name, binding, t))
         $(define_traits(name, binding))
     end

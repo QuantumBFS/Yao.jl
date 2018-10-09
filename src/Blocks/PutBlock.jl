@@ -1,16 +1,16 @@
 export PutBlock
 
 """
-    PutBlock{N, C, GT, T} <: CompositeBlock{N, T}
+    PutBlock{N, C, GT, T} <: AbstractContainer{N, T}
 
 put a block on given addrs.
 """
-mutable struct PutBlock{N, C, GT<:MatrixBlock, T} <: CompositeBlock{N, T}
+mutable struct PutBlock{N, C, GT<:MatrixBlock, T} <: AbstractContainer{N, T}
     block::GT
     addrs::NTuple{C, Int}
 
     function PutBlock{N, C, GT, T}(block::GT, addrs::NTuple{C, Int}) where {N, C, T, GT<:MatrixBlock{C, T}}
-        _assert_addr_safe(N, [i:i for i in addrs])
+        _assert_addr_safe(N, [addrs...])
         length(addrs) == C || throw(ArgumentError("Repeat number mismatch!"))
         new{N, C, GT, T}(block, addrs)
     end
@@ -20,14 +20,11 @@ function PutBlock{N}(block::GT, addrs::NTuple) where {N, C, T, GT <: MatrixBlock
     PutBlock{N, C, GT, T}(block, addrs)
 end
 
-blocks(pb::PutBlock) = [pb.block]
 addrs(pb::PutBlock) = pb.addrs
 usedbits(pb::PutBlock) = [pb.addrs...]
 copy(x::PutBlock) = typeof(x)(x.block, x.addrs)
 adjoint(blk::PutBlock{N}) where N = PutBlock{N}(adjoint(blk.block), blk.addrs)
-
-dispatch!(pb::PutBlock, params...) = dispatch!(pb.block, params...)
-dispatch!(f::Function, pb::PutBlock, params...) = dispatch!(f, pb.block, params...)
+chblock(pb::PutBlock{N, C}, blk::MatrixBlock{C}) where {N, C} = PutBlock{N}(blk, pb.addrs)
 
 # TODO
 mat(pb::PutBlock{N, 1}) where N = u1mat(N, mat(pb.block), pb.addrs...)

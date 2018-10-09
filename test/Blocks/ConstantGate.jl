@@ -45,9 +45,9 @@ end
 
 @testset "bind new type" begin
     @test @allocated(mat(X)) == 0
-    @test @allocated(mat(X(ComplexF32))) > 0
+    @test @allocated(mat(XGate{ComplexF32}())) > 0
     @const_gate X::ComplexF32
-    @test @allocated(mat(X(ComplexF32))) == 0
+    @test @allocated(mat(XGate{ComplexF32}())) == 0
 end
 
 # @testset "define new" begin

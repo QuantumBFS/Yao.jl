@@ -1,4 +1,4 @@
-export ConstantGate
+export ConstantGate, PauliGate
 
 """
     ConstantGate{N, T} <: PrimitiveBlock{N, T}
@@ -11,3 +11,5 @@ include("ConstGateTools.jl")
 cache_key(x::ConstantGate) = 0x1
 
 include("ConstGateGen.jl")
+
+PauliGate{T} = Union{I2Gate{T}, XGate{T}, YGate{T}, ZGate{T}}

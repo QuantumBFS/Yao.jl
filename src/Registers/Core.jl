@@ -88,11 +88,22 @@ eltype(r::AbstractRegister{B, T}) where {B, T} = T
 
 basis(r::AbstractRegister) = basis(nqubits(r))
 
-import Base: +, -, kron, ==, ≈
+import Base: +, -, *, /, kron, ==, ≈
 
 for op in [:+, :-]
     @eval function ($op)(lhs::RT, rhs::RT) where {RT <: AbstractRegister}
         RT(($op)(state(lhs), state(rhs)))
+    end
+end
+-(reg::RT) where RT<:AbstractRegister = RT(-state(reg))
+for op in [:*, :/]
+    @eval function ($op)(lhs::RT, rhs::Number) where {RT <: AbstractRegister}
+        RT(($op)(state(lhs), rhs))
+    end
+    if op == :*
+        @eval function ($op)(lhs::Number, rhs::RT) where {RT <: AbstractRegister}
+            RT(($op)(lhs, state(rhs)))
+        end
     end
 end
 
@@ -123,9 +134,16 @@ normalize!(r::AbstractRegister) = throw(MethodError(:normalize!, r))
 """
     statevec(r::AbstractRegister) -> AbstractArray
 
-Return the raveled state (vector) form of this register.
+Return a state matrix/vector by droping the last dimension of size 1.
 """
 function statevec end
+
+"""
+    relaxedvec(r::AbstractRegister) -> AbstractArray
+
+Activate all qubits, and return a matrix (vector) for B>1 (B=1).
+"""
+function relaxedvec end
 
 """
     hypercubic(r::AbstractRegister) -> AbstractArray

@@ -33,6 +33,8 @@ id = IMatrix(2)
     @test m == mat(g)
     @test addrs(g) == [2]
     @test usedbits(g) == [2]
+    blks = [Rx(0.3)]
+    @test chsubblocks(g, blks) |> subblocks == blks
 
     m = U2 ⊗ id ⊗ U ⊗ id
     g = KronBlock{5}(4=>CNOT, 2=>X)
@@ -138,7 +140,7 @@ end
     # TODO: define traits for primitive blocks
     g = KronBlock{5}(1=>X, 3=>Y, 4=>rot(X, 0.0), 5=>rot(Y, 0.0))
     addrs(g) === g.addrs
-    blocks(g) === g.blocks
+    subblocks(g) === g.blocks
     eltype(g) == Tuple{Int, MatrixBlock}
 
     @test isunitary(g) == true

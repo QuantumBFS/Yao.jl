@@ -97,6 +97,23 @@ bmask(ibit::Int...)::DInt = sum([one(DInt) << (b-1) for b in ibit])
 bmask(bits::UnitRange{Int})::DInt = ((one(DInt) << (bits.stop - bits.start + 1)) - one(DInt)) << (bits.start-1)
 
 """
+    baddrs(b::DInt) -> Vector
+
+get the locations of nonzeros bits, i.e. the inverse operation of bmask.
+"""
+function baddrs(b::DInt)
+    locs = Vector{Int}(undef, count_ones(b))
+    k = 1
+    for i = 1:bit_length(b)
+        if takebit(b, i) == 1
+            locs[k] = i
+            k += 1
+        end
+    end
+    locs
+end
+
+"""
     takebit(index::Int, bits::Int...) -> Int
 
 Return a bit(s) at specific position.

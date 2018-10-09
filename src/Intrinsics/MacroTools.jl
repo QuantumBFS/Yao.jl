@@ -1,10 +1,16 @@
+for METHOD in [:_assert_addr_inbounds, :_assert_addr_safe, :assert_addr_fit]
+    @eval $METHOD(n::Int, addrs::Vector{<:Integer}) = $METHOD(n, UnitRange{Int}[i:i for i in addrs])
+end
+
 function _assert_addr_inbounds(n::Int, addrs::Vector{UnitRange{Int}})
+    if length(addrs) == 0 return true end
     addrs = sort(addrs, by=x->x.start)
     (minimum(first(addrs)) > 0 && maximum(last(addrs)) <= n) || throw(AddressConflictError("addr out of bounds"))
     true
 end
 
 function _assert_addr_safe(n::Int, addrs::Vector{UnitRange{Int}})
+    if length(addrs) == 0 return true end
     addrs = sort(addrs, by=x->x.start)
     (minimum(first(addrs)) > 0 && maximum(last(addrs)) <= n) || throw(AddressConflictError("addr out of bounds"))
     for (nxt, cur) in zip(addrs[2:end], addrs[1:end-1])
@@ -14,6 +20,7 @@ function _assert_addr_safe(n::Int, addrs::Vector{UnitRange{Int}})
 end
 
 function _assert_addr_fit(n::Int, addrs::Vector{UnitRange{Int}})
+    if length(addrs) == 0 return n == 0 end
     addrs = sort(addrs, by=x->x.start)
     (minimum(first(addrs)) > 0 && maximum(last(addrs)) <= n) || throw(AddressConflictError("addr out of bounds"))
     addrs |> first |> minimum == 1 || throw(AddressConflictError("addr not exact fit at 1"))

@@ -1,7 +1,7 @@
 export TimeEvolution
 
 """
-    TimeEvolution{N, T, GT <: MatrixBlock{N, Complex{T}}} <: MatrixBlock{N, Complex{T}}
+    TimeEvolution{N, T, GT <: MatrixBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
 
 TimeEvolution, with GT hermitian
 """
@@ -32,14 +32,10 @@ adjoint(blk::TimeEvolution) = TimeEvolution(blk.H, -blk.t)
 
 copy(te::TimeEvolution) = TimeEvolution(te.H, te.t)
 
-function dispatch!(te::TimeEvolution, itr)
-    te.t = first(itr)
-    te
-end
-
-# Properties
-nparameters(::Type{<:TimeEvolution}) = 1
-parameters(x::TimeEvolution) = x.t
+# parametric interface
+niparameters(::Type{<:TimeEvolution}) = 1
+iparameters(x::TimeEvolution) = x.t
+setiparameters!(r::TimeEvolution, param::Real) = (r.t = param; r)
 
 ==(lhs::TimeEvolution{TA, GTA}, rhs::TimeEvolution{TB, GTB}) where {TA, TB, GTA, GTB} = false
 ==(lhs::TimeEvolution{TA, GT}, rhs::TimeEvolution{TB, GT}) where {TA, TB, GT} = lhs.t == rhs.t

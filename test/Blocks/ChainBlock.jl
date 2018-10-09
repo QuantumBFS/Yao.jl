@@ -6,12 +6,18 @@ using Yao.Blocks
 @testset "constructor" begin
 
     g = ChainBlock(
-        kron(2, 1=>X(), 2=>Y()),
+        kron(2, 1=>X, 2=>Y),
         kron(2, 1=>phase(0.1)),
     )
 
     @test g isa ChainBlock{2, ComplexF64} # default type
     @test g.blocks == [kron(2, X, Y), kron(2, 1=>phase(0.1))]
+    blks = [X, Y, Rx(0.3)]
+    @test chsubblocks(g, blks) |> subblocks == blks
+    @test g |> parameters == [0.1]
+    @test dispatch!(g, :random) |> parameters != [0.1]
+    @test dispatch!(g, :zero) |> parameters == [0.0]
+    @test dispatch!(+, g, :random) |> parameters != [0.0]
 end
 
 @testset "matrix" begin
@@ -68,6 +74,11 @@ end
     @test g[1] == phase(0.1)
     @test g[2] == X
     @test g[end] == rot(Y, 0.0)
+    first = popfirst!(g)
+    last = pop!(g)
+    @test first == phase(0.1)
+    @test last == rot(Y, 0.0)
+    @test g == chain(1, [X, Y, Z, rot(X, 0.0)])
 end
 
 @testset "traits" begin

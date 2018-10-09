@@ -9,6 +9,10 @@ end
     include("PhaseGate.jl")
 end
 
+@testset "Shift Gate" begin
+    include("ShiftGate.jl")
+end
+
 @testset "Rotation Gate" begin
     include("RotationGate.jl")
 end
