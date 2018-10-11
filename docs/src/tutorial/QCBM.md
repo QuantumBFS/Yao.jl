@@ -162,9 +162,10 @@ QCBM(4, 1, [1=>2, 2=>3, 3=>4])
 Let's define a circuit to use later
 
 ```@example QCBM
-circuit = QCBM(6, 10, [1=>2, 3=>4, 5=>6, 2=>3, 4=>5, 6=>1])
+circuit = QCBM(6, 10, [1=>2, 3=>4, 5=>6, 2=>3, 4=>5, 6=>1]) |> autodiff(:QC)
 nothing # hide
 ```
+Here, the function `autodiff(:QC)` will mark rotation gates in a circuit as differentiable automatically.
 
 ## MMD Loss & Gradients
 
@@ -237,54 +238,6 @@ Now, we define its shorthand
 get_prob(qcbm) = apply!(register(bit"0"^6), qcbm) |> statevec .|> abs2
 ```
 
-We will first iterate through each layer contains rotation gates and allocate an array to store our gradient
-
-```julia
-function gradient(n, nlayers, qcbm, kernel, ptrain)
-    prob = get_prob(qcbm)
-    grad = zeros(real(datatype(qcbm)), nparameters(qcbm))
-    idx = 0
-    for ilayer = 1:2:(2 * nlayers + 1)
-        idx = grad_layer!(grad, idx, prob, qcbm, qcbm[ilayer], kernel, ptrain)
-    end
-    grad
-end
-```
-
-Then we iterate through each rotation gate.
-
-```julia
-function grad_layer!(grad, idx, prob, qcbm, layer, kernel, ptrain)
-    count = idx
-    for each_line in blocks(layer)
-        for each in blocks(each_line)
-            gradient!(grad, count+1, prob, qcbm, each, kernel, ptrain)
-            count += 1
-        end
-    end
-    count
-end
-```
-
-We update each parameter by rotate it ``-\pi/2`` and ``\pi/2``
-
-```julia
-function gradient!(grad, idx, prob, qcbm, gate, kernel, ptrain)
-    dispatch!(+, gate, pi / 2)
-    prob_pos = get_prob(qcbm)
-
-    dispatch!(-, gate, pi)
-    prob_neg = get_prob(qcbm)
-
-    dispatch!(+, gate, pi / 2) # set back
-
-    grad_pos = expect(kernel, prob, prob_pos) - expect(kernel, prob, prob_neg)
-    grad_neg = expect(kernel, ptrain, prob_pos) - expect(kernel, ptrain, prob_neg)
-    grad[idx] = grad_pos - grad_neg
-    grad
-end
-```
-
 ## Optimizer
 
 We will use the Adam optimizer. Since we don't want you to install another package for this, the following code for this optimizer is copied from [Knet.jl](https://github.com/denizyuret/Knet.jl)
@@ -352,7 +305,7 @@ function train!(qcbm, ptrain, optim; learning_rate=0.1, niter=50)
     history = Float64[]
 
     for i = 1:niter
-        grad = gradient(n, nlayers, qcbm, kernel, ptrain)
+        grad = exactdiff.(n, nlayers, qcbm, kernel, ptrain)
         curr_loss = loss(qcbm, kernel, ptrain)
         push!(history, curr_loss)        
         params = parameters(qcbm)

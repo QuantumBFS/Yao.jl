@@ -18,9 +18,9 @@ subblocks(c::AbstractContainer) = (c |> block,)
 chsubblocks(pb::AbstractContainer, blk) = chblock(pb, blk |> first)
 
 """
-    block(container)
+    block(container::AbstractContainer) -> AbstractBlock
 
-get an iterator that iterate through all sub-blocks.
+get the contained block (i.e. subblock) of a container.
 """
 function block end
 

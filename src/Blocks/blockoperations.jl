@@ -106,7 +106,7 @@ expect(op::MatrixBlock, dm::DensityMatrix{1}) = sum(mat(op).*dropdims(dm.state, 
 ################### AutoDiff Circuit ###################
 export gradient, backward!
 """
-    backward!(circuit::MatrixBlock, δ::AbstractRegister) -> AbstractRegister
+    backward!(δ::AbstractRegister, circuit::MatrixBlock) -> AbstractRegister
 
 back propagate and calculate the gradient ∂f/∂θ = 2*Re(∂f/∂ψ*⋅∂ψ*/∂θ), given ∂f/∂ψ*.
 

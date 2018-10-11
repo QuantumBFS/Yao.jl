@@ -18,6 +18,7 @@ using Yao.Blocks
     @test dispatch!(g, :random) |> parameters != [0.1]
     @test dispatch!(g, :zero) |> parameters == [0.0]
     @test dispatch!(+, g, :random) |> parameters != [0.0]
+    @test iparameter_type(g) == Union{}
 end
 
 @testset "matrix" begin
