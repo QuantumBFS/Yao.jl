@@ -13,6 +13,7 @@ using Yao.Blocks
     @test setiparameters!(RotationGate(X, 0.0), 0.5).theta == 0.5
     @test setiparameters!(RotationGate(X, 0.0), :random).theta != 0.0
     @test setiparameters!(RotationGate(X, 2.0), :zero).theta == 0.0
+    @test iparameter_type(RotationGate(X, Float64(2.0))) == Float64
 end
 
 @testset "matrix" begin

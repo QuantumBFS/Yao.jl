@@ -26,8 +26,8 @@ chblock(pb::Concentrator{N}, blk::AbstractBlock) where N = Concentrator{N}(blk, 
 apply!(reg::AbstractRegister, c::Concentrator) = relax!(apply!(focus!(reg, usedbits(c)), c.block), usedbits(c), nbit=nqubits(c))
 adjoint(blk::Concentrator{N}) where N = Concentrator{N}(adjoint(blk.block), blk.usedbits)
 function mat(c::Concentrator)
-    c.block isa MatrixBlock || throw(MethodError("Concentrator contains non-MatrixBlock!"))
-    throw(MethodError("It should have a matrix, but we didn't realize it, you can post an issue if you really need it."))
+    c.block isa MatrixBlock || throw(MethodError(mat, c))
+    throw(ArgumentError("It should have a matrix, but we didn't realize it, you can post an issue if you really need it."))
 end
 
 for FUNC in [:isunitary, :isreflexive, :ishermitian]

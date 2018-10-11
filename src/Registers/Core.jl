@@ -129,7 +129,7 @@ import LinearAlgebra: normalize!
 
 Return the register with normalized state.
 """
-normalize!(r::AbstractRegister) = throw(MethodError(:normalize!, r))
+normalize!(r::AbstractRegister) = throw(MethodError(normalize!, r))
 
 """
     statevec(r::AbstractRegister) -> AbstractArray

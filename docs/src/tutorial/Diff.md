@@ -59,10 +59,10 @@ Blocks marked by `[̂∂]` will be differentiated.
 dbs = collect(c, QDiff)  # collect all QDiff blocks
 ```
 Here, we recommend collect [`QDiff`](@ref) blocks into a sequence using `collect` API for future calculations.
-Then, we can get the gradient one by one, using `exactdiff`
+Then, we can get the gradient one by one, using `opdiff`
 ```@repl QDiff
-ed = exactdiff(dbs[1]) do   # the exact differentiation with respect to first QDiff block.
-    expect(put(4, 1=>Z), zero_state(4) |> c) |> real
+ed = opdiff(dbs[1], put(4, 1=>Z)) do   # the exact differentiation with respect to first QDiff block.
+    zero_state(4) |> c
 end
 ```
 Here, contents in the do-block returns the loss, it must be the expectation value of an observable.
@@ -77,8 +77,7 @@ This numerical differentiation scheme is always applicable (even the loss is not
 
 We can also get all gradients using broadcasting
 ```@repl QDiff
-loss1z() = expect(kron(4, 1=>Z, 2=>X), zero_state(4) |> c) |> real;  # return loss
-ed = exactdiff.(loss1z, dbs)   # using broadcast to get all gradients.
+ed = opdiff.(()->zero_state(4) |> c, dbs, Ref(kron(4, 1=>Z, 2=>X)))   # using broadcast to get all gradients.
 ```
 
 !!! note
