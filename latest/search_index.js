@@ -149,7 +149,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Differentiatiable Quantum Circuits",
     "title": "Example: Practical quantum differenciation",
     "category": "section",
-    "text": "We use QDiff block to mark differentiable circuitsusing Yao, Yao.Blocks\nc = chain(put(4, 1=>Rx(0.5)), control(4, 1, 2=>Ry(0.5)), kron(4, 2=>Rz(0.3), 3=>Rx(0.7))) |> autodiff(:QC)  # automatically mark differentiable blocksBlocks marked by [̂∂] will be differentiated.dbs = collect(c, QDiff)  # collect all QDiff blocksHere, we recommend collect QDiff blocks into a sequence using collect API for future calculations. Then, we can get the gradient one by one, using exactdiffed = exactdiff(dbs[1]) do   # the exact differentiation with respect to first QDiff block.\n    expect(put(4, 1=>Z), zero_state(4) |> c) |> real\nendHere, contents in the do-block returns the loss, it must be the expectation value of an observable.For results checking, we get the numeric gradient use numdiffed = numdiff(dbs[1]) do    # compare with numerical differentiation\n   expect(put(4, 1=>Z), zero_state(4) |> c) |> real\nendThis numerical differentiation scheme is always applicable (even the loss is not an observable), but with numeric errors introduced by finite step size.We can also get all gradients using broadcastingloss1z() = expect(kron(4, 1=>Z, 2=>X), zero_state(4) |> c) |> real;  # return loss\ned = exactdiff.(loss1z, dbs)   # using broadcast to get all gradients.note: Note\nSince BP is not implemented for QDiff blocks, the memory consumption is much less since we don\'t cache intermediate results anymore."
+    "text": "We use QDiff block to mark differentiable circuitsusing Yao, Yao.Blocks\nc = chain(put(4, 1=>Rx(0.5)), control(4, 1, 2=>Ry(0.5)), kron(4, 2=>Rz(0.3), 3=>Rx(0.7))) |> autodiff(:QC)  # automatically mark differentiable blocksBlocks marked by [̂∂] will be differentiated.dbs = collect(c, QDiff)  # collect all QDiff blocksHere, we recommend collect QDiff blocks into a sequence using collect API for future calculations. Then, we can get the gradient one by one, using opdiffed = opdiff(dbs[1], put(4, 1=>Z)) do   # the exact differentiation with respect to first QDiff block.\n    zero_state(4) |> c\nendHere, contents in the do-block returns the loss, it must be the expectation value of an observable.For results checking, we get the numeric gradient use numdiffed = numdiff(dbs[1]) do    # compare with numerical differentiation\n   expect(put(4, 1=>Z), zero_state(4) |> c) |> real\nendThis numerical differentiation scheme is always applicable (even the loss is not an observable), but with numeric errors introduced by finite step size.We can also get all gradients using broadcastinged = opdiff.(()->zero_state(4) |> c, dbs, Ref(kron(4, 1=>Z, 2=>X)))   # using broadcast to get all gradients.note: Note\nSince BP is not implemented for QDiff blocks, the memory consumption is much less since we don\'t cache intermediate results anymore."
 },
 
 {
@@ -205,7 +205,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Circuit Born Machine",
     "title": "CNOT Entangler",
     "category": "section",
-    "text": "Another component of quantum circuit born machine is several CNOT operators applied on different qubits.entangler(pairs) = chain(control([ctrl, ], target=>X) for (ctrl, target) in pairs)We can then define such a born machinefunction QCBM(n, nlayer, pairs)\n    circuit = chain(n)\n    push!(circuit, layer(:first))\n\n    for i = 1:(nlayer - 1)\n        push!(circuit, cache(entangler(pairs)))\n        push!(circuit, layer(:mid))\n    end\n\n    push!(circuit, cache(entangler(pairs)))\n    push!(circuit, layer(:last))\n\n    circuit\nend\nnothing # hideWe use the method cache here to tag the entangler block that it should be cached after its first run, because it is actually a constant oracle. Let\'s see what will be constructedQCBM(4, 1, [1=>2, 2=>3, 3=>4])Let\'s define a circuit to use latercircuit = QCBM(6, 10, [1=>2, 3=>4, 5=>6, 2=>3, 4=>5, 6=>1])\nnothing # hide"
+    "text": "Another component of quantum circuit born machine is several CNOT operators applied on different qubits.entangler(pairs) = chain(control([ctrl, ], target=>X) for (ctrl, target) in pairs)We can then define such a born machinefunction QCBM(n, nlayer, pairs)\n    circuit = chain(n)\n    push!(circuit, layer(:first))\n\n    for i = 1:(nlayer - 1)\n        push!(circuit, cache(entangler(pairs)))\n        push!(circuit, layer(:mid))\n    end\n\n    push!(circuit, cache(entangler(pairs)))\n    push!(circuit, layer(:last))\n\n    circuit\nend\nnothing # hideWe use the method cache here to tag the entangler block that it should be cached after its first run, because it is actually a constant oracle. Let\'s see what will be constructedQCBM(4, 1, [1=>2, 2=>3, 3=>4])Let\'s define a circuit to use latercircuit = QCBM(6, 10, [1=>2, 3=>4, 5=>6, 2=>3, 4=>5, 6=>1]) |> autodiff(:QC)\nnothing # hideHere, the function autodiff(:QC) will mark rotation gates in a circuit as differentiable automatically."
 },
 
 {
@@ -221,7 +221,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Circuit Born Machine",
     "title": "Gradients",
     "category": "section",
-    "text": "the gradient of MMD loss isbeginaligned\nfracpartial mathcalLpartial theta^i_l = langle K(x y) rangle_xsim p_theta^+ ysim p_theta - langle K(x y) rangle_xsim p_theta^- ysim p_theta\n- langle K(x y) rangle _xsim p_theta^+ ysimpi + langle K(x y) rangle_xsim p_theta^- ysimpi\nendalignedWe have to update one parameter of each rotation gate each time, and calculate its gradient then collect them. Since we will need to calculate the probability from the state vector frequently, let\'s define a shorthand first.Firstly, you have to define a quantum register. Each run of a QCBM\'s input is a simple 00cdots 0rangle state. We provide string literal bit to help you define one-hot state vectors like thisr = register(bit\"0000\")Now, we define its shorthandget_prob(qcbm) = apply!(register(bit\"0\"^6), qcbm) |> statevec .|> abs2We will first iterate through each layer contains rotation gates and allocate an array to store our gradientfunction gradient(n, nlayers, qcbm, kernel, ptrain)\n    prob = get_prob(qcbm)\n    grad = zeros(real(datatype(qcbm)), nparameters(qcbm))\n    idx = 0\n    for ilayer = 1:2:(2 * nlayers + 1)\n        idx = grad_layer!(grad, idx, prob, qcbm, qcbm[ilayer], kernel, ptrain)\n    end\n    grad\nendThen we iterate through each rotation gate.function grad_layer!(grad, idx, prob, qcbm, layer, kernel, ptrain)\n    count = idx\n    for each_line in blocks(layer)\n        for each in blocks(each_line)\n            gradient!(grad, count+1, prob, qcbm, each, kernel, ptrain)\n            count += 1\n        end\n    end\n    count\nendWe update each parameter by rotate it -pi2 and pi2function gradient!(grad, idx, prob, qcbm, gate, kernel, ptrain)\n    dispatch!(+, gate, pi / 2)\n    prob_pos = get_prob(qcbm)\n\n    dispatch!(-, gate, pi)\n    prob_neg = get_prob(qcbm)\n\n    dispatch!(+, gate, pi / 2) # set back\n\n    grad_pos = expect(kernel, prob, prob_pos) - expect(kernel, prob, prob_neg)\n    grad_neg = expect(kernel, ptrain, prob_pos) - expect(kernel, ptrain, prob_neg)\n    grad[idx] = grad_pos - grad_neg\n    grad\nend"
+    "text": "the gradient of MMD loss isbeginaligned\nfracpartial mathcalLpartial theta^i_l = langle K(x y) rangle_xsim p_theta^+ ysim p_theta - langle K(x y) rangle_xsim p_theta^- ysim p_theta\n- langle K(x y) rangle _xsim p_theta^+ ysimpi + langle K(x y) rangle_xsim p_theta^- ysimpi\nendalignedWe have to update one parameter of each rotation gate each time, and calculate its gradient then collect them. Since we will need to calculate the probability from the state vector frequently, let\'s define a shorthand first.Firstly, you have to define a quantum register. Each run of a QCBM\'s input is a simple 00cdots 0rangle state. We provide string literal bit to help you define one-hot state vectors like thisr = register(bit\"0000\")Now, we define its shorthandget_prob(qcbm) = apply!(register(bit\"0\"^6), qcbm) |> statevec .|> abs2"
 },
 
 {
@@ -237,7 +237,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Circuit Born Machine",
     "title": "Start Training",
     "category": "section",
-    "text": "The training of the quantum circuit is simple, just iterate through the steps.function train!(qcbm, ptrain, optim; learning_rate=0.1, niter=50)\n    # initialize the parameters\n    params = 2pi * rand(nparameters(qcbm))\n    dispatch!(qcbm, params)\n    kernel = Kernel(nqubits(qcbm), 0.25)\n\n    n, nlayers = nqubits(qcbm), (length(qcbm)-1)÷2\n    history = Float64[]\n\n    for i = 1:niter\n        grad = gradient(n, nlayers, qcbm, kernel, ptrain)\n        curr_loss = loss(qcbm, kernel, ptrain)\n        push!(history, curr_loss)        \n        params = parameters(qcbm)\n        update!(params, grad, optim)\n        dispatch!(qcbm, params)\n    end\n    history\nendoptim = Adam(lr=0.1)\nhis = train!(circuit, pg, optim, niter=50, learning_rate=0.1)\nplot(1:50, his, xlabel=\"iteration\", ylabel=\"loss\")(Image: History)p = get_prob(circuit)\nplot(0:1<<n-1, p, pg, xlabel=\"x\", ylabel=\"p\")(Image: Learnt Distribution)"
+    "text": "The training of the quantum circuit is simple, just iterate through the steps.function train!(qcbm, ptrain, optim; learning_rate=0.1, niter=50)\n    # initialize the parameters\n    params = 2pi * rand(nparameters(qcbm))\n    dispatch!(qcbm, params)\n    kernel = Kernel(nqubits(qcbm), 0.25)\n\n    n, nlayers = nqubits(qcbm), (length(qcbm)-1)÷2\n    history = Float64[]\n\n    for i = 1:niter\n        grad = exactdiff.(n, nlayers, qcbm, kernel, ptrain)\n        curr_loss = loss(qcbm, kernel, ptrain)\n        push!(history, curr_loss)        \n        params = parameters(qcbm)\n        update!(params, grad, optim)\n        dispatch!(qcbm, params)\n    end\n    history\nendoptim = Adam(lr=0.1)\nhis = train!(circuit, pg, optim, niter=50, learning_rate=0.1)\nplot(1:50, his, xlabel=\"iteration\", ylabel=\"loss\")(Image: History)p = get_prob(circuit)\nplot(0:1<<n-1, p, pg, xlabel=\"x\", ylabel=\"p\")(Image: Learnt Distribution)"
 },
 
 {
@@ -353,6 +353,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/interfaces/#Yao.Interfaces.Vstat",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.Vstat",
+    "category": "type",
+    "text": "Vstat{N, AT}\nVstat(data) -> Vstat\n\nV-statistic functional.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/interfaces/#Yao.Interfaces.@fn",
     "page": "Interfaces",
     "title": "Yao.Interfaces.@fn",
@@ -397,7 +405,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Yao.Interfaces.autodiff",
     "category": "function",
-    "text": "autodiff(block::AbstractBlock) -> AbstractBlock\n\nautomatically mark differentiable items in a block tree as differentiable.\n\n\n\n\n\n"
+    "text": "autodiff(mode::Symbol, block::AbstractBlock) -> AbstractBlock\nautodiff(mode::Symbol) -> Function\n\nautomatically mark differentiable items in a block tree as differentiable.\n\n\n\n\n\n"
 },
 
 {
@@ -430,6 +438,22 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Interfaces.matrixgate",
     "category": "method",
     "text": "matrixgate(matrix::AbstractMatrix) -> GeneralMatrixGate\nmatrixgate(matrix::MatrixBlock) -> GeneralMatrixGate\n\nConstruct a general matrix gate.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.numdiff-Tuple{Any,AbstractDiff}",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.numdiff",
+    "category": "method",
+    "text": "numdiff(loss, diffblock::AbstractDiff; δ::Real=1e-2)\n\nNumeric differentiation.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.opdiff-Tuple{Any,AbstractDiff,MatrixBlock}",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.opdiff",
+    "category": "method",
+    "text": "opdiff(psifunc, diffblock::AbstractDiff, op::MatrixBlock)\n\nOperator differentiation.\n\n\n\n\n\n"
 },
 
 {
@@ -518,6 +542,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Interfaces.timeevolve",
     "category": "function",
     "text": "timeevolve([block::MatrixBlock], t::Real) -> TimeEvolution\n\nMake a time machine! If block is not provided, it will become lazy.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/interfaces/#Yao.Interfaces.vstatdiff-Tuple{Any,AbstractDiff,Vstat}",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.vstatdiff",
+    "category": "method",
+    "text": "vstatdiff(psifunc, diffblock::AbstractDiff, vstat::Vstat; p0::AbstractVector=psifunc()|>probs)\n\nDifferentiation for V-statistics.\n\n\n\n\n\n"
 },
 
 {
@@ -981,7 +1013,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.BPDiff",
     "category": "type",
-    "text": "BPDiff{GT, N, T, PT, RT<:AbstractRegister} <: AbstractDiff{N, Complex{T}}\nBPDiff(block, [output::AbstractRegister, grad]) -> BPDiff\n\nMark a block as differentiable, here GT, PT and RT are gate type, parameter type and register type respectively.\n\nWarning:     please don\'t use the adjoint after BPDiff! adjoint is reserved for special purpose! (back propagation)\n\n\n\n\n\n"
+    "text": "BPDiff{GT, N, T, PT, RT<:AbstractRegister} <: AbstractDiff{GT, N, Complex{T}}\nBPDiff(block, [input::AbstractRegister, grad]) -> BPDiff\n\nMark a block as differentiable, here GT, PT and RT are gate type, parameter type and register type respectively.\n\nWarning:     please don\'t use the adjoint after BPDiff! adjoint is reserved for special purpose! (back propagation)\n\n\n\n\n\n"
 },
 
 {
@@ -1141,7 +1173,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.QDiff",
     "category": "type",
-    "text": "QDiff{GT, N, T} <: AbstractDiff{N, Complex{T}}\nQDiff(block) -> QDiff\n\nMark a block as quantum differentiable.\n\n\n\n\n\n"
+    "text": "QDiff{GT, N, T} <: AbstractDiff{GT, N, Complex{T}}\nQDiff(block) -> QDiff\n\nMark a block as quantum differentiable.\n\n\n\n\n\n"
 },
 
 {
@@ -1229,7 +1261,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.backward!",
     "category": "method",
-    "text": "backward!(circuit::MatrixBlock, δ::AbstractRegister) -> AbstractRegister\n\nback propagate and calculate the gradient ∂f/∂θ = 2Re(∂f/∂ψ⋅∂ψ/∂θ), given ∂f/∂ψ.\n\nNote: Here, the input circuit should be a matrix block, otherwise the back propagate may not apply (like Measure operations).\n\n\n\n\n\n"
+    "text": "backward!(δ::AbstractRegister, circuit::MatrixBlock) -> AbstractRegister\n\nback propagate and calculate the gradient ∂f/∂θ = 2Re(∂f/∂ψ⋅∂ψ/∂θ), given ∂f/∂ψ.\n\nNote: Here, the input circuit should be a matrix block, otherwise the back propagate may not apply (like Measure operations).\n\n\n\n\n\n"
 },
 
 {
@@ -1237,7 +1269,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.block",
     "category": "function",
-    "text": "block(container)\n\nget an iterator that iterate through all sub-blocks.\n\n\n\n\n\n"
+    "text": "block(container::AbstractContainer) -> AbstractBlock\n\nget the contained block (i.e. subblock) of a container.\n\n\n\n\n\n"
 },
 
 {
@@ -1369,6 +1401,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.setiparameters!",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.setiparameters!",
+    "category": "function",
+    "text": "setparameters!([elementwisefunction], r::AbstractBlock, params::Number...) -> AbstractBlock\nsetparameters!([elementwisefunction], r::AbstractBlock, :random) -> AbstractBlock\nsetparameters!([elementwisefunction], r::AbstractBlock, :zero) -> AbstractBlock\n\nset intrinsics parameter for block, input params can be numbers or :random or :zero.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.subblocks",
     "page": "Blocks System",
     "title": "Yao.Blocks.subblocks",
@@ -1454,14 +1494,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.render_params",
     "category": "method",
     "text": "render_params(r::AbstractBlock, raw_parameters) -> Iterable\n\nMore elegant way of rendering parameters for symbols.\n\n\n\n\n\n"
-},
-
-{
-    "location": "man/blocks/#Yao.Blocks.setiparameters",
-    "page": "Blocks System",
-    "title": "Yao.Blocks.setiparameters",
-    "category": "function",
-    "text": "setparameters!([elementwisefunction], r::AbstractBlock, params::Number...) -> AbstractBlock\nsetparameters!([elementwisefunction], r::AbstractBlock, :random) -> AbstractBlock\nsetparameters!([elementwisefunction], r::AbstractBlock, :zero) -> AbstractBlock\n\nset intrinsics parameter for block, input params can be numbers or :random or :zero.\n\n\n\n\n\n"
 },
 
 {

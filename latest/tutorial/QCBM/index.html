@@ -110,7 +110,7 @@ chain
    │  └─ Rot X gate: 0.0
    └─ chain
       ├─ Rot Z gate: 0.0
-      └─ Rot X gate: 0.0</code></pre><p>Let&#39;s define a circuit to use later</p><div><pre><code class="language-julia">circuit = QCBM(6, 10, [1=&gt;2, 3=&gt;4, 5=&gt;6, 2=&gt;3, 4=&gt;5, 6=&gt;1])</code></pre></div><h2><a class="nav-anchor" id="MMD-Loss-and-Gradients-1" href="#MMD-Loss-and-Gradients-1">MMD Loss &amp; Gradients</a></h2><p>The MMD loss is describe below:</p><div>\[\begin{aligned}
+      └─ Rot X gate: 0.0</code></pre><p>Let&#39;s define a circuit to use later</p><div><pre><code class="language-julia">circuit = QCBM(6, 10, [1=&gt;2, 3=&gt;4, 5=&gt;6, 2=&gt;3, 4=&gt;5, 6=&gt;1]) |&gt; autodiff(:QC)</code></pre></div><p>Here, the function <code>autodiff(:QC)</code> will mark rotation gates in a circuit as differentiable automatically.</p><h2><a class="nav-anchor" id="MMD-Loss-and-Gradients-1" href="#MMD-Loss-and-Gradients-1">MMD Loss &amp; Gradients</a></h2><p>The MMD loss is describe below:</p><div>\[\begin{aligned}
 \mathcal{L} &amp;= \left| \sum_{x} p \theta(x) \phi(x) - \sum_{x} \pi(x) \phi(x) \right|^2\\
             &amp;= \langle K(x, y) \rangle_{x \sim p_{\theta}, y\sim p_{\theta}} - 2 \langle K(x, y) \rangle_{x\sim p_{\theta}, y\sim \pi} + \langle K(x, y) \rangle_{x\sim\pi, y\sim\pi}
 \end{aligned}\]</div><p>We will use a squared exponential kernel here.</p><div><pre><code class="language-julia">struct Kernel
@@ -134,37 +134,7 @@ end</code></pre></div><h3><a class="nav-anchor" id="Gradients-1" href="#Gradient
 &amp;- \langle K(x, y) \rangle _{x\sim p_{\theta^+}, y\sim\pi} + \langle K(x, y) \rangle_{x\sim p_{\theta^-}, y\sim\pi}
 \end{aligned}\]</div><p>We have to update one parameter of each rotation gate each time, and calculate its gradient then collect them. Since we will need to calculate the probability from the state vector frequently, let&#39;s define a shorthand first.</p><p>Firstly, you have to define a quantum register. Each run of a QCBM&#39;s input is a simple <span>$|00\cdots 0\rangle$</span> state. We provide string literal <code>bit</code> to help you define one-hot state vectors like this</p><pre><code class="language-julia-repl">julia&gt; r = register(bit&quot;0000&quot;)
 DefaultRegister{1, Complex{Float64}}
-    active qubits: 4/4</code></pre><p>Now, we define its shorthand</p><pre><code class="language-julia">get_prob(qcbm) = apply!(register(bit&quot;0&quot;^6), qcbm) |&gt; statevec .|&gt; abs2</code></pre><p>We will first iterate through each layer contains rotation gates and allocate an array to store our gradient</p><pre><code class="language-julia">function gradient(n, nlayers, qcbm, kernel, ptrain)
-    prob = get_prob(qcbm)
-    grad = zeros(real(datatype(qcbm)), nparameters(qcbm))
-    idx = 0
-    for ilayer = 1:2:(2 * nlayers + 1)
-        idx = grad_layer!(grad, idx, prob, qcbm, qcbm[ilayer], kernel, ptrain)
-    end
-    grad
-end</code></pre><p>Then we iterate through each rotation gate.</p><pre><code class="language-julia">function grad_layer!(grad, idx, prob, qcbm, layer, kernel, ptrain)
-    count = idx
-    for each_line in blocks(layer)
-        for each in blocks(each_line)
-            gradient!(grad, count+1, prob, qcbm, each, kernel, ptrain)
-            count += 1
-        end
-    end
-    count
-end</code></pre><p>We update each parameter by rotate it <span>$-\pi/2$</span> and <span>$\pi/2$</span></p><pre><code class="language-julia">function gradient!(grad, idx, prob, qcbm, gate, kernel, ptrain)
-    dispatch!(+, gate, pi / 2)
-    prob_pos = get_prob(qcbm)
-
-    dispatch!(-, gate, pi)
-    prob_neg = get_prob(qcbm)
-
-    dispatch!(+, gate, pi / 2) # set back
-
-    grad_pos = expect(kernel, prob, prob_pos) - expect(kernel, prob, prob_neg)
-    grad_neg = expect(kernel, ptrain, prob_pos) - expect(kernel, ptrain, prob_neg)
-    grad[idx] = grad_pos - grad_neg
-    grad
-end</code></pre><h2><a class="nav-anchor" id="Optimizer-1" href="#Optimizer-1">Optimizer</a></h2><p>We will use the Adam optimizer. Since we don&#39;t want you to install another package for this, the following code for this optimizer is copied from <a href="https://github.com/denizyuret/Knet.jl">Knet.jl</a></p><p>Reference: <a href="https://arxiv.org/abs/1412.6980">Kingma, D. P., &amp; Ba, J. L. (2015)</a>. Adam: a Method for Stochastic Optimization. International Conference on Learning Representations, 1–13.</p><pre><code class="language-julia">using LinearAlgebra
+    active qubits: 4/4</code></pre><p>Now, we define its shorthand</p><pre><code class="language-julia">get_prob(qcbm) = apply!(register(bit&quot;0&quot;^6), qcbm) |&gt; statevec .|&gt; abs2</code></pre><h2><a class="nav-anchor" id="Optimizer-1" href="#Optimizer-1">Optimizer</a></h2><p>We will use the Adam optimizer. Since we don&#39;t want you to install another package for this, the following code for this optimizer is copied from <a href="https://github.com/denizyuret/Knet.jl">Knet.jl</a></p><p>Reference: <a href="https://arxiv.org/abs/1412.6980">Kingma, D. P., &amp; Ba, J. L. (2015)</a>. Adam: a Method for Stochastic Optimization. International Conference on Learning Representations, 1–13.</p><pre><code class="language-julia">using LinearAlgebra
 
 mutable struct Adam
     lr::AbstractFloat
@@ -213,7 +183,7 @@ end</code></pre><h2><a class="nav-anchor" id="Start-Training-1" href="#Start-Tra
     history = Float64[]
 
     for i = 1:niter
-        grad = gradient(n, nlayers, qcbm, kernel, ptrain)
+        grad = exactdiff.(n, nlayers, qcbm, kernel, ptrain)
         curr_loss = loss(qcbm, kernel, ptrain)
         push!(history, curr_loss)        
         params = parameters(qcbm)
