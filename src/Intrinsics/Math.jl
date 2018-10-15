@@ -98,7 +98,7 @@ Return general kronecher product form of gates in Hilbert space of `num_bit` qub
 * `start_locs` should have the same length as `gates`, specifing the gates starting positions.
 """
 function hilbertkron(num_bit::Int, ops::Vector{T}, start_locs::Vector{Int}) where T<:AbstractMatrix
-    sizes = [op |> nqubits for op in ops]
+    sizes = [op |> nactive for op in ops]
     start_locs = num_bit .- start_locs .- sizes .+ 2
 
     order = sortperm(start_locs)

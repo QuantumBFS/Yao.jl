@@ -6,7 +6,7 @@ using MacroTools: @forward
 using ..Intrinsics
 
 import Base: length, broadcastable, iterate, getindex, eltype
-import Base: cat, repeat
+import Base: repeat
 import Base: copy, similar, *, join, copyto!
 import Base: show
 import Base: +, -, *, /, kron, ==, ≈
@@ -16,8 +16,9 @@ import ..Yao: DefaultType, nqubits, nactive, reorder, invorder
 import ..Intrinsics: basis, hypercubic
 
 # APIs
-export nqubits, nactive, nremain, nbatch, state, datatype, viewbatch
-export relaxedvec, statevec, hypercubic, rank3, focus!, relax!, extend!, basis, probs, isnormalized
+export nqubits, nactive, nremain, nbatch, basis, state, datatype, viewbatch
+export relaxedvec, statevec, hypercubic, rank3
+export focus!, relax!, oneto, probs, isnormalized
 export AbstractRegister, Register, ConjRegister, RegOrConjReg
 export invorder!, reorder!, addbit!, reset!
 

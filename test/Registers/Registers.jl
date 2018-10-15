@@ -1,5 +1,8 @@
 using Test, Random, LinearAlgebra, SparseArrays
 
+@testset "abstract register" begin
+    include("AbstractRegister.jl")
+end
 
 @testset "default register" begin
     include("Default.jl")
@@ -7,5 +10,5 @@ using Test, Random, LinearAlgebra, SparseArrays
 end
 
 @testset "reorder" begin
-include("reorder.jl")
+    include("reorder.jl")
 end

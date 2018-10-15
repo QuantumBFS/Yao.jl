@@ -117,43 +117,6 @@ function probs(r::DefaultRegister{B}) where B
     end
 end
 
-"""
-    extend!(r::DefaultRegister, n::Int) -> DefaultRegister
-    extend!(n::Int) -> Function
-
-extend the register by n bits in state |0>.
-i.e. |psi> -> |000> ⊗ |psi>, extended bits have higher indices.
-If only an integer is provided, then perform lazy evaluation.
-"""
-function extend!(r::DefaultRegister{B, T}, n::Int) where {B, T}
-    mat = r.state
-    M, N = size(mat)
-    r.state = zeros(T, M*(1<<n), N)
-    r.state[1:M, :] = mat
-    r
-end
-
-extend!(n::Int) = r->extend!(r, n)
-
-function join(reg1::DefaultRegister{B, T1}, reg2::DefaultRegister{B, T2}) where {B, T1, T2}
-    s1 = reg1 |> rank3
-    s2 = reg2 |> rank3
-    T = promote_type(T1, T2)
-    state = Array{T,3}(undef, size(s1, 1)*size(s2, 1), size(s1, 2)*size(s2, 2), B)
-    for b = 1:B
-        @inbounds @views state[:,:,b] = kron(s2[:,:,b], s1[:,:,b])
-    end
-    DefaultRegister{B}(reshape(state, size(state, 1), :))
-end
-join(reg1::DefaultRegister{1}, reg2::DefaultRegister{1}) = DefaultRegister{1}(kron(reg2.state, reg1.state))
-
-"""
-    isnormalized(reg::DefaultRegister) -> Bool
-
-Return true if a register is normalized else false.
-"""
-isnormalized(reg::DefaultRegister) = all(sum(copy(reg) |> relax! |> probs, dims=1) .≈ 1)
-
 # we convert state to a vector to use
 # intrincs like gemv, when nremain is
 # 0 and the state is actually a vector
@@ -190,13 +153,6 @@ reorder!(orders::Int...) = reg::DefaultRegister -> reorder!(reg, [orders...])
 Inverse the order of lines inplace.
 """
 invorder!(reg::DefaultRegister) = reorder!(reg, collect(nactive(reg):-1:1))
-
-function addbit!(reg::DefaultRegister{B, T}, n::Int) where {B, T}
-    state = zeros(T, size(reg.state, 1)*(1<<n), size(reg.state, 2))
-    state[1:size(reg.state, 1), :] = reg.state
-    reg.state = state
-    reg
-end
 
 """
     reset!(reg::AbstractRegister, val::Integer=0) -> AbstractRegister

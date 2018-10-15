@@ -2,6 +2,15 @@
 #            focus! and relax!
 ##############################################
 """
+    oneto(reg::DefaultRegister, n::Int=nqubits(reg)) -> DefaultRegister
+
+Return a register with first 1:n bits activated.
+"""
+function oneto(reg::DefaultRegister{B}; n::Int=nqubits(reg)) where B
+    register(reshape(reg.state, 1<<n, :), B)
+end
+
+"""
     relax!(reg::DefaultRegister; nbit::Int=nqubits(reg)) -> DefaultRegister
     relax!(reg::DefaultRegister, bits::Ints; nbit::Int=nqubits(reg)) -> DefaultRegister
     relax!(bits::Ints...; nbit::Int=-1) -> Function
@@ -54,7 +63,7 @@ function focus!(reg::DefaultRegister{B}, bits) where B
         norder = move_ahead(nbit+1, bits)
         arr = group_permutedims(reg |> hypercubic, norder)
     end
-    reg.state = reshape(arr, :, (1<<(nbit-length(bits)))*B)
+    reg.state = reshape(arr, 1<<length(bits), :)
     reg
 end
 

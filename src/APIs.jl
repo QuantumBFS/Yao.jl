@@ -9,4 +9,4 @@ function reorder end
 
 Inverse the order of qubits.
 """
-invorder(v) = reorder(v, collect(nqubits(v):-1:1))
+invorder(v) = reorder(v, collect(nactive(v):-1:1))

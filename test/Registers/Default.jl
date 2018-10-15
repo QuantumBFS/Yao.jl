@@ -75,14 +75,13 @@ end
 @testset "Focus 1" begin
     # conanical shape
     reg = rand_state(3, 5)
-    @test copy(reg) |> extend!(2) |> nactive == 5
-    reg2 = copy(reg) |> extend!(2) |> focus!(4,5)
+    @test copy(reg) |> addbit!(2) |> nactive == 5
+    reg2 = copy(reg) |> addbit!(2) |> focus!(4,5)
     @test (reg2 |> measure_remove!; reg2) |> relax! ≈ reg
 end
 
-@testset "cat repeat" begin
+@testset "repeat" begin
     reg = register(bit"00000") + register(bit"11001") |> normalize!;
-    @test cat(reg, reg) |> nbatch == 2
     @test repeat(reg, 5) |> nbatch == 5
 
     v1, v2, v3 = randn(2), randn(2), randn(2)
@@ -94,7 +93,9 @@ end
     reg = zero_state(3)
     @test addbit!(copy(reg), 3) == zero_state(6)
     reg = rand_state(3, 2)
-    @test addbit!(copy(reg), 2) |> state == kron(zero_state(2) |> state, reg |> state)
+    @test addbit!(copy(reg), 2) ≈ join(reg, zero_state(2, 2))
+    reg = rand_state(3, 1)
+    @test addbit!(copy(reg), 2) ≈ join(reg, zero_state(2, 1))
 end
 
 @testset "reg join" begin

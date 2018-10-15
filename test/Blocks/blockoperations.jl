@@ -27,5 +27,5 @@ end
     reg = rand_state(4, 3)
     dm = reg |> density_matrix
     op = put(4, 3=>X)
-    @test expect(op, dm) ≈ expect(op, reg) |> diag
+    @test expect(op, dm) ≈ expect(op, reg)
 end
