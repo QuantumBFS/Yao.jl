@@ -65,7 +65,7 @@ Return the rank 3 tensor representation of state, the 3 dimensions are (activate
 rank3(reg::DefaultRegister{B}) where B = reshape(reg.state, size(reg.state, 1), :, B)
 
 copy(r::DefaultRegister{B}) where B = DefaultRegister{B}(copy(state(r)))
-copyto!(reg1::RT, reg2::RT) where {RT<:AbstractRegister} = (copyto!(reg1.state, reg2.state); reg1)
+copyto!(reg1::RT, reg2::RT) where {RT<:DefaultRegister} = (copyto!(reg1.state, reg2.state); reg1)
 
 similar(r::DefaultRegister{B, T}) where {B, T} = DefaultRegister{B}(similar(r.state))
 
@@ -99,28 +99,6 @@ for FUNC in [:zero_state, :rand_state, :uniform_state]
     @eval $FUNC(n::Int, nbatch::Int=1) = $FUNC(DefaultType, n, nbatch)
 end
 product_state(n::Int, config::Integer, nbatch::Int=1) = product_state(DefaultType, n, config, nbatch)
-
-function probs(r::DefaultRegister{1})
-    if size(r.state, 2) == 1
-        return vec(r.state .|> abs2)
-    else
-        return dropdims(sum(r.state .|> abs2, dims=2), dims=2)
-    end
-end
-
-function probs(r::DefaultRegister{B}) where B
-    if size(r.state, 2) == B
-        return r.state .|> abs2
-    else
-        probs = r |> rank3 .|> abs2
-        return dropdims(sum(probs, dims=2), dims=2)
-    end
-end
-
-# we convert state to a vector to use
-# intrincs like gemv, when nremain is
-# 0 and the state is actually a vector
-*(op::AbstractMatrix, r::AbstractRegister) = op * statevec(r)
 
 import Base: summary
 function summary(io::IO, r::DefaultRegister{B, T}) where {B, T}
@@ -159,8 +137,10 @@ end
 
 addbit!(n::Int) = r->addbit!(r, n)
 
+repeat(reg::DefaultRegister{B}, n::Int) where B = DefaultRegister{B*n}(hcat((reg.state for i=1:n)...,))
+
 ############ ConjDefaultRegister ##############
-const ConjDefaultRegister{B, T} = ConjRegister{B, T, <:DefaultRegister}
+const ConjDefaultRegister{B, T, RT} = ConjRegister{B, T, RT} where RT<:DefaultRegister{B, T}
 
 statevec(bra::ConjDefaultRegister) = Adjoint(parent(bra) |> statevec)
 relaxedvec(bra::ConjDefaultRegister) = Adjoint(parent(bra) |> relaxedvec)

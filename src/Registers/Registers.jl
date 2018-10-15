@@ -19,7 +19,7 @@ import ..Intrinsics: basis, hypercubic
 export nqubits, nactive, nremain, nbatch, basis, state, datatype, viewbatch
 export relaxedvec, statevec, hypercubic, rank3
 export focus!, relax!, oneto, probs, isnormalized
-export AbstractRegister, Register, ConjRegister, RegOrConjReg
+export AbstractRegister, Register, ConjRegister, RegOrConjReg, ConjDefaultRegister
 export invorder!, reorder!, addbit!, reset!
 
 # factories

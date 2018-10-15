@@ -218,7 +218,7 @@ Reference:
 """
 function fidelity_mix(m1::Matrix, m2::Matrix)
     O = m1'*m2
-    trace(sqrtm(O*O'))
+    tr(sqrt(O*O'))
 end
 
 """

@@ -126,3 +126,10 @@ function addbit! end
 Merge two registers together with kronecker tensor product.
 """
 function join end
+
+"""
+    repeat(reg::AbstractRegister{B}, n::Int) -> AbstractRegister
+
+Repeat register in batch dimension for `n` times.
+"""
+function repeat end

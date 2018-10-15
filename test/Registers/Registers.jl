@@ -12,3 +12,7 @@ end
 @testset "reorder" begin
     include("reorder.jl")
 end
+
+@testset "density matrix" begin
+    include("DensityMatrix.jl")
+end
