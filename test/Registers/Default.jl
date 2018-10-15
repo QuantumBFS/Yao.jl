@@ -22,7 +22,7 @@ using Yao.Intrinsics
     # product state initializer
     reg = product_state(5, 2, 3)
     @test all(state(reg)[3, :] .== 1)
-    @test reg'*reg ≈ ones(3, 3)
+    @test reg'*reg ≈ ones(3)
 
     # rand state initializer
     reg = rand_state(5, 3)
@@ -30,7 +30,7 @@ using Yao.Intrinsics
     @test isnormalized(reg)
 
     # check default type
-    @test eltype(reg) == ComplexF64
+    @test datatype(reg) == ComplexF64
 
     creg = copy(reg)
     @test state(creg) == state(reg)
@@ -47,7 +47,7 @@ end
     test_data = zeros(ComplexF32, 2^5)
     reg = register(test_data)
     @test typeof(reg) == DefaultRegister{1, ComplexF32, Matrix{ComplexF32}}
-    @test eltype(reg) == ComplexF32
+    @test datatype(reg) == ComplexF32
     @test nqubits(reg) == 5
     @test nbatch(reg) == 1
     @test state(reg) == reshape(test_data, :, 1)
@@ -65,7 +65,7 @@ end
     @test isnormalized(reg)
 
     # check default type
-    @test eltype(reg) == ComplexF64
+    @test datatype(reg) == ComplexF64
 
     creg = copy(reg)
     @test state(creg) == state(reg)
@@ -80,9 +80,9 @@ end
     @test (reg2 |> measure_remove!; reg2) |> relax! ≈ reg
 end
 
-@testset "stack repeat" begin
+@testset "cat repeat" begin
     reg = register(bit"00000") + register(bit"11001") |> normalize!;
-    @test stack(reg, reg) |> nbatch == 2
+    @test cat(reg, reg) |> nbatch == 2
     @test repeat(reg, 5) |> nbatch == 5
 
     v1, v2, v3 = randn(2), randn(2), randn(2)
@@ -115,7 +115,7 @@ end
     r2= select(focus!(copy(reg), [2,3]), 0b11) |> relax!
     r3= copy(reg) |> focus!(2,3) |> select!(0b11) |> relax!
 
-    @test r1'*r1 ≈ [1 1; 1 1]
+    @test r1'*r1 ≈ ones(2)
     @test r1 ≈ r2
     @test r3 ≈ r2
 end
@@ -127,6 +127,9 @@ end
     rb = copy(reg)
     @test all(ra .|> Ref(c) .≈ rb .|> Ref(c))
     @test typeof.(reg)[1] <: DefaultRegister{<:Any, <:Any, <:SubArray}
+
+    @test [reg...] |> length == 3
+    @test [rand_state(3)...] |> length == 1
 end
 
 @testset "measure and reset" begin

@@ -2,6 +2,23 @@
 #            focus! and relax!
 ##############################################
 """
+    relax!(reg::DefaultRegister; nbit::Int=nqubits(reg)) -> DefaultRegister
+    relax!(reg::DefaultRegister, bits::Ints; nbit::Int=nqubits(reg)) -> DefaultRegister
+    relax!(bits::Ints...; nbit::Int=-1) -> Function
+
+Inverse transformation of focus, with nbit is the number of active bits of target register.
+"""
+function relax! end
+
+"""
+    focus!(reg::DefaultRegister, bits::Ints) -> DefaultRegister
+    focus!(locs::Int...) -> Function
+
+Focus register on specified active bits.
+"""
+function focus! end
+
+"""
 Get the compact shape and order for permutedims.
 """
 function shapeorder(shape::NTuple, order::Vector{Int})
@@ -62,24 +79,3 @@ function focus!(func, reg::DefaultRegister, locs)
     nbit = nqubits(reg)
     relax!(func(reg |> focus!(locs...)), locs, nbit=nbit)
 end
-
-
-#=
-"""
-    Focus{N} <: AbatractBlock
-
-Focus manager, with N the number of qubits.
-"""
-struct Focus{N}
-    address::Vector{Int}
-    Focus{N}() where N = new{N}(collect(1:N))
-end
-(f::Focus)(bits::Int...) = (f.address[:] = move_ahead(f.address, bits);focus!(bits...))
-function (f::Focus{N})(::Void) where N
-    func = relax!(f.address...)
-    f.address[:] = 1:N
-    func
-end
-
-Focus(N::Int) = Focus{N}()
-=#

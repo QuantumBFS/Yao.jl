@@ -7,6 +7,12 @@ abstract type that all block with a matrix form will subtype from.
 """
 abstract type MatrixBlock{N, T} <: AbstractBlock end
 
+"""
+    nqubits(::Type{MT}) -> Int
+    nqubits(::MatrixBlock) -> Int
+
+Return the number of qubits of a `MatrixBlock`.
+"""
 nqubits(::Type{MT}) where {N, MT <: MatrixBlock{N}} = N
 nqubits(::MatrixBlock{N}) where N = N
 

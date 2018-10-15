@@ -82,7 +82,12 @@ end
     ex
 end
 
-nqubits(m::AbstractArray) = size(m, 1) |> log2i
+"""
+    nactive(m::AbstractArray) -> Int
+
+Returns the log-size of its first dimension.
+"""
+nactive(m::AbstractArray) = size(m, 1) |> log2i
 
 """
     hilbertkron(num_bit::Int, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix

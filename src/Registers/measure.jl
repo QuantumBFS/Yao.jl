@@ -65,7 +65,7 @@ end
 
 measure and set the register to specific value.
 """
-function measure_reset!(reg::AbstractRegister{B}; val::Int=0) where B
+function measure_reset!(reg::AbstractRegister{B}; val::Integer=0) where B
     state = reshape(reg.state, size(reg.state,1),:,B)
     nstate = zero(state)
     res = measure_remove!(reg)
@@ -77,7 +77,7 @@ function measure_reset!(reg::AbstractRegister{B}; val::Int=0) where B
     res
 end
 
-function measure_reset!(reg::AbstractRegister, mbits; val::Int=0) where {B, T, C}
+function measure_reset!(reg::AbstractRegister, mbits; val::Integer=0) where {B, T, C}
     local res
     focus!(reg, mbits) do reg_focused
         res = measure_reset!(reg_focused, val=val)

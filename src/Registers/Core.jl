@@ -8,18 +8,17 @@ data type.
 
 ## Required Properties
 
-|    Property    |                                                     Description                                                      |     default      |
-|:--------------:|:--------------------------------------------------------------------------------------------------------------------:|:----------------:|
-| `nqubits(reg)`  | get the total number of qubits.                                                                                     |                  |
-| `nactive(reg)` | get the number of active qubits.                                                                                     |                  |
-| `nremain(reg)` | get the number of remained qubits.                                                                                   | nqubits - nactive |
-| `nbatch(reg)`  | get the number of batch.                                                                                             | `B`              |
-| `state(reg)`   | get the state of this register. It always return the matrix stored inside.                                           |                  |
-| `statevec(reg)`| get the raveled state of this register.                                  .                                           |                  |
-| `hypercubic(reg)`| get the hypercubic form of this register.                                  .                                       |                  |
-| `eltype(reg)`  | get the element type stored by this register on classical memory. (the type Julia should use to represent amplitude) | `T`              |
-| `copy(reg)`    | copy this register.                                                                                                  |                  |
-| `similar(reg)` | construct a new register with similar configuration.                                                                 |                  |
+|    Property       |                                                     Description                                       |     default      |
+|:-----------------:|:-----------------------------------------------------------------------------------------------------:|:----------------:|
+| `viewbatch(reg,i)`| get the view of slice in batch dimension.                                                             |                  |
+| `nqubits(reg)`    | get the total number of qubits.                                                                       |                  |
+| `nactive(reg)`    | get the number of active qubits.                                                                      |                  |
+| `state(reg)`      | get the state of this register. It always return the matrix stored inside.                            |                  |
+|   (optional)      |                                                                                                       |                  |
+| `nremain(reg)`    | get the number of remained qubits.                                                                    | nqubits - nactive|
+| `datatype(reg)`     | get the element type Julia should use to represent amplitude)                                         | `T`              |
+| `nbatch(reg)`     | get the number of batch.                                                                              | `B`              |
+| `length(reg)`     | alias of `nbatch`, for interfacing.                                                                   | `B`              |
 
 ## Required Methods
 
@@ -80,104 +79,33 @@ abstract type AbstractRegister{B, T} end
 ## Interfaces
 ##############
 
-# nqubits
-# nactive
+"""
+    nactive(x::AbstractRegister) -> Int
+
+Return the number of active qubits.
+
+note!!!
+
+    Operatiors always apply on active qubits.
+"""
+function nactive end
 nremain(r::AbstractRegister) = nqubits(r) - nactive(r)
 nbatch(r::AbstractRegister{B}) where B = B
-eltype(r::AbstractRegister{B, T}) where {B, T} = T
-
+datatype(r::AbstractRegister{B, T}) where {B, T} = T
 basis(r::AbstractRegister) = basis(nqubits(r))
-
-import Base: +, -, *, /, kron, ==, ≈
-
-for op in [:+, :-]
-    @eval function ($op)(lhs::RT, rhs::RT) where {RT <: AbstractRegister}
-        RT(($op)(state(lhs), state(rhs)))
-    end
-end
--(reg::RT) where RT<:AbstractRegister = RT(-state(reg))
-for op in [:*, :/]
-    @eval function ($op)(lhs::RT, rhs::Number) where {RT <: AbstractRegister}
-        RT(($op)(state(lhs), rhs))
-    end
-    if op == :*
-        @eval function ($op)(lhs::Number, rhs::RT) where {RT <: AbstractRegister}
-            RT(($op)(lhs, state(rhs)))
-        end
-    end
-end
-
-for op in [:(==), :≈]
-    @eval function ($op)(lhs::RT, rhs::RT) where RT <: AbstractRegister
-        ($op)(state(lhs), state(rhs))
-    end
-end
+length(reg::AbstractRegister{B}) where B = B
+#eltype(reg::AbstractRegister) = typeof(first(reg))
 
 """
-    kron(lhs, rhs)
+    viewbatch(r::AbstractRegister, i::Int) -> AbstractRegister{1}
 
-Merge two registers together with kronecker tensor product.
+Return a view of a slice from batch dimension.
 """
-function kron(lhs::RT, rhs::AbstractRegister{B}) where {B, RT <: AbstractRegister{B}}
-    register(RT, kron(state(rhs), state(lhs)), Int(B))
-end
-
-import LinearAlgebra: normalize!
+function viewbatch end
 
 """
-    normalize!(r::AbstractRegister) -> AbstractRegister
+    state(reg) -> AbstractMatrix
 
-Return the register with normalized state.
+get the state of this register. It always return the matrix stored inside.
 """
-normalize!(r::AbstractRegister) = throw(MethodError(normalize!, r))
-
-"""
-    statevec(r::AbstractRegister) -> AbstractArray
-
-Return a state matrix/vector by droping the last dimension of size 1.
-"""
-function statevec end
-
-"""
-    relaxedvec(r::AbstractRegister) -> AbstractArray
-
-Activate all qubits, and return a matrix (vector) for B>1 (B=1).
-"""
-function relaxedvec end
-
-"""
-    hypercubic(r::AbstractRegister) -> AbstractArray
-
-Return the hypercubic form (high dimensional tensor) of this register, only active qubits are considered.
-"""
-function hypercubic end
-
-"""
-    relax!(reg::DefaultRegister; nbit::Int=nqubits(reg)) -> DefaultRegister
-    relax!(reg::DefaultRegister, bits::Ints; nbit::Int=nqubits(reg)) -> DefaultRegister
-    relax!(bits::Ints...; nbit::Int=-1) -> Function
-
-Inverse transformation of focus, with nbit is the number of active bits of target register.
-"""
-function relax! end
-
-"""
-    focus!(reg::DefaultRegister, bits::Ints) -> DefaultRegister
-    focus!(locs::Int...) -> Function
-
-Focus register on specified active bits.
-"""
-function focus! end
-
-"""
-    fidelity(reg1::DefaultRegister, reg2::DefaultRegister) -> Vector
-"""
-function fidelity end
-
-"""
-    tracedist(reg1::DefaultRegister, reg2::DefaultRegister) -> Vector
-    tracedist(reg1::DensityMatrix, reg2::DensityMatrix) -> Vector
-
-trace distance.
-"""
-function tracedist end
+function state end

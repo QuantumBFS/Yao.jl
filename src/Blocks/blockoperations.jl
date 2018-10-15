@@ -22,6 +22,11 @@ function blockfilter!(func, rgs::Vector, blk::AbstractContainer)
 end
 
 import Base: collect
+"""
+    collect(circuit::AbstractBlock, ::Type{BT}) where BT<:AbstractBlock
+
+collect blocks of type `BT` in the block tree with `circuit` as root.
+"""
 function collect(circuit::AbstractBlock, ::Type{BT}) where BT<:AbstractBlock
     Sequential(blockfilter!(x->x isa BT, Vector{BT}([]), circuit))
 end
