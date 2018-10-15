@@ -1,5 +1,6 @@
 ###################### Linear Algebra for Registers ########################
 const RegOrConjReg{B, T} = Union{ConjRegister{B, T}, AbstractRegister{B, T}}
+
 # iterable interface
 broadcastable(reg::RegOrConjReg{1}) = Ref(reg)
 broadcastable(bra::ConjRegister) = [bra...]
@@ -42,42 +43,6 @@ end
 
 # Register Linear algebra
 """
-    join(reg1::AbstractRegister, reg2::AbstractRegister) -> Register
-
-Merge two registers together with kronecker tensor product.
-"""
-function join(reg1::DefaultRegister{B, T1}, reg2::DefaultRegister{B, T2}) where {B, T1, T2}
-    s1 = reg1 |> rank3
-    s2 = reg2 |> rank3
-    T = promote_type(T1, T2)
-    state = Array{T,3}(undef, size(s1, 1)*size(s2, 1), size(s1, 2)*size(s2, 2), B)
-    for b = 1:B
-        @inbounds @views state[:,:,b] = kron(s2[:,:,b], s1[:,:,b])
-    end
-    DefaultRegister{B}(reshape(state, size(state, 1), :))
-end
-join(reg1::DefaultRegister{1}, reg2::DefaultRegister{1}) = DefaultRegister{1}(kron(reg2.state, reg1.state))
-
-"""
-    addbit!(r::DefaultRegister, n::Int) -> DefaultRegister
-    addbit!(n::Int) -> Function
-
-addbit the register by n bits in state |0>.
-i.e. |psi> -> |000> ⊗ |psi>, addbit bits have higher indices.
-If only an integer is provided, then perform lazy evaluation.
-"""
-function addbit!(r::DefaultRegister{B, T}, n::Int) where {B, T}
-    mat = r.state
-    M, N = size(mat)
-    r.state = zeros(T, M*(1<<n), N)
-    r.state[1:M, :] = mat
-    r
-end
-
-addbit!(n::Int) = r->addbit!(r, n)
-
-
-"""
     isnormalized(reg::DefaultRegister) -> Bool
 
 Return true if a register is normalized else false.
@@ -116,6 +81,55 @@ function fidelity end
 trace distance.
 """
 function tracedist end
+
+############## Reordering #################
+"""
+    reorder!(reg::AbstractRegister, order) -> AbstractRegister
+    reorder!(orders::Int...) -> Function    # currified
+
+Reorder the lines of qubits, it also works for array.
+"""
+function reorder!(reg::DefaultRegister, orders)
+    for i in 1:size(reg.state, 2)
+        reg.state[:,i] = reorder(reg.state[:, i], orders)
+    end
+    reg
+end
+reorder!(orders::Int...) = reg::DefaultRegister -> reorder!(reg, [orders...])
+
+"""
+    invorder!(reg::AbstractRegister) -> AbstractRegister
+
+Inverse the order of lines inplace.
+"""
+invorder!(reg::DefaultRegister) = reorder!(reg, collect(nactive(reg):-1:1))
+
+"""
+    reset!(reg::AbstractRegister, val::Integer=0) -> AbstractRegister
+
+`reset!` reg to default value.
+"""
+function reset!(reg::DefaultRegister; val::Integer=0)
+    reg.state .= 0
+    @inbounds reg.state[val+1,:] .= 1
+    reg
+end
+
+function fidelity(reg1::DefaultRegister{B}, reg2::DefaultRegister{B}) where B
+    state1 = reg1 |> rank3
+    state2 = reg2 |> rank3
+    size(state1) == size(state2) || throw(DimensionMismatch("Register size not match!"))
+    # 1. pure state
+    if size(state1, 2) == 1
+        return map(b->fidelity_pure(state1[:,1,b], state2[:,1,b]), 1:B)
+    else
+        return map(b->fidelity_mix(state1[:,:,b], state2[:,:,b]), 1:B)
+    end
+end
+
+function tracedist(reg1::DefaultRegister{B}, reg2::DefaultRegister{B}) where B
+    size(reg1.state, 2) == B ? sqrt.(1 .- fidelity(reg1, reg2).^2) : throw(ArgumentError("trace distance for non-pure state is not defined!"))
+end
 
 include("focus.jl")
 include("measure.jl")

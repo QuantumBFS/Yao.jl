@@ -109,3 +109,20 @@ function viewbatch end
 get the state of this register. It always return the matrix stored inside.
 """
 function state end
+
+"""
+    addbit!(r::AbstractRegister, n::Int) -> AbstractRegister
+    addbit!(n::Int) -> Function
+
+addbit the register by n bits in state |0>.
+i.e. |psi> -> |000> ⊗ |psi>, addbit bits have higher indices.
+If only an integer is provided, then perform lazy evaluation.
+"""
+function addbit! end
+
+"""
+    join(reg1::AbstractRegister, reg2::AbstractRegister) -> Register
+
+Merge two registers together with kronecker tensor product.
+"""
+function join end

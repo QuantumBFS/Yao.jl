@@ -2,13 +2,14 @@
 #            focus! and relax!
 ##############################################
 """
-    oneto(reg::DefaultRegister, n::Int=nqubits(reg)) -> DefaultRegister
+    oneto({reg::DefaultRegister}, n::Int=nqubits(reg)) -> DefaultRegister
 
-Return a register with first 1:n bits activated.
+Return a register with first 1:n bits activated, `reg` here can be lazy.
 """
-function oneto(reg::DefaultRegister{B}; n::Int=nqubits(reg)) where B
-    register(reshape(reg.state, 1<<n, :), B)
+function oneto(reg::DefaultRegister{B}, n::Int=nqubits(reg)) where B
+    register(reshape(reg.state, 1<<n, :), B=B)
 end
+oneto(n::Int) = reg->oneto(reg, n)
 
 """
     relax!(reg::DefaultRegister; nbit::Int=nqubits(reg)) -> DefaultRegister
