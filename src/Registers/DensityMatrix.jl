@@ -11,6 +11,21 @@ end
 DensityMatrix(state::MT) where {T, MT<:AbstractArray{T, 3}} = DensityMatrix{size(state, 3), T, MT}(state)
 DensityMatrix(state::MT) where {T, MT<:AbstractArray{T, 2}} = (state=state[:,:,1:1]; DensityMatrix{1, T, typeof(state)}(state))
 
+state(ρ::DensityMatrix) = ρ.state
+nqubits(ρ::DensityMatrix) = nactive(ρ |> state)
+nactive(ρ::DensityMatrix) = nqubits(ρ)
+
+function summary(io::IO, r::DensityMatrix{B, T}) where {B, T}
+    println(io, "DensityMatrix{", B, ", ", T, "}")
+end
+
+function show(io::IO, r::DensityMatrix{B, T}) where {B, T}
+    summary(io, r)
+    print(io, "nqubits: ", nqubits(r))
+end
+
+show(io::IO, mime::MIME"text/plain", c::DensityMatrix) = show(io, c)
+
 """
     density_matrix(register)
 
@@ -43,7 +58,7 @@ nbatch(dm::DensityMatrix{B}) where B = B
 
 Return trace distance between two density matrices.
 """
-tracedist(dm1::DensityMatrix{B}, dm2::DensityMatrix{B}) where B = map(b->norm(dm1.state[:,:,b] - dm2.state[:,:,b]), 1:B)
+tracedist(dm1::DensityMatrix{B}, dm2::DensityMatrix{B}) where B = map(b->opnorm(dm1.state[:,:,b] - dm2.state[:,:,b]), 1:B)
 
 """
     probs(dm::DensityMatrix{B, T}) where {B,T}

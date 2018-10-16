@@ -100,7 +100,6 @@ for FUNC in [:zero_state, :rand_state, :uniform_state]
 end
 product_state(n::Int, config::Integer, nbatch::Int=1) = product_state(DefaultType, n, config, nbatch)
 
-import Base: summary
 function summary(io::IO, r::DefaultRegister{B, T}) where {B, T}
     println(io, "DefaultRegister{", B, ", ", T, "}")
 end

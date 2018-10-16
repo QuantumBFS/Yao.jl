@@ -2,7 +2,10 @@ using Documenter
 using Yao, Yao.Blocks, Yao.Intrinsics, Yao.Registers, Yao.Interfaces
 
 # TODO: use Literate to process examples
-# using Literate
+using Literate
+Literate.markdown("src/tutorial/RegisterBasics.jl", "src/tutorial/")
+Literate.markdown("src/tutorial/BlockBasics.jl", "src/tutorial/")
+Literate.markdown("src/tutorial/QCBM.jl", "src/tutorial/")
 # preprocess tutorial scripts
 
 # make documents
@@ -16,10 +19,14 @@ makedocs(
     pages = [
         "Home" => "index.md",
         "Tutorial" => Any[
+            "tutorial/RegisterBasics.md",
+            "tutorial/BlockBasics.md",
+            "tutorial/Diff.md",
+        ],
+        "Examples" => Any[
             "tutorial/GHZ.md",
             "tutorial/QFT.md",
             "tutorial/Grover.md",
-            "tutorial/Diff.md",
             "tutorial/QCBM.md",
         ],
         "Manual" => Any[

@@ -6,7 +6,6 @@ Base.adjoint(reg::RT) where RT<:AbstractRegister = Adjoint{Any, RT}(reg)
 function Base.show(io::IO, c::ConjRegister)
     print(io, "$(parent(c)) [†]")
 end
-Base.show(io::IO, mime::MIME"text/plain", c::ConjRegister) = Base.show(io, c)
 
 #### Abstract Register Interfaces
 state(bra::ConjRegister) = Adjoint(parent(bra) |> state)

@@ -95,6 +95,7 @@ datatype(r::AbstractRegister{B, T}) where {B, T} = T
 basis(r::AbstractRegister) = basis(nqubits(r))
 length(reg::AbstractRegister{B}) where B = B
 #eltype(reg::AbstractRegister) = typeof(first(reg))
+show(io::IO, mime::MIME"text/plain", c::AbstractRegister) = show(io, c)
 
 """
     viewbatch(r::AbstractRegister, i::Int) -> AbstractRegister{1}

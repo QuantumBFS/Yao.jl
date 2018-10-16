@@ -8,7 +8,7 @@ using ..Intrinsics
 import Base: length, broadcastable, iterate, getindex, eltype
 import Base: repeat
 import Base: copy, similar, *, join, copyto!
-import Base: show
+import Base: show, summary
 import Base: +, -, *, /, kron, ==, ≈
 
 # import package APIs
