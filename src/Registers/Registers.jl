@@ -36,7 +36,7 @@ include("Core.jl")
 include("ConjRegister.jl")
 include("Default.jl")
 
-include("regoperations.jl")
+include("register_operations.jl")
 include("DensityMatrix.jl")
 # NOTE: these two are not implemented
 # include("GPU.jl")

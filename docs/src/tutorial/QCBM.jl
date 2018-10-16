@@ -229,8 +229,13 @@ end
 optim = Adam(lr=0.1);
 
 # ## Start Training
-# We define an iterator called `QCBMOptimizer`.
-# It seems making things a bit more complicated, but one will benefit from this interfaces for run time analysis, like keeping track of loss.
+# We define an iterator called `QCBMOptimizer`. We want to realize some interface like
+# ```julia
+# for x in qo
+#     # runtime result analysis
+# end
+# ```
+# Although such design makes the code a bit more complicated, but one will benefit from this interfaces when doing run time analysis, like keeping track of the loss.
 struct QCBMOptimizer
     qcbm::QCBM
     optimizer
@@ -238,7 +243,10 @@ struct QCBMOptimizer
     params::Vector
     QCBMOptimizer(qcbm::QCBM, optimizer) = new(qcbm, optimizer, collect(qcbm.circuit, AbstractDiff), parameters(qcbm.circuit))
 end
+# In the initialization of `QCBMOptimizer` instance, we collect all differentiable units into a sequence `dbs` for furture use.
 
+# **iterator interface**
+# To support iteration operations, [`Base.iterate`](https://docs.julialang.org/en/v1/manual/interfaces/index.html#man-interface-iteration-1) should be implemented
 function Base.iterate(qo::QCBMOptimizer, state::Int=1)
     p0 = qo.qcbm |> probs
     grad = mmdgrad.(Ref(qo.qcbm), qo.dbs, p0=p0)
@@ -247,7 +255,9 @@ function Base.iterate(qo::QCBMOptimizer, state::Int=1)
     (p0, state+1)
 end
 
-# Here, we collect all differentiable units into a sequence, and broadcast `mmdgrad` function over this sequence of gates to obtain all gradients.
+# In each iteration, the iterator will return the generated probability distribution in current step.
+# During each iteration step, we broadcast `mmdgrad` function over `dbs` to obtain all gradients.
+# Here, To avoid the QCBM instance from being broadcasted, we wrap it with [`Ref`](https://docs.julialang.org/en/v1/base/c/#Core.Ref) to create a reference for it.
 # The training of the quantum circuit is simple, just iterate through the steps.
 history = Float64[]
 for (k, p) in enumerate(QCBMOptimizer(qcbm, optim))

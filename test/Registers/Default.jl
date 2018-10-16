@@ -72,16 +72,6 @@ end
     @test state(creg) !== state(reg)
 end
 
-@testset "Focus 1" begin
-    # conanical shape
-    reg = rand_state(3, 5)
-    @test oneto(reg, 2) |> nactive == 2
-    @test reg |> nactive == 3
-    @test copy(reg) |> addbit!(2) |> nactive == 5
-    reg2 = copy(reg) |> addbit!(2) |> focus!(4,5)
-    @test (reg2 |> measure_remove!; reg2) |> relax! ≈ reg
-end
-
 @testset "repeat" begin
     reg = register(bit"00000") + register(bit"11001") |> normalize!;
     @test repeat(reg, 5) |> nbatch == 5
@@ -109,35 +99,4 @@ end
     reg5 = focus!(repeat(reg1, 3), 1:3)
     reg6 = focus!(repeat(reg2, 3), 1:2)
     @test (join(reg6, reg5) |> relaxedvec)[:,1] ≈ reg4 |> relaxedvec
-end
-
-@testset "select" begin
-    reg = product_state(4, 6, 2)
-    # println(focus!(reg, [1,3]))
-    r1 = select!(focus!(copy(reg), [2,3]), 0b11) |> relax!
-    r2= select(focus!(copy(reg), [2,3]), 0b11) |> relax!
-    r3= copy(reg) |> focus!(2,3) |> select!(0b11) |> relax!
-
-    @test r1'*r1 ≈ ones(2)
-    @test r1 ≈ r2
-    @test r3 ≈ r2
-end
-
-@testset "broadcast register" begin
-    reg = rand_state(5,3)
-    c = put(5, 2=>X)
-    ra = copy(reg)
-    rb = copy(reg)
-    @test all(ra .|> Ref(c) .≈ rb .|> Ref(c))
-    @test typeof.(reg)[1] <: DefaultRegister{<:Any, <:Any, <:SubArray}
-
-    @test [reg...] |> length == 3
-    @test [rand_state(3)...] |> length == 1
-end
-
-@testset "measure and reset" begin
-    reg = rand_state(4)
-    res = measure_reset!(reg, (4,))
-    result = measure(reg, 10)
-    @test all(result .< 8)
 end

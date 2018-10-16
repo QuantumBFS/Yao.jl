@@ -33,6 +33,16 @@ end
     @test relax!(reg, 2:3) == reg0
 end
 
+@testset "Focus 3" begin
+    # conanical shape
+    reg = rand_state(3, 5)
+    @test oneto(reg, 2) |> nactive == 2
+    @test reg |> nactive == 3
+    @test copy(reg) |> addbit!(2) |> nactive == 5
+    reg2 = copy(reg) |> addbit!(2) |> focus!(4,5)
+    @test (reg2 |> measure_remove!; reg2) |> relax! ≈ reg
+end
+
 @testset "Focus 2" begin
     reg0 = rand_state(8)
     reg = focus!(copy(reg0), 7)
