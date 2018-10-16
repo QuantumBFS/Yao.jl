@@ -1,12 +1,12 @@
 using Documenter
 using Yao, Yao.Blocks, Yao.Intrinsics, Yao.Registers, Yao.Interfaces
 
-# TODO: use Literate to process examples
-using Literate
-Literate.markdown("src/tutorial/RegisterBasics.jl", "src/tutorial/")
-Literate.markdown("src/tutorial/BlockBasics.jl", "src/tutorial/")
-Literate.markdown("src/tutorial/QCBM.jl", "src/tutorial/")
 # preprocess tutorial scripts
+using Literate, Pkg
+tutorialpath = joinpath(dirname(pathof(Yao)), "../docs/src/tutorial")
+for jlfile in ["RegisterBasics.jl", "BlockBasics.jl", "QCBM.jl"]
+    Literate.markdown(joinpath(tutorialpath, jlfile), tutorialpath)
+end
 
 # make documents
 makedocs(
