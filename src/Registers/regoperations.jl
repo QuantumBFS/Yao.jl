@@ -147,7 +147,7 @@ trace distance.
 """
 function tracedist end
 function tracedist(reg1::DefaultRegister{B}, reg2::DefaultRegister{B}) where B
-    size(reg1.state, 2) == B ? sqrt.(1 .- fidelity(reg1, reg2).^2) : throw(ArgumentError("trace distance for non-pure state is not defined!"))
+    size(reg1.state, 2) == B ? sqrt.(max.(1 .- fidelity(reg1, reg2).^2, 0)) : throw(ArgumentError("trace distance for non-pure state is not defined!"))
 end
 
 include("focus.jl")
