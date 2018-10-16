@@ -3,7 +3,7 @@ using Yao, Yao.Blocks, Yao.Intrinsics, Yao.Registers, Yao.Interfaces
 
 # preprocess tutorial scripts
 using Literate, Pkg
-tutorialpath = joinpath(dirname(pathof(Yao)), "../docs/src/tutorial")
+tutorialpath = joinpath(@__DIR__, "src/tutorial")
 for jlfile in ["RegisterBasics.jl", "BlockBasics.jl", "QCBM.jl"]
     Literate.markdown(joinpath(tutorialpath, jlfile), tutorialpath)
 end
