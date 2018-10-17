@@ -1,5 +1,5 @@
 # # Register Basics
-# ## Contents
+# ## Table of Contents
 # * Construction and Storage
 # * Basics Arithmatics
 # * Fidelity and DensityMatrix
@@ -8,17 +8,16 @@
 using Yao
 using LinearAlgebra
 
-#----
-
-dump(AbstractRegister)
-
 # ## Construction and Storage
+# `AbstractRegister{B, T}` is abstract type that registers will subtype from. B is the batch size, T is the data type.
+# Normally, we use a matrix as the `state` (with columns the batch and environment dimension) of a register, which is called `DefaultRegister{B, T}`.
+
 # To initialize a quantum register, all you need is
-# * `register(vec)`
-# * `zero_state(nbit)`
-# * `rand_state(nbit)`
-# * `product_state(nbit, val=0)`
-# * `uniform_state(nbit)`
+# * `register(vec)`,
+# * `zero_state(nbit)`,
+# * `rand_state(nbit)`, both real and imaginary parts are random normal distributions,
+# * `product_state(nbit, val=0)`, where val is an `Integer` as bitstring, e.g. `0b10011` or `19`,
+# * `uniform_state(nbit)`, evenly distributed state, i.e. H|0>.
 
 # e.g.
 
@@ -42,11 +41,11 @@ dump(AbstractRegister)
 # `focus!(reg, (3,2,4))` is equivalent to `reg |> focus!(3,2,4)`, which changes focused bits to `(3,2,4)`. Here from ψ1 -> ψ2, qubit line numbers change as
 # `(active)(remaining): (1,2,3,4,5)() -> (3,2,4)(1,5)`
 #
-# `focus!` uses *relative positions*, which means it sees only active qubits and does not memorize original qubits positions. We take this convension to support **modulized design**, e.g. we want to insert a `QFT` blocks into some parent module, both the `QFT` and its parent do not need to know `original position`, which provides flexibility.
+# `focus!` uses *relative positions*, which means it sees only active qubits and does not memorize original qubits positions. We take this convension to support **modulized design**. For example, if we want to insert a `QFT` blocks into some parent module, both the `QFT` and its parent do not need to know `original position`, which provides flexibility.
 #
-# `relax!` is the inverse process of `focus!`, `relax!(reg, (3,2,4))` will cancel the above operation. Here we have a second parameter since a register does not memorize original positions. This annoying feature can be circumvented using `focus!(reg, (3,2,4)) do ... end`, which will automatically restore your focus operation.
+# `relax!` is the inverse process of `focus!`, `relax!(reg, (3,2,4))` will cancel the above operation. Here we have a second parameter since a register does not memorize original positions. This annoying feature can be circumvented using `focus!(reg, (3,2,4)) do ... end`, which will automatically restore your focus operation, see an example [here](@ref focusdo).
 #
-# Please also notice **APIs for changing line orders**
+# Please also notice **APIs for changing lines order**
 # * reorder!(reg, order), change lines order
 # * reg |> invorder!, inverse lines order
 #
@@ -57,17 +56,17 @@ dump(AbstractRegister)
 # **Extending Registers**
 # We can extend registers by either joining two registers or adding bits.
 
-@assert join(product_state(3, 0b110), product_state(3, 0b001)) == product_state(6, 0b110001)
+@assert product_state(3, 0b110) ⊗ product_state(3, 0b001) == product_state(6, 0b110001)
 
 #--------------
 reg = product_state(5, 0b11100)
 @assert addbit!(copy(reg), 2) == product_state(7, 0b0011100) == zero_state(2) ⊗ reg
 
 # **Storage**
-# Let's dive into the storage of a register, there are three `representation`s
-# * `state`, matrix format, size = `(2^nactive, 2^nremain * nbatch)`
-# * `rank3`, rank 3 tensor format, size = `(2^nactive, 2^nremain, nbatch)`
-# * `hypercubic`, hypercubic format, size = `(2, 2, 2, ..., nbatch)`
+# Let's dive into the storage of a register, there are three types `representation`s
+# * `reg |> state`, matrix format, size = `(2^nactive, 2^nremain * nbatch)`
+# * `reg |> rank3`, rank 3 tensor format, size = `(2^nactive, 2^nremain, nbatch)`
+# * `reg |> hypercubic`, hypercubic format, size = `(2, 2, 2, ..., nbatch)`
 
 # Here, we add a dimension `nbatch` to support parallism among registers.
 # They are all different views of same memory. Please also check `statevec` and `relaxedvec` format, which prefer vectors whenever possible.
@@ -78,7 +77,7 @@ reg = product_state(5, 0b11100)
 @show ψ1 |> statevec |> size
 @show ψ1 |> relaxedvec |> size;
 
-# ### Example
+# ### [Example](@id focusdo)
 # multiply `|0>` by a random unitary operator on qubits `(3, 1, 5)` (relax the register afterwards).
 
 using Yao.Intrinsics: rand_unitary
@@ -145,7 +144,8 @@ reg = rand_state(7)
 
 # **select**
 #
-# select will remove all activated qubits, one can use `relax!` to activate qubits.
+# select will allow you to get the disired measurement result, and collapse to that state.
+# It is equivalent to calculating $|\phi\rangle = |x\rangle\langle x|\psi\rangle$.
 reg = rand_state(9) |> focus!(1, 2, 3, 4)
 @show ψ = select(reg, 0b1110)
 @show ψ |> relax!;

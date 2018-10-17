@@ -1,10 +1,9 @@
 """
-    bit_length(x::Int) -> Int
+    bit_length(x::Integer) -> Int
 
 Return the number of bits required to represent input integer x.
 """
-bit_length(x::Int64)  =  64 - leading_zeros(x)
-bit_length(x::Int32)  =  32 - leading_zeros(x)
+bit_length(x::Integer)  =  sizeof(x)*8 - leading_zeros(x)
 
 """
     log2i(x::Integer) -> Integer

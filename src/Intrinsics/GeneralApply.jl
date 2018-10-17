@@ -1,5 +1,4 @@
 function u1apply!(state::AbstractVecOrMat{T}, U1::AbstractMatrix, ibit::Int) where T
-    mask = bmask(ibit)
     a, c, b, d = U1
     step = 1<<(ibit-1)
     step_2 = 1<<ibit

@@ -16,16 +16,16 @@ function xapply!(state::AbstractVecOrMat{T}, bits::Ints) where T
     state
 end
 
-function yapply!(state::AbstractVecOrMat{T}, bits::Ints) where T
+function yapply!(state::AbstractVecOrMat{T}, bits::Ints{Int}) where T
     if length(bits) == 0
         return state
     end
-    mask = bmask(bits...)
-    do_mask = bmask(bits[1])
+    mask = bmask(Int, bits...)
+    do_mask = bmask(Int, bits[1])
     bit_parity = length(bits)%2 == 0 ? 1 : -1
     factor = T(-im)^length(bits)
 
-    @simd for b = basis(state)
+    @simd for b = basis(Int, state)
         local temp::T
         local factor1::T
         local factor2::T
@@ -42,9 +42,9 @@ function yapply!(state::AbstractVecOrMat{T}, bits::Ints) where T
     state
 end
 
-function zapply!(state::AbstractVecOrMat{T}, bits::Ints) where T
-    mask = bmask(bits...)
-    for b in basis(state)
+function zapply!(state::AbstractVecOrMat{T}, bits::Ints{Int}) where T
+    mask = bmask(Int, bits...)
+    for b in basis(Int, state)
         if count_ones(b&mask)%2==1
             mulrow!(state, b+1, -1)
         end

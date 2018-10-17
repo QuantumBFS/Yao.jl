@@ -18,7 +18,7 @@ export rand_unitary, rand_hermitian
 include("Math.jl")
 
 # Basis
-export DInt, Ints, DInts
+export DInt, Ints
 export basis, bmask, baddrs
 export bit_length, log2i, bsizeof
 export testall, testany, testval, setbit, flip, neg, swapbits, takebit, breflect

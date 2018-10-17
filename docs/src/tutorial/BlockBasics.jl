@@ -1,8 +1,8 @@
 # # Block Basics
-# ## Contents
+# ## Table of Contents
 # * Construction and Matrix Representation
 # * Block Tree Architecture
-# * Tag System
+# * Tagging System
 # * Parameter System
 # * Differentiable Blocks
 # * Time Evolution and Hamiltonian
@@ -53,7 +53,7 @@ mat(cx)
 #-----------------
 mat(rx)
 
-# now let's build a random circuit for following adventures
+# now let's build a random circuit for following demos
 using Yao.Intrinsics: rand_unitary
 circuit = chain(5, control(5, 3=>Rx(0.25π)), put(5, (2,3)=>matrixgate(rand_unitary(4))), swap(5, 3, 4), repeat(5, H, 2:5), put(5, 2=>Ry(0.6)))
 # to apply it on some register, we can use
@@ -67,7 +67,7 @@ focus!(reg, 1:5) do reg_focused
     reg_focused |> circuit'
 end
 @show reg ≈ zero_state(10);   # reg is restored!
-# Here, we have used the pip eye candy `reg |> block`, which is equivalent to `apply!(reg, block)`
+# Here, we have used the pip "eye candy" `reg |> block` to represent applying a block on register, which is equivalent to `apply!(reg, block)`
 #---------------
 
 # **Type Tree**
@@ -86,11 +86,13 @@ subtypetree(Yao.Blocks.AbstractBlock);
 # In the top level, we have
 # * `MatrixBlock`, linear operators
 # * `AbstractMeasure`, measurement operations
+# * `FunctionBlock`, a wrapper for register function that take register as input, change the register inplace and return the register.
 # * `Sequential`, a container for **block tree**, which is similar to `ChainBlock`, but has less constraints.
 
 # ## Block Tree Architecture
-# * subblocks
-# * chsubblocks
+# A block tree is specified the following two APIs
+# * subblocks(block), siblings of a block.
+# * chsubblocks, change siblings of a node.
 crx = circuit[1]
 @show crx
 @show subblocks(crx)
@@ -106,32 +108,36 @@ print_block_tree(circuit);
 # there are some functions defined using this strategy, like `collect(circuit, block_type)`, it can filter out any type of blocks
 rg = collect(circuit, RotationGate)
 
-# ## Tag System
-# We proudly introduced our tag system, we have seen the magic operation `circuit'` to get the dagger a block
+# ## Tagging System
+# We proudly introduced our tag system here.
+# In previous sections, we have introduced the magic operation `circuit'` to get the dagger a circuit, its realization is closely related to the tagging mechanism of `Yao`.
 @show X'    # hermitian gate
 @show Pu'   # special gate
 @show Rx(0.5)';   # rotation gate
 
-# but some blocks has no predefined dagger operations, then we put a tag
+# The dagger of above gates can be translated to other gates easily.
+# but some blocks has no predefined dagger operations, then we put a tag for it as a default behavior, e.g.
 daggered_gate = matrixgate(randn(4, 4))'
 @show daggered_gate |> typeof
 daggered_gate
-# Here, `Daggered` is a kind of `TagBlock`.
+# Here, `Daggered` is a subtype of `TagBlock`.
 #--------------------
-# Other tag blocks are
+# Other tag blocks include
+#-----------------
 # **Scale**, static scaling
 2X
-# **CachedBlock**, force get matrix when applying on registers, and cache it in memory
+# **CachedBlock**, get the matrix representation of a block when applying it on registers, and cache it in memory (or `CacheServer` more precisely).
+# This matrix can be useful in future calculation, like boosting time evolution.
 put(5, 2=>X) |> cache
-# **AbstactDiff**, mark a block as differentiable, either in `back propagation` mode (with extra memory cost to store intermediate data)
+# **AbstactDiff**, marks a block as differentiable, either in classical `back propagation` mode (with extra memory cost to store intermediate data)
 put(5, 2=>Rx(0.3)) |> autodiff(:BP)
 # or non-cheating quantum circuit simulation
 put(5, 2=>Rx(0.3)) |> autodiff(:QC)
 
 # ## Parameter System
 # using the depth first searching strategy, we can find all parameters in a tree or subtree. Two relevant APIs are
-# * parameters(block)
-# * dispatch!([operator], block, params)
+# * parameters(block), get all parameters in a (sub)tree rooted on block
+# * dispatch!([func], block, params), dispatch `params` into (sub)tree rooted on `block`, optional parameter `func` can be used to custom parameter update rule.
 @show parameters(circuit)
 dispatch!(circuit, [0.1, 0.9])
 @show parameters(circuit)

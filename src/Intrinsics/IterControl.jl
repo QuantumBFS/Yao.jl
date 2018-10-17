@@ -59,6 +59,11 @@ function group_shift(num_bit::Int, poss::Vector{Int})
     masks, ns
 end
 
+"""
+    controldo(func::Function, ic::IterControl{N, C})
+
+Faster than `for i in ic ... end`.
+"""
 function controldo(func::Function, ic::IterControl{N, C}) where {N, C}
     for i in 0:N-1
         @simd for s in 1:C

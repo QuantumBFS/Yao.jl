@@ -14,13 +14,23 @@ We aim to provide a powerful tool for researchers, students to study and explore
 future, before quantum computer being used in large-scale.
 
 ## Tutorial
+```@contents
+Pages = [
+    "tutorial/RegisterBasics.md",
+    "tutorial/BlockBasics.md",
+    "tutorial/Diff.md",
+    "tutorial/BinaryBasics.md",
+]
+Depth = 1
+```
+
+## Examples
 
 ```@contents
 Pages = [
     "tutorial/GHZ.md",
     "tutorial/QFT.md",
     "tutorial/Grover.md",
-    "tutorial/Diff.md",
     "tutorial/QCBM.md",
 ]
 Depth = 1
