@@ -1,4 +1,4 @@
-const DInt = Int64
+const DInt = Int
 const Ints{IT} = Union{Vector{IT}, IT, UnitRange{IT}} where IT<:Integer
 """
     basis([IntType], num_bit::Int) -> UnitRange{IntType}
