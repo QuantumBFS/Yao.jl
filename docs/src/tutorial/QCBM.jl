@@ -131,7 +131,7 @@ kmat(mbf::RBFKernel) = mbf.matrix
 """statistic functional for kernel matrix"""
 kernel_expect(kernel::RBFKernel, px::Vector, py::Vector=px) = px' * kmat(kernel) * py;
 
-# # Next, let's define the RBF kernel matrix used in calculation
+# Now let's define the RBF kernel matrix used in calculation
 function rbf_kernel(basis, σ::Real)
     dx2 = (basis .- basis').^2
     RBFKernel(σ, exp.(-1/2σ * dx2))
