@@ -183,7 +183,7 @@ dispatch!(circuit, :random)
 parameters(circuit) = [0.1, 0.9]
 parameters(circuit) = [0.2, 1.0]
 parameters(circuit) = [0.0, 0.0]
-parameters(circuit) = [5.98502, 3.19363]</code></pre></div><h3><a class="nav-anchor" id="Intrinsic-parameters-1" href="#Intrinsic-parameters-1">Intrinsic parameters</a></h3><p>Intrinsic parameters are block&#39;s net contribution to total paramters, normally, we define these two APIs for subtyping blocks</p><ul><li><code>iparameters(block)</code>,</li><li><code>setiparameters!(block, params...)</code>,</li></ul><div><pre><code class="language-julia">@show iparameters(Rx(0.3))
+parameters(circuit) = [1.12677, 3.45908]</code></pre></div><h3><a class="nav-anchor" id="Intrinsic-parameters-1" href="#Intrinsic-parameters-1">Intrinsic parameters</a></h3><p>Intrinsic parameters are block&#39;s net contribution to total paramters, normally, we define these two APIs for subtyping blocks</p><ul><li><code>iparameters(block)</code>,</li><li><code>setiparameters!(block, params...)</code>,</li></ul><div><pre><code class="language-julia">@show iparameters(Rx(0.3))
 @show setiparameters!(Rx(0.3), 1.2)
 @show chain(Rx(0.3), Ry(0.5)) |&gt; iparameters;</code></pre><pre><code class="language-none">iparameters(Rx(0.3)) = 0.3
 setiparameters!(Rx(0.3), 1.2) = Rot X gate: 1.2
