@@ -5,7 +5,7 @@ using StaticArrays: SVector, SMatrix, SDiagonal
 using Base.Cartesian
 
 using LuxurySparse
-import ..Yao: nqubits, reorder, invorder, reorder
+import ..Yao: nactive, reorder, invorder, reorder
 
 include("Exceptions.jl")
 
@@ -18,9 +18,9 @@ export rand_unitary, rand_hermitian
 include("Math.jl")
 
 # Basis
-export DInt, Ints, DInts
+export DInt, Ints
 export basis, bmask, baddrs
-export bit_length, log2i, bsizeof, nqubits
+export bit_length, log2i, bsizeof
 export testall, testany, testval, setbit, flip, neg, swapbits, takebit, breflect
 export indices_with, bitarray, packbits, controller
 export bint, bfloat, bint_r, bfloat_r

@@ -13,7 +13,7 @@ using LuxurySparse
 # import package APIs
 import ..Yao
 import ..Yao: DefaultType, nqubits, nactive, invorder
-import ..Registers: focus!, relax!
+import ..Registers: focus!, relax!, datatype
 import ..Intrinsics: ishermitian, isunitary, isreflexive
 import CacheServers: update!, iscached, clear!, pull, iscacheable
 export clear! # TODO: rm this later

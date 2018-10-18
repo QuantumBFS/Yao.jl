@@ -1,4 +1,4 @@
-# Differentiatiable Quantum Circuits
+# [Automatic Differentiation](@id autodiff)
 
 ## Classical back propagation
 Back propagation has $O(M)$ complexity in obtaining gradients, with $M$ the number of circuit parameters.

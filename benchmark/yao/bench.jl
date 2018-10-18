@@ -1,5 +1,6 @@
 using Yao
 using BenchmarkTools
+using Statistics, DelimitedFiles
 
 const NL = 10:3:25
 
@@ -19,7 +20,8 @@ function bgate(ops, filename)
 end
 
 function bench_xyz()
-    bgate([repeat(G, [3]) for G in [X,Y,Z]], "xyz-report.dat")
+    #bgate([repeat(G, [3]) for G in [X,Y,Z]], "xyz-report.dat")
+    bgate([put(3=>G) for G in [X,Y,Z]], "xyz-report.dat")
 end
 
 function bench_cxyz()
@@ -35,8 +37,7 @@ function bench_hgate()
 end
 
 function bench_hgate()
-    rollH(nbit) = roll(nbit, I2, fill(H, 6)..., fill(I2,nbit-7)...)
-    bgate([repeat(H, [3]), control((7,), 3=>H), rollH], "h-report.dat")
+    bgate([put(3=>H), control((7,), 3=>H), repeat(H, 2:7)], "h-report.dat")
 end
 
 function bench_rot()
@@ -58,14 +59,13 @@ function bench_all()
     bench_cxyz()
     bench_repeatxyz()
     bench_hgate()
-    bench_hgate()
     bench_rot()
     bench_crot()
     bench_toffoli()
 end
 
 #bench_all()
-#bench_rot()
-#bench_crot()
-#bench_toffoli()
-bench_hgate()
+bench_rot()
+bench_crot()
+bench_toffoli()
+#bench_hgate()

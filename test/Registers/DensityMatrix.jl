@@ -27,6 +27,7 @@ end
     dm = reg |> density_matrix
     dm_ = reg_ |> density_matrix
     dm2 = reg2 |> density_matrix
+    @test reg |> probs ≈ dm |> probs
     @test isapprox(tracedist(dm, dm), tracedist(reg, reg), atol=1e-5)
     @test isapprox(tracedist(dm, dm_), tracedist(reg, reg_), atol=1e-5)
     @test isapprox(tracedist(dm2, dm2), tracedist(reg2, reg2), atol=1e-5)

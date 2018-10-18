@@ -1,15 +1,15 @@
-const DInt = Int
-const Ints = Union{Vector{Int}, Int, UnitRange{Int}}
-const DInts = Union{Vector{DInt}, DInt, UnitRange{DInt}}
+const DInt = Int64
+const Ints{IT} = Union{Vector{IT}, IT, UnitRange{IT}} where IT<:Integer
 """
-    basis(num_bit::Int) -> UnitRange{Int}
-    basis(state::AbstractArray) -> UnitRange{Int}
+    basis([IntType], num_bit::Int) -> UnitRange{IntType}
+    basis([IntType], state::AbstractArray) -> UnitRange{IntType}
 
 Returns the UnitRange for basis in Hilbert Space of num_bit qubits.
 If an array is supplied, it will return a basis having the same size with the first diemension of array.
 """
-basis(num_bit::Int) = UnitRange{DInt}(0, 1<<num_bit-1)
-basis(state::AbstractArray)::UnitRange{DInt} = UnitRange{DInt}(0, size(state, 1)-1)
+basis(arg::Union{Int, AbstractArray}) = basis(DInt, arg)
+basis(::Type{Ti}, num_bit::Int) where Ti<:Integer = UnitRange{Ti}(0, 1<<num_bit-1)
+basis(::Type{Ti}, state::AbstractArray) where Ti<:Integer = UnitRange{Ti}(0, size(state, 1)-1)
 
 
 ########## BitArray views ###################
@@ -54,54 +54,59 @@ _packbits(arr) = selectdim(sum(mapslices(x -> x .* (1 .<< (0:size(arr, 1)-1)), a
 
 # different view points of qubits
 """
-    bfloat(b::Int; nbit::Int=bit_length(b)) -> Float64
+    bfloat(b::Integer; nbit::Int=bit_length(b)) -> Float64
 
 float view, with big end qubit 1.
 """
-bfloat(b::Int; nbit::Int=bit_length(b)) = breflect(nbit, b) / (1<<nbit)
+bfloat(b::Integer; nbit::Int=bit_length(b)) = breflect(nbit, b) / (1<<nbit)
 
 """
-    bfloat_r(b::Int; nbit::Int) -> Float64
+    bfloat_r(b::Integer; nbit::Int) -> Float64
 
 float view, with bits read in inverse order.
 """
-bfloat_r(b::Int; nbit::Int) = b / (1<<nbit)
+bfloat_r(b::Integer; nbit::Int) = b / (1<<nbit)
 
 """
-    bint(b::Int; nbit=nothing) -> Int
+    bint(b; nbit=nothing) -> Int
 
 integer view, with little end qubit 1.
 """
-bint(b::Int; nbit=nothing) = b
+bint(b::Integer; nbit=nothing) = b
 bint(x::Float64; nbit::Int) = breflect(nbit,bint_r(x, nbit=nbit))
 
 """
-    bint_r(b::Int; nbit::Int) -> Int
+    bint_r(b; nbit::Int) -> Integer
 
 integer read in inverse order.
 """
-bint_r(b::Int; nbit::Int) = breflect(nbit, b)
+bint_r(b::Integer; nbit::Int) = breflect(nbit, b)
 bint_r(x::Float64; nbit::Int) = Int(round(x * (1<<nbit)))
 
 ########## Bit-Wise Operations ##############
 """
-    bmask(ibit::Int...) -> Int
-    bmask(bits::UnitRange{Int}) ->Int
+    bmask([IntType], ibit::Int...) -> IntType
+    bmask([IntType], bits::UnitRange{Int}) ->IntType
 
 Return an integer with specific position masked, which is offten used as a mask for binary operations.
 """
 function bmask end
 
-bmask() = DInt(0)
-bmask(ibit::Int...)::DInt = sum([one(DInt) << (b-1) for b in ibit])
-bmask(bits::UnitRange{Int})::DInt = ((one(DInt) << (bits.stop - bits.start + 1)) - one(DInt)) << (bits.start-1)
+bmask(args...) = bmask(DInt, args...)
+bmask(::Type{Ti}) where Ti<:Integer = Ti(0)
+function bmask(::Type{Ti}, ibit::Int...)::Ti where Ti<:Integer
+    reduce(+, [Ti(1) << (b-1) for b in ibit])
+end
+function bmask(::Type{Ti}, bits::UnitRange{Int})::Ti where Ti<:Integer
+    ((Ti(1) << (bits.stop - bits.start + 1)) - Ti(1)) << (bits.start-1)
+end
 
 """
-    baddrs(b::DInt) -> Vector
+    baddrs(b::Integer) -> Vector
 
 get the locations of nonzeros bits, i.e. the inverse operation of bmask.
 """
-function baddrs(b::DInt)
+function baddrs(b::Integer)
     locs = Vector{Int}(undef, count_ones(b))
     k = 1
     for i = 1:bit_length(b)
@@ -114,13 +119,13 @@ function baddrs(b::DInt)
 end
 
 """
-    takebit(index::Int, bits::Int...) -> Int
+    takebit(index::Integer, bits::Int...) -> Int
 
 Return a bit(s) at specific position.
 """
-takebit(index::DInt, ibit::Int)::DInt = (index >> (ibit-1)) & one(DInt)
-@inline function takebit(index::DInt, bits::Int...)::DInt
-    res = DInt(0)
+takebit(index::Ti, ibit::Int) where Ti<:Integer = (index >> (ibit-1)) & one(Ti)
+@inline function takebit(index::Ti, bits::Int...) where Ti<:Integer
+    res = Ti(0)
     for (i, ibit) in enumerate(bits)
         res += takebit(index, ibit) << (i-1)
     end
@@ -128,53 +133,53 @@ takebit(index::DInt, ibit::Int)::DInt = (index >> (ibit-1)) & one(DInt)
 end
 
 """
-    testany(index::Int, mask::Int) -> Bool
+    testany(index::Integer, mask::Integer) -> Bool
 
 Return true if any masked position of index is 1.
 """
-testany(index::DInt, mask::DInt)::Bool = (index & mask) != zero(DInt)
+testany(index::Ti, mask::Ti) where Ti<:Integer = (index & mask) != zero(Ti)
 
 """
-    testall(index::Int, mask::Int) -> Bool
+    testall(index::Integer, mask::Integer) -> Bool
 
 Return true if all masked position of index is 1.
 """
-testall(index::DInt, mask::DInt)::Bool = (index & mask) == mask
+testall(index::Ti, mask::Ti) where Ti<:Integer = (index & mask) == mask
 
 """
-    testval(index::Int, mask::Int, onemask::Int) -> Bool
+    testval(index::Integer, mask::Integer, onemask::Integer) -> Bool
 
 Return true if values at positions masked by `mask` with value 1 at positions masked by `onemask` and 0 otherwise.
 """
-testval(index::DInt, mask::DInt, onemask::DInt)::Bool = index&mask==onemask
+testval(index::Ti, mask::Ti, onemask::Ti) where Ti<:Integer = index&mask==onemask
 
 """
-    setbit(index::Int, mask::Int) -> Int
+    setbit(index::Integer, mask::Integer) -> Integer
 
 set the bit at masked position to 1.
 """
-setbit(index::DInt, mask::DInt)::DInt = indices | mask
+setbit(index::Ti, mask::Ti) where Ti<:Integer = index | mask
 
 """
-    flip(index::Int, mask::Int) -> Int
+    flip(index::Integer, mask::Integer) -> Integer
 
 Return an Integer with bits at masked position flipped.
 """
-flip(index::DInt, mask::DInt)::DInt = index ⊻ mask
+flip(index::Ti, mask::Ti) where Ti<:Integer = index ⊻ mask
 
 """
-    neg(index::Int, num_bit::Int) -> Int
+    neg(index::Integer, num_bit::Int) -> Integer
 
 Return an integer with all bits flipped (with total number of bit `num_bit`).
 """
-neg(index::DInt, num_bit::Int)::DInt = bmask(1:num_bit) ⊻ index
+neg(index::Ti, num_bit::Int) where Ti<:Integer = bmask(Ti, 1:num_bit) ⊻ index
 
 """
-    swapbits(num::Int, mask12::Int) -> Int
+    swapbits(num::Integer, mask12::Integer) -> Integer
 
 Return an integer with bits at `i` and `j` flipped.
 """
-@inline function swapbits(b::DInt, mask12::DInt)::DInt
+@inline function swapbits(b::Ti, mask12::Ti) where Ti<:Integer
     bm = b&mask12
     if bm!=0 && bm!=mask12
         b ⊻= mask12
@@ -183,20 +188,20 @@ Return an integer with bits at `i` and `j` flipped.
 end
 
 """
-    breflect(num_bit::Int, b::Int[, masks::Vector{Int}]) -> Int
+    breflect(num_bit::Int, b::Integer[, masks::Vector{Integer}]) -> Integer
 
 Return left-right reflected integer.
 """
 function breflect end
 
-@inline function breflect(num_bit::Int, b::DInt)
+@inline function breflect(num_bit::Int, b::Ti)::Ti where Ti<:Integer
     @simd for i in 1:num_bit÷2
-        b = swapbits(b, bmask(i, num_bit-i+1))
+        b = swapbits(b, bmask(Ti, i, num_bit-i+1))
     end
     b
 end
 
-@inline function breflect(num_bit::Int, b::DInt, masks::Vector{DInt})
+@inline function breflect(num_bit::Int, b::Ti, masks::Vector{Ti})::Ti where Ti<:Integer
     @simd for m in masks
         b = swapbits(b, m)
     end
@@ -211,7 +216,7 @@ Return indices with specific positions `poss` with value `vals` in a hilbert spa
 function indices_with(num_bit::Int, poss::Vector{Int}, vals::Vector{Int})::Vector{DInt}
     mask = bmask(poss...)
     onemask = bmask(poss[vals.!=0]...)
-    filter(x->testval(x, mask, onemask), basis(num_bit))
+    filter(x::DInt->testval(x, mask, onemask), basis(num_bit))
 end
 
 """
@@ -222,18 +227,18 @@ Return the size of object, in number of bit.
 bsizeof(x)::Int = sizeof(x) << 3
 
 """
-    bdistance(i::DInt, j::DInt) -> Int
+    bdistance(i::Integer, j::Integer) -> Int
 
 Return number of different bits.
 """
-bdistance(i::DInt, j::DInt)::Int = count_ones(i⊻j)
+bdistance(i::Ti, j::Ti) where Ti<:Integer = count_ones(i⊻j)
 
 """
-    onehotvec(::Type{T}, num_bit::Int, x::DInt) -> Vector{T}
+    onehotvec(::Type{T}, num_bit::Int, x::Integer) -> Vector{T}
 
 one-hot wave vector.
 """
-function onehotvec(::Type{T}, num_bit::Int, x::DInt) where T
+function onehotvec(::Type{T}, num_bit::Int, x::Integer) where T
     v = zeros(T, 1<<num_bit)
     v[x+1] = 1
     v

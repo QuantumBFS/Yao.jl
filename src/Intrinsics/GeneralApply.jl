@@ -1,5 +1,4 @@
 function u1apply!(state::AbstractVecOrMat{T}, U1::AbstractMatrix, ibit::Int) where T
-    mask = bmask(ibit)
     a, c, b, d = U1
     step = 1<<(ibit-1)
     step_2 = 1<<ibit
@@ -13,7 +12,7 @@ end
 
 #=
 function unapply!(state::VecOrMat, U::AbstractMatrix, locs::Vector{Int})
-    nbit, Nu, nu = nqubits(state), size(U, 1), length(locs)
+    nbit, Nu, nu = nactive(state), size(U, 1), length(locs)
     #Nu == 1<<nu || throw(DimensionMismatch("Unitary Matrix shape does not macth locations to apply"))
     locs_raw = [i+1 for i in itercontrol(nbit, setdiff(1:nbit, locs), zeros(Int, nbit-nu))]
     ic = itercontrol(nbit, locs, zeros(Int, length(locs)))
@@ -50,7 +49,7 @@ function cunapply! end
 function cunapply!(state::AbstractVecOrMat, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::AbstractMatrix, locs::NTuple{M, Int}) where {C, M}
     # reorder a unirary matrix.
     U = all(diff(locs).>0) ? U0 : reorder(U0, collect(locs)|>sortperm)
-    N, MM = nqubits(state), size(U0, 1)
+    N, MM = nactive(state), size(U0, 1)
     locked_bits = [cbits..., locs...]
     locked_vals = [cvals..., zeros(Int, M)...]
     locs_raw = [i+1 for i in itercontrol(N, setdiff(1:N, locs), zeros(Int, N-M))]

@@ -19,6 +19,9 @@ using Yao.Intrinsics
     @test flip.(inds, bmask(2)) == [14, 0]
     @test flip.(inds, bmask(2, 1)) == [15, 1]
 
+    # setbit
+    @test setbit.(inds, bmask(2, 1)) == [15, 3]
+
     # indices_with
     nbit = 5
     poss, vals = [4,2,3], [1,0,1]
