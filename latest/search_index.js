@@ -21,7 +21,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Tutorial",
     "category": "section",
-    "text": "Pages = [\n    \"tutorial/GHZ.md\",\n    \"tutorial/QFT.md\",\n    \"tutorial/Grover.md\",\n    \"tutorial/Diff.md\",\n    \"tutorial/QCBM.md\",\n]\nDepth = 1"
+    "text": "Pages = [\n    \"tutorial/RegisterBasics.md\",\n    \"tutorial/BlockBasics.md\",\n    \"tutorial/Diff.md\",\n    \"tutorial/BinaryBasics.md\",\n]\nDepth = 1"
+},
+
+{
+    "location": "#Examples-1",
+    "page": "Home",
+    "title": "Examples",
+    "category": "section",
+    "text": "Pages = [\n    \"tutorial/GHZ.md\",\n    \"tutorial/QFT.md\",\n    \"tutorial/Grover.md\",\n    \"tutorial/QCBM.md\",\n]\nDepth = 1"
 },
 
 {
@@ -30,6 +38,262 @@ var documenterSearchIndex = {"docs": [
     "title": "Manual",
     "category": "section",
     "text": "Pages = [\n    \"man/interfaces.md\",\n    \"man/registers.md\",\n    \"man/blocks.md\",\n    \"man/intrinsics.md\",\n]\nDepth = 1"
+},
+
+{
+    "location": "tutorial/RegisterBasics/#",
+    "page": "Register Basics",
+    "title": "Register Basics",
+    "category": "page",
+    "text": "EditURL = \"https://github.com/QuantumBFS/Yao.jl/blob/master/../../../../build/QuantumBFS/Yao.jl/docs/src/tutorial/RegisterBasics.jl\""
+},
+
+{
+    "location": "tutorial/RegisterBasics/#Register-Basics-1",
+    "page": "Register Basics",
+    "title": "Register Basics",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "tutorial/RegisterBasics/#Table-of-Contents-1",
+    "page": "Register Basics",
+    "title": "Table of Contents",
+    "category": "section",
+    "text": "Construction and Storage\nBasics Arithmatics\nFidelity and DensityMatrix\nBatched Registersusing Yao\nusing LinearAlgebra"
+},
+
+{
+    "location": "tutorial/RegisterBasics/#Construction-and-Storage-1",
+    "page": "Register Basics",
+    "title": "Construction and Storage",
+    "category": "section",
+    "text": "AbstractRegister{B, T} is abstract type that registers will subtype from. B is the batch size, T is the data type. Normally, we use a matrix as the state (with columns the batch and environment dimension) of a register, which is called DefaultRegister{B, T}.To initialize a quantum register, all you need isregister(vec),\nzero_state(nbit),\nrand_state(nbit), both real and imaginary parts are random normal distributions,\nproduct_state(nbit, val=0), where val is an Integer as bitstring, e.g. 0b10011 or 19,\nuniform_state(nbit), evenly distributed state, i.e. H|0>.e.g.ψ1 = zero_state(5)\n@show ψ1\n@show nqubits(ψ1)\n@show nactive(ψ1)   # number of activated qubits\n@show nremain(ψ1)   # number of remaining qubits\n\nψ2 = ψ1 |> focus!(3,2,4)   # set activated qubits\n@show ψ2\n@show nqubits(ψ2)\n@show nactive(ψ2)\n@show nremain(ψ2)\n\n@assert relax!(ψ2, (3,2,4)) == ψ1The total number of qubits here is 5, they are all acitve by default. active qubits are also called system qubits that are visible to operations, remaining qubits are the environment. nremain == nqubits-nactive always holds.focus! & relax! focus!(reg, (3,2,4)) is equivalent to reg |> focus!(3,2,4), which changes focused bits to (3,2,4). Here from ψ1 -> ψ2, qubit line numbers change as (active)(remaining): (1,2,3,4,5)() -> (3,2,4)(1,5)focus! uses relative positions, which means it sees only active qubits and does not memorize original qubits positions. We take this convension to support modulized design. For example, if we want to insert a QFT blocks into some parent module, both the QFT and its parent do not need to know original position, which provides flexibility.relax! is the inverse process of focus!, relax!(reg, (3,2,4)) will cancel the above operation. Here we have a second parameter since a register does not memorize original positions. This annoying feature can be circumvented using focus!(reg, (3,2,4)) do ... end, which will automatically restore your focus operation, see an example here.Please also notice APIs for changing lines orderreorder!(reg, order), change lines order\nreg |> invorder!, inverse lines orderandreg |> oneto(n), return a register view, with first n bits focused.Extending Registers We can extend registers by either joining two registers or adding bits.@assert product_state(3, 0b110) ⊗ product_state(3, 0b001) == product_state(6, 0b110001)reg = product_state(5, 0b11100)\n@assert addbit!(copy(reg), 2) == product_state(7, 0b0011100) == zero_state(2) ⊗ regStorage Let\'s dive into the storage of a register, there are three types representationsreg |> state, matrix format, size = (2^nactive, 2^nremain * nbatch)\nreg |> rank3, rank 3 tensor format, size = (2^nactive, 2^nremain, nbatch)\nreg |> hypercubic, hypercubic format, size = (2, 2, 2, ..., nbatch)Here, we add a dimension nbatch to support parallism among registers. They are all different views of same memory. Please also check statevec and relaxedvec format, which prefer vectors whenever possible.@show ψ1 |> state |> size\n@show ψ1 |> rank3 |> size\n@show ψ1 |> hypercubic |> size\n@show ψ1 |> statevec |> size\n@show ψ1 |> relaxedvec |> size;"
+},
+
+{
+    "location": "tutorial/RegisterBasics/#focusdo-1",
+    "page": "Register Basics",
+    "title": "Example",
+    "category": "section",
+    "text": "multiply |0> by a random unitary operator on qubits (3, 1, 5) (relax the register afterwards).using Yao.Intrinsics: rand_unitary\n\nreg = zero_state(5)\nfocus!(reg, [3,1,5]) do r\n    r.state = rand_unitary(8) * r.state\n    r\nend\n@show reg.state;"
+},
+
+{
+    "location": "tutorial/RegisterBasics/#Basic-Arithmatics-1",
+    "page": "Register Basics",
+    "title": "Basic Arithmatics",
+    "category": "section",
+    "text": "+, -, *, /, ⊗, \' are implemented.The adjoint of a register is also called bra, it can be used in calculating state overlapψ1 = rand_state(5)\nψ2 = rand_state(5)arithmatics@show ψ1\n@show ψ2\n@show ψ3 = (0.3ψ1 + 2ψ2)/2 ⊗ ψ1\n@assert ψ3 ≈ 0.15ψ1 ⊗ ψ1 + ψ2 ⊗ ψ1normalize ψ3@assert ψ1 |> isnormalized && ψ2 |> isnormalized\n@assert ψ3 |> isnormalized == false\n@show ψ3 |> normalize! |> isnormalized\n\n@show ψ3\' * ψ3;"
+},
+
+{
+    "location": "tutorial/RegisterBasics/#Measure-1",
+    "page": "Register Basics",
+    "title": "Measure",
+    "category": "section",
+    "text": "measure(reg), measure without collapsing state,\nmeasure!(reg), measure and collapse,\nmeasure_remove!(reg), measure focused bits and remove them,\nmeasure_reset!(reg, val=0), measure focused bits and reset them to some value,\nreset!(reg), collapse to specific value directly.\nselect(reg, x), select subspace projected on specific basis, i.e. phirangle = xranglelangle xpsirangle.measure@show product_state(5, 0b11001) |> measure  # please notice binary number `0b11001` is equivalent to `25`!\nreg = rand_state(7)\n@show measure(reg, 5);          # measure multiple timesmeasure!reg = rand_state(7)\n@show [measure!(reg) for i=1:5];  # measure! will collapse statemeasure_reset!reg = rand_state(7)\n@show [measure_reset!(reg, val=i*10) for i=1:5];   # measure_reset! will reset the measured bit to target state (default is `0`)measure_remove!reg = rand_state(7)\n@show measure_remove!(reg)\n@show reg;\n\nreg = rand_state(7)\n@show measure_remove!(reg |> focus!(2,3))\n@show reg;selectselect will allow you to get the disired measurement result, and collapse to that state. It is equivalent to calculating phirangle = xranglelangle xpsirangle.reg = rand_state(9) |> focus!(1, 2, 3, 4)\n@show ψ = select(reg, 0b1110)\n@show ψ |> relax!;\n\n# Fidelity and Density Matrix\nψ1 = rand_state(6)\nψ2 = rand_state(6)\n@show fidelity(ψ1, ψ2)\n@show tracedist(ψ1, ψ2)\n@show ψ1 |> ρ\n@show tracedist(ψ1 |> ρ, ψ2|> ρ);  # calculate trace distance using density matrix\n@assert ψ1 |> probs ≈ dropdims(ψ1 |> ρ |> probs, dims=2)"
+},
+
+{
+    "location": "tutorial/RegisterBasics/#Batched-Registers-1",
+    "page": "Register Basics",
+    "title": "Batched Registers",
+    "category": "section",
+    "text": "Most operations support batched register, which means running multiple registers in parallel.ψ = rand_state(6, 3)\n@show ψ\n@show nbatch(ψ)\n@show viewbatch(ψ, 2)  # this is a view of register at 2nd column of the batch dimension\n@show repeat(ψ, 3);    # repeat registers in batch dimensionbroadcasting along batch dimension@. ψ * 5 - 4 * ψ ≈ ψX2 = put(5, 2=>X)       # X operator on 2nd bit, with total number of bit 5.\ndirect = copy(ψ) |> X2  # applying X2 directly\nmap(reg->reg |> X2, ψ)  # applying X2 using broadcasting, here X2 operator is applied inplace!\nψ .≈ directThis page was generated using Literate.jl."
+},
+
+{
+    "location": "tutorial/BlockBasics/#",
+    "page": "Block Basics",
+    "title": "Block Basics",
+    "category": "page",
+    "text": "EditURL = \"https://github.com/QuantumBFS/Yao.jl/blob/master/../../../../build/QuantumBFS/Yao.jl/docs/src/tutorial/BlockBasics.jl\""
+},
+
+{
+    "location": "tutorial/BlockBasics/#Block-Basics-1",
+    "page": "Block Basics",
+    "title": "Block Basics",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "tutorial/BlockBasics/#Table-of-Contents-1",
+    "page": "Block Basics",
+    "title": "Table of Contents",
+    "category": "section",
+    "text": "Construction and Matrix Representation\nBlock Tree Architecture\nTagging System\nParameter System\nDifferentiable Blocks\nTime Evolution and Hamiltonianusing Yao, Yao.Blocks\nusing LinearAlgebra"
+},
+
+{
+    "location": "tutorial/BlockBasics/#Construction-and-Matrix-Representation-1",
+    "page": "Block Basics",
+    "title": "Construction and Matrix Representation",
+    "category": "section",
+    "text": "Blocks are operations on registers, we call those with matrix representation (linear) MatrixBlock.A MatrixBlock can beisunitary, O^dagger O=I\nishermitian, O^dagger = O\nisreflexive, O^2 = 1@show X\n@show X |> typeof\n@show isunitary(X)\n@show ishermitian(X)\n@show isreflexive(X);matrix representationmat(X)composite gates Embeding an X gate into larger Hilbert space, the first parameter of most non-primitive constructors are always qubit numbers@show X2 = put(3, 2=>X)\n@show isunitary(X2)\n@show ishermitian(X2)\n@show isreflexive(X2);mat(X2)@show cx = control(3, 3, 1=>X)\n@show isunitary(cx)\n@show ishermitian(cx)\n@show isreflexive(cx);mat(cx)hermitian and reflexive blocks can be used to construct rotation gates@show rx = rot(X, π/4)\n@show isunitary(rx)\n@show ishermitian(rx)\n@show isreflexive(rx);mat(rx)now let\'s build a random circuit for following demosusing Yao.Intrinsics: rand_unitary\ncircuit = chain(5, control(5, 3=>Rx(0.25π)), put(5, (2,3)=>matrixgate(rand_unitary(4))), swap(5, 3, 4), repeat(5, H, 2:5), put(5, 2=>Ry(0.6)))to apply it on some register, we can usereg = zero_state(10)\nfocus!(reg, 1:5) do reg_focused\n    apply!(reg_focused, circuit)\nend\n@show reg ≈ zero_state(10);   # reg is changed!then we reverse the process and check the correctnessfocus!(reg, 1:5) do reg_focused\n    reg_focused |> circuit\'\nend\n@show reg ≈ zero_state(10);   # reg is restored!Here, we have used the pip \"eye candy\" reg |> block to represent applying a block on register, which is equivalent to apply!(reg, block)Type Tree To see a full list of block typesusing InteractiveUtils: subtypes\nfunction subtypetree(t, level=1, indent=4)\n   level == 1 && println(t)\n   for s in subtypes(t)\n     println(join(fill(\" \", level * indent)) * string(s))\n     subtypetree(s, level+1, indent)\n   end\nend\n\nsubtypetree(Yao.Blocks.AbstractBlock);In the top level, we haveMatrixBlock, linear operators\nAbstractMeasure, measurement operations\nFunctionBlock, a wrapper for register function that take register as input, change the register inplace and return the register.\nSequential, a container for block tree, which is similar to ChainBlock, but has less constraints."
+},
+
+{
+    "location": "tutorial/BlockBasics/#Block-Tree-Architecture-1",
+    "page": "Block Basics",
+    "title": "Block Tree Architecture",
+    "category": "section",
+    "text": "A block tree is specified the following two APIssubblocks(block), siblings of a block.\nchsubblocks, change siblings of a node.crx = circuit[1]\n@show crx\n@show subblocks(crx)\n@show chsubblocks(crx, (Y,));if we want to define a function that travals over the tree in depth first order, we can write something likefunction print_block_tree(root, depth=0)\n    println(\"  \"^depth * \"- $(typeof(root).name)\")\n    print_block_tree.(root |> subblocks, depth+1)\nend\nprint_block_tree(circuit);there are some functions defined using this strategy, like collect(circuit, block_type), it can filter out any type of blocksrg = collect(circuit, RotationGate)"
+},
+
+{
+    "location": "tutorial/BlockBasics/#Tagging-System-1",
+    "page": "Block Basics",
+    "title": "Tagging System",
+    "category": "section",
+    "text": "We proudly introduced our tag system here. In previous sections, we have introduced the magic operation circuit\' to get the dagger a circuit, its realization is closely related to the tagging mechanism of Yao.@show X\'    # hermitian gate\n@show Pu\'   # special gate\n@show Rx(0.5)\';   # rotation gateThe dagger of above gates can be translated to other gates easily. but some blocks has no predefined dagger operations, then we put a tag for it as a default behavior, e.g.daggered_gate = matrixgate(randn(4, 4))\'\n@show daggered_gate |> typeof\ndaggered_gateHere, Daggered is a subtype of TagBlock.Other tag blocks includeScale, static scaling2XCachedBlock, get the matrix representation of a block when applying it on registers, and cache it in memory (or CacheServer more precisely). This matrix can be useful in future calculation, like boosting time evolution.put(5, 2=>X) |> cacheAbstactDiff, marks a block as differentiable, either in classical back propagation mode (with extra memory cost to store intermediate data)put(5, 2=>Rx(0.3)) |> autodiff(:BP)or non-cheating quantum circuit simulationput(5, 2=>Rx(0.3)) |> autodiff(:QC)"
+},
+
+{
+    "location": "tutorial/BlockBasics/#Parameter-System-1",
+    "page": "Block Basics",
+    "title": "Parameter System",
+    "category": "section",
+    "text": "using the depth first searching strategy, we can find all parameters in a tree or subtree. Two relevant APIs areparameters(block), get all parameters in a (sub)tree rooted on block\ndispatch!([func], block, params), dispatch params into (sub)tree rooted on block, optional parameter func can be used to custom parameter update rule.@show parameters(circuit)\ndispatch!(circuit, [0.1, 0.9])\n@show parameters(circuit)\ndispatch!(+, circuit, [0.1, 0.1])\n@show parameters(circuit)\ndispatch!(circuit, :zero)\n@show parameters(circuit)\ndispatch!(circuit, :random)\n@show parameters(circuit);"
+},
+
+{
+    "location": "tutorial/BlockBasics/#Intrinsic-parameters-1",
+    "page": "Block Basics",
+    "title": "Intrinsic parameters",
+    "category": "section",
+    "text": "Intrinsic parameters are block\'s net contribution to total paramters, normally, we define these two APIs for subtyping blocksiparameters(block),\nsetiparameters!(block, params...),@show iparameters(Rx(0.3))\n@show setiparameters!(Rx(0.3), 1.2)\n@show chain(Rx(0.3), Ry(0.5)) |> iparameters;"
+},
+
+{
+    "location": "tutorial/BlockBasics/#Differentiable-Blocks-1",
+    "page": "Block Basics",
+    "title": "Differentiable Blocks",
+    "category": "section",
+    "text": "see the independant chapter Automatic Differentiation"
+},
+
+{
+    "location": "tutorial/BlockBasics/#Time-Evolution-and-Hamiltonian-1",
+    "page": "Block Basics",
+    "title": "Time Evolution and Hamiltonian",
+    "category": "section",
+    "text": "docs are under preparationThis page was generated using Literate.jl."
+},
+
+{
+    "location": "tutorial/Diff/#",
+    "page": "Automatic Differentiation",
+    "title": "Automatic Differentiation",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "tutorial/Diff/#autodiff-1",
+    "page": "Automatic Differentiation",
+    "title": "Automatic Differentiation",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "tutorial/Diff/#Classical-back-propagation-1",
+    "page": "Automatic Differentiation",
+    "title": "Classical back propagation",
+    "category": "section",
+    "text": "Back propagation has O(M) complexity in obtaining gradients, with M the number of circuit parameters. We can use autodiff(:BP) to mark differentiable units in a circuit. Let\'s see an example."
+},
+
+{
+    "location": "tutorial/Diff/#Example:-Classical-back-propagation-1",
+    "page": "Automatic Differentiation",
+    "title": "Example: Classical back propagation",
+    "category": "section",
+    "text": "using Yao\ncircuit = chain(4, repeat(4, H, 1:4), put(4, 3=>Rz(0.5)), control(2, 1=>X), put(4, 4=>Ry(0.2)))\ncircuit = circuit |> autodiff(:BP)From the output, we can see parameters of blocks marked by [∂] will be differentiated automatically.op = put(4, 3=>Y);  # loss is defined as its expectation.\nψ = rand_state(4);\nψ |> circuit;\nδ = ψ |> op;     # ∂f/∂ψ*\nbackward!(δ, circuit);    # classical back propagation!Here, the loss is L = <ψ|op|ψ>, δ = ∂f/∂ψ* is the error to be back propagated. The gradient is related to δ as fracpartial fpartialtheta = 2Refracpartial fpartialpsi^*fracpartial psi^*partialthetaIn face, backward!(δ, circuit) on wave function is equivalent to calculating δ |> circuit\' (apply!(reg, Daggered{<:BPDiff})). This function is overloaded so that gradientis for parameters are also calculated and stored in BPDiff block at the same time.Finally, we use gradient to collect gradients in the ciruits.g1 = gradient(circuit)  # collect gradientnote: Note\nIn real quantum devices, gradients can not be back propagated, this is why we need the following section."
+},
+
+{
+    "location": "tutorial/Diff/#Quantum-circuit-differentiation-1",
+    "page": "Automatic Differentiation",
+    "title": "Quantum circuit differentiation",
+    "category": "section",
+    "text": "Experimental applicable differentiation strategies are based on the following two papersQuantum Circuit Learning, Kosuke Mitarai, Makoto Negoro, Masahiro Kitagawa, Keisuke Fujii\nDifferentiable Learning of Quantum Circuit Born Machine, Jin-Guo Liu, Lei WangThe former differentiation scheme is for observables, and the latter is for V-statistics. One may find the derivation of both schemes in this post.Realizable quantum circuit gradient finding algorithms have complexity O(M^2)."
+},
+
+{
+    "location": "tutorial/Diff/#Example:-Practical-quantum-differenciation-1",
+    "page": "Automatic Differentiation",
+    "title": "Example: Practical quantum differenciation",
+    "category": "section",
+    "text": "We use QDiff block to mark differentiable circuitsusing Yao, Yao.Blocks\nc = chain(put(4, 1=>Rx(0.5)), control(4, 1, 2=>Ry(0.5)), kron(4, 2=>Rz(0.3), 3=>Rx(0.7))) |> autodiff(:QC)  # automatically mark differentiable blocksBlocks marked by [̂∂] will be differentiated.dbs = collect(c, QDiff)  # collect all QDiff blocksHere, we recommend collect QDiff blocks into a sequence using collect API for future calculations. Then, we can get the gradient one by one, using opdiffed = opdiff(dbs[1], put(4, 1=>Z)) do   # the exact differentiation with respect to first QDiff block.\n    zero_state(4) |> c\nendHere, contents in the do-block returns the loss, it must be the expectation value of an observable.For results checking, we get the numeric gradient use numdiffed = numdiff(dbs[1]) do    # compare with numerical differentiation\n   expect(put(4, 1=>Z), zero_state(4) |> c) |> real\nendThis numerical differentiation scheme is always applicable (even the loss is not an observable), but with numeric errors introduced by finite step size.We can also get all gradients using broadcastinged = opdiff.(()->zero_state(4) |> c, dbs, Ref(kron(4, 1=>Z, 2=>X)))   # using broadcast to get all gradients.note: Note\nSince BP is not implemented for QDiff blocks, the memory consumption is much less since we don\'t cache intermediate results anymore."
+},
+
+{
+    "location": "tutorial/BinaryBasics/#",
+    "page": "Binary Basics",
+    "title": "Binary Basics",
+    "category": "page",
+    "text": "EditURL = \"https://github.com/QuantumBFS/Yao.jl/blob/master/../../../../build/QuantumBFS/Yao.jl/docs/src/tutorial/BinaryBasics.jl\""
+},
+
+{
+    "location": "tutorial/BinaryBasics/#Binary-Basics-1",
+    "page": "Binary Basics",
+    "title": "Binary Basics",
+    "category": "section",
+    "text": "This tutorial is about operations about basis, it is mainly designed for developers, but is also useful to users.using Yao, Yao.Intrinsics"
+},
+
+{
+    "location": "tutorial/BinaryBasics/#Table-of-Contents-1",
+    "page": "Binary Basics",
+    "title": "Table of Contents",
+    "category": "section",
+    "text": "Storage of Computing Bases\nBinray Operations\nNumber Readouts\nIterating over Bases"
+},
+
+{
+    "location": "tutorial/BinaryBasics/#Storage-of-Computing-Bases-1",
+    "page": "Binary Basics",
+    "title": "Storage of Computing Bases",
+    "category": "section",
+    "text": "We use an Int type to store spin configurations, e.g. 0b011101 (29) represents qubit configurationsigma_1=1 sigma_2=0 sigma_3=1 sigma_4=1 sigma_5=1 sigma_6=0so we relate the configurations vec σ with integer b by b = sumlimits_i 2^i-1σ_i.related APIs areinteger(s) |> bitarray(nbit), transform integers to bistrings of type BitArray.\nbitstring |> packabits, transform bitstrings to integers.\ninteger |> baddrs, get the locations of nonzero qubits.@show 4 |> bitarray(5)\n@show [4, 5, 6] |> bitarray(5)\n@show [1, 1 , 0] |> packbits\n@show [4, 5, 6] |> bitarray(5) |> packbits\n@show baddrs(0b011);"
+},
+
+{
+    "location": "tutorial/BinaryBasics/#Binray-Operations-1",
+    "page": "Binary Basics",
+    "title": "Binray Operations",
+    "category": "section",
+    "text": "takebit(0b11100, 2, 3)Masking is an important concept for binary operations, to generate a mask with specific position masked, e.g. we want to mask qubits 1, 3, 4mask = bmask(UInt8, 1,3,4)\n@assert mask == 0b1101;with this mask, we can@show testall(0b1011, mask) # true if all masked positions are 1\n@show testany(0b1011, mask) # true if any masked positions is 1\n@show testval(0b1011, mask, 0b1001)  # true if mask outed position matches `0b1001`\n@show flip(0b1011, mask)  # flip masked positions\n@show swapbits(0b1011, 0b1100)  # swap masked positions\n@show setbit(0b1011, 0b1100);  # set masked positions 1For more interesting bitwise operations, see manual page Yao.Intrinsics."
+},
+
+{
+    "location": "tutorial/BinaryBasics/#Number-Readouts-1",
+    "page": "Binary Basics",
+    "title": "Number Readouts",
+    "category": "section",
+    "text": "In phase estimation and HHL algorithms, we sometimes need to readouts qubits as integer or float point numbers. We can read the register in different ways, likebint, the integer itself\nbint_r, the integer with bits small-big end reflected.\nbfloat, the float point number 0.σ₁σ₂...σₙ.\nbfloat_r, the float point number 0.σₙ...σ₂σ₁.@show bint(0b010101)\n@show bint_r(0b010101, nbit=6)\n@show bfloat(0b010101)\n@show bfloat_r(0b010101, nbit=6);Notice here functions with _r ending always require nbit as an additional input parameter to help reading, which is regarded as less natural way of expressing numbers."
+},
+
+{
+    "location": "tutorial/BinaryBasics/#Iterating-over-Bases-1",
+    "page": "Binary Basics",
+    "title": "Iterating over Bases",
+    "category": "section",
+    "text": "Counting from 0 is very natural way of iterating quantum registers, very pity for Julia@show basis(4);itercontrol is a complicated API, but it plays an fundamental role in high performance quantum simulation of Yao. It is used for iterating over basis in controlled way, its interface looks like@doc itercontrolHere, poss is a vector of controled positions, vals is a vector of values in controled positions."
+},
+
+{
+    "location": "tutorial/BinaryBasics/#example-1",
+    "page": "Binary Basics",
+    "title": "example",
+    "category": "section",
+    "text": "In a 4 qubit system, find out basis with 1st and 3rd qubits in state 0 and 1 respectively.ic = itercontrol(4, [1,3], [0,1])\nfor i in ic\n    println(i |> bitarray(4) .|> Int)\nendHere, we have 1st and 3rd bits controlled, only 2 qubits are free, so the size of phase space here is 4.This page was generated using Literate.jl."
 },
 
 {
@@ -105,59 +369,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "tutorial/Diff/#",
-    "page": "Differentiatiable Quantum Circuits",
-    "title": "Differentiatiable Quantum Circuits",
-    "category": "page",
-    "text": ""
-},
-
-{
-    "location": "tutorial/Diff/#Differentiatiable-Quantum-Circuits-1",
-    "page": "Differentiatiable Quantum Circuits",
-    "title": "Differentiatiable Quantum Circuits",
-    "category": "section",
-    "text": ""
-},
-
-{
-    "location": "tutorial/Diff/#Classical-back-propagation-1",
-    "page": "Differentiatiable Quantum Circuits",
-    "title": "Classical back propagation",
-    "category": "section",
-    "text": "Back propagation has O(M) complexity in obtaining gradients, with M the number of circuit parameters. We can use autodiff(:BP) to mark differentiable units in a circuit. Let\'s see an example."
-},
-
-{
-    "location": "tutorial/Diff/#Example:-Classical-back-propagation-1",
-    "page": "Differentiatiable Quantum Circuits",
-    "title": "Example: Classical back propagation",
-    "category": "section",
-    "text": "using Yao\ncircuit = chain(4, repeat(4, H, 1:4), put(4, 3=>Rz(0.5)), control(2, 1=>X), put(4, 4=>Ry(0.2)))\ncircuit = circuit |> autodiff(:BP)From the output, we can see parameters of blocks marked by [∂] will be differentiated automatically.op = put(4, 3=>Y);  # loss is defined as its expectation.\nψ = rand_state(4);\nψ |> circuit;\nδ = ψ |> op;     # ∂f/∂ψ*\nbackward!(δ, circuit);    # classical back propagation!Here, the loss is L = <ψ|op|ψ>, δ = ∂f/∂ψ* is the error to be back propagated. The gradient is related to δ as fracpartial fpartialtheta = 2Refracpartial fpartialpsi^*fracpartial psi^*partialthetaIn face, backward!(δ, circuit) on wave function is equivalent to calculating δ |> circuit\' (apply!(reg, Daggered{<:BPDiff})). This function is overloaded so that gradientis for parameters are also calculated and stored in BPDiff block at the same time.Finally, we use gradient to collect gradients in the ciruits.g1 = gradient(circuit)  # collect gradientnote: Note\nIn real quantum devices, gradients can not be back propagated, this is why we need the following section."
-},
-
-{
-    "location": "tutorial/Diff/#Quantum-circuit-differentiation-1",
-    "page": "Differentiatiable Quantum Circuits",
-    "title": "Quantum circuit differentiation",
-    "category": "section",
-    "text": "Experimental applicable differentiation strategies are based on the following two papersQuantum Circuit Learning, Kosuke Mitarai, Makoto Negoro, Masahiro Kitagawa, Keisuke Fujii\nDifferentiable Learning of Quantum Circuit Born Machine, Jin-Guo Liu, Lei WangThe former differentiation scheme is for observables, and the latter is for V-statistics. One may find the derivation of both schemes in this post.Realizable quantum circuit gradient finding algorithms have complexity O(M^2)."
-},
-
-{
-    "location": "tutorial/Diff/#Example:-Practical-quantum-differenciation-1",
-    "page": "Differentiatiable Quantum Circuits",
-    "title": "Example: Practical quantum differenciation",
-    "category": "section",
-    "text": "We use QDiff block to mark differentiable circuitsusing Yao, Yao.Blocks\nc = chain(put(4, 1=>Rx(0.5)), control(4, 1, 2=>Ry(0.5)), kron(4, 2=>Rz(0.3), 3=>Rx(0.7))) |> autodiff(:QC)  # automatically mark differentiable blocksBlocks marked by [̂∂] will be differentiated.dbs = collect(c, QDiff)  # collect all QDiff blocksHere, we recommend collect QDiff blocks into a sequence using collect API for future calculations. Then, we can get the gradient one by one, using opdiffed = opdiff(dbs[1], put(4, 1=>Z)) do   # the exact differentiation with respect to first QDiff block.\n    zero_state(4) |> c\nendHere, contents in the do-block returns the loss, it must be the expectation value of an observable.For results checking, we get the numeric gradient use numdiffed = numdiff(dbs[1]) do    # compare with numerical differentiation\n   expect(put(4, 1=>Z), zero_state(4) |> c) |> real\nendThis numerical differentiation scheme is always applicable (even the loss is not an observable), but with numeric errors introduced by finite step size.We can also get all gradients using broadcastinged = opdiff.(()->zero_state(4) |> c, dbs, Ref(kron(4, 1=>Z, 2=>X)))   # using broadcast to get all gradients.note: Note\nSince BP is not implemented for QDiff blocks, the memory consumption is much less since we don\'t cache intermediate results anymore."
-},
-
-{
     "location": "tutorial/QCBM/#",
     "page": "Quantum Circuit Born Machine",
     "title": "Quantum Circuit Born Machine",
     "category": "page",
-    "text": ""
+    "text": "EditURL = \"https://github.com/QuantumBFS/Yao.jl/blob/master/../../../../build/QuantumBFS/Yao.jl/docs/src/tutorial/QCBM.jl\""
 },
 
 {
@@ -165,7 +381,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Circuit Born Machine",
     "title": "Quantum Circuit Born Machine",
     "category": "section",
-    "text": "Quantum circuit born machine is a fresh approach to quantum machine learning. It use a parameterized quantum circuit to learning machine learning tasks with gradient based optimization. In this tutorial, we will show how to implement it with Yao (幺) framework.about the frameworkusing Yao # hide\n@doc 幺"
+    "text": "Reference: Jin-Guo Liu, Lei Wang (2018) Differentiable Learning of Quantum Circuit Born Machineusing Yao, Yao.Blocks\nusing LinearAlgebra"
 },
 
 {
@@ -173,7 +389,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Circuit Born Machine",
     "title": "Training target",
     "category": "section",
-    "text": "a gaussian distributionfunction gaussian_pdf(n, μ, σ)\n    x = collect(1:1<<n)\n    pl = @. 1 / sqrt(2pi * σ^2) * exp(-(x - μ)^2 / (2 * σ^2))\n    pl / sum(pl)\nendf(x left mu sigma^2right) = frac1sqrt2pisigma^2 e^-frac(x-mu)^22sigma^2const n = 6\nconst maxiter = 20\npg = gaussian_pdf(n, 2^5-0.5, 2^4)\nnothing # hidefig = plot(0:1<<n-1, pg)(Image: Gaussian Distribution)"
+    "text": "A gaussian distributionf(x left mu sigma^2right) = frac1sqrt2pisigma^2 e^-frac(x-mu)^22sigma^2function gaussian_pdf(x, μ::Real, σ::Real)\n    pl = @. 1 / sqrt(2pi * σ^2) * exp(-(x - μ)^2 / (2 * σ^2))\n    pl / sum(pl)\nend\npg = gaussian_pdf(1:1<<6, 1<<5-0.5, 1<<4);This distribution looks like (Image: Gaussian Distribution)"
 },
 
 {
@@ -197,7 +413,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Circuit Born Machine",
     "title": "Arbitrary Rotation",
     "category": "section",
-    "text": "Arbitrary Rotation is built with Rotation Gate on Z, Rotation Gate on X and Rotation Gate on Z:Rz(theta) cdot Rx(theta) cdot Rz(theta)Since our input will be a 0dots 0rangle state. The first layer of arbitrary rotation can just use Rx(theta) cdot Rz(theta) and the last layer of arbitrary rotation could just use Rz(theta)cdot Rx(theta)In 幺, every Hilbert operator is a block type, this includes all quantum gates and quantum oracles. In general, operators appears in a quantum circuit can be divided into Composite Blocks and Primitive Blocks.We follow the low abstraction principle and thus each block represents a certain approach of calculation. The simplest Composite Block is a Chain Block, which chains other blocks (oracles) with the same number of qubits together. It is just a simple mathematical composition of operators with same size. e.g.textchain(X Y Z) iff X cdot Y cdot ZWe can construct an arbitrary rotation block by chain Rz, Rx, Rz together.chain(Rz(0), Rx(0), Rz(0))Rx, Ry and Rz will construct new rotation gate, which are just shorthands for rot(X, 0.0), etc.Then, let\'s pile them up vertically with another method called rollrepeatlayer(x::Symbol) = layer(Val(x))\nlayer(::Val{:first}) = rollrepeat(chain(Rx(0), Rz(0)))In 幺, the factory method rollrepeat will construct a block called Roller. It is mathematically equivalent to the kronecker product of all operators in this layer:rollrepeat(n U) iff roll(n texti=U for i = 1n) iff kron(n texti=U for i=1n) iff U otimes dots otimes Uroll(4, i=>X for i = 1:4)rollrepeat(4, X)kron(4, i=>X for i = 1:4)However, kron is calculated differently comparing to roll. In principal, Roller will be able to calculate small blocks with same size with higher efficiency. But for large blocks Roller may be slower. In 幺, we offer you this freedom to choose the most suitable solution.all factory methods will lazy evaluate the first arguements, which is the number of qubits. It will return a lambda function that requires a single interger input. The instance of desired block will only be constructed until all the information is filled.rollrepeat(X)rollrepeat(X)(4)When you filled all the information in somewhere of the declaration, 幺 will be able to infer the others.chain(4, rollrepeat(X), rollrepeat(Y))We will now define the rest of rotation layerslayer(::Val{:last}) = rollrepeat(chain(Rz(0), Rx(0)))\nlayer(::Val{:mid}) = rollrepeat(chain(Rz(0), Rx(0), Rz(0)))"
+    "text": "Arbitrary Rotation is built with Rotation Gate on Z, Rotation Gate on X and Rotation Gate on Z:Rz(theta) cdot Rx(theta) cdot Rz(theta)Since our input will be a 0dots 0rangle state. The first layer of arbitrary rotation can just use Rx(theta) cdot Rz(theta) and the last layer of arbitrary rotation could just use Rz(theta)cdot Rx(theta)In 幺, every Hilbert operator is a block type, this includes all quantum gates and quantum oracles. In general, operators appears in a quantum circuit can be divided into Composite Blocks and Primitive Blocks.We follow the low abstraction principle and thus each block represents a certain approach of calculation. The simplest Composite Block is a Chain Block, which chains other blocks (oracles) with the same number of qubits together. It is just a simple mathematical composition of operators with same size. e.g.textchain(X Y Z) iff X cdot Y cdot ZWe can construct an arbitrary rotation block by chain Rz, Rx, Rz together.chain(Rz(0), Rx(0), Rz(0))Rx, Ry and Rz will construct new rotation gate, which are just shorthands for rot(X, 0.0), etc.Then, let\'s chain them uplayer(nbit::Int, x::Symbol) = layer(nbit, Val(x))\nlayer(nbit::Int, ::Val{:first}) = chain(nbit, put(i=>chain(Rx(0), Rz(0))) for i = 1:nbit);Here, we do not need to feed the first nbit parameter into put. All factory methods can be lazy evaluate the first arguements, which is the number of qubits. It will return a lambda function that requires a single interger input. The instance of desired block will only be constructed until all the information is filled. When you filled all the information in somewhere of the declaration, 幺 will be able to infer the others. We will now define the rest of rotation layerslayer(nbit::Int, ::Val{:last}) = chain(nbit, put(i=>chain(Rz(0), Rx(0))) for i = 1:nbit)\nlayer(nbit::Int, ::Val{:mid}) = chain(nbit, put(i=>chain(Rz(0), Rx(0), Rz(0))) for i = 1:nbit);"
 },
 
 {
@@ -205,7 +421,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Circuit Born Machine",
     "title": "CNOT Entangler",
     "category": "section",
-    "text": "Another component of quantum circuit born machine is several CNOT operators applied on different qubits.entangler(pairs) = chain(control([ctrl, ], target=>X) for (ctrl, target) in pairs)We can then define such a born machinefunction QCBM(n, nlayer, pairs)\n    circuit = chain(n)\n    push!(circuit, layer(:first))\n\n    for i = 1:(nlayer - 1)\n        push!(circuit, cache(entangler(pairs)))\n        push!(circuit, layer(:mid))\n    end\n\n    push!(circuit, cache(entangler(pairs)))\n    push!(circuit, layer(:last))\n\n    circuit\nend\nnothing # hideWe use the method cache here to tag the entangler block that it should be cached after its first run, because it is actually a constant oracle. Let\'s see what will be constructedQCBM(4, 1, [1=>2, 2=>3, 3=>4])Let\'s define a circuit to use latercircuit = QCBM(6, 10, [1=>2, 3=>4, 5=>6, 2=>3, 4=>5, 6=>1]) |> autodiff(:QC)\nnothing # hideHere, the function autodiff(:QC) will mark rotation gates in a circuit as differentiable automatically."
+    "text": "Another component of quantum circuit born machine is several CNOT operators applied on different qubits.entangler(pairs) = chain(control([ctrl, ], target=>X) for (ctrl, target) in pairs);We can then define such a born machinefunction build_circuit(n::Int, nlayer::Int, pairs)\n    circuit = chain(n)\n    push!(circuit, layer(n, :first))\n\n    for i = 1:(nlayer - 1)\n        push!(circuit, cache(entangler(pairs)))\n        push!(circuit, layer(n, :mid))\n    end\n\n    push!(circuit, cache(entangler(pairs)))\n    push!(circuit, layer(n, :last))\n\n    circuit\nend;We use the method cache here to tag the entangler block that it should be cached after its first run, because it is actually a constant oracle. Let\'s see what will be constructedbuild_circuit(4, 1, [1=>2, 2=>3, 3=>4]) |> autodiff(:QC)RotationGates inside this circuit are automatically marked by [̂∂], which means parameters inside are diferentiable. autodiff has two modes, one is autodiff(:QC), which means quantum differentiation with simulation complexity O(M^2) (M is the number of parameters), the other is classical backpropagation autodiff(:BP) with simulation coplexity O(M).Let\'s define a circuit to use latercircuit = build_circuit(6, 10, [1=>2, 3=>4, 5=>6, 2=>3, 4=>5, 6=>1]) |> autodiff(:QC)\ndispatch!(circuit, :random);Here, the function autodiff(:QC) will mark rotation gates in a circuit as differentiable automatically."
 },
 
 {
@@ -213,7 +429,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Circuit Born Machine",
     "title": "MMD Loss & Gradients",
     "category": "section",
-    "text": "The MMD loss is describe below:beginaligned\nmathcalL = left sum_x p theta(x) phi(x) - sum_x pi(x) phi(x) right^2\n            = langle K(x y) rangle_x sim p_theta ysim p_theta - 2 langle K(x y) rangle_xsim p_theta ysim pi + langle K(x y) rangle_xsimpi ysimpi\nendalignedWe will use a squared exponential kernel here.struct Kernel\n    sigma::Float64\n    matrix::Matrix{Float64}\nend\n\nfunction Kernel(nqubits, sigma)\n    basis = collect(0:(1<<nqubits - 1))\n    Kernel(sigma, kernel_matrix(basis, basis, sigma))\nend\n\nexpect(kernel::Kernel, px::Vector{Float64}, py::Vector{Float64}) = px\' * kernel.matrix * py\nloss(qcbm, kernel::Kernel, ptrain) = (p = get_prob(qcbm) - ptrain; expect(kernel, p, p))\nnothing # hideNext, let\'s define the kernel matrixfunction kernel_matrix(x, y, sigma)\n    dx2 = (x .- y\').^2\n    gamma = 1.0 / (2 * sigma)\n    K = exp.(-gamma * dx2)\n    K\nend\nnothing # hide"
+    "text": "The MMD loss is describe below:beginaligned\nmathcalL = left sum_x p theta(x) phi(x) - sum_x pi(x) phi(x) right^2\n            = langle K(x y) rangle_x sim p_theta ysim p_theta - 2 langle K(x y) rangle_xsim p_theta ysim pi + langle K(x y) rangle_xsimpi ysimpi\nendalignedWe will use a squared exponential kernel here.struct RBFKernel\n    sigma::Float64\n    matrix::Matrix{Float64}\nend\n\n\"\"\"get kernel matrix\"\"\"\nkmat(mbf::RBFKernel) = mbf.matrix\n\n\"\"\"statistic functional for kernel matrix\"\"\"\nkernel_expect(kernel::RBFKernel, px::Vector, py::Vector=px) = px\' * kmat(kernel) * py;"
+},
+
+{
+    "location": "tutorial/QCBM/#Next,-let\'s-define-the-RBF-kernel-matrix-used-in-calculation-1",
+    "page": "Quantum Circuit Born Machine",
+    "title": "Next, let\'s define the RBF kernel matrix used in calculation",
+    "category": "section",
+    "text": "function rbf_kernel(basis, σ::Real)\n    dx2 = (basis .- basis\').^2\n    RBFKernel(σ, exp.(-1/2σ * dx2))\nend\n\nkernel = rbf_kernel(0:1<<6-1, 0.25);Next, we build a QCBM setup, which is a combination of circuit, kernel and target probability distribution ptrain Its loss function is MMD loss, if and only if it is 0, the output probability of circuit matches ptrain exactly.struct QCBM{BT<:AbstractBlock}\n    circuit::BT\n    kernel::RBFKernel\n    ptrain::Vector{Float64}\nend\n\n\"\"\"get wave function\"\"\"\npsi(qcbm::QCBM) = zero_state(qcbm.circuit |> nqubits) |> qcbm.circuit\n\n\"\"\"extract probability dierctly\"\"\"\nYao.probs(qcbm::QCBM) = qcbm |> psi |> probs\n\n\"\"\"the loss function\"\"\"\nfunction mmd_loss(qcbm, p=qcbm|>probs)\n    p = p - qcbm.ptrain\n    kernel_expect(qcbm.kernel, p, p)\nend;problem setupqcbm = QCBM(circuit, kernel, pg);"
 },
 
 {
@@ -221,7 +445,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Circuit Born Machine",
     "title": "Gradients",
     "category": "section",
-    "text": "the gradient of MMD loss isbeginaligned\nfracpartial mathcalLpartial theta^i_l = langle K(x y) rangle_xsim p_theta^+ ysim p_theta - langle K(x y) rangle_xsim p_theta^- ysim p_theta\n- langle K(x y) rangle _xsim p_theta^+ ysimpi + langle K(x y) rangle_xsim p_theta^- ysimpi\nendalignedWe have to update one parameter of each rotation gate each time, and calculate its gradient then collect them. Since we will need to calculate the probability from the state vector frequently, let\'s define a shorthand first.Firstly, you have to define a quantum register. Each run of a QCBM\'s input is a simple 00cdots 0rangle state. We provide string literal bit to help you define one-hot state vectors like thisr = register(bit\"0000\")Now, we define its shorthandget_prob(qcbm) = apply!(register(bit\"0\"^6), qcbm) |> statevec .|> abs2"
+    "text": "the gradient of MMD loss isbeginaligned\nfracpartial mathcalLpartial theta^i_l = langle K(x y) rangle_xsim p_theta^+ ysim p_theta - langle K(x y) rangle_xsim p_theta^- ysim p_theta\n- langle K(x y) rangle _xsim p_theta^+ ysimpi + langle K(x y) rangle_xsim p_theta^- ysimpi\nendalignedfunction mmdgrad(qcbm::QCBM, dbs; p0::Vector)\n    vstatdiff(()->psi(qcbm), dbs, Vstat(kmat(qcbm.kernel)), p0=p0) -\n        2*vstatdiff(()->psi(qcbm), dbs, Vstat(kmat(qcbm.kernel)*qcbm.ptrain))\nend;"
 },
 
 {
@@ -229,7 +453,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Circuit Born Machine",
     "title": "Optimizer",
     "category": "section",
-    "text": "We will use the Adam optimizer. Since we don\'t want you to install another package for this, the following code for this optimizer is copied from Knet.jlReference: Kingma, D. P., & Ba, J. L. (2015). Adam: a Method for Stochastic Optimization. International Conference on Learning Representations, 1–13.using LinearAlgebra\n\nmutable struct Adam\n    lr::AbstractFloat\n    gclip::AbstractFloat\n    beta1::AbstractFloat\n    beta2::AbstractFloat\n    eps::AbstractFloat\n    t::Int\n    fstm\n    scndm\nend\n\nAdam(; lr=0.001, gclip=0, beta1=0.9, beta2=0.999, eps=1e-8)=Adam(lr, gclip, beta1, beta2, eps, 0, nothing, nothing)\n\nfunction update!(w, g, p::Adam)\n    gclip!(g, p.gclip)\n    if p.fstm===nothing; p.fstm=zeros(w); p.scndm=zeros(w); end\n    p.t += 1\n    lmul!(p.beta1, p.fstm)\n    BLAS.axpy!(1-p.beta1, g, p.fstm)\n    lmul!(p.beta2, p.scndm)\n    BLAS.axpy!(1-p.beta2, g .* g, p.scndm)\n    fstm_corrected = p.fstm / (1 - p.beta1 ^ p.t)\n    scndm_corrected = p.scndm / (1 - p.beta2 ^ p.t)\n    BLAS.axpy!(-p.lr, @.(fstm_corrected / (sqrt(scndm_corrected) + p.eps)), w)\nend\n\nfunction gclip!(g, gclip)\n    if gclip == 0\n        g\n    else\n        gnorm = vecnorm(g)\n        if gnorm <= gclip\n            g\n        else\n            BLAS.scale!(gclip/gnorm, g)\n        end\n    end\nend"
+    "text": "We will use the Adam optimizer. Since we don\'t want you to install another package for this, the following code for this optimizer is copied from Knet.jlReference: Kingma, D. P., & Ba, J. L. (2015). Adam: a Method for Stochastic Optimization. International Conference on Learning Representations, 1–13.mutable struct Adam\n    lr::AbstractFloat\n    gclip::AbstractFloat\n    beta1::AbstractFloat\n    beta2::AbstractFloat\n    eps::AbstractFloat\n    t::Int\n    fstm\n    scndm\nend\n\nAdam(; lr=0.001, gclip=0, beta1=0.9, beta2=0.999, eps=1e-8)=Adam(lr, gclip, beta1, beta2, eps, 0, nothing, nothing)\n\nfunction update!(w, g, p::Adam)\n    gclip!(g, p.gclip)\n    if p.fstm===nothing; p.fstm=zero(w); p.scndm=zero(w); end\n    p.t += 1\n    lmul!(p.beta1, p.fstm)\n    BLAS.axpy!(1-p.beta1, g, p.fstm)\n    lmul!(p.beta2, p.scndm)\n    BLAS.axpy!(1-p.beta2, g .* g, p.scndm)\n    fstm_corrected = p.fstm / (1 - p.beta1 ^ p.t)\n    scndm_corrected = p.scndm / (1 - p.beta2 ^ p.t)\n    BLAS.axpy!(-p.lr, @.(fstm_corrected / (sqrt(scndm_corrected) + p.eps)), w)\nend\n\nfunction gclip!(g, gclip)\n    if gclip == 0\n        g\n    else\n        gnorm = vecnorm(g)\n        if gnorm <= gclip\n            g\n        else\n            BLAS.scale!(gclip/gnorm, g)\n        end\n    end\nend\noptim = Adam(lr=0.1);"
 },
 
 {
@@ -237,7 +461,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Circuit Born Machine",
     "title": "Start Training",
     "category": "section",
-    "text": "The training of the quantum circuit is simple, just iterate through the steps.function train!(qcbm, ptrain, optim; learning_rate=0.1, niter=50)\n    # initialize the parameters\n    params = 2pi * rand(nparameters(qcbm))\n    dispatch!(qcbm, params)\n    kernel = Kernel(nqubits(qcbm), 0.25)\n\n    n, nlayers = nqubits(qcbm), (length(qcbm)-1)÷2\n    history = Float64[]\n\n    for i = 1:niter\n        grad = exactdiff.(n, nlayers, qcbm, kernel, ptrain)\n        curr_loss = loss(qcbm, kernel, ptrain)\n        push!(history, curr_loss)        \n        params = parameters(qcbm)\n        update!(params, grad, optim)\n        dispatch!(qcbm, params)\n    end\n    history\nendoptim = Adam(lr=0.1)\nhis = train!(circuit, pg, optim, niter=50, learning_rate=0.1)\nplot(1:50, his, xlabel=\"iteration\", ylabel=\"loss\")(Image: History)p = get_prob(circuit)\nplot(0:1<<n-1, p, pg, xlabel=\"x\", ylabel=\"p\")(Image: Learnt Distribution)"
+    "text": "We define an iterator called QCBMOptimizer. We want to realize some interface likefor x in qo\n    # runtime result analysis\nendAlthough such design makes the code a bit more complicated, but one will benefit from this interfaces when doing run time analysis, like keeping track of the loss.struct QCBMOptimizer\n    qcbm::QCBM\n    optimizer\n    dbs\n    params::Vector\n    QCBMOptimizer(qcbm::QCBM, optimizer) = new(qcbm, optimizer, collect(qcbm.circuit, AbstractDiff), parameters(qcbm.circuit))\nendIn the initialization of QCBMOptimizer instance, we collect all differentiable units into a sequence dbs for furture use.iterator interface To support iteration operations, Base.iterate should be implementedfunction Base.iterate(qo::QCBMOptimizer, state::Int=1)\n    p0 = qo.qcbm |> probs\n    grad = mmdgrad.(Ref(qo.qcbm), qo.dbs, p0=p0)\n    update!(qo.params, grad, qo.optimizer)\n    dispatch!(qo.qcbm.circuit, qo.params)\n    (p0, state+1)\nendIn each iteration, the iterator will return the generated probability distribution in current step. During each iteration step, we broadcast mmdgrad function over dbs to obtain all gradients. Here, To avoid the QCBM instance from being broadcasted, we wrap it with Ref to create a reference for it. The training of the quantum circuit is simple, just iterate through the steps.history = Float64[]\nfor (k, p) in enumerate(QCBMOptimizer(qcbm, optim))\n    curr_loss = mmd_loss(qcbm, p)\n    push!(history, curr_loss)\n    k%5 == 0 && println(\"k = \", k, \" loss = \", curr_loss)\n    k >= 50 && break\nendThe training history looks like (Image: History)and the learnt distribution (Image: Learnt Distribution)This page was generated using Literate.jl."
 },
 
 {
@@ -265,27 +489,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/yao/#Yao.nactive",
+    "location": "man/yao/#Yao.invorder-Tuple{Any}",
     "page": "Yao",
-    "title": "Yao.nactive",
-    "category": "function",
-    "text": "nactive(x) -> Int\n\nReturns number of active qubits\n\n\n\n\n\n"
-},
-
-{
-    "location": "man/yao/#Yao.nqubits",
-    "page": "Yao",
-    "title": "Yao.nqubits",
-    "category": "function",
-    "text": "nqubits(m::AbstractRegister) -> Int\n\nReturns number of qubits in a register,\n\nnqubits(m::AbstractBlock) -> Int\n\nReturns number of qubits applied for a block,\n\nnqubits(m::AbstractArray) -> Int\n\nReturns size of the first dimension of an array, in 2^nqubits.\n\n\n\n\n\n"
-},
-
-{
-    "location": "man/yao/#Yao.reorder",
-    "page": "Yao",
-    "title": "Yao.reorder",
-    "category": "function",
-    "text": "Reorder the lines of qubits.\n\n\n\n\n\n"
+    "title": "Yao.invorder",
+    "category": "method",
+    "text": "invorder(reg) -> reg\n\nInverse the order of qubits.\n\n\n\n\n\n"
 },
 
 {
@@ -473,7 +681,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{M}, Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s294} where #s294<:AbstractBlock}} where M",
+    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{M}, Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s307} where #s307<:AbstractBlock}} where M",
     "page": "Interfaces",
     "title": "Yao.Interfaces.put",
     "category": "method",
@@ -577,7 +785,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Pair{Int64,#s294} where #s294<:MatrixBlock,N} where N}",
+    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Pair{Int64,#s307} where #s307<:MatrixBlock,N} where N}",
     "page": "Interfaces",
     "title": "Base.kron",
     "category": "method",
@@ -685,7 +893,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Registers",
     "title": "Yao.Registers.AbstractRegister",
     "category": "type",
-    "text": "AbstractRegister{B, T}\n\nabstract type that registers will subtype from. B is the batch size, T is the data type.\n\nRequired Properties\n\nProperty Description default\nnqubits(reg) get the total number of qubits. \nnactive(reg) get the number of active qubits. \nnremain(reg) get the number of remained qubits. nqubits - nactive\nnbatch(reg) get the number of batch. B\nstate(reg) get the state of this register. It always return the matrix stored inside. \nstatevec(reg) get the raveled state of this register.                                  . \nhypercubic(reg) get the hypercubic form of this register.                                  . \neltype(reg) get the element type stored by this register on classical memory. (the type Julia should use to represent amplitude) T\ncopy(reg) copy this register. \nsimilar(reg) construct a new register with similar configuration. \n\nRequired Methods\n\nMultiply\n\n*(op, reg)\n\ndefine how operator op act on this register. This is quite useful when there is a special approach to apply an operator on this register. (e.g a register with no batch, or a register with a MPS state, etc.)\n\nnote: Note\nbe careful, generally, operators can only be applied to a register, thus we should only overload this operation and do not overload *(reg, op).\n\nPack Address\n\npack addrs together to the first k-dimensions.\n\nExample\n\nGiven a register with dimension [2, 3, 1, 5, 4], we pack [5, 4] to the first 2 dimensions. We will get [5, 4, 2, 3, 1].\n\nFocus Address\n\nfocus!(reg, range)\n\nmerge address in range together as one dimension (the active space).\n\nExample\n\nGiven a register with dimension (2^4)x3 and address [1, 2, 3, 4], we focus address [3, 4], will pack [3, 4] together and merge them as the active space. Then we will have a register with size 2^2x(2^2x3), and address [3, 4, 1, 2].\n\nInitializers\n\nInitializers are functions that provide specific quantum states, e.g zero states, random states, GHZ states and etc.\n\nregister(::Type{RT}, raw, nbatch)\n\nan general initializer for input raw state array.\n\nregister(::Val{InitMethod}, ::Type{RT}, ::Type{T}, n, nbatch)\n\ninit register type RT with InitMethod type (e.g Val{:zero}) with element type T and total number qubits n with nbatch. This will be auto-binded to some shortcuts like zero_state, rand_state.\n\n\n\n\n\n"
+    "text": "AbstractRegister{B, T}\n\nabstract type that registers will subtype from. B is the batch size, T is the data type.\n\nRequired Properties\n\nProperty Description default\nviewbatch(reg,i) get the view of slice in batch dimension. \nnqubits(reg) get the total number of qubits. \nnactive(reg) get the number of active qubits. \nstate(reg) get the state of this register. It always return the matrix stored inside. \n(optional)  \nnremain(reg) get the number of remained qubits. nqubits - nactive\ndatatype(reg) get the element type Julia should use to represent amplitude) T\nnbatch(reg) get the number of batch. B\nlength(reg) alias of nbatch, for interfacing. B\n\nRequired Methods\n\nMultiply\n\n*(op, reg)\n\ndefine how operator op act on this register. This is quite useful when there is a special approach to apply an operator on this register. (e.g a register with no batch, or a register with a MPS state, etc.)\n\nnote: Note\nbe careful, generally, operators can only be applied to a register, thus we should only overload this operation and do not overload *(reg, op).\n\nPack Address\n\npack addrs together to the first k-dimensions.\n\nExample\n\nGiven a register with dimension [2, 3, 1, 5, 4], we pack [5, 4] to the first 2 dimensions. We will get [5, 4, 2, 3, 1].\n\nFocus Address\n\nfocus!(reg, range)\n\nmerge address in range together as one dimension (the active space).\n\nExample\n\nGiven a register with dimension (2^4)x3 and address [1, 2, 3, 4], we focus address [3, 4], will pack [3, 4] together and merge them as the active space. Then we will have a register with size 2^2x(2^2x3), and address [3, 4, 1, 2].\n\nInitializers\n\nInitializers are functions that provide specific quantum states, e.g zero states, random states, GHZ states and etc.\n\nregister(::Type{RT}, raw, nbatch)\n\nan general initializer for input raw state array.\n\nregister(::Val{InitMethod}, ::Type{RT}, ::Type{T}, n, nbatch)\n\ninit register type RT with InitMethod type (e.g Val{:zero}) with element type T and total number qubits n with nbatch. This will be auto-binded to some shortcuts like zero_state, rand_state.\n\n\n\n\n\n"
 },
 
 {
@@ -697,6 +905,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/registers/#Yao.Registers.DensityMatrix",
+    "page": "Registers",
+    "title": "Yao.Registers.DensityMatrix",
+    "category": "type",
+    "text": "DensityMatrix{B, T, MT<:AbstractArray{T, 3}}\nDensityMatrix(state) -> DensityMatrix\n\nDensity Matrix.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/registers/#Yao.Registers.@bit_str-Tuple{Any}",
     "page": "Registers",
     "title": "Yao.Registers.@bit_str",
@@ -705,11 +921,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/registers/#Yao.Intrinsics.hypercubic",
+    "location": "man/registers/#Yao.Intrinsics.hypercubic-Union{Tuple{DefaultRegister{B,T,MT} where MT<:AbstractArray{T,2} where T}, Tuple{B}} where B",
     "page": "Registers",
     "title": "Yao.Intrinsics.hypercubic",
+    "category": "method",
+    "text": "hypercubic(r::DefaultRegister) -> AbstractArray\n\nReturn the hypercubic form (high dimensional tensor) of this register, only active qubits are considered.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.addbit!",
+    "page": "Registers",
+    "title": "Yao.Registers.addbit!",
     "category": "function",
-    "text": "hypercubic(r::AbstractRegister) -> AbstractArray\n\nReturn the hypercubic form (high dimensional tensor) of this register, only active qubits are considered.\n\n\n\n\n\n"
+    "text": "addbit!(r::AbstractRegister, n::Int) -> AbstractRegister\naddbit!(n::Int) -> Function\n\naddbit the register by n bits in state |0>. i.e. |psi> -> |000> ⊗ |psi>, addbit bits have higher indices. If only an integer is provided, then perform lazy evaluation.\n\n\n\n\n\n"
 },
 
 {
@@ -721,19 +945,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/registers/#Yao.Registers.extend!-Union{Tuple{T}, Tuple{B}, Tuple{DefaultRegister{B,T,MT} where MT<:AbstractArray{T,2},Int64}} where T where B",
-    "page": "Registers",
-    "title": "Yao.Registers.extend!",
-    "category": "method",
-    "text": "extend!(r::DefaultRegister, n::Int) -> DefaultRegister\nextend!(n::Int) -> Function\n\nextend the register by n bits in state |0>. i.e. |psi> -> |000> ⊗ |psi>, extended bits have higher indices. If only an integer is provided, then perform lazy evaluation.\n\n\n\n\n\n"
-},
-
-{
     "location": "man/registers/#Yao.Registers.fidelity",
     "page": "Registers",
     "title": "Yao.Registers.fidelity",
     "category": "function",
-    "text": "fidelity(reg1::DefaultRegister, reg2::DefaultRegister) -> Vector\n\n\n\n\n\n"
+    "text": "fidelity(reg1::AbstractRegister, reg2::AbstractRegister) -> Vector\n\nReturn the fidelity between two states.\n\n\n\n\n\n"
 },
 
 {
@@ -753,11 +969,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/registers/#Yao.Registers.isnormalized-Tuple{DefaultRegister}",
+    "location": "man/registers/#Yao.Registers.invorder!",
+    "page": "Registers",
+    "title": "Yao.Registers.invorder!",
+    "category": "function",
+    "text": "invorder!(reg::AbstractRegister) -> AbstractRegister\n\nInverse the order of lines inplace.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.isnormalized",
     "page": "Registers",
     "title": "Yao.Registers.isnormalized",
-    "category": "method",
-    "text": "isnormalized(reg::DefaultRegister) -> Bool\n\nReturn true if a register is normalized else false.\n\n\n\n\n\n"
+    "category": "function",
+    "text": "isnormalized(reg::AbstractRegister) -> Bool\n\nReturn true if a register is normalized else false.\n\n\n\n\n\n"
 },
 
 {
@@ -793,6 +1017,30 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/registers/#Yao.Registers.oneto-Union{Tuple{DefaultRegister{B,T,MT} where MT<:AbstractArray{T,2} where T}, Tuple{B}, Tuple{DefaultRegister{B,T,MT} where MT<:AbstractArray{T,2} where T,Int64}} where B",
+    "page": "Registers",
+    "title": "Yao.Registers.oneto",
+    "category": "method",
+    "text": "oneto({reg::DefaultRegister}, n::Int=nqubits(reg)) -> DefaultRegister\n\nReturn a register with first 1:n bits activated, reg here can be lazy.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.probs",
+    "page": "Registers",
+    "title": "Yao.Registers.probs",
+    "category": "function",
+    "text": "probs(r::AbstractRegister)\n\nReturns the probability distribution in computation basis xψ^2.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.probs-Union{Tuple{DensityMatrix{B,T,MT} where MT<:AbstractArray{T,3}}, Tuple{T}, Tuple{B}} where T where B",
+    "page": "Registers",
+    "title": "Yao.Registers.probs",
+    "category": "method",
+    "text": "probs(dm::DensityMatrix{B, T}) where {B,T}\n\nReturn probability from density matrix.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/registers/#Yao.Registers.product_state-Union{Tuple{T}, Tuple{Type{T},Int64,Integer}, Tuple{Type{T},Int64,Integer,Int64}} where T",
     "page": "Registers",
     "title": "Yao.Registers.product_state",
@@ -806,6 +1054,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Registers.rand_state",
     "category": "method",
     "text": "rand_state([::Type{T}], n::Int, nbatch::Int=1) -> DefaultRegister\n\nhere, random complex numbers are generated using randn(ComplexF64).\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.rank3-Union{Tuple{DefaultRegister{B,T,MT} where MT<:AbstractArray{T,2} where T}, Tuple{B}} where B",
+    "page": "Registers",
+    "title": "Yao.Registers.rank3",
+    "category": "method",
+    "text": "rank3(reg::DefaultRegister) -> Array{T, 3}\n\nReturn the rank 3 tensor representation of state, the 3 dimensions are (activated space, remaining space, batch dimension).\n\n\n\n\n\n"
 },
 
 {
@@ -833,11 +1089,27 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/registers/#Yao.Registers.relaxedvec",
+    "location": "man/registers/#Yao.Registers.relaxedvec-Union{Tuple{DefaultRegister{B,T,MT} where MT<:AbstractArray{T,2} where T}, Tuple{B}} where B",
     "page": "Registers",
     "title": "Yao.Registers.relaxedvec",
+    "category": "method",
+    "text": "relaxedvec(r::DefaultRegister) -> AbstractArray\n\nReturn a matrix (vector) for B>1 (B=1) as a vector representation of state, with all qubits activated.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.reorder!",
+    "page": "Registers",
+    "title": "Yao.Registers.reorder!",
     "category": "function",
-    "text": "relaxedvec(r::AbstractRegister) -> AbstractArray\n\nActivate all qubits, and return a matrix (vector) for B>1 (B=1).\n\n\n\n\n\n"
+    "text": "reorder!(reg::AbstractRegister, order) -> AbstractRegister\nreorder!(orders::Int...) -> Function    # currified\n\nReorder the lines of qubits, it also works for array.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.reset!",
+    "page": "Registers",
+    "title": "Yao.Registers.reset!",
+    "category": "function",
+    "text": "reset!(reg::AbstractRegister, val::Integer=0) -> AbstractRegister\n\nreset! reg to default value.\n\n\n\n\n\n"
 },
 
 {
@@ -857,19 +1129,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/registers/#Yao.Registers.stack-Tuple{Vararg{DefaultRegister,N} where N}",
+    "location": "man/registers/#Yao.Registers.state",
     "page": "Registers",
-    "title": "Yao.Registers.stack",
-    "category": "method",
-    "text": "stack(regs::DefaultRegister...) -> DefaultRegister\n\nstack multiple registers into a batch.\n\n\n\n\n\n"
+    "title": "Yao.Registers.state",
+    "category": "function",
+    "text": "state(reg) -> AbstractMatrix\n\nget the state of this register. It always return the matrix stored inside.\n\n\n\n\n\n"
 },
 
 {
-    "location": "man/registers/#Yao.Registers.statevec",
+    "location": "man/registers/#Yao.Registers.statevec-Tuple{DefaultRegister}",
     "page": "Registers",
     "title": "Yao.Registers.statevec",
-    "category": "function",
-    "text": "statevec(r::AbstractRegister) -> AbstractArray\n\nReturn a state matrix/vector by droping the last dimension of size 1.\n\n\n\n\n\n"
+    "category": "method",
+    "text": "statevec(r::DefaultRegister) -> AbstractArray\n\nReturn a state matrix/vector by droping the last dimension of size 1.\n\n\n\n\n\n"
 },
 
 {
@@ -877,7 +1149,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Registers",
     "title": "Yao.Registers.tracedist",
     "category": "function",
-    "text": "tracedist(reg1::DefaultRegister, reg2::DefaultRegister) -> Vector\ntracedist(reg1::DensityMatrix, reg2::DensityMatrix) -> Vector\n\ntrace distance.\n\n\n\n\n\n"
+    "text": "tracedist(reg1::AbstractRegister, reg2::AbstractRegister) -> Vector\ntracedist(reg1::DensityMatrix, reg2::DensityMatrix) -> Vector\n\ntrace distance.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.tracedist-Union{Tuple{B}, Tuple{DensityMatrix{B,T,MT} where MT<:AbstractArray{T,3} where T,DensityMatrix{B,T,MT} where MT<:AbstractArray{T,3} where T}} where B",
+    "page": "Registers",
+    "title": "Yao.Registers.tracedist",
+    "category": "method",
+    "text": "tracedist(dm1::DensityMatrix{B}, dm2::DensityMatrix{B}) -> Vector\n\nReturn trace distance between two density matrices.\n\n\n\n\n\n"
 },
 
 {
@@ -886,6 +1166,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Registers.uniform_state",
     "category": "method",
     "text": "uniform_state([::Type{T}], n::Int, nbatch::Int=1) -> DefaultRegister\n\nuniform state, the state after applying H gates on |0> state.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.viewbatch",
+    "page": "Registers",
+    "title": "Yao.Registers.viewbatch",
+    "category": "function",
+    "text": "viewbatch(r::AbstractRegister, i::Int) -> AbstractRegister{1}\n\nReturn a view of a slice from batch dimension.\n\n\n\n\n\n"
 },
 
 {
@@ -905,6 +1193,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/registers/#Yao.nactive",
+    "page": "Registers",
+    "title": "Yao.nactive",
+    "category": "function",
+    "text": "nactive(x::AbstractRegister) -> Int\n\nReturn the number of active qubits.\n\nnote!!!\n\nOperatiors always apply on active qubits.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/registers/#Yao.Registers.QuBitStr",
     "page": "Registers",
     "title": "Yao.Registers.QuBitStr",
@@ -913,18 +1209,26 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/registers/#Base.kron-Union{Tuple{RT}, Tuple{B}, Tuple{RT,AbstractRegister{B,T} where T}} where RT<:(AbstractRegister{B,T} where T) where B",
+    "location": "man/registers/#Base.join",
     "page": "Registers",
-    "title": "Base.kron",
-    "category": "method",
-    "text": "kron(lhs, rhs)\n\nMerge two registers together with kronecker tensor product.\n\n\n\n\n\n"
+    "title": "Base.join",
+    "category": "function",
+    "text": "join(reg1::AbstractRegister, reg2::AbstractRegister) -> Register\n\nMerge two registers together with kronecker tensor product.\n\n\n\n\n\n"
 },
 
 {
-    "location": "man/registers/#LinearAlgebra.normalize!-Tuple{AbstractRegister}",
+    "location": "man/registers/#Base.repeat",
+    "page": "Registers",
+    "title": "Base.repeat",
+    "category": "function",
+    "text": "repeat(reg::AbstractRegister{B}, n::Int) -> AbstractRegister\n\nRepeat register in batch dimension for n times.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#LinearAlgebra.normalize!",
     "page": "Registers",
     "title": "LinearAlgebra.normalize!",
-    "category": "method",
+    "category": "function",
     "text": "normalize!(r::AbstractRegister) -> AbstractRegister\n\nReturn the register with normalized state.\n\n\n\n\n\n"
 },
 
@@ -1297,14 +1601,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.datatype-Union{Tuple{MatrixBlock{N,T}}, Tuple{T}, Tuple{N}} where T where N",
-    "page": "Blocks System",
-    "title": "Yao.Blocks.datatype",
-    "category": "method",
-    "text": "datatype(x) -> DataType\n\nReturns the data type of x.\n\n\n\n\n\n"
-},
-
-{
     "location": "man/blocks/#Yao.Blocks.dispatch!!-Tuple{AbstractBlock,Any}",
     "page": "Blocks System",
     "title": "Yao.Blocks.dispatch!!",
@@ -1449,6 +1745,30 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Registers.datatype-Union{Tuple{MatrixBlock{N,T}}, Tuple{T}, Tuple{N}} where T where N",
+    "page": "Blocks System",
+    "title": "Yao.Registers.datatype",
+    "category": "method",
+    "text": "datatype(x) -> DataType\n\nReturns the data type of x.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.nqubits-Union{Tuple{Type{MT}}, Tuple{MT}, Tuple{N}} where MT<:(MatrixBlock{N,T} where T) where N",
+    "page": "Blocks System",
+    "title": "Yao.nqubits",
+    "category": "method",
+    "text": "nqubits(::Type{MT}) -> Int\nnqubits(::MatrixBlock) -> Int\n\nReturn the number of qubits of a MatrixBlock.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Base.collect-Union{Tuple{BT}, Tuple{AbstractBlock,Type{BT}}} where BT<:AbstractBlock",
+    "page": "Blocks System",
+    "title": "Base.collect",
+    "category": "method",
+    "text": "collect(circuit::AbstractBlock, ::Type{BT}) where BT<:AbstractBlock\n\ncollect blocks of type BT in the block tree with circuit as root.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks._allmatblock-Tuple{Any}",
     "page": "Blocks System",
     "title": "Yao.Blocks._allmatblock",
@@ -1473,7 +1793,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.cache_type-Tuple{Type{#s14} where #s14<:MatrixBlock}",
+    "location": "man/blocks/#Yao.Blocks.cache_type-Tuple{Type{#s105} where #s105<:MatrixBlock}",
     "page": "Blocks System",
     "title": "Yao.Blocks.cache_type",
     "category": "method",
@@ -1553,19 +1873,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.baddrs-Tuple{Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.baddrs-Tuple{Integer}",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.baddrs",
     "category": "method",
-    "text": "baddrs(b::DInt) -> Vector\n\nget the locations of nonzeros bits, i.e. the inverse operation of bmask.\n\n\n\n\n\n"
+    "text": "baddrs(b::Integer) -> Vector\n\nget the locations of nonzeros bits, i.e. the inverse operation of bmask.\n\n\n\n\n\n"
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.basis-Tuple{Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.basis-Tuple{Union{Int64, AbstractArray}}",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.basis",
     "category": "method",
-    "text": "basis(num_bit::Int) -> UnitRange{Int}\nbasis(state::AbstractArray) -> UnitRange{Int}\n\nReturns the UnitRange for basis in Hilbert Space of num_bit qubits. If an array is supplied, it will return a basis having the same size with the first diemension of array.\n\n\n\n\n\n"
+    "text": "basis([IntType], num_bit::Int) -> UnitRange{IntType}\nbasis([IntType], state::AbstractArray) -> UnitRange{IntType}\n\nReturns the UnitRange for basis in Hilbert Space of num_bit qubits. If an array is supplied, it will return a basis having the same size with the first diemension of array.\n\n\n\n\n\n"
 },
 
 {
@@ -1585,51 +1905,51 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.bdistance-Tuple{Int64,Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.bdistance-Union{Tuple{Ti}, Tuple{Ti,Ti}} where Ti<:Integer",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.bdistance",
     "category": "method",
-    "text": "bdistance(i::DInt, j::DInt) -> Int\n\nReturn number of different bits.\n\n\n\n\n\n"
+    "text": "bdistance(i::Integer, j::Integer) -> Int\n\nReturn number of different bits.\n\n\n\n\n\n"
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.bfloat-Tuple{Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.bfloat-Tuple{Integer}",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.bfloat",
     "category": "method",
-    "text": "bfloat(b::Int; nbit::Int=bit_length(b)) -> Float64\n\nfloat view, with big end qubit 1.\n\n\n\n\n\n"
+    "text": "bfloat(b::Integer; nbit::Int=bit_length(b)) -> Float64\n\nfloat view, with big end qubit 1.\n\n\n\n\n\n"
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.bfloat_r-Tuple{Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.bfloat_r-Tuple{Integer}",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.bfloat_r",
     "category": "method",
-    "text": "bfloat_r(b::Int; nbit::Int) -> Float64\n\nfloat view, with bits read in inverse order.\n\n\n\n\n\n"
+    "text": "bfloat_r(b::Integer; nbit::Int) -> Float64\n\nfloat view, with bits read in inverse order.\n\n\n\n\n\n"
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.bint-Tuple{Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.bint-Tuple{Integer}",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.bint",
     "category": "method",
-    "text": "bint(b::Int; nbit=nothing) -> Int\n\ninteger view, with little end qubit 1.\n\n\n\n\n\n"
+    "text": "bint(b; nbit=nothing) -> Int\n\ninteger view, with little end qubit 1.\n\n\n\n\n\n"
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.bint_r-Tuple{Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.bint_r-Tuple{Integer}",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.bint_r",
     "category": "method",
-    "text": "bint_r(b::Int; nbit::Int) -> Int\n\ninteger read in inverse order.\n\n\n\n\n\n"
+    "text": "bint_r(b; nbit::Int) -> Integer\n\ninteger read in inverse order.\n\n\n\n\n\n"
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.bit_length-Tuple{Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.bit_length-Tuple{Integer}",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.bit_length",
     "category": "method",
-    "text": "bit_length(x::Int) -> Int\n\nReturn the number of bits required to represent input integer x.\n\n\n\n\n\n"
+    "text": "bit_length(x::Integer) -> Int\n\nReturn the number of bits required to represent input integer x.\n\n\n\n\n\n"
 },
 
 {
@@ -1645,7 +1965,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.bmask",
     "category": "function",
-    "text": "bmask(ibit::Int...) -> Int\nbmask(bits::UnitRange{Int}) ->Int\n\nReturn an integer with specific position masked, which is offten used as a mask for binary operations.\n\n\n\n\n\n"
+    "text": "bmask([IntType], ibit::Int...) -> IntType\nbmask([IntType], bits::UnitRange{Int}) ->IntType\n\nReturn an integer with specific position masked, which is offten used as a mask for binary operations.\n\n\n\n\n\n"
 },
 
 {
@@ -1653,7 +1973,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.breflect",
     "category": "function",
-    "text": "breflect(num_bit::Int, b::Int[, masks::Vector{Int}]) -> Int\n\nReturn left-right reflected integer.\n\n\n\n\n\n"
+    "text": "breflect(num_bit::Int, b::Integer[, masks::Vector{Integer}]) -> Integer\n\nReturn left-right reflected integer.\n\n\n\n\n\n"
 },
 
 {
@@ -1662,6 +1982,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Intrinsics.bsizeof",
     "category": "method",
     "text": "bsizeof(x) -> Int\n\nReturn the size of object, in number of bit.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.controldo-Union{Tuple{C}, Tuple{N}, Tuple{Function,IterControl{N,C}}} where C where N",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.controldo",
+    "category": "method",
+    "text": "controldo(func::Function, ic::IterControl{N, C})\n\nFaster than for i in ic ... end.\n\n\n\n\n\n"
 },
 
 {
@@ -1705,11 +2033,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.flip-Tuple{Int64,Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.flip-Union{Tuple{Ti}, Tuple{Ti,Ti}} where Ti<:Integer",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.flip",
     "category": "method",
-    "text": "flip(index::Int, mask::Int) -> Int\n\nReturn an Integer with bits at masked position flipped.\n\n\n\n\n\n"
+    "text": "flip(index::Integer, mask::Integer) -> Integer\n\nReturn an Integer with bits at masked position flipped.\n\n\n\n\n\n"
 },
 
 {
@@ -1825,19 +2153,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.neg-Tuple{Int64,Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.neg-Union{Tuple{Ti}, Tuple{Ti,Int64}} where Ti<:Integer",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.neg",
     "category": "method",
-    "text": "neg(index::Int, num_bit::Int) -> Int\n\nReturn an integer with all bits flipped (with total number of bit num_bit).\n\n\n\n\n\n"
+    "text": "neg(index::Integer, num_bit::Int) -> Integer\n\nReturn an integer with all bits flipped (with total number of bit num_bit).\n\n\n\n\n\n"
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.onehotvec-Union{Tuple{T}, Tuple{Type{T},Int64,Int64}} where T",
+    "location": "man/intrinsics/#Yao.Intrinsics.onehotvec-Union{Tuple{T}, Tuple{Type{T},Int64,Integer}} where T",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.onehotvec",
     "category": "method",
-    "text": "onehotvec(::Type{T}, num_bit::Int, x::DInt) -> Vector{T}\n\none-hot wave vector.\n\n\n\n\n\n"
+    "text": "onehotvec(::Type{T}, num_bit::Int, x::Integer) -> Vector{T}\n\none-hot wave vector.\n\n\n\n\n\n"
 },
 
 {
@@ -1873,11 +2201,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.setbit-Tuple{Int64,Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.setbit-Union{Tuple{Ti}, Tuple{Ti,Ti}} where Ti<:Integer",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.setbit",
     "category": "method",
-    "text": "setbit(index::Int, mask::Int) -> Int\n\nset the bit at masked position to 1.\n\n\n\n\n\n"
+    "text": "setbit(index::Integer, mask::Integer) -> Integer\n\nset the bit at masked position to 1.\n\n\n\n\n\n"
 },
 
 {
@@ -1889,11 +2217,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.swapbits-Tuple{Int64,Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.swapbits-Union{Tuple{Ti}, Tuple{Ti,Ti}} where Ti<:Integer",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.swapbits",
     "category": "method",
-    "text": "swapbits(num::Int, mask12::Int) -> Int\n\nReturn an integer with bits at i and j flipped.\n\n\n\n\n\n"
+    "text": "swapbits(num::Integer, mask12::Integer) -> Integer\n\nReturn an integer with bits at i and j flipped.\n\n\n\n\n\n"
 },
 
 {
@@ -1913,35 +2241,35 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.takebit-Tuple{Int64,Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.takebit-Union{Tuple{Ti}, Tuple{Ti,Int64}} where Ti<:Integer",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.takebit",
     "category": "method",
-    "text": "takebit(index::Int, bits::Int...) -> Int\n\nReturn a bit(s) at specific position.\n\n\n\n\n\n"
+    "text": "takebit(index::Integer, bits::Int...) -> Int\n\nReturn a bit(s) at specific position.\n\n\n\n\n\n"
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.testall-Tuple{Int64,Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.testall-Union{Tuple{Ti}, Tuple{Ti,Ti}} where Ti<:Integer",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.testall",
     "category": "method",
-    "text": "testall(index::Int, mask::Int) -> Bool\n\nReturn true if all masked position of index is 1.\n\n\n\n\n\n"
+    "text": "testall(index::Integer, mask::Integer) -> Bool\n\nReturn true if all masked position of index is 1.\n\n\n\n\n\n"
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.testany-Tuple{Int64,Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.testany-Union{Tuple{Ti}, Tuple{Ti,Ti}} where Ti<:Integer",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.testany",
     "category": "method",
-    "text": "testany(index::Int, mask::Int) -> Bool\n\nReturn true if any masked position of index is 1.\n\n\n\n\n\n"
+    "text": "testany(index::Integer, mask::Integer) -> Bool\n\nReturn true if any masked position of index is 1.\n\n\n\n\n\n"
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.testval-Tuple{Int64,Int64,Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.testval-Union{Tuple{Ti}, Tuple{Ti,Ti,Ti}} where Ti<:Integer",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.testval",
     "category": "method",
-    "text": "testval(index::Int, mask::Int, onemask::Int) -> Bool\n\nReturn true if values at positions masked by mask with value 1 at positions masked by onemask and 0 otherwise.\n\n\n\n\n\n"
+    "text": "testval(index::Integer, mask::Integer, onemask::Integer) -> Bool\n\nReturn true if values at positions masked by mask with value 1 at positions masked by onemask and 0 otherwise.\n\n\n\n\n\n"
 },
 
 {
@@ -1993,6 +2321,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/intrinsics/#Yao.nactive-Tuple{AbstractArray}",
+    "page": "Intrinsics",
+    "title": "Yao.nactive",
+    "category": "method",
+    "text": "nactive(m::AbstractArray) -> Int\n\nReturns the log-size of its first dimension.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/intrinsics/#Intrinsics-1",
     "page": "Intrinsics",
     "title": "Intrinsics",
@@ -2017,7 +2353,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.cxgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Any,Any,Union{UnitRange{Int64}, Int64, Array{Int64,1}}}} where MT<:Number",
+    "location": "man/boost/#Yao.Boost.cxgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Any,Any,Union{UnitRange{IT}, Array{IT,1}, IT} where IT<:Integer}} where MT<:Number",
     "page": "Boost",
     "title": "Yao.Boost.cxgate",
     "category": "method",
@@ -2041,7 +2377,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.xgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Union{UnitRange{Int64}, Int64, Array{Int64,1}}}} where MT<:Number",
+    "location": "man/boost/#Yao.Boost.xgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Union{UnitRange{IT}, Array{IT,1}, IT} where IT<:Integer}} where MT<:Number",
     "page": "Boost",
     "title": "Yao.Boost.xgate",
     "category": "method",
@@ -2049,7 +2385,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.ygate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Union{UnitRange{Int64}, Int64, Array{Int64,1}}}} where MT<:Complex",
+    "location": "man/boost/#Yao.Boost.ygate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Union{UnitRange{IT}, Array{IT,1}, IT} where IT<:Integer}} where MT<:Complex",
     "page": "Boost",
     "title": "Yao.Boost.ygate",
     "category": "method",
@@ -2057,7 +2393,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.zgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Union{UnitRange{Int64}, Int64, Array{Int64,1}}}} where MT<:Number",
+    "location": "man/boost/#Yao.Boost.zgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Union{UnitRange{IT}, Array{IT,1}, IT} where IT<:Integer}} where MT<:Number",
     "page": "Boost",
     "title": "Yao.Boost.zgate",
     "category": "method",
