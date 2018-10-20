@@ -71,7 +71,7 @@ function hhlsolve(A::Matrix, b::Vector, n_reg::Int, C_value::Real)
     UG = matrixgate(exp(2π*im.*A))
 
     # Generating input bits
-    all_bit = zero_state(1) ⊗ zero_state(n_reg) ⊗ register(b)
+    all_bit =  register(b) ⊗ zero_state(n_reg) ⊗ zero_state(1)
 
     # Construct HHL circuit.
     circuit = hhlcircuit(UG, n_reg, C_value)

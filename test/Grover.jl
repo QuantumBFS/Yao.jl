@@ -2,7 +2,7 @@ using Test, Random, LinearAlgebra, SparseArrays
 
 using QuAlgorithmZoo
 import QuAlgorithmZoo: _num_grover_step
-using Yao.Blocks
+using Yao, Yao.Blocks
 using Yao.Intrinsics
 
 function GroverSearch(oracle, num_bit::Int; psi::DefaultRegister = uniform_state(num_bit))

@@ -12,13 +12,17 @@ import Yao.Intrinsics: ishermitian, isreflexive, isunitary
 export openbox
 
 """
+    openbox(block::AbstractBlock) -> AbstractBlock
+
 For a black box, like QFTBlock, you can get its white box (loyal simulation) using this function.
 """
 function openbox end
 
 include("Miscellaneous.jl")
+include("Adam.jl")
 include("QFT.jl")
-include("Differential.jl")
+include("CircuitBuild.jl")
+include("QCOptProblem.jl")
 include("RotBasis.jl")
 include("Grover.jl")
 include("PhaseEstimation.jl")

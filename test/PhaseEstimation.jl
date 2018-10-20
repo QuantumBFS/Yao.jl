@@ -37,13 +37,13 @@ end
     circuit = PEBlock(UG, M, N)
 
     # run
-    reg = apply!(join(reg1, reg2), circuit)
+    reg = apply!(join(reg2, reg1), circuit)
 
     # measure
     res = breflect(M, measure(focus!(copy(reg), 1:M), 10)[1]) / (1<<M)
 
     @test res ≈ ϕ
-    @test apply!(reg, circuit |> adjoint) ≈ join(reg1, reg2)
+    @test apply!(reg, circuit |> adjoint) ≈ join(reg2, reg1)
 end
 
 @testset "phaseest, non-eigen" begin
@@ -58,7 +58,7 @@ end
     UG = matrixgate(U);
 
     # run circuit
-    reg= join(reg1, reg2)
+    reg= join(reg2, reg1)
     pe = PEBlock(UG, M, N)
     apply!(reg, pe)
 

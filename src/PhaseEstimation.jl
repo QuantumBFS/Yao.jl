@@ -34,7 +34,7 @@ Analyse using state projection.
 It returns a tuple of (most probable configuration, the overlap matrix, the relative probability for this configuration)
 """
 function projection_analysis(evec::Matrix, reg::DefaultRegister)
-    overlap = register(evec)'*reg
+    overlap = evec'*state(reg)
     amp_relative = Float64[]
     bs = Int[]
 
