@@ -97,4 +97,11 @@ end
     diffblock.grad = (r2 - r1)*ndims(vstat)/2
 end
 
+export scale, staticscale
+
+scale(blk::MatrixBlock, x::Number) = Scale(blk, x)
+scale(x::Number) = blk -> scale(blk, x)
+
+staticscale(blk::MatrixBlock, x::Number) = StaticScale(blk, x)
+staticscale(x::Number) = blk -> staticscale(blk, x)
 include("Cache.jl")

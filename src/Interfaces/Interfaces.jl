@@ -10,7 +10,7 @@ using MacroTools: @forward
 
 # import package configs
 import ..Yao: DefaultType
-import ..Blocks: expect, blockfilter, gradient, scale, backward!
+import ..Blocks: expect, blockfilter, gradient, backward!
 
 @reexport using ..Registers
 
@@ -19,7 +19,7 @@ export @const_gate
 
 # Block APIs
 export mat, apply!, parameters, nparameters, dispatch!, datatype, adjoint, subblocks
-export expect, blockfilter, gradient, scale, backward!
+export expect, blockfilter, gradient, backward!
 
 # Candies
 export ⊗

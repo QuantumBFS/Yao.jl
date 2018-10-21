@@ -22,6 +22,6 @@ include("Scale.jl")
 include("Diff.jl")
 
 ########## common interfaces are defined here! ##############
-for BLOCKTYPE in (:Daggered, :CachedBlock, :Scale, :BPDiff, :QDiff)
+for BLOCKTYPE in (:Daggered, :CachedBlock, :StaticScale, :Scale, :BPDiff, :QDiff)
     @eval parent(dg::$BLOCKTYPE) = dg.block
 end

@@ -1,64 +1,120 @@
-export Scale, Pos, Neg, Im, _Im, scale, getscale
-"""
-    Scale{X, N, T, BT} <: TagBlock{N, T}
+export AbstractScale, factor, chfactor
+export Scale
+export StaticScale, Pos, Neg, Im, _Im
 
-    Scale{X}(blk::MatrixBlock)
-    Scale{X, N, T, BT}(blk::MatrixBlock)
-
-Scale Block, by a factor of X, notice X is static!
 """
-struct Scale{X, BT, N, T} <: TagBlock{N, T}
-    block::BT
+    AbstractScale{N, T} <: TagBlock{N, T}
+
+Block for scaling siblings by a factor of X.
+"""
+abstract type AbstractScale{N, T} <: TagBlock{N, T} end
+
+"""
+    factor(blk::AbstractScale) -> Number
+
+get scaling factor of `blk`.
+"""
+function factor end
+
+"""
+    chfactor(blk::AbstractScale) -> AbstractScale
+
+change scaling factor of `blk`.
+"""
+function chfactor end
+
+==(b1::AbstractScale, b2::AbstractScale) = parent(b1) == parent(b2) && factor(b1) == factor(b2)
+==(b1::AbstractScale, b2::MatrixBlock) where X = parent(b1) == b2 && factor(b1) == 1
+==(b1::MatrixBlock, b2::AbstractScale) where X = b1 == parent(b2) && factor(b2) == 1
+
+-(blk::MatrixBlock) = -1*blk
+
+mat(blk::AbstractScale) = factor(blk)*mat(blk |> parent)
+datatype(blk::AbstractScale) = promote_type(typeof(factor(blk)), parent(blk) |> datatype)
+apply!(reg::AbstractRegister, blk::AbstractScale) = factor(blk)*apply!(reg, blk |> parent)
+adjoint(blk::AbstractScale) = chfactor(chblock(blk, parent(blk)), factor(blk)')
+
+function print_block(io::IO, c::AbstractScale)
+    printstyled(io, "[$(factor(c))] "; bold=true, color=:yellow)
+    print_block(io, c |> parent)
 end
-Scale{X}(blk::BT) where {X, N, T, BT<:MatrixBlock{N, T}} = Scale{X, BT, N, T}(blk)
 
-==(b1::Scale{X}, b2::Scale{X}) where X = parent(b1) == parent(b2)
-==(b1::Scale{1}, b2::MatrixBlock) where X = parent(b1) == b2
-==(b1::MatrixBlock, b2::Scale{1}) where X = b1 == parent(b2)
-scale(blk::Scale{X}, x::Number) where X = Scale{X*x}(parent(blk))
-scale(blk::MatrixBlock, x::Number) = Scale{x}(blk)
-scale(x::Number) = blk -> scale(blk, x)
-getscale(blk::Scale{X}) where X = X
+############### Scale ##################
+"""
+    Scale{BT, FT, N, T} <: AbstractScale{N, T}
 
-# since adjoint can propagate, this way is better
-adjoint(blk::Scale{X}) where X = Scale{X'}(adjoint(blk.block))
+    Scale(block, factor) -> Scale
 
-mat(blk::Scale{X}) where X = X*mat(blk.block)
-apply!(reg::AbstractRegister, blk::Scale{X}) where X = X*apply!(reg, blk.block)
+Scale Block.
+"""
+struct Scale{BT, FT, N, T} <: AbstractScale{N, T}
+    block::BT
+    factor::FT
+end
+Scale(blk::BT, factor::FT) where {N, T, FT, BT<:MatrixBlock{N, T}} = Scale{BT, FT, N, T}(blk, factor)
+Scale(blk::AbstractScale) = Scale(blk |> parent, factor(blk))
+Scale(blk::AbstractScale, α::Number) = Scale(blk |> parent, factor(blk)*α)
+
+factor(blk::Scale) = blk.factor
+chfactor(blk::Scale, factor::Number) = Scale(blk |> parent, factor)
+adjoint(blk::Scale) = Scale(adjoint(blk.block), factor(blk)')
 
 # take care of hash_key method!
-similar(c::Scale{X}) where X = Scale{X}(similar(c.block))
-copy(c::Scale{X}) where X = Scale{X}(copy(c.block))
-chblock(pb::Scale{X}, blk::MatrixBlock) where {X} = Scale{X}(blk)
+similar(c::Scale) = Scale{X}(similar(c.block), one(factor(c)))
+copy(c::Scale) = Scale(copy(c.block), c |> factor)
+chblock(sb::Scale, blk::MatrixBlock) = Scale(blk, sb|>factor)
 
-*(x::Number, blk::MatrixBlock) = scale(blk, x)
-*(x::Number, blk::Scale{X}) where X = scale(blk, x)
-*(blk::MatrixBlock, x::Number) = scale(blk, x)
+LinearAlgebra.rmul!(s::Scale{<:Any, FT}, factor::Number) where FT = (s.factor = FT(s.factor*factor); s)
+LinearAlgebra.lmul!(factor::Number, s::Scale{<:Any, FT}) where FT = (s.factor = FT(factor*s.factor); s)
 
-function *(g1::Scale{X1}, g2::Scale{X2}) where {X1, X2}
-    scale(parent(g1)*parent(g2), X1*X2)
+*(x::Number, blk::MatrixBlock) = Scale(blk, x)
+*(blk::MatrixBlock, x::Number) = Scale(blk, x)
+*(g1::Scale, g2::MatrixBlock) = Scale(parent(g1)*g2, factor(g1))
+*(g2::MatrixBlock, g1::Scale) = Scale(g2*parent(g1), factor(g1))
+*(x::Number, blk::Scale) = Scale(blk, x)
+*(blk::Scale, x::Number) = Scale(blk, x)
+*(g1::Scale, g2::Scale) = Scale(parent(g1)*parent(g2), factor(g1)*factor(g2))
+
+############### StaticScale ##################
+"""
+    StaticScale{X, BT, N, T} <: AbstractScale{N, T}
+
+    StaticScale{X}(blk::MatrixBlock)
+    StaticScale{X, N, T, BT}(blk::MatrixBlock)
+
+Scale Block, by a static factor of X, notice X is static!
+"""
+struct StaticScale{X, BT, N, T} <: AbstractScale{N, T}
+    block::BT
 end
+StaticScale{X}(blk::BT) where {X, N, T, BT<:MatrixBlock{N, T}} = StaticScale{X, BT, N, T}(blk)
+StaticScale(blk::MatrixBlock, x::Number) = StaticScale{x}(blk)
+StaticScale(blk::AbstractScale) = StaticScale{factor(X)}(blk |> parent)
+StaticScale(blk::AbstractScale, α::Number) = StaticScale{factor(blk)*α}(blk |> parent)
 
-function *(g1::Scale{X1}, g2::MatrixBlock) where {X1}
-    scale(parent(g1)*g2, X1)
-end
-function *(g2::MatrixBlock, g1::Scale{X1}) where {X1}
-    scale(g2*parent(g1), X1)
-end
+factor(blk::StaticScale{X}) where X = X
+chfactor(blk::StaticScale, factor::Number) = StaticScale{factor}(blk |> parent)
 
-function print_block(io::IO, c::Scale{X}) where X
-    printstyled(io, "[$X] "; bold=true, color=:yellow)
-    print_block(io, c.block)
-end
+# since adjoint can propagate, this way is better
+adjoint(blk::StaticScale{X}) where X = StaticScale{X'}(adjoint(blk.block))
 
+# take care of hash_key method!
+similar(c::StaticScale{X}) where X = StaticScale{X}(similar(c.block))
+copy(c::StaticScale{X}) where X = StaticScale{X}(copy(c.block))
+chblock(pb::StaticScale{X}, blk::MatrixBlock) where {X} = StaticScale{X}(blk)
 
-const Pos{BT, N, T} = Scale{1+0im, BT, N, T}
-const Neg{BT, N, T} = Scale{-1+0im, BT, N, T}
-const Im{BT, N, T} = Scale{1im, BT, N, T}
-const _Im{BT, N, T} = Scale{-1im, BT, N, T}
+*(g1::StaticScale, g2::MatrixBlock) = StaticScale(parent(g1)*g2, factor(g1))
+*(g2::MatrixBlock, g1::StaticScale) = StaticScale(g2*parent(g1), factor(g1))
+*(x::Number, blk::StaticScale) = StaticScale(blk, x)
+*(blk::StaticScale, x::Number) = StaticScale(blk, x)
+*(g1::StaticScale, g2::StaticScale) = StaticScale(parent(g1)*parent(g2), factor(g1)*factor(g2))
 
--(blk::MatrixBlock) = (-1+0im)*blk
--(blk::Neg) = blk.block
+-(blk::AbstractScale) = chfactor(blk, -factor(blk))
+
+const Pos{BT, N, T} = StaticScale{1+0im, BT, N, T}
+const Neg{BT, N, T} = StaticScale{-1+0im, BT, N, T}
+const Im{BT, N, T} = StaticScale{1im, BT, N, T}
+const _Im{BT, N, T} = StaticScale{-1im, BT, N, T}
 
 function print_block(io::IO, c::Pos)
     printstyled(io, "[+] "; bold=true, color=:yellow)
@@ -69,6 +125,7 @@ function print_block(io::IO, c::Neg)
     printstyled(io, "[-] "; bold=true, color=:yellow)
     print_block(io, c.block)
 end
+-(blk::Neg) = blk.block
 
 function print_block(io::IO, c::Im)
     printstyled(io, "[i] "; bold=true, color=:yellow)

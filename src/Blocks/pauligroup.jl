@@ -1,9 +1,9 @@
-*(::XGate, ::YGate) = im*Z
-*(::XGate, ::ZGate) = -im*Y
-*(::YGate, ::XGate) = -im*Z
-*(::YGate, ::ZGate) = im*X
-*(::ZGate, ::XGate) = im*Y
-*(::ZGate, ::YGate) = -im*X
+*(::XGate, ::YGate) = Im(Z)
+*(::XGate, ::ZGate) = _Im(Y)
+*(::YGate, ::XGate) = _Im(Z)
+*(::YGate, ::ZGate) = Im(X)
+*(::ZGate, ::XGate) = Im(Y)
+*(::ZGate, ::YGate) = _Im(X)
 
 for G in [:XGate, :YGate, :ZGate]
     @eval *(g::$G, ::I2Gate) = g

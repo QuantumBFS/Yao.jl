@@ -37,7 +37,7 @@ end
 # Additional Methods for Composite Blocks
 getindex(c::ChainBlock, index) = getindex(c.blocks, index)
 getindex(c::ChainBlock, index::Union{UnitRange, Vector}) = ChainBlock(getindex(c.blocks, index))
-setindex!(c::ChainBlock{N}, val::MatrixBlock{N}, index::Integer) where N = setindex!(c.blocks, val, index)
+setindex!(c::ChainBlock{N}, val::MatrixBlock{N}, index::Integer) where N = (setindex!(c.blocks, val, index); c)
 insert!(c::ChainBlock{N}, index::Integer, val::MatrixBlock{N}) where N = (insert!(c.blocks, index, val); c)
 adjoint(blk::ChainBlock) = typeof(blk)(map(adjoint, subblocks(blk) |> reverse))
 
