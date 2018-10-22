@@ -32,3 +32,7 @@ end
 @testset "QCOptProblem" begin
     include("QCOptProblem.jl")
 end
+
+@testset "hamiltonian solvers" begin
+    include("hamiltonian_solvers.jl")
+end
