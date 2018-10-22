@@ -54,6 +54,10 @@ usedbits(c::ChainBlock) = unique(vcat([usedbits(b) for b in subblocks(c)]...))
 chsubblocks(pb::ChainBlock, blocks) = ChainBlock(blocks)
 @forward ChainBlock.blocks popfirst!, pop!
 
+isunitary(c::ChainBlock) = isunitary.(c.blocks) |> all || isunitary(mat(c))
+isreflexive(c::ChainBlock) = (iscommute(c.blocks...) && all(isreflexive.(c.blocks))) || isreflexive(mat(c))
+ishermitian(c::ChainBlock) = (all(isreflexive.(c.blocks)) && iscommute(c.blocks...)) || isreflexive(mat(c))
+
 # Additional Methods for Chain
 push!(c::ChainBlock{N}, val::MatrixBlock{N}) where N = (push!(c.blocks, val); c)
 

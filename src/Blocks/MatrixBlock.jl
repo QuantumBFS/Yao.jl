@@ -26,6 +26,9 @@ isreflexive(::Type{X}) where {X <: MatrixBlock} = isreflexive(mat(X))
 ishermitian(x::MatrixBlock) = ishermitian(mat(x))
 ishermitian(::Type{X}) where {X <: MatrixBlock} = ishermitian(mat(X))
 
+_default_iscommute(op1, op2) = length(intersect(usedbits(op1), usedbits(op2))) == 0 || iscommute(mat(op1), mat(op2))
+iscommute(op1::MatrixBlock{N}, op2::MatrixBlock{N}) where N = _default_iscommute(op1, op2)
+
 function apply!(reg::AbstractRegister, b::MatrixBlock)
     reg.state .= mat(b) * reg
     reg

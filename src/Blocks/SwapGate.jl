@@ -18,6 +18,9 @@ end
 
 apply!(r::AbstractRegister, rb::Swap) = swapapply!(state(r) |> matvec, rb.addr1, rb.addr2)
 usedbits(rb::Swap) = [addr1, addr2]
+isunitary(rb::Swap) = true
+ishermitian(rb::Swap) = true
+reflexive(rb::Swap) = true
 
 function swapapply!(state::VecOrMat{T}, b1::Int, b2::Int) where T
     mask1 = bmask(b1)

@@ -23,6 +23,8 @@ iscached(c::CachedBlock) = iscached(c.server, c.block)
 iscacheable(c::CachedBlock) = iscacheable(c.server, c.block)
 chblock(cb::CachedBlock, blk::MatrixBlock) = CachedBlock(cb.server, blk, cb.level)
 
+istraitkeeper(::CachedBlock) = Val(true)
+
 function update_cache(c::CachedBlock)
     if !iscached(c.server, c.block)
         m = dropzeros!(mat(c.block))

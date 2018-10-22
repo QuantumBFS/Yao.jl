@@ -41,3 +41,5 @@
 # fix add chain ambiguous
 *(x::ChainBlock{N, T1}, y::AddBlock{N, T2}) where {N, T1, T2} = AddBlock{N, promote_type(T1, T2)}([x*b for b in subblocks(y)])
 *(x::AddBlock{N, T1}, y::ChainBlock{N, T2}) where {N, T1, T2} = AddBlock{N, promote_type(T1, T2)}([b*y for b in subblocks(x)])
+
+Base.:^(blk::MatrixBlock, n::Int) = ChainBlock(fill(blk, n))

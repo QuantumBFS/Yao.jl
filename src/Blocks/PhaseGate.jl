@@ -19,6 +19,8 @@ niparameters(::Type{<:PhaseGate}) = 1
 iparameters(x::PhaseGate) = x.theta
 setiparameters!(r::PhaseGate, param::Real) = (r.theta = param; r)
 
+isunitary(r::PhaseGate) = true
+
 ==(lhs::PhaseGate, rhs::PhaseGate) = lhs.theta == rhs.theta
 
 function hash(gate::PhaseGate, h::UInt)

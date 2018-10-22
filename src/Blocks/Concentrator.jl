@@ -17,11 +17,11 @@ function Concentrator{N}(block::BT, usedbits::Vector{Int}) where {N, M, T, BT<:M
 end
 
 nqubits(::Concentrator{N}) where N = N
-eltype(::Concentrator{N, T}) where {N, T}= T
 nactive(c::Concentrator) = length(c.usedbits)
 usedbits(c::Concentrator) = c.usedbits
 addrs(c::Concentrator) = [1]
 chblock(pb::Concentrator{N}, blk::AbstractBlock) where N = Concentrator{N}(blk, pb |> usedbits)
+iscommute(x::Concentrator{N}, y::Concentrator{N}) where N = x.usedbits == y.usedbits ? iscommute(x.block, y.block) : _default_iscommute(x, y)
 
 apply!(reg::AbstractRegister, c::Concentrator) = relax!(apply!(focus!(reg, usedbits(c)), c.block), usedbits(c), nbit=nqubits(c))
 adjoint(blk::Concentrator{N}) where N = Concentrator{N}(adjoint(blk.block), blk.usedbits)
@@ -30,9 +30,7 @@ function mat(c::Concentrator)
     throw(ArgumentError("It should have a matrix, but we didn't realize it, you can post an issue if you really need it."))
 end
 
-for FUNC in [:isunitary, :isreflexive, :ishermitian]
-    @eval $FUNC(c::Concentrator) = $FUNC(c.block)
-end
+istraitkeeper(::Concentrator) = Val(true)
 
 ==(a::Concentrator{N, T, BT}, b::Concentrator{N, T, BT}) where {N, T, BT} = a.block == b.block && a.usedbits == b.usedbits
 

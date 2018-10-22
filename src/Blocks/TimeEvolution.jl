@@ -3,20 +3,21 @@ export TimeEvolution
 """
     TimeEvolution{N, TT, GT} <: PrimitiveBlock{N, ComplexF64}
 
-    TimeEvolution(H::GT, t::TT) -> TimeEvolution
+    TimeEvolution(H::GT, t::TT; tol::Real=1e-7) -> TimeEvolution
 
 TimeEvolution, where GT is block type. input matrix should be hermitian.
 """
 mutable struct TimeEvolution{N, TT, GT} <: PrimitiveBlock{N, ComplexF64}
     H::GT
     t::TT
-    function TimeEvolution{N, TT, GT}(H::GT, t) where {N, TT, GT <: MatrixBlock{N}}
+    tol::Float64
+    function TimeEvolution{N, TT, GT}(H::GT, t; tol::Real) where {N, TT, GT <: MatrixBlock{N}}
         # we ignore hermitian check here for efficiency!
         #ishermitian(H) || throw(ArgumentError("Gate type $GT is not hermitian!"))
-        new{N, TT, GT}(H, TT(t))
+        new{N, TT, GT}(H, TT(t), Float64(tol))
     end
 end
-TimeEvolution(H::GT, t::TT) where {N, TT<:Number, GT<:MatrixBlock{N}} = TimeEvolution{N, TT, GT}(H, t)
+TimeEvolution(H::GT, t::TT; tol::Real=1e-7) where {N, TT<:Number, GT<:MatrixBlock{N}} = TimeEvolution{N, TT, GT}(H, t; tol=tol)
 
 mat(te::TimeEvolution{N}) where N = exp(Matrix(-im*te.t*mat(te.H)))
 
@@ -25,21 +26,21 @@ function apply!(reg::DefaultRegister, te::TimeEvolution{N}) where N
     Hmat = mat(te.H)
     LinearMap(x->apply!(register(x), te.H), size(st, 1))
     for j in 1:size(st, 2)
-        st[:,j] .= expmv(-im*te.t, Hmat, st[:,j])
+        st[:,j] .= expmv(-im*te.t, Hmat, st[:,j], tol=te.tol)
     end
     reg
 end
 
-adjoint(blk::TimeEvolution) = TimeEvolution(blk.H, -blk.t')
+adjoint(blk::TimeEvolution) = TimeEvolution(blk.H, -blk.t', tol=te.tol)
 
-copy(te::TimeEvolution) = TimeEvolution(te.H, te.t)
+copy(te::TimeEvolution) = TimeEvolution(te.H, te.t, tol=te.tol)
 
 # parametric interface
 niparameters(::Type{<:TimeEvolution}) = 1
 iparameters(x::TimeEvolution) = x.t
 setiparameters!(r::TimeEvolution, param::Real) = (r.t = param; r)
 
-isunitary(te::TimeEvolution) = ishermitian(te.H) && (te.t isa Real)
+isunitary(te::TimeEvolution) = (ishermitian(te.H) && ishermitian(te.t)) || ishermitian(mat(te.t*te.H))
 ==(lhs::TimeEvolution, rhs::TimeEvolution) = lhs.H == rhs.H && lhs.t == rhs.t
 
 function hash(gate::TimeEvolution{<:Any, <:Any, GT}, h::UInt) where GT
@@ -52,5 +53,5 @@ end
 cache_key(te::TimeEvolution) = te.t
 
 function print_block(io::IO, te::TimeEvolution)
-    print(io, "Time Evolution ", te.H, ": ", te.t)
+    print(io, "Time Evolution ", te.H, "Δt = $(te.t), tol = $(te.tol)")
 end

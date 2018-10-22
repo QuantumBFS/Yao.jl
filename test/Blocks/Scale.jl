@@ -34,6 +34,11 @@ end
 
     blk = kron(4, 2=>Rx(0.3))
     @test first(chsubblocks(-X, [blk]) |> subblocks) == blk
+
+    @test ishermitian(2X)
+    @test !isreflexive(2X)
+    @test isunitary(im*X)
+    @test !ishermitian(im*X)
 end
 
 @testset "StaticScale" begin

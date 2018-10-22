@@ -30,9 +30,8 @@ usedbits(rb::RepeatedBlock) = vcat([i.+(0:nqubits(rb.block)-1) for i in addrs(rb
 copy(x::RepeatedBlock) = typeof(x)(x.block, x.addrs)
 chblock(pb::RepeatedBlock{N}, blk::AbstractBlock) where N = RepeatedBlock{N}(blk, pb.addrs)
 
-isunitary(rb::RepeatedBlock) = isunitary(rb.block)
-ishermitian(rb::RepeatedBlock) = ishermitian(rb.block)
-reflexive(rb::RepeatedBlock) = reflexive(rb.block)
+istraitkeeper(::RepeatedBlock) = Val(true)
+iscommute(x::RepeatedBlock{N}, y::RepeatedBlock{N}) where N = x.addrs == y.addrs ? iscommute(x.block, y.block) : _default_iscommute(x, y)
 
 mat(rb::RepeatedBlock{N}) where N = hilbertkron(N, fill(mat(rb.block), length(rb.addrs)), [rb.addrs...])
 mat(rb::RepeatedBlock{N, 0, GT, T}) where {N, GT, T} = IMatrix{1<<N, T}()

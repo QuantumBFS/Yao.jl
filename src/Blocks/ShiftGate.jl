@@ -19,6 +19,8 @@ niparameters(::Type{<:ShiftGate}) = 1
 iparameters(x::ShiftGate) = x.theta
 setiparameters!(r::ShiftGate, param::Real) = (r.theta = param; r)
 
+isunitary(r::ShiftGate) = true
+
 ==(lhs::ShiftGate, rhs::ShiftGate) = lhs.theta == rhs.theta
 
 function hash(gate::ShiftGate, h::UInt)

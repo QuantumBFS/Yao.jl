@@ -13,6 +13,8 @@ generator(rot::PutBlock{N, C, GT}) where {N, C, GT<:RotationGate} = PutBlock{N}(
 abstract type AbstractDiff{GT, N, T} <: TagBlock{N, T} end
 adjoint(df::AbstractDiff) = Daggered(df)
 
+istraitkeeper(::AbstractDiff) = Val(true)
+
 #################### The Basic Diff #################
 """
     QDiff{GT, N, T} <: AbstractDiff{GT, N, Complex{T}}

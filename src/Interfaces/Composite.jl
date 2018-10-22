@@ -281,10 +281,10 @@ paulistring(blocks...,) = N->paulistring(N, blocks...,)
 
 export timeevolve
 """
-    timeevolve([block::MatrixBlock], t::Real) -> TimeEvolution
+    timeevolve({block::MatrixBlock}, t::Real; tol::Real=1e-7) -> TimeEvolution
 
 Make a time machine! If block is not provided, it will become lazy.
 """
 function timeevolve end
-timeevolve(block::MatrixBlock, t::Number) = TimeEvolution(block, t)
-timeevolve(t::Number) = block -> TimeEvolution(block, t)
+timeevolve(block::MatrixBlock, t::Number; tol::Real=1e-7) = TimeEvolution(block, t, tol=tol)
+timeevolve(t::Number; tol::Real=1e-7) = block -> TimeEvolution(block, t, tol=tol)

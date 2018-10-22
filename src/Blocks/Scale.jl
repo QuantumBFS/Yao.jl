@@ -32,6 +32,13 @@ datatype(blk::AbstractScale) = promote_type(typeof(factor(blk)), parent(blk) |> 
 apply!(reg::AbstractRegister, blk::AbstractScale) = factor(blk)*apply!(reg, blk |> parent)
 adjoint(blk::AbstractScale) = chfactor(chblock(blk, parent(blk)), factor(blk)')
 
+ishermitian(s::AbstractScale) = (ishermitian(s |> parent) && ishermitian(s |> factor)) || ishermitian(mat(s))
+isunitary(s::AbstractScale) = (isunitary(s |> parent) && isunitary(s |> factor)) || isunitary(mat(s))
+isreflexive(s::AbstractScale) = (isreflexive(s |> parent) && isreflexive(s |> factor)) || isreflexive(mat(s))
+iscommute(x::AbstractScale, y::AbstractScale) = iscommute(x |> parent, y |> parent)
+iscommute(x::MatrixBlock, y::AbstractScale) = iscommute(x, y |> parent)
+iscommute(x::AbstractScale, y::MatrixBlock) = iscommute(x |> parent, y)
+
 function print_block(io::IO, c::AbstractScale)
     printstyled(io, "[$(factor(c))] "; bold=true, color=:yellow)
     print_block(io, c |> parent)
