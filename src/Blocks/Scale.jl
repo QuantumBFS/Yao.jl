@@ -27,8 +27,6 @@ function chfactor end
 ==(b1::AbstractScale, b2::MatrixBlock) where X = parent(b1) == b2 && factor(b1) == 1
 ==(b1::MatrixBlock, b2::AbstractScale) where X = b1 == parent(b2) && factor(b2) == 1
 
--(blk::MatrixBlock) = -1*blk
-
 mat(blk::AbstractScale) = factor(blk)*mat(blk |> parent)
 datatype(blk::AbstractScale) = promote_type(typeof(factor(blk)), parent(blk) |> datatype)
 apply!(reg::AbstractRegister, blk::AbstractScale) = factor(blk)*apply!(reg, blk |> parent)
@@ -67,14 +65,6 @@ chblock(sb::Scale, blk::MatrixBlock) = Scale(blk, sb|>factor)
 LinearAlgebra.rmul!(s::Scale{<:Any, FT}, factor::Number) where FT = (s.factor = FT(s.factor*factor); s)
 LinearAlgebra.lmul!(factor::Number, s::Scale{<:Any, FT}) where FT = (s.factor = FT(factor*s.factor); s)
 
-*(x::Number, blk::MatrixBlock) = Scale(blk, x)
-*(blk::MatrixBlock, x::Number) = Scale(blk, x)
-*(g1::Scale, g2::MatrixBlock) = Scale(parent(g1)*g2, factor(g1))
-*(g2::MatrixBlock, g1::Scale) = Scale(g2*parent(g1), factor(g1))
-*(x::Number, blk::Scale) = Scale(blk, x)
-*(blk::Scale, x::Number) = Scale(blk, x)
-*(g1::Scale, g2::Scale) = Scale(parent(g1)*parent(g2), factor(g1)*factor(g2))
-
 ############### StaticScale ##################
 """
     StaticScale{X, BT, N, T} <: AbstractScale{N, T}
@@ -103,14 +93,6 @@ similar(c::StaticScale{X}) where X = StaticScale{X}(similar(c.block))
 copy(c::StaticScale{X}) where X = StaticScale{X}(copy(c.block))
 chblock(pb::StaticScale{X}, blk::MatrixBlock) where {X} = StaticScale{X}(blk)
 
-*(g1::StaticScale, g2::MatrixBlock) = StaticScale(parent(g1)*g2, factor(g1))
-*(g2::MatrixBlock, g1::StaticScale) = StaticScale(g2*parent(g1), factor(g1))
-*(x::Number, blk::StaticScale) = StaticScale(blk, x)
-*(blk::StaticScale, x::Number) = StaticScale(blk, x)
-*(g1::StaticScale, g2::StaticScale) = StaticScale(parent(g1)*parent(g2), factor(g1)*factor(g2))
-
--(blk::AbstractScale) = chfactor(blk, -factor(blk))
-
 const Pos{BT, N, T} = StaticScale{1+0im, BT, N, T}
 const Neg{BT, N, T} = StaticScale{-1+0im, BT, N, T}
 const Im{BT, N, T} = StaticScale{1im, BT, N, T}
@@ -125,7 +107,6 @@ function print_block(io::IO, c::Neg)
     printstyled(io, "[-] "; bold=true, color=:yellow)
     print_block(io, c.block)
 end
--(blk::Neg) = blk.block
 
 function print_block(io::IO, c::Im)
     printstyled(io, "[i] "; bold=true, color=:yellow)

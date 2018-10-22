@@ -50,6 +50,11 @@ end
 
 @testset "chain" begin
     @test chain(X, Y, Z) isa ChainBlock
+    @test chain(1,[X, Y, Z]) isa ChainBlock
+    @test chain(1) isa ChainBlock
+    @test 3 |> chain() isa ChainBlock
+    @test chain(3) isa ChainBlock
+    @test chain(3, put(3=>X)) isa ChainBlock
 end
 
 @testset "kron" begin
@@ -170,4 +175,13 @@ end
 
 @testset "TagBlock" begin
     include("TagBlock.jl")
+end
+
+@testset "add" begin
+    @test add(X, Y, Z) isa AddBlock
+    @test add(1,[X, Y, Z]) isa AddBlock
+    @test add(1) isa AddBlock
+    @test 3 |> add() isa AddBlock
+    @test add(3) isa AddBlock
+    @test add(3, put(3=>X)) isa AddBlock
 end

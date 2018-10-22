@@ -34,7 +34,7 @@ end
 ==(lhs::CompositeBlock, rhs::CompositeBlock) = false
 
 include("ChainBlock.jl")
-include("Adder.jl")
+include("AddBlock.jl")
 include("KronBlock.jl")
 include("Roller.jl")
 include("PauliString.jl")

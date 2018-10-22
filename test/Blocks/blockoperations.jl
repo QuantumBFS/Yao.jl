@@ -29,3 +29,5 @@ end
     op = put(4, 3=>X)
     @test expect(op, dm) ≈ expect(op, reg)
 end
+
+include("linalg.jl")

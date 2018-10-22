@@ -41,5 +41,6 @@ include("IOSyntax.jl")
 
 include("pauligroup.jl")
 include("blockoperations.jl")
+include("linalg.jl")
 
 end
