@@ -18,6 +18,7 @@ export chain
 """
     chain([T], n::Int) -> ChainBlock
     chain([n], blocks) -> ChainBlock
+    chain(blocks...) -> ChainBlock
 
 Returns a `ChainBlock`. This factory method can be called lazily if you
 missed the total number of qubits.
@@ -25,7 +26,7 @@ missed the total number of qubits.
 This chains several blocks with the same size together.
 """
 function chain end
-chain(::Type{T}, n::Int) where T = ChainBlock{n, T}([])
+chain(::Type{T}, n::Int) where T = ChainBlock{n, T}(MatrixBlock[])
 chain(n::Int) = chain(DefaultType, n)
 chain() = n -> chain(n)
 
@@ -48,6 +49,44 @@ function chain(blocks::MatrixBlock...,)
 end
 
 chain(blocks) = n -> chain(n, blocks)
+
+# 2.2 add block
+export add
+
+"""
+    add([T], n::Int) -> AddBlock
+    add([n], blocks) -> AddBlock
+    add(blocks...) -> AddBlock
+
+Returns a `AddBlock`. This factory method can be called lazily if you
+missed the total number of qubits.
+
+This adds several blocks with the same size together.
+"""
+function add end
+add(::Type{T}, n::Int) where T = AddBlock{n, T}(MatrixBlock[])
+add(n::Int) = add(DefaultType, n)
+add() = n -> add(n)
+
+function add(n::Int, blocks...,)
+    AddBlock([parse_block(n, each) for each in blocks])
+end
+
+add(blocks...,) = n -> add(n, blocks...,)
+
+function add(n::Int, blocks)
+    AddBlock([parse_block(n, each) for each in blocks])
+end
+
+function add(n::Int, f::Function)
+    AddBlock([f(n)])
+end
+
+function add(blocks::MatrixBlock...,)
+    AddBlock(blocks...,)
+end
+
+add(blocks) = n -> add(n, blocks)
 
 # 2.2 kron block
 import Base: kron
@@ -242,10 +281,10 @@ paulistring(blocks...,) = N->paulistring(N, blocks...,)
 
 export timeevolve
 """
-    timeevolve([block::MatrixBlock], t::Real) -> TimeEvolution
+    timeevolve({block::MatrixBlock}, t::Real; tol::Real=1e-7) -> TimeEvolution
 
 Make a time machine! If block is not provided, it will become lazy.
 """
 function timeevolve end
-timeevolve(block::MatrixBlock, t::Real) = TimeEvolution(block, t)
-timeevolve(t::Real) = block -> TimeEvolution(block, t)
+timeevolve(block::MatrixBlock, t::Number; tol::Real=1e-7) = TimeEvolution(block, t, tol=tol)
+timeevolve(t::Number; tol::Real=1e-7) = block -> TimeEvolution(block, t, tol=tol)

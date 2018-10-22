@@ -30,6 +30,11 @@ using Yao.Blocks: PutBlock
     @test setiparameters!(copy(pb)) == pb
     @test setiparameters!(copy(pb), :random) == pb
     @test setiparameters!(copy(pb), :zero) == pb
+
+    pb = PutBlock{1000}(X, (3,))
+    @test pb |> ishermitian
+    @test pb |> isunitary
+    @test pb |> isreflexive
 end
 
 @testset "dispatch!" begin

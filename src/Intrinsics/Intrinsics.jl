@@ -37,7 +37,7 @@ include("MacroTools.jl")
 include("TupleTools.jl")
 
 import LinearAlgebra: ishermitian
-export isunitary, isreflexive, ishermitian
+export isunitary, isreflexive, ishermitian, iscommute
 include("OperatorTraits.jl")
 
 # Matrices

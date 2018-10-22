@@ -144,3 +144,9 @@ end
     @test all(isapprox.(gradse, gradsn, atol=1e-4))
 end
 
+@testset "scale" begin
+    scale(X, 3) isa Scale
+    X |> scale(3) isa Scale
+    staticscale(X, 3) isa StaticScale
+    X |> staticscale(3) isa StaticScale
+end

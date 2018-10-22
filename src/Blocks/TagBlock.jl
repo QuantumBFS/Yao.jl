@@ -1,10 +1,10 @@
 export TagBlock
-abstract type TagBlock{N, T} <: AbstractContainer{N, T} end
+"""
+    TagBlock{N, T} <: AbstractContainer{N, T}
 
-for METHOD in (:ishermitian, :isreflexive, :isunitary, :nqubits, :usedbits,
-               :datatype, :length, :eltype, :blocks, :start, :nactive)
-    @eval $METHOD(dg::TagBlock) = $METHOD(parent(dg))
-end
+TagBlock is a special kind of Container, it is a size keeper.
+"""
+abstract type TagBlock{N, T} <: AbstractContainer{N, T} end
 
 ==(a::TB, b::TB) where {TB<:TagBlock} = parent(a) == parent(b)
 getindex(c::TagBlock, index...) = getindex(parent(c), index...)
@@ -22,6 +22,10 @@ include("Scale.jl")
 include("Diff.jl")
 
 ########## common interfaces are defined here! ##############
-for BLOCKTYPE in (:Daggered, :CachedBlock, :Scale, :BPDiff, :QDiff)
+for BLOCKTYPE in (:Daggered, :CachedBlock, :StaticScale, :Scale, :BPDiff, :QDiff)
     @eval parent(dg::$BLOCKTYPE) = dg.block
+end
+
+for METHOD in (:usedbits,)
+    @eval $METHOD(dg::TagBlock) = $METHOD(parent(dg))
 end
