@@ -9,6 +9,12 @@ using Yao.Intrinsics
 
     @test applymatrix(te) ≈ mat(te)
     @test applymatrix(adjoint(te)) ≈ applymatrix(te)'
+    @test isunitary(te)
+
+    tei = TimeEvolution(hami, 0.2im)
+    @test applymatrix(tei) ≈ mat(tei)
+    @test applymatrix(adjoint(tei)) ≈ applymatrix(tei)'
+    @test !isunitary(tei)
 
     # copy
     cte = copy(te)

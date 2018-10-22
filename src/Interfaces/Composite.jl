@@ -286,5 +286,5 @@ export timeevolve
 Make a time machine! If block is not provided, it will become lazy.
 """
 function timeevolve end
-timeevolve(block::MatrixBlock, t::Real) = TimeEvolution(block, t)
-timeevolve(t::Real) = block -> TimeEvolution(block, t)
+timeevolve(block::MatrixBlock, t::Number) = TimeEvolution(block, t)
+timeevolve(t::Number) = block -> TimeEvolution(block, t)

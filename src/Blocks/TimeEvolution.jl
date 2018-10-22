@@ -1,24 +1,26 @@
 export TimeEvolution
 
 """
-    TimeEvolution{N, T, GT <: MatrixBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
+    TimeEvolution{N, TT, GT} <: PrimitiveBlock{N, ComplexF64}
 
-TimeEvolution, with GT hermitian
+    TimeEvolution(H::GT, t::TT) -> TimeEvolution
+
+TimeEvolution, where GT is block type. input matrix should be hermitian.
 """
-mutable struct TimeEvolution{N, T, GT <: MatrixBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
+mutable struct TimeEvolution{N, TT, GT} <: PrimitiveBlock{N, ComplexF64}
     H::GT
-    t::T
-    function TimeEvolution{N, T, GT}(H::GT, t) where {N, T, GT <: MatrixBlock{N, Complex{T}}}
+    t::TT
+    function TimeEvolution{N, TT, GT}(H::GT, t) where {N, TT, GT <: MatrixBlock{N}}
         # we ignore hermitian check here for efficiency!
         #ishermitian(H) || throw(ArgumentError("Gate type $GT is not hermitian!"))
-        new{N, T, GT}(H, T(t))
+        new{N, TT, GT}(H, TT(t))
     end
 end
-TimeEvolution(H::GT, t) where {N, T, GT<:MatrixBlock{N, Complex{T}}} = TimeEvolution{N, T, GT}(H, t)
+TimeEvolution(H::GT, t::TT) where {N, TT<:Number, GT<:MatrixBlock{N}} = TimeEvolution{N, TT, GT}(H, t)
 
-mat(te::TimeEvolution{N, T}) where {N, T} = exp(Matrix(-im*te.t*mat(te.H)))
+mat(te::TimeEvolution{N}) where N = exp(Matrix(-im*te.t*mat(te.H)))
 
-function apply!(reg::DefaultRegister, te::TimeEvolution{N, T}) where {N, T}
+function apply!(reg::DefaultRegister, te::TimeEvolution{N}) where N
     st = state(reg)
     Hmat = mat(te.H)
     LinearMap(x->apply!(register(x), te.H), size(st, 1))
@@ -28,7 +30,7 @@ function apply!(reg::DefaultRegister, te::TimeEvolution{N, T}) where {N, T}
     reg
 end
 
-adjoint(blk::TimeEvolution) = TimeEvolution(blk.H, -blk.t)
+adjoint(blk::TimeEvolution) = TimeEvolution(blk.H, -blk.t')
 
 copy(te::TimeEvolution) = TimeEvolution(te.H, te.t)
 
@@ -37,10 +39,10 @@ niparameters(::Type{<:TimeEvolution}) = 1
 iparameters(x::TimeEvolution) = x.t
 setiparameters!(r::TimeEvolution, param::Real) = (r.t = param; r)
 
-==(lhs::TimeEvolution{TA, GTA}, rhs::TimeEvolution{TB, GTB}) where {TA, TB, GTA, GTB} = false
-==(lhs::TimeEvolution{TA, GT}, rhs::TimeEvolution{TB, GT}) where {TA, TB, GT} = lhs.t == rhs.t
+isunitary(te::TimeEvolution) = ishermitian(te.H) && (te.t isa Real)
+==(lhs::TimeEvolution, rhs::TimeEvolution) = lhs.H == rhs.H && lhs.t == rhs.t
 
-function hash(gate::TimeEvolution{T, GT}, h::UInt) where {T, GT}
+function hash(gate::TimeEvolution{<:Any, <:Any, GT}, h::UInt) where GT
     hashkey = hash(objectid(gate), h)
     hashkey = hash(gate.t, hashkey)
     hashkey = hash(gate.H, hashkey)
