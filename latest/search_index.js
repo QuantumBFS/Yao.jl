@@ -593,6 +593,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/interfaces/#Yao.Interfaces.add",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.add",
+    "category": "function",
+    "text": "add([T], n::Int) -> AddBlock\nadd([n], blocks) -> AddBlock\nadd(blocks...) -> AddBlock\n\nReturns a AddBlock. This factory method can be called lazily if you missed the total number of qubits.\n\nThis adds several blocks with the same size together.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/interfaces/#Yao.Interfaces.addbit-Tuple{Int64}",
     "page": "Interfaces",
     "title": "Yao.Interfaces.addbit",
@@ -613,7 +621,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Yao.Interfaces.chain",
     "category": "function",
-    "text": "chain([T], n::Int) -> ChainBlock\nchain([n], blocks) -> ChainBlock\n\nReturns a ChainBlock. This factory method can be called lazily if you missed the total number of qubits.\n\nThis chains several blocks with the same size together.\n\n\n\n\n\n"
+    "text": "chain([T], n::Int) -> ChainBlock\nchain([n], blocks) -> ChainBlock\nchain(blocks...) -> ChainBlock\n\nReturns a ChainBlock. This factory method can be called lazily if you missed the total number of qubits.\n\nThis chains several blocks with the same size together.\n\n\n\n\n\n"
 },
 
 {
@@ -673,7 +681,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{M}, Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s307} where #s307<:AbstractBlock}} where M",
+    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{M}, Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s321} where #s321<:AbstractBlock}} where M",
     "page": "Interfaces",
     "title": "Yao.Interfaces.put",
     "category": "method",
@@ -741,7 +749,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Interfaces",
     "title": "Yao.Interfaces.timeevolve",
     "category": "function",
-    "text": "timeevolve([block::MatrixBlock], t::Real) -> TimeEvolution\n\nMake a time machine! If block is not provided, it will become lazy.\n\n\n\n\n\n"
+    "text": "timeevolve({block::MatrixBlock}, t::Real; tol::Real=1e-7) -> TimeEvolution\n\nMake a time machine! If block is not provided, it will become lazy.\n\n\n\n\n\n"
 },
 
 {
@@ -777,7 +785,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Pair{Int64,#s307} where #s307<:MatrixBlock,N} where N}",
+    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Pair{Int64,#s321} where #s321<:MatrixBlock,N} where N}",
     "page": "Interfaces",
     "title": "Base.kron",
     "category": "method",
@@ -1305,6 +1313,22 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.AbstractScale",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.AbstractScale",
+    "category": "type",
+    "text": "AbstractScale{N, T} <: TagBlock{N, T}\n\nBlock for scaling siblings by a factor of X.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.AddBlock",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.AddBlock",
+    "category": "type",
+    "text": "AddBlock{N, T} <: CompositeBlock{N, T}\n\nAdding multiple blocks into one.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.BPDiff",
     "page": "Blocks System",
     "title": "Yao.Blocks.BPDiff",
@@ -1509,7 +1533,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.Scale",
     "category": "type",
-    "text": "Scale{X, N, T, BT} <: TagBlock{N, T}\n\nScale{X}(blk::MatrixBlock)\nScale{X, N, T, BT}(blk::MatrixBlock)\n\nScale Block, by a factor of X, notice X is static!\n\n\n\n\n\n"
+    "text": "Scale{BT, FT, N, T} <: AbstractScale{N, T}\n\nScale(block, factor) -> Scale\n\nScale Block.\n\n\n\n\n\n"
 },
 
 {
@@ -1529,11 +1553,27 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.StaticScale",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.StaticScale",
+    "category": "type",
+    "text": "StaticScale{X, BT, N, T} <: AbstractScale{N, T}\n\nStaticScale{X}(blk::MatrixBlock)\nStaticScale{X, N, T, BT}(blk::MatrixBlock)\n\nScale Block, by a static factor of X, notice X is static!\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.TagBlock",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.TagBlock",
+    "category": "type",
+    "text": "TagBlock{N, T} <: AbstractContainer{N, T}\n\nTagBlock is a special kind of Container, it is a size keeper.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.TimeEvolution",
     "page": "Blocks System",
     "title": "Yao.Blocks.TimeEvolution",
     "category": "type",
-    "text": "TimeEvolution{N, T, GT <: MatrixBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}\n\nTimeEvolution, with GT hermitian\n\n\n\n\n\n"
+    "text": "TimeEvolution{N, TT, GT} <: PrimitiveBlock{N, ComplexF64}\n\nTimeEvolution(H::GT, t::TT; tol::Real=1e-7) -> TimeEvolution\n\nTimeEvolution, where GT is block type. input matrix should be hermitian.\n\n\n\n\n\n"
 },
 
 {
@@ -1585,6 +1625,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/blocks/#Yao.Blocks.chfactor",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.chfactor",
+    "category": "function",
+    "text": "chfactor(blk::AbstractScale) -> AbstractScale\n\nchange scaling factor of blk.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/blocks/#Yao.Blocks.chsubblocks-Tuple{AbstractBlock,Any}",
     "page": "Blocks System",
     "title": "Yao.Blocks.chsubblocks",
@@ -1614,6 +1662,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.expect",
     "category": "function",
     "text": "expect(op::AbstractBlock, reg::AbstractRegister{B}) -> Vector\nexpect(op::AbstractBlock, dm::DensityMatrix{B}) -> Vector\n\nexpectation value of an operator.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.factor",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.factor",
+    "category": "function",
+    "text": "factor(blk::AbstractScale) -> Number\n\nget scaling factor of blk.\n\n\n\n\n\n"
 },
 
 {
@@ -1790,6 +1846,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Blocks.cache_type",
     "category": "method",
     "text": "cache_type(::Type) -> DataType\n\nA type trait that defines the element type that a CacheFragment will use.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/blocks/#Yao.Blocks.istraitkeeper",
+    "page": "Blocks System",
+    "title": "Yao.Blocks.istraitkeeper",
+    "category": "function",
+    "text": "istraitkeeper(block) -> Bool\n\nchange the block of a container.\n\n\n\n\n\n"
 },
 
 {
@@ -2078,6 +2142,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Intrinsics.indices_with",
     "category": "method",
     "text": "indices_with(num_bit::Int, poss::Vector{Int}, vals::Vector{Int}) -> Vector{Int}\n\nReturn indices with specific positions poss with value vals in a hilbert space of num_bit qubits.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/intrinsics/#Yao.Intrinsics.iscommute-Tuple",
+    "page": "Intrinsics",
+    "title": "Yao.Intrinsics.iscommute",
+    "category": "method",
+    "text": "iscommute(ops...) -> Bool\n\ncheck if operators are commute.\n\n\n\n\n\n"
 },
 
 {
