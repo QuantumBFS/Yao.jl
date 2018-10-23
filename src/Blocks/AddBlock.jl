@@ -65,6 +65,7 @@ mat(c::AddBlock) = mapreduce(x->mat(x), +, c.blocks)
 
 function apply!(r::AbstractRegister, c::AddBlock)
     length(c) == 0 && return r
+    length(c) == 1 && return apply!(r, c.blocks[])
     res = mapreduce(blk->apply!(copy(r), blk), +, c.blocks[1:end-1])
     apply!(r, c.blocks[end])
     r.state += res.state
