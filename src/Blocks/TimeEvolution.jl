@@ -31,7 +31,7 @@ function apply!(reg::DefaultRegister, te::TimeEvolution{N}) where N
     reg
 end
 
-adjoint(blk::TimeEvolution) = TimeEvolution(blk.H, -blk.t', tol=te.tol)
+adjoint(blk::TimeEvolution) = TimeEvolution(blk.H, -blk.t', tol=blk.tol)
 
 copy(te::TimeEvolution) = TimeEvolution(te.H, te.t, tol=te.tol)
 

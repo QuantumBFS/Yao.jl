@@ -52,10 +52,10 @@ end
     @test g[1] isa XGate
     @test g[2] isa YGate
 
-    @test iterate(g) == iterate(g.block)
-    @test length(g) == length(g.block)
+    #@test iterate(g) == iterate(g.block)
+    #@test length(g) == length(g.block)
 
-    @test eltype(g) == eltype(g.block)
+    @test datatype(g) == datatype(g.block)
     @test subblocks(g) == (g.block,)
 
     gg = chain(g, g)

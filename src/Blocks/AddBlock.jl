@@ -38,7 +38,7 @@ subblocks(c::AddBlock) = c.blocks
 chsubblocks(pb::AddBlock, blocks) = AddBlock(blocks)
 usedbits(c::AddBlock) = unique(vcat([usedbits(b) for b in subblocks(c)]...))
 
-ishermitian(ad::AddBlock) = ishermitian.(ad.blocks) |> all || ishermitian(mat(ad))
+ishermitian(ad::AddBlock) = all(ishermitian, ad.blocks) || ishermitian(mat(ad))
 
 # Additional Methods for AddBlock
 push!(c::AddBlock{N}, val::MatrixBlock{N}) where N = (push!(c.blocks, val); c)

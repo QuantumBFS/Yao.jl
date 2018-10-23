@@ -18,13 +18,13 @@ nqubits(::MatrixBlock{N}) where N = N
 
 # Traits
 isunitary(x::MatrixBlock) = isunitary(mat(x))
-isunitary(::Type{X}) where {X <: MatrixBlock} = isunitary(mat(X))
+#isunitary(::Type{X}) where {X <: MatrixBlock} = isunitary(mat(X))
 
 isreflexive(x::MatrixBlock) = isreflexive(mat(x))
-isreflexive(::Type{X}) where {X <: MatrixBlock} = isreflexive(mat(X))
+#isreflexive(::Type{X}) where {X <: MatrixBlock} = isreflexive(mat(X))
 
 ishermitian(x::MatrixBlock) = ishermitian(mat(x))
-ishermitian(::Type{X}) where {X <: MatrixBlock} = ishermitian(mat(X))
+#ishermitian(::Type{X}) where {X <: MatrixBlock} = ishermitian(mat(X))
 
 _default_iscommute(op1, op2) = length(intersect(usedbits(op1), usedbits(op2))) == 0 || iscommute(mat(op1), mat(op2))
 iscommute(op1::MatrixBlock{N}, op2::MatrixBlock{N}) where N = _default_iscommute(op1, op2)
