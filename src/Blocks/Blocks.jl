@@ -39,8 +39,8 @@ include("Measure.jl")
 include("Function.jl")
 include("IOSyntax.jl")
 
-include("PauliGroup.jl")
-include("BlockOperations.jl.jl")
+include("pauli_group.jl.jl")
+include("block_operations.jl")
 include("linalg.jl")
 
 end
