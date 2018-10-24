@@ -18,9 +18,9 @@ subblocks(c::AbstractContainer) = (c |> block,)
 chsubblocks(pb::AbstractContainer, blk) = chblock(pb, blk |> first)
 
 """
-    block(container)
+    block(container::AbstractContainer) -> AbstractBlock
 
-get an iterator that iterate through all sub-blocks.
+get the contained block (i.e. subblock) of a container.
 """
 function block end
 
@@ -30,6 +30,20 @@ function block end
 change the block of a container.
 """
 function chblock end
+
+"""
+    istraitkeeper(block) -> Bool
+
+change the block of a container.
+"""
+function istraitkeeper end
+istraitkeeper(::AbstractContainer) = Val(false)
+
+for METHOD in (:ishermitian, :isreflexive, :isunitary)
+    @eval $METHOD(c::AbstractContainer) = $METHOD(c, istraitkeeper(c))
+    @eval $METHOD(c::AbstractContainer, ::Val{true}) = $METHOD(block(c))
+    @eval $METHOD(c::AbstractContainer, ::Val{false}) = $METHOD(mat(c))
+end
 
 include("PutBlock.jl")
 include("Control.jl")

@@ -18,6 +18,8 @@ adjoint(blk::Daggered) = blk.block
 # sometimes, using daggered cached blocks can be inefficient, we leave this problem to users.
 # adjoint(blk::CachedBlock) = CachedBlock(blk.server, adjoint(blk.block), blk.level)
 
+istraitkeeper(::Daggered) = Val(true)
+
 mat(blk::Daggered) = mat(blk.block)'
 
 # take care of hash_key method!

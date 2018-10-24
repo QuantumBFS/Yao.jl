@@ -42,6 +42,9 @@ mat(c::ControlBlock{N, BT, C}) where {N, BT, C} = cunmat(N, c.ctrl_qubits, c.val
 apply!(reg::DefaultRegister, c::ControlBlock) = (cunapply!(reg.state |> matvec, c.ctrl_qubits, c.vals, mat(c.block), c.addrs); reg)
 adjoint(blk::ControlBlock{N}) where N = ControlBlock{N}(blk.ctrl_qubits, blk.vals, adjoint(blk.block), blk.addrs)
 
+istraitkeeper(::ControlBlock) = Val(true)
+iscommute(x::ControlBlock{N}, y::ControlBlock{N}) where N = x.addrs == y.addrs && x.ctrl_qubits == y.ctrl_qubits ? iscommute(x.block, y.block) : _default_iscommute(x, y)
+
 addrs(c::ControlBlock) = c.addrs
 usedbits(c::ControlBlock) = [c.ctrl_qubits..., c.addrs[usedbits(c.block)]...]
 chblock(pb::ControlBlock{N}, blk::AbstractBlock) where {N} = ControlBlock{N}(pb.ctrl_qubits, pb.vals, blk, pb.addrs)

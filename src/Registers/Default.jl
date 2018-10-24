@@ -1,6 +1,5 @@
 export DefaultRegister
 
-
 """
     DefaultRegister{B, T} <: AbstractRegister{B, T}
 
@@ -35,28 +34,40 @@ end
 register(raw::AbstractVector) = register(reshape(raw, :, 1))
 
 # Required Properties
-
 nqubits(r::DefaultRegister{B}) where B = log2i(length(r.state) ÷ B)
-nactive(r::DefaultRegister) = state(r) |> nqubits
+nactive(r::DefaultRegister) = state(r) |> nactive
 state(r::DefaultRegister) = r.state
+
+"""
+    relaxedvec(r::DefaultRegister) -> AbstractArray
+
+Return a matrix (vector) for B>1 (B=1) as a vector representation of state, with all qubits activated.
+"""
 relaxedvec(r::DefaultRegister{B}) where B = reshape(r.state, :, B)
 relaxedvec(r::DefaultRegister{1}) = vec(r.state)
+"""
+    statevec(r::DefaultRegister) -> AbstractArray
+
+Return a state matrix/vector by droping the last dimension of size 1.
+"""
 statevec(r::DefaultRegister) = r.state |> matvec
+"""
+    hypercubic(r::DefaultRegister) -> AbstractArray
+
+Return the hypercubic form (high dimensional tensor) of this register, only active qubits are considered.
+"""
 hypercubic(reg::DefaultRegister{B}) where B = reshape(reg.state, ntuple(i->2, Val(nactive(reg)))..., :)
+"""
+    rank3(reg::DefaultRegister) -> Array{T, 3}
+
+Return the rank 3 tensor representation of state, the 3 dimensions are (activated space, remaining space, batch dimension).
+"""
 rank3(reg::DefaultRegister{B}) where B = reshape(reg.state, size(reg.state, 1), :, B)
+
 copy(r::DefaultRegister{B}) where B = DefaultRegister{B}(copy(state(r)))
-copyto!(reg1::RT, reg2::RT) where {RT<:AbstractRegister} = (copyto!(reg1.state, reg2.state); reg1)
-normalize!(r::DefaultRegister) = (batch_normalize!(r.state); r)
+copyto!(reg1::RT, reg2::RT) where {RT<:DefaultRegister} = (copyto!(reg1.state, reg2.state); reg1)
 
 similar(r::DefaultRegister{B, T}) where {B, T} = DefaultRegister{B}(similar(r.state))
-
-"""
-    stack(regs::DefaultRegister...) -> DefaultRegister
-
-stack multiple registers into a batch.
-"""
-stack(regs::DefaultRegister...) = DefaultRegister{sum(nbatch, regs)}(hcat((reg.state for reg in regs)...,))
-Base.repeat(reg::DefaultRegister{B}, n::Int) where B = DefaultRegister{B*n}(hcat((reg.state for i=1:n)...,))
 
 """
     product_state([::Type{T}], n::Int, config::Int, nbatch::Int=1) -> DefaultRegister
@@ -89,40 +100,19 @@ for FUNC in [:zero_state, :rand_state, :uniform_state]
 end
 product_state(n::Int, config::Integer, nbatch::Int=1) = product_state(DefaultType, n, config, nbatch)
 
-function probs(r::DefaultRegister{1})
-    if size(r.state, 2) == 1
-        return vec(r.state .|> abs2)
-    else
-        return dropdims(sum(r.state .|> abs2, dims=2), dims=2)
-    end
+function summary(io::IO, r::DefaultRegister{B, T}) where {B, T}
+    println(io, "DefaultRegister{", B, ", ", T, "}")
 end
 
-function probs(r::DefaultRegister{B}) where B
-    if size(r.state, 2) == B
-        return r.state .|> abs2
-    else
-        probs = r |> rank3 .|> abs2
-        return dropdims(sum(probs, dims=2), dims=2)
-    end
+function show(io::IO, r::DefaultRegister{B, T}) where {B, T}
+    summary(io, r)
+    print(io, "    active qubits: ", nactive(r), "/", nqubits(r))
 end
 
-"""
-    extend!(r::DefaultRegister, n::Int) -> DefaultRegister
-    extend!(n::Int) -> Function
-
-extend the register by n bits in state |0>.
-i.e. |psi> -> |000> ⊗ |psi>, extended bits have higher indices.
-If only an integer is provided, then perform lazy evaluation.
-"""
-function extend!(r::DefaultRegister{B, T}, n::Int) where {B, T}
-    mat = r.state
-    M, N = size(mat)
-    r.state = zeros(T, M*(1<<n), N)
-    r.state[1:M, :] = mat
-    r
+@inline function viewbatch(reg::DefaultRegister, ind::Int)
+    st = reg |> rank3
+    @inbounds register(view(st, :, :, ind), B=1)
 end
-
-extend!(n::Int) = r->extend!(r, n)
 
 function join(reg1::DefaultRegister{B, T1}, reg2::DefaultRegister{B, T2}) where {B, T1, T2}
     s1 = reg1 |> rank3
@@ -130,92 +120,27 @@ function join(reg1::DefaultRegister{B, T1}, reg2::DefaultRegister{B, T2}) where 
     T = promote_type(T1, T2)
     state = Array{T,3}(undef, size(s1, 1)*size(s2, 1), size(s1, 2)*size(s2, 2), B)
     for b = 1:B
-        @inbounds @views state[:,:,b] = kron(s2[:,:,b], s1[:,:,b])
+        @inbounds @views state[:,:,b] = kron(s1[:,:,b], s2[:,:,b])
     end
     DefaultRegister{B}(reshape(state, size(state, 1), :))
 end
-join(reg1::DefaultRegister{1}, reg2::DefaultRegister{1}) = DefaultRegister{1}(kron(reg2.state, reg1.state))
+join(reg1::DefaultRegister{1}, reg2::DefaultRegister{1}) = DefaultRegister{1}(kron(reg1.state, reg2.state))
 
-"""
-    isnormalized(reg::DefaultRegister) -> Bool
-
-Return true if a register is normalized else false.
-"""
-isnormalized(reg::DefaultRegister) = all(sum(copy(reg) |> relax! |> probs, dims=1) .≈ 1)
-
-# we convert state to a vector to use
-# intrincs like gemv, when nremain is
-# 0 and the state is actually a vector
-*(op::AbstractMatrix, r::AbstractRegister) = op * statevec(r)
-
-function Base.summary(io::IO, r::DefaultRegister{B, T}) where {B, T}
-    println(io, "DefaultRegister{", B, ", ", T, "}")
+function addbit!(r::DefaultRegister{B, T}, n::Int) where {B, T}
+    mat = r.state
+    M, N = size(mat)
+    r.state = zeros(T, M*(1<<n), N)
+    r.state[1:M, :] = mat
+    r
 end
 
-function Base.show(io::IO, r::DefaultRegister{B, T}) where {B, T}
-    summary(io, r)
-    print(io, "    active qubits: ", nactive(r), "/", nqubits(r))
-end
+addbit!(n::Int) = r->addbit!(r, n)
 
-############## Reordering #################
-function reorder!(reg::DefaultRegister, orders)
-    for i in 1:size(reg.state, 2)
-        reg.state[:,i] = reorder(reg.state[:, i], orders)
-    end
-    reg
-end
+repeat(reg::DefaultRegister{B}, n::Int) where B = DefaultRegister{B*n}(hcat((reg.state for i=1:n)...,))
 
-reorder!(orders::Int...) = reg::DefaultRegister -> reorder!(reg, [orders...])
+############ ConjDefaultRegister ##############
+const ConjDefaultRegister{B, T, RT} = ConjRegister{B, T, RT} where RT<:DefaultRegister{B, T}
 
-invorder!(reg::DefaultRegister) = reorder!(reg, collect(nactive(reg):-1:1))
-
-function addbit!(reg::DefaultRegister{B, T}, n::Int) where {B, T}
-    state = zeros(T, size(reg.state, 1)*(1<<n), size(reg.state, 2))
-    state[1:size(reg.state, 1), :] = reg.state
-    reg.state = state
-    reg
-end
-
-function reset!(reg::DefaultRegister)
-    reg.state .= 0
-    reg.state[1,:] .= 1
-    reg
-end
-
-function fidelity(reg1::DefaultRegister{B}, reg2::DefaultRegister{B}) where B
-    state1 = reg1 |> rank3
-    state2 = reg2 |> rank3
-    size(state1) == size(state2) || throw(DimensionMismatch("Register size not match!"))
-    # 1. pure state
-    if size(state1, 2) == 1
-        return map(b->fidelity_pure(state1[:,1,b], state2[:,1,b]), 1:B)
-    else
-        return map(b->fidelity_mix(state1[:,:,b], state2[:,:,b]), 1:B)
-    end
-end
-
-function tracedist(reg1::DefaultRegister{B}, reg2::DefaultRegister{B}) where B
-    size(reg1.state, 2) == B ? sqrt.(1 .- fidelity(reg1, reg2).^2) : throw(MethodError("trace distance for non-pure state is not defined!"))
-end
-
-################### ConjRegister ##################
-const ConjRegister{B, T, RT} = Adjoint{T, RT} where RT<:AbstractRegister{B, T}
-Base.adjoint(reg::DefaultRegister{B, T}) where {B, T} = Adjoint{T, typeof(reg)}(reg)
-
-function Base.show(io::IO, c::ConjRegister)
-    print(io, "$(parent(c)) (Daggered)")
-end
-Base.show(io::IO, mime::MIME"text/plain", c::ConjRegister{<:Any, T}) where T = Base.show(io, c)
-
-state(bra::ConjRegister) where T = Adjoint(parent(bra) |> state)
-statevec(bra::ConjRegister) where T = Adjoint(parent(bra) |> statevec)
-relaxedvec(bra::ConjRegister) where T = Adjoint(parent(bra) |> relaxedvec)
-
-*(bra::ConjRegister, ket::DefaultRegister) = statevec(bra) * statevec(ket)
-
-################ Broadcasting ###################
-function broadcastable(reg::DefaultRegister{B}) where B
-    st = reg |> rank3
-    Tuple(register(view(st, :, :, i)) for i = 1:B)
-end
-broadcastable(reg::DefaultRegister{1}) = Ref{reg}
+statevec(bra::ConjDefaultRegister) = Adjoint(parent(bra) |> statevec)
+relaxedvec(bra::ConjDefaultRegister) = Adjoint(parent(bra) |> relaxedvec)
+rank3(bra::ConjDefaultRegister) = Adjoint(parent(bra) |> rank3)

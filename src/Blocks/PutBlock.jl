@@ -26,6 +26,9 @@ copy(x::PutBlock) = typeof(x)(x.block, x.addrs)
 adjoint(blk::PutBlock{N}) where N = PutBlock{N}(adjoint(blk.block), blk.addrs)
 chblock(pb::PutBlock{N, C}, blk::MatrixBlock{C}) where {N, C} = PutBlock{N}(blk, pb.addrs)
 
+istraitkeeper(::PutBlock) = Val(true)
+iscommute(x::PutBlock{N}, y::PutBlock{N}) where N = x.addrs == y.addrs ? iscommute(x.block, y.block) : _default_iscommute(x, y)
+
 # TODO
 mat(pb::PutBlock{N, 1}) where N = u1mat(N, mat(pb.block), pb.addrs...)
 mat(pb::PutBlock{N, C}) where {N, C} = unmat(N, mat(pb.block), pb.addrs)

@@ -13,8 +13,8 @@ using LuxurySparse
 # import package APIs
 import ..Yao
 import ..Yao: DefaultType, nqubits, nactive, invorder
-import ..Registers: focus!, relax!
-import ..Intrinsics: ishermitian, isunitary, isreflexive
+import ..Registers: focus!, relax!, datatype
+import ..Intrinsics: ishermitian, isunitary, isreflexive, iscommute
 import CacheServers: update!, iscached, clear!, pull, iscacheable
 export clear! # TODO: rm this later
 import Base: copy, hash, ==, eltype, show, similar, getindex, setindex!, iterate, length, parent, adjoint, lastindex, push!, append!, prepend!, insert!, +, -, *, /, pop!, popfirst!
@@ -27,7 +27,7 @@ export usedbits, addrs, subblocks, block, chblock, chsubblocks, @const_gate, tok
 export nqubits, nactive, mat, datatype, invorder
 export iparameters, niparameters, setiparameters!, nparameters, parameters, parameter_type, iparameter_type
 export apply!, dispatch!, dispatch!!, applymatrix
-export ishermitian, isunitary, isreflexive
+export ishermitian, isunitary, isreflexive, iscommute
 export parent, adjoint
 export blockfilter, blockfilter!, expect
 
@@ -41,5 +41,6 @@ include("IOSyntax.jl")
 
 include("pauligroup.jl")
 include("blockoperations.jl")
+include("linalg.jl")
 
 end

@@ -22,6 +22,11 @@ function blockfilter!(func, rgs::Vector, blk::AbstractContainer)
 end
 
 import Base: collect
+"""
+    collect(circuit::AbstractBlock, ::Type{BT}) where BT<:AbstractBlock
+
+collect blocks of type `BT` in the block tree with `circuit` as root.
+"""
 function collect(circuit::AbstractBlock, ::Type{BT}) where BT<:AbstractBlock
     Sequential(blockfilter!(x->x isa BT, Vector{BT}([]), circuit))
 end
@@ -106,7 +111,7 @@ expect(op::MatrixBlock, dm::DensityMatrix{1}) = sum(mat(op).*dropdims(dm.state, 
 ################### AutoDiff Circuit ###################
 export gradient, backward!
 """
-    backward!(circuit::MatrixBlock, δ::AbstractRegister) -> AbstractRegister
+    backward!(δ::AbstractRegister, circuit::MatrixBlock) -> AbstractRegister
 
 back propagate and calculate the gradient ∂f/∂θ = 2*Re(∂f/∂ψ*⋅∂ψ*/∂θ), given ∂f/∂ψ*.
 

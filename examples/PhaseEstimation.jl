@@ -29,7 +29,7 @@ function phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::Gener
 
     # calculation
     reg1 |> HGates
-    reg = join(reg1, reg2)
+    reg = join(reg2, reg1)
     reg |> control_circuit |> focus(1:M...) |> iqft
     res = measure(reg, nshot)
     breflect.(M, res)./(1<<M), reg

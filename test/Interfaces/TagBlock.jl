@@ -26,18 +26,40 @@ Return the loss function f = <Zi> (means measuring the ibit-th bit in computatio
 """
 loss_Z1!(circuit::AbstractBlock; ibit::Int=1) = loss_expect!(circuit, put(nqubits(circuit), ibit=>Z))
 
-@testset "diff adjoint" begin
+cnot_entangler(n::Int, pairs) = chain(n, control(n, [ctrl], target=>X) for (ctrl, target) in pairs)
+
+function rotor(nbit::Int, ibit::Int, noleading::Bool=false, notrailing::Bool=false)
+    rt = chain(nbit, [put(nbit, ibit=>Rz(0.0)), put(nbit, ibit=>Rx(0.0)), put(nbit, ibit=>Rz(0.0))])
+    noleading && popfirst!(rt)
+    notrailing && pop!(rt)
+    rt
+end
+
+rotorset(nbit::Int, noleading::Bool=false, notrailing::Bool=false) = chain(nbit, [rotor(nbit, j, noleading, notrailing) for j=1:nbit])
+
+function ibm_diff_circuit(nbit, nlayer, pairs)
+    circuit = chain(nbit)
+
+    ent = cnot_entangler(nbit, pairs)
+    for i = 1:(nlayer + 1)
+        i!=1 && push!(circuit, ent)
+        push!(circuit, rotorset(nbit, i==1, i==nlayer+1))
+    end
+    circuit
+end
+
+@testset "BP diff" begin
     c = put(4, 3=>Rx(0.5)) |> autodiff(:BP)
     cad = c'
     @test mat(cad) == mat(c)'
 
     circuit = chain(4, repeat(4, H, 1:4), put(4, 3=>Rz(0.5)) |> autodiff(:BP), control(2, 1=>X), put(4, 4=>Ry(0.2)) |> autodiff(:BP))
     op = put(4, 3=>Y)
-    loss! = loss_expect!(circuit, op)
     θ = [0.1, 0.2]
+    dispatch!(circuit, θ)
+    loss! = loss_expect!(circuit, op)
     ψ0 = rand_state(4)
-    ψ = copy(ψ0)
-    loss = loss!(ψ, θ)
+    ψ = copy(ψ0) |> circuit
 
     # get gradient
     δ = ψ |> op
@@ -53,10 +75,12 @@ loss_Z1!(circuit::AbstractBlock; ibit::Int=1) = loss_expect!(circuit, put(nqubit
         θ2[i] += 0.5η
         g2[i] = (loss!(copy(ψ0), θ2) - loss!(copy(ψ0), θ1))/η |> real
     end
+    g3 = opdiff.(() -> copy(ψ0) |> circuit, collect(circuit, BPDiff), Ref(op))
     @test isapprox.(g1, g2, atol=1e-5) |> all
+    @test isapprox.(g2, g3, atol=1e-5) |> all
 end
 
-@testset "autodiff" begin
+@testset "constructor" begin
     @test generator(put(4, 1=>Rx(0.1))) == put(4, 1=>X)
     @test generator(Rx(0.1)) == X
     circuit = chain(put(4, 1=>Rx(0.1)), control(4, 2, 1=>Ry(0.3)))
@@ -65,7 +89,7 @@ end
     @test !(c2[2] isa BPDiff)
 end
 
-@testset "numdiff & exactdiff" begin
+@testset "numdiff & opdiff" begin
     @test collect(sequence([X, Y, Z]), XGate) == sequence([X])
 
     c = chain(put(4, 1=>Rx(0.5))) |> autodiff(:QC)
@@ -73,8 +97,8 @@ end
         expect(put(4, 1=>Z), zero_state(4) |> c) |> real # return loss please
     end
 
-    ed = exactdiff(c[1].block) do
-        expect(put(4, 1=>Z), zero_state(4) |> c) |> real
+    ed = opdiff(c[1].block, put(4, 1=>Z)) do
+        zero_state(4) |> c  # a function get output
     end
     @test isapprox(nd, ed, atol=1e-4)
 
@@ -83,7 +107,7 @@ end
     dbs = collect(c, QDiff)
     loss1z() = expect(kron(4, 1=>Z, 2=>X), copy(reg) |> c) |> real  # return loss please
     nd = numdiff.(loss1z, dbs)
-    ed = exactdiff.(loss1z, dbs)
+    ed = opdiff.(()->copy(reg) |> c, dbs, Ref(kron(4, 1=>Z, 2=>X)))
     gd = gradient(c)
     @test gradient(c, :QC) == gd
     @test gradient(c, :BP) == []
@@ -91,3 +115,38 @@ end
     @test ed == gd
 end
 
+@testset "vstat" begin
+    h = randn(16,16)
+    h+=h'
+    V = Vstat(h)
+    prs = [1=>2, 2=>3, 3=>4, 4=>1]
+    c = ibm_diff_circuit(4, 2, prs) |> autodiff(:QC)
+    dispatch!(c, :random)
+    dbs = collect(c, AbstractDiff)
+
+    p0 = zero_state(4) |> c |> probs
+    loss0 = expect(V, p0)
+    gradsn = numdiff.(()->expect(V, zero_state(4) |> c |> probs), dbs)
+    gradse = vstatdiff.(()->zero_state(4) |> c, dbs, Ref(V), p0=p0)
+    @test all(isapprox.(gradse, gradsn, atol=1e-4))
+
+    # 1D
+    h = randn(16)
+    V = Vstat(h)
+    c = ibm_diff_circuit(4, 2, prs) |> autodiff(:QC)
+    dispatch!(c, :random)
+    dbs = collect(c, AbstractDiff)
+
+    p0 = zero_state(4) |> c |> probs
+    loss0 = expect(V, p0)
+    gradsn = numdiff.(()->expect(V, zero_state(4) |> c |> probs), dbs)
+    gradse = vstatdiff.(()->zero_state(4) |> c, dbs, Ref(V))
+    @test all(isapprox.(gradse, gradsn, atol=1e-4))
+end
+
+@testset "scale" begin
+    scale(X, 3) isa Scale
+    X |> scale(3) isa Scale
+    staticscale(X, 3) isa StaticScale
+    X |> staticscale(3) isa StaticScale
+end

@@ -81,9 +81,9 @@ iparameters(x::AbstractBlock) = ()
 
 set intrinsics parameter for block, input `params` can be numbers or :random or :zero.
 """
-function setiparameters end
+function setiparameters! end
 setiparameters!(func::Function, r::AbstractBlock, params::Number...) = setiparameters!(r, func.(r |> iparameters, params)...)
-setiparameters!(r::AbstractBlock, params::Number...) = r
+setiparameters!(r::AbstractBlock, params::Number...) = niparameters(r)==0 ? r : throw(MethodError(setiparameters!, (r, params...)))
 
 setiparameters!(func::Function, r::AbstractBlock, params::Symbol) = setiparameters!(func, r, render_params(r, params)...)
 setiparameters!(r::AbstractBlock, params::Symbol) = setiparameters!(r, render_params(r, params)...)
@@ -135,7 +135,7 @@ random numbers (its behavior is specified by `setiparameters!`) or 0s will be br
 
 using `dispatch!!` is more efficient, but will pop! out all params inplace.
 """
-dispatch!(block::AbstractBlock, params) = dispatch!!(block, params |> collect)
+dispatch!(block::AbstractBlock, params) = dispatch!!(block, [params...])
 dispatch!(func::Function, block::AbstractBlock, params) = dispatch!!(func, block, params |> collect)
 """
     dispatch!!([func::Function], block::AbstractBlock, params) -> AbstractBlock

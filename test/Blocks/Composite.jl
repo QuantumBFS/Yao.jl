@@ -4,6 +4,10 @@ using Test, Random, LinearAlgebra, SparseArrays
     include("ChainBlock.jl")
 end
 
+@testset "add block" begin
+    include("AddBlock.jl")
+end
+
 @testset "kron block" begin
     include("KronBlock.jl")
 end

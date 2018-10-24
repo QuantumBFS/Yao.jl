@@ -18,6 +18,13 @@ using Yao.Blocks
     @test dispatch!(g, :random) |> parameters != [0.1]
     @test dispatch!(g, :zero) |> parameters == [0.0]
     @test dispatch!(+, g, :random) |> parameters != [0.0]
+    @test iparameter_type(g) == Union{}
+
+    c1 = ChainBlock(put(500, 1=>X), put(500, 3=>Y))
+    c2 = ChainBlock(put(500, 4=>X), put(500, 5=>Y))
+    @test iscommute(c1, c2)
+    @test iscommute(c1, c2, c2)
+    @test ishermitian(ChainBlock(c1, c2))
 end
 
 @testset "matrix" begin

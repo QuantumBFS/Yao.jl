@@ -22,7 +22,7 @@ using Yao.Intrinsics
     # product state initializer
     reg = product_state(5, 2, 3)
     @test all(state(reg)[3, :] .== 1)
-    @test reg'*reg ≈ ones(3, 3)
+    @test reg'*reg ≈ ones(3)
 
     # rand state initializer
     reg = rand_state(5, 3)
@@ -30,7 +30,7 @@ using Yao.Intrinsics
     @test isnormalized(reg)
 
     # check default type
-    @test eltype(reg) == ComplexF64
+    @test datatype(reg) == ComplexF64
 
     creg = copy(reg)
     @test state(creg) == state(reg)
@@ -47,7 +47,7 @@ end
     test_data = zeros(ComplexF32, 2^5)
     reg = register(test_data)
     @test typeof(reg) == DefaultRegister{1, ComplexF32, Matrix{ComplexF32}}
-    @test eltype(reg) == ComplexF32
+    @test datatype(reg) == ComplexF32
     @test nqubits(reg) == 5
     @test nbatch(reg) == 1
     @test state(reg) == reshape(test_data, :, 1)
@@ -65,24 +65,15 @@ end
     @test isnormalized(reg)
 
     # check default type
-    @test eltype(reg) == ComplexF64
+    @test datatype(reg) == ComplexF64
 
     creg = copy(reg)
     @test state(creg) == state(reg)
     @test state(creg) !== state(reg)
 end
 
-@testset "Focus 1" begin
-    # conanical shape
-    reg = rand_state(3, 5)
-    @test copy(reg) |> extend!(2) |> nactive == 5
-    reg2 = copy(reg) |> extend!(2) |> focus!(4,5)
-    @test (reg2 |> measure_remove!; reg2) |> relax! ≈ reg
-end
-
-@testset "stack repeat" begin
+@testset "repeat" begin
     reg = register(bit"00000") + register(bit"11001") |> normalize!;
-    @test stack(reg, reg) |> nbatch == 2
     @test repeat(reg, 5) |> nbatch == 5
 
     v1, v2, v3 = randn(2), randn(2), randn(2)
@@ -94,44 +85,18 @@ end
     reg = zero_state(3)
     @test addbit!(copy(reg), 3) == zero_state(6)
     reg = rand_state(3, 2)
-    @test addbit!(copy(reg), 2) |> state == kron(zero_state(2) |> state, reg |> state)
+    @test addbit!(copy(reg), 2) ≈ join(zero_state(2, 2), reg)
+    reg = rand_state(3, 1)
+    @test addbit!(copy(reg), 2) ≈ join(zero_state(2, 1), reg)
 end
 
 @testset "reg join" begin
     reg1 = rand_state(6)
     reg2 = rand_state(6)
-    reg3 = join(reg1, reg2)
-    reg4 = join(focus!(copy(reg1), 1:3), focus!(copy(reg2), 1:2))
+    reg3 = join(reg2, reg1)
+    reg4 = join(focus!(copy(reg2), 1:2), focus!(copy(reg1), 1:3))
     @test reg4 |> relaxedvec ≈ focus!(copy(reg3), [1,2,3,7,8,4,5,6,9,10,11,12]) |> relaxedvec
     reg5 = focus!(repeat(reg1, 3), 1:3)
     reg6 = focus!(repeat(reg2, 3), 1:2)
-    @test (join(reg5, reg6) |> relaxedvec)[:,1] ≈ reg4 |> relaxedvec
-end
-
-@testset "select" begin
-    reg = product_state(4, 6, 2)
-    # println(focus!(reg, [1,3]))
-    r1 = select!(focus!(copy(reg), [2,3]), 0b11) |> relax!
-    r2= select(focus!(copy(reg), [2,3]), 0b11) |> relax!
-    r3= copy(reg) |> focus!(2,3) |> select!(0b11) |> relax!
-
-    @test r1'*r1 ≈ [1 1; 1 1]
-    @test r1 ≈ r2
-    @test r3 ≈ r2
-end
-
-@testset "broadcast register" begin
-    reg = rand_state(5,3)
-    c = put(5, 2=>X)
-    ra = copy(reg)
-    rb = copy(reg)
-    @test all(ra .|> Ref(c) .≈ rb .|> Ref(c))
-    @test typeof.(reg)[1] <: DefaultRegister{<:Any, <:Any, <:SubArray}
-end
-
-@testset "measure and reset" begin
-    reg = rand_state(4)
-    res = measure_reset!(reg, (4,))
-    result = measure(reg, 10)
-    @test all(result .< 8)
+    @test (join(reg6, reg5) |> relaxedvec)[:,1] ≈ reg4 |> relaxedvec
 end

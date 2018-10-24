@@ -37,7 +37,7 @@ end
 # Additional Methods for Composite Blocks
 getindex(c::ChainBlock, index) = getindex(c.blocks, index)
 getindex(c::ChainBlock, index::Union{UnitRange, Vector}) = ChainBlock(getindex(c.blocks, index))
-setindex!(c::ChainBlock{N}, val::MatrixBlock{N}, index::Integer) where N = setindex!(c.blocks, val, index)
+setindex!(c::ChainBlock{N}, val::MatrixBlock{N}, index::Integer) where N = (setindex!(c.blocks, val, index); c)
 insert!(c::ChainBlock{N}, index::Integer, val::MatrixBlock{N}) where N = (insert!(c.blocks, index, val); c)
 adjoint(blk::ChainBlock) = typeof(blk)(map(adjoint, subblocks(blk) |> reverse))
 
@@ -53,6 +53,10 @@ addrs(c::ChainBlock) = ones(Int, length(c))
 usedbits(c::ChainBlock) = unique(vcat([usedbits(b) for b in subblocks(c)]...))
 chsubblocks(pb::ChainBlock, blocks) = ChainBlock(blocks)
 @forward ChainBlock.blocks popfirst!, pop!
+
+isunitary(c::ChainBlock) = all(isunitary, c.blocks) || isunitary(mat(c))
+isreflexive(c::ChainBlock) = (iscommute(c.blocks...) && all(isreflexive, c.blocks)) || isreflexive(mat(c))
+ishermitian(c::ChainBlock) = (all(isreflexive, c.blocks) && iscommute(c.blocks...)) || isreflexive(mat(c))
 
 # Additional Methods for Chain
 push!(c::ChainBlock{N}, val::MatrixBlock{N}) where N = (push!(c.blocks, val); c)

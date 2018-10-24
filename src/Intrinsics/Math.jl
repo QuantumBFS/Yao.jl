@@ -1,10 +1,9 @@
 """
-    bit_length(x::Int) -> Int
+    bit_length(x::Integer) -> Int
 
 Return the number of bits required to represent input integer x.
 """
-bit_length(x::Int64)  =  64 - leading_zeros(x)
-bit_length(x::Int32)  =  32 - leading_zeros(x)
+bit_length(x::Integer)  =  sizeof(x)*8 - leading_zeros(x)
 
 """
     log2i(x::Integer) -> Integer
@@ -82,7 +81,12 @@ end
     ex
 end
 
-nqubits(m::AbstractArray) = size(m, 1) |> log2i
+"""
+    nactive(m::AbstractArray) -> Int
+
+Returns the log-size of its first dimension.
+"""
+nactive(m::AbstractArray) = size(m, 1) |> log2i
 
 """
     hilbertkron(num_bit::Int, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix
@@ -93,7 +97,7 @@ Return general kronecher product form of gates in Hilbert space of `num_bit` qub
 * `start_locs` should have the same length as `gates`, specifing the gates starting positions.
 """
 function hilbertkron(num_bit::Int, ops::Vector{T}, start_locs::Vector{Int}) where T<:AbstractMatrix
-    sizes = [op |> nqubits for op in ops]
+    sizes = [op |> nactive for op in ops]
     start_locs = num_bit .- start_locs .- sizes .+ 2
 
     order = sortperm(start_locs)
@@ -213,7 +217,7 @@ Reference:
 """
 function fidelity_mix(m1::Matrix, m2::Matrix)
     O = m1'*m2
-    trace(sqrtm(O*O'))
+    tr(sqrt(O*O'))
 end
 
 """
