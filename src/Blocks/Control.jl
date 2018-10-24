@@ -1,7 +1,7 @@
 export ControlBlock
 
 """
-    ControlBlock{BT, N, C, B, T} <: AbstractContainer{N, T}
+    ControlBlock{N, BT<:AbstractBlock, C, M, T} <: AbstractContainer{N, T}
 
 N: number of qubits,
 BT: controlled block type,
