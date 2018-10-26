@@ -9,8 +9,8 @@ using QuAlgorithmZoo
     include("QFT.jl")
 end
 
-@testset "Differential" begin
-    include("Differential.jl")
+@testset "CircuitBuild" begin
+    include("CircuitBuild.jl")
 end
 
 @testset "RotBasis" begin
@@ -19,4 +19,20 @@ end
 
 @testset "Grover" begin
     include("Grover.jl")
+end
+
+@testset "PhaseEstimation" begin
+    include("PhaseEstimation.jl")
+end
+
+@testset "HHL" begin
+    include("HHL.jl")
+end
+
+@testset "QCOptProblem" begin
+    include("QCOptProblem.jl")
+end
+
+@testset "hamiltonian solvers" begin
+    include("hamiltonian_solvers.jl")
 end

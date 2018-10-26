@@ -25,6 +25,10 @@ using QuAlgorithmZoo
     @test state(apply!(psi, rb)) ≈ [1, 0]
 
     @test nparameters(rot_basis(3)) == 6
+    dispatch!(rb, :zero)
+    @test parameters(rb)[1] == 0
+    dispatch!(rb, :random)
+    @test parameters(rb)[1] != 0
 end
 
 @testset "polar and u" begin

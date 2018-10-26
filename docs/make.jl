@@ -42,6 +42,9 @@ makedocs(
     pages = [
         "Home" => "index.md",
         "Tutorial" => TUTORIALS,
+        "Manual" => Any[
+            "man/zoo.md",
+        ],
     ],
     html_prettyurls = !("local" in ARGS),
     html_canonical = "https://quantumbfs.github.io/QuAlgorithmZoo.jl/latest/",

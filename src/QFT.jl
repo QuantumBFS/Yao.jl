@@ -20,7 +20,7 @@ isreflexive(q::QFTBlock{N}) where N = N==1
 isunitary(q::QFTBlock{N}) where N = true
 
 openbox(q::QFTBlock{N}) where N = QFTCircuit(N)
-openbox(q::Daggered{N,T,<:QFTBlock}) where {N, T} = adjoint(QFTCircuit(N))
+openbox(q::Daggered{<:QFTBlock, N}) where {N} = adjoint(QFTCircuit(N))
 
 function print_block(io::IO, pb::QFTBlock{N}) where N
     printstyled(io, "QFT(1-$N)"; bold=true, color=:blue)
