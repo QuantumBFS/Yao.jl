@@ -20,11 +20,14 @@ Please notice, this package is still under development and needs further polish.
 ## Contents
 
 - [x] QCBM tutorial
-- [ ] differentiable circuit
-- [ ] grover search
-- [ ] HHL
-- [ ] QFT
+- [x] grover search
+- [x] HHL
+- [x] QFT
+- [x] QuGAN
+- [x] QCBM
+- [x] Hamiltonian Solver
 - [ ] QAOA
+- [ ] Quantum Chemistry
 
 ## License
 
