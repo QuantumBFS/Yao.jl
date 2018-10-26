@@ -10,7 +10,7 @@ mutable struct RepeatedBlock{N, C, GT<:MatrixBlock, T} <: AbstractContainer{N, T
     addrs::NTuple{C, Int}
 
     function RepeatedBlock{N, C, GT, T}(block, addrs) where {N, M, C, T, GT<:MatrixBlock{M, T}}
-        _assert_addr_safe(N, UnitRange{Int}[i:i+M-1 for i in addrs])
+        assert_addr_safe(N, UnitRange{Int}[i:i+M-1 for i in addrs])
         length(addrs) == C || throw(ArgumentError("Repeat number mismatch!"))
         new{N, C, GT, T}(block, addrs)
     end

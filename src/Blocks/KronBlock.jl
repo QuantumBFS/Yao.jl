@@ -19,7 +19,7 @@ struct KronBlock{N, T, MT<:MatrixBlock} <: CompositeBlock{N, T}
         perm = sortperm(addrs)
         permute!(addrs, perm)
         permute!(blocks, perm)
-        _assert_addr_safe(N, [i:i+nqubits(b)-1 for (i, b) in zip(addrs, blocks)])
+        assert_addr_safe(N, [i:i+nqubits(b)-1 for (i, b) in zip(addrs, blocks)])
 
         slots = zeros(Int, N)
         for (i, each) in enumerate(addrs)
