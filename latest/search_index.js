@@ -917,7 +917,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Registers",
     "title": "Yao.Registers.@bit_str",
     "category": "macro",
-    "text": "@bit_str -> QuBitStr\n\nConstruct a bit string. such as bit\"0000\". The bit strings also supports string concat. Just use it like normal strings.\n\n\n\n\n\n"
+    "text": "@bit_str -> BitStr\n\nConstruct a bit string. such as bit\"0000\". The bit strings also supports string concat. Just use it like normal strings.\n\n\n\n\n\n"
 },
 
 {
@@ -1201,11 +1201,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/registers/#Yao.Registers.QuBitStr",
+    "location": "man/registers/#Yao.Registers.BitStr",
     "page": "Registers",
-    "title": "Yao.Registers.QuBitStr",
+    "title": "Yao.Registers.BitStr",
     "category": "type",
-    "text": "QuBitStr\n\nString literal for qubits.\n\n\n\n\n\n"
+    "text": "BitStr\n\nString literal for qubits.\n\n\n\n\n\n"
 },
 
 {
