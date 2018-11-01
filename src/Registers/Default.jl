@@ -100,8 +100,8 @@ for FUNC in [:zero_state, :rand_state, :uniform_state]
 end
 product_state(n::Int, config::Integer, nbatch::Int=1) = product_state(DefaultType, n, config, nbatch)
 
-function summary(io::IO, r::DefaultRegister{B, T}) where {B, T}
-    println(io, "DefaultRegister{", B, ", ", T, "}")
+function summary(io::IO, r::DefaultRegister{B, T, MT}) where {B, T, MT}
+    println(io, "DefaultRegister{", B, ", ", MT, "}")
 end
 
 function show(io::IO, r::DefaultRegister{B, T}) where {B, T}

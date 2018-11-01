@@ -29,6 +29,14 @@ end
 
 Base.length(ic::IterControl{N}) where N = N
 Base.eltype(::Type{IterControl}) = Int
+function Base.getindex(ic::IterControl{N, C}, i::Int) where {N, C}
+    res = i-1
+    for s in 1:C
+        @inbounds res = lmove(res, ic.masks[s], ic.ks[s])
+    end
+    res+ic.base
+end
+
 lmove(b::Int, mask::Int, k::Int)::Int = (b&~mask)<<k + (b&mask)
 
 """

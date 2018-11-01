@@ -11,7 +11,7 @@ _measure(pl::AbstractVector, ntimes::Int) = sample(0:length(pl)-1, Weights(pl), 
 function _measure(pl::AbstractMatrix, ntimes::Int)
     B = size(pl, 2)
     res = Matrix{Int}(undef, ntimes, B)
-    @simd for ib=1:B
+    for ib=1:B
         @inbounds res[:,ib] = _measure(view(pl,:,ib), ntimes)
     end
     res
@@ -38,7 +38,7 @@ function measure_remove!(reg::AbstractRegister{B}) where B
     nstate = similar(reg.state, 1<<nremain(reg), B)
     pl = dropdims(sum(state .|> abs2, dims=2), dims=2)
     res = Vector{Int}(undef, B)
-    @simd for ib = 1:B
+    for ib = 1:B
         @inbounds ires = _measure(view(pl, :, ib), 1)[]
         @inbounds nstate[:,ib] = view(state, ires+1,:,ib)./sqrt(pl[ires+1, ib])
         @inbounds res[ib] = ires
@@ -57,7 +57,7 @@ function measure!(reg::AbstractRegister{B}) where B
     nstate = zero(state)
     res = measure_remove!(reg)
     _nstate = reshape(reg.state, :, B)
-    @simd for ib in 1:B
+    for ib in 1:B
         @inbounds nstate[res[ib]+1, :, ib] = view(_nstate, :,ib)
     end
     reg.state = reshape(nstate, size(state, 1), :)

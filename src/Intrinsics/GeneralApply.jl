@@ -57,6 +57,6 @@ function cunapply!(state::AbstractVecOrMat, cbits::NTuple{C, Int}, cvals::NTuple
     _unapply!(state, U |> autostatic, locs_raw |> autostatic, ic)
 end
 
-cunapply!(state::AbstractVecOrMat, cbits::NTuple, cvals::NTuple, U::IMatrix, locs::NTuple) = state
+cunapply!(state::AbstractVecOrMat, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U::IMatrix, locs::NTuple{M, Int}) where {C, M} = state
 
 unapply!(state::AbstractVecOrMat, U::AbstractMatrix, locs::NTuple) = cunapply!(state, (), (), U, locs)
