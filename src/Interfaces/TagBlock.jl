@@ -82,10 +82,10 @@ Base.parent(vstat::Vstat) = vstat.data
 
 import Yao.Blocks: expect
 using Yao.Interfaces: _perturb
-expect(vstat::Vstat{2, <:AbstractArray}, px::Vector, py::Vector=px) = px' * vstat.data * py
-expect(vstat::Vstat{1, <:AbstractArray}, px::Vector) = vstat.data' * px
-expect(vstat::Vstat{2, <:Function}, xs::Vector, ys::Vector=xs) = mean(vstat.data.(xs', ys))
-expect(vstat::Vstat{1, <:Function}, xs::Vector) = mean(vstat.data.(xs))
+expect(vstat::Vstat{2, <:AbstractArray}, px::AbstractVector, py::AbstractVector=px) = px' * vstat.data * py
+expect(vstat::Vstat{1, <:AbstractArray}, px::AbstractVector) = vstat.data' * px
+expect(vstat::Vstat{2, <:Function}, xs::AbstractVector, ys::AbstractVector=xs) = mean(vstat.data.(xs', ys))
+expect(vstat::Vstat{1, <:Function}, xs::AbstractVector) = mean(vstat.data.(xs))
 Base.ndims(vstat::Vstat{N}) where N = N
 
 """
