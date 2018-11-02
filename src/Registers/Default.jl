@@ -126,10 +126,11 @@ function join(reg1::DefaultRegister{B, T1}, reg2::DefaultRegister{B, T2}) where 
 end
 join(reg1::DefaultRegister{1}, reg2::DefaultRegister{1}) = DefaultRegister{1}(kron(reg1.state, reg2.state))
 
-function addbit!(r::DefaultRegister{B, T}, n::Int) where {B, T}
+function addbit!(r::DefaultRegister, n::Int)
     mat = r.state
     M, N = size(mat)
-    r.state = zeros(T, M*(1<<n), N)
+    r.state = similar(r.state, M*(1<<n), N)
+    r.state .= 0
     r.state[1:M, :] = mat
     r
 end

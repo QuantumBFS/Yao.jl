@@ -38,10 +38,10 @@ function measure_remove!(reg::AbstractRegister{B}) where B
     nstate = similar(reg.state, 1<<nremain(reg), B)
     pl = dropdims(sum(state .|> abs2, dims=2), dims=2)
     res = Vector{Int}(undef, B)
-    for ib = 1:B
-        @inbounds ires = _measure(view(pl, :, ib), 1)[]
-        @inbounds nstate[:,ib] = view(state, ires+1,:,ib)./sqrt(pl[ires+1, ib])
-        @inbounds res[ib] = ires
+    @inbounds for ib = 1:B
+        ires = _measure(view(pl, :, ib), 1)[]
+        nstate[:,ib] = view(state, ires+1,:,ib)./sqrt(pl[ires+1, ib])
+        res[ib] = ires
     end
     reg.state = reshape(nstate,1,:)
     res
@@ -58,7 +58,7 @@ function measure!(reg::AbstractRegister{B}) where B
     res = measure_remove!(reg)
     _nstate = reshape(reg.state, :, B)
     for ib in 1:B
-        @inbounds nstate[res[ib]+1, :, ib] = view(_nstate, :,ib)
+        @inbounds nstate[res[ib]+1, :, ib] .= view(_nstate, :,ib)
     end
     reg.state = reshape(nstate, size(state, 1), :)
     res
