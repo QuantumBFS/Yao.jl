@@ -135,7 +135,7 @@ end
     gradse = vstatdiff.(()->zero_state(nbit) |> c |> probs, dbs, Ref(V), initial=p0)
     gradsf = vstatdiff.(()->measure(zero_state(nbit) |> c, 2000), dbs, Ref(VF), initial=sample0)
     @test all(isapprox.(gradse, gradsn, atol=1e-4))
-    @test all(isapprox.(gradsf, gradse, atol=0.01))
+    @test all(isapprox.(gradsf, gradse, atol=0.025))
 
     # 1D
     h = randn(1<<nbit)

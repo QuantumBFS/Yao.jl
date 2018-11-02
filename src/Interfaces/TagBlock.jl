@@ -67,11 +67,13 @@ end
 """
     Vstat{N, AT}
     Vstat(data) -> Vstat
+    Vstat{N}(func) -> Vstat
 
 V-statistic functional.
 """
 struct Vstat{N, AT}
     data::AT
+    Vstat{N}(data::AT) where {N, AT<:Function} = new{N, AT}(data)
     Vstat(data::AT) where {N, AT<:AbstractArray{<:Real, N}} = new{N, AT}(data)
 end
 
@@ -80,20 +82,24 @@ Base.parent(vstat::Vstat) = vstat.data
 
 import Yao.Blocks: expect
 using Yao.Interfaces: _perturb
-expect(vstat::Vstat{2}, px::Vector, py::Vector=px) = px' * vstat.data * py
-expect(vstat::Vstat{1}, px::Vector) = vstat.data' * px
+expect(vstat::Vstat{2, <:AbstractArray}, px::Vector, py::Vector=px) = px' * vstat.data * py
+expect(vstat::Vstat{1, <:AbstractArray}, px::Vector) = vstat.data' * px
+expect(vstat::Vstat{2, <:Function}, xs::Vector, ys::Vector=xs) = mean(vstat.data.(xs', ys))
+expect(vstat::Vstat{1, <:Function}, xs::Vector) = mean(vstat.data.(xs))
+Base.ndims(vstat::Vstat{N}) where N = N
 
 """
-    vstatdiff(psifunc, diffblock::AbstractDiff, vstat::Vstat; p0::AbstractVector=psifunc()|>probs)
+    vstatdiff(probfunc, diffblock::AbstractDiff, vstat::Vstat{<:Any, <:AbstractArray}; initial::AbstractVector=probfunc())
+    vstatdiff(samplefunc, diffblock::AbstractDiff, vstat::Vstat{<:Any, <:Function}; initial::AbstractVector=samplefunc())
 
 Differentiation for V-statistics.
 """
-@inline function vstatdiff(psifunc, diffblock::AbstractDiff, vstat::Vstat; p0::AbstractVector=psifunc()|>probs)
-    r1, r2 = _perturb(()->expect(vstat, psifunc()|>probs, p0), diffblock, π/2)
+@inline function vstatdiff(probfunc, diffblock::AbstractDiff, vstat::Vstat{2}; initial::AbstractVector=probfunc())
+    r1, r2 = _perturb(()->expect(vstat, probfunc(), initial), diffblock, π/2)
     diffblock.grad = (r2 - r1)*ndims(vstat)/2
 end
-@inline function vstatdiff(psifunc, diffblock::AbstractDiff, vstat::Vstat{1})
-    r1, r2 = _perturb(()->expect(vstat, psifunc()|>probs), diffblock, π/2)
+@inline function vstatdiff(probfunc, diffblock::AbstractDiff, vstat::Vstat{1})
+    r1, r2 = _perturb(()->expect(vstat, probfunc()), diffblock, π/2)
     diffblock.grad = (r2 - r1)*ndims(vstat)/2
 end
 

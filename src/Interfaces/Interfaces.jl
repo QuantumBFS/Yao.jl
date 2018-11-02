@@ -7,6 +7,7 @@ using ..Blocks: _blockpromote
 using CacheServers
 using ..Intrinsics
 using MacroTools: @forward
+using StatsBase: mean
 
 # import package configs
 import ..Yao: DefaultType

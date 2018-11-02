@@ -47,7 +47,7 @@ end
     unrows!(v, sinds, sA)
     @test 0 == @allocated unrows!(v, sinds, sA)
     out = zeros(ComplexF64, 4,4)
-    @test unrows!(copy(v), sinds, sA)[:,1] == unrows!(copy(v[:,1]), inds, A)
+    @test unrows!(copy(v), sinds, sA)[:,1] ≈ unrows!(copy(v[:,1]), inds, A)
 end
 
 @testset "diagonal unrows!" begin
