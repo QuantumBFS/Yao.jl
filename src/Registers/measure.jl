@@ -23,7 +23,7 @@ end
 measure active qubits for `nshot` times.
 """
 measure(reg::AbstractRegister{1}; nshot::Int=1) = _measure(reg |> probs, nshot)
-function measure(reg::AbstractRegister{B}, nshot::Int=1) where B
+function measure(reg::AbstractRegister{B}; nshot::Int=1) where B
     pl = dropdims(sum(reg |> rank3 .|> abs2, dims=2), dims=2)
     _measure(pl, nshot)
 end
