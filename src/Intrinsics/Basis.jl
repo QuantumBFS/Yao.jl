@@ -250,12 +250,8 @@ end
 Return a function that test whether a basis at `cbits` takes specific value `cvals`.
 """
 function controller(cbits::Ints{Int}, cvals::Ints{Int})
-    do_mask= bmask(cbits...)
-    onemask= 0
-    for (ibit, ival) in zip(cbits, cvals)
-        mask = 1 << (ibit-1)
-        ival == 1 && (onemask |= mask)
-    end
+    do_mask = bmask(cbits...)
+    onemask = mapreduce(xy -> (xy[2]==1 ? 1<<(xy[1]-1) : 0), |, zip(cbits, cvals))
     return b->testval(b, do_mask, onemask)
 end
 
