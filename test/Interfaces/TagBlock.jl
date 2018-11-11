@@ -129,13 +129,13 @@ end
     dbs = collect(c, AbstractDiff)
 
     p0 = zero_state(nbit) |> c |> probs
-    sample0 = measure(zero_state(nbit) |> c, 2000)
+    sample0 = measure(zero_state(nbit) |> c, nshot=2000)
     loss0 = expect(V, p0)
     gradsn = numdiff.(()->expect(V, zero_state(nbit) |> c |> probs), dbs)
     gradse = vstatdiff.(()->zero_state(nbit) |> c |> probs, dbs, Ref(V), initial=p0)
-    gradsf = vstatdiff.(()->measure(zero_state(nbit) |> c, 2000), dbs, Ref(VF), initial=sample0)
+    gradsf = vstatdiff.(()->measure(zero_state(nbit) |> c, nshot=2000), dbs, Ref(VF), initial=sample0)
     @test all(isapprox.(gradse, gradsn, atol=1e-4))
-    @test all(isapprox.(gradsf, gradse, atol=0.025))
+    @test norm(gradsf-gradse)/norm(gradsf) <= 0.2
 
     # 1D
     h = randn(1<<nbit)

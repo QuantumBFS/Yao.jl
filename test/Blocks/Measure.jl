@@ -65,7 +65,7 @@ end
     reg = rand_state(4)
     mb = MeasureAndReset(3)
     reg |> mb
-    @test all(measure(reg, 10) .== 3)
+    @test all(measure(reg, nshot=10) .== 3)
     @test length(mb.result) == 1
 end
 
