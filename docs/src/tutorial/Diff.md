@@ -42,7 +42,7 @@ Experimental applicable differentiation strategies are based on the following tw
 * [Quantum Circuit Learning](https://arxiv.org/abs/1803.00745), Kosuke Mitarai, Makoto Negoro, Masahiro Kitagawa, Keisuke Fujii
 * [Differentiable Learning of Quantum Circuit Born Machine](https://arxiv.org/abs/1804.04168), Jin-Guo Liu, Lei Wang
 
-The former differentiation scheme is for observables, and the latter is for V-statistics.
+The former differentiation scheme is for observables, and the latter is for statistic functionals (U statistics).
 One may find the derivation of both schemes in [this post](https://giggleliu.github.io/2018/04/16/circuitgrad.html).
 
 Realizable quantum circuit gradient finding algorithms have complexity $O(M^2)$.
