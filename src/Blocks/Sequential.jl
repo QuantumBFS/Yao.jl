@@ -15,7 +15,7 @@ copy(c::Sequential) = Sequential(copy(c.blocks))
 similar(c::Sequential) = Sequential(empty!(similar(c.blocks)))
 subblocks(c::Sequential) = c.blocks
 addrs(c::Sequential) = ones(Int, subblocks(c)|>length)
-
+chsubblocks(pb::Sequential, blks) = Sequential(blks...)
 
 @forward Sequential.blocks Base.getindex, lastindex, Base.setindex!, Base.iterate, Base.length, Base.eltype, Base.eachindex, pop!, popfirst!
 

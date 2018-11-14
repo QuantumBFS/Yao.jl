@@ -99,7 +99,7 @@ function expect(stat::StatFunctional{2, <:Function}, xs::AbstractVector{T}) wher
     end
     res/binomial(N,2)
 end
-function expect(stat::StatFunctional{2, <:Function}, xs::AbstractVector, ys::AbstractVector{T}) where T
+function expect(stat::StatFunctional{2, <:Function}, xs::AbstractVector, ys::AbstractVector)
     M = length(xs)
     N = length(ys)
     ci = CartesianIndices((M, N))
