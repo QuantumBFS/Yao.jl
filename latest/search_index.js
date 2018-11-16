@@ -681,7 +681,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{M}, Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s321} where #s321<:AbstractBlock}} where M",
+    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{M}, Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s381} where #s381<:AbstractBlock}} where M",
     "page": "Interfaces",
     "title": "Yao.Interfaces.put",
     "category": "method",
@@ -785,7 +785,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Pair{Int64,#s321} where #s321<:MatrixBlock,N} where N}",
+    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Pair{Int64,#s381} where #s381<:MatrixBlock,N} where N}",
     "page": "Interfaces",
     "title": "Base.kron",
     "category": "method",
@@ -1397,7 +1397,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.ControlBlock",
     "category": "type",
-    "text": "ControlBlock{BT, N, C, B, T} <: AbstractContainer{N, T}\n\nN: number of qubits, BT: controlled block type, C: number of control bits, T: type of matrix.\n\n\n\n\n\n"
+    "text": "ControlBlock{N, BT<:AbstractBlock, C, M, T} <: AbstractContainer{N, T}\n\nN: number of qubits, BT: controlled block type, C: number of control bits, T: type of matrix.\n\n\n\n\n\n"
 },
 
 {
@@ -2430,14 +2430,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Boost.cygate",
     "category": "method",
     "text": "cygate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) -> PermMatrix\n\nSingle Controlled-Y Gate on single bit.\n\n\n\n\n\n"
-},
-
-{
-    "location": "man/boost/#Yao.Boost.czgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Any,Any,Int64}} where MT<:Number",
-    "page": "Boost",
-    "title": "Yao.Boost.czgate",
-    "category": "method",
-    "text": "czgate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) -> Diagonal\n\nSingle Controlled-Z Gate on single bit.\n\n\n\n\n\n"
 },
 
 {
