@@ -52,26 +52,45 @@ function zapply!(state::AbstractVecOrMat{T}, bits::Ints{Int}) where T
     state
 end
 
-function zapply!(state::AbstractVecOrMat{T}, bit::Int) where T
-    mask = bmask(bit)
-    @simd for b in basis(state)
-        if testany(b, mask)
-            mulrow!(state, b+1, -1)
+for (G, FACTOR) in zip([:s, :t, :sdag, :tdag], [:(im), :($(exp(im*π/4))), :(-im), :($(exp(-im*π/4)))])
+    FUNC = Symbol(G, :apply!)
+    @eval function $FUNC(state::AbstractVecOrMat{T}, bits::Ints{Int}) where T
+        mask = bmask(Int, bits...)
+        for b in basis(Int, state)
+            mulrow!(state, b+1, $FACTOR^count_ones(b&mask))
+        end
+        state
+    end
+end
+
+for (G, FACTOR) in zip([:z, :s, :t, :sdag, :tdag], [:(-1), :(im), :($(exp(im*π/4))), :(-im), :($(exp(-im*π/4)))])
+FUNC = Symbol(G, :apply!)
+@eval function $FUNC(state::AbstractVecOrMat{T}, ibit::Int) where T
+    mask = bmask(ibit)
+    step = 1<<(ibit-1)
+    step_2 = 1<<ibit
+    for j = 0:step_2:size(state, 1)-step
+        for i = j+step+1:j+step_2
+            mulrow!(state, i, $FACTOR)
         end
     end
     state
 end
+end
 
 ################### Multi Controlled Version ####################
 
-function czapply!(state::AbstractVecOrMat{T}, cbits, cvals, b2::Int) where T
-    c = controller([cbits..., b2[1]], [cvals..., 1])
-    @simd for b = basis(state)
-        if b |> c
-            mulrow!(state, b+1, -1)
+for (G, FACTOR) in zip([:z, :s, :t, :sdag, :tdag], [:(-1), :(im), :($(exp(im*π/4))), :(-im), :($(exp(-im*π/4)))])
+    FUNC = Symbol(:c, G, :apply!)
+    @eval function $FUNC(state::AbstractVecOrMat{T}, cbits, cvals, b2::Int) where T
+        c = controller([cbits..., b2[1]], [cvals..., 1])
+        for b = basis(state)
+            if b |> c
+                mulrow!(state, b+1, $FACTOR)
+            end
         end
+        state
     end
-    state
 end
 
 function cyapply!(state::AbstractVecOrMat{T}, cbits, cvals, b2::Int) where T
@@ -106,19 +125,22 @@ end
 
 ################### Single Controlled Version ####################
 
-function czapply!(state::AbstractVecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
-    mask2 = bmask(b2)
-    step = 1<<(cbit-1)
-    step_2 = 1<<cbit
-    start = cval==1 ? step : 0
-    for j = start:step_2:size(state, 1)-step+start
-        @simd for i = j+1:j+step
-            if testall(i-1, mask2)
-                mulrow!(state, i, -1)
+for (G, FACTOR) in zip([:z, :s, :t, :sdag, :tdag], [:(-1), :(im), :($(exp(im*π/4))), :(-im), :($(exp(-im*π/4)))])
+    FUNC = Symbol(:c, G, :apply!)
+    @eval function $FUNC(state::AbstractVecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
+        mask2 = bmask(b2)
+        step = 1<<(cbit-1)
+        step_2 = 1<<cbit
+        start = cval==1 ? step : 0
+        for j = start:step_2:size(state, 1)-step+start
+            for i = j+1:j+step
+                if testall(i-1, mask2)
+                    mulrow!(state, i, $FACTOR)
+                end
             end
         end
+        state
     end
-    state
 end
 
 function cyapply!(state::AbstractVecOrMat{T}, cbit::Int, cval::Int, b2::Int) where T
