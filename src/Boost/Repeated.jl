@@ -1,11 +1,10 @@
-GATES = [:X, :Y, :Z]
-
-for (G, MATFUNC) in zip(GATES, [:xgate, :ygate, :zgate])
-    GGate = Symbol(G, :Gate)
-    @eval function mat(rb::RepeatedBlock{N, C, GT, MT}) where {N, C, MT, GT <: $GGate}
+for (G, g) in zip(GATES, gATES)
+    GATE = Symbol(G, :Gate)
+    MATFUNC = Symbol(g, :gate)
+    @eval function mat(rb::RepeatedBlock{N, C, GT, MT}) where {N, C, MT, GT <: $GATE}
         $MATFUNC(MT, N, [rb.addrs...])
     end
-    @eval function mat(rb::PutBlock{N, 1, GT, MT}) where {N, MT, GT <: $GGate}
+    @eval function mat(rb::PutBlock{N, 1, GT, MT}) where {N, MT, GT <: $GATE}
         $MATFUNC(MT, N, [rb.addrs...])
     end
 end
@@ -23,10 +22,9 @@ function apply!(reg::AbstractRegister, pb::PutBlock{N, 1, <:MatrixBlock{1}}) whe
     reg
 end
 
-for (GATE, METHOD) in zip([:XGate, :YGate, :ZGate], [:xapply!, :yapply!, :zapply!])
+for (G, g) in zip(GATES, gATES)
+    GATE = Symbol(G, :Gate)
+    METHOD = Symbol(g, :apply!)
     @eval apply!(r::AbstractRegister{B}, rb::RepeatedBlock{N, C, <:$GATE}) where {B, N, C} = ($METHOD(r.state |> matvec, [rb.addrs...]); r)
-end
-
-for (GATE, METHOD) in zip([:XGate, :YGate, :ZGate], [:xapply!, :yapply!, :zapply!])
-    @eval apply!(r::AbstractRegister, pb::PutBlock{N, 1, <:$GATE}) where N = ($METHOD(r.state |> matvec, [pb.addrs...]); r)
+    @eval apply!(r::AbstractRegister, pb::PutBlock{N, 1, <:$GATE}) where N = ($METHOD(r.state |> matvec, pb.addrs[1]); r)
 end

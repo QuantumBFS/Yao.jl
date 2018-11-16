@@ -1,4 +1,4 @@
-export H, phase, shift, Rx, Ry, Rz, rot, swap, I2, reflect, matrixgate, PauliGate
+export H, phase, shift, Rx, Ry, Rz, rot, swap, I2, reflect, matrixgate, PauliGate, S, T, Sdag, Tdag
 
 include("PauliGates.jl")
 

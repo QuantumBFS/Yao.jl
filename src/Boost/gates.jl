@@ -1,3 +1,6 @@
+const GATES = [:X, :Y, :Z, :S, :Sdag, :T, :Tdag]
+const gATES = [:x, :y, :z, :s, :sdag, :t, :tdag]
+
 ####################### Gate Utilities ######################
 
 ###################### X, Y, Z Gates ######################
@@ -28,6 +31,20 @@ function ygate(::Type{MT}, num_bit::Int, bits::Ints) where MT<:Complex
         vals[i] = count_ones(b&mask)%2 == 1 ? -factor : factor
     end
     PermMatrix(order, vals)
+end
+
+for (G, FACTOR) in zip([:s, :t, :sdag, :tdag], [:(im), :($(exp(im*π/4))), :(-im), :($(exp(-im*π/4)))])
+    FUNC = Symbol(G, :gate)
+"""
+    $FUNC(::Type{MT}, num_bit::Int, bits::Ints) -> Diagonal
+
+$G Gate on multiple bits.
+"""
+@eval function $FUNC(::Type{MT}, num_bit::Int, bits::Ints) where MT<:Number
+    mask = bmask(bits...)
+    vals = map(b->MT($FACTOR)^count_ones(b&mask), basis(num_bit))
+    Diagonal(vals)
+end
 end
 
 """
@@ -78,15 +95,19 @@ function cygate(::Type{MT}, num_bit::Int, cbits, cvals, b2::Int) where MT<:Compl
     PermMatrix(order, vals)
 end
 
-"""
-    czgate(::Type{MT}, num_bit::Int, b1::Int, b2::Int) -> Diagonal
 
-Single Controlled-Z Gate on single bit.
+for (G, FACTOR) in zip([:z, :s, :t, :sdag, :tdag], [:(-1), :(im), :($(exp(im*π/4))), :(-im), :($(exp(-im*π/4)))])
+    FUNC = Symbol(:c, G, :gate)
 """
-function czgate(::Type{MT}, num_bit::Int, cbits, cvals, b2::Int) where MT<:Number
+    $FUNC(::Type{MT}, num_bit::Int, b1::Int, b2::Int) -> Diagonal
+
+Single Controlled-$(G |> string |> uppercase) Gate on single bit.
+"""
+@eval function $FUNC(::Type{MT}, num_bit::Int, cbits, cvals, b2::Int) where MT<:Number
     c = controller([cbits...,b2], [cvals..., 1])
-    vals = map(i -> c(i) ? MT(-1) : MT(1), basis(num_bit))
+    vals = map(i -> c(i) ? MT($FACTOR) : MT(1), basis(num_bit))
     Diagonal(vals)
+end
 end
 
 """

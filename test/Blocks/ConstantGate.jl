@@ -9,20 +9,33 @@ CNOT_R = PermMatrix([1, 2, 4, 3], ones(ComplexF64, 4))
 Toffoli_R = PermMatrix([1, 2, 3, 4, 5, 6, 8, 7], ones(ComplexF64, 8))
 
 @testset "builtins" begin
-    for each in [X, Y, Z, H]
-        @test nqubits(each) == 1
+    for each in [X, Y, Z, H, CNOT, SWAP, Toffoli]
         @test isunitary(each) == true
         @test isreflexive(each) == true
         @test ishermitian(each) == true
     end
+    for each in [X, Y, Z, H, T, S, Tdag, Sdag, P0, P1, Pu, Pd]
+        @test nqubits(each) == 1
+    end
+    for each in [S, T]
+        @test isunitary(each)
+        @test isreflexive(each) == false
+        @test ishermitian(each) == false
+    end
+    for each in [P0, P1]
+        @test isunitary(each) == false
+        @test isreflexive(each) == false
+        @test ishermitian(each) == true
+    end
+    for each in [Pu, Pd]
+        @test isunitary(each) == false
+        @test isreflexive(each) == false
+        @test ishermitian(each) == false
+    end
+
     @test nqubits(CNOT) == 2
-    @test isunitary(CNOT) == true
-    @test isreflexive(CNOT) == true
-    @test ishermitian(CNOT) == true
+    @test nqubits(SWAP) == 2
     @test nqubits(Toffoli) == 3
-    @test isunitary(Toffoli) == true
-    @test isreflexive(Toffoli) == true
-    @test ishermitian(Toffoli) == true
 
 
     @testset "matrix" begin
@@ -38,6 +51,17 @@ Toffoli_R = PermMatrix([1, 2, 3, 4, 5, 6, 8, 7], ones(ComplexF64, 8))
         end
         @test mat(CNOT) |> invorder == CNOT_R
         @test mat(Toffoli) |> invorder == Toffoli_R
+        @test mat(T)*mat(T) ≈ mat(S)
+
+        @test mat(T)' ≈ mat(T')
+        @test mat(Tdag)' ≈ mat(Tdag')
+        @test T' isa TdagGate
+        @test Tdag' isa TGate
+
+        @test mat(S)' ≈ mat(S')
+        @test mat(Sdag)' ≈ mat(Sdag')
+        @test S' isa SdagGate
+        @test Sdag' isa SGate
     end
 end
 

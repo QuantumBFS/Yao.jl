@@ -1,15 +1,18 @@
-for METHOD in [:_assert_addr_inbounds, :_assert_addr_safe, :assert_addr_fit]
+# NOTE: this file is not the copy of MacroTools.jl
+# it contains some of the tools made as macros
+
+for METHOD in [:assert_addr_inbounds, :assert_addr_safe, :assert_addr_fit]
     @eval $METHOD(n::Int, addrs::Vector{<:Integer}) = $METHOD(n, UnitRange{Int}[i:i for i in addrs])
 end
 
-function _assert_addr_inbounds(n::Int, addrs::Vector{UnitRange{Int}})
+function assert_addr_inbounds(n::Int, addrs::Vector{UnitRange{Int}})
     if length(addrs) == 0 return true end
     addrs = sort(addrs, by=x->x.start)
     (minimum(first(addrs)) > 0 && maximum(last(addrs)) <= n) || throw(AddressConflictError("addr out of bounds"))
     true
 end
 
-function _assert_addr_safe(n::Int, addrs::Vector{UnitRange{Int}})
+function assert_addr_safe(n::Int, addrs::Vector{UnitRange{Int}})
     if length(addrs) == 0 return true end
     addrs = sort(addrs, by=x->x.start)
     (minimum(first(addrs)) > 0 && maximum(last(addrs)) <= n) || throw(AddressConflictError("addr out of bounds"))
@@ -19,7 +22,7 @@ function _assert_addr_safe(n::Int, addrs::Vector{UnitRange{Int}})
     true
 end
 
-function _assert_addr_fit(n::Int, addrs::Vector{UnitRange{Int}})
+function assert_addr_fit(n::Int, addrs::Vector{UnitRange{Int}})
     if length(addrs) == 0 return n == 0 end
     addrs = sort(addrs, by=x->x.start)
     (minimum(first(addrs)) > 0 && maximum(last(addrs)) <= n) || throw(AddressConflictError("addr out of bounds"))
@@ -29,23 +32,4 @@ function _assert_addr_fit(n::Int, addrs::Vector{UnitRange{Int}})
     end
     addrs |> last |> maximum == n || throw(AddressConflictError("addr not exact fit at end"))
     true
-end
-
-macro assert_addr_safe(total, addrs)
-    #quote
-    #    _assert_addr_safe($total, $(esc(addrs)))
-    #end
-    :(_assert_addr_safe($total, $(esc(addrs))))
-end
-
-macro assert_addr_fit(total, addrs)
-    quote
-        _assert_addr_fit($total, $(esc(addrs)))
-    end
-end
-
-macro assert_addr_inbounds(total, addrs)
-    quote
-        _assert_addr_inbounds($total, $(esc(addrs)))
-    end
 end

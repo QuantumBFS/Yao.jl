@@ -9,7 +9,7 @@ using Yao.Boost
 @testset "XYZ" begin
     reg1 = rand_state(3)
     reg2 = rand_state(3, 2)
-    for G in [X, Y, Z]
+    for G in [X, Y, Z, S, T, Sdag, Tdag]
         rb = RepeatedBlock{3}(G, (1,2))
         res = kron(kron(mat(I2), mat(G)), mat(G))
         @test mat(rb) ≈ res
@@ -39,7 +39,7 @@ end
 @testset "Put" begin
     reg1 = rand_state(5)
     reg2 = rand_state(5, 2)
-    for G in [H, rot(X, 0.5), rot(Z, 0.5), I2, X, Y, Z]
+    for G in [H, rot(X, 0.5), rot(Z, 0.5), I2, X, Y, Z, T, S, Tdag, Sdag]
         rb = put(5, (5,3)=>control(2, (1,), 2=>G))
         res = mat(control(5, (5,), 3=>G))
         @test applymatrix(rb) ≈ res

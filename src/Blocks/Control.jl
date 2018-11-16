@@ -1,7 +1,7 @@
 export ControlBlock
 
 """
-    ControlBlock{BT, N, C, B, T} <: AbstractContainer{N, T}
+    ControlBlock{N, BT<:AbstractBlock, C, M, T} <: AbstractContainer{N, T}
 
 N: number of qubits,
 BT: controlled block type,
@@ -14,7 +14,7 @@ mutable struct ControlBlock{N, BT<:AbstractBlock, C, M, T} <: AbstractContainer{
     block::BT
     addrs::NTuple{M, Int}
     function ControlBlock{N, BT, C, M, T}(ctrl_qubits, vals, block, addrs) where {N, C, M, T, BT<:AbstractBlock}
-        _assert_addr_safe(N, [ctrl_qubits..., addrs...])
+        assert_addr_safe(N, [ctrl_qubits..., addrs...])
         new{N, BT, C, M, T}(ctrl_qubits, vals, block, addrs)
     end
 end
