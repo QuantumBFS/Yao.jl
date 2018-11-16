@@ -36,7 +36,7 @@ include("Blocks/Blocks.jl")
 include("Boost/Boost.jl")
 include("Interfaces/Interfaces.jl")
 
-include("QASM/QASM.jl")
+#include("QASM/QASM.jl")
 
 @reexport using .Interfaces
 
