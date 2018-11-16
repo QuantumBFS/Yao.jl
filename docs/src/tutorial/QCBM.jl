@@ -175,8 +175,8 @@ qcbm = QCBM(circuit, kernel, pg);
 # ```
 
 function mmdgrad(qcbm::QCBM, dbs; p0::Vector)
-    statdiff(()->probs(qcbm), dbs, StatFunctional(kmat(qcbm.kernel)), initial=p0) -
-        2*statdiff(()->probs(qcbm), dbs, StatFunctional(kmat(qcbm.kernel)*qcbm.ptrain))
+    statdiff(()->probs(qcbm) |> as_weights, dbs, StatFunctional(kmat(qcbm.kernel)), initial=p0 |> as_weights) -
+        2*statdiff(()->probs(qcbm) |> as_weights, dbs, StatFunctional(kmat(qcbm.kernel)*qcbm.ptrain))
 end;
 
 # ## Optimizer

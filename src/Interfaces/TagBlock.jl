@@ -1,4 +1,4 @@
-export autodiff, numdiff, opdiff, StatFunctional, statdiff
+export autodiff, numdiff, opdiff, StatFunctional, statdiff, as_weights
 
 """
     autodiff(mode::Symbol, block::AbstractBlock) -> AbstractBlock
@@ -87,8 +87,8 @@ Base.parent(stat::StatFunctional) = stat.data
 
 import Yao.Blocks: expect
 using Yao.Interfaces: _perturb
-expect(stat::StatFunctional{2, <:AbstractArray}, px::AbstractVector, py::AbstractVector=px) = px' * stat.data * py
-expect(stat::StatFunctional{1, <:AbstractArray}, px::AbstractVector) = stat.data' * px
+expect(stat::StatFunctional{2, <:AbstractArray}, px::Weights, py::Weights=px) = px.values' * stat.data * py.values
+expect(stat::StatFunctional{1, <:AbstractArray}, px::Weights) = stat.data' * px.values
 function expect(stat::StatFunctional{2, <:Function}, xs::AbstractVector{T}) where T
     N = length(xs)
     res = zero(stat.data(xs[1], xs[1]))
@@ -130,4 +130,7 @@ scale(x::Number) = blk -> scale(blk, x)
 
 staticscale(blk::MatrixBlock, x::Number) = StaticScale(blk, x)
 staticscale(x::Number) = blk -> staticscale(blk, x)
+
+as_weights(probs::AbstractVector) = Weights(probs, 1)
+
 include("Cache.jl")
