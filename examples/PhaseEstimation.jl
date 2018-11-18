@@ -4,7 +4,7 @@ using Yao.Intrinsics
 using LinearAlgebra: qr, Diagonal
 
 """
-    phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::GeneralMatrixGate{N, T}, nshot::Int=1) -> (phase, DefaultRegister)
+    phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::GeneralMatrixGate{N, T}; nshot::Int=1) -> (phase, DefaultRegister)
 
 where,
     reg1: the output space to store phase ϕ.
@@ -14,7 +14,7 @@ where,
 
 reference: https://en.wikipedia.org/wiki/Quantum_phase_estimation_algorithm
 """
-function phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::GeneralMatrixGate{N}, nshot::Int=1) where {N}
+function phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::GeneralMatrixGate{N}; nshot::Int=1) where {N}
     M = nqubits(reg1)
     iqft = QFT(M)'
     HGates = rollrepeat(M, H)
@@ -31,7 +31,7 @@ function phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::Gener
     reg1 |> HGates
     reg = join(reg2, reg1)
     reg |> control_circuit |> focus(1:M...) |> iqft
-    res = measure(reg, nshot)
+    res = measure(reg, nshot=nshot)
     breflect.(M, res)./(1<<M), reg
 end
 

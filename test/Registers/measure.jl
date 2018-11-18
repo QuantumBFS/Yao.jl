@@ -18,7 +18,7 @@ end
 @testset "measure and reset/remove" begin
     reg = rand_state(4)
     res = measure_reset!(reg, (4,))
-    result = measure(reg, nshot=10)
+    result = measure(reg; nshot=10)
     println(result)
     @test all(result .< 8)
 

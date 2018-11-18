@@ -123,7 +123,7 @@ end
 
 @show product_state(5, 0b11001) |> measure  # please notice binary number `0b11001` is equivalent to `25`!
 reg = rand_state(7)
-@show measure(reg, nshot=5);          # measure multiple times
+@show measure(reg; nshot=5);          # measure multiple times
 
 # **measure!**
 reg = rand_state(7)
