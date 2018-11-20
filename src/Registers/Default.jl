@@ -100,8 +100,8 @@ for FUNC in [:zero_state, :rand_state, :uniform_state]
 end
 product_state(n::Int, config::Integer, nbatch::Int=1) = product_state(DefaultType, n, config, nbatch)
 
-function summary(io::IO, r::DefaultRegister{B, T}) where {B, T}
-    println(io, "DefaultRegister{", B, ", ", T, "}")
+function summary(io::IO, r::DefaultRegister{B, T, MT}) where {B, T, MT}
+    println(io, "DefaultRegister{", B, ", ", MT, "}")
 end
 
 function show(io::IO, r::DefaultRegister{B, T}) where {B, T}
@@ -126,10 +126,11 @@ function join(reg1::DefaultRegister{B, T1}, reg2::DefaultRegister{B, T2}) where 
 end
 join(reg1::DefaultRegister{1}, reg2::DefaultRegister{1}) = DefaultRegister{1}(kron(reg1.state, reg2.state))
 
-function addbit!(r::DefaultRegister{B, T}, n::Int) where {B, T}
+function addbit!(r::DefaultRegister, n::Int)
     mat = r.state
     M, N = size(mat)
-    r.state = zeros(T, M*(1<<n), N)
+    r.state = similar(r.state, M*(1<<n), N)
+    r.state .= 0
     r.state[1:M, :] = mat
     r
 end

@@ -5,7 +5,7 @@ using LinearAlgebra, Test
 @testset "BP diff" begin
     reg = rand_state(4)
     block = put(4, 2=>rot(X, 0.3))
-    df = BPDiff(block, copy(reg))
+    df = BPDiff(block)
     @test df.grad == 0
     @test nqubits(df) == 4
 

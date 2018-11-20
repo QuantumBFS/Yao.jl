@@ -1,5 +1,5 @@
 const DInt = Int
-const Ints{IT} = Union{Vector{IT}, IT, UnitRange{IT}} where IT<:Integer
+const Ints{IT} = Union{NTuple{<:Any, IT}, Vector{IT}, IT, UnitRange{IT}} where IT<:Integer
 """
     basis([IntType], num_bit::Int) -> UnitRange{IntType}
     basis([IntType], state::AbstractArray) -> UnitRange{IntType}
@@ -249,10 +249,9 @@ end
 
 Return a function that test whether a basis at `cbits` takes specific value `cvals`.
 """
-function controller(cbits, cvals)
+function controller(cbits::Ints{Int}, cvals::Ints{Int})
     do_mask = bmask(cbits...)
-    onepos = cvals.==1
-    onemask = any(onepos) ? bmask(cbits[onepos]...) : DInt(0)
+    onemask = length(cvals)==0 ? 0 : mapreduce(xy -> (xy[2]==1 ? 1<<(xy[1]-1) : 0), |, zip(cbits, cvals))
     return b->testval(b, do_mask, onemask)
 end
 

@@ -82,7 +82,7 @@ import LinearAlgebra: normalize!
 Return the register with normalized state.
 """
 function normalize! end
-normalize!(r::DefaultRegister) = (batch_normalize!(r.state); r)
+normalize!(r::DefaultRegister{B}) where B = (batch_normalize!(reshape(r.state, :, B)); r)
 
 # Register Operations
 ############## Reordering #################

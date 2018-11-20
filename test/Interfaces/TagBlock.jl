@@ -115,38 +115,44 @@ end
     @test ed == gd
 end
 
-@testset "vstat" begin
-    h = randn(16,16)
-    h+=h'
-    V = Vstat(h)
-    prs = [1=>2, 2=>3, 3=>4, 4=>1]
-    c = ibm_diff_circuit(4, 2, prs) |> autodiff(:QC)
+@testset "stat" begin
+    nbit = 3
+    f(x::Number, y::Number) = Float64(abs(x-y) < 1.5)
+    x = 0:1<<nbit-1
+    h = f.(x', x)
+    V = StatFunctional(h)
+    VF = StatFunctional{2}(f)
+    prs = [1=>2, 2=>3, 3=>1]
+    c = ibm_diff_circuit(nbit, 2, prs) |> autodiff(:QC)
     dispatch!(c, :random)
     dbs = collect(c, AbstractDiff)
 
-    p0 = zero_state(4) |> c |> probs
-    loss0 = expect(V, p0)
-    gradsn = numdiff.(()->expect(V, zero_state(4) |> c |> probs), dbs)
-    gradse = vstatdiff.(()->zero_state(4) |> c, dbs, Ref(V), p0=p0)
+    p0 = zero_state(nbit) |> c |> probs
+    sample0 = measure(zero_state(nbit) |> c; nshot=5000)
+    loss0 = expect(V, p0 |> as_weights)
+    gradsn = numdiff.(()->expect(V, zero_state(nbit) |> c |> probs |> as_weights), dbs)
+    gradse = statdiff.(()->zero_state(nbit) |> c |> probs |> as_weights, dbs, Ref(V), initial=p0 |> as_weights)
+    gradsf = statdiff.(()->measure(zero_state(nbit) |> c; nshot=5000), dbs, Ref(VF), initial=sample0)
     @test all(isapprox.(gradse, gradsn, atol=1e-4))
+    @test norm(gradsf-gradse)/norm(gradsf) <= 0.2
 
     # 1D
-    h = randn(16)
-    V = Vstat(h)
-    c = ibm_diff_circuit(4, 2, prs) |> autodiff(:QC)
+    h = randn(1<<nbit)
+    V = StatFunctional(h)
+    c = ibm_diff_circuit(nbit, 2, prs) |> autodiff(:QC)
     dispatch!(c, :random)
     dbs = collect(c, AbstractDiff)
 
-    p0 = zero_state(4) |> c |> probs
-    loss0 = expect(V, p0)
-    gradsn = numdiff.(()->expect(V, zero_state(4) |> c |> probs), dbs)
-    gradse = vstatdiff.(()->zero_state(4) |> c, dbs, Ref(V))
+    p0 = zero_state(nbit) |> c |> probs |> as_weights
+    loss0 = expect(V, p0 |> as_weights)
+    gradsn = numdiff.(()->expect(V, zero_state(nbit) |> c |> probs |> as_weights), dbs)
+    gradse = statdiff.(()->zero_state(nbit) |> c |> probs |> as_weights, dbs, Ref(V))
     @test all(isapprox.(gradse, gradsn, atol=1e-4))
 end
 
 @testset "scale" begin
-    scale(X, 3) isa Scale
-    X |> scale(3) isa Scale
-    staticscale(X, 3) isa StaticScale
-    X |> staticscale(3) isa StaticScale
+    @test scale(X, 3) isa Scale
+    @test X |> scale(3) isa Scale
+    @test staticscale(X, 3) isa StaticScale
+    @test X |> staticscale(3) isa StaticScale
 end

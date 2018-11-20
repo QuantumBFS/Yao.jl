@@ -28,7 +28,7 @@ subblocks(blk::AbstractBlock) = ()
 
 Change `subblocks` of target block.
 """
-chsubblocks(pb::AbstractBlock, blks) = length(blks)==0 ? pb : throws(ArgumentError("size of blocks not match!"))
+chsubblocks(pb::AbstractBlock, blks) = length(blks)==0 ? pb : throw(ArgumentError("size of blocks not match!"))
 
 """
     apply!(reg, block, [signal])

@@ -1,4 +1,4 @@
-export autodiff, numdiff, opdiff, Vstat, vstatdiff
+export autodiff, numdiff, opdiff, StatFunctional, statdiff, as_weights
 
 """
     autodiff(mode::Symbol, block::AbstractBlock) -> AbstractBlock
@@ -65,36 +65,62 @@ Operator differentiation.
 end
 
 """
-    Vstat{N, AT}
-    Vstat(data) -> Vstat
+    StatFunctional{N, AT}
+    StatFunctional(array::AT<:Array) -> StatFunctional{N, <:Array}
+    StatFunctional{N}(func::AT<:Function) -> StatFunctional{N, <:Function}
 
-V-statistic functional.
+statistic functional, i.e.
+    * if `AT` is an array, A[i,j,k...], it is defined on finite Hilbert space, which is `∫A[i,j,k...]p[i]p[j]p[k]...`
+    * if `AT` is a function, F(xᵢ,xⱼ,xₖ...), this functional is `1/C(r,n)... ∑ᵢⱼₖ...F(xᵢ,xⱼ,xₖ...)`, see U-statistics for detail.
+
+References:
+    U-statistics, http://personal.psu.edu/drh20/asymp/fall2006/lectures/ANGELchpt10.pdf
 """
-struct Vstat{N, AT}
+struct StatFunctional{N, AT}
     data::AT
-    Vstat(data::AT) where {N, AT<:AbstractArray{<:Real, N}} = new{N, AT}(data)
+    StatFunctional{N}(data::AT) where {N, AT<:Function} = new{N, AT}(data)
+    StatFunctional(data::AT) where {N, AT<:AbstractArray{<:Real, N}} = new{N, AT}(data)
 end
 
-@forward Vstat.data Base.ndims
-Base.parent(vstat::Vstat) = vstat.data
+@forward StatFunctional.data Base.ndims
+Base.parent(stat::StatFunctional) = stat.data
 
 import Yao.Blocks: expect
 using Yao.Interfaces: _perturb
-expect(vstat::Vstat{2}, px::Vector, py::Vector=px) = px' * vstat.data * py
-expect(vstat::Vstat{1}, px::Vector) = vstat.data' * px
-
-"""
-    vstatdiff(psifunc, diffblock::AbstractDiff, vstat::Vstat; p0::AbstractVector=psifunc()|>probs)
-
-Differentiation for V-statistics.
-"""
-@inline function vstatdiff(psifunc, diffblock::AbstractDiff, vstat::Vstat; p0::AbstractVector=psifunc()|>probs)
-    r1, r2 = _perturb(()->expect(vstat, psifunc()|>probs, p0), diffblock, π/2)
-    diffblock.grad = (r2 - r1)*ndims(vstat)/2
+expect(stat::StatFunctional{2, <:AbstractArray}, px::Weights, py::Weights=px) = px.values' * stat.data * py.values
+expect(stat::StatFunctional{1, <:AbstractArray}, px::Weights) = stat.data' * px.values
+function expect(stat::StatFunctional{2, <:Function}, xs::AbstractVector{T}) where T
+    N = length(xs)
+    res = zero(stat.data(xs[1], xs[1]))
+    for i = 2:N
+        for j = 1:i-1
+            @inbounds res += stat.data(xs[i], xs[j])
+        end
+    end
+    res/binomial(N,2)
 end
-@inline function vstatdiff(psifunc, diffblock::AbstractDiff, vstat::Vstat{1})
-    r1, r2 = _perturb(()->expect(vstat, psifunc()|>probs), diffblock, π/2)
-    diffblock.grad = (r2 - r1)*ndims(vstat)/2
+function expect(stat::StatFunctional{2, <:Function}, xs::AbstractVector, ys::AbstractVector)
+    M = length(xs)
+    N = length(ys)
+    ci = CartesianIndices((M, N))
+    @inbounds mapreduce(ind->stat.data(xs[ind[1]], ys[ind[2]]), +, ci)/M/N
+end
+expect(stat::StatFunctional{1, <:Function}, xs::AbstractVector) = mean(stat.data.(xs))
+Base.ndims(stat::StatFunctional{N}) where N = N
+
+"""
+    statdiff(probfunc, diffblock::AbstractDiff, stat::StatFunctional{<:Any, <:AbstractArray}; initial::AbstractVector=probfunc())
+    statdiff(samplefunc, diffblock::AbstractDiff, stat::StatFunctional{<:Any, <:Function}; initial::AbstractVector=samplefunc())
+
+Differentiation for statistic functionals.
+"""
+@inline function statdiff(probfunc, diffblock::AbstractDiff, stat::StatFunctional{2}; initial::AbstractVector=probfunc())
+    r1, r2 = _perturb(()->expect(stat, probfunc(), initial), diffblock, π/2)
+    diffblock.grad = (r2 - r1)*ndims(stat)/2
+end
+@inline function statdiff(probfunc, diffblock::AbstractDiff, stat::StatFunctional{1})
+    r1, r2 = _perturb(()->expect(stat, probfunc()), diffblock, π/2)
+    diffblock.grad = (r2 - r1)*ndims(stat)/2
 end
 
 export scale, staticscale
@@ -104,4 +130,7 @@ scale(x::Number) = blk -> scale(blk, x)
 
 staticscale(blk::MatrixBlock, x::Number) = StaticScale(blk, x)
 staticscale(x::Number) = blk -> staticscale(blk, x)
+
+as_weights(probs::AbstractVector{T}) where T = Weights(probs, T(1))
+
 include("Cache.jl")

@@ -36,4 +36,7 @@ end
     res = mat(kron(nbit, 3=>X))*V
     @test (rrr=copy(V); controldo(x->swaprows!(rrr, x+1, x-3), it); rrr) ≈ res
     @test (rrr=copy(V); controldo(x->mulrow!(rrr, x+1, -1), itercontrol(nbit, [3,7, 6], [1, 1, 1])); rrr) ≈ mat(control(nbit, (3,7), 6=>Z)) * V
+
+    ic = itercontrol(4, [2,3], [0,0])
+    @test [ic...] == [ic[k] for k=1:4]
 end

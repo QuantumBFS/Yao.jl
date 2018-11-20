@@ -111,7 +111,7 @@ end
 @show ψ3' * ψ3;
 
 # ## Measure
-# * `measure(reg)`, measure without collapsing state,
+# * `measure(reg; nshot=1)`, measure without collapsing state,
 # * `measure!(reg)`, measure and collapse,
 # * `measure_remove!(reg)`, measure focused bits and remove them,
 # * `measure_reset!(reg, val=0)`, measure focused bits and reset them to some value,
@@ -123,7 +123,7 @@ end
 
 @show product_state(5, 0b11001) |> measure  # please notice binary number `0b11001` is equivalent to `25`!
 reg = rand_state(7)
-@show measure(reg, 5);          # measure multiple times
+@show measure(reg; nshot=5);          # measure multiple times
 
 # **measure!**
 reg = rand_state(7)

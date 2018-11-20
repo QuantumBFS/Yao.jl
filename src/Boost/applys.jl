@@ -190,7 +190,7 @@ end
 
 
 ####################### General Apply U1 ########################
-function u1apply!(state::AbstractVecOrMat{T}, U1::PermMatrix{T}, ibit::Int) where T
+function u1apply!(state::AbstractVecOrMat, U1::SDPermMatrix, ibit::Int)
     if U1.perm[1] == 1
         return u1apply!(state, Diagonal(U1), ibit)
     end
@@ -206,7 +206,7 @@ function u1apply!(state::AbstractVecOrMat{T}, U1::PermMatrix{T}, ibit::Int) wher
     state
 end
 
-function u1apply!(state::AbstractVecOrMat{T}, U1::Diagonal{T}, ibit::Int) where T
+function u1apply!(state::AbstractVecOrMat, U1::SDDiagonal, ibit::Int)
     mask = bmask(ibit)
     a, d = U1.diag
     step = 1<<(ibit-1)

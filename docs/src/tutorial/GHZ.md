@@ -78,7 +78,7 @@ statevec(r)
 We have a GHZ state here, try to measure the first qubit
 
 ```julia
-measure(r, 1000)
+measure(r; nshot=1000)
 ```
 
 ![GHZ](../assets/figures/GHZ.png)

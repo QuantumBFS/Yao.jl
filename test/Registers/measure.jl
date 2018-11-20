@@ -15,9 +15,15 @@ using Yao.Registers
     @test r3 ≈ r2
 end
 
-@testset "measure and reset" begin
+@testset "measure and reset/remove" begin
     reg = rand_state(4)
     res = measure_reset!(reg, (4,))
-    result = measure(reg, 10)
+    result = measure(reg; nshot=10)
+    println(result)
     @test all(result .< 8)
+
+    reg = rand_state(6) |> focus(1,4,3)
+    reg0 = copy(reg)
+    res = measure_remove!(reg)
+    @test select(reg0, res) |> normalize! ≈ reg
 end

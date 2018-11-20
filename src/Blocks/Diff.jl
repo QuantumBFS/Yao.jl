@@ -39,29 +39,28 @@ end
 
 #################### The Back Propagation Diff #################
 """
-    BPDiff{GT, N, T, PT, RT<:AbstractRegister} <: AbstractDiff{GT, N, Complex{T}}
-    BPDiff(block, [input::AbstractRegister, grad]) -> BPDiff
+    BPDiff{GT, N, T, PT} <: AbstractDiff{GT, N, Complex{T}}
+    BPDiff(block, [grad]) -> BPDiff
 
-Mark a block as differentiable, here `GT`, `PT` and `RT` are gate type, parameter type and register type respectively.
+Mark a block as differentiable, here `GT`, `PT` is gate type, parameter type.
 
 Warning:
     please don't use the `adjoint` after `BPDiff`! `adjoint` is reserved for special purpose! (back propagation)
 """
-mutable struct BPDiff{GT, N, T, PT, RT<:AbstractRegister} <: AbstractDiff{GT, N, T}
+mutable struct BPDiff{GT, N, T, PT} <: AbstractDiff{GT, N, T}
     block::GT
-    input::RT
     grad::PT
-    BPDiff(block::MatrixBlock{N, T}, input::RT, grad::PT) where {N, T, PT, RT} = new{typeof(block), N, T, typeof(grad), RT}(block, input, grad)
+    input::AbstractRegister
+    BPDiff(block::MatrixBlock{N, T}, grad::PT) where {N, T, PT} = new{typeof(block), N, T, typeof(grad)}(block, grad)
 end
-BPDiff(block::MatrixBlock, input::AbstractRegister) = BPDiff(block, input, zeros(iparameter_type(block), niparameters(block)))
-BPDiff(block::MatrixBlock{N, T}) where {N, T} = BPDiff(block, zero_state(N))
-BPDiff(block::Rotor{N, T}, input::AbstractRegister) where {N, T} = BPDiff(block, input, T(0))
+BPDiff(block::MatrixBlock) = BPDiff(block, zeros(iparameter_type(block), niparameters(block)))
+BPDiff(block::Rotor{N, T}) where {N, T} = BPDiff(block, T(0))
 
 chblock(cb::BPDiff, blk::MatrixBlock) = BPDiff(blk)
 
 @forward BPDiff.block mat
 function apply!(reg::AbstractRegister, df::BPDiff)
-    copyto!(df.input, copy(reg))
+    df.input = copy(reg)
     apply!(reg, parent(df))
     reg
 end

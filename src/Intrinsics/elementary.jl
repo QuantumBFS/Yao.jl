@@ -42,7 +42,7 @@ Return vector if a matrix is a column vector, else untouched.
 function matvec end
 
 @inline function swaprows!(v::AbstractMatrix{T}, i::Int, j::Int, f1, f2) where T
-    @inbounds @simd for c = 1:size(v, 2)
+    @inbounds for c = 1:size(v, 2)
         local temp::T
         temp = v[i, c]
         v[i, c] = v[j, c]*f2
@@ -52,7 +52,7 @@ function matvec end
 end
 
 @inline function swaprows!(v::AbstractMatrix{T}, i::Int, j::Int) where T
-    @inbounds @simd for c = 1:size(v, 2)
+    @inbounds for c = 1:size(v, 2)
         local temp::T
         temp = v[i, c]
         v[i, c] = v[j, c]
@@ -62,7 +62,7 @@ end
 end
 
 @inline function swapcols!(v::AbstractMatrix{T}, i::Int, j::Int, f1, f2) where T
-    @inbounds @simd for c = 1:size(v, 1)
+    @inbounds for c = 1:size(v, 1)
         local temp::T
         temp = v[c, i]
         v[c, i] = v[c, j]*f2
@@ -72,7 +72,7 @@ end
 end
 
 @inline function swapcols!(v::AbstractMatrix{T}, i::Int, j::Int) where T
-    @inbounds @simd for c = 1:size(v, 1)
+    @inbounds for c = 1:size(v, 1)
         local temp::T
         temp = v[c, i]
         v[c, i] = v[c, j]
@@ -106,7 +106,7 @@ end
 end
 
 @inline function u1rows!(state::AbstractMatrix, i::Int,j::Int, a, b, c, d)
-    @inbounds @simd for col = 1:size(state, 2)
+    @inbounds for col = 1:size(state, 2)
         w = state[i, col]
         v = state[j, col]
         state[i, col] = a*w+b*v
@@ -117,7 +117,7 @@ end
 
 @inline mulrow!(v::AbstractVector, i::Int, f) = (v[i] *= f; v)
 @inline function mulrow!(v::AbstractMatrix, i::Int, f)
-    @inbounds @simd for j = 1:size(v, 2)
+    @inbounds for j = 1:size(v, 2)
         v[i, j] *= f
     end
     v
@@ -125,7 +125,7 @@ end
 
 @inline mulcol!(v::AbstractVector, i::Int, f) = (v[i] *= f; v)
 @inline function mulcol!(v::AbstractMatrix, j::Int, f)
-    @inbounds @simd for i = 1:size(v, 1)
+    @inbounds for i = 1:size(v, 1)
         v[i, j] *= f
     end
     v
@@ -135,13 +135,13 @@ matvec(x::AbstractMatrix) = size(x, 2) == 1 ? vec(x) : x
 matvec(x::AbstractVector) = x
 
 @inline function unrows!(state::AbstractVector, inds::AbstractVector, U::SDMatrix)
-    @inbounds state[inds] = U*view(state, inds)
+    @inbounds state[inds] = U*state[inds]
     state
 end
 
 @inline function unrows!(state::AbstractMatrix, inds::AbstractVector, U::SDMatrix)
-    @inbounds @simd for k in 1:size(state, 2)
-        state[inds, k] = U*view(state, inds, k)
+    @inbounds for k in 1:size(state, 2)
+        state[inds, k] = U*state[inds, k]
     end
     state
 end
@@ -150,7 +150,7 @@ end
 @inline unrows!(state::AbstractVector, inds::AbstractVector, U::IMatrix) = state
 
 @inline function unrows!(state::AbstractVector, inds::AbstractVector, U::SDDiagonal)
-    @simd for i in 1:length(U.diag)
+    for i in 1:length(U.diag)
         @inbounds state[inds[i]] *= U.diag[i]
     end
     state
@@ -158,7 +158,7 @@ end
 
 @inline function unrows!(state::AbstractMatrix, inds::AbstractVector, U::SDDiagonal)
     for j in 1:size(state, 2)
-        @simd for i in 1:length(U.diag)
+        for i in 1:length(U.diag)
             @inbounds state[inds[i],j] *= U.diag[i]
         end
     end
@@ -171,7 +171,7 @@ end
 end
 
 @inline function unrows!(state::AbstractMatrix, inds::AbstractVector, U::SDPermMatrix)
-    @inbounds @simd for k in 1:size(state, 2)
+    @inbounds for k in 1:size(state, 2)
         state[inds, k] = state[inds[U.perm], k] .* U.vals
     end
     state
@@ -181,7 +181,7 @@ end
     work .= 0
     @inbounds for col = 1:length(inds)
         xj = state[inds[col]]
-        @inbounds @simd for j = A.colptr[col]:(A.colptr[col + 1] - 1)
+        for j = A.colptr[col]:(A.colptr[col + 1] - 1)
             work[A.rowval[j]] += A.nzval[j]*xj
         end
     end
@@ -192,9 +192,9 @@ end
 @inline function unrows!(state::AbstractMatrix, inds::AbstractVector, A::SDSparseMatrixCSC, work::Matrix)
     work .= 0
     @inbounds for k = 1:size(state, 2)
-        @inbounds for col = 1:length(inds)
+        for col = 1:length(inds)
             xj = state[inds[col],k]
-            @inbounds @simd for j = A.colptr[col]:(A.colptr[col + 1] - 1)
+            for j = A.colptr[col]:(A.colptr[col + 1] - 1)
                 work[A.rowval[j], k] += A.nzval[j]*xj
             end
         end

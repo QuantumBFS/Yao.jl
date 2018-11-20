@@ -115,7 +115,7 @@ function phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::Gener
     # using iqft to read out the phase
     apply!(reg, sequence(control_circuit, focus(1:M...), iqft))
     # measure the register (on focused bits), if the phase can be exactly represented by M qubits, only a single shot is needed.
-    res = measure(reg, nshot)
+    res = measure(reg; nshot=nshot)
     # inverse the bits in result due to the exchange of big and little ends, so that we can get the correct phase.
     breflect.(M, res)./(1<<M), reg
 end
