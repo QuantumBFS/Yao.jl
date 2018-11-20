@@ -8,6 +8,7 @@ docs/src/tutorial/RegisterBasics.md
 docs/src/tutorial/BlockBasics.md
 docs/src/tutorial/BinaryBasics.md
 docs/src/tutorial/QCBM.md
+docs/src/tutorial/GHZ.md
 
 *.ipynb_checkpoints
 **/*.ipynb_checkpoints
