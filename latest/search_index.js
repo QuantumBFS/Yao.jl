@@ -93,7 +93,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Register Basics",
     "title": "Measure",
     "category": "section",
-    "text": "measure(reg), measure without collapsing state,\nmeasure!(reg), measure and collapse,\nmeasure_remove!(reg), measure focused bits and remove them,\nmeasure_reset!(reg, val=0), measure focused bits and reset them to some value,\nreset!(reg), collapse to specific value directly.\nselect(reg, x), select subspace projected on specific basis, i.e. phirangle = xranglelangle xpsirangle.measure@show product_state(5, 0b11001) |> measure  # please notice binary number `0b11001` is equivalent to `25`!\nreg = rand_state(7)\n@show measure(reg, 5);          # measure multiple timesmeasure!reg = rand_state(7)\n@show [measure!(reg) for i=1:5];  # measure! will collapse statemeasure_reset!reg = rand_state(7)\n@show [measure_reset!(reg, val=i*10) for i=1:5];   # measure_reset! will reset the measured bit to target state (default is `0`)measure_remove!reg = rand_state(7)\n@show measure_remove!(reg)\n@show reg;\n\nreg = rand_state(7)\n@show measure_remove!(reg |> focus!(2,3))\n@show reg;selectselect will allow you to get the disired measurement result, and collapse to that state. It is equivalent to calculating phirangle = xranglelangle xpsirangle.reg = rand_state(9) |> focus!(1, 2, 3, 4)\n@show ψ = select(reg, 0b1110)\n@show ψ |> relax!;\n\n# Fidelity and Density Matrix\nψ1 = rand_state(6)\nψ2 = rand_state(6)\n@show fidelity(ψ1, ψ2)\n@show tracedist(ψ1, ψ2)\n@show ψ1 |> ρ\n@show tracedist(ψ1 |> ρ, ψ2|> ρ);  # calculate trace distance using density matrix\n@assert ψ1 |> probs ≈ dropdims(ψ1 |> ρ |> probs, dims=2)"
+    "text": "measure(reg; nshot=1), measure without collapsing state,\nmeasure!(reg), measure and collapse,\nmeasure_remove!(reg), measure focused bits and remove them,\nmeasure_reset!(reg, val=0), measure focused bits and reset them to some value,\nreset!(reg), collapse to specific value directly.\nselect(reg, x), select subspace projected on specific basis, i.e. phirangle = xranglelangle xpsirangle.measure@show product_state(5, 0b11001) |> measure  # please notice binary number `0b11001` is equivalent to `25`!\nreg = rand_state(7)\n@show measure(reg; nshot=5);          # measure multiple timesmeasure!reg = rand_state(7)\n@show [measure!(reg) for i=1:5];  # measure! will collapse statemeasure_reset!reg = rand_state(7)\n@show [measure_reset!(reg, val=i*10) for i=1:5];   # measure_reset! will reset the measured bit to target state (default is `0`)measure_remove!reg = rand_state(7)\n@show measure_remove!(reg)\n@show reg;\n\nreg = rand_state(7)\n@show measure_remove!(reg |> focus!(2,3))\n@show reg;selectselect will allow you to get the disired measurement result, and collapse to that state. It is equivalent to calculating phirangle = xranglelangle xpsirangle.reg = rand_state(9) |> focus!(1, 2, 3, 4)\n@show ψ = select(reg, 0b1110)\n@show ψ |> relax!;\n\n# Fidelity and Density Matrix\nψ1 = rand_state(6)\nψ2 = rand_state(6)\n@show fidelity(ψ1, ψ2)\n@show tracedist(ψ1, ψ2)\n@show ψ1 |> ρ\n@show tracedist(ψ1 |> ρ, ψ2|> ρ);  # calculate trace distance using density matrix\n@assert ψ1 |> probs ≈ dropdims(ψ1 |> ρ |> probs, dims=2)"
 },
 
 {
@@ -221,7 +221,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Automatic Differentiation",
     "title": "Quantum circuit differentiation",
     "category": "section",
-    "text": "Experimental applicable differentiation strategies are based on the following two papersQuantum Circuit Learning, Kosuke Mitarai, Makoto Negoro, Masahiro Kitagawa, Keisuke Fujii\nDifferentiable Learning of Quantum Circuit Born Machine, Jin-Guo Liu, Lei WangThe former differentiation scheme is for observables, and the latter is for V-statistics. One may find the derivation of both schemes in this post.Realizable quantum circuit gradient finding algorithms have complexity O(M^2)."
+    "text": "Experimental applicable differentiation strategies are based on the following two papersQuantum Circuit Learning, Kosuke Mitarai, Makoto Negoro, Masahiro Kitagawa, Keisuke Fujii\nDifferentiable Learning of Quantum Circuit Born Machine, Jin-Guo Liu, Lei WangThe former differentiation scheme is for observables, and the latter is for statistic functionals (U statistics). One may find the derivation of both schemes in this post.Realizable quantum circuit gradient finding algorithms have complexity O(M^2)."
 },
 
 {
@@ -309,7 +309,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
     "title": "Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit",
     "category": "section",
-    "text": "First, you have to use this package in Julia.using YaoThen let\'s define the oracle, it is a function of the number of qubits. The circuit looks like this:(Image: ghz)n = 4\ncircuit(n) = chain(\n    n,\n    repeat(X, [1, ]),\n    kron(i=>H for i in 2:n),\n    control([2, ], 1=>X),\n    control([4, ], 3=>X),\n    control([3, ], 1=>X),\n    control([4, ], 3=>X),\n    kron(i=>H for i in 1:n),\n)Let me explain what happens here. Firstly, we have a X gate which is applied to the first qubit. We need decide how we calculate this numerically, Yao offers serveral different approach to this. The simplest (but not the most efficient) one is to use kronecker product which will product X with I on other lines to gather an operator in the whole space and then apply it to the register. The first argument n means the number of qubits.kron(n, 1=>X)Similar with kron, we then need to apply some controled gates.control(n, [2, ], 1=>X)This means there is a X gate on the first qubit that is controled by the second qubit. In fact, you can also create a controled gate with multiple control qubits, likecontrol(n, [2, 3], 1=>X)In the end, we need to apply H gate to all lines, of course, you can do it by kron, but we offer something more efficient called roll, this applies a single gate each time on each qubit without calculating a new large operator, which will be extremely efficient for calculating small gates that tiles on almost every lines.The whole circuit is a chained structure of the above blocks. And we actually store a quantum circuit in a tree structure.circuitAfter we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.r = apply!(register(bit\"0000\"), circuit(4))Let\'s check the output:statevec(r)We have a GHZ state here, try to measure the first qubitmeasure(r, 1000)(Image: GHZ)GHZ state will collapse to 0000rangle or 1111rangle due to entanglement!"
+    "text": "First, you have to use this package in Julia.using YaoThen let\'s define the oracle, it is a function of the number of qubits. The circuit looks like this:(Image: ghz)n = 4\ncircuit(n) = chain(\n    n,\n    repeat(X, [1, ]),\n    kron(i=>H for i in 2:n),\n    control([2, ], 1=>X),\n    control([4, ], 3=>X),\n    control([3, ], 1=>X),\n    control([4, ], 3=>X),\n    kron(i=>H for i in 1:n),\n)Let me explain what happens here. Firstly, we have a X gate which is applied to the first qubit. We need decide how we calculate this numerically, Yao offers serveral different approach to this. The simplest (but not the most efficient) one is to use kronecker product which will product X with I on other lines to gather an operator in the whole space and then apply it to the register. The first argument n means the number of qubits.kron(n, 1=>X)Similar with kron, we then need to apply some controled gates.control(n, [2, ], 1=>X)This means there is a X gate on the first qubit that is controled by the second qubit. In fact, you can also create a controled gate with multiple control qubits, likecontrol(n, [2, 3], 1=>X)In the end, we need to apply H gate to all lines, of course, you can do it by kron, but we offer something more efficient called roll, this applies a single gate each time on each qubit without calculating a new large operator, which will be extremely efficient for calculating small gates that tiles on almost every lines.The whole circuit is a chained structure of the above blocks. And we actually store a quantum circuit in a tree structure.circuitAfter we have an circuit, we can construct a quantum register, and input it into the oracle. You will then receive this register after processing it.r = apply!(register(bit\"0000\"), circuit(4))Let\'s check the output:statevec(r)We have a GHZ state here, try to measure the first qubitmeasure(r; nshot=1000)(Image: GHZ)GHZ state will collapse to 0000rangle or 1111rangle due to entanglement!"
 },
 
 {
@@ -341,7 +341,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Fourier Transformation and Phase Estimation",
     "title": "Phase Estimation",
     "category": "section",
-    "text": "Since we have QFT and IQFT blocks we can then use them to realize phase estimation circuit, what we want to realize is the following circuit (Image: phase estimation)In the following simulation, we use equivalent QFTBlock in the Yao.Zoo module rather than the above chain block, it is faster than the above construction because it hides all the simulation details (yes, we are cheating :D) and get the equivalent output.using Yao\nusing Yao.Blocks\nusing Yao.Intrinsics\n\nfunction phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::GeneralMatrixGate{N}, nshot::Int=1) where {N}\n    M = nqubits(reg1)\n    iqft = QFT(M) |> adjoint\n    HGates = rollrepeat(M, H)\n\n    control_circuit = chain(M+N)\n    for i = 1:M\n        push!(control_circuit, control(M+N, (i,), (M+1:M+N...,)=>U))\n        if i != M\n            U = matrixgate(mat(U) * mat(U))\n        end\n    end\n\n    # calculation\n    # step1 apply hadamard gates.\n    apply!(reg1, HGates)\n    # join two registers\n    reg = join(reg1, reg2)\n    # using iqft to read out the phase\n    apply!(reg, sequence(control_circuit, focus(1:M...), iqft))\n    # measure the register (on focused bits), if the phase can be exactly represented by M qubits, only a single shot is needed.\n    res = measure(reg, nshot)\n    # inverse the bits in result due to the exchange of big and little ends, so that we can get the correct phase.\n    breflect.(M, res)./(1<<M), reg\nendHere, reg1 (Q_1-5) is used as the output space to store phase ϕ, and reg2 (Q_6-8) is the input state which corresponds to an eigenvector of oracle matrix U. The algorithm detials can be found here.In this function, HGates corresponds to circuit block in dashed box A, control_circuit corresponds to block in dashed box B. matrixgate is a factory function for GeneralMatrixGate.Here, the only difficult concept is focus, focus returns a FunctionBlock, that will make focused bits the active bits. An operator sees only active bits, and operating active space is more efficient, most importantly, it becomes much easier to integrate blocks. However, it has the potential ability to change line orders, for safety consideration, you may also need safer Concentrator.r = rand_state(6)\napply!(r, focus(4,1,2))  # or equivalently using focus!(r, [4,1,2])\nnactive(r)Then we will have a check to above functionusing LinearAlgebra: qr, Diagonal\nrand_unitary(N::Int) = qr(randn(N, N)).Q\n\nM = 5\nN = 3\n\n# prepair oracle matrix U\nV = rand_unitary(1<<N)\nphases = rand(1<<N)\nϕ = Int(0b11101)/(1<<M)\nphases[3] = ϕ  # set the phase of the 3rd eigenstate manually.\nsigns = exp.(2pi*im.*phases)\nU = V*Diagonal(signs)*V\'  # notice U is unitary\n\n# the state with phase ϕ\npsi = U[:,3]\n\nres, reg = phase_estimation(zero_state(M), register(psi), GeneralMatrixGate(U))\nprintln(\"Phase is 2π * $(res[]), the exact value is 2π * $ϕ\")"
+    "text": "Since we have QFT and IQFT blocks we can then use them to realize phase estimation circuit, what we want to realize is the following circuit (Image: phase estimation)In the following simulation, we use equivalent QFTBlock in the Yao.Zoo module rather than the above chain block, it is faster than the above construction because it hides all the simulation details (yes, we are cheating :D) and get the equivalent output.using Yao\nusing Yao.Blocks\nusing Yao.Intrinsics\n\nfunction phase_estimation(reg1::DefaultRegister, reg2::DefaultRegister, U::GeneralMatrixGate{N}, nshot::Int=1) where {N}\n    M = nqubits(reg1)\n    iqft = QFT(M) |> adjoint\n    HGates = rollrepeat(M, H)\n\n    control_circuit = chain(M+N)\n    for i = 1:M\n        push!(control_circuit, control(M+N, (i,), (M+1:M+N...,)=>U))\n        if i != M\n            U = matrixgate(mat(U) * mat(U))\n        end\n    end\n\n    # calculation\n    # step1 apply hadamard gates.\n    apply!(reg1, HGates)\n    # join two registers\n    reg = join(reg1, reg2)\n    # using iqft to read out the phase\n    apply!(reg, sequence(control_circuit, focus(1:M...), iqft))\n    # measure the register (on focused bits), if the phase can be exactly represented by M qubits, only a single shot is needed.\n    res = measure(reg; nshot=nshot)\n    # inverse the bits in result due to the exchange of big and little ends, so that we can get the correct phase.\n    breflect.(M, res)./(1<<M), reg\nendHere, reg1 (Q_1-5) is used as the output space to store phase ϕ, and reg2 (Q_6-8) is the input state which corresponds to an eigenvector of oracle matrix U. The algorithm detials can be found here.In this function, HGates corresponds to circuit block in dashed box A, control_circuit corresponds to block in dashed box B. matrixgate is a factory function for GeneralMatrixGate.Here, the only difficult concept is focus, focus returns a FunctionBlock, that will make focused bits the active bits. An operator sees only active bits, and operating active space is more efficient, most importantly, it becomes much easier to integrate blocks. However, it has the potential ability to change line orders, for safety consideration, you may also need safer Concentrator.r = rand_state(6)\napply!(r, focus(4,1,2))  # or equivalently using focus!(r, [4,1,2])\nnactive(r)Then we will have a check to above functionusing LinearAlgebra: qr, Diagonal\nrand_unitary(N::Int) = qr(randn(N, N)).Q\n\nM = 5\nN = 3\n\n# prepair oracle matrix U\nV = rand_unitary(1<<N)\nphases = rand(1<<N)\nϕ = Int(0b11101)/(1<<M)\nphases[3] = ϕ  # set the phase of the 3rd eigenstate manually.\nsigns = exp.(2pi*im.*phases)\nU = V*Diagonal(signs)*V\'  # notice U is unitary\n\n# the state with phase ϕ\npsi = U[:,3]\n\nres, reg = phase_estimation(zero_state(M), register(psi), GeneralMatrixGate(U))\nprintln(\"Phase is 2π * $(res[]), the exact value is 2π * $ϕ\")"
 },
 
 {
@@ -437,7 +437,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Circuit Born Machine",
     "title": "Gradients",
     "category": "section",
-    "text": "the gradient of MMD loss isbeginaligned\nfracpartial mathcalLpartial theta^i_l = langle K(x y) rangle_xsim p_theta^+ ysim p_theta - langle K(x y) rangle_xsim p_theta^- ysim p_theta\n- langle K(x y) rangle _xsim p_theta^+ ysimpi + langle K(x y) rangle_xsim p_theta^- ysimpi\nendalignedfunction mmdgrad(qcbm::QCBM, dbs; p0::Vector)\n    vstatdiff(()->psi(qcbm), dbs, Vstat(kmat(qcbm.kernel)), p0=p0) -\n        2*vstatdiff(()->psi(qcbm), dbs, Vstat(kmat(qcbm.kernel)*qcbm.ptrain))\nend;"
+    "text": "the gradient of MMD loss isbeginaligned\nfracpartial mathcalLpartial theta^i_l = langle K(x y) rangle_xsim p_theta^+ ysim p_theta - langle K(x y) rangle_xsim p_theta^- ysim p_theta\n- langle K(x y) rangle _xsim p_theta^+ ysimpi + langle K(x y) rangle_xsim p_theta^- ysimpi\nendalignedfunction mmdgrad(qcbm::QCBM, dbs; p0::Vector)\n    statdiff(()->probs(qcbm) |> as_weights, dbs, StatFunctional(kmat(qcbm.kernel)), initial=p0 |> as_weights) -\n        2*statdiff(()->probs(qcbm) |> as_weights, dbs, StatFunctional(kmat(qcbm.kernel)*qcbm.ptrain))\nend;"
 },
 
 {
@@ -553,11 +553,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Yao.Interfaces.Vstat",
+    "location": "man/interfaces/#Yao.Interfaces.StatFunctional",
     "page": "Interfaces",
-    "title": "Yao.Interfaces.Vstat",
+    "title": "Yao.Interfaces.StatFunctional",
     "category": "type",
-    "text": "Vstat{N, AT}\nVstat(data) -> Vstat\n\nV-statistic functional.\n\n\n\n\n\n"
+    "text": "StatFunctional{N, AT}\nStatFunctional(array::AT<:Array) -> StatFunctional{N, <:Array}\nStatFunctional{N}(func::AT<:Function) -> StatFunctional{N, <:Function}\n\nstatistic functional, i.e.     * if AT is an array, A[i,j,k...], it is defined on finite Hilbert space, which is ∫A[i,j,k...]p[i]p[j]p[k]...     * if AT is a function, F(xᵢ,xⱼ,xₖ...), this functional is 1/C(r,n)... ∑ᵢⱼₖ...F(xᵢ,xⱼ,xₖ...), see U-statistics for detail.\n\nReferences:     U-statistics, http://personal.psu.edu/drh20/asymp/fall2006/lectures/ANGELchpt10.pdf\n\n\n\n\n\n"
 },
 
 {
@@ -681,7 +681,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{M}, Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s381} where #s381<:AbstractBlock}} where M",
+    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{M}, Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s360} where #s360<:AbstractBlock}} where M",
     "page": "Interfaces",
     "title": "Yao.Interfaces.put",
     "category": "method",
@@ -737,6 +737,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/interfaces/#Yao.Interfaces.statdiff-Tuple{Any,AbstractDiff,StatFunctional{2,AT} where AT}",
+    "page": "Interfaces",
+    "title": "Yao.Interfaces.statdiff",
+    "category": "method",
+    "text": "statdiff(probfunc, diffblock::AbstractDiff, stat::StatFunctional{<:Any, <:AbstractArray}; initial::AbstractVector=probfunc())\nstatdiff(samplefunc, diffblock::AbstractDiff, stat::StatFunctional{<:Any, <:Function}; initial::AbstractVector=samplefunc())\n\nDifferentiation for statistic functionals.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/interfaces/#Yao.Interfaces.swap",
     "page": "Interfaces",
     "title": "Yao.Interfaces.swap",
@@ -750,14 +758,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Yao.Interfaces.timeevolve",
     "category": "function",
     "text": "timeevolve({block::MatrixBlock}, t::Real; tol::Real=1e-7) -> TimeEvolution\n\nMake a time machine! If block is not provided, it will become lazy.\n\n\n\n\n\n"
-},
-
-{
-    "location": "man/interfaces/#Yao.Interfaces.vstatdiff-Tuple{Any,AbstractDiff,Vstat}",
-    "page": "Interfaces",
-    "title": "Yao.Interfaces.vstatdiff",
-    "category": "method",
-    "text": "vstatdiff(psifunc, diffblock::AbstractDiff, vstat::Vstat; p0::AbstractVector=psifunc()|>probs)\n\nDifferentiation for V-statistics.\n\n\n\n\n\n"
 },
 
 {
@@ -785,7 +785,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Pair{Int64,#s381} where #s381<:MatrixBlock,N} where N}",
+    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Pair{Int64,#s360} where #s360<:MatrixBlock,N} where N}",
     "page": "Interfaces",
     "title": "Base.kron",
     "category": "method",
@@ -921,6 +921,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "man/registers/#LinearAlgebra.normalize!",
+    "page": "Registers",
+    "title": "LinearAlgebra.normalize!",
+    "category": "function",
+    "text": "normalize!(r::AbstractRegister) -> AbstractRegister\n\nReturn the register with normalized state.\n\n\n\n\n\n"
+},
+
+{
     "location": "man/registers/#Yao.Intrinsics.hypercubic-Union{Tuple{DefaultRegister{B,T,MT} where MT<:AbstractArray{T,2} where T}, Tuple{B}} where B",
     "page": "Registers",
     "title": "Yao.Intrinsics.hypercubic",
@@ -985,19 +993,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/registers/#Yao.Registers.measure",
-    "page": "Registers",
-    "title": "Yao.Registers.measure",
-    "category": "function",
-    "text": "measure(register, [n=1]) -> Vector\n\nmeasure active qubits for n times.\n\n\n\n\n\n"
-},
-
-{
     "location": "man/registers/#Yao.Registers.measure!-Union{Tuple{AbstractRegister{B,T} where T}, Tuple{B}} where B",
     "page": "Registers",
     "title": "Yao.Registers.measure!",
     "category": "method",
-    "text": "measure!(reg::AbstractRegister) -> Int\n\nmeasure and collapse to result state.\n\n\n\n\n\n"
+    "text": "measure!(reg::AbstractRegister; [locs]) -> Int\n\nmeasure and collapse to result state.\n\n\n\n\n\n"
+},
+
+{
+    "location": "man/registers/#Yao.Registers.measure-Tuple{AbstractRegister{1,T} where T}",
+    "page": "Registers",
+    "title": "Yao.Registers.measure",
+    "category": "method",
+    "text": "measure(register, [locs]; [nshot=1]) -> Vector\n\nmeasure active qubits for nshot times.\n\n\n\n\n\n"
 },
 
 {
@@ -1005,7 +1013,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Registers",
     "title": "Yao.Registers.measure_remove!",
     "category": "method",
-    "text": "measure_remove!(register) -> Int\n\nmeasure the active qubits of this register and remove them.\n\n\n\n\n\n"
+    "text": "measure_remove!(register; [locs]) -> Int\n\nmeasure the active qubits of this register and remove them.\n\n\n\n\n\n"
 },
 
 {
@@ -1013,7 +1021,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Registers",
     "title": "Yao.Registers.measure_reset!",
     "category": "method",
-    "text": "measure_and_reset!(reg::AbstractRegister, [mbits]; val=0) -> Int\n\nmeasure and set the register to specific value.\n\n\n\n\n\n"
+    "text": "measure_and_reset!(reg::AbstractRegister; [locs], [val=0]) -> Int\n\nmeasure and set the register to specific value.\n\n\n\n\n\n"
 },
 
 {
@@ -1225,14 +1233,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/registers/#LinearAlgebra.normalize!",
-    "page": "Registers",
-    "title": "LinearAlgebra.normalize!",
-    "category": "function",
-    "text": "normalize!(r::AbstractRegister) -> AbstractRegister\n\nReturn the register with normalized state.\n\n\n\n\n\n"
-},
-
-{
     "location": "man/registers/#Yao.Registers.shapeorder-Tuple{Tuple{Vararg{T,N}} where T where N,Array{Int64,1}}",
     "page": "Registers",
     "title": "Yao.Registers.shapeorder",
@@ -1333,7 +1333,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Blocks System",
     "title": "Yao.Blocks.BPDiff",
     "category": "type",
-    "text": "BPDiff{GT, N, T, PT, RT<:AbstractRegister} <: AbstractDiff{GT, N, Complex{T}}\nBPDiff(block, [input::AbstractRegister, grad]) -> BPDiff\n\nMark a block as differentiable, here GT, PT and RT are gate type, parameter type and register type respectively.\n\nWarning:     please don\'t use the adjoint after BPDiff! adjoint is reserved for special purpose! (back propagation)\n\n\n\n\n\n"
+    "text": "BPDiff{GT, N, T, PT} <: AbstractDiff{GT, N, Complex{T}}\nBPDiff(block, [grad]) -> BPDiff\n\nMark a block as differentiable, here GT, PT is gate type, parameter type.\n\nWarning:     please don\'t use the adjoint after BPDiff! adjoint is reserved for special purpose! (back propagation)\n\n\n\n\n\n"
 },
 
 {
@@ -1841,7 +1841,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.cache_type-Tuple{Type{#s105} where #s105<:MatrixBlock}",
+    "location": "man/blocks/#Yao.Blocks.cache_type-Tuple{Type{#s90} where #s90<:MatrixBlock}",
     "page": "Blocks System",
     "title": "Yao.Blocks.cache_type",
     "category": "method",
@@ -2049,7 +2049,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.controller-Tuple{Any,Any}",
+    "location": "man/intrinsics/#Yao.Intrinsics.controller-Tuple{Union{UnitRange{Int64}, Int64, Array{Int64,1}, Tuple{Vararg{Int64,#s16}} where #s16},Union{UnitRange{Int64}, Int64, Array{Int64,1}, Tuple{Vararg{Int64,#s16}} where #s16}}",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.controller",
     "category": "method",
@@ -2417,7 +2417,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.cxgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Any,Any,Union{UnitRange{IT}, Array{IT,1}, IT} where IT<:Integer}} where MT<:Number",
+    "location": "man/boost/#Yao.Boost.cxgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Any,Any,Union{UnitRange{IT}, Array{IT,1}, Tuple{Vararg{IT,#s16}} where #s16, IT} where IT<:Integer}} where MT<:Number",
     "page": "Boost",
     "title": "Yao.Boost.cxgate",
     "category": "method",
@@ -2433,7 +2433,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.xgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Union{UnitRange{IT}, Array{IT,1}, IT} where IT<:Integer}} where MT<:Number",
+    "location": "man/boost/#Yao.Boost.xgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Union{UnitRange{IT}, Array{IT,1}, Tuple{Vararg{IT,#s16}} where #s16, IT} where IT<:Integer}} where MT<:Number",
     "page": "Boost",
     "title": "Yao.Boost.xgate",
     "category": "method",
@@ -2441,7 +2441,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.ygate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Union{UnitRange{IT}, Array{IT,1}, IT} where IT<:Integer}} where MT<:Complex",
+    "location": "man/boost/#Yao.Boost.ygate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Union{UnitRange{IT}, Array{IT,1}, Tuple{Vararg{IT,#s16}} where #s16, IT} where IT<:Integer}} where MT<:Complex",
     "page": "Boost",
     "title": "Yao.Boost.ygate",
     "category": "method",
@@ -2449,7 +2449,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/boost/#Yao.Boost.zgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Union{UnitRange{IT}, Array{IT,1}, IT} where IT<:Integer}} where MT<:Number",
+    "location": "man/boost/#Yao.Boost.zgate-Union{Tuple{MT}, Tuple{Type{MT},Int64,Union{UnitRange{IT}, Array{IT,1}, Tuple{Vararg{IT,#s16}} where #s16, IT} where IT<:Integer}} where MT<:Number",
     "page": "Boost",
     "title": "Yao.Boost.zgate",
     "category": "method",

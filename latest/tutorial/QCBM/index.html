@@ -111,8 +111,8 @@ end;</code></pre></div><p>problem setup</p><div><pre><code class="language-julia
 \frac{\partial \mathcal{L}}{\partial \theta^i_l} &amp;= \langle K(x, y) \rangle_{x\sim p_{\theta^+}, y\sim p_{\theta}} - \langle K(x, y) \rangle_{x\sim p_{\theta}^-, y\sim p_{\theta}}\\
 &amp;- \langle K(x, y) \rangle _{x\sim p_{\theta^+}, y\sim\pi} + \langle K(x, y) \rangle_{x\sim p_{\theta^-}, y\sim\pi}
 \end{aligned}\]</div><div><pre><code class="language-julia">function mmdgrad(qcbm::QCBM, dbs; p0::Vector)
-    vstatdiff(()-&gt;psi(qcbm), dbs, Vstat(kmat(qcbm.kernel)), p0=p0) -
-        2*vstatdiff(()-&gt;psi(qcbm), dbs, Vstat(kmat(qcbm.kernel)*qcbm.ptrain))
+    statdiff(()-&gt;probs(qcbm) |&gt; as_weights, dbs, StatFunctional(kmat(qcbm.kernel)), initial=p0 |&gt; as_weights) -
+        2*statdiff(()-&gt;probs(qcbm) |&gt; as_weights, dbs, StatFunctional(kmat(qcbm.kernel)*qcbm.ptrain))
 end;</code></pre></div><h2><a class="nav-anchor" id="Optimizer-1" href="#Optimizer-1">Optimizer</a></h2><p>We will use the Adam optimizer. Since we don&#39;t want you to install another package for this, the following code for this optimizer is copied from <a href="https://github.com/denizyuret/Knet.jl">Knet.jl</a></p><p>Reference: <a href="https://arxiv.org/abs/1412.6980">Kingma, D. P., &amp; Ba, J. L. (2015)</a>. Adam: a Method for Stochastic Optimization. International Conference on Learning Representations, 1–13.</p><div><pre><code class="language-julia">mutable struct Adam
     lr::AbstractFloat
     gclip::AbstractFloat
@@ -171,13 +171,13 @@ for (k, p) in enumerate(QCBMOptimizer(qcbm, optim))
     push!(history, curr_loss)
     k%5 == 0 &amp;&amp; println(&quot;k = &quot;, k, &quot; loss = &quot;, curr_loss)
     k &gt;= 50 &amp;&amp; break
-end</code></pre><pre><code class="language-none">k = 5 loss = 0.005927296534638282
-k = 10 loss = 0.00278082315734217
-k = 15 loss = 0.0014322198384658525
-k = 20 loss = 0.0006510986430697919
-k = 25 loss = 0.00041368174480982
-k = 30 loss = 0.0002638936578428576
-k = 35 loss = 0.00017921166765866525
-k = 40 loss = 0.00011597907986842192
-k = 45 loss = 7.021560993568737e-5
-k = 50 loss = 3.9744067102911495e-5</code></pre></div><p>The training history looks like <img src="../../assets/figures/QCBM_2.svg" alt="History"/></p><p>and the learnt distribution <img src="../../assets/figures/QCBM_3.svg" alt="Learnt Distribution"/></p><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../Grover/"><span class="direction">Previous</span><span class="title">Grover Search and Quantum Inference</span></a><a class="next" href="../../man/yao/"><span class="direction">Next</span><span class="title">Yao</span></a></footer></article></body></html>
+end</code></pre><pre><code class="language-none">k = 5 loss = 0.008757324856074328
+k = 10 loss = 0.002624013675954289
+k = 15 loss = 0.0017000126096099102
+k = 20 loss = 0.0006747372472295396
+k = 25 loss = 0.0004194355216465257
+k = 30 loss = 0.00023495091456056166
+k = 35 loss = 0.0001583284239376401
+k = 40 loss = 0.00011149149291222065
+k = 45 loss = 5.983352906940533e-5
+k = 50 loss = 3.3977270201117865e-5</code></pre></div><p>The training history looks like <img src="../../assets/figures/QCBM_2.svg" alt="History"/></p><p>and the learnt distribution <img src="../../assets/figures/QCBM_3.svg" alt="Learnt Distribution"/></p><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../Grover/"><span class="direction">Previous</span><span class="title">Grover Search and Quantum Inference</span></a><a class="next" href="../../man/yao/"><span class="direction">Next</span><span class="title">Yao</span></a></footer></article></body></html>
