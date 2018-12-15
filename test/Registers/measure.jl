@@ -26,4 +26,8 @@ end
     reg0 = copy(reg)
     res = measure_remove!(reg)
     @test select(reg0, res) |> normalize! ≈ reg
+
+    reg = rand_state(6,5) |> focus!((1:5)...)
+    measure_reset!(reg, 1)
+    @test nactive(reg) == 5
 end

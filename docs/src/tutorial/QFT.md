@@ -9,7 +9,7 @@ using Yao
 # Control-R(k) gate in block-A
 A(i::Int, j::Int, k::Int) = control([i, ], j=>shift(2π/(1<<k)))
 # block-B
-B(n::Int, i::Int) = chain(i==j ? kron(i=>H) : A(j, i, j-i+1) for j = i:n)
+B(n::Int, i::Int) = chain(i==j ? put(i=>H) : A(j, i, j-i+1) for j = i:n)
 QFT(n::Int) = chain(n, B(n, i) for i = 1:n)
 
 # define QFT and IQFT block.

@@ -16,13 +16,6 @@ a quantum circuit into serveral kinds of blocks. The uppermost abstract type for
 
 ## Composite Blocks
 
-### Roller
-
-[`Roller`](@ref) is a special pattern of quantum circuits. Usually is equivalent to a [`KronBlock`](@ref), but we can optimize
-the computation by rotate the tensor form of a quantum state and apply each small block on it each time.
-
-![Block-System](../assets/figures/roller.svg)
-
 ## Blocks
 
 ```@autodocs

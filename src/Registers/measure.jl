@@ -75,17 +75,19 @@ end
 
 for FUNC in [:measure_reset!, :measure!, :measure]
     @eval function $FUNC(reg::AbstractRegister, locs; args...)
+        nbit = nactive(reg)
         focus!(reg, locs)
         res = $FUNC(reg; args...)
-        relax!(reg, locs)
+        relax!(reg, locs; nbit=nbit)
         res
     end
 end
 
 function measure_remove!(reg::AbstractRegister, locs)
+    nbit = nactive(reg)
     focus!(reg, locs)
     res = measure_remove!(reg)
-    relax!(reg)
+    relax!(reg; nbit=nbit)
     res
 end
 
