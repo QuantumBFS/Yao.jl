@@ -15,6 +15,5 @@ end
 @testset "Test Printing" begin
     @test_io TestRegister() """
     TestRegister{1,Float64}
-        active qubits: 2/8
-    """
+        active qubits: 2/8"""
 end
