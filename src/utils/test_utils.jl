@@ -1,5 +1,25 @@
 module TestUtils
 
+using ..YaoBase
+
+# mocked registers
+export TestRegister
+struct TestRegister{B, T} <: AbstractRegister{B, T}
+end
+
+TestRegister() = TestRegister{1, Float64}()
+
+YaoBase.nqubits(::TestRegister) = 8
+YaoBase.nactive(::TestRegister) = 2
+
+export TestInterfaceRegister
+struct TestInterfaceRegister{B, T} <: AbstractRegister{B, T}
+end
+
+TestInterfaceRegister() = TestInterfaceRegister{1, Float64}()
+
+# IO tests
+
 using Test
 export @test_io
 
