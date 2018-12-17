@@ -1,8 +1,17 @@
 using Test, Random, LinearAlgebra, SparseArrays
+using Statistics: mean
 
 using Yao
 using Yao.Registers
 using Yao.Intrinsics
+
+@testset "insert_qubit!" begin
+    reg = rand_state(5, 10)
+    insert_qubit!(reg, 3, nbit=2)
+    @test reg |> nqubits == 7
+    @test expect(put(7, 3=>Z), reg) .|> tr |> mean ≈ 1
+    @test expect(put(7, 4=>Z), reg) .|> tr |> mean ≈ 1
+end
 
 @testset "Constructors" begin
     test_data = zeros(ComplexF32, 2^5, 3)
@@ -81,7 +90,7 @@ end
     @test repeat(register(v1 ⊗ v2 ⊗ v3), 2) |> reorder!(3,2,1) ≈ repeat(register(v3 ⊗ v2 ⊗ v1), 2)
 end
 
-@testset "addbit" begin
+@testset "addbit!" begin
     reg = zero_state(3)
     @test addbit!(copy(reg), 3) == zero_state(6)
     reg = rand_state(3, 2)

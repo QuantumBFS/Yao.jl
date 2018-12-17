@@ -91,6 +91,33 @@ function measure_remove!(reg::AbstractRegister, locs)
     res
 end
 
+for FUNC in [:measure!, :measure_reset!, :measure_remove!]
+    rotback = FUNC == :measure! ? :(reg.state = V*reg.state) : :()
+    @eval function $FUNC(op::Eigen, reg::AbstractRegister{B}; kwargs...) where B
+        E, V = op
+        reg.state = V'*reg.state
+        res = $FUNC(reg; kwargs...)
+        $rotback
+        E[res.+1]
+    end
+end
+
+for FUNC in [:measure_reset!, :measure!]
+    @eval function $FUNC(op, reg::AbstractRegister, locs; args...)
+        focus!(reg, locs)
+        res = $FUNC(op, reg; args...)
+        relax!(reg, locs)
+        res
+    end
+end
+
+function measure_remove!(op, reg::AbstractRegister, locs)
+    focus!(reg, locs)
+    res = measure_remove!(op, reg)
+    relax!(reg)
+    res
+end
+
 """
     select!(reg::AbstractRegister, b::Integer) -> AbstractRegister
     select!(b::Integer) -> Function

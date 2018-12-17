@@ -1,6 +1,6 @@
 using Test, Random, LinearAlgebra, SparseArrays
 
-using Yao.Registers
+using Yao.Registers, Yao
 using Yao.Intrinsics
 
 @testset "reorder" begin

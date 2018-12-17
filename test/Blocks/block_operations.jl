@@ -30,4 +30,15 @@ end
     @test expect(op, dm) ≈ expect(op, reg)
 end
 
+@testset "expect" begin
+    reg = rand_state(3,10)
+    e1 = expect(put(2, 2=>X), reg |> copy |> focus!(1,2) |> ρ)
+    e2 = expect(put(2, 2=>X), reg |> copy |> focus!(1,2))
+    e3 = expect(put(3, 2=>X), reg |> ρ)
+    e4 = expect(put(3, 2=>X), reg)
+    @test e1 ≈ e2
+    @test e1 ≈ e3
+    @test e1 ≈ e4
+end
+
 include("linalg.jl")
