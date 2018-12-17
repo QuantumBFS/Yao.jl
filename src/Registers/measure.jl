@@ -87,7 +87,7 @@ function measure_remove!(reg::AbstractRegister, locs)
     nbit = nactive(reg)
     focus!(reg, locs)
     res = measure_remove!(reg)
-    relax!(reg; nbit=nbit)
+    relax!(reg; nbit=nbit-length(locs))
     res
 end
 
