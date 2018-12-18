@@ -81,6 +81,34 @@ If only an integer is provided, then perform lazy evaluation.
 @interface addbit!(::AbstractRegister)
 
 """
+    focus!(register, locs::Int...) -> register
+    focus!(locs::Int...) -> f(register) -> register
+
+Focus the wires on specified location.
+"""
+@interface focus!(::AbstractRegister, locs; nbit)
+
+"""
+    relax!(register[, locs]; nbit::Int=nqubits(register)) -> register
+    relax!(locs; nbit::Int=nqubits(register)) -> f(register) -> register
+
+Inverse transformation of [`focus!`](@ref), where `nbit` is the number
+ of active bits for target register.
+"""
+@interface relax!(::AbstractRegister, locs; nbit)
+
+## Measurement
+
+"""
+    measure(register[, ntimes=1]) -> Vector{Int}
+
+Return measurement results of current active qubits (regarding to active qubits,
+see [`focus!`](@ref) and [`relax!`](@ref)).
+"""
+@interface measure(::AbstractRegister, ntimes::Int=1)
+
+
+"""
     join(::AbstractRegister...) -> register
 
 Merge several registers as one register via tensor product.
