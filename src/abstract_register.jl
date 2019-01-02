@@ -16,7 +16,7 @@ Returns the number of active qubits.
 
 note!!!
 
-    Operatiors always apply on active qubits.
+    Operators always apply on active qubits.
 """
 @interface nactive(::AbstractRegister)
 
@@ -61,6 +61,8 @@ note!!!
 Returns a view of the i-th slice on batch dimension.
 """
 @interface viewbatch(::AbstractRegister, ::Int)
+
+# TODO: move this method to `DefaultRegister`
 
 """
     state(register) -> AbstractMatrix
