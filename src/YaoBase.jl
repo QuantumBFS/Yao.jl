@@ -1,3 +1,6 @@
+"""
+Base module for Yao.
+"""
 module YaoBase
 
 using LinearAlgebra, LuxurySparse
