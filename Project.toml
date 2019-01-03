@@ -1,6 +1,6 @@
 name = "YaoBase"
 uuid = "774cebe0-ffd5-11e8-22d5-535b72c6bdcb"
-authors = ["Roger-luo <hiroger@qq.com>"]
+authors = ["GiggleLiu <cacate0129@gmail.com>", "Roger-luo <hiroger@qq.com>"]
 version = "0.1.0"
 
 [deps]
