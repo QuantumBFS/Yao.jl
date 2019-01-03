@@ -109,6 +109,28 @@ see [`focus!`](@ref) and [`relax!`](@ref)).
 """
 @interface measure(::AbstractRegister, ntimes::Int=1)
 
+"""
+    select!(dest::AbstractRegister, src::AbstractRegister, bits::Integer...) -> AbstractRegister
+    select!(register::AbstractRegister, bits::Integer...) -> register
+    select!(b::Integer) -> f(register)
+
+select a subspace of given quantum state based on input eigen state `bits`.
+
+## Example
+
+`select!(reg, 0b110)` will select the subspace with (focused) configuration `110`.
+After selection, the focused qubit space is 0, so you may want call `relax!` manually.
+"""
+@interface select!(dest::AbstractRegister, bits...)
+
+"""
+    select(register, bits...) -> AbstractRegister
+
+Non-inplace version of [`select!`](@ref).
+"""
+@interface select(register::AbstractRegister, bits...) = select!(copy(register), bits...)
+
+@interface select!(::AbstractRegister, bits)
 
 """
     join(::AbstractRegister...) -> register
@@ -132,6 +154,21 @@ Repeat register `r` for `n` times on batch dimension.
 Returns an `UnitRange` of the all the bits in the Hilbert space of given register.
 """
 @interface basis(::AbstractRegister)
+
+"""
+    density_matrix(register)
+
+Returns the density matrix of current active qubits.
+"""
+@interface density_matrix(::AbstractRegister)
+
+"""
+    ρ(register)
+
+Returns the density matrix of current active qubits. This is the same as
+[`density_matrix`](@ref).
+"""
+@interface ρ(x) = density_matrix(x)
 
 # fallback printing
 function Base.show(io::IO, reg::AbstractRegister)
