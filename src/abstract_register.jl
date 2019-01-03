@@ -62,6 +62,23 @@ Returns a view of the i-th slice on batch dimension.
 """
 @interface viewbatch(::AbstractRegister, ::Int)
 
+struct BatchIterator{B, T <: AbstractRegister{B}}
+    register::T
+end
+
+Base.length(::BatchIterator{B}) where B = B
+
+function Base.iterate(it::BatchIterator{B}, state=1) where B
+    if state > B
+        return nothing
+    else
+        viewbatch(it.register, state), state + 1
+    end
+end
+
+eachbatch(register::AbstractRegister) = BatchIterator(register)
+
+
 # TODO: move this method to `DefaultRegister`
 
 """
@@ -121,7 +138,7 @@ select a subspace of given quantum state based on input eigen state `bits`.
 `select!(reg, 0b110)` will select the subspace with (focused) configuration `110`.
 After selection, the focused qubit space is 0, so you may want call `relax!` manually.
 """
-@interface select!(dest::AbstractRegister, bits...)
+@interface select!(::AbstractRegister, bits...)
 
 """
     select(register, bits...) -> AbstractRegister
@@ -129,8 +146,6 @@ After selection, the focused qubit space is 0, so you may want call `relax!` man
 Non-inplace version of [`select!`](@ref).
 """
 @interface select(register::AbstractRegister, bits...) = select!(copy(register), bits...)
-
-@interface select!(::AbstractRegister, bits)
 
 """
     join(::AbstractRegister...) -> register
