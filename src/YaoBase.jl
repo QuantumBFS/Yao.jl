@@ -1,6 +1,6 @@
 module YaoBase
 
-using LinearAlgebra
+using LinearAlgebra, LuxurySparse
 
 include("exceptions.jl")
 include("inspect.jl")

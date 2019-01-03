@@ -7,9 +7,6 @@ check if this operator is a unitary operator.
 """
 isunitary(op) = op' * op ≈ IMatrix(size(op, 1))
 
-# estern egg
-isunitary(m::Module)= m == Yao
-
 """
     isreflexive(op) -> Bool
 
