@@ -28,6 +28,7 @@ include("Grover.jl")
 include("PhaseEstimation.jl")
 include("HHL.jl")
 include("hamiltonian_solvers.jl")
+include("HadamardTest.jl")
 
 
 end # module

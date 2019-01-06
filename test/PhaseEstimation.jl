@@ -40,7 +40,7 @@ end
     reg = apply!(join(reg2, reg1), circuit)
 
     # measure
-    res = breflect(M, measure(focus!(copy(reg), 1:M), 10)[1]) / (1<<M)
+    res = breflect(M, measure(focus!(copy(reg), 1:M); nshot=10)[1]) / (1<<M)
 
     @test res ≈ ϕ
     @test apply!(reg, circuit |> adjoint) ≈ join(reg2, reg1)

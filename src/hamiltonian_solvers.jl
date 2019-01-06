@@ -1,4 +1,4 @@
-export heisenberg, iter_groundstate!, itime_groundstate!
+export heisenberg, iter_groundstate!, itime_groundstate!, vqe_solve!
 
 """
     heisenberg(nbit::Int; periodic::Bool=true)
@@ -29,7 +29,7 @@ end
 """
     itime_groundstate!({reg::AbstractRegister}, h::MatrixBlock; τ::Int=20, tol=1e-4) -> AbstractRegister
 
-project wave function to ground state by exp(-hτ). `tol` is for `expmv`.
+Imaginary time evolution method to get ground state, i.e. by projecting wave function to ground state by exp(-hτ). `tol` is for `expmv`.
 """
 itime_groundstate!(h::MatrixBlock; τ::Real=20, tol=1e-4) = reg -> itime_groundstate!(reg, h; τ=τ, tol=tol)
 function itime_groundstate!(reg::AbstractRegister, h::MatrixBlock; τ::Int=20, tol=1e-4)
@@ -44,3 +44,24 @@ function itime_groundstate!(reg::AbstractRegister, h::MatrixBlock; τ::Int=20, t
     reg
 end
 
+# a patch for Yao.expect, to make it faster
+function Yao.expect(op::AddBlock, reg::AbstractRegister{1})
+    sum(opi->expect(opi, reg), op)
+end
+
+"""
+    vqe_solve!(circuit::MatrixBlock{N}, hamiltonian::AbstractBlock; niter::Int=100) -> circuit
+
+variational quantum eigensolver, faithful simulation with optimizer Adam(lr=0.01).
+"""
+function vqe_solve!(circuit::MatrixBlock{N}, hamiltonian::AbstractBlock; niter::Int=100) where N
+    optimizer = Adam(lr=0.01)
+    dbs = collect(circuit, AbstractDiff)
+    params = parameters(circuit)
+    for i = 1:niter
+        grad = opdiff.(()->zero_state(N) |> circuit, dbs, Ref(hamiltonian))
+        dispatch!(circuit, update!(params, grad, optimizer))
+        println("Step $i, Energy = $(expect(hamiltonian, zero_state(N) |> circuit))")
+    end
+    circuit
+end

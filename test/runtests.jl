@@ -36,3 +36,7 @@ end
 @testset "hamiltonian solvers" begin
     include("hamiltonian_solvers.jl")
 end
+
+@testset "hadamard test" begin
+    include("HadamardTest.jl")
+end

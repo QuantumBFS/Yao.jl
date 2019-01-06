@@ -18,5 +18,14 @@ using QuAlgorithmZoo
     reg |> itime_groundstate!(h, τ=20)
     EG = expect(h, reg)/nbit/4
     @test isapprox(EG, -0.4564, atol=1e-4)
-end
 
+    # using VQE
+    N = 4
+    h = heisenberg(N)
+    E = eigen(h |> mat |> Matrix).values[1]
+    c = random_diff_circuit(N, 5, [i=>mod(i,N)+1 for i=1:N], mode=:Merged) |> autodiff(:QC)
+    dispatch!(c, :random)
+    vqe_solve!(c, h)
+    E2 = expect(h, zero_state(N) |> c)
+    @test isapprox(E, E2, atol=1e-1)
+end

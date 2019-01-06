@@ -46,7 +46,8 @@ gradient of MMD two sample test loss, `db` must be contained in qcbm.
 `p0` is current probability distribution.
 """
 function mmdgrad(qcbm::QCBM, db::AbstractDiff; p0::Vector)
-    vstatdiff(()->psi(qcbm), db, Vstat(kmat(qcbm.kernel)), p0=p0) - 2*vstatdiff(()->psi(qcbm), db, Vstat(kmat(qcbm.kernel)*qcbm.ptrain))
+    statdiff(()->probs(qcbm) |> as_weights, db, StatFunctional(kmat(qcbm.kernel)), initial=p0 |> as_weights) -
+        2*statdiff(()->probs(qcbm) |> as_weights, db, StatFunctional(kmat(qcbm.kernel)*qcbm.ptrain))
 end
 
 """
