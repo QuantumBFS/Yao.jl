@@ -1,5 +1,5 @@
 using Test, Random, LinearAlgebra, SparseArrays
-using Statistics: mean
+using StatsBase: mean
 
 using Yao
 using Yao.Registers
