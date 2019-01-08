@@ -121,6 +121,12 @@ function expect(op::AbstractBlock, reg::AbstractRegister{B}) where B
     dropdims(sum(A.*C, dims=1), dims=1) |> conj
 end
 
+function expect(op::AddBlock, reg::AbstractRegister)
+    sum(opi->expect(opi, reg), op)
+end
+
+expect(op::AddBlock, reg::AbstractRegister{1}) = invoke(expect, Tuple{AddBlock, AbstractRegister}, op, reg)
+
 for FUNC in [:measure!, :measure_reset!, :measure_remove!]
     @eval function $FUNC(op::AbstractBlock, reg::AbstractRegister; kwargs...) where B
         $FUNC(eigen!(mat(op) |> Matrix), reg; kwargs...)
