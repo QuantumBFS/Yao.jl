@@ -39,7 +39,8 @@ clear!(c::CachedBlock) = (clear!(c.server, c.block); c)
 # forward methods
 function mat(c::CachedBlock)
     if !iscached(c.server, c.block)
-        m = dropzeros!(mat(c.block))
+        #m = dropzeros!(mat(c.block); trim=1e-16)
+        m = mat(c.block)
         push!(c.server, m, c.block)
         return m
     end

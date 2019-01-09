@@ -125,7 +125,12 @@ function expect(op::AddBlock, reg::AbstractRegister)
     sum(opi->expect(opi, reg), op)
 end
 
+function expect(op::AbstractScale, reg::AbstractRegister)
+    factor(op)*expect(parent(op), reg)
+end
+
 expect(op::AddBlock, reg::AbstractRegister{1}) = invoke(expect, Tuple{AddBlock, AbstractRegister}, op, reg)
+expect(op::AbstractScale, reg::AbstractRegister{1}) = invoke(expect, Tuple{AbstractScale, AbstractRegister}, op, reg)
 
 for FUNC in [:measure!, :measure_reset!, :measure_remove!]
     @eval function $FUNC(op::AbstractBlock, reg::AbstractRegister; kwargs...) where B
