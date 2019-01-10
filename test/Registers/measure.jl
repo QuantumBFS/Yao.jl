@@ -55,7 +55,7 @@ end
     # measure_remove!
     reg2 = reg |> copy
     res = measure_remove!(op, reg2, 2:4)
-    reg2 |> repeat(6, H, 2:4)
+    reg2 |> repeat(3, H, 2:3)
     @test size(res) == (10,)
     @test nqubits(reg2) == 3
 
