@@ -105,16 +105,16 @@ If only an integer is provided, then perform lazy evaluation.
 
 Focus the wires on specified location.
 """
-@interface focus!(::AbstractRegister, locs; nbit)
+@interface focus!(::AbstractRegister, locs...)
 
 """
-    relax!(register[, locs]; nbit::Int=nqubits(register)) -> register
-    relax!(locs; nbit::Int=nqubits(register)) -> f(register) -> register
+    relax!(register[, locs]) -> register
+    relax!(nbits, locs) -> f(register) -> register
 
 Inverse transformation of [`focus!`](@ref), where `nbit` is the number
  of active bits for target register.
 """
-@interface relax!(::AbstractRegister, locs; nbit)
+@interface relax!(::AbstractRegister, locs)
 
 ## Measurement
 
@@ -125,6 +125,37 @@ Return measurement results of current active qubits (regarding to active qubits,
 see [`focus!`](@ref) and [`relax!`](@ref)).
 """
 @interface measure(::AbstractRegister, ntimes::Int=1)
+
+"""
+    measure!(register[, locs])
+
+measure and collapse to result state.
+"""
+@interface measure!(::AbstractRegister)
+
+"""
+    measure_remove!(::AbstractRegister[, locs])
+
+measure the active qubits of this register and remove them.
+"""
+@interface measure_remove!(::AbstractRegister)
+
+"""
+    measure_reset!(reg::AbstractRegister[, locs]; [val=0]) -> Int
+
+measure and set the register to specific value.
+"""
+@interface measure_reset!(::AbstractRegister; val::Int=0)
+
+
+for FUNC in [:measure_reset!, :measure!, :measure]
+    @eval function $FUNC(reg::AbstractRegister, locs; args...)
+        focus!(reg, locs)
+        res = $FUNC(reg; args...)
+        relax!(reg, locs)
+        return res
+    end
+end
 
 """
     select!(dest::AbstractRegister, src::AbstractRegister, bits::Integer...) -> AbstractRegister

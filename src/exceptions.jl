@@ -1,4 +1,4 @@
-export NotImplementedError
+export NotImplementedError, AddressConflictError, QubitMismatchError
 
 struct NotImplementedError{ArgsT} <: Exception
     name::Symbol
@@ -25,4 +25,18 @@ end
 
 function Base.show(io::IO, e::AddressConflictError)
     print(io, "address of $(e.blk1) and $(e.blk2) is conflict.")
+end
+
+# NOTE: More detailed error msg?
+"""
+    QubitMismatchError <: Exception
+
+Qubit number mismatch error when applying a Block to a Register or concatenating Blocks.
+"""
+struct QubitMismatchError <: Exception
+    msg::String
+end
+
+function show(io::IO, e::QubitMismatchError)
+    print(io, e.msg)
 end
