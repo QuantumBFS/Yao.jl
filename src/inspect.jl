@@ -1,4 +1,5 @@
 # Some of the function does not exist in Julia/LinearAlgebra
+export isunitary, isreflexive, iscommute, ishermitian
 
 """
     isunitary(op) -> Bool

@@ -1,5 +1,15 @@
+module Basis
+
+export DInt, Ints
+export reorder, reordered_basis, invorder, bmask, bitarray, bfloat, bfloat_r, packbits,
+    bint, takebit, flip, swapbits, baddrs, packbits, takebit, testany, testall, setbit,
+    indices_with, bsizeof, basis, breflect, bdistance, onehotvec, bint_r, pmrand
+
+using YaoBase, YaoBase.Math, SparseArrays, LuxurySparse, LinearAlgebra
+
 const DInt = Int
 const Ints{IT} = Union{NTuple{<:Any, IT}, Vector{IT}, IT, UnitRange{IT}} where IT<:Integer
+
 """
     basis([IntType], num_bit::Int) -> UnitRange{IntType}
     basis([IntType], state::AbstractArray) -> UnitRange{IntType}
@@ -7,10 +17,9 @@ const Ints{IT} = Union{NTuple{<:Any, IT}, Vector{IT}, IT, UnitRange{IT}} where I
 Returns the UnitRange for basis in Hilbert Space of num_bit qubits.
 If an array is supplied, it will return a basis having the same size with the first diemension of array.
 """
-basis(arg::Union{Int, AbstractArray}) = basis(DInt, arg)
-basis(::Type{Ti}, num_bit::Int) where Ti<:Integer = UnitRange{Ti}(0, 1<<num_bit-1)
-basis(::Type{Ti}, state::AbstractArray) where Ti<:Integer = UnitRange{Ti}(0, size(state, 1)-1)
-
+YaoBase.basis(arg::Union{Int, AbstractArray}) = basis(DInt, arg)
+YaoBase.basis(::Type{Ti}, num_bit::Int) where Ti<:Integer = UnitRange{Ti}(0, 1<<num_bit-1)
+YaoBase.basis(::Type{Ti}, state::AbstractArray) where Ti<:Integer = UnitRange{Ti}(0, size(state, 1)-1)
 
 ########## BitArray views ###################
 import Base: BitArray
@@ -298,8 +307,50 @@ end
 
 function reorder(A::Union{Matrix, SparseMatrixCSC}, orders)
     M, N = size(A)
-    nbit = M|>log2i
+    nbit = log2i(M)
     od = [1+b for b in reordered_basis(nbit, orders)]
     od = od |> invperm
     A[od, od]
 end
+
+function invorder(A::Matrix)
+    M, N = size(A)
+    m, n = log2i(M), log2i(N)
+    A = hypercubic(A)
+    reshape(permutedims(A, [m:-1:1..., n+m:-1:m+1...]), M, N)
+end
+
+invorder(v) = reorder(v, collect(nactive(v):-1:1))
+invorder(v::AbstractMatrix) = reorder(v, collect(Math._nactive(v):-1:1))
+
+reorder(A::IMatrix, orders) = A
+function reorder(A::PermMatrix, orders::Vector{Int})
+    M = size(A, 1)
+    nbit = log2i(M)
+    od::Vector{Int} = [b+1 for b::Int in reordered_basis(nbit, orders)]
+    perm = similar(A.perm)
+    vals = similar(A.vals)
+    @simd for i = 1:length(perm)
+        @inbounds perm[od[i]] = od[A.perm[i]]
+        @inbounds vals[od[i]] = A.vals[i]
+    end
+    PermMatrix(perm, vals)
+end
+
+function reorder(A::Diagonal, orders::Vector{Int})
+    M = size(A, 1)
+    nbit = log2i(M)
+    #od::Vector{Int} = [b+1 for b::Int in reordered_basis(nbit, orders)]
+    diag = similar(A.diag)
+    #for i = 1:length(perm)
+    #    diag[od[i]] = A.diag[i]
+    #end
+    i = 1
+    for b::Int in reordered_basis(nbit, orders)
+        diag[b+1] = A.diag[i]
+        i += 1
+    end
+    Diagonal(diag)
+end
+
+end # Basis

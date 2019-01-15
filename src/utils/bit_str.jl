@@ -63,14 +63,14 @@ function register(::Type{T}, bits::BitStr, nbatch::Int) where T
     register(st)
 end
 
-"""
-    register([type], bit_str, [nbatch=1]) -> DefaultRegister
+# """
+#     register([type], bit_str, [nbatch=1]) -> DefaultRegister
 
-Returns a [`DefaultRegister`](@ref) by inputing a bit string, e.g
+# Returns a [`DefaultRegister`](@ref) by inputing a bit string, e.g
 
-```@repl
-using Yao
-register(bit"0000")
-```
-"""
-register(bits::BitStr, nbatch::Int=1) = register(DefaultType, bits, nbatch)
+# ```@repl
+# using Yao
+# register(bit"0000")
+# ```
+# """
+# register(bits::BitStr, nbatch::Int=1) = register(DefaultType, bits, nbatch)

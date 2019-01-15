@@ -1,3 +1,11 @@
+module Math
+
+export log2i, bit_length, batch_normalize, batch_normalize!, rolldims!, rolldims2!,
+    hilbertkron, rand_hermitian, rand_unitary
+
+
+using LuxurySparse, LinearAlgebra
+
 """
     bit_length(x::Integer) -> Int
 
@@ -154,44 +162,6 @@ get the hypercubic representation for an array or a regiseter.
 """
 hypercubic(A::Array) = reshape(A, fill(2, size(A) |> prod |> log2i)...)
 
-#################### Reorder ######################
-function invorder(A::Matrix)
-    M, N = size(A)
-    m, n = M |> log2i, N |> log2i
-    A = A |> hypercubic
-    reshape(permutedims(A, [m:-1:1..., n+m:-1:m+1...]), M, N)
-end
-
-reorder(A::IMatrix, orders) = A
-function reorder(A::PermMatrix, orders::Vector{Int})
-    M = size(A, 1)
-    nbit = M|>log2i
-    od::Vector{Int} = [b+1 for b::Int in reordered_basis(nbit, orders)]
-    perm = similar(A.perm)
-    vals = similar(A.vals)
-    @simd for i = 1:length(perm)
-        @inbounds perm[od[i]] = od[A.perm[i]]
-        @inbounds vals[od[i]] = A.vals[i]
-    end
-    PermMatrix(perm, vals)
-end
-
-function reorder(A::Diagonal, orders::Vector{Int})
-    M = size(A, 1)
-    nbit = M|>log2i
-    #od::Vector{Int} = [b+1 for b::Int in reordered_basis(nbit, orders)]
-    diag = similar(A.diag)
-    #for i = 1:length(perm)
-    #    diag[od[i]] = A.diag[i]
-    #end
-    i = 1
-    for b::Int in reordered_basis(nbit, orders)
-        diag[b+1] = A.diag[i]
-        i += 1
-    end
-    Diagonal(diag)
-end
-
 rotmat(m::AbstractMatrix, θ::Real) = exp(-im*θ/2*Matrix(m))
 
 ################### Fidelity ###################
@@ -229,3 +199,6 @@ function rand_hermitian(N::Int)
     A = randn(ComplexF64, N, N)
     A + A'
 end
+
+
+end # Math
