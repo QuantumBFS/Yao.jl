@@ -1,9 +1,20 @@
 using MacroTools: @forward
+export AdjointRegister
 
+"""
+    AdjointRegister{B, T, RT} <: AbstractRegister{B, T}
+
+Lazy adjoint for a quantum register.
+"""
 struct AdjointRegister{B, T, RT <: AbstractRegister{B, T}} <: AbstractRegister{B, T}
     parent::RT
 end
 
+"""
+    adjoint(register) -> register
+
+Lazy adjoint for quantum registers.
+"""
 Base.adjoint(reg::AbstractRegister) = AdjointRegister(reg)
 Base.adjoint(reg::AdjointRegister) = reg.parent
 Base.parent(reg::AdjointRegister) = reg.parent
