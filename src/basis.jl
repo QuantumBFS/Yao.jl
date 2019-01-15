@@ -286,7 +286,7 @@ end
 
 function reorder(v::AbstractVector, orders)
     nbit = length(orders)
-    nbit == length(v) |> log2i || throw(DimensionMismatch("size of array not match length of order"))
+    nbit == log2i(length(v)) || throw(DimensionMismatch("size of array not match length of order"))
     nv = similar(v)
     taker, differ = bmask.(orders), (1:nbit).-orders
 

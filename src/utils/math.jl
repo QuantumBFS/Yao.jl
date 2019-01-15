@@ -73,11 +73,11 @@ end
 end
 
 """
-    nactive(m::AbstractArray) -> Int
+    _nactive(m::AbstractArray) -> Int
 
 Returns the log-size of its first dimension.
 """
-nactive(m::AbstractArray) = size(m, 1) |> log2i
+_nactive(m::AbstractArray) = log2i(size(m, 1))
 
 """
     hilbertkron(num_bit::Int, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix
@@ -88,7 +88,7 @@ Return general kronecher product form of gates in Hilbert space of `num_bit` qub
 * `start_locs` should have the same length as `gates`, specifing the gates starting positions.
 """
 function hilbertkron(num_bit::Int, ops::Vector{T}, start_locs::Vector{Int}) where T<:AbstractMatrix
-    sizes = [op |> nactive for op in ops]
+    sizes = [op |> _nactive for op in ops]
     start_locs = num_bit .- start_locs .- sizes .+ 2
 
     order = sortperm(start_locs)
