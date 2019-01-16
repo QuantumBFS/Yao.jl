@@ -1,7 +1,7 @@
 module Math
 
 export log2i, bit_length, batch_normalize, batch_normalize!, rolldims!, rolldims2!,
-    hilbertkron, rand_hermitian, rand_unitary
+    hilbertkron, rand_hermitian, rand_unitary, fidelity_mix, fidelity_pure
 
 
 using LuxurySparse, LinearAlgebra
