@@ -1,4 +1,4 @@
-import Base: repeat
+export @bit_str
 
 """
     BitStr
@@ -42,10 +42,9 @@ function bitstring2int(str::String)
 end
 
 
-import Base: *, repeat
-(*)(lhs::BitStr, rhs::BitStr) = BitStr(string(lhs.val, base=2, pad=lhs.len) * bin(rhs.val, base=2, pad=rhs.len))
+Base.:*(lhs::BitStr, rhs::BitStr) = BitStr(string(lhs.val, base=2, pad=lhs.len) * bin(rhs.val, base=2, pad=rhs.len))
 
-function repeat(s::BitStr, n::Integer)
+function Base.repeat(s::BitStr, n::Integer)
     val = s.val
     for i in 1:n-1
         val += s.val << (s.len * i)
@@ -53,15 +52,15 @@ function repeat(s::BitStr, n::Integer)
     BitStr(val, n * s.len)
 end
 
-function show(io::IO, bitstr::BitStr)
+function Base.show(io::IO, bitstr::BitStr)
     print(io, string(bitstr.val, base=2, pad=bitstr.len))
 end
 
-function register(::Type{T}, bits::BitStr, nbatch::Int) where T
-    st = zeros(T, 1 << length(bits), nbatch)
-    st[asindex(bits), :] .= 1
-    register(st)
-end
+# function register(::Type{T}, bits::BitStr, nbatch::Int) where T
+#     st = zeros(T, 1 << length(bits), nbatch)
+#     st[asindex(bits), :] .= 1
+#     register(st)
+# end
 
 # """
 #     register([type], bit_str, [nbatch=1]) -> DefaultRegister

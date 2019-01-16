@@ -42,6 +42,9 @@ Returns the number of batches.
 """
 @interface nbatch(r::AbstractRegister{B}) where B = B
 
+# same with nbatch
+Base.length(r::AbstractRegister{B}) where B = B
+
 """
     datatype(register) -> Int
 
@@ -76,18 +79,7 @@ function Base.iterate(it::BatchIterator{B}, state=1) where B
     end
 end
 
-eachbatch(register::AbstractRegister) = BatchIterator(register)
-
-
-# TODO: move this method to `DefaultRegister`
-
-"""
-    state(register) -> AbstractMatrix
-
-Returns the raw state of register. This always returns a matrix which is a batch
-of quantum states.
-"""
-@interface state(::AbstractRegister)
+@interface eachbatch(register::AbstractRegister) = BatchIterator(register)
 
 """
     addbit!(register, n::Int) -> register
