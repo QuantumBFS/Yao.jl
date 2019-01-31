@@ -60,7 +60,11 @@ chblock(cb::BPDiff, blk::MatrixBlock) = BPDiff(blk)
 
 @forward BPDiff.block mat
 function apply!(reg::AbstractRegister, df::BPDiff)
-    df.input = copy(reg)
+    if isdefined(df, :input)
+        copyto!(df.input, reg)
+    else
+        df.input = copy(reg)
+    end
     apply!(reg, parent(df))
     reg
 end

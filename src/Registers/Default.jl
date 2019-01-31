@@ -137,6 +137,14 @@ end
 
 addbit!(n::Int) = r->addbit!(r, n)
 
+function insert_qubit!(reg::DefaultRegister{B}, loc::Int; nbit::Int=1) where B
+    na = nactive(reg)
+    focus!(reg, 1:loc-1)
+    reg2 = join(zero_state(nbit, B), reg) |> relax! |> focus!((1:na+nbit)...)
+    reg.state = reg2.state
+    reg
+end
+
 repeat(reg::DefaultRegister{B}, n::Int) where B = DefaultRegister{B*n}(hcat((reg.state for i=1:n)...,))
 
 ############ ConjDefaultRegister ##############

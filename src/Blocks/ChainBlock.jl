@@ -51,7 +51,7 @@ eachindex(c::ChainBlock) = eachindex(c.blocks)
 subblocks(c::ChainBlock) = c.blocks
 addrs(c::ChainBlock) = ones(Int, length(c))
 usedbits(c::ChainBlock) = unique(vcat([usedbits(b) for b in subblocks(c)]...))
-chsubblocks(pb::ChainBlock, blocks) = ChainBlock(blocks)
+chsubblocks(pb::ChainBlock{N, T}, blocks) where {N, T} = length(blocks) == 0 ? ChainBlock{N, T}([]) : ChainBlock(blocks)
 @forward ChainBlock.blocks popfirst!, pop!
 
 isunitary(c::ChainBlock) = all(isunitary, c.blocks) || isunitary(mat(c))

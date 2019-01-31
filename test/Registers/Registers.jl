@@ -1,8 +1,5 @@
 using Test, Random, LinearAlgebra, SparseArrays
 
-@testset "default register" begin
-    include("Default.jl")
-end
 @testset "focus" begin
     include("focus.jl")
 end
@@ -18,3 +15,8 @@ end
 @testset "density matrix" begin
     include("DensityMatrix.jl")
 end
+
+@testset "default register" begin
+    include("Default.jl")
+end
+

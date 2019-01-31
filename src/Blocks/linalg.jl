@@ -16,6 +16,7 @@
 -(blk::AbstractScale) = chfactor(blk, -factor(blk))
 -(blk::MatrixBlock) = -1*blk
 -(blk::Neg) = blk.block
+-(A::MatrixBlock, B::MatrixBlock) = A + (-B)
 
 +(a::MatrixBlock{N}, b::MatrixBlock{N}) where N = AddBlock(a, b)
 +(a::AddBlock{N, T1}, b::MatrixBlock{N, T2}) where {N, T1, T2} = AddBlock{N, promote_type(T1, T2)}([a.blocks...; b])
@@ -43,3 +44,5 @@
 *(x::AddBlock{N, T1}, y::ChainBlock{N, T2}) where {N, T1, T2} = AddBlock{N, promote_type(T1, T2)}([b*y for b in subblocks(x)])
 
 Base.:^(blk::MatrixBlock, n::Int) = ChainBlock(fill(blk, n))
+
+/(A::MatrixBlock, x::Number) = (1/x)*A

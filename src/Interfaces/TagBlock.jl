@@ -131,6 +131,6 @@ scale(x::Number) = blk -> scale(blk, x)
 staticscale(blk::MatrixBlock, x::Number) = StaticScale(blk, x)
 staticscale(x::Number) = blk -> staticscale(blk, x)
 
-as_weights(probs::AbstractVector{T}) where T = Weights(probs, T(1))
+as_weights(probs::AbstractVector) = Weights(probs, 1)
 
 include("Cache.jl")

@@ -22,4 +22,7 @@ using Yao, Yao.Blocks
     @test g1*g2 isa ChainBlock
     @test (g1*g2)*(g3+g2) |> mat |> Matrix ≈ Matrix(mat(g1)*mat(g2)*(mat(g2)+mat(g3)))
     @test (g1+g3)*(g3+g2) |> mat ≈ (mat(g1)+mat(g3))*(mat(g2)+mat(g3))
+
+    @test mat(g1-g2) ≈ mat(g1+(-g2))
+    @test mat(g1/2) ≈ mat(0.5*g1)
 end

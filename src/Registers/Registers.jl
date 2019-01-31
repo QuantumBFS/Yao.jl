@@ -20,7 +20,7 @@ export nqubits, nactive, nremain, nbatch, basis, state, datatype, viewbatch
 export relaxedvec, statevec, hypercubic, rank3
 export focus!, relax!, oneto, probs, isnormalized, normalize!
 export AbstractRegister, Register, ConjRegister, RegOrConjReg, ConjDefaultRegister
-export invorder!, reorder!, addbit!, reset!
+export invorder!, reorder!, addbit!, reset!, insert_qubit!
 
 # factories
 export register, zero_state, product_state, rand_state, uniform_state

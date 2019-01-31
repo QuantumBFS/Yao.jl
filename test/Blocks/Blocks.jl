@@ -21,8 +21,8 @@ end
     include("Sequential.jl")
 end
 
-@testset "blockoperations" begin
-    include("blockoperations.jl")
+@testset "block operations" begin
+    include("block_operations.jl")
 end
 
 @testset "arithmatics" begin
