@@ -7,7 +7,6 @@ FFTW
 LinearMaps
 LuxurySparse
 MacroTools
-Random
 Reexport
 StaticArrays
 StatsBase
