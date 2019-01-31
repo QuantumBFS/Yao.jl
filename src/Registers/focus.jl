@@ -58,6 +58,8 @@ end
 
 function focus!(reg::DefaultRegister{B}, bits) where B
     nbit = nactive(reg)
+    assert_addr_safe(nbit, [bit:bit for bit in bits] |> vec)
+
     if all(bits .== 1:length(bits))
         arr = reg.state
     else
