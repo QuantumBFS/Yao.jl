@@ -1,0 +1,13 @@
+julia 1.0
+
+CacheServers
+DataStructures
+Expokit
+FFTW
+LinearMaps
+LuxurySparse
+MacroTools
+Random
+Reexport
+StaticArrays
+StatsBase
