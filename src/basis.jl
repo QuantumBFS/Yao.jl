@@ -313,15 +313,16 @@ function reorder(A::Union{Matrix, SparseMatrixCSC}, orders)
     A[od, od]
 end
 
+
 function invorder(A::Matrix)
     M, N = size(A)
     m, n = log2i(M), log2i(N)
-    A = hypercubic(A)
+    A = Math.hypercubic(A)
     reshape(permutedims(A, [m:-1:1..., n+m:-1:m+1...]), M, N)
 end
 
 invorder(v) = reorder(v, collect(nactive(v):-1:1))
-invorder(v::AbstractMatrix) = reorder(v, collect(Math._nactive(v):-1:1))
+invorder(v::AbstractVecOrMat) = reorder(v, collect(Math._nactive(v):-1:1))
 
 reorder(A::IMatrix, orders) = A
 function reorder(A::PermMatrix, orders::Vector{Int})
