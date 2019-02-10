@@ -1,8 +1,8 @@
 using Test, Random, LinearAlgebra, SparseArrays
 
 
-@testset "abstract block" begin
-    include("abstract_block.jl")
+@testset "core APIs" begin
+    include("Core.jl")
 end
 
 @testset "matrix block" begin

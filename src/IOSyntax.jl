@@ -1,0 +1,156 @@
+# Pretty Printing
+
+function show(io::IO, c::AbstractBlock)
+    print_tree(io, c)
+end
+
+# This part is copied and tweaked from Keno/AbstractTrees.jl
+
+struct BlockTreeCharSet
+    mid
+    terminator
+    skip
+    dash
+end
+
+# Color Traits
+color(::Type{T}) where {T <: PutBlock} = :cyan
+color(::Type{T}) where {T <: Roller} = :cyan
+color(::Type{T}) where {T <: KronBlock} = :cyan
+color(::Type{T}) where {T <: PauliString} = :cyan
+color(::Type{T}) where {T <: RepeatedBlock} = :cyan
+color(::Type{T}) where {T <: ChainBlock} = :blue
+color(::Type{T}) where {T <: ControlBlock} = :red
+color(::Type{T}) where {T <: Swap} = :magenta
+color(::Type{T}) where {T <: Sequential} = :blue
+
+# Default Charset
+BlockTreeCharSet() = BlockTreeCharSet('├','└','│','─')
+
+_charwidth(c::Char) = textwidth(c)
+_charwidth(s) = sum(map(textwidth, collect(s)))
+
+function print_prefix(io, depth, charset, active_levels)
+    for current_depth in 0:(depth-1)
+        if current_depth in active_levels
+            print(io, charset.skip, " "^(_charwidth(charset.dash) + 1))
+        else
+            print(io, " "^(_charwidth(charset.skip) + _charwidth(charset.dash) + 1))
+        end
+    end
+end
+
+print_tree(io::IO, tree::PrimitiveBlock, maxdepth=5) = print_block(io, tree)
+print_tree(io::IO, tree::CachedBlock{ST, BT}, maxdepth=5) where {ST, BT <: PrimitiveBlock} = print_block(io, tree)
+print_tree(io::IO, tree::AbstractMeasure, maxdepth=5) = print_block(io, tree)
+
+function print_tree(
+    io::IO, tree, maxdepth = 5;
+    line=nothing,
+    depth=0,
+    active_levels=Int[],
+    charset=BlockTreeCharSet(),
+    roottree=tree,
+    title=true,
+)
+    nodebuf = IOBuffer()
+    isa(io, IOContext) && (nodebuf = IOContext(nodebuf, io))
+
+    # print circuit summary
+    if (tree === roottree) && title && tree isa MatrixBlock
+        println(io, "Total: ", nqubits(tree), ", DataType: ", datatype(tree))
+    end
+
+    if line !== nothing
+        printstyled(io, line; bold=true, color=:white)
+        print(io, "=>")
+    end
+    print_block(nodebuf, tree)
+
+    str = String(take!(isa(nodebuf, IOContext) ? nodebuf.io : nodebuf))
+
+    lines = split(str, '\n')
+    for (i, line) in enumerate(lines)
+        i != 1 && print_prefix(io, depth, charset, active_levels)
+        println(io, line)
+    end
+
+    print_subblocks(io, tree, depth, charset, active_levels)
+end
+
+print_tree(tree, args...; kwargs...) = print_tree(STDOUT::IO, tree, args...; kwargs...)
+
+print_subblocks(io::IO, tree, depth, charset, active_levels) = nothing
+
+function print_subblocks(io::IO, tree::AbstractBlock, depth, charset, active_levels)
+    c = subblocks(tree)
+    it_result = iterate(c)
+    while it_result !== nothing
+        child, st = it_result
+        child_active_levels = active_levels
+        print_prefix(io, depth, charset, active_levels)
+
+
+        it_result = iterate(c, st)
+        if it_result === nothing
+            print(io, charset.terminator)
+        else
+            print(io, charset.mid)
+            child_active_levels = push!(copy(active_levels), depth)
+        end
+
+        print(io, charset.dash, ' ')
+        print_tree(
+            io, child;
+            depth=depth+1,
+            active_levels=child_active_levels,
+            charset=charset,
+            roottree=tree,
+        )
+    end
+end
+
+function print_subblocks(io::IO, tree::TagBlock, depth, charset, active_levels)
+    print_subblocks(io, tree |> parent, depth, charset, active_levels)
+end
+
+function print_subblocks(io::IO, tree::KronBlock, depth, charset, active_levels)
+    it_result = iterate(tree)
+    while it_result !== nothing
+        (line, child), st = it_result
+        child_active_levels = active_levels
+        print_prefix(io, depth, charset, active_levels)
+
+        it_result = iterate(tree, st)
+        if it_result === nothing
+            print(io, charset.terminator)
+        else
+            print(io, charset.mid)
+            child_active_levels = push!(copy(active_levels), depth)
+        end
+
+        print(io, charset.dash, ' ')
+        print_tree(
+            io, child;
+            line=line,
+            depth=depth+1,
+            active_levels=child_active_levels,
+            charset=charset,
+            roottree=tree,
+        )
+    end
+end
+
+function print_subblocks(io::IO, tree::ControlBlock, depth, charset, active_levels)
+    print_prefix(io, depth, charset, active_levels)
+    print(io, charset.terminator)
+    print(io, charset.dash, ' ')
+    print_tree(
+        io, tree.block;
+        line=tree.addrs,
+        depth=depth+1,
+        active_levels=active_levels,
+        charset=charset,
+        roottree=tree,
+    )
+end
