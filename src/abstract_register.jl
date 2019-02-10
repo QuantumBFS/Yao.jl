@@ -191,7 +191,7 @@ Repeat register `r` for `n` times on batch dimension.
 
 Returns an `UnitRange` of the all the bits in the Hilbert space of given register.
 """
-@interface basis(::AbstractRegister)
+@interface basis(r::AbstractRegister) = basis(nqubits(r))
 
 """
     density_matrix(register)

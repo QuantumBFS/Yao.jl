@@ -18,13 +18,13 @@ function Base.show(io::IO, e::NotImplementedError{Tuple{}})
     print(io, "$(e.name) is not implemented.")
 end
 
-struct AddressConflictError{T1, T2} <: Exception
-    blk1::T1
-    blk2::T2
+struct AddressConflictError <: Exception
+    msg::String
 end
 
 function Base.show(io::IO, e::AddressConflictError)
-    print(io, "address of $(e.blk1) and $(e.blk2) is conflict.")
+    print(io, "AddressConflictError: ", e.msg)
+    # print(io, "address of $(e.blk1) and $(e.blk2) is conflict.")
 end
 
 # NOTE: More detailed error msg?

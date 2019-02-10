@@ -3,7 +3,7 @@ module Basis
 export DInt, Ints
 export reorder, reordered_basis, invorder, bmask, bitarray, bfloat, bfloat_r, packbits,
     bint, takebit, flip, swapbits, baddrs, packbits, takebit, testany, testall, setbit,
-    indices_with, bsizeof, basis, breflect, bdistance, onehotvec, bint_r, pmrand
+    indices_with, bsizeof, basis, breflect, bdistance, onehotvec, bint_r, pmrand, controller
 
 using YaoBase, YaoBase.Math, SparseArrays, LuxurySparse, LinearAlgebra
 
