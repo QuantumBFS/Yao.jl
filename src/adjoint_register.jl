@@ -10,14 +10,15 @@ struct AdjointRegister{B, T, RT <: AbstractRegister{B, T}} <: AbstractRegister{B
     parent::RT
 end
 
+Base.parent(reg::AdjointRegister) = reg.parent
+
 """
     adjoint(register) -> register
 
 Lazy adjoint for quantum registers.
 """
 Base.adjoint(reg::AbstractRegister) = AdjointRegister(reg)
-Base.adjoint(reg::AdjointRegister) = reg.parent
-Base.parent(reg::AdjointRegister) = reg.parent
+Base.adjoint(reg::AdjointRegister) = parent(reg)
 
 viewbatch(reg::AdjointRegister, i::Int) = adjoint(viewbatch(parent(reg), i))
 

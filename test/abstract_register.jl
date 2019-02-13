@@ -26,6 +26,13 @@ end
     @test nbatch(TestInterfaceRegister()) == 1
 end
 
+@testset "adjoint register" begin
+    @test adjoint(TestRegister()) isa AdjointRegister
+    @test adjoint(adjoint(TestRegister())) isa TestRegister
+    @test nqubits(adjoint(TestRegister())) == 8
+    @test nactive(adjoint(TestRegister())) == 2
+end
+
 @testset "Test Printing" begin
     @test repr(TestRegister()) == """
     TestRegister{1,Float64}
