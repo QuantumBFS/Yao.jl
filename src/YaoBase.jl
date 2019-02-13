@@ -3,7 +3,7 @@ Base module for Yao.
 """
 module YaoBase
 
-using LinearAlgebra, LuxurySparse, SparseArrays
+using LinearAlgebra, LuxurySparse, SparseArrays, BitBasis
 
 # TODO: polish this
 include("utils/math.jl")
@@ -11,9 +11,6 @@ include("utils/math.jl")
 include("utils/interface.jl")
 include("abstract_register.jl")
 include("adjoint_register.jl")
-
-# TODO: polish this
-include("basis.jl")
 
 include("exceptions.jl")
 include("inspect.jl")

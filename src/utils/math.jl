@@ -1,33 +1,8 @@
-module Math
-
-export log2i, bit_length, batch_normalize, batch_normalize!, rolldims!, rolldims2!,
-    hilbertkron, rand_hermitian, rand_unitary, fidelity_mix, fidelity_pure
-
+export batch_normalize, batch_normalize!, rotmat,
+    hilbertkron, rand_hermitian, rand_unitary, fidelity_mix, fidelity_pure,
+    general_controlled_gates, general_c1_gates, linop2dense
 
 using LuxurySparse, LinearAlgebra
-
-"""
-    bit_length(x::Integer) -> Int
-
-Return the number of bits required to represent input integer x.
-"""
-bit_length(x::Integer)  =  sizeof(x)*8 - leading_zeros(x)
-
-"""
-    log2i(x::Integer) -> Integer
-
-Return log2(x), this integer version of `log2` is fast but only valid for number equal to 2^n.
-"""
-function log2i end
-
-for N in [8, 16, 32, 64, 128]
-    T = Symbol(:Int, N)
-    UT = Symbol(:UInt, N)
-    @eval begin
-        log2i(x::$T) = !signbit(x) ? ($(N - 1) - leading_zeros(x)) : throw(ErrorException("nonnegative expected ($x)"))
-        log2i(x::$UT) = $(N - 1) - leading_zeros(x)
-    end
-end
 
 """
     batch_normalize!(matrix)
@@ -51,41 +26,6 @@ function batch_normalize(s::AbstractMatrix, p::Real=2)
     ts = copy(s)
     batch_normalize!(ts, p)
 end
-
-# N: number of qubits
-# st: state vector with batch
-function rolldims2!(::Val{N}, ::Val{B}, st::AbstractMatrix) where {N, B}
-    n = 1 << N
-    halfn = 1 << (N - 1)
-    temp = st[2:2:n, :]
-    st[1:halfn, :] = st[1:2:n, :]
-    st[halfn+1:end, :] = temp
-    st
-end
-
-function rolldims2!(::Val{N}, ::Val{1}, st::AbstractVector) where {N}
-    n = 1 << N
-    halfn = 1 << (N - 1)
-    temp = st[2:2:n]
-    st[1:halfn] = st[1:2:n]
-    st[halfn+1:end] = temp
-    st
-end
-
-@generated function rolldims!(::Val{K}, ::Val{N}, ::Val{B}, st::AbstractVecOrMat) where {K, N, B}
-    ex = :(rolldims2!(Val($N), Val($B), st))
-    for i = 2:K
-        ex = :(rolldims2!(Val($N), Val($B), st); $ex)
-    end
-    ex
-end
-
-"""
-    _nactive(m::AbstractArray) -> Int
-
-Returns the log-size of its first dimension.
-"""
-_nactive(m::AbstractArray) = log2i(size(m, 1))
 
 """
     hilbertkron(num_bit::Int, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix
@@ -146,26 +86,28 @@ general (low performance) construction method for control gate on different line
 general_c1_gates(num_bit::Int, projector::Tp, cbit::Int, gates::Vector{Tg}, locs::Vector{Int}) where {Tg<:AbstractMatrix, Tp<:AbstractMatrix} =
 hilbertkron(num_bit, [IMatrix(2) - projector], [cbit]) + hilbertkron(num_bit, vcat([projector], gates), vcat([cbit], locs))
 
-rotate_matrix(gate::AbstractMatrix, θ::Real) = exp(-0.5im * θ * Matrix(gate))
+"""
+    rotmat(M::AbstractMatrix, θ::Real)
+
+Returns rotated `M`: ``exp(-\\frac{imθ}{2} M)``.
+"""
+rotmat(M::AbstractMatrix, θ::Real) = exp(-im * θ/2 * M)
+
 
 """
-    linop2dense(applyfunc!::Function, num_bit::Int) -> Matrix
+    linop2dense([T=ComplexF64], linear_map!::Function, n::Int) -> Matrix
 
-get the dense matrix representation given matrix*matrix function.
+Returns the dense matrix representation given linear map function.
 """
-linop2dense(applyfunc!::Function, num_bit::Int) = applyfunc!(Matrix{ComplexF64}(I, 1<<num_bit, 1<<num_bit))
-
-"""
-    hypercubic(A::Union{Array, DefaultRegister}) -> Array
-
-get the hypercubic representation for an array or a regiseter.
-"""
-hypercubic(A::Array) = reshape(A, fill(2, size(A) |> prod |> log2i)...)
-
-rotmat(m::AbstractMatrix, θ::Real) = exp(-im*θ/2*Matrix(m))
+linop2dense(linear_map!::Function, n::Int) = linop2dense(ComplexF64, linear_map!, n)
+linop2dense(::Type{T}, linear_map!::Function, n::Int) = linear_map!(Matrix{T}(I, 1<<n, 1<<n))
 
 ################### Fidelity ###################
-"""fidelity for pure states."""
+"""
+    fidelity_pure(v1::Vector, v2::Vector)
+
+fidelity for pure states.
+"""
 fidelity_pure(v1::Vector, v2::Vector) = abs(v1'*v2)
 
 """
@@ -199,6 +141,3 @@ function rand_hermitian(N::Int)
     A = randn(ComplexF64, N, N)
     A + A'
 end
-
-
-end # Math

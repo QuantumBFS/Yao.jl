@@ -1,7 +1,44 @@
 export assert_addr_fit, assert_addr_inbounds, assert_addr_safe
 
-# NOTE: this file is not the copy of MacroTools.jl
-# it contains some of the tools made as macros
+
+macro assert_addrs(n, addrs, msgs...)
+    msg = isempty(msgs) ? ex : msgs[1]
+    if msg isa AbstractString
+        msg = msg # pass-through
+    elseif !isempty(msgs) && (isa(msg, Expr) || isa(msg, Symbol))
+        # message is an expression needing evaluating
+        msg = :(Main.Base.string($(esc(msg))))
+    elseif isdefined(Main, :Base) && isdefined(Main.Base, :string) && applicable(Main.Base.string, msg)
+        msg = Main.Base.string(msg)
+    else
+        # string() might not be defined during bootstrap
+        msg = :(Main.Base.string($(Expr(:quote,msg))))
+    end
+
+    quote
+        if length(addrs) == 0
+            nothing
+        else
+            addrs = sort(addrs, by=x->x.start)
+        end
+    end
+end
+
+macro assert(ex, msgs...)
+    msg = isempty(msgs) ? ex : msgs[1]
+    if isa(msg, AbstractString)
+        msg = msg # pass-through
+    elseif !isempty(msgs) && (isa(msg, Expr) || isa(msg, Symbol))
+        # message is an expression needing evaluating
+        msg = :(Main.Base.string($(esc(msg))))
+    elseif isdefined(Main, :Base) && isdefined(Main.Base, :string) && applicable(Main.Base.string, msg)
+        msg = Main.Base.string(msg)
+    else
+        # string() might not be defined during bootstrap
+        msg = :(Main.Base.string($(Expr(:quote,msg))))
+    end
+    return :($(esc(ex)) ? $(nothing) : throw(AssertionError($msg)))
+end
 
 for METHOD in [:assert_addr_inbounds, :assert_addr_safe, :assert_addr_fit]
     @eval $METHOD(n::Int, addrs::Vector{<:Integer}) = $METHOD(n, UnitRange{Int}[i:i for i in addrs])
@@ -35,3 +72,5 @@ function assert_addr_fit(n::Int, addrs::Vector{UnitRange{Int}})
     addrs |> last |> maximum == n || throw(AddressConflictError("addr not exact fit at end"))
     true
 end
+
+@which @assert 1==1

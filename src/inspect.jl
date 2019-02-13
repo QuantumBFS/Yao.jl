@@ -15,7 +15,6 @@ isunitary(op::Number) = op' * op ≈ one(op)
 check if this operator is reflexive.
 """
 isreflexive(op) = op * op ≈ IMatrix(size(op, 1))
-
 isreflexive(op::Number) = op * op ≈ one(op)
 
 """
