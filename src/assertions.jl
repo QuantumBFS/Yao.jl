@@ -1,9 +1,61 @@
-export assert_addr_fit, assert_addr_inbounds, assert_addr_safe
+export isaddrs_inbounds, isaddrs_conflict, isaddrs_contiguous
+export @assert_addrs, @assert_addr_inbounds, @assert_addrs_contiguous
+
+_sort(x::Vector; by=identity) = sort(x, by=by)
+_sort(x::Tuple; by=identity) = TupleTools.sort(x, by=by)
+
+# NOTE: this method assumes its input is not empty, it gets rid of errors
+nonempty_minimum(x::UnitRange) = x.start
+nonempty_minimum(x::Integer) = x
+nonempty_maximum(x::UnitRange) = x.stop
+nonempty_maximum(x::Integer) = x
+
+const AddressVector{T} = Vector{T} where {T <: Union{Integer, UnitRange}}
+const AddressNTuple{N, T} = NTuple{N, T} where {T <: Union{Integer, UnitRange}}
+const AddressList{T} = Union{AddressVector{T}, AddressNTuple{N, T} where N}
+
+"""
+    isaddrs_inbounds(n, addrs) -> Bool
+
+Check if the input address are inside given bounds `n`.
+"""
+function isaddrs_inbounds(n::Int, addrs::AddressList)
+    length(addrs) == 0 && return true
+    addrs = _sort(addrs, by=x->nonempty_minimum(x))
+    (minimum(first(addrs)) > 0 && maximum(last(addrs)) <= n) || return false
+    return true
+end
+
+"""
+    isaddrs_conflict(addrs) -> Bool
+
+Check if the input address has conflicts.
+"""
+function isaddrs_conflict(addrs::AddressList)
+    for (nxt, cur) in zip(addrs[2:end], addrs[1:end-1])
+        nonempty_minimum(nxt) > nonempty_maximum(cur) || return false
+    end
+    return true
+end
+
+"""
+    isaddrs_contiguous(n::Int, addrs) -> Bool
+
+Check if the input address is contiguous in ``[1, n]``.
+"""
+function isaddrs_contiguous(n::Int, addrs::AddressList)
+    nonempty_minimum(first(addrs)) == 1 || return false
+    for (nxt, cur) in zip(addrs[2:end], addrs[1:end-1])
+        nonempty_minimum(nxt) == nonempty_maximum(cur) + 1 || return false
+    end
+    nonempty_maximum(last(addrs)) == n || return false
+    return true
+end
 
 
-macro assert_addrs(n, addrs, msgs...)
-    msg = isempty(msgs) ? ex : msgs[1]
-    if msg isa AbstractString
+function process_msgs(msgs...; default="")
+    msg = isempty(msgs) ? default : msgs[1]
+    if isa(msg, AbstractString)
         msg = msg # pass-through
     elseif !isempty(msgs) && (isa(msg, Expr) || isa(msg, Symbol))
         # message is an expression needing evaluating
@@ -14,47 +66,34 @@ macro assert_addrs(n, addrs, msgs...)
         # string() might not be defined during bootstrap
         msg = :(Main.Base.string($(Expr(:quote,msg))))
     end
+    return msg
+end
 
+
+# NOTE: we may use @assert in the future
+#       these macro will help us keep original APIs
+macro assert_addrs_inbounds(n::Int, addrs, msgs...)
+    msg = process_msgs(msgs...; default="address is out of bounds!, expect $n qubits.")
+    return quote
+        isaddrs_inbounds($n, $(esc(addrs))) ? nothing : error($msg)
+    end
+end
+
+macro assert_addrs(n::Int, addrs, msgs...)
+    msg = process_msgs(msgs...; default="address conflict.")
+    return quote
+        @assert_addrs_inbounds $n $(esc(addrs))
+
+        isaddrs_conflict($(esc(addrs))) ? nothing :
+            throw(AddressConflictError($msg))
+    end
+end
+
+macro assert_addrs_contiguous(n::Int, addrs, msgs...)
+    msg = process_msgs(msgs...; default="address is not contiguous.")
     quote
-        if length(addrs) == 0
-            nothing
-        else
-            addrs = sort(addrs, by=x->x.start)
-        end
+        @assert_addrs $n $(esc(addrs))
+        isaddrs_contiguous($n, $(esc(addrs))) ? nothing :
+            error($msg)
     end
 end
-
-for METHOD in [:assert_addr_inbounds, :assert_addr_safe, :assert_addr_fit]
-    @eval $METHOD(n::Int, addrs::Vector{<:Integer}) = $METHOD(n, UnitRange{Int}[i:i for i in addrs])
-end
-
-function assert_addr_inbounds(n::Int, addrs::Vector{UnitRange{Int}})
-    if length(addrs) == 0 return true end
-    addrs = sort(addrs, by=x->x.start)
-    (minimum(first(addrs)) > 0 && maximum(last(addrs)) <= n) || throw(AddressConflictError("addr out of bounds"))
-    true
-end
-
-function assert_addr_safe(n::Int, addrs::Vector{UnitRange{Int}})
-    if length(addrs) == 0 return true end
-    addrs = sort(addrs, by=x->x.start)
-    (minimum(first(addrs)) > 0 && maximum(last(addrs)) <= n) || throw(AddressConflictError("addr out of bounds"))
-    for (nxt, cur) in zip(addrs[2:end], addrs[1:end-1])
-        nxt.start > cur.stop || throw(AddressConflictError("addr has collisions at $(nxt.start)"))
-    end
-    true
-end
-
-function assert_addr_fit(n::Int, addrs::Vector{UnitRange{Int}})
-    if length(addrs) == 0 return n == 0 end
-    addrs = sort(addrs, by=x->x.start)
-    (minimum(first(addrs)) > 0 && maximum(last(addrs)) <= n) || throw(AddressConflictError("addr out of bounds"))
-    addrs |> first |> minimum == 1 || throw(AddressConflictError("addr not exact fit at 1"))
-    for (nxt, cur) in zip(addrs[2:end], addrs[1:end-1])
-        nxt.start == cur.stop+1 || throw(AddressConflictError("addr not exact fit at $(nxt.start)"))
-    end
-    addrs |> last |> maximum == n || throw(AddressConflictError("addr not exact fit at end"))
-    true
-end
-
-@which @assert 1==1
