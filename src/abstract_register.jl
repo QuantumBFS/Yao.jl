@@ -14,7 +14,7 @@ abstract type AbstractRegister{B, T} end
 
 Returns the number of active qubits.
 
-note!!!
+!!! note
 
     Operators always apply on active qubits.
 """
@@ -50,7 +50,7 @@ Base.length(r::AbstractRegister{B}) where B = B
 
 Returns the numerical data type used by register.
 
-note!!!
+!!! note
 
     `datatype` is not the same with `eltype`, since `AbstractRegister` family
     is not exactly the same with `AbstractArray`, it is an iterator of several
@@ -59,37 +59,17 @@ note!!!
 @interface datatype(r::AbstractRegister{B, T}) where {B, T} = T
 
 """
-    viewbatch(register, i::Int) -> AbstractRegister{1}
+    increase!(register, n::Int) -> register
+    increase!(n::Int) -> λ(register)
 
-Returns a view of the i-th slice on batch dimension.
+Increase the register by n bits in state |0>.
+i.e. |psi> -> |000> ⊗ |psi>, increased bits have higher indices.
+
+If only an integer is provided, then returns a lambda function.
 """
-@interface viewbatch(::AbstractRegister, ::Int)
+@interface increase!(::AbstractRegister, n::Int)
 
-struct BatchIterator{B, T <: AbstractRegister{B}}
-    register::T
-end
-
-Base.length(::BatchIterator{B}) where B = B
-
-function Base.iterate(it::BatchIterator{B}, state=1) where B
-    if state > B
-        return nothing
-    else
-        viewbatch(it.register, state), state + 1
-    end
-end
-
-@interface eachbatch(register::AbstractRegister) = BatchIterator(register)
-
-"""
-    addbit!(register, n::Int) -> register
-    addbit!(n::Int) -> Function
-
-addbit the register by n bits in state |0>.
-i.e. |psi> -> |000> ⊗ |psi>, addbit bits have higher indices.
-If only an integer is provided, then perform lazy evaluation.
-"""
-@interface addbit!(::AbstractRegister)
+increase!(n::Int) = r -> increase!(r, n)
 
 """
     focus!(register, locs::Int...) -> register
@@ -207,6 +187,29 @@ Returns the density matrix of current active qubits. This is the same as
 [`density_matrix`](@ref).
 """
 @interface ρ(x) = density_matrix(x)
+
+"""
+    viewbatch(register, i::Int) -> AbstractRegister{1}
+
+Returns a view of the i-th slice on batch dimension.
+"""
+@interface viewbatch(::AbstractRegister, ::Int)
+
+struct BatchIterator{B, T <: AbstractRegister{B}}
+    register::T
+end
+
+Base.length(::BatchIterator{B}) where B = B
+
+function Base.iterate(it::BatchIterator{B}, state=1) where B
+    if state > B
+        return nothing
+    else
+        viewbatch(it.register, state), state + 1
+    end
+end
+
+@interface eachbatch(register::AbstractRegister) = BatchIterator(register)
 
 # fallback printing
 function Base.show(io::IO, reg::AbstractRegister)

@@ -1,5 +1,48 @@
+export NotImplementedError, AddressConflictError, QubitMismatchError
+
+struct NotImplementedError{ArgsT} <: Exception
+    name::Symbol
+    args::ArgsT
+end
+
+NotImplementedError(name::Symbol) = NotImplementedError(name, ())
+
+function Base.show(io::IO, e::NotImplementedError{<:Tuple})
+    str = join(map(typeof, e.args), ", ::")
+    str = "::" * str
+    print(io, "$(e.name) is not implemented for (", str, "),
+        please implement this method for your custom type")
+end
+
+function Base.show(io::IO, e::NotImplementedError{Tuple{}})
+    print(io, "$(e.name) is not implemented.")
+end
+
+struct AddressConflictError <: Exception
+    msg::String
+end
+
+function Base.show(io::IO, e::AddressConflictError)
+    print(io, "AddressConflictError: ", e.msg)
+    # print(io, "address of $(e.blk1) and $(e.blk2) is conflict.")
+end
+
+# NOTE: More detailed error msg?
+"""
+    QubitMismatchError <: Exception
+
+Qubit number mismatch error when applying a Block to a Register or concatenating Blocks.
+"""
+struct QubitMismatchError <: Exception
+    msg::String
+end
+
+function show(io::IO, e::QubitMismatchError)
+    print(io, e.msg)
+end
+
+
 export isaddrs_inbounds, isaddrs_conflict, isaddrs_contiguous
-export @assert_addrs, @assert_addr_inbounds, @assert_addrs_contiguous
 
 _sort(x::Vector; by=identity) = sort(x, by=by)
 _sort(x::Tuple; by=identity) = TupleTools.sort(x, by=by)
@@ -72,6 +115,8 @@ end
 
 # NOTE: we may use @assert in the future
 #       these macro will help us keep original APIs
+export @assert_addrs, @assert_addr_inbounds, @assert_addrs_contiguous
+
 macro assert_addrs_inbounds(n::Int, addrs, msgs...)
     msg = process_msgs(msgs...; default="address is out of bounds!, expect $n qubits.")
     return quote

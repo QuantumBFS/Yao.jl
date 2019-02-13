@@ -4,6 +4,7 @@ authors = ["GiggleLiu <cacate0129@gmail.com>", "Roger-luo <hiroger@qq.com>"]
 version = "0.1.0"
 
 [deps]
+BitBasis = "187ba324-2ddc-11e9-1b5d-7b8844fa955b"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 LuxurySparse = "d05aeea4-b7d4-55ac-b691-9e7fabb07ba2"
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"

@@ -2,7 +2,7 @@ export batch_normalize, batch_normalize!, rotmat,
     hilbertkron, rand_hermitian, rand_unitary, fidelity_mix, fidelity_pure,
     general_controlled_gates, general_c1_gates, linop2dense
 
-using LuxurySparse, LinearAlgebra
+using LuxurySparse, LinearAlgebra, BitBasis
 
 """
     batch_normalize!(matrix)
@@ -35,8 +35,8 @@ Return general kronecher product form of gates in Hilbert space of `num_bit` qub
 * `gates` are a list of matrices.
 * `start_locs` should have the same length as `gates`, specifing the gates starting positions.
 """
-function hilbertkron(num_bit::Int, ops::Vector{T}, start_locs::Vector{Int}) where T<:AbstractMatrix
-    sizes = [op |> _nactive for op in ops]
+function hilbertkron(num_bit::Int, ops::Vector{<:AbstractMatrix}, start_locs::Vector{Int})
+    sizes = [logdim1(op) for op in ops]
     start_locs = num_bit .- start_locs .- sizes .+ 2
 
     order = sortperm(start_locs)
@@ -50,7 +50,6 @@ end
 # kron, and wrap matrices with identities.
 function _wrap_identity(data_list::Vector{T}, num_bit_list::Vector{Int}) where T<:AbstractMatrix
     length(num_bit_list) == length(data_list) + 1 || throw(ArgumentError())
-
     ⊗ = kron
     reduce(zip(data_list, num_bit_list[2:end]); init=IMatrix(1 << num_bit_list[1])) do x, y
         x ⊗ y[1] ⊗ IMatrix(1<<y[2])
@@ -100,7 +99,7 @@ rotmat(M::AbstractMatrix, θ::Real) = exp(-im * θ/2 * M)
 Returns the dense matrix representation given linear map function.
 """
 linop2dense(linear_map!::Function, n::Int) = linop2dense(ComplexF64, linear_map!, n)
-linop2dense(::Type{T}, linear_map!::Function, n::Int) = linear_map!(Matrix{T}(I, 1<<n, 1<<n))
+linop2dense(::Type{T}, linear_map!::Function, n::Int) where T = linear_map!(Matrix{T}(I, 1<<n, 1<<n))
 
 ################### Fidelity ###################
 """
