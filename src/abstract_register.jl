@@ -91,39 +91,39 @@ Inverse transformation of [`focus!`](@ref), where `nbit` is the number
 ## Measurement
 
 """
-    measure(register[, ntimes=1]) -> Vector{Int}
+    measure(register[, locs]; ntimes=1) -> Vector{Int}
 
 Return measurement results of current active qubits (regarding to active qubits,
 see [`focus!`](@ref) and [`relax!`](@ref)).
 """
-@interface measure(::AbstractRegister, ntimes::Int=1)
+@interface measure(::AbstractRegister; ntimes::Int=1)
 
 """
     measure!(register[, locs])
 
-measure and collapse to result state.
+Measure current active qubits or qubits at `locs` and collapse to result state.
 """
 @interface measure!(::AbstractRegister)
 
 """
     measure_remove!(::AbstractRegister[, locs])
 
-measure the active qubits of this register and remove them.
+Measure current active qubits or qubits at `locs` and remove them.
 """
 @interface measure_remove!(::AbstractRegister)
 
 """
-    measure_reset!(reg::AbstractRegister[, locs]; [val=0]) -> Int
+    measure_reset!(reg::AbstractRegister[, locs]; bit_config) -> Int
 
-measure and set the register to specific value.
+Measure current active qubits or qubits at `locs` and set the register to specific value.
 """
-@interface measure_reset!(::AbstractRegister; val::Int=0)
+@interface measure_setto!(::AbstractRegister; bit_config::Int=0)
 
-
-for FUNC in [:measure_reset!, :measure!, :measure]
-    @eval function $FUNC(reg::AbstractRegister, locs; args...)
+# focus context
+for FUNC in [:measure_reset!, :measure!, :measure, :measure_setto!]
+    @eval function $FUNC(reg::AbstractRegister, locs; kwargs...)
         focus!(reg, locs)
-        res = $FUNC(reg; args...)
+        res = $FUNC(reg; kwargs...)
         relax!(reg, locs)
         return res
     end
@@ -200,7 +200,7 @@ Inverse the address of register.
 Set the `register` to bit string literal `bit_str`. About bit string literal,
 see more in [`@bit_str`](@ref).
 """
-@interface setto!(r::AbstractRegister, bit_str::BitStr)
+@interface setto!(r::AbstractRegister, bit_str::BitStr) = setto!(r, bit_str.val)
 
 """
     setto!(register, bit_config::Integer)
@@ -208,6 +208,20 @@ see more in [`@bit_str`](@ref).
 Set the `register` to bit configuration `bit_config`.
 """
 @interface setto!(r::AbstractRegister, bit_config::Integer=0)
+
+"""
+    fidelity(register1, register2)
+
+Return the fidelity between two states.
+"""
+@interface fidelity(r1::AbstractRegister, r2::AbstractRegister)
+
+"""
+    trace_distance(register1, register2)
+
+Return the trace distance of `register1` and `register2`.
+"""
+@interface trace_distance(r1::AbstractRegister, r2::AbstractRegister)
 
 """
     density_matrix(register)
