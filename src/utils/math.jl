@@ -1,6 +1,6 @@
 export batch_normalize, batch_normalize!, rotmat,
     hilbertkron, rand_hermitian, rand_unitary, fidelity_mix, fidelity_pure,
-    general_controlled_gates, general_c1_gates, linop2dense
+    general_controlled_gates, general_c1_gates, linop2dense, batched_kron
 
 using LuxurySparse, LinearAlgebra, BitBasis
 
@@ -56,6 +56,50 @@ function _wrap_identity(data_list::Vector{T}, num_bit_list::Vector{Int}) where T
     end
 end
 
+Base.kron(As...) = reduce(kron, As)
+
+batched_kron(As...) = reduce(batched_kron, As)
+
+function batched_kron(A::AbstractArray{T, 3}, B::AbstractArray{S, 3}) where {T, S}
+    @assert size(A, 3) == size(B, 3) "batch size mismatch"
+    C = Array{Base.promote_op(*,T,S), 3}(undef, size(A, 1) * size(B, 1), size(A, 2) * size(B, 2), size(A, 3))
+    return batched_kron!(C, A, B)
+end
+
+function batched_kron!(C::Array{T, 3}, A::Array{T1, 3}, B::Array{T2, 3}) where {T, T1, T2}
+    ptrA = Base.unsafe_convert(Ptr{T}, A)
+    ptrB = Base.unsafe_convert(Ptr{T1}, B)
+    ptrC = Base.unsafe_convert(Ptr{T2}, C)
+
+    for k in 1:size(C, 3)
+        Ak = unsafe_wrap(Matrix{T1}, ptrA, (size(A, 1), size(A, 2)))
+        Bk = unsafe_wrap(Matrix{T2}, ptrB, (size(B, 1), size(B, 2)))
+        Ck = unsafe_wrap(Matrix{T}, ptrC, (size(C, 1), size(C, 2)))
+
+        kron!(Ck, Ak, Bk)
+
+        ptrA += size(A, 1) * size(A, 2) * sizeof(T)
+        ptrB += size(B, 1) * size(B, 2) * sizeof(T)
+        ptrC += size(C, 1) * size(C, 2) * sizeof(T)
+    end
+
+    return C
+end
+
+function kron!(C::AbstractMatrix{T}, A::AbstractMatrix{T1}, B::AbstractMatrix{T2}) where {T,T1,T2}
+    @assert !Base.has_offset_axes(A, B)
+    m = 1
+    @inbounds for j = 1:size(A, 2), l = 1:size(B, 2), i = 1:size(A, 1)
+        aij = A[i,j]
+        for k = 1:size(B, 1)
+            C[m] = aij * B[k,l]
+            m += 1
+        end
+    end
+    return C
+end
+
+
 """
     general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix
 
@@ -83,7 +127,7 @@ end
 general (low performance) construction method for control gate on different lines.
 """
 general_c1_gates(num_bit::Int, projector::Tp, cbit::Int, gates::Vector{Tg}, locs::Vector{Int}) where {Tg<:AbstractMatrix, Tp<:AbstractMatrix} =
-hilbertkron(num_bit, [IMatrix(2) - projector], [cbit]) + hilbertkron(num_bit, vcat([projector], gates), vcat([cbit], locs))
+    hilbertkron(num_bit, [IMatrix(2) - projector], [cbit]) + hilbertkron(num_bit, vcat([projector], gates), vcat([cbit], locs))
 
 """
     rotmat(M::AbstractMatrix, θ::Real)

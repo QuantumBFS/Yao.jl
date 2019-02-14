@@ -30,6 +30,19 @@ end
     @test m == hilbertkron(5, [U, U2], [2, 4])
 end
 
+@testset "batched kron" begin
+    A, B, C  = rand(4, 4, 3), rand(4, 4, 3), rand(4, 4, 3)
+    D = batched_kron(A, B, C)
+
+    tD = zeros(64, 64, 3)
+    for k in 1:3
+        tD[:, :, k] = kron(A[:, :, k], B[:, :, k], C[:, :, k])
+    end
+
+    @test tD ≈ D
+end
+
+
 @testset "random matrices" begin
     mat = rand_unitary(8)
     @test isunitary(mat)
