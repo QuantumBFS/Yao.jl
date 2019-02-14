@@ -1,6 +1,7 @@
 export batch_normalize, batch_normalize!, rotmat,
     hilbertkron, rand_hermitian, rand_unitary, fidelity_mix, fidelity_pure,
-    general_controlled_gates, general_c1_gates, linop2dense, batched_kron
+    general_controlled_gates, general_c1_gates, linop2dense, batched_kron!,
+    batched_kron, kron!
 
 using LuxurySparse, LinearAlgebra, BitBasis
 
