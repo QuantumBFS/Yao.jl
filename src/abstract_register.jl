@@ -174,6 +174,13 @@ Returns an `UnitRange` of the all the bits in the Hilbert space of given registe
 @interface basis(r::AbstractRegister) = basis(nqubits(r))
 
 """
+    probs(register)
+
+Returns the probability distribution of computation basis, aka ``|<x|ψ>|^2``.
+"""
+@interface probs(r::AbstractRegister)
+
+"""
     density_matrix(register)
 
 Returns the density matrix of current active qubits.
@@ -195,21 +202,16 @@ Returns a view of the i-th slice on batch dimension.
 """
 @interface viewbatch(::AbstractRegister, ::Int)
 
-struct BatchIterator{B, T <: AbstractRegister{B}}
-    register::T
-end
 
-Base.length(::BatchIterator{B}) where B = B
-
-function Base.iterate(it::BatchIterator{B}, state=1) where B
+function Base.iterate(it::AbstractRegister{B}, state=1) where B
     if state > B
         return nothing
     else
-        viewbatch(it.register, state), state + 1
+        return viewbatch(it, state), state + 1
     end
 end
 
-@interface eachbatch(register::AbstractRegister) = BatchIterator(register)
+Base.length(::BatchIterator{B}) where B = B
 
 # fallback printing
 function Base.show(io::IO, reg::AbstractRegister)
