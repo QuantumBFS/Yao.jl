@@ -151,11 +151,11 @@ Non-inplace version of [`select!`](@ref).
 @interface select(register::AbstractRegister, bits...) = select!(copy(register), bits...)
 
 """
-    join(::AbstractRegister...) -> register
+    cat(::AbstractRegister...) -> register
 
 Merge several registers as one register via tensor product.
 """
-@interface Base.join(::AbstractRegister...)
+@interface Base.cat(::AbstractRegister...)
 
 """
     repeat(r::AbstractRegister, n::Int) -> register
@@ -171,7 +171,7 @@ Repeat register `r` for `n` times on batch dimension.
 
 Returns an `UnitRange` of the all the bits in the Hilbert space of given register.
 """
-@interface basis(r::AbstractRegister) = basis(nqubits(r))
+@interface BitBasis.basis(r::AbstractRegister) = basis(nqubits(r))
 
 """
     probs(register)
@@ -179,6 +179,20 @@ Returns an `UnitRange` of the all the bits in the Hilbert space of given registe
 Returns the probability distribution of computation basis, aka ``|<x|ψ>|^2``.
 """
 @interface probs(r::AbstractRegister)
+
+"""
+    reorder!(reigster, orders)
+
+Reorder the address of register by input orders.
+"""
+@interface reorder!(r::AbstractRegister, orders)
+
+"""
+    invorder(register)
+
+Inverse the address of register.
+"""
+@interface invorder!(r::AbstractRegister) = reorder!(r, Tuple(nactive(reg):-1:1))
 
 """
     density_matrix(register)
