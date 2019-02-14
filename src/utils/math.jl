@@ -57,9 +57,7 @@ function _wrap_identity(data_list::Vector{T}, num_bit_list::Vector{Int}) where T
     end
 end
 
-Base.kron(As...) = reduce(kron, As)
-
-batched_kron(As...) = reduce(batched_kron, As)
+batched_kron(a, b, c, xs...) = Base.afoldl(batched_kron, (batched_kron)((batched_kron)(a,b),c), xs...)
 
 function batched_kron(A::AbstractArray{T, 3}, B::AbstractArray{S, 3}) where {T, S}
     @assert size(A, 3) == size(B, 3) "batch size mismatch"
