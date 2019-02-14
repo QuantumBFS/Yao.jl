@@ -195,6 +195,21 @@ Inverse the address of register.
 @interface invorder!(r::AbstractRegister) = reorder!(r, Tuple(nactive(reg):-1:1))
 
 """
+    setto!(register, bit_str)
+
+Set the `register` to bit string literal `bit_str`. About bit string literal,
+see more in [`@bit_str`](@ref).
+"""
+@interface setto!(r::AbstractRegister, bit_str::BitStr)
+
+"""
+    setto!(register, bit_config::Integer)
+
+Set the `register` to bit configuration `bit_config`.
+"""
+@interface setto!(r::AbstractRegister, bit_config::Integer=0)
+
+"""
     density_matrix(register)
 
 Returns the density matrix of current active qubits.
