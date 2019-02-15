@@ -100,6 +100,8 @@ Inverse transformation of [`focus!`](@ref), where `to_nactive` is the number
 @interface relax!(r::AbstractRegister, locs...; to_nactive::Int=nqubits(r)) =
     relax!(r::AbstractRegister, to_address(locs); to_nactive=to_nactive)
 
+relax!(r::AbstractRegister; to_nactive::Int=nqubits(r)) = relax!(r, (); to_nactive=to_nactive)
+
 """
     relax!(locs::Int...; to_nactive=nqubits(register)) -> f(register) -> register
 
