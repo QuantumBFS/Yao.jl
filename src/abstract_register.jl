@@ -1,3 +1,5 @@
+using BitBasis
+
 export AbstractRegister
 
 """
@@ -72,21 +74,47 @@ If only an integer is provided, then returns a lambda function.
 increase!(n::Int) = r -> increase!(r, n)
 
 """
-    focus!(register, locs::Int...) -> register
-    focus!(locs::Int...) -> f(register) -> register
+    focus!(register, locs...) -> register
 
 Focus the wires on specified location.
+
+# Example
+
+```julia
+julia> focus!(r, bit"1011", bit"1111", 0)
+
+julia> focus!(r, bit"")
+```
 """
-@interface focus!(::AbstractRegister, locs...)
+@interface focus!(r::AbstractRegister, locs...) = focus!(r, to_address(locs))
+
+focus!(locs...) = r::AbstractRegister -> focus!(r, locs...)
 
 """
-    relax!(register[, locs]) -> register
-    relax!(nbits, locs) -> f(register) -> register
+    relax!(register[, locs...]; to_nactive=nqubits(register)) -> register
+    relax!(register[, locs::NTuple]; to_nactive=nqubits(register)) -> register
 
-Inverse transformation of [`focus!`](@ref), where `nbit` is the number
+Inverse transformation of [`focus!`](@ref), where `to_nactive` is the number
  of active bits for target register.
 """
-@interface relax!(::AbstractRegister, locs)
+@interface relax!(r::AbstractRegister, locs...; to_nactive::Int=nqubits(r)) =
+    relax!(r::AbstractRegister, to_address(locs); to_nactive=to_nactive)
+
+"""
+    relax!(locs::Int...; to_nactive=nqubits(register)) -> f(register) -> register
+
+Lazy version of [`relax!`](@ref), it will be evaluated once you feed a register
+to its output lambda.
+"""
+function relax!(locs::Int...; to_nactive::Union{Nothing, Int}=nothing)
+    return function (r::AbstractRegister)
+        if to_nactive === nothing
+            return relax!(r, locs...; to_nactive=nqubits(r))
+        else
+            return relax!(r, locs...; to_nactive=to_nactive)
+        end
+    end
+end
 
 ## Measurement
 
@@ -213,6 +241,29 @@ Set the `register` to bit configuration `bit_config`.
     fidelity(register1, register2)
 
 Return the fidelity between two states.
+
+# Definition
+The fidelity of two quantum state for qubits is defined as:
+
+```math
+F(ρ, σ) = tr(\\sqrt{\\sqrt{ρ}σ\\sqrt{ρ}})
+```
+
+Or its equivalent form (which we use in numerical calculation):
+
+```math
+F(ρ, σ) = sqrt(tr(ρσ) + 2 \\sqrt{det(ρ)det(σ)})
+```
+
+# Reference
+
+- Jozsa R. Fidelity for mixed quantum states[J]. Journal of modern optics, 1994, 41(12): 2315-2323.
+- Nielsen M A, Chuang I. Quantum computation and quantum information[J]. 2002.
+
+!!! note
+
+    The original definition of fidelity ``F`` was from "transition probability",
+    defined by Jozsa in 1994, it is the square of what we use here.
 """
 @interface fidelity(r1::AbstractRegister, r2::AbstractRegister)
 
@@ -220,6 +271,17 @@ Return the fidelity between two states.
     trace_distance(register1, register2)
 
 Return the trace distance of `register1` and `register2`.
+
+# Definition
+Trace distance is defined as following:
+
+```math
+\\frac{1}{2} || A - B ||_{tr}
+```
+
+# Reference
+
+- https://en.wikipedia.org/wiki/Trace_distance
 """
 @interface trace_distance(r1::AbstractRegister, r2::AbstractRegister)
 
@@ -253,8 +315,6 @@ function Base.iterate(it::AbstractRegister{B}, state=1) where B
         return viewbatch(it, state), state + 1
     end
 end
-
-Base.length(::BatchIterator{B}) where B = B
 
 # fallback printing
 function Base.show(io::IO, reg::AbstractRegister)

@@ -1,9 +1,44 @@
-export batch_normalize, batch_normalize!, rotmat,
-    hilbertkron, rand_hermitian, rand_unitary, fidelity_mix, fidelity_pure,
-    general_controlled_gates, general_c1_gates, linop2dense, batched_kron!,
-    batched_kron, kron!
+export batch_normalize,
+    batch_normalize!,
+    rotmat,
+    rand_hermitian,
+    rand_unitary,
+    general_controlled_gates,
+    general_c1_gates,
+    linop2dense,
+    # kron
+    hilbertkron,
+    batched_kron!,
+    batched_kron,
+    kron!,
+    # norms
+    trnorm,
+    nucnorm,
+    # fidelity
+    pure_state_fidelity,
+    density_fidelity,
+    purification_fidelity
+
 
 using LuxurySparse, LinearAlgebra, BitBasis
+import LinearAlgebra: svdvals
+
+"""
+nucnorm(m)
+
+Computes the nuclear norm of a matrix `m`.
+"""
+function nucnorm(m::AbstractMatrix)
+    norm(svdvals(m),1)
+end
+
+"""
+trnorm(m)
+
+Computes the trace norm of a matrix `m`.
+"""
+trnorm(m::AbstractMatrix) = nucnorm(m)
+
 
 """
     batch_normalize!(matrix)
@@ -146,24 +181,40 @@ linop2dense(linear_map!::Function, n::Int) = linop2dense(ComplexF64, linear_map!
 linop2dense(::Type{T}, linear_map!::Function, n::Int) where T = linear_map!(Matrix{T}(I, 1<<n, 1<<n))
 
 ################### Fidelity ###################
+
 """
-    fidelity_pure(v1::Vector, v2::Vector)
+    density_fidelity(ρ1, ρ2)
+
+General fidelity (including mixed states) between two density matrix for qubits.
+
+# Definition
+
+```math
+F(ρ, σ)^2 = tr(ρσ) + 2 \\sqrt{det(ρ)det(σ)}
+```
+"""
+function density_fidelity(ρ1::AbstractMatrix, ρ2::AbstractMatrix)
+    return sqrt( tr(ρ1 * ρ2) + 2 * sqrt(det(ρ1) * det(ρ2)) )
+end
+
+"""
+    pure_state_fidelity(v1::Vector, v2::Vector)
 
 fidelity for pure states.
 """
-fidelity_pure(v1::Vector, v2::Vector) = abs(v1'*v2)
+pure_state_fidelity(v1::Vector, v2::Vector) = abs(v1'*v2)
 
 """
-    fidelity_mix(m1::Matrix, m2::Matrix)
+    purification_fidelity(m1::Matrix, m2::Matrix)
 
-Fidelity for mixed states.
+Fidelity for mixed states via purification.
 
 Reference:
     http://iopscience.iop.org/article/10.1088/1367-2630/aa6a4b/meta
 """
-function fidelity_mix(m1::Matrix, m2::Matrix)
+function purification_fidelity(m1::Matrix, m2::Matrix)
     O = m1'*m2
-    tr(sqrt(O*O'))
+    return tr(sqrt(O*O'))
 end
 
 """
