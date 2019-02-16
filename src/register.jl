@@ -7,6 +7,7 @@ export ArrayReg,
     # YaoBase
     nqubits,
     nactive,
+    nremain,
     nbatch,
     viewbatch,
     increase!,
