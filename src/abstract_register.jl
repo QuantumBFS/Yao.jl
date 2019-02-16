@@ -81,19 +81,18 @@ Focus the wires on specified location.
 # Example
 
 ```julia
-julia> focus!(r, bit"1011", bit"1111", 0)
+julia> focus!(r, 1, 2, 4)
 
-julia> focus!(r, bit"")
 ```
 """
-@interface focus!(r::AbstractRegister, locs...) = focus!(r, locs)
+@interface focus!(r::AbstractRegister, locs::Int...) = focus!(r, locs)
 
 """
     focus!(locs...) -> f(register) -> register
 
 Lazy version of [`focus!`](@ref), this returns a lambda which requires a register.
 """
-focus!(locs...) = r::AbstractRegister -> focus!(r, locs...)
+focus!(locs::Int...) = r::AbstractRegister -> focus!(r, locs...)
 
 """
     focus(f, register, locs...)
@@ -106,11 +105,11 @@ print the focused register
 
 ```julia
 julia> r = ArrayReg(bit"101100")
-ArrayReg{1,Complex{Float64},Array{Complex{Float64},2}}
+ArrayReg{1,Complex{Float64},Array...}
     active qubits: 6/6
 
 julia> focus(x->(println(x);x), r, 1, 2);
-ArrayReg{1,Complex{Float64},Array{Complex{Float64},2}}
+ArrayReg{1,Complex{Float64},Array...}
     active qubits: 2/6
 ```
 """
