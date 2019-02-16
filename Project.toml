@@ -1,10 +1,10 @@
 name = "YaoBase"
 uuid = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
 authors = ["GiggleLiu <cacate0129@gmail.com>", "Roger-luo <hiroger@qq.com>"]
-version = "0.2.2-DEV"
+version = "0.3.0-DEV"
 
 [deps]
-BitBasis = "187ba324-2ddc-11e9-1b5d-7b8844fa955b"
+BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 LuxurySparse = "d05aeea4-b7d4-55ac-b691-9e7fabb07ba2"
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
