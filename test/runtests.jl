@@ -1,6 +1,6 @@
 using YaoArrayRegister
 using Test
 
-@testset "YaoArrayRegister.jl" begin
-    # Write your own tests here.
+@testset "test ArrayReg" begin
+    include("register.jl")
 end

@@ -7,22 +7,28 @@ export ArrayReg,
     # YaoBase
     nqubits,
     nactive,
+    nbatch,
     viewbatch,
     increase!,
+    datatype,
     probs,
     reorder!,
     invorder!,
     setto!,
     fidelity,
     trace_distance,
+    # YaoBase deprecated
+    addbit!,
+    reset!,
+    measure_reset!,
     # additional
     state,
     statevec,
     relaxedvec,
-    hypercubic,
     rank3,
     # BitBasis
     @bit_str,
+    hypercubic,
     # initialization
     product_state,
     zero_state,
@@ -59,7 +65,9 @@ explicitly. The batch size will be `size(raw, 2)` by default.
 """
 function ArrayReg{B}(raw::MT) where {B, T, MT <: AbstractMatrix{T}}
     ispow2(size(raw, 1)) || throw(DimensionMismatch("Expect first dimension size to be power of 2"))
-    ispow2(size(raw, 2) ÷ B) || throw(DimensionMismatch("Expect second dimension size to be an integral multiple of batch size $B"))
+    if !(ispow2(size(raw, 2) ÷ B) && size(raw, 2) % B == 0)
+        throw(DimensionMismatch("Expect second dimension size to be an integral multiple of batch size $B"))
+    end
     return ArrayReg{B, T, MT}(raw)
 end
 
@@ -79,11 +87,11 @@ For bit string literal please read [`@bit_str`](@ref).
 
 ```jldoctest
 julia> ArrayReg(bit"1010")
-ArrayReg{1,Complex{Float64},Array{Complex{Float64},2}}
+ArrayReg{1,Complex{Float64},Array...}
     active qubits: 4/4
 
 julia> ArrayReg(ComplexF32, bit"1010")
-ArrayReg{1,Complex{Float32},Array{Complex{Float32},2}}
+ArrayReg{1,Complex{Float32},Array...}
     active qubits: 4/4
 ```
 """
@@ -100,7 +108,6 @@ Initialize a new `ArrayReg` by an existing `ArrayReg`. This is equivalent
 to `copy`.
 """
 ArrayReg(r::ArrayReg{B}) where B = ArrayReg{B}(copy(r.state))
-ArrayReg(r::AdjointArrayReg{B}) where B = ArrayReg{B}(copy(adjoint(r.state)))
 
 Base.copy(r::ArrayReg) = ArrayReg(r)
 Base.similar(r::ArrayRegOrAdjointArrayReg{B}) where B = ArrayReg{B}(similar(state(r)))
@@ -116,7 +123,7 @@ YaoBase.nactive(r::ArrayReg) = log2dim1(r.state)
 YaoBase.viewbatch(r::ArrayReg, ind::Int) = @inbounds ArrayReg{1}(view(rank3(r), :, :, ind))
 
 function YaoBase.increase!(r::ArrayReg, n::Int)
-    raw = state(r); M, N = size(r)
+    raw = state(r); M, N = size(raw)
     r.state = similar(r.state, M * (1 << n), N)
     fill!(r.state, 0)
     r.state[1:M, :] = raw
@@ -149,7 +156,7 @@ end
 
 function YaoBase.setto!(r::ArrayReg, bit_config::Integer=0)
     fill!(r.state, 0)
-    @inbounds reg.state[bit_config+1,:] .= 1
+    @inbounds r.state[bit_config+1,:] .= 1
     return r
 end
 
@@ -180,7 +187,7 @@ YaoBase.trace_distance(r1::ArrayReg{B}, r2::ArrayReg{B}) where B = trace_distanc
 Returns the raw array storage of `register`. See also [`statevec`](@ref).
 """
 state(r::ArrayReg) = r.state
-state(r::AdjointArrayReg) = adjoint(r.state)
+state(r::AdjointArrayReg) = adjoint(state(parent(r)))
 
 """
     statevec(r::ArrayReg) -> array
@@ -204,10 +211,10 @@ relaxedvec(r::ArrayReg{1}) = vec(r.state)
 Return the hypercubic form (high dimensional tensor) of this register, only active qubits are considered.
 See also [`rank3`](@ref).
 """
-hypercubic(r::ArrayRegOrAdjointArrayReg) = reshape(state(r), ntuple(i->2, Val(nactive(r)))..., :)
+BitBasis.hypercubic(r::ArrayRegOrAdjointArrayReg) = reshape(state(r), ntuple(i->2, Val(nactive(r)))..., :)
 
 """
-    rank3(reg::ArrayReg)
+    rank3(r::ArrayReg)
 
 Return the rank 3 tensor representation of state,
 the 3 dimensions are (activated space, remaining space, batch dimension).
@@ -221,17 +228,17 @@ rank3(r::ArrayRegOrAdjointArrayReg{B}) where B = reshape(state(r), size(state(r)
 concat a list of registers `regs` to a larger register, each register should
 have the same batch size. See also [`repeat`](@ref).
 """
-Base.cat(regs::ArrayReg{B}...) where B = _cat(cat_datatype(regs...))
+Base.cat(rs::ArrayReg{B}...) where B = _cat(cat_datatype(rs...), rs...)
 Base.cat(r::ArrayReg) = r
 
-function _cat(::Type{T}, regs::ArrayReg{B}...) where {T, B}
-    state = batched_kron(rank3.(regs)...)
+function _cat(::Type{T}, rs::ArrayReg{B}...) where {T, B}
+    state = batched_kron(rank3.(rs)...)
     return ArrayReg{B}(reshape(state, size(state, 1), :))
 end
 
-cat_datatype(r::ArrayReg{B, T}, regs::ArrayReg{B}...) where {B, T} = cat_datatype(T, r, regs...)
-cat_datatype(::Type{T}, r::ArrayReg{B, T1}, regs::ArrayReg{B}...) where {T, T1, B} =
-    cat_datatype(promote_type(T, T1), regs...)
+cat_datatype(r::ArrayReg{B, T}, rs::ArrayReg{B}...) where {B, T} = cat_datatype(T, r, rs...)
+cat_datatype(::Type{T}, r::ArrayReg{B, T1}, rs::ArrayReg{B}...) where {T, T1, B} =
+    cat_datatype(promote_type(T, T1), rs...)
 cat_datatype(::Type{T}) where T = T
 
 
@@ -247,11 +254,11 @@ defined with [`@bit_str`](@ref). See also [`zero_state`](@ref),
 
 ```jldoctest
 julia> product_state(bit"100"; nbatch=2)
-ArrayReg{2,Complex{Float64},Array{Complex{Float64},2}}
+ArrayReg{2,Complex{Float64},Array...}
     active qubits: 3/3
 
 julia> product_state(ComplexF32, bit"101"; nbatch=2)
-ArrayReg{2,Complex{Float32},Array{Complex{Float32},2}}
+ArrayReg{2,Complex{Float32},Array...}
     active qubits: 3/3
 ```
 """
@@ -267,15 +274,15 @@ See also [`zero_state`](@ref), [`rand_state`](@ref), [`uniform_state`](@ref).
 
 ```jldoctest
 julia> product_state(4, 3; nbatch=2)
-ArrayReg{2,Complex{Float64},Array{Complex{Float64},2}}
+ArrayReg{2,Complex{Float64},Array...}
     active qubits: 4/4
 
 julia> product_state(4, 0b1001; nbatch=2)
-ArrayReg{2,Complex{Float64},Array{Complex{Float64},2}}
+ArrayReg{2,Complex{Float64},Array...}
     active qubits: 4/4
 
 julia> product_state(ComplexF32, 4, 0b101)
-ArrayReg{1,Complex{Float32},Array{Complex{Float32},2}}
+ArrayReg{1,Complex{Float32},Array...}
     active qubits: 4/4
 ```
 
@@ -303,15 +310,15 @@ See also [`product_state`](@ref), [`rand_state`](@ref), [`uniform_state`](@ref).
 
 ```jldoctest
 julia> zero_state(4)
-ArrayReg{1,Complex{Float64},Array{Complex{Float64},2}}
+ArrayReg{1,Complex{Float64},Array...}
     active qubits: 4/4
 
 julia> zero_state(ComplexF32, 4)
-ArrayReg{1,Complex{Float32},Array{Complex{Float32},2}}
+ArrayReg{1,Complex{Float32},Array...}
     active qubits: 4/4
 
 julia> zero_state(ComplexF32, 4; nbatch=3)
-ArrayReg{3,Complex{Float32},Array{Complex{Float32},2}}
+ArrayReg{3,Complex{Float32},Array...}
     active qubits: 4/4
 ```
 """
@@ -328,15 +335,15 @@ Create a random [`ArrayReg`](@ref) with total number of qubits `n`.
 
 ```jldoctest
 julia> rand_state(4)
-ArrayReg{1,Complex{Float64},Array{Complex{Float64},2}}
+ArrayReg{1,Complex{Float64},Array...}
     active qubits: 4/4
 
 julia> rand_state(ComplexF64, 4)
-ArrayReg{1,Complex{Float64},Array{Complex{Float64},2}}
+ArrayReg{1,Complex{Float64},Array...}
     active qubits: 4/4
 
 julia> rand_state(ComplexF64, 4; nbatch=2)
-ArrayReg{2,Complex{Float64},Array{Complex{Float64},2}}
+ArrayReg{2,Complex{Float64},Array...}
     active qubits: 4/4
 ```
 """
@@ -357,11 +364,11 @@ can also be created by applying [`H`](@ref) (Hadmard gate) on ``|00⋯00⟩`` st
 
 ```jldoctest
 julia> uniform_state(4; nbatch=2)
-ArrayReg{2,Complex{Float64},Array{Complex{Float64},2}}
+ArrayReg{2,Complex{Float64},Array...}
     active qubits: 4/4
 
 julia> uniform_state(ComplexF32, 4; nbatch=2)
-ArrayReg{2,Complex{Float64},Array{Complex{Float64},2}}
+ArrayReg{2,Complex{Float64},Array...}
     active qubits: 4/4
 ```
 """
@@ -373,7 +380,7 @@ uniform_state(::Type{T}, n::Int; nbatch::Int=1) where T = ArrayReg{nbatch}(ones(
 
 Returns an `ArrayReg` with `1:n` qubits activated.
 """
-oneto(r::ArrayReg{B}, n::Int=nqubits(r)) where B = ArrayReg{B}(reshape(copy(reg.state), 1<<n, :))
+oneto(r::ArrayReg{B}, n::Int=nqubits(r)) where B = ArrayReg{B}(reshape(copy(r.state), 1<<n, :))
 
 """
     oneto(n::Int) -> f(register)
@@ -392,8 +399,14 @@ batch dimension.
 
 ```jldoctest
 julia> repeat(ArrayReg{3}(bit"101"), 4)
-ArrayReg{12,Complex{Float64},Array{Complex{Float64},2}}
+ArrayReg{12,Complex{Float64},Array...}
     active qubits: 3/3
 ```
 """
 Base.repeat(r::ArrayReg{B}, n::Int) where B = ArrayReg{B * n}(hcat((state(r) for k in 1:n)...))
+
+# NOTE: overload this to make printing more compact
+#       but do not alter the way how type parameters print
+function Base.summary(io::IO, r::ArrayReg{B, T, MT}) where {B, T, MT}
+    print(io, "ArrayReg{$B, $T, $(nameof(MT))...}")
+end
