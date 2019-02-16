@@ -1,7 +1,7 @@
 name = "YaoBase"
 uuid = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
 authors = ["GiggleLiu <cacate0129@gmail.com>", "Roger-luo <hiroger@qq.com>"]
-version = "0.1.0"
+version = "0.2.2-DEV"
 
 [deps]
 BitBasis = "187ba324-2ddc-11e9-1b5d-7b8844fa955b"
