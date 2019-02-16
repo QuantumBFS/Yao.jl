@@ -86,9 +86,38 @@ julia> focus!(r, bit"1011", bit"1111", 0)
 julia> focus!(r, bit"")
 ```
 """
-@interface focus!(r::AbstractRegister, locs...) = focus!(r, to_address(locs))
+@interface focus!(r::AbstractRegister, locs...) = focus!(r, locs)
 
+"""
+    focus!(locs...) -> f(register) -> register
+
+Lazy version of [`focus!`](@ref), this returns a lambda which requires a register.
+"""
 focus!(locs...) = r::AbstractRegister -> focus!(r, locs...)
+
+"""
+    focus(f, register, locs...)
+
+Call a callable `f` under the context of `focus`. See also [`focus!`](@ref).
+
+# Example
+
+print the focused register
+
+```julia
+julia> r = ArrayReg(bit"101100")
+ArrayReg{1,Complex{Float64},Array{Complex{Float64},2}}
+    active qubits: 6/6
+
+julia> focus(x->(println(x);x), r, 1, 2);
+ArrayReg{1,Complex{Float64},Array{Complex{Float64},2}}
+    active qubits: 2/6
+```
+"""
+@interface focus(f::Base.Callable, r::AbstractRegister, locs...) = focus(f, r, locs)
+
+focus(f::Base.Callable, r::AbstractRegister, locs::Tuple) =
+    relax!(f(focus!(r, locs)), locs; to_nactive=nqubits(r))
 
 """
     relax!(register[, locs...]; to_nactive=nqubits(register)) -> register
@@ -98,7 +127,7 @@ Inverse transformation of [`focus!`](@ref), where `to_nactive` is the number
  of active bits for target register.
 """
 @interface relax!(r::AbstractRegister, locs...; to_nactive::Int=nqubits(r)) =
-    relax!(r::AbstractRegister, to_address(locs); to_nactive=to_nactive)
+    relax!(r::AbstractRegister, locs; to_nactive=to_nactive)
 
 relax!(r::AbstractRegister; to_nactive::Int=nqubits(r)) = relax!(r, (); to_nactive=to_nactive)
 
