@@ -11,6 +11,10 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 YaoBase = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
 
+[compat]
+LuxurySparse = ">=0.3.3"
+YaoBase = ">=0.3.0"
+
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
