@@ -86,6 +86,8 @@ julia> focus!(r, 1, 2, 4)
 ```
 """
 @interface focus!(r::AbstractRegister, locs::Int...) = focus!(r, locs)
+# NOTE: do not delete this, this line is for dis-ambiguity
+focus!(r::AbstractRegister, loc::Int) = focus!(r, (loc, ))
 
 """
     focus!(locs...) -> f(register) -> register
