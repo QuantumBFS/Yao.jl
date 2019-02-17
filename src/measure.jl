@@ -1,5 +1,11 @@
-using StatsBase
-export measure, measure!, measure_remove!, measure_reset!, select, select!
+using StatsBase, StaticArrays
+export measure,
+    measure!,
+    measure_remove!,
+    measure_setto!,
+    measure_reset!,
+    select,
+    select!
 
 _measure(pl::AbstractVector, ntimes::Int) = sample(0:length(pl)-1, Weights(pl), ntimes)
 function _measure(pl::AbstractMatrix, ntimes::Int)
@@ -54,7 +60,16 @@ function YaoBase.measure_setto!(reg::ArrayReg{B}; bit_config::Integer=0) where B
     return res
 end
 
-function YaoBase.select!(reg::ArrayReg{B}, bits) where B
-    reg.state = reg.state[[bits...] .+ 1, :]
-    return reg
+function YaoBase.select!(r::ArrayReg, bits)
+    to_address(x::Integer) = x + 1
+    to_address(x) = x
+    r.state = r.state[map(to_address, bits), :]
+    return r
 end
+
+function YaoBase.select!(r::ArrayReg, bits::Integer)
+    r.state = reshape(r.state[bits+1, :], 1, :)
+    return r
+end
+
+YaoBase.select!(r::ArrayReg, bits::BitStr) = select!(r, bits.val)

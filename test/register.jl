@@ -74,7 +74,7 @@ end
         for k in 1:3
             @test viewbatch(r, k) == ArrayReg(bit"101")
         end
-
+        # broadcast
         for each in r
             @test each == ArrayReg(bit"101")
         end

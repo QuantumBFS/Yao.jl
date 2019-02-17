@@ -7,6 +7,7 @@ end
 
 @testset "test ArrayReg" begin
     include("register.jl")
+    include("operations.jl")
 end
 
 @testset "test focus" begin
