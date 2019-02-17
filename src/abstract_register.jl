@@ -74,27 +74,26 @@ If only an integer is provided, then returns a lambda function.
 increase!(n::Int) = @λ(register -> increase!(register, n))
 
 """
-    focus!(register, locs...) -> register
+    focus!(register, locs) -> register
 
 Focus the wires on specified location.
 
 # Example
 
 ```julia
-julia> focus!(r, 1, 2, 4)
+julia> focus!(r, (1, 2, 4))
 
 ```
 """
-@interface focus!(r::AbstractRegister, locs::Int...) = focus!(r, locs)
-# NOTE: do not delete this, this line is for dis-ambiguity
-focus!(r::AbstractRegister, loc::Int) = focus!(r, (loc, ))
+@interface focus!(r::AbstractRegister, locs)
 
 """
     focus!(locs...) -> f(register) -> register
 
 Lazy version of [`focus!`](@ref), this returns a lambda which requires a register.
 """
-focus!(locs::Int...) = @λ(register -> focus!(register, locs...))
+focus!(locs::Int...) = focus!(locs)
+focus!(locs::NTuple{N, Int}) where N = @λ(register -> focus!(register, locs))
 
 """
     focus(f, register, locs...)
@@ -122,17 +121,13 @@ focus(f::Base.Callable, r::AbstractRegister, locs) =
     relax!(f(focus!(r, locs)), locs; to_nactive=nqubits(r))
 
 """
-    relax!(register[, locs...]; to_nactive=nqubits(register)) -> register
-    relax!(register[, locs::NTuple]; to_nactive=nqubits(register)) -> register
+    relax!(register[, locs]; to_nactive=nqubits(register)) -> register
 
 Inverse transformation of [`focus!`](@ref), where `to_nactive` is the number
  of active bits for target register.
 """
-@interface relax!(r::AbstractRegister, locs::Int...; to_nactive::Int=nqubits(r)) =
-    relax!(r::AbstractRegister, locs; to_nactive=to_nactive)
-
+@interface relax!(r::AbstractRegister, locs; to_nactive::Int=nqubits(r))
 relax!(r::AbstractRegister; to_nactive::Int=nqubits(r)) = relax!(r, (); to_nactive=to_nactive)
-relax!(r::AbstractRegister, loc::Int; to_nactive::Int=nqubits(r)) = relax!(r, (loc, ); to_nactive=to_nactive)
 
 """
     relax!(locs::Int...; to_nactive=nqubits(register)) -> f(register) -> register
@@ -140,7 +135,10 @@ relax!(r::AbstractRegister, loc::Int; to_nactive::Int=nqubits(r)) = relax!(r, (l
 Lazy version of [`relax!`](@ref), it will be evaluated once you feed a register
 to its output lambda.
 """
-function relax!(locs::Int...; to_nactive::Union{Nothing, Int}=nothing)
+relax!(locs::Int...; to_nactive::Union{Nothing, Int}=nothing) =
+    relax!(locs; to_nactive=to_nactive)
+
+function relax!(locs::NTuple{N, Int}; to_nactive::Union{Nothing, Int}=nothing)
     lambda = function (r::AbstractRegister)
         if to_nactive === nothing
             return relax!(r, locs...; to_nactive=nqubits(r))
