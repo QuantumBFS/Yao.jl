@@ -7,8 +7,9 @@ using LinearAlgebra, LuxurySparse, SparseArrays
 
 include("utils/math.jl")
 include("utils/interface.jl")
-include("error.jl")
+include("utils/legible_lambdas.jl")
 
+include("error.jl")
 include("abstract_register.jl")
 include("adjoint_register.jl")
 

@@ -71,7 +71,7 @@ If only an integer is provided, then returns a lambda function.
 """
 @interface increase!(::AbstractRegister, n::Int)
 
-increase!(n::Int) = r -> increase!(r, n)
+increase!(n::Int) = @λ(r -> increase!(r, n))
 
 """
     focus!(register, locs...) -> register
@@ -92,7 +92,7 @@ julia> focus!(r, 1, 2, 4)
 
 Lazy version of [`focus!`](@ref), this returns a lambda which requires a register.
 """
-focus!(locs::Int...) = r::AbstractRegister -> focus!(r, locs...)
+focus!(locs::Int...) = @λ(register -> focus!(register, locs...))
 
 """
     focus(f, register, locs...)
