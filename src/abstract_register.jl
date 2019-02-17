@@ -210,10 +210,7 @@ After selection, the focused qubit space is 0, so you may want call `relax!` man
     do not assume `bits` has specific number of bits (e.g `Int64`), or it will restrict the
     its maximum available number of qubits.
 """
-@interface select!(r::AbstractRegister, bits::NTuple{N, <:Integer}) where N
-
-# NOTE: we promote int type here to allow directly input things like 0b0101
-select!(r::AbstractRegister, bits...) = select!(r, promote(to_address(bits)))
+@interface select!(r::AbstractRegister, bits)
 
 """
     select!(b::Integer) -> f(register)

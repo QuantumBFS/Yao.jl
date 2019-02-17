@@ -1,8 +1,8 @@
 using MacroTools
 
 macro interface(ex::Expr)
-    if is_function_def(ex)
-        return define_abstract_api(ex, get_raw_name(ex.args[1]))
+    if is_function_call(ex)
+        return define_abstract_api(ex, get_raw_name(eatwhere(ex).args[1]))
     else
         try
             def = splitdef(ex)
@@ -27,7 +27,7 @@ function eatwhere(ex::Expr)
     end
 end
 
-is_function_def(ex::Expr) = eatwhere(ex).head == :call
+is_function_call(ex::Expr) = eatwhere(ex).head == :call
 
 function export_api(ex, api)
     api_name = QuoteNode(api)
