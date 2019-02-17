@@ -15,4 +15,6 @@ include("adjoint_register.jl")
 include("inspect.jl")
 include("instruct.jl")
 
+include("deprecations.jl")
+
 end # module
