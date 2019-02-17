@@ -18,6 +18,7 @@ YaoBase = ">=0.3.0"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [targets]
-test = ["Test"]
+test = ["Test", "SparseArrays"]
