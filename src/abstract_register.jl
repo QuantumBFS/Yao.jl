@@ -141,9 +141,9 @@ relax!(locs::Int...; to_nactive::Union{Nothing, Int}=nothing) =
 function relax!(locs::NTuple{N, Int}; to_nactive::Union{Nothing, Int}=nothing) where N
     lambda = function (r::AbstractRegister)
         if to_nactive === nothing
-            return relax!(r, locs...; to_nactive=nqubits(r))
+            return relax!(r, locs; to_nactive=nqubits(r))
         else
-            return relax!(r, locs...; to_nactive=to_nactive)
+            return relax!(r, locs; to_nactive=to_nactive)
         end
     end
     return LegibleLambda(
