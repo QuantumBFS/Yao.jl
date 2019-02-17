@@ -1,4 +1,7 @@
+using StaticArrays
 export itercontrol, controldo
+
+# NOTE: use SortedVector in Blocks would help benchmarks
 
 """
     IterControl{N, S, T}
@@ -6,22 +9,24 @@ export itercontrol, controldo
 Iterator to iterate through controlled subspace. See also [`itercontrol`](@ref).
 `N` is the size of whole hilbert space, `S` is the number of shifts.
 """
-struct IterControl{NSpace, NShifts, T}
+struct IterControl{N, NShift, T}
     base::T
-    masks::NTuple{NShifts, Int}
-    ks::NTuple{NShifts, Int}
+    masks::SVector{NShift, Int}
+    ks::SVector{NShift, Int}
 
-    IterControl{N}(base::T, masks::NTuple{S, Int}, ks::NTuple{S, Int}) where {T <: Integer, N, S} =
-        new{N, S, T}(base, masks, ks)
+    function IterControl{N}(base::T, masks, ks) where {N, T}
+        NShift = length(masks)
+        new{N, NShift, T}(base, SVector{NShift, Int}(masks), SVector{NShift, Int}(ks))
+    end
 end
 
-function IterControl(::Type{T}, nbits::Int, positions::Tuple{C, Int}, bit_configs::NTuple{U, Int}) where {T, C, U}
-    base = bmask(T, positions[u] for u in bit_configs if positions[u] != 0)
-    masks, ks = group_shift(nbits, control_bits)
-    return IterControl{1<<(nbits - length(positions))}(base, Tuple(masks), Tuple(ks))
+function IterControl(::Type{T}, nbits::Int, positions, bit_configs) where T
+    base = bmask(T, positions[i] for (i, u) in enumerate(bit_configs) if u != 0)
+    masks, ks = group_shift(nbits, positions)
+    return IterControl{1<<(nbits - length(positions))}(base, masks, ks)
 end
 
-IterControl(nbits::Int, positions::Tuple{C, Int}, bit_configs::NTuple{U, Int}) where {C, U} =
+IterControl(nbits::Int, positions, bit_configs) =
     IterControl(Int, nbits, positions, bit_configs)
 
 """
@@ -40,7 +45,7 @@ julia> for each in itercontrol(7, (1, 3, 4, 7), (1, 0, 1, 0))
 ```
 """
 itercontrol(nbits::Int, positions, bit_configs) = itercontrol(Int, nbits, positions, bit_configs)
-itercontrol(::Type{T}, nbits::Int, positions, bit_configs) where T = IterControl(T, nbits, Tuple(positions), Tuple(bit_configs))
+itercontrol(::Type{T}, nbits::Int, positions, bit_configs) where T = IterControl(T, nbits, positions, bit_configs)
 
 """
     controldo(f, itr::IterControl)
@@ -50,7 +55,7 @@ using `itr` as an iterator. See also [`itercontrol`](@ref).
 """
 function controldo(f::Base.Callable, ic::IterControl{N, S}) where {N, S}
     for i in 0:N-1
-        @simd for s in 1:C
+        @simd for s in 1:S
             @inbounds i = lmove(i, ic.masks[s], ic.ks[s])
         end
         f(i+ic.base)
@@ -73,7 +78,7 @@ function Base.iterate(it::IterControl{N, S}, state = 1) where {N, S}
     if state > length(it)
         return nothing
     else
-        return it[state]
+        return it[state], state + 1
     end
 end
 
