@@ -138,7 +138,7 @@ to its output lambda.
 relax!(locs::Int...; to_nactive::Union{Nothing, Int}=nothing) =
     relax!(locs; to_nactive=to_nactive)
 
-function relax!(locs::NTuple{N, Int}; to_nactive::Union{Nothing, Int}=nothing)
+function relax!(locs::NTuple{N, Int}; to_nactive::Union{Nothing, Int}=nothing) where N
     lambda = function (r::AbstractRegister)
         if to_nactive === nothing
             return relax!(r, locs...; to_nactive=nqubits(r))
