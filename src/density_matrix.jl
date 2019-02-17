@@ -1,4 +1,4 @@
-export DensityMatrix
+export DensityMatrix, density_matrix, ρ
 
 """
     DensityMatrix{B, T, MT}
@@ -19,7 +19,7 @@ end
 Create a `DensityMatrix` with a state represented by array.
 """
 DensityMatrix(state::MT) where {T, MT<:AbstractArray{T, 3}} = DensityMatrix{size(state, 3), T, MT}(state)
-DensityMatrix(state::AbstractMatrix) = DensityMatrix(reshape(state, :, :, 1))
+DensityMatrix(state::AbstractMatrix) = DensityMatrix(reshape(state, size(state)..., 1))
 
 """
     state(ρ::DensityMatrix)
@@ -51,10 +51,12 @@ YaoBase.trace_distance(dm1::DensityMatrix{B}, dm2::DensityMatrix{B}) where B =
 
 Returns the probability distribution from a density matrix `ρ`.
 """
-function YaoBase.probs(m::DensityMatrix{B}) where B
+function YaoBase.probs(m::DensityMatrix{B, T}) where {B, T}
     res = zeros(T, size(m.state, 1), B)
     for i in 1:B
         @inbounds res[:,B] = diag(view(m.state, :,:,i))
     end
     return res
 end
+
+YaoBase.probs(m::DensityMatrix{1})= diag(view(m.state, :,:,1))
