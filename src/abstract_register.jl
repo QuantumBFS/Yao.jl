@@ -115,6 +115,7 @@ ArrayReg{1,Complex{Float64},Array...}
 """
 @interface focus(f::Base.Callable, r::AbstractRegister, locs::Int...) = focus(f, r, locs)
 
+focus(f::Base.Callable, r::AbstractRegister, loc::Int) = focus(f, r, (loc, ))
 focus(f::Base.Callable, r::AbstractRegister, locs) =
     relax!(f(focus!(r, locs)), locs; to_nactive=nqubits(r))
 
@@ -125,10 +126,11 @@ focus(f::Base.Callable, r::AbstractRegister, locs) =
 Inverse transformation of [`focus!`](@ref), where `to_nactive` is the number
  of active bits for target register.
 """
-@interface relax!(r::AbstractRegister, locs...; to_nactive::Int=nqubits(r)) =
+@interface relax!(r::AbstractRegister, locs::Int...; to_nactive::Int=nqubits(r)) =
     relax!(r::AbstractRegister, locs; to_nactive=to_nactive)
 
 relax!(r::AbstractRegister; to_nactive::Int=nqubits(r)) = relax!(r, (); to_nactive=to_nactive)
+relax!(r::AbstractRegister, loc::Int; to_nactive::Int=nqubits(r)) = relax!(r, (loc, ); to_nactive=to_nactive)
 
 """
     relax!(locs::Int...; to_nactive=nqubits(register)) -> f(register) -> register
@@ -137,13 +139,16 @@ Lazy version of [`relax!`](@ref), it will be evaluated once you feed a register
 to its output lambda.
 """
 function relax!(locs::Int...; to_nactive::Union{Nothing, Int}=nothing)
-    return function (r::AbstractRegister)
+    lambda = function (r::AbstractRegister)
         if to_nactive === nothing
             return relax!(r, locs...; to_nactive=nqubits(r))
         else
             return relax!(r, locs...; to_nactive=to_nactive)
         end
     end
+    return LegibleLambda(
+        "(register->relax!(register, locs...; to_nactive))",
+        lambda)
 end
 
 ## Measurement
