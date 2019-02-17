@@ -71,7 +71,7 @@ If only an integer is provided, then returns a lambda function.
 """
 @interface increase!(::AbstractRegister, n::Int)
 
-increase!(n::Int) = @λ(r -> increase!(r, n))
+increase!(n::Int) = @λ(register -> increase!(register, n))
 
 """
     focus!(register, locs...) -> register
