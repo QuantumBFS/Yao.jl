@@ -204,7 +204,7 @@ select a subspace of given quantum state based on input eigen state `bits`.
 `select!(reg, 0b110)` will select the subspace with (focused) configuration `110`.
 After selection, the focused qubit space is 0, so you may want call `relax!` manually.
 """
-@interface select!(r::AbstractRegister, bits::Tuple)
+@interface select!(r::AbstractRegister, bits::NTuple{N, Int}) where N
 
 select!(r::AbstractRegister, bits...) = select!(r, to_address(bits))
 select!(bits...) = @λ(register->select!(register, bits...))
