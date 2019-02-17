@@ -113,9 +113,9 @@ ArrayReg{1,Complex{Float64},Array...}
     active qubits: 2/6
 ```
 """
-@interface focus(f::Base.Callable, r::AbstractRegister, locs...) = focus(f, r, locs)
+@interface focus(f::Base.Callable, r::AbstractRegister, locs::Int...) = focus(f, r, locs)
 
-focus(f::Base.Callable, r::AbstractRegister, locs::Tuple) =
+focus(f::Base.Callable, r::AbstractRegister, locs) =
     relax!(f(focus!(r, locs)), locs; to_nactive=nqubits(r))
 
 """
