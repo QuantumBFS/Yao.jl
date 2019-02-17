@@ -195,18 +195,31 @@ end
 """
     select!(dest::AbstractRegister, src::AbstractRegister, bits::Integer...) -> AbstractRegister
     select!(register::AbstractRegister, bits::Integer...) -> register
-    select!(b::Integer) -> f(register)
 
 select a subspace of given quantum state based on input eigen state `bits`.
+See also [`select`](@ref).
 
 ## Example
 
 `select!(reg, 0b110)` will select the subspace with (focused) configuration `110`.
 After selection, the focused qubit space is 0, so you may want call `relax!` manually.
-"""
-@interface select!(r::AbstractRegister, bits::NTuple{N, Int}) where N
 
-select!(r::AbstractRegister, bits...) = select!(r, to_address(bits))
+!!! tip
+
+    Developers should overload `select!(r::RegisterType, bits::NTuple{N, <:Integer})` and
+    do not assume `bits` has specific number of bits (e.g `Int64`), or it will restrict the
+    its maximum available number of qubits.
+"""
+@interface select!(r::AbstractRegister, bits::NTuple{N, <:Integer}) where N
+
+# NOTE: we promote int type here to allow directly input things like 0b0101
+select!(r::AbstractRegister, bits...) = select!(r, promote(to_address(bits)))
+
+"""
+    select!(b::Integer) -> f(register)
+
+Lazy version of [`select!`](@ref). See also [`select`](@ref).
+"""
 select!(bits...) = @λ(register->select!(register, bits...))
 
 """
