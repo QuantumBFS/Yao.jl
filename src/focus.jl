@@ -1,4 +1,4 @@
-using YaoBase
+using YaoBase, TupleTools
 
 export focus!,
     relax!,
@@ -81,6 +81,16 @@ move_ahead(collection, orders) = (orders..., setdiff(collection, orders)...)
 move_ahead(ndim::Int, orders) = (orders..., setdiff(1:ndim, orders)...)
 
 function group_permutedims(A::AbstractArray, orders)
+    @assert length(orders) == ndims(A) "number of orders does not match number of dimensions"
+    return unsafe_group_permutedims(A, orders)
+end
+
+# forward directly if the length is the same with ndims
+function group_permutedims(A::AbstractArray{T, N}, orders::NTuple{N, Int}) where {T, N}
+    return unsafe_group_permutedims(A, orders)
+end
+
+function unsafe_group_permutedims(A::AbstractArray, orders)
     s, o = contiguous_shape_orders(size(A), orders)
     return permutedims(reshape(A, s...), o)
 end
@@ -99,7 +109,7 @@ function YaoBase.focus!(r::ArrayReg{B}, locs) where B
     if is_order_same(locs)
         arr = r.state
     else
-        new_orders = move_ahead(nactive(r), locs)
+        new_orders = move_ahead(nactive(r) + 1, locs)
         arr = group_permutedims(hypercubic(r), new_orders)
     end
     r.state = reshape(arr, 1 << length(locs), :)
@@ -107,12 +117,10 @@ function YaoBase.focus!(r::ArrayReg{B}, locs) where B
 end
 
 function YaoBase.relax!(r::ArrayReg{B}, locs; to_nactive::Int=nqubits(r)) where B
-    if is_order_same(locs)
-        arr = r.state
-    else
+    r.state = reshape(state(r), 1 << to_nactive, :)
+    if !is_order_same(locs)
         new_orders = TupleTools.invperm(move_ahead(to_nactive+1, locs))
-        arr = group_permutedims(hypercubic(r), new_orders)
+        r.state = reshape(group_permutedims(hypercubic(r), new_orders), 1 << to_nactive, :)
     end
-    r.state = reshape(arr, 1 << to_nactive, :)
     return r
 end
