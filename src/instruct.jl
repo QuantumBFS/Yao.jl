@@ -1,8 +1,6 @@
 using BitBasis, LuxurySparse, StaticArrays
 export instruct!
 
-# TODO: control_bits -> control_locs
-#       control_vals -> control_bits
 const STATIC_THRESHOLD = 8
 # to avoid potential ambiguity, we limit them to tuple for now
 # but they only has to be an iterator over integers
@@ -20,14 +18,14 @@ function YaoBase.instruct!(
     state::AbstractVecOrMat{T},
     operator::AbstractMatrix{T},
     locs::NTuple{M, Int},
-    control_bits::NTuple{C, Int} = (),
-    control_vals::NTuple{C, Int} = ()) where {T, M, C}
+    control_locs::NTuple{C, Int} = (),
+    control_bits::NTuple{C, Int} = ()) where {T, M, C}
 
     U = sort_unitary(operator, locs)
     N, MM = log2dim1(state), size(U, 1)
 
-    locked_bits = MVector(control_bits..., locs...)
-    locked_vals = MVector(control_vals..., (0 for k in 1:M)...)
+    locked_bits = MVector(control_locs..., locs...)
+    locked_vals = MVector(control_bits..., (0 for k in 1:M)...)
     locs_raw_it = (b+1 for b in itercontrol(N, setdiff(1:N, locs), zeros(Int, N-M)))
     locs_raw = SVector(locs_raw_it...)
     ic = itercontrol(N, locked_bits, locked_vals)
@@ -120,7 +118,7 @@ end
 
 function YaoBase.instruct!(state::AbstractVecOrMat{T}, ::Val{:Y}, locs::NTuple{N, Int}) where {T, N}
     mask = bmask(Int, locs); do_mask = bmask(Int, first(locs))
-    bit_parity = iseven(length(bits)) ? 1 : -1
+    bit_parity = iseven(length(locs)) ? 1 : -1
     factor = T(-im)^length(locs)
 
     @simd for b in basis(Int, state)
@@ -179,10 +177,10 @@ end
 function YaoBase.instruct!(
     state::AbstractVecOrMat{T}, ::Val{:X},
     locs::NTuple{N1, Int},
-    control_bits::NTuple{N2, Int},
-    control_vals::NTuple{N3, Int}) where {T, N1, N2, N3}
+    control_locs::NTuple{N2, Int},
+    control_bits::NTuple{N3, Int}) where {T, N1, N2, N3}
 
-    ctrl = controller((control_bits..., locs[1]), (control_vals..., 0))
+    ctrl = controller((control_locs..., locs[1]), (control_bits..., 0))
     mask2 = bmask(locs)
     @simd for b in basis(state)
         local i_::Int
@@ -198,10 +196,10 @@ end
 function YaoBase.instruct!(
     state::AbstractVecOrMat{T}, ::Val{:Y},
     locs::NTuple{N1, Int},
-    control_bits::NTuple{N2, Int},
-    control_vals::NTuple{N3, Int}) where {T, N1,N2,N3}
+    control_locs::NTuple{N2, Int},
+    control_bits::NTuple{N3, Int}) where {T, N1,N2,N3}
 
-    ctrl = controller((control_bits..., locs[1]), (control_vals..., 0))
+    ctrl = controller((control_locs..., locs[1]), (control_bits..., 0))
     mask2 = bmask(locs)
     @simd for b in basis(state)
         local i_::Int
@@ -218,10 +216,10 @@ for (G, FACTOR) in zip([:Z, :S, :T, :Sdag, :Tdag], [:(-1), :(im), :($(exp(im*π/
     @eval function YaoBase.instruct!(
             state::AbstractVecOrMat{T}, ::Val{$(QuoteNode(G))},
             locs::NTuple{N1, Int},
-            control_bits::NTuple{N2, Int},
-            control_vals::NTuple{N3, Int}) where {T, N1, N2, N3}
+            control_locs::NTuple{N2, Int},
+            control_bits::NTuple{N3, Int}) where {T, N1, N2, N3}
 
-        ctrl = controller([cbits..., b2[1]], [cvals..., 1])
+        ctrl = controller([control_locs..., b2[1]], [control_bits..., 1])
         for b in basis(state)
             if ctrl(b)
                 mulrow!(state, b+1, $FACTOR)
@@ -235,20 +233,20 @@ end
 for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     # forward single controlled
     @eval YaoBase.instruct!(state::AbstractVecOrMat, ::Val{$(QuoteNode(G))},
-        locs::NTuple{N, Int}, control_bits::Tuple{Int}, control_vals::Tuple{Int}) where N =
-            instruct!(state, g, locs, control_bits..., control_vals...)
+        locs::NTuple{N, Int}, control_locs::Tuple{Int}, control_bits::Tuple{Int}) where N =
+            instruct!(state, g, locs, control_locs..., control_bits...)
 end
 
 
 function YaoBase.instruct!(
         state::AbstractVecOrMat{T},
         ::Val{:X}, loc::Int,
-        control_bits::Int, control_vals::Int) where T
+        control_locs::Int, control_bits::Int) where T
 
-    mask2 = bmask(loc); mask = bmask(control_bits, loc)
-    step = 1 << (control_bits-1)
-    step_2 = 1 << control_bits
-    start = control_vals == 1 ? step : 0
+    mask2 = bmask(loc); mask = bmask(control_locs, loc)
+    step = 1 << (control_locs-1)
+    step_2 = 1 << control_locs
+    start = control_bits == 1 ? step : 0
     for j in start:step_2:size(state, 1)-step+start
         local i_::Int
         @simd for b in j:j+step-1
@@ -265,12 +263,12 @@ end
 function YaoBase.instruct!(
         state::AbstractVecOrMat{T},
         ::Val{:Y}, loc::Int,
-        control_bits::Int, control_vals::Int) where T
+        control_locs::Int, control_bits::Int) where T
 
-    mask2 = bmask(loc); mask = bmask(control_bits, loc)
-    step = 1<<(control_bits-1)
-    step_2 = 1<<control_bits
-    start = control_vals==1 ? step : 0
+    mask2 = bmask(loc); mask = bmask(control_locs, loc)
+    step = 1<<(control_locs-1)
+    step_2 = 1<<control_locs
+    start = control_bits==1 ? step : 0
     for j in start:step_2:size(state, 1)-step+start
         local i_::Int
         @simd for b in j:j+step-1
@@ -294,13 +292,13 @@ for (G, FACTOR) in zip([:Z, :S, :T, :Sdag, :Tdag], [:(-1), :(im), :($(exp(im*π/
     @eval function YaoBase.instruct!(
             state::AbstractVecOrMat{T},
             ::Val{$(QuoteNode(G))}, loc::Int,
-            control_bits::Int,
-            control_vals::Int) where T
+            control_locs::Int,
+            control_bits::Int) where T
 
         mask2 = bmask(loc)
-        step = 1 << (control_bits - 1)
-        step_2 = 1 << control_bits
-        start = control_vals == 1 ? step : 0
+        step = 1 << (control_locs - 1)
+        step_2 = 1 << control_locs
+        start = control_bits == 1 ? step : 0
         for j in start:step_2:size(state, 1)-step+start
             for i in j+1:j+step
                 if allmasked(i-1, mask2)
