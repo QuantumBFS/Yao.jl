@@ -14,7 +14,7 @@ const BitConfigs{T} = NTuple{N, T} where N
 
 Staticize dynamic array `A` by a constant `STATIC_THRESHOLD`.
 """
-autostatic(A::AbstractVecOrMat) = length(A) > (1 << _STATIC_THRESHOLD) ? A : staticize(A)
+autostatic(A::AbstractVecOrMat) = length(A) > (1 << STATIC_THRESHOLD) ? A : staticize(A)
 
 function YaoBase.instruct!(
     state::AbstractVecOrMat{T},
@@ -26,11 +26,13 @@ function YaoBase.instruct!(
     U = sort_unitary(operator, locs)
     N, MM = log2dim1(state), size(U, 1)
 
-    locked_bits = (control_bits..., locs...)
-    locked_vals = (control_vals..., (0 for k in 1:M)...)
-    locs_raw = Tuple(b+1 for b in itercontrol(N, setdiff(1:N, locs), zeros(Int, N-M)))
+    locked_bits = MVector(control_bits..., locs...)
+    locked_vals = MVector(control_vals..., (0 for k in 1:M)...)
+    locs_raw_it = (b+1 for b in itercontrol(N, setdiff(1:N, locs), zeros(Int, N-M)))
+    locs_raw = SVector(locs_raw_it...)
     ic = itercontrol(N, locked_bits, locked_vals)
-    return _instruct!(state, autostatic(U), SVector(locs_raw), ic)
+
+    return _instruct!(state, autostatic(U), locs_raw, ic)
 end
 
 function _instruct!(state::AbstractVecOrMat{T}, U::AbstractMatrix{T}, locs_raw::SVector, ic::IterControl) where T
