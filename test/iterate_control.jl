@@ -1,11 +1,11 @@
 using Test, YaoArrayRegister, LuxurySparse
-import YaoArrayRegister: group_shift, itercontrol,
+import YaoArrayRegister: group_shift!, itercontrol,
     controldo, IterControl, lmove, swaprows!, mulrow!
 
-@testset "test group_shift and lmove" begin
-    @test group_shift(5, [1,2,5]) == ([0, 15], [2, 1])
-    @test group_shift(5, [2,3]) == ([1], [2])
-    @test group_shift(5, [1,3,5]) == ([0, 3, 15], [1, 1, 1])
+@testset "test group_shift! and lmove" begin
+    @test group_shift!(5, [1,2,5]) == ([0, 15], [2, 1])
+    @test group_shift!(5, [2,3]) == ([1], [2])
+    @test group_shift!(5, [1,3,5]) == ([0, 3, 15], [1, 1, 1])
 
     @test string(lmove(5, 1, 2), base=2) == "10001"
 end

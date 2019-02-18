@@ -24,7 +24,7 @@ end
 #       do not use Tuple, or other immutables, it increases the sorting time.
 function IterControl(::Type{T}, nbits::Int, positions::AbstractVector, bit_configs) where T
     base = bmask(T, positions[i] for (i, u) in enumerate(bit_configs) if u != 0)
-    masks, ks = group_shift(nbits, positions)
+    masks, ks = group_shift!(nbits, positions)
     return IterControl{1<<(nbits - length(positions))}(base, masks, ks)
 end
 
@@ -41,7 +41,7 @@ Returns an iterator which iterate through controlled subspace of bits.
 To iterate through all the bits satisfy `0xx10x1` where `x` means an arbitrary bit.
 
 ```jldoctest
-julia> for each in itercontrol(7, (1, 3, 4, 7), (1, 0, 1, 0))
+julia> for each in itercontrol(7, [1, 3, 4, 7], (1, 0, 1, 0))
             println(string(each, base=2, pad=7))
        end
 ```
@@ -86,7 +86,7 @@ end
 
 lmove(b::Int, mask::Int, k::Int)::Int = (b&~mask)<<k + (b&mask)
 
-function group_shift(nbits::Int, positions::AbstractVector{Int}) where N
+function group_shift!(nbits::Int, positions::AbstractVector{Int}) where N
     sort!(positions)
     masks = Int[]; ns = Int[]
     k_prv = -1
