@@ -318,3 +318,24 @@ for (G, FACTOR) in zip([:Z, :S, :T, :Sdag, :Tdag], [:(-1), :(im), :($(exp(im*π/
         return state
     end
 end
+
+# 2-qubit gates
+function YaoBase.instruct!(
+        state::AbstractVecOrMat{T},
+        ::Val{:SWAP},
+        locs::Tuple{Int, Int}) where T
+
+    mask1 = bmask(locs[1])
+    mask2 = bmask(locs[2])
+    mask12 = mask1|mask2
+    @simd for b = basis(state)
+        local temp::T
+        local i_::Int
+        if b&mask1==0 && b&mask2==mask2
+            i = b+1
+            i_ = b ⊻ mask12 + 1
+            swaprows!(state, i, i_)
+        end
+    end
+    return state
+end

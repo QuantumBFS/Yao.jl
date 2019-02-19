@@ -1,5 +1,5 @@
 using LuxurySparse
-
+using TupleTools
 @static if isdefined(TupleTools, :diff)
     tuple_diff(args...) = TupleTools.diff(args...)
 else
