@@ -62,7 +62,7 @@ else
         end
     end
 
-    struct LegibleLambda{F, T}
+    struct LegibleLambda{F, T} <: Function
         λ::F
         ex::Expr
         vars::Dict{Symbol, T}
