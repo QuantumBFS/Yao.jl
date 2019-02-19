@@ -83,9 +83,12 @@ function capture(template)
     syms = Set(Symbol[])
     capturing_analysis(template, syms, true)
     out_expr = Expr(:call, Dict, (Expr(:call, =>, QuoteNode(each), each) for each in syms)...)
+    arg_sym = gensym()
     let template = Expr(:quote, template)
         quote
-            @λ $(template) -> $(out_expr)
+            $arg_sym -> $MLStyle.@match $arg_sym  begin
+                $(template) => $(out_expr)
+            end
         end
     end
 end
@@ -105,11 +108,11 @@ Dict{Symbol,Int64} with 1 entry:
 :(@capture)
 
 macro capture(template)
-    capture(template)
+    capture(template) |> esc
 end
 
 macro capture(template, ex)
-    Expr(:call, capture(template), ex)
+    Expr(:call, capture(template), ex) |> esc
 end
 
 end
