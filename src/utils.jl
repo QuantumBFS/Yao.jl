@@ -5,7 +5,7 @@ using TupleTools
 else
     tuple_diff(v::Tuple{}) = () # similar to diff([])
     tuple_diff(v::Tuple{Any}) = ()
-    tuple_diff(v::Tuple) = (v[2]-v[1], diff(Base.tail(v))...)
+    tuple_diff(v::Tuple) = (v[2]-v[1], tuple_diff(Base.tail(v))...)
 end
 
 """
