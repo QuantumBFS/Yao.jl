@@ -7,20 +7,22 @@
 using MacroTools: postwalk
 export @λ, @lambda, LegibleLambda
 
+"""
+    @λ <lambda definition>
+
+Create legible lambdas.
+
+# Example
+
+```julia
+julia> @λ(x -> g(x)/3)
+(x -> g(x)/3)
+```
+"""
+:(@λ)
+
 # NOTE: Base.@locals is in v1.1
 @static if VERSION < v"1.1.0"
-    """
-        @λ <lambda definition>
-
-    Create legible lambdas.
-
-    # Example
-
-    ```julia
-    julia> @λ(x -> g(x)/3)
-    (x -> g(x)/3)
-    ```
-    """
     macro λ(ex)
         if ex.head == :(->)
             ex_cut = ex |> (ex -> postwalk(cutlnn, ex)) |> (ex -> postwalk(cutblock, ex))
