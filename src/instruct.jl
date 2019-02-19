@@ -174,6 +174,15 @@ end
 
 # multi-controlled gates
 ## controlled paulis
+for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
+    # forward single gates
+    @eval YaoBase.instruct!(state::AbstractVecOrMat, g::Val{$(QuoteNode(G))},
+                            locs::Int,
+                            control_locs::NTuple{N1, Int},
+                            control_bits::NTuple{N2, Int}) where {N1, N2} =
+                instruct!(state, g, (locs, ), control_locs, control_bits)
+end
+
 function YaoBase.instruct!(
     state::AbstractVecOrMat{T}, ::Val{:X},
     locs::NTuple{N1, Int},
@@ -219,7 +228,7 @@ for (G, FACTOR) in zip([:Z, :S, :T, :Sdag, :Tdag], [:(-1), :(im), :($(exp(im*π/
             control_locs::NTuple{N2, Int},
             control_bits::NTuple{N3, Int}) where {T, N1, N2, N3}
 
-        ctrl = controller([control_locs..., b2[1]], [control_bits..., 1])
+        ctrl = controller([control_locs..., locs[1]], [control_bits..., 1])
         for b in basis(state)
             if ctrl(b)
                 mulrow!(state, b+1, $FACTOR)

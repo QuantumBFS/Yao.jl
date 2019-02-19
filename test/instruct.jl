@@ -1,28 +1,30 @@
-using Test, YaoBase, YaoArrayRegister, LuxurySparse
+using Test, YaoBase, YaoArrayRegister, LinearAlgebra, LuxurySparse
+
+# NOTE: we don't have block here, feel safe to use
+using YaoBase.Const
 
 @testset "test general unitary instruction" begin
     U1 = randn(ComplexF64, 2, 2)
     ST = randn(ComplexF64, 1<<4)
-    II = IMatrix(2)
-    M = kron(II, U1, II, II) * ST
+    I2 = IMatrix(2)
+    M = kron(I2, U1, I2, I2) * ST
 
-    @test instruct!(copy(ST), U1, 3) ≈ M ≈ instruct!(reshape(copy(ST), :, 1), U1, 3)
+    @test instruct!(copy(ST), U1, 3) ≈ M ≈
+        instruct!(reshape(copy(ST), :, 1), U1, 3)
 
     U2 = rand(ComplexF64, 4, 4)
-    M = kron(II, U2, II) * ST
+    M = kron(I2, U2, I2) * ST
     @test instruct!(copy(ST), U2, (2, 3)) ≈ M
 
-    @test instruct!(copy(ST), kron(U1, U1), (3, 1)) ≈ instruct!(instruct!(copy(ST), U1, 3), U1, 1)
+    @test instruct!(copy(ST), kron(U1, U1), (3, 1)) ≈
+        instruct!(instruct!(copy(ST), U1, 3), U1, 1)
+
     @test instruct!(reshape(copy(ST), :, 1), kron(U1, U1), (3, 1)) ≈
         instruct!(instruct!(reshape(copy(ST), :, 1), U1, 3), U1, 1)
 end
 
 
 @testset "test general control unitary operator" begin
-    P0 = ComplexF64[1 0;0 0]
-    P1 = ComplexF64[0 0;0 1]
-    Z  = ComplexF64[1 0;0 -1]
-
     ST = randn(ComplexF64, 1<<5)
     U1 = randn(ComplexF64, 2,2)
     instruct!(copy(ST), U1, (3, ), (1, ), (1, ))
@@ -34,43 +36,36 @@ end
 
     # control U2
     U2 = kron(U1, U1)
-    @test instruct!(copy(ST), U2, (3, 4), (1, ), (1, )) ≈ general_controlled_gates(5, [P1], [1], [U2], [3]) * ST
+    @test instruct!(copy(ST), U2, (3, 4), (1, ), (1, )) ≈
+        general_controlled_gates(5, [P1], [1], [U2], [3]) * ST
 
     # multi-control U2
-    @test instruct!(copy(ST), U2, (3, 4), (5, 1), (1, 0)) ≈ general_controlled_gates(5, [P1, P0], [5, 1], [U2], [3]) * ST
+    @test instruct!(copy(ST), U2, (3, 4), (5, 1), (1, 0)) ≈
+        general_controlled_gates(5, [P1, P0], [5, 1], [U2], [3]) * ST
 end
+
 
 @testset "test Pauli instructions" begin
-    linop2dense(s->instruct!(s, 1), 1)
+    @testset "test $G instructions" for (G, M) in zip((:X, :Y, :Z), (X, Y, Z))
+        @test linop2dense(s->instruct!(s, Val(G), (1, )), 1) == M
+    end
+
+    @testset "test controlled $G instructions" for (G, M) in zip((:X, :Y, :Z), (X, Y, Z))
+        @test linop2dense(s->instruct!(s, Val(G), 4, (2, 1), (0, 1)), 4) ≈
+            general_controlled_gates(4, [P0, P1], [2, 1], [M], [4])
+
+        @test linop2dense(s->instruct!(s, Val(G), 1, 2, 0), 2) ≈
+            general_controlled_gates(2, [P0], [2], [M], [1])
+    end
 end
 
-@test linop2dense(s->instruct!(s, Val(:X), (1, )), 1) == ComplexF64[0 1;1 0]
-linop2dense(s->instruct!(s, Val(:Y), (1, )), 1)
-
-@testset "xyz" begin
-    @test linop2dense(s->xapply!(s, [1]), 1) == mat(X)
-    @test linop2dense(s->yapply!(s, [1]), 1) == mat(Y)
-    @test linop2dense(s->zapply!(s, [1]), 1) == mat(Z)
-
-    @test linop2dense(s->cxapply!(s, 2, 1, 1), 2) == mat(control(2, 2, 1=>X))
-    @test linop2dense(s->cyapply!(s, 2, 1, 1), 2) == mat(control(2, 2, 1=>Y))
-    @test linop2dense(s->czapply!(s, 2, 1, 1), 2) == mat(control(2, 2, 1=>Z))
-
-    @test linop2dense(s->cxapply!(s, (2, 1), (0, 1), 4), 4) == mat(control(4, (-2, 1), 4=>X))
-    @test linop2dense(s->cyapply!(s, (2, 1), (0, 1), 4), 4) == mat(control(4, (-2, 1), 4=>Y))
-    @test linop2dense(s->czapply!(s, (2, 1), (0, 1), 4), 4) == mat(control(4, (-2, 1), 4=>Z))
-    @test linop2dense(s->cxapply!(s, 2, 0, 1), 2) == mat(control(2, -2, 1=>X))
-    @test linop2dense(s->cyapply!(s, 2, 0, 1), 2) == mat(control(2, -2, 1=>Y))
-    @test linop2dense(s->czapply!(s, 2, 0, 1), 2) == mat(control(2, -2, 1=>Z))
-end
-
-@testset "U1apply!" begin
-    ⊗ = kron
+@testset "single qubit instruction" begin
+    ST = randn(ComplexF64, 1 << 4)
     Pm = pmrand(ComplexF64, 2)
     Dv = Diagonal(randn(ComplexF64, 2))
-    II = mat(I2)
-    v = randn(ComplexF64, 1<<4)
-    @test u1apply!(copy(v), Pm, 3) ≈ (II ⊗ Pm ⊗ II ⊗ II)*v ≈ u1apply!(reshape(copy(v), :,1), Pm, 3)
-    @test u1apply!(copy(v), Dv, 3) ≈ (II ⊗ Dv ⊗ II ⊗ II)*v ≈ u1apply!(reshape(copy(v), :,1), Dv, 3)
 
+    @test instruct!(copy(ST), Pm, 3) ≈ kron(I2, Pm, I2, I2) * ST ≈
+        instruct!(reshape(copy(ST), :, 1), Pm, 3)
+    @test instruct!(copy(ST), Dv, 3) ≈ kron(I2, Dv, I2, I2) * ST ≈
+        instruct!(reshape(copy(ST), :, 1), Dv, 3)
 end
