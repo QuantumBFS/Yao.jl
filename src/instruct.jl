@@ -107,7 +107,7 @@ function YaoBase.instruct!(state::AbstractVecOrMat, ::Val{:X}, locs::NTuple{N, I
     do_mask = bmask(first(locs))
     @simd for b in basis(state)
         local i_::Int
-        @inbounds if testany(b, do_mask)
+        @inbounds if anymasked(b, do_mask)
             i = b+1
             i_ = flip(b, mask) + 1
             swaprows!(state, i, i_)
