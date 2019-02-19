@@ -1,12 +1,20 @@
 using LuxurySparse
 
+@static if isdefined(TupleTools, :diff)
+    tuple_diff(args...) = TupleTools.diff(args...)
+else
+    tuple_diff(v::Tuple{}) = () # similar to diff([])
+    tuple_diff(v::Tuple{Any}) = ()
+    tuple_diff(v::Tuple) = (v[2]-v[1], diff(Base.tail(v))...)
+end
+
 """
     sort_unitary(U, locations::NTuple{N, Int}) -> U
 
 Return an sorted unitary operator according to the locations.
 """
 function sort_unitary(U::AbstractMatrix, locs::NTuple{N, Int}) where N
-    if all(each > 0 for each in TupleTools.diff(locs))
+    if all(each > 0 for each in tuple_diff(locs))
         return U
     else
         return reorder(U, TupleTools.sortperm(locs))
