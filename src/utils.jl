@@ -1,6 +1,6 @@
 using LuxurySparse
 using TupleTools
-@static if isdefined(TupleTools, :diff)
+@static if hasmethod(TupleTools.diff, Tuple{Tuple{}})
     tuple_diff(args...) = TupleTools.diff(args...)
 else
     tuple_diff(v::Tuple{}) = () # similar to diff([])
