@@ -11,6 +11,7 @@ module ASTTools
 using MLStyle
 export @capture
 
+# capture
 function capturing_analysis(expr, out, is_literal)
 
     @match expr begin
@@ -84,7 +85,7 @@ function capture(template)
     out_expr = Expr(:call, Dict, (Expr(:call, =>, QuoteNode(each), each) for each in syms)...)
     let template = Expr(:quote, template)
         quote
-            @λ $esc(template) -> $esc(out_expr)
+            @λ $(template) -> $(out_expr)
         end
     end
 end

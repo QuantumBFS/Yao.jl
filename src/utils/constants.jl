@@ -8,7 +8,7 @@ Contains common constant definitions.
 module Const
 
 using LuxurySparse, LinearAlgebra, SparseArrays
-using .ASTTools
+using YaoBase.ASTTools
 
 """
     @def name = value
