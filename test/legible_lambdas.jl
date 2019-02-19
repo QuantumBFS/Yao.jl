@@ -17,6 +17,10 @@ using Test, YaoBase
     @test h("hi", "abh", "ing")
 
     D(f, ϵ=1e-10) = @λ(x -> (f(x+ϵ)-f(x))/ϵ)
+@static if VERSION < v"1.1.0"
+    @test repr(D(sin)) == "(x->(f(x + ϵ) - f(x)) / ϵ)"
+else
     @test repr(D(sin)) == "(x->((sin)(x + 1.0e-10) - (sin)(x)) / 1.0e-10)"
+end
     @test D(sin)(π) == -1.000000082740371
 end
