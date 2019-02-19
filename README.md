@@ -21,6 +21,10 @@ In Julia **v1.0+**, please type `]` in the REPL to use the package mode, then ty
 pkg> add YaoArrayRegister
 ```
 
+## Usage
+
+This package implements `AbstractRegister` interface defined in [YaoBase](https://github.com/QuantumBFS/YaoBase.jl), you can use it like other kind of registers intuitively.
+
 ## License
 
 Apache License 2.0
