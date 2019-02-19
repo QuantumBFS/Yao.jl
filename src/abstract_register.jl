@@ -176,14 +176,14 @@ Measure current active qubits or qubits at `locs` and remove them.
 @interface measure_remove!(::AbstractRegister)
 
 """
-    measure_reset!(reg::AbstractRegister[, locs]; bit_config) -> Int
+    measure_setto!(reg::AbstractRegister[, locs]; bit_config) -> Int
 
 Measure current active qubits or qubits at `locs` and set the register to specific value.
 """
 @interface measure_setto!(::AbstractRegister; bit_config::Int=0)
 
 # focus context
-for FUNC in [:measure_reset!, :measure!, :measure, :measure_setto!]
+for FUNC in [:measure!, :measure, :measure_setto!]
     @eval function $FUNC(reg::AbstractRegister, locs; kwargs...)
         focus!(reg, locs)
         res = $FUNC(reg; kwargs...)
