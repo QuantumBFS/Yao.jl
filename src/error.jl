@@ -115,7 +115,7 @@ end
 
 # NOTE: we may use @assert in the future
 #       these macro will help us keep original APIs
-export @assert_addrs, @assert_addr_inbounds, @assert_addrs_contiguous
+export @assert_addrs, @assert_addrs_inbounds, @assert_addrs_contiguous
 
 macro assert_addrs_inbounds(n::Int, addrs, msgs...)
     msg = process_msgs(msgs...; default="address is out of bounds!, expect $n qubits.")
