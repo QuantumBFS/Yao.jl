@@ -117,6 +117,11 @@ end
 #       these macro will help us keep original APIs
 export @assert_addrs, @assert_addrs_inbounds, @assert_addrs_contiguous
 
+"""
+    @assert_addrs_inbounds <number of total qubits> <address list> [<msg>]
+
+Assert if all the address are inbounds.
+"""
 macro assert_addrs_inbounds(n::Int, addrs, msgs...)
     msg = process_msgs(msgs...; default="address is out of bounds!, expect $n qubits.")
     return quote
@@ -124,6 +129,13 @@ macro assert_addrs_inbounds(n::Int, addrs, msgs...)
     end
 end
 
+"""
+    @assert_addrs <number of total qubits> <address list> [<msg>]
+
+Assert if all the address are:
+    - inbounds.
+    - do not have any conflict.
+"""
 macro assert_addrs(n::Int, addrs, msgs...)
     msg = process_msgs(msgs...; default="address conflict.")
     return quote
@@ -134,6 +146,14 @@ macro assert_addrs(n::Int, addrs, msgs...)
     end
 end
 
+"""
+    @assert_addrs_contiguous <number of qubits> <address list> [<msg>]
+
+Assert if all the address are:
+    - inbounds.
+    - do not have any conflict.
+    - contiguous on address
+"""
 macro assert_addrs_contiguous(n::Int, addrs, msgs...)
     msg = process_msgs(msgs...; default="address is not contiguous.")
     quote
