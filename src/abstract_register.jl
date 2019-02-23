@@ -1,6 +1,6 @@
 using BitBasis, LegibleLambdas
 
-export AbstractRegister
+export AbstractRegister, @λ, @lambda
 
 """
     AbstractRegister{B, T}
