@@ -10,7 +10,6 @@ include("utils/ast_tools.jl")
 include("utils/constants.jl")
 include("utils/math.jl")
 include("utils/interface.jl")
-include("utils/legible_lambdas.jl")
 
 include("error.jl")
 include("abstract_register.jl")

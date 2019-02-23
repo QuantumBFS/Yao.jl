@@ -1,4 +1,4 @@
-using BitBasis
+using BitBasis, LegibleLambdas
 
 export AbstractRegister
 
