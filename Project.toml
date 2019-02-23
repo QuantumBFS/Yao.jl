@@ -1,6 +1,5 @@
 name = "Yao"
 uuid = "5a1af4f6-c801-11e8-08ea-1bad16a356b2"
-authors = ["Roger-luo <hiroger@qq.com>"]
 version = "0.3.0-DEV"
 
 [deps]
