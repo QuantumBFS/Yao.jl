@@ -1,6 +1,5 @@
 name = "YaoArrayRegister"
 uuid = "e600142f-9330-5003-8abb-0ebd767abc51"
-authors = ["Roger-luo <hiroger@qq.com>"]
 version = "0.1.0"
 
 [deps]
