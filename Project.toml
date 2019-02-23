@@ -12,6 +12,7 @@ MLStyle = "d8e11817-5142-5d16-987a-aa16d5891078"
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+TupleTools = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

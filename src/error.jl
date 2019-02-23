@@ -1,3 +1,5 @@
+using TupleTools
+
 export NotImplementedError, AddressConflictError, QubitMismatchError
 
 struct NotImplementedError{ArgsT} <: Exception
