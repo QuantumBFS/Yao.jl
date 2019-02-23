@@ -97,6 +97,22 @@ julia> control(1, 2)
 """
 control(control_locations::Int...) = @λ(target -> control(control_locations, target))
 
+"""
+    cnot(n, control_locations, location)
+
+Return a speical [`ControlBlock`](@ref), aka CNOT gate with number of active qubits
+`n` and locations of control qubits `control_locations`, and `location` of `X` gate.
+
+# Example
+
+```jldoctest
+julia> cnot(3, 2, 1)
+julia> cnot(2, 1)
+```
+"""
+cnot(total::Int, control_locations, location::Int) = control(total, control_location, locations=>X)
+cnot(control_locations, location::Int) = @λ(n -> cnot(n, control_locations, location))
+
 mat(c::ControlBlock{N, BT, C}) where {N, BT, C} = cunmat(N, c.ctrl_qubits, c.vals, mat(c.block), c.addrs)
 apply!(r::ArrayReg, c::ControlBlock) =
     instruct!(matvec(r.state), mat(c.block), c.addrs, c.ctrl_qubits, c.vals)
