@@ -5,6 +5,7 @@ version = "0.4.0"
 
 [deps]
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
+LegibleLambdas = "f1f30506-32fe-5131-bd72-7c197988f9e5"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 LuxurySparse = "d05aeea4-b7d4-55ac-b691-9e7fabb07ba2"
 MLStyle = "d8e11817-5142-5d16-987a-aa16d5891078"
