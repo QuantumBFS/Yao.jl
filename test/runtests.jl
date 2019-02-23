@@ -1,4 +1,13 @@
-include("exceptions.jl")
-include("abstract_register.jl")
-include("math.jl")
-include("legible_lambdas.jl")
+using Test, YaoBase
+
+@testset "test exceptions"
+    include("exceptions.jl")
+end
+
+@testset "test abstract interface" begin
+    include("abstract_register.jl")
+end
+
+@testset "test math" begin
+    include("math.jl")
+end
