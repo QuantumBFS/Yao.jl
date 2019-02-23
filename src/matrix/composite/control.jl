@@ -16,7 +16,8 @@ end
 
 Decode signs into control sequence on control or inversed control.
 """
-decode_sign(ctrls::Int...,) = tuple(ctrls .|> abs, ctrls .|> sign .|> (x->(1+x)÷2))
+decode_sign(ctrls::Int...,) = decode_sign(ctrls)
+decode_sign(ctrls::NTuple{N, Int}) where N = tuple(ctrls .|> abs, ctrls .|> sign .|> (x->(1+x)÷2))
 
 # use controlled block's datatype
 ControlBlock{N}(ctrl_qubits::NTuple{C}, vals::NTuple{C}, block::BT, addrs::NTuple{M}) where {BT<:AbstractBlock, N, C, M} =
@@ -33,7 +34,7 @@ ControlBlock{N}(ctrl_qubits::NTuple{C}, block::AbstractBlock, addrs::NTuple) whe
     ControlBlock{N}(decode_sign(ctrl_qubits)..., block, addrs)
 
 # use pair to represent block under control in a compact way
-ControlBlock{N}(ctrl_qubits::NTuple{C}, target::Pair) where C =
+ControlBlock{N}(ctrl_qubits::NTuple{C}, target::Pair) where {N, C} =
     ControlBlock{N}(ctrl_qubits, target.second, (target.first...,))
 
 """
