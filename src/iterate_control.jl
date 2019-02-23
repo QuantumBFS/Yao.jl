@@ -70,7 +70,7 @@ Base.eltype(it::IterControl) = Int
 
 function Base.getindex(it::IterControl{N, S}, k::Int) where {N, S}
     out = k - 1
-    for s in 1:S
+    @simd for s in 1:S
         @inbounds out = lmove(out, it.masks[s], it.ks[s])
     end
     return out + it.base
