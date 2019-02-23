@@ -122,7 +122,7 @@ export @assert_addrs, @assert_addrs_inbounds, @assert_addrs_contiguous
 
 Assert if all the address are inbounds.
 """
-macro assert_addrs_inbounds(n::Int, addrs, msgs...)
+macro assert_addrs_inbounds(n, addrs, msgs...)
     msg = process_msgs(msgs...; default="address is out of bounds!, expect $n qubits.")
     return quote
         isaddrs_inbounds($n, $(esc(addrs))) ? nothing : error($msg)
@@ -136,7 +136,7 @@ Assert if all the address are:
     - inbounds.
     - do not have any conflict.
 """
-macro assert_addrs(n::Int, addrs, msgs...)
+macro assert_addrs(n, addrs, msgs...)
     msg = process_msgs(msgs...; default="address conflict.")
     return quote
         @assert_addrs_inbounds $n $(esc(addrs))
@@ -154,7 +154,7 @@ Assert if all the address are:
     - do not have any conflict.
     - contiguous on address
 """
-macro assert_addrs_contiguous(n::Int, addrs, msgs...)
+macro assert_addrs_contiguous(n, addrs, msgs...)
     msg = process_msgs(msgs...; default="address is not contiguous.")
     quote
         @assert_addrs $n $(esc(addrs))
