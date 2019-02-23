@@ -1,3 +1,5 @@
+using YaoBase
+
 export CompositeBlock
 
 """
@@ -22,7 +24,8 @@ abstract type AbstractContainer{N, T} <: CompositeBlock{N, T} end
 
 Return the contained block.
 """
-block(x::AbstractContainer) = x.block
+@interface block(x::AbstractContainer) = x.block
+@interface chblock(x::AbstractContainer, blk)
 
 # NOTE: this is a holy trait, no overhead, don't use methods on this
 abstract type PreserveStyle end
@@ -35,18 +38,19 @@ PreserveStyle(c::AbstractContainer) = PreserveNothing()
 for METHOD in (:ishermitian, :isreflexive, :isunitary)
     @eval begin
         # forward to trait
-        $METHOD(c::AbstractContainer) = $METHOD(PreserveStyle(x), c)
+        YaoBase.$METHOD(c::AbstractContainer) = $METHOD(PreserveStyle(x), c)
         # forward contained block property
-        $METHOD(::PreserveAll, c::AbstractContainer) = $METHOD(block(c))
+        YaoBase.$METHOD(::PreserveAll, c::AbstractContainer) = $METHOD(block(c))
         # forward to default property by calculating the matrix
-        $METHOD(::PreserveNothing, c::AbstractContainer) = $METHOD(mat(c))
+        YaoBase.$METHOD(::PreserveNothing, c::AbstractContainer) = $METHOD(mat(c))
         # preseve each property
-        $METHOD(::PreserveProperty{$(QuoteNode(METHOD))}, c::AbstractContainer) =
+        YaoBase.$METHOD(::PreserveProperty{$(QuoteNode(METHOD))}, c::AbstractContainer) =
             $METHOD(block(c))
         # fallback
-        $METHOD(::PreserveStyle, c::AbstractContainer) = $METHOD(block(c))
+        YaoBase.$METHOD(::PreserveStyle, c::AbstractContainer) = $METHOD(block(c))
     end
 end
+
 
 include("chain.jl")
 include("kron.jl")
