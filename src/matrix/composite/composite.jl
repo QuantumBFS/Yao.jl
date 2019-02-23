@@ -40,6 +40,11 @@ for METHOD in (:ishermitian, :isreflexive, :isunitary)
         $METHOD(::PreserveAll, c::AbstractContainer) = $METHOD(block(c))
         # forward to default property by calculating the matrix
         $METHOD(::PreserveNothing, c::AbstractContainer) = $METHOD(mat(c))
+        # preseve each property
+        $METHOD(::PreserveProperty{$(QuoteNode(METHOD))}, c::AbstractContainer) =
+            $METHOD(block(c))
+        # fallback
+        $METHOD(::PreserveStyle, c::AbstractContainer) = $METHOD(block(c))
     end
 end
 
