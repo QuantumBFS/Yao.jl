@@ -52,8 +52,12 @@ itercontrol(::Type{T}, nbits::Int, positions::AbstractVector, bit_configs) where
 """
     controldo(f, itr::IterControl)
 
-Execute `f` while iterating `itr`, this is faster but equivalent than
-using `itr` as an iterator. See also [`itercontrol`](@ref).
+Execute `f` while iterating `itr`.
+
+!!! note
+
+    this is faster but equivalent than using `itr` as an iterator.
+    See also [`itercontrol`](@ref).
 """
 function controldo(f::Base.Callable, ic::IterControl{N, S}) where {N, S}
     for i in 0:N-1
