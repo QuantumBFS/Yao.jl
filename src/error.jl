@@ -123,9 +123,10 @@ export @assert_addrs, @assert_addrs_inbounds, @assert_addrs_contiguous
 Assert if all the address are inbounds.
 """
 macro assert_addrs_inbounds(n, addrs, msgs...)
-    msg = process_msgs(msgs...; default="address is out of bounds!, expect $n qubits.")
+    msg = process_msgs(msgs...; default="address is out of bounds!")
+
     return quote
-        isaddrs_inbounds($n, $(esc(addrs))) ? nothing : error($msg)
+        isaddrs_inbounds($(esc(n)), $(esc(addrs))) ? nothing : error($msg)
     end
 end
 
@@ -139,7 +140,7 @@ Assert if all the address are:
 macro assert_addrs(n, addrs, msgs...)
     msg = process_msgs(msgs...; default="address conflict.")
     return quote
-        @assert_addrs_inbounds $n $(esc(addrs))
+        @assert_addrs_inbounds $(esc(n)) $(esc(addrs))
 
         isaddrs_conflict($(esc(addrs))) ? nothing :
             throw(AddressConflictError($msg))
@@ -157,8 +158,8 @@ Assert if all the address are:
 macro assert_addrs_contiguous(n, addrs, msgs...)
     msg = process_msgs(msgs...; default="address is not contiguous.")
     quote
-        @assert_addrs $n $(esc(addrs))
-        isaddrs_contiguous($n, $(esc(addrs))) ? nothing :
+        @assert_addrs $(esc(n)) $(esc(addrs))
+        isaddrs_contiguous($(esc(n)), $(esc(addrs))) ? nothing :
             error($msg)
     end
 end
