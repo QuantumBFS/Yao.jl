@@ -1,4 +1,5 @@
 using YaoBase, YaoArrayRegister
+import StaticArrays: SMatrix
 export RotationGate, Rx, Ry, Rz, rot
 
 """
@@ -47,10 +48,19 @@ Return a [`RotationGate`](@ref) on U axis.
 """
 rot(axis::MatrixBlock, theta) = RotationGate(axis, theta)
 
+# General definition
 function mat(R::RotationGate{N, T}) where {N, T}
     I = IMatrix{1<<N, Complex{T}}()
     return I * cos(R.theta / 2) - im * sin(R.theta / 2) * mat(R.block)
 end
+
+# Specialized
+mat(R::RotationGate{1, T, XGate{Complex{T}}}) where T =
+    SMatrix{2, 2, Complex{T}}(cos(R.theta/2), -im * sin(R.theta/2), -im * sin(R.theta/2), cos(R.theta/2))
+mat(R::RotationGate{1, T, YGate{Complex{T}}}) where T =
+    SMatrix{2, 2, Complex{T}}(cos(R.theta/2), sin(R.theta/2), -sin(R.theta/2), cos(R.theta/2))
+mat(R::RotationGate{1, T, ZGate{Complex{T}}}) where T =
+    SMatrix{2, 2, Complex{T}}(cos(R.theta/2)-im*sin(R.theta/2), 0, 0, cos(R.theta/2)+im*sin(R.theta/2))
 
 function apply!(r::ArrayReg, rb::RotationGate)
     v0 = copy(r.state)
@@ -72,7 +82,3 @@ Base.:(==)(lhs::RotationGate{TA, GTA}, rhs::RotationGate{TB, GTB}) where {TA, TB
 Base.:(==)(lhs::RotationGate{TA, GT}, rhs::RotationGate{TB, GT}) where {TA, TB, GT} = lhs.theta == rhs.theta
 
 cache_key(R::RotationGate) = R.theta
-
-function print_block(io::IO, R::RotationGate)
-    print(io, "Rot ", R.block, ": ", R.theta)
-end

@@ -43,5 +43,6 @@ Returns a list of occupied locations of a given block.
 @interface occupied_locations(blk::AbstractBlock) = Tuple(1:nqubits(blk))
 
 @interface print_block(io::IO, blk::AbstractBlock) = print(io, blk)
+print_block(blk::AbstractBlock) = print_block(stdout, blk)
 print_block(io::IO, ::MIME"text/plain", blk::AbstractBlock) =
     print_block(io::IO, blk)
