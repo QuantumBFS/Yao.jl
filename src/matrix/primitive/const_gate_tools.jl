@@ -178,7 +178,7 @@ function define_methods(__module__::Module, const_binding, name)
 
             (::$gt_name)(::Type{T}) where T = $gt_name{T}()
             function YaoBlockTree.print_block(io::IO, ::$gt_name)
-                print(io, $name, " gate")
+                print(io, $(QuoteNode(name)), " gate")
             end
         end # eval
     end # quote

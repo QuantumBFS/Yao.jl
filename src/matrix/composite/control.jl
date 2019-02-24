@@ -127,19 +127,6 @@ chblock(pb::ControlBlock{N}, blk::AbstractBlock) where {N} = ControlBlock{N}(pb.
 # NOTE: ControlBlock will forward parameters directly without loop
 cache_key(ctrl::ControlBlock) = cache_key(ctrl.block)
 
-function print_block(io::IO, x::ControlBlock)
-    printstyled(io, "control("; bold=true, color=color(ControlBlock))
-
-    for i in eachindex(x.ctrl_qubits)
-        printstyled(io, x.ctrl_qubits[i]; bold=true, color=color(ControlBlock))
-
-        if i != lastindex(x.ctrl_qubits)
-            printstyled(io, ", "; bold=true, color=color(ControlBlock))
-        end
-    end
-    printstyled(io, ")"; bold=true, color=color(ControlBlock))
-end
-
 function Base.:(==)(lhs::ControlBlock{N, BT, C, M, T}, rhs::ControlBlock{N, BT, C, M, T}) where {BT, N, C, M, T}
     return (lhs.ctrl_qubits == rhs.ctrl_qubits) && (lhs.block == rhs.block) && (lhs.addrs == rhs.addrs)
 end

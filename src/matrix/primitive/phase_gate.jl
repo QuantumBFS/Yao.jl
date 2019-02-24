@@ -30,7 +30,3 @@ Base.copy(block::PhaseGate{T}) where T = PhaseGate{T}(block.theta)
 Base.:(==)(lhs::PhaseGate, rhs::PhaseGate) = lhs.theta == rhs.theta
 
 cache_key(gate::PhaseGate) = gate.theta
-
-function print_block(io::IO, g::PhaseGate)
-    print(io, "Global Phase Gate:", g.theta)
-end

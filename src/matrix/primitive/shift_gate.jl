@@ -21,10 +21,6 @@ mat(gate::ShiftGate{T}) where T = Diagonal(Complex{T}[1.0, exp(im * gate.theta)]
 
 cache_key(gate::ShiftGate) = gate.theta
 
-function print_block(io::IO, g::ShiftGate)
-    print(io, "Phase Shift Gate:", g.theta)
-end
-
 # parametric interface
 niparameters(::Type{<:ShiftGate}) = 1
 iparameters(x::ShiftGate) = x.theta

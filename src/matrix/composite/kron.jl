@@ -19,7 +19,7 @@ function KronBlock{N, T}(addrs::Vector{Int}, blocks::Vector{MT}) where {N, T, MT
     perm = sortperm(addrs)
     permute!(addrs, perm)
     permute!(blocks, perm)
-    assert_addr_safe(N, [i:i+nqubits(b)-1 for (i, b) in zip(addrs, blocks)])
+    @assert_addrs N collect(i:i+nqubits(b)-1 for (i, b) in zip(addrs, blocks))
 
     slots = zeros(Int, N)
     for (i, each) in enumerate(addrs)
@@ -90,8 +90,10 @@ Base.kron(blocks::Base.Generator) = @λ(n->kron(n, blocks))
 
 occupied_locations(k::KronBlock) =
     collect(map(x-> x + i - 1, occupied_locations(b)) for (i, b) in zip(k.addrs, subblocks(k)))
+subblocks(x::KronBlock) = x.blocks
 chsubblocks(pb::KronBlock{N}, blocks) where N = KronBlock{N}(pb.addrs, blocks)
 cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
+color(::Type{T}) where {T <: KronBlock} = :cyan
 
 
 function mat(k::KronBlock{N}) where N
@@ -106,11 +108,6 @@ function mat(k::KronBlock{N}) where N
         kron(x, mat(y[1]), IMatrix(1<<y[2]))
     end
 end
-
-function print_block(io::IO, x::KronBlock)
-    printstyled(io, "kron"; bold=true, color=color(KronBlock))
-end
-
 
 function Base.copy(k::KronBlock{N, T}) where {N, T}
     slots = copy(k.slots)

@@ -38,16 +38,13 @@ for each_property in [:isunitary, :isreflexive, :ishermitian]
     @eval YaoBase.$each_property(::Type{T}) where T <: MatrixBlock = $each_property(mat(T))
 end
 
-function _default_iscommute(op1, op2)
+function YaoBase.iscommute(op1::MatrixBlock{N}, op2::MatrixBlock{N}) where N
     if length(intersect(occupied_locations(op1), occupied_locations(op2))) == 0
         return true
     else
         return iscommute(mat(op1), mat(op2))
     end
 end
-
-YaoBase.iscommute(op1::MatrixBlock{N}, op2::MatrixBlock{N}) where N = _default_iscommute(op1, op2)
-
 
 include("routines.jl") # contains routines to generate matrices for quantum gates.
 include("primitive/primitive.jl")
