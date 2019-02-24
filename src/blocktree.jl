@@ -1,11 +1,34 @@
-# empty by default
-subblock(blk::AbstractBlock) = ()
+using YaoBase
 
-function blockwalk(f::Base.Callable, src::AbstractBlock; with=(parent, child, ret)->nothing)
-    for each in subblock(blk)
-        with(src, each, blockwalk(f, each))
+export prewalk, postwalk, blockfilter!
+
+# empty by default
+@interface subblocks(blk::AbstractBlock) = ()
+
+"""
+    prewalk(f, src::AbstractBlock)
+
+Walk the tree and call `f` once the node is visited.
+"""
+function prewalk(f::Base.Callable, src::AbstractBlock)
+    out = f(src)
+    for each in subblocks(src)
+        prewalk(f, each)
+    end
+    return out
+end
+
+"""
+    postwalk(f, src::AbstractBlock)
+
+Walk the tree and call `f` after the children are visited.
+"""
+function postwalk(f::Base.Callable, src::AbstractBlock)
+    for each in subblocks(src)
+        postwalk(f, each)
     end
     return f(src)
 end
 
-@deprecate blockfilter!(f, v::Vector, blk::AbstractBlock) blockwalk(x -> f(x) ? push!(v, x) : v, blk)
+blockfilter!(f, v::Vector, blk::AbstractBlock) =
+    postwalk(x -> f(x) ? push!(v, x) : v, blk)

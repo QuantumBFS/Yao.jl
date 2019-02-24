@@ -11,6 +11,10 @@ as well.
 """
 abstract type CompositeBlock{N, T} <: MatrixBlock{N, T} end
 
+YaoBase.isunitary(m::CompositeBlock) = all(isunitary, subblocks(m)) || isunitary(mat(m))
+YaoBase.ishermitian(m::CompositeBlock) = all(ishermitian, subblocks(m)) || ishermitian(mat(m))
+YaoBase.isreflexive(m::CompositeBlock) = all(isreflexive, subblocks(m)) || isreflexive(mat(m))
+
 """
     AbstractContainer{N, T} <: CompositeBlock{N, T}
 
@@ -26,6 +30,8 @@ Return the contained block.
 """
 @interface block(x::AbstractContainer) = x.block
 @interface chblock(x::AbstractContainer, blk)
+
+subblocks(x::AbstractContainer) = (block(x), )
 
 # NOTE: this is a holy trait, no overhead, don't use methods on this
 abstract type PreserveStyle end
@@ -55,3 +61,11 @@ end
 include("chain.jl")
 include("kron.jl")
 include("control.jl")
+include("roller.jl")
+
+# include("put_block.jl")
+# include("repeated.jl")
+# include("concentrator.jl")
+# include("tag/tag.jl")
+# include("tag/cache.jl")
+# include("tag/daggered.jl")
