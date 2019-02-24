@@ -194,6 +194,9 @@ state(r::AdjointArrayReg) = adjoint(state(parent(r)))
     statevec(r::ArrayReg) -> array
 
 Return a state matrix/vector by droping the last dimension of size 1. See also [`state`](@ref).
+
+!!! warning
+    `statevec` is not type stable. It may cause performance slow down.
 """
 statevec(r::ArrayRegOrAdjointArrayReg) = matvec(state(r))
 
