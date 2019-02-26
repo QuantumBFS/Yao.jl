@@ -333,7 +333,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Quantum Fourier Transformation and Phase Estimation",
     "title": "Quantum Fourier Transformation",
     "category": "section",
-    "text": "(Image: ghz)using Yao\n\n# Control-R(k) gate in block-A\nA(i::Int, j::Int, k::Int) = control([i, ], j=>shift(2π/(1<<k)))\n# block-B\nB(n::Int, i::Int) = chain(i==j ? put(i=>H) : A(j, i, j-i+1) for j = i:n)\nQFT(n::Int) = chain(n, B(n, i) for i = 1:n)\n\n# define QFT and IQFT block.\nnum_bit = 5\nqft = QFT(num_bit)\niqft = qft\'   # get the hermitian conjugateThe basic building block - controled phase shift gate is defined asR(k)=beginbmatrix\n1  0\n0  expleft(frac2pi i2^kright)\nendbmatrixIn Yao, factory methods for blocks will be loaded lazily. For example, if you missed the total number of qubits of chain, then it will return a function that requires an input of an integer. So the following two statements are equivalentcontrol([4, ], 1=>shift(-2π/(1<<4)))(5) == control(5, [4, ], 1=>shift(-2π/(1<<4)))Both of then will return a ControlBlock instance. If you missed the total number of qubits. It is OK. Just go on, it will be filled when its possible.Once you have construct a block, you can inspect its matrix using mat function. Let\'s construct the circuit in dashed box A, and see the matrix of R_4 gatejulia> a = A(4, 1, 4)(5)\nTotal: 5, DataType: Complex{Float64}\ncontrol(4)\n└─ 1=>Phase Shift Gate:-0.39269908169872414\n\n\njulia> mat(a.block)\n2×2 Diagonal{Complex{Float64}}:\n 1.0+0.0im          ⋅         \n     ⋅      0.92388-0.382683imSimilarly, you can use put and chain to construct PutBlock (basic placement of a single gate) and ChainBlock (sequential application of MatrixBlocks) instances. Yao.jl view every component in a circuit as an AbstractBlock, these blocks can be integrated to perform higher level functionality.You can check the result using classical fft# if you\'re using lastest julia, you need to add the fft package.\nusing FFTW: fft, ifft\nusing LinearAlgebra: I\nusing Test\n\n@test chain(num_bit, qft, iqft) |> mat ≈ I\n\n# define a register and get its vector representation\nreg = rand_state(num_bit)\nrv = reg |> statevec |> copy\n\n# test fft\nreg_qft = apply!(copy(reg) |>invorder!, qft)\nkv = ifft(rv)*sqrt(length(rv))\n@test reg_qft |> statevec ≈ kv\n\n# test ifft\nreg_iqft = apply!(copy(reg), iqft)\nkv = fft(rv)/sqrt(length(rv))\n@test reg_iqft |> statevec ≈ kv |> invorderQFT and IQFT are different from FFT and IFFT in three ways,they are different by a factor of sqrt2^n with n the number of qubits.\nthe little end and big end will exchange after applying QFT or IQFT.\ndue to the convention, QFT is more related to IFFT rather than FFT."
+    "text": "(Image: ghz)using Yao\n\n# Control-R(k) gate in block-A\nA(i::Int, j::Int, k::Int) = control([i, ], j=>shift(2π/(1<<k)))\n# block-B\nB(n::Int, i::Int) = chain(i==j ? kron(i=>H) : A(j, i, j-i+1) for j = i:n)\nQFT(n::Int) = chain(n, B(n, i) for i = 1:n)\n\n# define QFT and IQFT block.\nnum_bit = 5\nqft = QFT(num_bit)\niqft = qft\'   # get the hermitian conjugateThe basic building block - controled phase shift gate is defined asR(k)=beginbmatrix\n1  0\n0  expleft(frac2pi i2^kright)\nendbmatrixIn Yao, factory methods for blocks will be loaded lazily. For example, if you missed the total number of qubits of chain, then it will return a function that requires an input of an integer. So the following two statements are equivalentcontrol([4, ], 1=>shift(-2π/(1<<4)))(5) == control(5, [4, ], 1=>shift(-2π/(1<<4)))Both of then will return a ControlBlock instance. If you missed the total number of qubits. It is OK. Just go on, it will be filled when its possible.Once you have construct a block, you can inspect its matrix using mat function. Let\'s construct the circuit in dashed box A, and see the matrix of R_4 gatejulia> a = A(4, 1, 4)(5)\nTotal: 5, DataType: Complex{Float64}\ncontrol(4)\n└─ 1=>Phase Shift Gate:-0.39269908169872414\n\n\njulia> mat(a.block)\n2×2 Diagonal{Complex{Float64}}:\n 1.0+0.0im          ⋅         \n     ⋅      0.92388-0.382683imSimilarly, you can use put and chain to construct PutBlock (basic placement of a single gate) and ChainBlock (sequential application of MatrixBlocks) instances. Yao.jl view every component in a circuit as an AbstractBlock, these blocks can be integrated to perform higher level functionality.You can check the result using classical fft# if you\'re using lastest julia, you need to add the fft package.\nusing FFTW: fft, ifft\nusing LinearAlgebra: I\nusing Test\n\n@test chain(num_bit, qft, iqft) |> mat ≈ I\n\n# define a register and get its vector representation\nreg = rand_state(num_bit)\nrv = reg |> statevec |> copy\n\n# test fft\nreg_qft = apply!(copy(reg) |>invorder!, qft)\nkv = ifft(rv)*sqrt(length(rv))\n@test reg_qft |> statevec ≈ kv\n\n# test ifft\nreg_iqft = apply!(copy(reg), iqft)\nkv = fft(rv)/sqrt(length(rv))\n@test reg_iqft |> statevec ≈ kv |> invorderQFT and IQFT are different from FFT and IFFT in three ways,they are different by a factor of sqrt2^n with n the number of qubits.\nthe little end and big end will exchange after applying QFT or IQFT.\ndue to the convention, QFT is more related to IFFT rather than FFT."
 },
 
 {
@@ -681,7 +681,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{M}, Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s360} where #s360<:AbstractBlock}} where M",
+    "location": "man/interfaces/#Yao.Interfaces.put-Union{Tuple{M}, Tuple{Int64,Pair{Tuple{Vararg{Int64,M}},#s393} where #s393<:AbstractBlock}} where M",
     "page": "Interfaces",
     "title": "Yao.Interfaces.put",
     "category": "method",
@@ -785,7 +785,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Pair{Int64,#s360} where #s360<:MatrixBlock,N} where N}",
+    "location": "man/interfaces/#Base.kron-Tuple{Int64,Vararg{Pair{Int64,#s393} where #s393<:MatrixBlock,N} where N}",
     "page": "Interfaces",
     "title": "Base.kron",
     "category": "method",
@@ -1278,6 +1278,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Composite Blocks",
     "category": "section",
     "text": ""
+},
+
+{
+    "location": "man/blocks/#Roller-1",
+    "page": "Blocks System",
+    "title": "Roller",
+    "category": "section",
+    "text": "Roller is a special pattern of quantum circuits. Usually is equivalent to a KronBlock, but we can optimize the computation by rotate the tensor form of a quantum state and apply each small block on it each time.(Image: Block-System)"
 },
 
 {
@@ -1833,7 +1841,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/blocks/#Yao.Blocks.cache_type-Tuple{Type{#s90} where #s90<:MatrixBlock}",
+    "location": "man/blocks/#Yao.Blocks.cache_type-Tuple{Type{#s96} where #s96<:MatrixBlock}",
     "page": "Blocks System",
     "title": "Yao.Blocks.cache_type",
     "category": "method",
@@ -2105,7 +2113,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "man/intrinsics/#Yao.Intrinsics.getcol-Tuple{Union{SSparseMatrixCSC, SparseMatrixCSC},Int64}",
+    "location": "man/intrinsics/#Yao.Intrinsics.getcol-Tuple{Union{SparseMatrixCSC{Tv,Ti}, SSparseMatrixCSC{Tv,Ti,NNZ,NP} where NP where NNZ} where Ti where Tv,Int64}",
     "page": "Intrinsics",
     "title": "Yao.Intrinsics.getcol",
     "category": "method",

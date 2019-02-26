@@ -11,7 +11,7 @@ ga('send', 'pageview');
 # Control-R(k) gate in block-A
 A(i::Int, j::Int, k::Int) = control([i, ], j=&gt;shift(2π/(1&lt;&lt;k)))
 # block-B
-B(n::Int, i::Int) = chain(i==j ? put(i=&gt;H) : A(j, i, j-i+1) for j = i:n)
+B(n::Int, i::Int) = chain(i==j ? kron(i=&gt;H) : A(j, i, j-i+1) for j = i:n)
 QFT(n::Int) = chain(n, B(n, i) for i = 1:n)
 
 # define QFT and IQFT block.
@@ -20,20 +20,20 @@ qft = QFT(num_bit)
 iqft = qft&#39;   # get the hermitian conjugate</code></pre><pre><code class="language-none">Total: 5, DataType: Complex{Float64}
 chain
 ├─ chain
-│  └─ put on (5)
-│     └─ H gate
+│  └─ kron
+│     └─ 5=&gt;H gate
 ├─ chain
 │  ├─ control(5)
 │  │  └─ (4,)=&gt;Phase Shift Gate:-1.5707963267948966
-│  └─ put on (4)
-│     └─ H gate
+│  └─ kron
+│     └─ 4=&gt;H gate
 ├─ chain
 │  ├─ control(5)
 │  │  └─ (3,)=&gt;Phase Shift Gate:-0.7853981633974483
 │  ├─ control(4)
 │  │  └─ (3,)=&gt;Phase Shift Gate:-1.5707963267948966
-│  └─ put on (3)
-│     └─ H gate
+│  └─ kron
+│     └─ 3=&gt;H gate
 ├─ chain
 │  ├─ control(5)
 │  │  └─ (2,)=&gt;Phase Shift Gate:-0.39269908169872414
@@ -41,8 +41,8 @@ chain
 │  │  └─ (2,)=&gt;Phase Shift Gate:-0.7853981633974483
 │  ├─ control(3)
 │  │  └─ (2,)=&gt;Phase Shift Gate:-1.5707963267948966
-│  └─ put on (2)
-│     └─ H gate
+│  └─ kron
+│     └─ 2=&gt;H gate
 └─ chain
    ├─ control(5)
    │  └─ (1,)=&gt;Phase Shift Gate:-0.19634954084936207
@@ -52,8 +52,8 @@ chain
    │  └─ (1,)=&gt;Phase Shift Gate:-0.7853981633974483
    ├─ control(2)
    │  └─ (1,)=&gt;Phase Shift Gate:-1.5707963267948966
-   └─ put on (1)
-      └─ H gate</code></pre></div><p>The basic building block - controled phase shift gate is defined as</p><div>\[R(k)=\begin{bmatrix}
+   └─ kron
+      └─ 1=&gt;H gate</code></pre></div><p>The basic building block - controled phase shift gate is defined as</p><div>\[R(k)=\begin{bmatrix}
 1 &amp; 0\\
 0 &amp; \exp\left(\frac{2\pi i}{2^k}\right)
 \end{bmatrix}\]</div><p>In Yao, factory methods for blocks will be loaded lazily. For example, if you missed the total number of qubits of <code>chain</code>, then it will return a function that requires an input of an integer. So the following two statements are equivalent</p><div><pre><code class="language-julia">control([4, ], 1=&gt;shift(-2π/(1&lt;&lt;4)))(5) == control(5, [4, ], 1=&gt;shift(-2π/(1&lt;&lt;4)))</code></pre><pre><code class="language-none">true</code></pre></div><p>Both of then will return a <code>ControlBlock</code> instance. If you missed the total number of qubits. It is OK. Just go on, it will be filled when its possible.</p><p>Once you have construct a block, you can inspect its matrix using <code>mat</code> function. Let&#39;s construct the circuit in dashed box A, and see the matrix of <span>$R_4$</span> gate</p><pre><code class="language-julia">julia&gt; a = A(4, 1, 4)(5)
@@ -132,4 +132,4 @@ U = V*Diagonal(signs)*V&#39;  # notice U is unitary
 psi = U[:,3]
 
 res, reg = phase_estimation(zero_state(M), register(psi), GeneralMatrixGate(U))
-println(&quot;Phase is 2π * $(res[]), the exact value is 2π * $ϕ&quot;)</code></pre><pre><code class="language-none">Phase is 2π * 0.65625, the exact value is 2π * 0.90625</code></pre></div><footer><hr/><a class="previous" href="../GHZ/"><span class="direction">Previous</span><span class="title">Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</span></a><a class="next" href="../Grover/"><span class="direction">Next</span><span class="title">Grover Search and Quantum Inference</span></a></footer></article></body></html>
+println(&quot;Phase is 2π * $(res[]), the exact value is 2π * $ϕ&quot;)</code></pre><pre><code class="language-none">Phase is 2π * 0.71875, the exact value is 2π * 0.90625</code></pre></div><footer><hr/><a class="previous" href="../GHZ/"><span class="direction">Previous</span><span class="title">Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</span></a><a class="next" href="../Grover/"><span class="direction">Next</span><span class="title">Grover Search and Quantum Inference</span></a></footer></article></body></html>

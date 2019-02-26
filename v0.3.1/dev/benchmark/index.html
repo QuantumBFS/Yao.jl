@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Benchmark with ProjectQ · Yao.jl</title><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-89508993-1', 'auto');
+ga('send', 'pageview');
+</script><link rel="canonical" href="https://quantumbfs.github.io/Yao.jl/latest/dev/benchmark/index.html"/><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="../../index.html"><img class="logo" src="../../assets/logo.png" alt="Yao.jl logo"/></a><h1>Yao.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../">Home</a></li><li><span class="toctext">Tutorial</span><ul><li><a class="toctext" href="../../tutorial/RegisterBasics/">Register Basics</a></li><li><a class="toctext" href="../../tutorial/BlockBasics/">Block Basics</a></li><li><a class="toctext" href="../../tutorial/Diff/">Automatic Differentiation</a></li><li><a class="toctext" href="../../tutorial/BinaryBasics/">Binary Basics</a></li></ul></li><li><span class="toctext">Examples</span><ul><li><a class="toctext" href="../../tutorial/GHZ/">Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</a></li><li><a class="toctext" href="../../tutorial/QFT/">Quantum Fourier Transformation and Phase Estimation</a></li><li><a class="toctext" href="../../tutorial/Grover/">Grover Search and Quantum Inference</a></li><li><a class="toctext" href="../../tutorial/QCBM/">Quantum Circuit Born Machine</a></li></ul></li><li><span class="toctext">Manual</span><ul><li><a class="toctext" href="../../man/yao/">Yao</a></li><li><a class="toctext" href="../../man/interfaces/">Interfaces</a></li><li><a class="toctext" href="../../man/registers/">Registers</a></li><li><a class="toctext" href="../../man/blocks/">Blocks System</a></li><li><a class="toctext" href="../../man/intrinsics/">Intrinsics</a></li><li><a class="toctext" href="../../man/boost/">Boost</a></li></ul></li><li><span class="toctext">Developer Documentation</span><ul><li><a class="toctext" href="../extending-blocks/">Extending Blocks</a></li><li class="current"><a class="toctext" href>Benchmark with ProjectQ</a><ul class="internal"><li><a class="toctext" href="#CPU-Information-1">CPU Information</a></li><li><a class="toctext" href="#Julia-Version-1">Julia Version</a></li></ul></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Developer Documentation</li><li><a href>Benchmark with ProjectQ</a></li></ul><a class="edit-page" href="https://github.com/QuantumBFS/Yao.jl/blob/master/docs/src/dev/benchmark.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Benchmark with ProjectQ</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Benchmark-with-ProjectQ-1" href="#Benchmark-with-ProjectQ-1">Benchmark with ProjectQ</a></h1><p><a href="https://projectq.ch">ProjectQ</a> is an open source software framework for quantum computing. Here we present the single process benchmark result</p><img src="../assets/benchmarks/xyz-bench.png"    alt="xyz" height="200">
+<img src="../assets/benchmarks/repeatxyz-bench.png" alt="xyz" height="200">
+<img src="../assets/benchmarks/cxyz-bench.png"      alt="xyz" height="200">
+<img src="../assets/benchmarks/crot-bench.png"      alt="xyz" height="200">
+<img src="../assets/benchmarks/hgate-bench.png"     alt="xyz" height="200">
+<img src="../assets/benchmarks/rot-bench.png"       alt="xyz" height="200"><p>From this benchmark, we see the performance of ProjectQ and Yao.jl are quite similar, both of them are close to the theoretical bound in performance.</p><p>ProjectQ is a state of art quantum simulator, it kept the record of 45 qubit quantum circuit simulation for several months: https://arxiv.org/abs/1704.01127 4 It uses parallisms like SIMD, OpenMP, MPI to speed up calculation.</p><p>ProjectQ has C++ backend, while Yao.jl uses pure julia. Yao.jl has significantly less overhead than ProjectQ, which benefits from julia’s jit and multile dispatch.</p><p>In some benchmarks, like repeated blocks, Yao.jl can perform much better, this is an algorithmic win. Thanks to julia’s multiple dispatch, we can dispatch any advanced-speciallized algortihm to push the performance for frequently used gates easily, without touching the backend!</p><h2><a class="nav-anchor" id="CPU-Information-1" href="#CPU-Information-1">CPU Information</a></h2><pre><code class="language-none">Architecture:          x86_64
+CPU op-mode(s):        32-bit, 64-bit
+Byte Order:            Little Endian
+CPU(s):                48
+On-line CPU(s) list:   0-47
+Thread(s) per core:    2
+Core(s) per socket:    12
+Socket(s):             2
+NUMA node(s):          2
+Vendor ID:             GenuineIntel
+CPU family:            6
+Model:                 79
+Stepping:              1
+CPU MHz:               2499.921
+BogoMIPS:              4401.40
+Virtualization:        VT-x
+L1d cache:             32K
+L1i cache:             32K
+L2 cache:              256K
+L3 cache:              30720K
+NUMA node0 CPU(s):     0-11,24-35
+NUMA node1 CPU(s):     12-23,36-47</code></pre><h4><a class="nav-anchor" id="ProjectQ-1" href="#ProjectQ-1">ProjectQ</a></h4><p>We use ProjectQ v0.3.6 in this benchmark, with python version 3.6.</p><ul><li><a href="https://github.com/ProjectQ-Framework/ProjectQ">Github Repo</a></li><li>Damian S. Steiger, Thomas Häner, and Matthias Troyer &quot;ProjectQ: An Open Source Software Framework for Quantum Computing&quot; [arxiv:1612.08091]</li><li>Thomas Häner, Damian S. Steiger, Krysta M. Svore, and Matthias Troyer &quot;A Software Methodology for Compiling Quantum Programs&quot; [arxiv:1604.01401]</li></ul><h2><a class="nav-anchor" id="Julia-Version-1" href="#Julia-Version-1">Julia Version</a></h2><pre><code class="language-none">Julia Version 0.7.0-alpha.147
+Commit 5e3259e (2018-06-16 18:43 UTC)
+Platform Info:
+  OS: Linux (x86_64-linux-gnu)
+  CPU: Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+  WORD_SIZE: 64
+  LIBM: libopenlibm
+  LLVM: libLLVM-6.0.0 (ORCJIT, broadwell)</code></pre><footer><hr/><a class="previous" href="../extending-blocks/"><span class="direction">Previous</span><span class="title">Extending Blocks</span></a></footer></article></body></html>
