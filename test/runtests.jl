@@ -12,6 +12,5 @@ end
 end
 
 @testset "test instructions" begin
-    include("iterate_control.jl")
     include("instruct.jl")
 end
