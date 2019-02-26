@@ -44,7 +44,7 @@ focus!(reg, [3,1,5]) do r
     r.state = rand_unitary(8) * r.state
     r
 end
-@show reg.state;</code></pre><pre><code class="language-none">reg.state = Complex{Float64}[-0.473381+0.195217im; -0.0525527-0.409221im; 0.0+0.0im; 0.0+0.0im; 0.384754-0.09901im; -0.141119-0.248745im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.483462-0.216228im; -0.082457-0.0921447im; 0.0+0.0im; 0.0+0.0im; 0.0763171+0.0197363im; -0.15999+0.0189457im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im]</code></pre></div><h2><a class="nav-anchor" id="Basic-Arithmatics-1" href="#Basic-Arithmatics-1">Basic Arithmatics</a></h2><p><code>+, -, *, /, ⊗, &#39;</code> are implemented.</p><p>The adjoint of a register is also called <code>bra</code>, it can be used in calculating state overlap</p><div><pre><code class="language-julia">ψ1 = rand_state(5)
+@show reg.state;</code></pre><pre><code class="language-none">reg.state = Complex{Float64}[-0.21051+0.377235im; 0.0518697+0.401157im; 0.0+0.0im; 0.0+0.0im; 0.208579+0.109038im; 0.247089+0.247447im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; -0.219601+0.109683im; -0.344295-0.248108im; 0.0+0.0im; 0.0+0.0im; 0.210487-0.153284im; -0.174676-0.365268im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im; 0.0+0.0im]</code></pre></div><h2><a class="nav-anchor" id="Basic-Arithmatics-1" href="#Basic-Arithmatics-1">Basic Arithmatics</a></h2><p><code>+, -, *, /, ⊗, &#39;</code> are implemented.</p><p>The adjoint of a register is also called <code>bra</code>, it can be used in calculating state overlap</p><div><pre><code class="language-julia">ψ1 = rand_state(5)
 ψ2 = rand_state(5)</code></pre><pre><code class="language-none">DefaultRegister{1, Array{Complex{Float64},2}}
     active qubits: 5/5</code></pre></div><p>arithmatics</p><div><pre><code class="language-julia">@show ψ1
 @show ψ2
@@ -59,21 +59,21 @@ end
 @show ψ3 |&gt; normalize! |&gt; isnormalized
 
 @show ψ3&#39; * ψ3;</code></pre><pre><code class="language-none">(ψ3 |&gt; normalize!) |&gt; isnormalized = true
-ψ3&#39; * ψ3 = 1.0000000000000002 + 0.0im</code></pre></div><h2><a class="nav-anchor" id="Measure-1" href="#Measure-1">Measure</a></h2><ul><li><code>measure(reg; nshot=1)</code>, measure without collapsing state,</li><li><code>measure!(reg)</code>, measure and collapse,</li><li><code>measure_remove!(reg)</code>, measure focused bits and remove them,</li><li><code>measure_reset!(reg, val=0)</code>, measure focused bits and reset them to some value,</li><li><code>reset!(reg)</code>, collapse to specific value directly.</li><li><code>select(reg, x)</code>, select subspace projected on specific basis, i.e. <span>$|\phi\rangle = |x\rangle\langle x|\psi\rangle$</span>.</li></ul><p><strong>measure</strong></p><div><pre><code class="language-julia">@show product_state(5, 0b11001) |&gt; measure  # please notice binary number `0b11001` is equivalent to `25`!
+ψ3&#39; * ψ3 = 0.9999999999999998 + 0.0im</code></pre></div><h2><a class="nav-anchor" id="Measure-1" href="#Measure-1">Measure</a></h2><ul><li><code>measure(reg; nshot=1)</code>, measure without collapsing state,</li><li><code>measure!(reg)</code>, measure and collapse,</li><li><code>measure_remove!(reg)</code>, measure focused bits and remove them,</li><li><code>measure_reset!(reg, val=0)</code>, measure focused bits and reset them to some value,</li><li><code>reset!(reg)</code>, collapse to specific value directly.</li><li><code>select(reg, x)</code>, select subspace projected on specific basis, i.e. <span>$|\phi\rangle = |x\rangle\langle x|\psi\rangle$</span>.</li></ul><p><strong>measure</strong></p><div><pre><code class="language-julia">@show product_state(5, 0b11001) |&gt; measure  # please notice binary number `0b11001` is equivalent to `25`!
 reg = rand_state(7)
 @show measure(reg; nshot=5);          # measure multiple times</code></pre><pre><code class="language-none">product_state(5, 0x19) |&gt; measure = [25]
-measure(reg; nshot=5) = [98, 24, 58, 48, 122]</code></pre></div><p><strong>measure!</strong></p><div><pre><code class="language-julia">reg = rand_state(7)
-@show [measure!(reg) for i=1:5];  # measure! will collapse state</code></pre><pre><code class="language-none">[measure!(reg) for i = 1:5] = Array{Int64,1}[[48], [48], [48], [48], [48]]</code></pre></div><p><strong>measure_reset!</strong></p><div><pre><code class="language-julia">reg = rand_state(7)
-@show [measure_reset!(reg, val=i*10) for i=1:5];   # measure_reset! will reset the measured bit to target state (default is `0`)</code></pre><pre><code class="language-none">[measure_reset!(reg, val=i * 10) for i = 1:5] = Array{Int64,1}[[14], [10], [20], [30], [40]]</code></pre></div><p><strong>measure_remove!</strong></p><div><pre><code class="language-julia">reg = rand_state(7)
+measure(reg; nshot=5) = [107, 115, 97, 4, 68]</code></pre></div><p><strong>measure!</strong></p><div><pre><code class="language-julia">reg = rand_state(7)
+@show [measure!(reg) for i=1:5];  # measure! will collapse state</code></pre><pre><code class="language-none">[measure!(reg) for i = 1:5] = Array{Int64,1}[[51], [51], [51], [51], [51]]</code></pre></div><p><strong>measure_reset!</strong></p><div><pre><code class="language-julia">reg = rand_state(7)
+@show [measure_reset!(reg, val=i*10) for i=1:5];   # measure_reset! will reset the measured bit to target state (default is `0`)</code></pre><pre><code class="language-none">[measure_reset!(reg, val=i * 10) for i = 1:5] = Array{Int64,1}[[54], [10], [20], [30], [40]]</code></pre></div><p><strong>measure_remove!</strong></p><div><pre><code class="language-julia">reg = rand_state(7)
 @show measure_remove!(reg)
 @show reg;
 
 reg = rand_state(7)
 @show measure_remove!(reg |&gt; focus!(2,3))
-@show reg;</code></pre><pre><code class="language-none">measure_remove!(reg) = [29]
+@show reg;</code></pre><pre><code class="language-none">measure_remove!(reg) = [21]
 reg = DefaultRegister{1, Array{Complex{Float64},2}}
     active qubits: 0/0
-measure_remove!(reg |&gt; focus!(2, 3)) = [0]
+measure_remove!(reg |&gt; focus!(2, 3)) = [1]
 reg = DefaultRegister{1, Array{Complex{Float64},2}}
     active qubits: 0/5</code></pre></div><p><strong>select</strong></p><p>select will allow you to get the disired measurement result, and collapse to that state. It is equivalent to calculating <span>$|\phi\rangle = |x\rangle\langle x|\psi\rangle$</span>.</p><div><pre><code class="language-julia">reg = rand_state(9) |&gt; focus!(1, 2, 3, 4)
 @show ψ = select(reg, 0b1110)
@@ -90,11 +90,11 @@ reg = DefaultRegister{1, Array{Complex{Float64},2}}
     active qubits: 0/5
 ψ |&gt; relax! = DefaultRegister{1, Array{Complex{Float64},2}}
     active qubits: 5/5
-fidelity(ψ1, ψ2) = [0.0883134]
-tracedist(ψ1, ψ2) = [0.996093]
+fidelity(ψ1, ψ2) = [0.088904]
+tracedist(ψ1, ψ2) = [0.99604]
 ψ1 |&gt; ρ = DensityMatrix{1, Complex{Float64}}
 nqubits: 6
-tracedist(ψ1 |&gt; ρ, ψ2 |&gt; ρ) = [0.996093]</code></pre></div><h2><a class="nav-anchor" id="Batched-Registers-1" href="#Batched-Registers-1">Batched Registers</a></h2><p>Most operations support batched register, which means running multiple registers in parallel.</p><div><pre><code class="language-julia">ψ = rand_state(6, 3)
+tracedist(ψ1 |&gt; ρ, ψ2 |&gt; ρ) = [0.99604]</code></pre></div><h2><a class="nav-anchor" id="Batched-Registers-1" href="#Batched-Registers-1">Batched Registers</a></h2><p>Most operations support batched register, which means running multiple registers in parallel.</p><div><pre><code class="language-julia">ψ = rand_state(6, 3)
 @show ψ
 @show nbatch(ψ)
 @show viewbatch(ψ, 2)  # this is a view of register at 2nd column of the batch dimension
