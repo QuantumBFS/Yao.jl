@@ -134,12 +134,15 @@ end
 matvec(x::AbstractMatrix) = size(x, 2) == 1 ? vec(x) : x
 matvec(x::AbstractVector) = x
 
-@inline function unrows!(state::AbstractVector, inds::AbstractVector, U::SDMatrix)
+
+unrows!(state::AbstractVector, inds::AbstractVector, U::SDMatrix) = invoke(unrows!, Tuple{AbstractVector, AbstractVector, AbstractMatrix}, state, inds, U)
+unrows!(state::AbstractMatrix, inds::AbstractVector, U::SDMatrix) = invoke(unrows!, Tuple{AbstractMatrix, AbstractVector, AbstractMatrix}, state, inds, U)
+@inline function unrows!(state::AbstractVector, inds::AbstractVector, U::AbstractMatrix)
     @inbounds state[inds] = U*state[inds]
     state
 end
 
-@inline function unrows!(state::AbstractMatrix, inds::AbstractVector, U::SDMatrix)
+@inline function unrows!(state::AbstractMatrix, inds::AbstractVector, U::AbstractMatrix)
     @inbounds for k in 1:size(state, 2)
         state[inds, k] = U*state[inds, k]
     end
