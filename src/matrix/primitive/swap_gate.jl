@@ -7,7 +7,7 @@ struct Swap{N, T} <: PrimitiveBlock{N, T}
     locs::Tuple{Int, Int}
 
     function Swap{N, T}(locs::Tuple{Int, Int}) where {N, T}
-        @assert_addrs_inbounds N locs
+        @assert_addrs N locs
         return new{N, T}(locs)
     end
 end
@@ -15,7 +15,7 @@ end
 Swap{N, T}(loc1::Int, loc2::Int) where {N, T} = Swap{N, T}((loc1, loc2))
 
 
-swap(::Type{T}, n::Int, loc1::Int, loc2::Int) where T = Swap{n, T}(locs)
+swap(::Type{T}, n::Int, loc1::Int, loc2::Int) where T = Swap{n, T}((loc1, loc2))
 
 """
     swap([T=ComplexF64], n, loc1, loc2)
@@ -40,6 +40,7 @@ end
 
 apply!(r::ArrayReg, g::Swap) = instruct!(state(r), Val(:SWAP), g.locs)
 occupied_locations(g::Swap) = g.locs
+
 Base.:(==)(lhs::Swap, rhs::Swap) = lhs.locs == rhs.locs
 
 YaoBase.isunitary(rb::Swap) = true

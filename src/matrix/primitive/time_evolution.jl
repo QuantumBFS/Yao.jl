@@ -1,3 +1,5 @@
+using Expokit
+
 """
     TimeEvolution{N, TT, GT} <: PrimitiveBlock{N, ComplexF64}
 

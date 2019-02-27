@@ -11,3 +11,7 @@ end
 @testset "test shift gate" begin
     include("shift_gate.jl")
 end
+
+@testset "test swap gate" begin
+    include("swap_gate.jl")
+end
