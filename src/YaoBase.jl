@@ -18,6 +18,10 @@ include("adjoint_register.jl")
 include("inspect.jl")
 include("instruct.jl")
 
+# compat with older version of dependencies
+include("compat.jl")
+
+# deprecation warns
 include("deprecations.jl")
 
 end # module
