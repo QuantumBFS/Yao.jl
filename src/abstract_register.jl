@@ -247,8 +247,6 @@ Merge several registers as one register via tensor product.
     repeat(r::AbstractRegister, n::Int) -> register
 
 Repeat register `r` for `n` times on batch dimension.
-
-### Example
 """
 @interface Base.repeat(::AbstractRegister, n::Int)
 
