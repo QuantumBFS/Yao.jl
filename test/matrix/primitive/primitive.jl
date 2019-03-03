@@ -15,3 +15,15 @@ end
 @testset "test swap gate" begin
     include("swap_gate.jl")
 end
+
+@testset "test time evolution" begin
+    include("time_evolution.jl")
+end
+
+@testset "test general matrix gate" begin
+    include("general_matrix_gate.jl")
+end
+
+@testset "test math gate" begin
+    include("math_gate.jl")
+end

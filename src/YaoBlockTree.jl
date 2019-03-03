@@ -1,8 +1,11 @@
 module YaoBlockTree
 
 include("utils.jl")
+include("traits.jl")
 
 include("abstract_block.jl")
+include("block_map.jl")
+
 # concrete blocks
 include("matrix/matrix.jl")
 # include("symbolic/symbolic.jl")

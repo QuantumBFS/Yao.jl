@@ -11,6 +11,20 @@ as well.
 """
 abstract type CompositeBlock{N, T} <: MatrixBlock{N, T} end
 
+"""
+    SubBlocks(x)
+
+Returns an iterator of the sub-blocks of a composite block. Default is empty.
+"""
+SubBlocks(x::CompositeBlock) = ()
+
+"""
+    chsubblocks(composite_block, itr)
+
+Change the sub-blocks of a [`CompositeBlock`](@ref) with given iterator `itr`.
+"""
+@interface chsubblocks(::CompositeBlock, itr)
+
 YaoBase.isunitary(m::CompositeBlock) = all(isunitary, subblocks(m)) || isunitary(mat(m))
 YaoBase.ishermitian(m::CompositeBlock) = all(ishermitian, subblocks(m)) || ishermitian(mat(m))
 YaoBase.isreflexive(m::CompositeBlock) = all(isreflexive, subblocks(m)) || isreflexive(mat(m))
@@ -19,19 +33,27 @@ YaoBase.isreflexive(m::CompositeBlock) = all(isreflexive, subblocks(m)) || isref
     AbstractContainer{N, T} <: CompositeBlock{N, T}
 
 Abstract type for container block. Container blocks are blocks contain a single
-block.
+block. Container block should have a
 """
 abstract type AbstractContainer{N, T} <: CompositeBlock{N, T} end
 
 """
-    block(x::AbstractContainer)
+    contained_block(x::AbstractContainer)
 
 Return the contained block.
 """
-@interface block(x::AbstractContainer) = x.block
-@interface chblock(x::AbstractContainer, blk)
+@interface contained_block(x::AbstractContainer) = x.block
+SubBlocks(x::AbstractContainer) = (contained_block(x), )
 
-subblocks(x::AbstractContainer) = (block(x), )
+"""
+    chcontained_block(x::AbstractContainer, blk)
+
+Create a new [`AbstractContainer`](@ref) with given sub-block. This uses
+[`chsubblocks`](@ref) by default.
+"""
+@interface chcontained_block(x::AbstractContainer, blk)
+
+chsubblocks(x, itr) = chcontained_block(x, first(itr))
 
 # NOTE: this is a holy trait, no overhead, don't use methods on this
 abstract type PreserveStyle end
@@ -44,7 +66,7 @@ PreserveStyle(c::AbstractContainer) = PreserveNothing()
 for METHOD in (:ishermitian, :isreflexive, :isunitary)
     @eval begin
         # forward to trait
-        YaoBase.$METHOD(c::AbstractContainer) = $METHOD(PreserveStyle(x), c)
+        YaoBase.$METHOD(x::AbstractContainer) = $METHOD(PreserveStyle(x), x)
         # forward contained block property
         YaoBase.$METHOD(::PreserveAll, c::AbstractContainer) = $METHOD(block(c))
         # forward to default property by calculating the matrix
@@ -62,10 +84,9 @@ include("chain.jl")
 include("kron.jl")
 include("control.jl")
 include("roller.jl")
-
-# include("put_block.jl")
-# include("repeated.jl")
-# include("concentrator.jl")
-# include("tag/tag.jl")
-# include("tag/cache.jl")
-# include("tag/daggered.jl")
+include("put_block.jl")
+include("repeated.jl")
+include("concentrator.jl")
+include("tag/tag.jl")
+include("tag/cache.jl")
+include("tag/dagger.jl")

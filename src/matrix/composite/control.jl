@@ -1,6 +1,9 @@
+using YaoArrayRegister
+using YaoArrayRegister: matvec
+
 export ControlBlock, control
 
-mutable struct ControlBlock{N, BT<:AbstractBlock, C, M, T} <: AbstractContainer{N, T}
+struct ControlBlock{N, BT<:AbstractBlock, C, M, T} <: AbstractContainer{N, T}
     ctrl_qubits::NTuple{C, Int}
     vals::NTuple{C, Int}
     block::BT
@@ -115,14 +118,24 @@ cnot(total::Int, control_locations, location::Int) = control(total, control_loca
 cnot(control_locations, location::Int) = @λ(n -> cnot(n, control_locations, location))
 
 mat(c::ControlBlock{N, BT, C}) where {N, BT, C} = cunmat(N, c.ctrl_qubits, c.vals, mat(c.block), c.addrs)
-apply!(r::ArrayReg, c::ControlBlock) =
+
+function apply!(r::ArrayReg, c::ControlBlock)
     instruct!(matvec(r.state), mat(c.block), c.addrs, c.ctrl_qubits, c.vals)
+    return r
+end
 
 PreserveStyle(::ControlBlock) = PreserveAll()
-iscommute(x::ControlBlock{N}, y::ControlBlock{N}) where N = x.addrs == y.addrs && x.ctrl_qubits == y.ctrl_qubits ? iscommute(x.block, y.block) : _default_iscommute(x, y)
 
-occupied_locations(c::ControlBlock) = (c.ctrl_qubits..., map(x->c.addrs[x], occupied_locations(c.block))...)
-chblock(pb::ControlBlock{N}, blk::AbstractBlock) where {N} = ControlBlock{N}(pb.ctrl_qubits, pb.vals, blk, pb.addrs)
+function iscommute(x::ControlBlock{N}, y::ControlBlock{N}) where N
+    if x.addrs == y.addrs && x.ctrl_qubits == y.ctrl_qubits
+        return iscommute(x.block, y.block)
+    else
+        return iscommute_fallback(x, y)
+    end
+end
+
+OccupiedLocations(c::ControlBlock) = (c.ctrl_qubits, map(x->c.addrs[x], OccupiedLocations(c.block))) |> Iterators.flatten
+chcontained_block(pb::ControlBlock{N}, blk::AbstractBlock) where {N} = ControlBlock{N}(pb.ctrl_qubits, pb.vals, blk, pb.addrs)
 
 # NOTE: ControlBlock will forward parameters directly without loop
 cache_key(ctrl::ControlBlock) = cache_key(ctrl.block)

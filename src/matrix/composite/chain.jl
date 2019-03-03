@@ -25,11 +25,12 @@ block in `blocks`, chain can infer the number of qubits and create an
 instance itself.
 """
 chain(blocks::MatrixBlock{N, T}...) where {N, T} = ChainBlock(blocks...)
+chain(blocks::Union{MatrixBlock{N, T}, Function}...) where {N, T} = chain(map(x->parse_block(N, x), blocks)...)
 chain(list::Vector) = ChainBlock(list)
 
 # if not all matrix block, try to put the number of qubits.
 chain(n::Int, blocks...) = chain(map(x->parse_block(n, x), blocks)...)
-chain(blocks...) = @λ(n->chain(n, blocks...))
+chain(blocks::Function...) = @λ(n->chain(n, blocks...))
 
 """
     chain([T=ComplexF64], n)
@@ -47,8 +48,8 @@ Return an lambda `n->chain(n)`.
 chain() = @λ(n->chain(n))
 
 subblocks(c::ChainBlock) = c.blocks
-occupied_locations(c::ChainBlock) =
-    unique(vcat((occupied_locations(b) for b in subblocks(c))...))
+OccupiedLocations(c::ChainBlock) =
+    unique(Iterators.flatten(OccupiedLocations(b) for b in subblocks(c)))
 chsubblocks(pb::ChainBlock, blocks) = ChainBlock(blocks)
 
 mat(c::ChainBlock) = prod(x->mat(x), reverse(c.blocks))

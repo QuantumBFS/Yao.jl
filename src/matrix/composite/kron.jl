@@ -88,9 +88,8 @@ Base.kron(blocks::MatrixBlock...,) = @λ(n->kron(n, blocks...))
 Base.kron(blocks::Pair{Int, <:MatrixBlock}...,) = @λ(n->kron(n, blocks...))
 Base.kron(blocks::Base.Generator) = @λ(n->kron(n, blocks))
 
-occupied_locations(k::KronBlock) =
-    collect(map(x-> x + i - 1, occupied_locations(b)) for (i, b) in zip(k.addrs, subblocks(k)))
-subblocks(x::KronBlock) = x.blocks
+OccupiedLocations(k::KronBlock) = Iterators.flatten(map(x-> x + i - 1, OccupiedLocations(b)) for (i, b) in zip(k.addrs, subblocks(k)))
+subblocks(x::KronBlock) = SubBlockIt(x.blocks)
 chsubblocks(pb::KronBlock{N}, blocks) where N = KronBlock{N}(pb.addrs, blocks)
 cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
 color(::Type{T}) where {T <: KronBlock} = :cyan
@@ -98,7 +97,7 @@ color(::Type{T}) where {T <: KronBlock} = :cyan
 
 function mat(k::KronBlock{N}) where N
     sizes = map(nqubits, subblocks(k))
-    start_locs = @. N - $(addrs(k)) - sizes + 1
+    start_locs = @. N - $(k.addrs) - sizes + 1
 
     order = sortperm(start_locs)
     sorted_start_locs = start_locs[order]

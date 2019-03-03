@@ -4,11 +4,12 @@ using YaoBase
 import YaoBase: @interface
 
 """
-    AbstractBlock
+    AbstractBlock{T}
 
-Abstract type for quantum circuit blocks.
+Abstract type for quantum circuit blocks, where `T` is the numerical type.
+Usually use `ComplexF32` or `ComplexF64`.
 """
-abstract type AbstractBlock end
+abstract type AbstractBlock{T} end
 
 """
     apply!(register, block)
@@ -36,13 +37,19 @@ julia> ArrayReg(bit"0") |> X |> Y
 Base.:(|>)(r::AbstractRegister, blk::AbstractBlock) = apply!(r, blk)
 
 """
-    occupied_locations(blk)
+    OccupiedLocations(x)
 
-Returns a list of occupied locations of a given block.
+Return an iterator of occupied locations of `x`.
 """
-@interface occupied_locations(blk::AbstractBlock) = Tuple(1:nqubits(blk))
+@interface OccupiedLocations(x::AbstractBlock) = 1:nqubits(x)
 
-@interface print_block(io::IO, blk::AbstractBlock) = print(io, blk)
+"""
+    applymatrix(g::AbstractBlock) -> Matrix
+
+Transform the apply! function of specific block to dense matrix.
+"""
+@interface applymatrix(g::AbstractBlock) = linop2dense(r->statevec(apply!(ArrayReg(r), g)), nqubits(g))
+
+@interface print_block(io::IO, blk::AbstractBlock) = print_block(io, MIME("text/plain"), blk)
 print_block(blk::AbstractBlock) = print_block(stdout, blk)
-print_block(io::IO, ::MIME"text/plain", blk::AbstractBlock) =
-    print_block(io::IO, blk)
+print_block(io::IO, ::MIME"text/plain", blk::AbstractBlock) = summary(io, blk)

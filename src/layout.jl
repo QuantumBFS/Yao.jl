@@ -103,15 +103,17 @@ end
 
 
 # Custom layouts
-color(::Type{T}) where {T <: Swap} = :magenta
-color(::Type{T}) where {T <: ControlBlock} = :red
-color(::Type{T}) where {T <: ChainBlock} = :blue
-color(::Type{T}) where {T <: Roller} = :cyan
+color(m::AbstractBlock) = color(typeof(m))
+color(::Type{<:Swap}) = :magenta
+color(::Type{<:ControlBlock}) = :red
+color(::Type{<:ChainBlock}) = :blue
+color(::Type{<:Roller}) = :cyan
+color(::Type{<:MathGate}) = :red
+color(::Type{<:PutBlock}) = :cyan
+color(::Type{<:RepeatedBlock}) = :cyan
 
 # color(::Type{T}) where {T <: PauliString} = :cyan
-# color(::Type{T}) where {T <: RepeatedBlock} = :cyan
 # color(::Type{T}) where {T <: Sequential} = :blue
-# color(::Type{T}) where {T <: PutBlock} = :cyan
 
 print_block(io::IO, g::PhaseGate) = print(io, "phase(", g.theta, ")")
 print_block(io::IO, S::ShiftGate) = print(io, "shift(", S.theta, ")")
@@ -120,8 +122,24 @@ print_block(io::IO, swap::Swap) = printstyled(io, "swap", swap.locs; bold=true, 
 print_block(io::IO, x::KronBlock) = printstyled(io, "kron"; bold=true, color=color(KronBlock))
 print_block(io::IO, x::ChainBlock) = printstyled(io, "chain"; bold=true, color=color(ChainBlock))
 print_block(io::IO, x::Roller) = printstyled(io, "roller"; bold=true, color=color(Roller))
-print_block(io::IO, te::TimeEvolution) = print(io, "Time Evolution ", te.H, "Δt = $(te.t), tol = $(te.tol)")
+print_block(io::IO, x::ReflectGate{N}) where N = print(io, "reflect: nqubits=$N")
+print_block(io::IO, c::Concentrator) = print(io, "Concentrator: ", occupied_locations(c))
+print_block(io::IO, c::CachedBlock) = print_block(io, c.block)
+print_block(io::IO, c::Daggered) = print_block(io, c.block)
 
+# TODO: use OhMyREPL's default syntax highlighting for functions
+function print_block(io::IO, m::MathGate{N, <:LegibleLambda}) where N
+    printstyled(io, "mathgate($(m.f); nbits=$N, bview=$(nameof(m.v)))"; bold=true, color=color(m))
+end
+
+function print_block(io::IO, m::MathGate{N, <:Function}) where N
+    printstyled(io, "mathgate($(nameof(m.f)); nbits=$N, bview=$(nameof(m.v)))"; bold=true, color=color(m))
+end
+
+function print_block(io::IO, te::TimeEvolution)
+    println(io, "Time Evolution Δt = $(te.dt), tol = $(te.tol)")
+    print_tree(io, te.H.block; title=false)
+end
 
 function print_block(io::IO, x::ControlBlock)
     printstyled(io, "control("; bold=true, color=color(ControlBlock))
@@ -135,6 +153,33 @@ function print_block(io::IO, x::ControlBlock)
     end
     printstyled(io, ")"; bold=true, color=color(ControlBlock))
 end
+
+function print_block(io::IO, pb::PutBlock{N}) where N
+    printstyled(io, "put on ("; bold=true, color=color(PutBlock))
+    for i in eachindex(pb.addrs)
+        printstyled(io, pb.addrs[i]; bold=true, color=color(PutBlock))
+        if i != lastindex(pb.addrs)
+            printstyled(io, ", "; bold=true, color=color(PutBlock))
+        end
+    end
+    printstyled(io, ")"; bold=true, color=color(PutBlock))
+end
+
+function print_block(io::IO, rb::RepeatedBlock{N}) where N
+    printstyled(io, "repeat on ("; bold=true, color=color(RepeatedBlock))
+    for i in eachindex(rb.addrs)
+        printstyled(io, rb.addrs[i]; bold=true, color=color(RepeatedBlock))
+        if i != lastindex(rb.addrs)
+            printstyled(io, ", "; bold=true, color=color(RepeatedBlock))
+        end
+    end
+    printstyled(io, ")"; bold=true, color=color(RepeatedBlock))
+end
+
+print_annotation(io::IO, c::Daggered) =
+    printstyled(io, " [†]"; bold=true, color=:yellow)
+print_annotation(io::IO, c::CachedBlock) =
+    printstyled(io, "[↺] "; bold=true, color=:yellow)
 
 function print_annotation(
     io::IO,

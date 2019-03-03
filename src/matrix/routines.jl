@@ -1,4 +1,5 @@
 using SparseArrays, LuxurySparse
+import YaoBase: diff
 
 """
     cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::AbstractMatrix, locs::NTuple{M, Int}) where {C, M} -> AbstractMatrix
@@ -45,7 +46,7 @@ get specific col of a CSC matrix, returns a slice of (rowval, nzval)
     end
 end
 
-@inline function reorderU_iterator(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::AbstractMatrix, locs::NTuple{M, Int}) where {C, M}
+@inline function reorder_unitary(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::AbstractMatrix, locs::NTuple{M, Int}) where {C, M}
     # reorder a unirary matrix.
     U = all(diff(locs).>0) ? U0 : reorder(U0, collect(locs)|>sortperm)
     locked_bits = [cbits..., locs...]
@@ -105,7 +106,7 @@ end
 end
 
 function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SDMatrix, locs::NTuple{M, Int}) where {C, M}
-    U, ic, locs_raw = reorderU_iterator(nbit, cbits, cvals, U0, locs)
+    U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
     N = 1<<nbit
     MM = size(U0, 1)
     NNZ = 1<<nbit + length(ic) * (length(U0) - size(U0,2))
@@ -135,7 +136,7 @@ end
 
 ############################### SparseMatrix ##############################
 function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SparseMatrixCSC{Tv}, locs::NTuple{M, Int})::SparseMatrixCSC{Tv} where {C, M, Tv}
-    U, ic, locs_raw = reorderU_iterator(nbit, cbits, cvals, U0, locs)
+    U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
     N = 1<<nbit
     NNZ::Int = 1<<nbit + length(ic) * (nnz(U0) - size(U0,2))
     ns = diff(U.colptr) |> autostatic
@@ -179,7 +180,7 @@ end
 end
 
 function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SDPermMatrix, locs::NTuple{M, Int}) where {C, M}
-    U, ic, locs_raw = reorderU_iterator(nbit, cbits, cvals, U0, locs)
+    U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
     N = 1<<nbit
     pm = PermMatrix(collect(1:N), ones(eltype(U), N))
     controldo(ic) do i
@@ -190,7 +191,7 @@ end
 
 ############################ Diagonal ##########################
 function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SDDiagonal, locs::NTuple{M, Int}) where {C, M}
-    U, ic, locs_raw = reorderU_iterator(nbit, cbits, cvals, U0, locs)
+    U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
     dg = Diagonal(ones(eltype(U0), 1<<nbit))
     controldo(ic) do i
         unij!(dg, locs_raw+i, U)
