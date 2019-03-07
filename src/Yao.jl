@@ -16,28 +16,5 @@ Extensible Framework for Quantum Algorithm Design for Humans.
 """
 const 幺 = Yao
 
-using MacroTools, Reexport, LuxurySparse
-using Random, LinearAlgebra, SparseArrays
-
-PKGNAME = "Yao"
-ENVNAME = join([PKGNAME, "DefaultType"])
-
-@static if haskey(ENV, ENVNAME)
-    const DefaultType = parse(ENV[ENVNAME])
-else
-    const DefaultType = ComplexF64
-end
-
-include("APIs.jl")
-
-include("Intrinsics/Intrinsics.jl")
-include("Registers/Registers.jl")
-include("Blocks/Blocks.jl")
-include("Boost/Boost.jl")
-include("Interfaces/Interfaces.jl")
-
-#include("QASM/QASM.jl")
-
-@reexport using .Interfaces
-
+using Reexport
 end # module

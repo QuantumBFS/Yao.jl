@@ -5,16 +5,13 @@ os:
   - osx
 julia:
   - 1.0
+  - 1.1
   - nightly
 notifications:
   email: false
 matrix:
  allow_failures:
  - julia: nightly
-
-env:
-  global:
-    - DOCUMENTER_DEBUG=true
 
 jobs:
   include:

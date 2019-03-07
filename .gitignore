@@ -19,5 +19,3 @@ _*.dat
 __pycache__/
 
 Manifest.toml
-
-_local/
