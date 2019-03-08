@@ -1,6 +1,5 @@
 name = "YaoBlockTree"
 uuid = "9ef32aa8-2a2b-11e9-20a5-91815742e9ae"
-version = "0.1.0"
 
 [deps]
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
