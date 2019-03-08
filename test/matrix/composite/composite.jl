@@ -25,5 +25,5 @@ end
 end
 
 @testset "test concentrate" begin
-    include("concentrate.jl")
+    include("concentrator.jl")
 end

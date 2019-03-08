@@ -62,7 +62,7 @@ end
     g = roll(X, kron(Y, Z), X, X)
     tg = kron(X, Y, Z, X, X)
     @test mat(g) == mat(tg)
-    @test linop2dense(r->apply!(register(r), g) |> statevec, 5) == mat(tg)
+    @test linop2dense(r->apply!(ArrayReg(r), g) |> statevec, 5) == mat(tg)
 
     m = kron(Const.CNOT, Const.I2, Const.X, Const.I2)
     r = roll(5, I2, X, I2, CNOT)
