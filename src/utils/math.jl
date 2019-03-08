@@ -17,8 +17,9 @@ export batch_normalize,
     # fidelity
     pure_state_fidelity,
     density_fidelity,
-    purification_fidelity
-
+    purification_fidelity,
+    # matrix tools
+    autostatic
 
 using LuxurySparse, LinearAlgebra, BitBasis
 import LinearAlgebra: svdvals
@@ -235,3 +236,10 @@ function rand_hermitian(N::Int)
     A = randn(ComplexF64, N, N)
     A + A'
 end
+
+"""
+    autostatic(A)
+
+Staticize dynamic array `A` by a constant `STATIC_THRESHOLD`.
+"""
+autostatic(A::AbstractVecOrMat; threshold::Int=8) = length(A) > (1 << threshold) ? A : staticize(A)
