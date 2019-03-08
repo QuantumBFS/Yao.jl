@@ -129,6 +129,7 @@ macro assert_addrs_inbounds(n, addrs, msgs...)
 
     return quote
         isaddrs_inbounds($(esc(n)), $(esc(addrs))) || error($msg)
+        nothing
     end
 end
 
@@ -144,6 +145,7 @@ macro assert_addrs(n, addrs, msgs...)
     return quote
         @assert_addrs_inbounds $(esc(n)) $(esc(addrs))
         isaddrs_conflict($(esc(addrs))) && throw(AddressConflictError($msg))
+        nothing
     end
 end
 
@@ -160,5 +162,6 @@ macro assert_addrs_contiguous(n, addrs, msgs...)
     quote
         @assert_addrs $(esc(n)) $(esc(addrs))
         isaddrs_contiguous($(esc(n)), $(esc(addrs))) || error($msg)
+        nothing
     end
 end
