@@ -1,4 +1,4 @@
-using BitBasis, LuxurySparse, StaticArrays
+using YaoBase, BitBasis, LuxurySparse, StaticArrays
 export instruct!
 
 # to avoid potential ambiguity, we limit them to tuple for now
