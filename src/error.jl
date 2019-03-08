@@ -77,6 +77,7 @@ end
 Check if the input address has conflicts.
 """
 function isaddrs_conflict(addrs::AddressList)
+    addrs = _sort(addrs)
     for (nxt, cur) in zip(addrs[2:end], addrs[1:end-1])
         nonempty_minimum(nxt) > nonempty_maximum(cur) || return false
     end
