@@ -17,11 +17,11 @@ function _measure(pl::AbstractMatrix, ntimes::Int)
     return res
 end
 
-YaoBase.measure(reg::ArrayReg{1}; nshot::Int=1) = _measure(reg |> probs, nshot)
+YaoBase.measure(reg::ArrayReg{1}; ntimes::Int=1) = _measure(reg |> probs, ntimes)
 
-function YaoBase.measure(reg::ArrayReg{B}; nshot::Int=1) where B
+function YaoBase.measure(reg::ArrayReg{B}; ntimes::Int=1) where B
     pl = dropdims(sum(reg |> rank3 .|> abs2, dims=2), dims=2)
-    return _measure(pl, nshot)
+    return _measure(pl, ntimes)
 end
 
 function YaoBase.measure_remove!(reg::ArrayReg{B}) where B
