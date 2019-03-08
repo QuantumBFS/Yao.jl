@@ -1,18 +1,10 @@
 using BitBasis, LuxurySparse, StaticArrays
 export instruct!
 
-const STATIC_THRESHOLD = 8
 # to avoid potential ambiguity, we limit them to tuple for now
 # but they only has to be an iterator over integers
 const Locations{T} = NTuple{N, T} where N
 const BitConfigs{T} = NTuple{N, T} where N
-
-"""
-    autostatic(A)
-
-Staticize dynamic array `A` by a constant `STATIC_THRESHOLD`.
-"""
-autostatic(A::AbstractVecOrMat) = length(A) > (1 << STATIC_THRESHOLD) ? A : staticize(A)
 
 function YaoBase.instruct!(
     state::AbstractVecOrMat{T},
