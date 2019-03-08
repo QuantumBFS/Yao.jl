@@ -29,11 +29,14 @@ function KronBlock{N, T}(addrs::Vector{Int}, blocks::Vector{MT}) where {N, T, MT
 end
 
 function KronBlock{N}(addrs::Vector{Int}, blocks::Vector{<:MatrixBlock}) where N
-    T = promote_type([datatype(each) for each in blocks]...)
+    T = datatype(first(blocks))
+    for k in 2:length(blocks)
+        T == datatype(blocks[k]) || error("datatype mismatch, got $(datatype(each)) at $k-th block")
+    end
     return KronBlock{N, T}(addrs, blocks)
 end
 
-function KronBlock{N}(itr::Union{Tuple{Int, <:MatrixBlock}, Pair{Int,<:MatrixBlock}}...) where N
+function KronBlock{N}(itr::Pair{Int,<:MatrixBlock}...) where N
     blocks = MatrixBlock[]
     addrs = Int[]
 
@@ -45,12 +48,16 @@ function KronBlock{N}(itr::Union{Tuple{Int, <:MatrixBlock}, Pair{Int,<:MatrixBlo
 end
 
 function KronBlock(itr::MatrixBlock...)
-    N = length(itr)
-    return KronBlock{N}(collect(1:N), collect(itr))
+    N = sum(nqubits, itr)
+    addrs = Int[]
+    count = 1
+    for each in itr
+        push!(addrs, count)
+        count += nqubits(each)
+    end
+    return KronBlock{N}(addrs, collect(itr))
 end
 
-KronBlock{N}(args::Union{Tuple, Vector{<:Pair}}) where N = KronBlock{N}(args...)
-KronBlock(args::Union{Tuple, Vector{<:MatrixBlock}}) where N = KronBlock(args...)
 KronBlock(blk::KronBlock) = copy(blk)
 
 """
@@ -60,19 +67,24 @@ Return a [`KronBlock`](@ref), with total number of qubits `n` and pairs of block
 
 # Example
 """
-Base.kron(total::Int, blocks::Pair{Int, <:MatrixBlock}...,) = KronBlock{total}(blocks...,)
+Base.kron(total::Int, blocks::Pair{Int, <:MatrixBlock}...) = KronBlock{total}(blocks...)
 
 """
-    kron(n, blocks::MatrixBlock...)
+    kron(blocks::MatrixBlock...)
     kron(n, itr)
 
 Return a [`KronBlock`](@ref), with total number of qubits `n`, and `blocks` should use all
 the locations on `n` wires in quantum circuits.
 """
-function Base.kron(total::Int, blocks::MatrixBlock...,)
-    sum(nqubits, blocks) == total || throw(AddressConflictError("Size of blocks does not match total size."))
-    return KronBlock(blocks)
+Base.kron(blocks::MatrixBlock...) = KronBlock(blocks...)
+
+function Base.kron(total::Int, blocks::MatrixBlock...)
+    sum(nqubits, blocks) == total || error("total number of qubits mismatch")
+    return kron(blocks...)
 end
+
+Base.kron(total::Int, blocks::Union{MatrixBlock, Pair}...) =
+    error("location of sparse distributed blocks must be explicit declared with pair (e.g 2=>X)")
 
 Base.kron(total::Int, blocks::Base.Generator) = kron(total, blocks...)
 
@@ -84,7 +96,6 @@ Return a lambda, which will take the total number of qubits as input.
 
 # Example
 """
-Base.kron(blocks::MatrixBlock...,) = @λ(n->kron(n, blocks...))
 Base.kron(blocks::Pair{Int, <:MatrixBlock}...,) = @λ(n->kron(n, blocks...))
 Base.kron(blocks::Base.Generator) = @λ(n->kron(n, blocks))
 

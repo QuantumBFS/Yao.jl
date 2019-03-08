@@ -1,3 +1,4 @@
+using LinearAlgebra, YaoArrayRegister
 import YaoBase: @interface
 
 abstract type IteratorWrapper{It} end
@@ -12,6 +13,19 @@ Base.size(it::IteratorWrapper) = size(it.it)
 Base.lastindex(it::IteratorWrapper) = lastindex(it.it)
 Base.getindex(it::IteratorWrapper, k) = getindex(it.it, k)
 Base.IndexStyle(it::IteratorWrapper) = Base.IndexStyles(it.it)
+
+function Base.:(==)(it_a::IteratorWrapper, it_b)
+    for (a, b) in zip(it_a, it_b)
+        if a != b
+            return false
+        end
+    end
+    return true
+end
+
+Base.:(==)(it_a, it_b::IteratorWrapper) = it_b == it_a
+Base.:(==)(it_a::IteratorWrapper, it_b::IteratorWrapper) =
+    invoke(Base.:(==), Tuple{IteratorWrapper, Any}, it_a, it_b)
 
 function Base.show(io::IO, it::IteratorWrapper)
     summary(io, it)
@@ -104,3 +118,27 @@ function Base.show(io::IO, it::OccupiedLocationsIt)
     end
     return
 end
+
+# abstract type MatrixTrait end
+# struct HasMatrix{N, T} end
+# struct MatrixUnkown end
+#
+# # NOTE: most blocks have matrix, use `HasMatrix` by default.
+# #       this will error when `mat` is not defined anyway, no worries.
+# MatrixTrait(x::AbstractBlock) where T = HasMatrix{nqubits(x), datatype(x)}()
+#
+# apply!(r::AbstractRegister, b::AbstractBlock) = apply!(MatrixTrait(b), r, b)
+#
+# function apply!(::HasMatrix, r::ArrayReg, b::AbstractBlock)
+#     mul!(r.state, mat(b), r)
+#     return r
+# end
+#
+# function apply!(::HasMatrix, r::ArrayReg, b::AbstractBlock)
+#     if applicable(mat, b)
+#         mul!(r.state, mat(b), r)
+#     else
+#         throw(MethodError(apply!, (r, b)))
+#     end
+#     return r
+# end

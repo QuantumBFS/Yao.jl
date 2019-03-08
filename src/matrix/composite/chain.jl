@@ -13,7 +13,7 @@ struct ChainBlock{N, T, MT <: MatrixBlock{N, T}} <: CompositeBlock{N, T}
     blocks::Vector{MT}
 end
 
-ChainBlock(blocks::MatrixBlock{N}...) where N = ChainBlock(collect(blocks))
+ChainBlock(blocks::MatrixBlock{N, T}...) where {N, T} = ChainBlock(collect(MatrixBlock{N, T}, blocks))
 ChainBlock(c::ChainBlock{N, T, MT}) where {N, T, MT} = copy(c)
 
 """
@@ -30,6 +30,7 @@ chain(list::Vector) = ChainBlock(list)
 
 # if not all matrix block, try to put the number of qubits.
 chain(n::Int, blocks...) = chain(map(x->parse_block(n, x), blocks)...)
+chain(n::Int, itr) = chain(map(x->parse_block(n, x), itr)...)
 chain(blocks::Function...) = @λ(n->chain(n, blocks...))
 
 """
@@ -47,7 +48,7 @@ Return an lambda `n->chain(n)`.
 """
 chain() = @λ(n->chain(n))
 
-subblocks(c::ChainBlock) = c.blocks
+SubBlocks(c::ChainBlock) = c.blocks
 OccupiedLocations(c::ChainBlock) =
     unique(Iterators.flatten(OccupiedLocations(b) for b in subblocks(c)))
 chsubblocks(pb::ChainBlock, blocks) = ChainBlock(blocks)

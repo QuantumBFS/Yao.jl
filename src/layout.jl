@@ -126,6 +126,8 @@ print_block(io::IO, x::ReflectGate{N}) where N = print(io, "reflect: nqubits=$N"
 print_block(io::IO, c::Concentrator) = print(io, "Concentrator: ", occupied_locations(c))
 print_block(io::IO, c::CachedBlock) = print_block(io, c.block)
 print_block(io::IO, c::Daggered) = print_block(io, c.block)
+print_block(io::IO, f::FunctionBlock) = printstyled(io, "function: $(nameof(f.call!))"; bold=true, color=:green)
+
 
 # TODO: use OhMyREPL's default syntax highlighting for functions
 function print_block(io::IO, m::MathGate{N, <:LegibleLambda}) where N
@@ -188,7 +190,7 @@ function print_annotation(
     child::AbstractBlock,
     k::Int)
 
-    printstyled(io, k; bold=true, color=:white)
+    printstyled(io, node.addrs[k]; bold=true, color=:white)
     print(io, "=>")
 end
 

@@ -18,7 +18,7 @@ function Concentrator{N}(block::BT, locations::NTuple{C, Int}) where {N, M, C, T
     if !(length(locations) == M && N>=M)
         throw(AddressConflictError("length of locations must be equal to the size of block, and smaller than size of itself."))
     end
-    return Concentrator{N, T, BT}(block, locations)
+    return Concentrator{N, T, BT, C}(block, locations)
 end
 
 """
@@ -44,14 +44,6 @@ chcontained_block(pb::Concentrator{N}, blk::AbstractBlock) where N =
     Concentrator{N}(blk, occupied_locations(pb))
 PreserveStyle(::Concentrator) = PreserveAll()
 
-function iscommute(x::Concentrator{N}, y::Concentrator{N}) where N
-    if occupied_locations(x) == occupied_locations(y)
-        return iscommute(x.block, y.block)
-    else
-        return iscommute_fallback(x, y)
-    end
-end
-
 function apply!(r::AbstractRegister, c::Concentrator)
     focus!(r, occupied_locations(c))
     apply!(r, c.block)
@@ -71,3 +63,11 @@ end
 
 YaoBase.nqubits(::Concentrator{N}) where N = N
 YaoBase.nactive(c::Concentrator) = length(c.locations)
+
+function YaoBase.iscommute(x::Concentrator{N}, y::Concentrator{N}) where N
+    if occupied_locations(x) == occupied_locations(y)
+        return iscommute(x.block, y.block)
+    else
+        return iscommute_fallback(x, y)
+    end
+end

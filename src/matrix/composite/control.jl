@@ -126,15 +126,7 @@ end
 
 PreserveStyle(::ControlBlock) = PreserveAll()
 
-function iscommute(x::ControlBlock{N}, y::ControlBlock{N}) where N
-    if x.addrs == y.addrs && x.ctrl_qubits == y.ctrl_qubits
-        return iscommute(x.block, y.block)
-    else
-        return iscommute_fallback(x, y)
-    end
-end
-
-OccupiedLocations(c::ControlBlock) = (c.ctrl_qubits, map(x->c.addrs[x], OccupiedLocations(c.block))) |> Iterators.flatten
+OccupiedLocations(c::ControlBlock) = (c.ctrl_qubits..., map(x->c.addrs[x], occupied_locations(c.block))...)
 chcontained_block(pb::ControlBlock{N}, blk::AbstractBlock) where {N} = ControlBlock{N}(pb.ctrl_qubits, pb.vals, blk, pb.addrs)
 
 # NOTE: ControlBlock will forward parameters directly without loop
@@ -149,4 +141,12 @@ Base.adjoint(blk::ControlBlock{N}) where N = ControlBlock{N}(blk.ctrl_qubits, bl
 # NOTE: we only copy one hierachy (shallow copy) for each block
 function Base.copy(ctrl::ControlBlock{N, BT, C, M, T}) where {BT, N, C, M, T}
     return ControlBlock{N, BT, C, M, T}(ctrl.ctrl_qubits, ctrl.vals, ctrl.block, ctrl.addrs)
+end
+
+function YaoBase.iscommute(x::ControlBlock{N}, y::ControlBlock{N}) where N
+    if x.addrs == y.addrs && x.ctrl_qubits == y.ctrl_qubits
+        return iscommute(x.block, y.block)
+    else
+        return iscommute_fallback(x, y)
+    end
 end

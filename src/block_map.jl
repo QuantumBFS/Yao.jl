@@ -2,8 +2,11 @@ using LinearAlgebra, LinearMaps
 
 export BlockMap
 
-struct BlockMap{T, GT <: AbstractBlock{T}} <: LinearMap{T}
+struct BlockMap{T, GT <: AbstractBlock} <: LinearMap{T}
     block::GT
+
+    BlockMap(block::GT) where GT <: AbstractBlock =
+        new{datatype(block), GT}(block)
 end
 
 function Base.show(io::IO, A::BlockMap{T}) where T

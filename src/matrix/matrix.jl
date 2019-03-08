@@ -13,7 +13,7 @@ export MatrixBlock
 Abstract type for circuit blocks that have matrix
 representation.
 """
-abstract type MatrixBlock{N, T} <: AbstractBlock{T} end
+abstract type MatrixBlock{N, T} <: AbstractBlock end
 
 function apply!(r::AbstractRegister, b::MatrixBlock)
     r.state .= mat(b) * r
@@ -31,6 +31,7 @@ Returns the matrix form of given block.
 YaoBase.nqubits(::Type{MT}) where {N, MT <: MatrixBlock{N}} = N
 YaoBase.nqubits(x::MatrixBlock{N}) where N = nqubits(typeof(x))
 YaoBase.datatype(x::MatrixBlock{N, T}) where {N, T} = T
+YaoBase.datatype(::Type{<:MatrixBlock{N, T}}) where {N, T} = T
 
 # properties
 for each_property in [:isunitary, :isreflexive, :ishermitian]

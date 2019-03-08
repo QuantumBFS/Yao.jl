@@ -53,7 +53,7 @@ Create a new [`AbstractContainer`](@ref) with given sub-block. This uses
 """
 @interface chcontained_block(x::AbstractContainer, blk)
 
-chsubblocks(x, itr) = chcontained_block(x, first(itr))
+chsubblocks(x::AbstractContainer, itr) = chcontained_block(x, first(itr))
 
 # NOTE: this is a holy trait, no overhead, don't use methods on this
 abstract type PreserveStyle end
@@ -68,14 +68,14 @@ for METHOD in (:ishermitian, :isreflexive, :isunitary)
         # forward to trait
         YaoBase.$METHOD(x::AbstractContainer) = $METHOD(PreserveStyle(x), x)
         # forward contained block property
-        YaoBase.$METHOD(::PreserveAll, c::AbstractContainer) = $METHOD(block(c))
+        YaoBase.$METHOD(::PreserveAll, c::AbstractContainer) = $METHOD(contained_block(c))
         # forward to default property by calculating the matrix
         YaoBase.$METHOD(::PreserveNothing, c::AbstractContainer) = $METHOD(mat(c))
         # preseve each property
         YaoBase.$METHOD(::PreserveProperty{$(QuoteNode(METHOD))}, c::AbstractContainer) =
-            $METHOD(block(c))
+            $METHOD(contained_block(c))
         # fallback
-        YaoBase.$METHOD(::PreserveStyle, c::AbstractContainer) = $METHOD(block(c))
+        YaoBase.$METHOD(::PreserveStyle, c::AbstractContainer) = $METHOD(contained_block(c))
     end
 end
 

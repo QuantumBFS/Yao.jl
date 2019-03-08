@@ -9,18 +9,23 @@ Roller block.
 """
 struct Roller{N, T, BT <: Tuple} <: CompositeBlock{N, T}
     blocks::BT
-    function Roller{N, T, BT}(blocks::BT) where {N, T, BT}
+    function Roller{N, T}(blocks::BT) where {N, T, BT}
         sum(nqubits, blocks) == N || throw(AddressConflictError("Size of blocks does not match roller size."))
         new{N, T, BT}(blocks)
     end
 end
 
-Roller{T}(blocks::Tuple) where T = Roller{sum(nqubits, blocks), T, typeof(blocks)}(blocks)
-Roller(blocks::Tuple) = Roller{blocks|>_blockpromote}(blocks)
-Roller(blocks::AbstractBlock...) = Roller(blocks)
-Roller{N}(block::MatrixBlock{K, T}) where {N, K, T} = Roller{N, T, NTuple{N÷K, typeof(block)}}(ntuple(x->deepcopy(block), Val(N÷K)))
 
-rollrepeat(n::Int, block::MatrixBlock) = Roller{n}(block)
+function Roller(blocks::Tuple)
+    T = datatype(first(blocks))
+    for k in 2:length(blocks)
+        T == datatype(blocks[k]) || error("datatype mismatch, got $(datatype(blocks[k])) at $k-th block")
+    end
+    return Roller{sum(nqubits, blocks), T}(blocks)
+end
+
+Roller(blocks::AbstractBlock...) = Roller(blocks)
+rollrepeat(n::Int, block::MatrixBlock{K}) where K = Roller(ntuple(x->copy(block), Val(n÷K)))
 rollrepeat(block::MatrixBlock) = n->rollrepeat(n, block)
 
 """
@@ -40,6 +45,7 @@ function roll(n::Int, a::Pair, blocks...,)
 end
 
 function roll(n::Int, itr)
+    itr = map(x->parse_block(n, x), itr)
     first(itr) isa Pair || throw(ArgumentError("Expect a Pair"))
 
     curr_head = 1
@@ -65,10 +71,12 @@ function roll(n::Int, itr)
     Roller(list...,)
 end
 
-roll(blocks...,) = @λ(n->roll(n, blocks...,))
+roll(blocks::AbstractBlock...) = Roller(blocks)
+roll(blocks::Union{Function, AbstractBlock}...) = @λ(n->roll(n, blocks))
 roll(itr) = @λ(n->roll(n, itr))
 
-subblocks(m::Roller) = m.blocks
+SubBlocks(m::Roller) = m.blocks
+chsubblocks(m::Roller{N, T}, itr) where {N, T} = Roller{N, T}(Tuple(itr))
 mat(m::Roller) = mapreduce(mat, kron, reverse(m.blocks))
 
 function apply!(reg::ArrayReg{1, T}, m::Roller{N}) where {N, T}
@@ -76,7 +84,7 @@ function apply!(reg::ArrayReg{1, T}, m::Roller{N}) where {N, T}
     temp = Vector{T}(undef, 1 << (N - 1))
     for block in m.blocks
         K = nqubits(block)
-        instruct!(st, mat(block), 1)
+        instruct!(st, mat(block), Tuple(1:K))
         rolldims!(Val(K), Val(N), Val(1), st, temp)
     end
     return reg
@@ -87,7 +95,7 @@ function apply!(reg::ArrayReg{B, T}, m::Roller{N}) where {B, N, T}
     temp = Matrix{T}(undef, 1 << (N - 1), B)
     for block in m.blocks
         K = nqubits(block)
-        mul!(st, mat(block), st)
+        instruct!(st, mat(block), Tuple(1:K))
         rolldims!(Val(K), Val(N), Val(B), st, temp)
     end
     return reg

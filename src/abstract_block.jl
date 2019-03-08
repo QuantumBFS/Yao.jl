@@ -4,12 +4,11 @@ using YaoBase
 import YaoBase: @interface
 
 """
-    AbstractBlock{T}
+    AbstractBlock
 
-Abstract type for quantum circuit blocks, where `T` is the numerical type.
-Usually use `ComplexF32` or `ComplexF64`.
+Abstract type for quantum circuit blocks.
 """
-abstract type AbstractBlock{T} end
+abstract type AbstractBlock end
 
 """
     apply!(register, block)
@@ -53,3 +52,6 @@ Transform the apply! function of specific block to dense matrix.
 @interface print_block(io::IO, blk::AbstractBlock) = print_block(io, MIME("text/plain"), blk)
 print_block(blk::AbstractBlock) = print_block(stdout, blk)
 print_block(io::IO, ::MIME"text/plain", blk::AbstractBlock) = summary(io, blk)
+
+# return itself by default
+Base.copy(x::AbstractBlock) = x

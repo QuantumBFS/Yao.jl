@@ -10,9 +10,9 @@ include("block_map.jl")
 include("matrix/matrix.jl")
 # include("symbolic/symbolic.jl")
 
-# include("measure.jl")
+include("measure.jl")
 # include("sequencial.jl")
-# include("function.jl")
+include("function.jl")
 
 include("parse_block.jl")
 
