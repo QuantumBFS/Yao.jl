@@ -61,17 +61,17 @@ Returns the numerical data type used by register.
 @interface datatype(r::AbstractRegister{B, T}) where {B, T} = T
 
 """
-    increase!(register, n::Int) -> register
-    increase!(n::Int) -> λ(register)
+    addbits!(register, n::Int) -> register
+    addbits!(n::Int) -> λ(register)
 
-Increase the register by n bits in state |0>.
+Add `n` qubits to given register in state |0>.
 i.e. |psi> -> |000> ⊗ |psi>, increased bits have higher indices.
 
 If only an integer is provided, then returns a lambda function.
 """
-@interface increase!(::AbstractRegister, n::Int)
+@interface addbits!(::AbstractRegister, n::Int)
 
-increase!(n::Int) = @λ(register -> increase!(register, n))
+addbits!(n::Int) = @λ(register -> addbits!(register, n))
 
 """
     focus!(register, locs) -> register
