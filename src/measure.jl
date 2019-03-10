@@ -2,8 +2,7 @@ using StatsBase, StaticArrays
 export measure,
     measure!,
     measure_remove!,
-    measure_setto!,
-    measure_reset!,
+    measure_collapseto!,
     select,
     select!
 
@@ -50,12 +49,12 @@ function YaoBase.measure!(reg::ArrayReg{B}) where B
     return res
 end
 
-function YaoBase.measure_setto!(reg::ArrayReg{B}; bit_config::Integer=0) where B
+function YaoBase.measure_collapseto!(reg::ArrayReg{B}; config::Integer=0) where B
     state = reg |> rank3
     M, N, B1 = state |> size
     nstate = zero(state)
     res = measure_remove!(reg)
-    nstate[bit_config+1, :, :] = reshape(reg.state, :, B)
+    nstate[config+1, :, :] = reshape(reg.state, :, B)
     reg.state = reshape(nstate, M, N*B)
     return res
 end

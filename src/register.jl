@@ -15,7 +15,7 @@ export ArrayReg,
     probs,
     reorder!,
     invorder!,
-    setto!,
+    collapseto!,
     fidelity,
     trace_distance,
     # YaoBase deprecated
@@ -155,7 +155,7 @@ function YaoBase.reorder!(r::ArrayReg, orders)
     return r
 end
 
-function YaoBase.setto!(r::ArrayReg, bit_config::Integer=0)
+function YaoBase.collapseto!(r::ArrayReg, bit_config::Integer=0)
     fill!(r.state, 0)
     @inbounds r.state[bit_config+1,:] .= 1
     return r
