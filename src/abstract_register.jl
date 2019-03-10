@@ -186,14 +186,14 @@ Measure current active qubits or qubits at `locs` and remove them.
 @interface measure_remove!(::AbstractRegister)
 
 """
-    measure_setto!(reg::AbstractRegister[, locs]; bit_config) -> Int
+    measure_collapseto!(reg::AbstractRegister[, locs]; config) -> Int
 
 Measure current active qubits or qubits at `locs` and set the register to specific value.
 """
-@interface measure_setto!(::AbstractRegister; bit_config::Int=0)
+@interface measure_collapseto!(::AbstractRegister; config::Int=0)
 
 # focus context
-for FUNC in [:measure!, :measure, :measure_setto!]
+for FUNC in [:measure!, :measure, :measure_collapseto!]
     @eval function $FUNC(reg::AbstractRegister, locs; kwargs...)
         focus!(reg, locs)
         res = $FUNC(reg; kwargs...)
@@ -279,19 +279,19 @@ Inverse the address of register.
 @interface invorder!(r::AbstractRegister) = reorder!(r, Tuple(nactive(reg):-1:1))
 
 """
-    setto!(register, bit_str)
+    collapseto!(register, bit_str)
 
 Set the `register` to bit string literal `bit_str`. About bit string literal,
 see more in [`@bit_str`](@ref).
 """
-@interface setto!(r::AbstractRegister, bit_str::BitStr) = setto!(r, bit_str.val)
+@interface collapseto!(r::AbstractRegister, bit_str::BitStr) = collapseto!(r, bit_str.val)
 
 """
-    setto!(register, bit_config::Integer)
+    collapseto!(register, config::Integer)
 
-Set the `register` to bit configuration `bit_config`.
+Set the `register` to bit configuration `config`.
 """
-@interface setto!(r::AbstractRegister, bit_config::Integer=0)
+@interface collapseto!(r::AbstractRegister, config::Integer=0)
 
 """
     fidelity(register1, register2)
@@ -324,7 +324,7 @@ F(ρ, σ) = sqrt(tr(ρσ) + 2 \\sqrt{det(ρ)det(σ)})
 @interface fidelity(r1::AbstractRegister, r2::AbstractRegister)
 
 """
-    trace_distance(register1, register2)
+    tracedist(register1, register2)
 
 Return the trace distance of `register1` and `register2`.
 
@@ -339,7 +339,7 @@ Trace distance is defined as following:
 
 - https://en.wikipedia.org/wiki/Trace_distance
 """
-@interface trace_distance(r1::AbstractRegister, r2::AbstractRegister)
+@interface tracedist(r1::AbstractRegister, r2::AbstractRegister)
 
 """
     density_matrix(register)
