@@ -79,12 +79,12 @@ end
             @test each == ArrayReg(bit"101")
         end
     end
-    @testset "test increase!" begin
-        @test increase!(zero_state(3), 3) == zero_state(6)
+    @testset "test addbits!" begin
+        @test addbits!(zero_state(3), 3) == zero_state(6)
         r = rand_state(3; nbatch=2)
-        @test increase!(copy(r), 2) ≈ cat(zero_state(2; nbatch=2), r)
+        @test addbits!(copy(r), 2) ≈ cat(zero_state(2; nbatch=2), r)
         r = rand_state(3; nbatch=1)
-        @test increase!(copy(r), 2) ≈ cat(zero_state(2; nbatch=1), r)
+        @test addbits!(copy(r), 2) ≈ cat(zero_state(2; nbatch=1), r)
     end
 end
 

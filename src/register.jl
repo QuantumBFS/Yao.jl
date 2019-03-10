@@ -10,7 +10,7 @@ export ArrayReg,
     nremain,
     nbatch,
     viewbatch,
-    increase!,
+    addbits!,
     datatype,
     probs,
     reorder!,
@@ -123,7 +123,7 @@ YaoBase.nqubits(r::ArrayReg{B}) where B = log2i(length(r.state) ÷ B)
 YaoBase.nactive(r::ArrayReg) = log2dim1(r.state)
 YaoBase.viewbatch(r::ArrayReg, ind::Int) = @inbounds ArrayReg{1}(view(rank3(r), :, :, ind))
 
-function YaoBase.increase!(r::ArrayReg, n::Int)
+function YaoBase.addbits!(r::ArrayReg, n::Int)
     raw = state(r); M, N = size(raw)
     r.state = similar(r.state, M * (1 << n), N)
     fill!(r.state, 0)
