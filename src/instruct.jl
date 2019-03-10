@@ -99,7 +99,7 @@ function YaoBase.instruct!(state::AbstractVecOrMat, ::Val{:X}, locs::NTuple{N, I
     do_mask = bmask(first(locs))
     @simd for b in basis(state)
         local i_::Int
-        @inbounds if anymasked(b, do_mask)
+        @inbounds if anyone(b, do_mask)
             i = b+1
             i_ = flip(b, mask) + 1
             swaprows!(state, i, i_)
@@ -115,7 +115,7 @@ function YaoBase.instruct!(state::AbstractVecOrMat{T}, ::Val{:Y}, locs::NTuple{N
 
     @simd for b in basis(Int, state)
         local i::Int, i_::Int
-        if anymasked(b, do_mask)
+        if anyone(b, do_mask)
             i = b + 1
             i_ = flip(b, mask) + 1
             factor1 = isodd(count_ones(b & mask)) ? -factor : factor
@@ -251,7 +251,7 @@ function YaoBase.instruct!(
     for j in start:step_2:size(state, 1)-step+start
         local i_::Int
         @simd for b in j:j+step-1
-            @inbounds if allmasked(b, mask2)
+            @inbounds if allone(b, mask2)
                 i = b+1
                 i_ = flip(b, mask2) + 1
                 swaprows!(state, i, i_)
@@ -273,10 +273,10 @@ function YaoBase.instruct!(
     for j in start:step_2:size(state, 1)-step+start
         local i_::Int
         @simd for b in j:j+step-1
-            @inbounds if allmasked(b, mask2)
+            @inbounds if allone(b, mask2)
                 i = b+1
                 i_ = flip(b, mask2) + 1
-                if allmasked(b, mask2)
+                if allone(b, mask2)
                     factor = T(im)
                 else
                     factor = T(-im)
@@ -302,7 +302,7 @@ for (G, FACTOR) in zip([:Z, :S, :T, :Sdag, :Tdag], [:(-1), :(im), :($(exp(im*π/
         start = control_bits == 1 ? step : 0
         for j in start:step_2:size(state, 1)-step+start
             for i in j+1:j+step
-                if allmasked(i-1, mask2)
+                if allone(i-1, mask2)
                     mulrow!(state, i, $FACTOR)
                 end
             end
