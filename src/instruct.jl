@@ -1,7 +1,7 @@
 export instruct!
 
 """
-    instruct(state, operator[, locs, control_bits, control_vals])
+    instruct(state, operator[, locs, control_locs, control_configs])
 
 instruction implementation for applying an operator to a quantum state.
 
