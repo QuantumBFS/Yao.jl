@@ -25,9 +25,9 @@ end
     dm_ = ρ(reg_)
     dm2 = ρ(reg2)
     @test reg |> probs ≈ dm |> probs
-    @test isapprox(trace_distance(dm, dm), trace_distance(reg, reg), atol=1e-5)
-    @test isapprox(trace_distance(dm, dm_), trace_distance(reg, reg_), atol=1e-5)
-    @test isapprox(trace_distance(dm2, dm2), trace_distance(reg2, reg2), atol=1e-5)
+    @test isapprox(tracedist(dm, dm), tracedist(reg, reg), atol=1e-5)
+    @test isapprox(tracedist(dm, dm_), tracedist(reg, reg_), atol=1e-5)
+    @test isapprox(tracedist(dm2, dm2), tracedist(reg2, reg2), atol=1e-5)
 
     # mix
     reg4 = cat(reg, reg)
@@ -36,6 +36,6 @@ end
     focus!(reg5, 1:3)
     dm4 = reg4 |> density_matrix
     dm5 = reg5 |> density_matrix
-    @test isapprox(trace_distance(dm, dm_)[], trace_distance(dm4, dm5)[], atol=1e-5)
-    @test isapprox.(trace_distance(dm, dm_)[], trace_distance(repeat(reg4, 3)|>density_matrix, repeat(reg5, 3)|>density_matrix), atol=1e-5) |> all
+    @test isapprox(tracedist(dm, dm_)[], tracedist(dm4, dm5)[], atol=1e-5)
+    @test isapprox.(tracedist(dm, dm_)[], tracedist(repeat(reg4, 3)|>density_matrix, repeat(reg5, 3)|>density_matrix), atol=1e-5) |> all
 end

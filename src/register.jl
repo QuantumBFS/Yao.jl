@@ -17,7 +17,7 @@ export ArrayReg,
     invorder!,
     collapseto!,
     fidelity,
-    trace_distance,
+    tracedist,
     # YaoBase deprecated
     addbit!,
     reset!,
@@ -178,7 +178,7 @@ function YaoBase.fidelity(r1::ArrayReg{B}, r2::ArrayReg{B}) where B
     end
 end
 
-YaoBase.trace_distance(r1::ArrayReg{B}, r2::ArrayReg{B}) where B = trace_distance(ρ(r1), ρ(r2))
+YaoBase.tracedist(r1::ArrayReg{B}, r2::ArrayReg{B}) where B = tracedist(ρ(r1), ρ(r2))
 
 
 # properties

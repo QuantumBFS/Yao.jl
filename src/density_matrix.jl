@@ -42,7 +42,7 @@ function YaoBase.density_matrix(reg::ArrayReg{B}) where B
     return DensityMatrix(out)
 end
 
-YaoBase.trace_distance(dm1::DensityMatrix{B}, dm2::DensityMatrix{B}) where B =
+YaoBase.tracedist(dm1::DensityMatrix{B}, dm2::DensityMatrix{B}) where B =
     map(b->trnorm(dm1.state[:,:,b] - dm2.state[:,:,b]), 1:B)
 
 # TODO: use batch_broadcast in the future
