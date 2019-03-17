@@ -27,7 +27,7 @@ ControlBlock{N}(ctrl_qubits::NTuple{C}, vals::NTuple{C}, block::BT, addrs::NTupl
     ControlBlock{N, BT, C, M, datatype(block)}(ctrl_qubits, vals, block, addrs)
 
 # check size for matrix blocks
-function ControlBlock{N}(ctrl_qubits::NTuple{C}, vals::NTuple{C}, block::BT, addrs::NTuple{K}) where {N, M, C, K, T, BT<:MatrixBlock{M, T}}
+function ControlBlock{N}(ctrl_qubits::NTuple{C}, vals::NTuple{C}, block::BT, addrs::NTuple{K}) where {N, M, C, K, T, BT<:AbstractBlock{M, T}}
     M == K || throw(DimensionMismatch("block position not maching its size!"))
     return ControlBlock{N, BT, C, M, T}(ctrl_qubits, vals, block, addrs)
 end

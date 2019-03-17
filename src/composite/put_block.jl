@@ -5,11 +5,11 @@ export PutBlock, put
 
 Type for putting a block at given locations.
 """
-struct PutBlock{N, M, C, T, GT <: MatrixBlock} <: AbstractContainer{N, T}
+struct PutBlock{N, M, C, T, GT <: AbstractBlock} <: AbstractContainer{N, T}
     block::GT
     addrs::NTuple{C, Int}
 
-    function PutBlock{N}(block::GT, addrs::NTuple{C, Int}) where {N, M, C, T, GT <: MatrixBlock{M, T}}
+    function PutBlock{N}(block::GT, addrs::NTuple{C, Int}) where {N, M, C, T, GT <: AbstractBlock{M, T}}
         @assert_addrs N addrs
         return new{N, M, C, T, GT}(block, addrs)
     end
@@ -33,7 +33,7 @@ Lazy curried version of [`put`](@ref).
 put(pa::Pair) = @λ(n -> put(n, pa))
 
 OccupiedLocations(x::PutBlock) = x.addrs
-chcontained_block(x::PutBlock{N, M}, b::MatrixBlock{M}) where {N, M} = PutBlock{N}(b, x.addrs)
+chcontained_block(x::PutBlock{N, M}, b::AbstractBlock{M}) where {N, M} = PutBlock{N}(b, x.addrs)
 PreserveStyle(::PutBlock) = PreserveAll()
 cache_key(pb::PutBlock) = cache_key(pb.block)
 

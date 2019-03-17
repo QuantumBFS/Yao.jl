@@ -14,7 +14,7 @@ end
 Concentrator{N}(block::AbstractBlock, locations::NTuple{C, Int}) where {N, C} =
     Concentrator{N, datatype(block), typeof(block), C}(block, locations)
 
-function Concentrator{N}(block::BT, locations::NTuple{C, Int}) where {N, M, C, T, BT<:MatrixBlock{M, T}}
+function Concentrator{N}(block::BT, locations::NTuple{C, Int}) where {N, M, C, T, BT<:AbstractBlock{M, T}}
     if !(length(locations) == M && N>=M)
         throw(AddressConflictError("length of locations must be equal to the size of block, and smaller than size of itself."))
     end
@@ -51,7 +51,7 @@ function apply!(r::AbstractRegister, c::Concentrator)
     return r
 end
 
-mat(c::Concentrator{N, T, <:MatrixBlock}) where {N, T} =
+mat(c::Concentrator{N, T, <:AbstractBlock}) where {N, T} =
     error("Not implemented, post an issue if you really need it.")
 
 Base.adjoint(blk::Concentrator{N}) where N =

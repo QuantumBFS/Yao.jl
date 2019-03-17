@@ -3,21 +3,21 @@ import StaticArrays: SMatrix
 export RotationGate, Rx, Ry, Rz, rot
 
 """
-    RotationGate{N, T, GT <: MatrixBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
+    RotationGate{N, T, GT <: AbstractBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
 
 RotationGate, with GT both hermitian and isreflexive.
 """
-mutable struct RotationGate{N, T, GT <: MatrixBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
+mutable struct RotationGate{N, T, GT <: AbstractBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
     block::GT
     theta::T
-    function RotationGate{N, T, GT}(block::GT, theta) where {N, T, GT <: MatrixBlock{N, Complex{T}}}
+    function RotationGate{N, T, GT}(block::GT, theta) where {N, T, GT <: AbstractBlock{N, Complex{T}}}
         ishermitian(block) && isreflexive(block) ||
             throw(ArgumentError("Gate type $GT is not hermitian or not isreflexive."))
         new{N, T, GT}(block, T(theta))
     end
 end
 
-RotationGate(block::GT, theta) where {N, T, GT<:MatrixBlock{N, Complex{T}}} = RotationGate{N, T, GT}(block, T(theta))
+RotationGate(block::GT, theta) where {N, T, GT<:AbstractBlock{N, Complex{T}}} = RotationGate{N, T, GT}(block, T(theta))
 
 # bindings
 """
@@ -46,7 +46,7 @@ Rz(theta::T) where T <: AbstractFloat = RotationGate(Z(Complex{T}), theta)
 
 Return a [`RotationGate`](@ref) on U axis.
 """
-rot(axis::MatrixBlock, theta) = RotationGate(axis, theta)
+rot(axis::AbstractBlock, theta) = RotationGate(axis, theta)
 
 # General definition
 function mat(R::RotationGate{N, T}) where {N, T}

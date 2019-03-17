@@ -7,7 +7,7 @@ export TimeEvolution
 
 TimeEvolution, where GT is block type. input matrix should be hermitian.
 """
-struct TimeEvolution{N, T, Hamilton <: MatrixBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
+struct TimeEvolution{N, T, Hamilton <: AbstractBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
     H::BlockMap{Complex{T}, Hamilton}
     dt::T
     tol::T
@@ -16,7 +16,7 @@ struct TimeEvolution{N, T, Hamilton <: MatrixBlock{N, Complex{T}}} <: PrimitiveB
     function TimeEvolution(
         H::BlockMap{Complex{T}, TH},
         dt::T, tol::T,
-        is_itime::Bool) where {N, T, TH <: MatrixBlock{N, Complex{T}}}
+        is_itime::Bool) where {N, T, TH <: AbstractBlock{N, Complex{T}}}
         # The time evolution Hamiltonian has to be a Hermitian
         ishermitian(H) || error("Time evolution Hamiltonian has to be a Hermitian")
         return new{N, T, TH}(H, dt, tol, is_itime)
@@ -34,7 +34,7 @@ Optional keywords are tolerance `tol` (default is `1e-7`)
 [imaginary time evolution](http://large.stanford.edu/courses/2008/ph372/behroozi2/)
 if `is_itime` is set to `true`.
 """
-TimeEvolution(H::MatrixBlock, dt::Real; tol::Real=1e-7, is_itime::Bool=false) =
+TimeEvolution(H::AbstractBlock, dt::Real; tol::Real=1e-7, is_itime::Bool=false) =
     TimeEvolution(BlockMap(H), dt, tol, is_itime)
 
 TimeEvolution(M::BlockMap, dt::Real; tol::Real, is_itime::Bool=false) =

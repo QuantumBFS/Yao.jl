@@ -6,38 +6,38 @@ export RepeatedBlock, repeat
 
 Repeat the same block on given locations.
 """
-struct RepeatedBlock{N, C, GT <: MatrixBlock, T} <: AbstractContainer{N, T}
+struct RepeatedBlock{N, C, GT <: AbstractBlock, T} <: AbstractContainer{N, T}
     block::GT
     addrs::NTuple{C, Int}
 end
 
-function RepeatedBlock{N}(block::MatrixBlock{M, T}, addrs::NTuple{C, Int}) where {N, M, T, C}
+function RepeatedBlock{N}(block::AbstractBlock{M, T}, addrs::NTuple{C, Int}) where {N, M, T, C}
     @assert_addrs N Tuple(i:i+M-1 for i in addrs)
     return RepeatedBlock{N, C, typeof(block), T}(block, addrs)
 end
 
-function RepeatedBlock{N}(block::GT) where {N, M, T, GT <: MatrixBlock{M, T}}
+function RepeatedBlock{N}(block::GT) where {N, M, T, GT <: AbstractBlock{M, T}}
     return RepeatedBlock{N, N, GT, T}(block, Tuple(1:M:N-M+1))
 end
 
 """
-    repeat(n, x::MatrixBlock[, addrs]) -> RepeatedBlock{n}
+    repeat(n, x::AbstractBlock[, addrs]) -> RepeatedBlock{n}
 
 Create a [`RepeatedBlock`](@ref) with total number of qubits `n` and the block
 to repeat on given address or on all the address.
 """
-Base.repeat(n::Int, x::MatrixBlock, addrs::Int...) =
+Base.repeat(n::Int, x::AbstractBlock, addrs::Int...) =
     repeat(n, x, addrs)
-Base.repeat(n::Int, x::MatrixBlock, addrs::NTuple{C, Int}) where C =
+Base.repeat(n::Int, x::AbstractBlock, addrs::NTuple{C, Int}) where C =
     RepeatedBlock{n}(x, addrs)
-Base.repeat(n::Int, x::MatrixBlock) = RepeatedBlock{n}(x)
+Base.repeat(n::Int, x::AbstractBlock) = RepeatedBlock{n}(x)
 
 """
-    repeat(x::MatrixBlock, addrs)
+    repeat(x::AbstractBlock, addrs)
 
 Lazy curried version of [`repeat`](@ref).
 """
-Base.repeat(x::MatrixBlock, addrs) = @λ(n->repeat(n, x, params...,))
+Base.repeat(x::AbstractBlock, addrs) = @λ(n->repeat(n, x, params...,))
 
 OccupiedLocations(x::RepeatedBlock) = Iterators.flatten(k:k+nqubits(x.block)-1 for k in x.addrs)
 chcontained_block(x::RepeatedBlock{N}, blk) where N = RepeatedBlock{N}(blk, x.addrs)
