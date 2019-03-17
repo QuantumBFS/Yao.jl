@@ -12,4 +12,4 @@ end
 apply!(r::AbstractRegister, f::FunctionBlock) = f.call!(r)
 
 const InvOrders = FunctionBlock(invorder!)
-const CollapseTo = FunctionBlock(setto!)
+const CollapseTo = FunctionBlock(collapseto!)

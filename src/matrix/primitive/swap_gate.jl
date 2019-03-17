@@ -39,7 +39,7 @@ function mat(g::Swap{N, T}) where {N, T}
 end
 
 apply!(r::ArrayReg, g::Swap) = instruct!(state(r), Val(:SWAP), g.locs)
-OccupiedLocations(g::Swap) = g.locs
+occupied_locations(g::Swap) = g.locs
 
 Base.:(==)(lhs::Swap, rhs::Swap) = lhs.locs == rhs.locs
 

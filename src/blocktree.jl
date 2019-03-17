@@ -3,7 +3,7 @@ using YaoBase
 export prewalk, postwalk, blockfilter!
 
 # empty by default
-subblocks(blk::AbstractBlock) = ()
+@interface subblocks(blk::AbstractBlock) = ()
 
 """
     prewalk(f, src::AbstractBlock)

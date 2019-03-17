@@ -112,9 +112,9 @@ function callmath(m::MathGate{N}) where N
         elseif hasmethod(m.f, Tuple{T, typeof(N)})
             return m.f(x, N)
         elseif hasmethod(m.f, Tuple{BitStr{T, N}})
-            return btruncate(_value(m.f(BitStr(x))), N)
+            return btruncate(_value(m.f(bit(x; len=N))), N)
         elseif hasmethod(m.f, Tuple{BitStr{T, N}, typeof(N)})
-            return _value(m.f(BitStr(x), N))
+            return _value(m.f(bit(x; len=N), N))
         else
             error("Invalid math function call, math operation should be either f(x) or f(x, N::Int)")
         end
@@ -122,15 +122,15 @@ function callmath(m::MathGate{N}) where N
 end
 
 function mathop(m::MathGate{N, F, typeof(bint_r)}, b::Int) where {N, F}
-    return b |> x->bint_r(x; nbit=N) |> callmath(m) |> x->bint_r(x; nbit=N)
+    return b |> x->bint_r(x; nbits=N) |> callmath(m) |> x->bint_r(x; nbits=N)
 end
 
 function mathop(m::MathGate{N, F, typeof(bfloat)}, b::Int) where {N, F}
-    return b |> x->bfloat(x; nbit=N) |> callmath(m) |> x->bint(x; nbit=N)
+    return b |> x->bfloat(x; nbits=N) |> callmath(m) |> x->bint(x; nbits=N)
 end
 
 function mathop(m::MathGate{N, F, typeof(bfloat_r)}, b::Int) where {N, F}
-    return b |> x->bfloat_r(x; nbit=N) |> callmath(m) |> x->bint_r(x; nbit=N)
+    return b |> x->bfloat_r(x; nbits=N) |> callmath(m) |> x->bint_r(x; nbits=N)
 end
 
 function apply!(r::ArrayReg, m::MathGate{N, F}) where {N, F}

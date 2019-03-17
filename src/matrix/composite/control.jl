@@ -126,7 +126,7 @@ end
 
 PreserveStyle(::ControlBlock) = PreserveAll()
 
-OccupiedLocations(c::ControlBlock) = (c.ctrl_qubits..., map(x->c.addrs[x], occupied_locations(c.block))...)
+occupied_locations(c::ControlBlock) = (c.ctrl_qubits..., map(x->c.addrs[x], occupied_locations(c.block))...)
 chcontained_block(pb::ControlBlock{N}, blk::AbstractBlock) where {N} = ControlBlock{N}(pb.ctrl_qubits, pb.vals, blk, pb.addrs)
 
 # NOTE: ControlBlock will forward parameters directly without loop
