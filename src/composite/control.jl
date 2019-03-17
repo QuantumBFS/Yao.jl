@@ -22,11 +22,6 @@ Decode signs into control sequence on control or inversed control.
 decode_sign(ctrls::Int...,) = decode_sign(ctrls)
 decode_sign(ctrls::NTuple{N, Int}) where N = tuple(ctrls .|> abs, ctrls .|> sign .|> (x->(1+x)÷2))
 
-# use controlled block's datatype
-ControlBlock{N}(ctrl_qubits::NTuple{C}, vals::NTuple{C}, block::BT, addrs::NTuple{M}) where {BT<:AbstractBlock, N, C, M} =
-    ControlBlock{N, BT, C, M, datatype(block)}(ctrl_qubits, vals, block, addrs)
-
-# check size for matrix blocks
 function ControlBlock{N}(ctrl_qubits::NTuple{C}, vals::NTuple{C}, block::BT, addrs::NTuple{K}) where {N, M, C, K, T, BT<:AbstractBlock{M, T}}
     M == K || throw(DimensionMismatch("block position not maching its size!"))
     return ControlBlock{N, BT, C, M, T}(ctrl_qubits, vals, block, addrs)

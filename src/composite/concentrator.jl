@@ -11,8 +11,6 @@ struct Concentrator{N, T, BT <: AbstractBlock, C} <: AbstractContainer{N, T}
     block::BT
     locations::NTuple{C, Int}
 end
-Concentrator{N}(block::AbstractBlock, locations::NTuple{C, Int}) where {N, C} =
-    Concentrator{N, datatype(block), typeof(block), C}(block, locations)
 
 function Concentrator{N}(block::BT, locations::NTuple{C, Int}) where {N, M, C, T, BT<:AbstractBlock{M, T}}
     if !(length(locations) == M && N>=M)

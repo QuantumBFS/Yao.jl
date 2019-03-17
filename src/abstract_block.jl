@@ -3,6 +3,8 @@ export AbstractBlock
 using YaoBase
 import YaoBase: @interface
 
+export nqubits, datatype, isreflexive, isunitary, ishermitian
+
 """
     AbstractBlock
 
