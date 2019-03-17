@@ -75,7 +75,7 @@ roll(blocks::AbstractBlock...) = Roller(blocks)
 roll(blocks::Union{Function, AbstractBlock}...) = @λ(n->roll(n, blocks))
 roll(itr) = @λ(n->roll(n, itr))
 
-SubBlocks(m::Roller) = m.blocks
+subblocks(m::Roller) = m.blocks
 chsubblocks(m::Roller{N, T}, itr) where {N, T} = Roller{N, T}(Tuple(itr))
 mat(m::Roller) = mapreduce(mat, kron, reverse(m.blocks))
 

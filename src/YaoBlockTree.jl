@@ -1,7 +1,7 @@
 module YaoBlockTree
 
 include("utils.jl")
-include("traits.jl")
+# include("traits.jl")
 
 include("abstract_block.jl")
 include("block_map.jl")

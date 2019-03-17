@@ -12,11 +12,11 @@ as well.
 abstract type CompositeBlock{N, T} <: MatrixBlock{N, T} end
 
 """
-    SubBlocks(x)
+    subblocks(x)
 
 Returns an iterator of the sub-blocks of a composite block. Default is empty.
 """
-SubBlocks(x::CompositeBlock) = ()
+subblocks(x::CompositeBlock) = ()
 
 """
     chsubblocks(composite_block, itr)
@@ -43,7 +43,7 @@ abstract type AbstractContainer{N, T} <: CompositeBlock{N, T} end
 Return the contained block.
 """
 @interface contained_block(x::AbstractContainer) = x.block
-SubBlocks(x::AbstractContainer) = (contained_block(x), )
+subblocks(x::AbstractContainer) = (contained_block(x), )
 
 """
     chcontained_block(x::AbstractContainer, blk)

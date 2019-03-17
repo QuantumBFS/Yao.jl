@@ -48,7 +48,7 @@ Return an lambda `n->chain(n)`.
 """
 chain() = @λ(n->chain(n))
 
-SubBlocks(c::ChainBlock) = c.blocks
+subblocks(c::ChainBlock) = c.blocks
 OccupiedLocations(c::ChainBlock) =
     unique(Iterators.flatten(OccupiedLocations(b) for b in subblocks(c)))
 chsubblocks(pb::ChainBlock, blocks) = ChainBlock(blocks)
