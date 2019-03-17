@@ -15,7 +15,11 @@ abstract type AbstractBlock{N, T} end
 
 Apply a block (of quantum circuit) to a quantum register.
 """
-@interface apply!(::AbstractRegister, ::AbstractBlock)
+@interface function apply!(r::AbstractRegister, b::AbstractBlock)
+    r.state .= mat(b) * r
+    return r
+end
+
 
 """
     |>(register, blk)
@@ -55,12 +59,6 @@ print_block(io::IO, ::MIME"text/plain", blk::AbstractBlock) = summary(io, blk)
 
 # return itself by default
 Base.copy(x::AbstractBlock) = x
-
-
-function apply!(r::AbstractRegister, b::AbstractBlock)
-    r.state .= mat(b) * r
-    return r
-end
 
 """
     mat(blk)
