@@ -25,8 +25,8 @@ function Roller(blocks::Tuple)
 end
 
 Roller(blocks::AbstractBlock...) = Roller(blocks)
-rollrepeat(n::Int, block::MatrixBlock{K}) where K = Roller(ntuple(x->copy(block), Val(n÷K)))
-rollrepeat(block::MatrixBlock) = n->rollrepeat(n, block)
+rollrepeat(n::Int, block::AbstractBlock{K}) where K = Roller(ntuple(x->copy(block), Val(n÷K)))
+rollrepeat(block::AbstractBlock) = n->rollrepeat(n, block)
 
 """
     roll(n, blocks...)
@@ -35,7 +35,7 @@ Return a [`Roller`](@ref) with total number of active qubits.
 """
 roll(n::Int, blocks...,) = roll(n, blocks)
 
-function roll(n::Int, blocks::MatrixBlock...,)
+function roll(n::Int, blocks::AbstractBlock...,)
     sum(nqubits, blocks) == n || throw(AddressConflictError("Size of blocks does not match total size."))
     Roller(blocks...,)
 end
@@ -51,10 +51,10 @@ function roll(n::Int, itr)
     curr_head = 1
     list = []
     for each in itr
-        if each isa MatrixBlock
+        if each isa AbstractBlock
             push!(list, each)
             curr_head += nqubits(each)
-        elseif each isa Pair{Int, <:MatrixBlock}
+        elseif each isa Pair{Int, <:AbstractBlock}
             line, b = each
             k = line - curr_head
 

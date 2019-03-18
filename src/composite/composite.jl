@@ -3,13 +3,13 @@ using YaoBase
 export CompositeBlock
 
 """
-    CompositeBlock{N, T} <: MatrixBlock{N, T}
+    CompositeBlock{N, T} <: AbstractBlock{N, T}
 
 Abstract supertype which composite blocks will inherit from. Composite blocks
-are blocks composited from other [`MatrixBlock`](@ref)s, thus it is a `MatrixBlock`
+are blocks composited from other [`AbstractBlock`](@ref)s, thus it is a `AbstractBlock`
 as well.
 """
-abstract type CompositeBlock{N, T} <: MatrixBlock{N, T} end
+abstract type CompositeBlock{N, T} <: AbstractBlock{N, T} end
 
 """
     subblocks(x)

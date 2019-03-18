@@ -1,4 +1,4 @@
-@deprecate usedbits(block::MatrixBlock{N}) where N occupied_locations(block)
+@deprecate usedbits(block::AbstractBlock{N}) where N occupied_locations(block)
 
 # Originally addrs means return the addression stored in a composite block
 # this is not necessary since not all composite block store the address, e.g

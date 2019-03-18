@@ -9,11 +9,11 @@ export ChainBlock, chain
 user defined blocks horizontically. It is a `Vector`
 like composite type.
 """
-struct ChainBlock{N, T, MT <: MatrixBlock{N, T}} <: CompositeBlock{N, T}
+struct ChainBlock{N, T, MT <: AbstractBlock{N, T}} <: CompositeBlock{N, T}
     blocks::Vector{MT}
 end
 
-ChainBlock(blocks::MatrixBlock{N, T}...) where {N, T} = ChainBlock(collect(MatrixBlock{N, T}, blocks))
+ChainBlock(blocks::AbstractBlock{N, T}...) where {N, T} = ChainBlock(collect(AbstractBlock{N, T}, blocks))
 ChainBlock(c::ChainBlock{N, T, MT}) where {N, T, MT} = copy(c)
 
 """
@@ -24,8 +24,8 @@ Return a [`ChainBlock`](@ref) which chains a list of blocks with same
 block in `blocks`, chain can infer the number of qubits and create an
 instance itself.
 """
-chain(blocks::MatrixBlock{N, T}...) where {N, T} = ChainBlock(blocks...)
-chain(blocks::Union{MatrixBlock{N, T}, Function}...) where {N, T} = chain(map(x->parse_block(N, x), blocks)...)
+chain(blocks::AbstractBlock{N, T}...) where {N, T} = ChainBlock(blocks...)
+chain(blocks::Union{AbstractBlock{N, T}, Function}...) where {N, T} = chain(map(x->parse_block(N, x), blocks)...)
 chain(list::Vector) = ChainBlock(list)
 
 # if not all matrix block, try to put the number of qubits.
@@ -39,7 +39,7 @@ chain(blocks::Function...) = @λ(n->chain(n, blocks...))
 Return an empty [`ChainBlock`](@ref) which can be used like a list of blocks.
 """
 chain(n::Int) = chain(ComplexF64, n)
-chain(::Type{T}, n::Int) = chain(MatrixBlock{n, T}[])
+chain(::Type{T}, n::Int) = chain(AbstractBlock{n, T}[])
 
 """
     chain()
@@ -72,8 +72,8 @@ Base.copy(c::ChainBlock) = ChainBlock{N, T, MT}(copy(c.blocks))
 Base.similar(c::ChainBlock{N, T, MT}) where {N, T, MT} = ChainBlock{N, T}(empty!(similar(c.blocks)))
 Base.getindex(c::ChainBlock, index) = getindex(c.blocks, index)
 Base.getindex(c::ChainBlock, index::Union{UnitRange, Vector}) = ChainBlock(getindex(c.blocks, index))
-Base.setindex!(c::ChainBlock{N}, val::MatrixBlock{N}, index::Integer) where N = (setindex!(c.blocks, val, index); c)
-Base.insert!(c::ChainBlock{N}, index::Integer, val::MatrixBlock{N}) where N = (insert!(c.blocks, index, val); c)
+Base.setindex!(c::ChainBlock{N}, val::AbstractBlock{N}, index::Integer) where N = (setindex!(c.blocks, val, index); c)
+Base.insert!(c::ChainBlock{N}, index::Integer, val::AbstractBlock{N}) where N = (insert!(c.blocks, index, val); c)
 Base.adjoint(blk::ChainBlock{N, T, MT}) where {N, T, MT} = ChainBlock{N, T, MT}(map(adjoint, reverse(subblocks(blk))))
 Base.lastindex(c::ChainBlock) = lastindex(c.blocks)
 ## Iterate contained blocks
@@ -83,11 +83,11 @@ Base.eltype(c::ChainBlock) = eltype(c.blocks)
 Base.eachindex(c::ChainBlock) = eachindex(c.blocks)
 Base.popfirst!(c::ChainBlock) = popfirst!(c.blocks)
 Base.pop!(c::ChainBlock) = pop!(c.blocks)
-Base.push!(c::ChainBlock{N}, m::MatrixBlock{N}) where N = (push!(c.blocks, m); c)
+Base.push!(c::ChainBlock{N}, m::AbstractBlock{N}) where N = (push!(c.blocks, m); c)
 Base.push!(c::ChainBlock{N}, f::Function) where N = (push!(c.blocks, f(N)); c)
-Base.append!(c::ChainBlock{N}, list::Vector{<:MatrixBlock{N}}) where N = (append!(c.blocks, list); c)
+Base.append!(c::ChainBlock{N}, list::Vector{<:AbstractBlock{N}}) where N = (append!(c.blocks, list); c)
 Base.append!(c1::ChainBlock{N}, c2::ChainBlock{N}) where N = (append!(c1.blocks, c2.blocks); c1)
-Base.prepend!(c1::ChainBlock{N}, list::Vector{<:MatrixBlock{N}}) where N = (prepend!(c1.blocks, list); c1)
+Base.prepend!(c1::ChainBlock{N}, list::Vector{<:AbstractBlock{N}}) where N = (prepend!(c1.blocks, list); c1)
 Base.prepend!(c1::ChainBlock{N}, c2::ChainBlock{N}) where N = (prepend!(c1.blocks, c2.blocks); c1)
 
 YaoBase.isunitary(c::ChainBlock) = all(isunitary, c.blocks) || isunitary(mat(c))

@@ -120,7 +120,7 @@ end
 @testset "test inspect" begin
     g = kron(5, 1=>X, 3=>Y, 4=>rot(X, 0.0), 5=>rot(Y, 0.0))
     collect(subblocks(g)) === g.blocks
-    eltype(g) == Tuple{Int, MatrixBlock}
+    eltype(g) == Tuple{Int, AbstractBlock}
 
     @test isunitary(g) == true
     @test isreflexive(g) == true

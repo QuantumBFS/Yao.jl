@@ -1,7 +1,7 @@
 export PrimitiveBlock
 
 """
-    PrimitiveBlock{N, T} <: MatrixBlock{N, T}
+    PrimitiveBlock{N, T} <: AbstractBlock{N, T}
 
 Abstract type that all primitive block will subtype from. A primitive block
 is a concrete block who can not be decomposed into other blocks. All composite
@@ -12,7 +12,7 @@ block can be decomposed into several primitive blocks.
     subtype for primitive block with parameter should implement `hash` and `==`
     method to enable key value cache.
 """
-abstract type PrimitiveBlock{N, T} <: MatrixBlock{N, T} end
+abstract type PrimitiveBlock{N, T} <: AbstractBlock{N, T} end
 
 # NOTE: all primitive block should name with postfix Gate
 #       and each primitive block should stay in a single

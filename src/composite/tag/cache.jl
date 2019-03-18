@@ -8,7 +8,7 @@ export CacheFragment, CachedBlock, update_cache
 Return the element type that a [`CacheFragment`](@ref)
 will use.
 """
-@interface cache_type(::Type{<:MatrixBlock}) = Any
+@interface cache_type(::Type{<:AbstractBlock}) = Any
 
 """
     cache_key(block)
@@ -65,7 +65,7 @@ struct CachedBlock{ST, BT, N, T} <: TagBlock{N, T}
     block::BT
     level::Int
 
-    function CachedBlock(server::ST, x::BT, level::Int) where {ST, N, T, BT <: MatrixBlock{N, T}}
+    function CachedBlock(server::ST, x::BT, level::Int) where {ST, N, T, BT <: AbstractBlock{N, T}}
         alloc!(server, x, CacheFragment(x))
         new{ST, BT, N, T}(server, x, level)
     end
@@ -73,7 +73,7 @@ end
 
 CacheServers.iscached(c::CachedBlock) = iscached(c.server, c.block)
 iscacheable(c::CachedBlock) = iscacheable(c.server, c.block)
-chcontained_block(cb::CachedBlock, blk::MatrixBlock) = CachedBlock(cb.server, blk, cb.level)
+chcontained_block(cb::CachedBlock, blk::AbstractBlock) = CachedBlock(cb.server, blk, cb.level)
 
 PreserveStyle(::CachedBlock) = PreserveAll()
 
@@ -85,7 +85,7 @@ function update_cache(c::CachedBlock)
     c
 end
 
-CacheServers.clear!(x::MatrixBlock) = x
+CacheServers.clear!(x::AbstractBlock) = x
 CacheServers.clear!(c::CachedBlock) = (clear!(c.server, c.block); c)
 
 # forward methods

@@ -2,20 +2,20 @@ using YaoBase
 export KronBlock, kron
 
 """
-    KronBlock{N, T, MT<:MatrixBlock} <: CompositeBlock{N, T}
+    KronBlock{N, T, MT<:AbstractBlock} <: CompositeBlock{N, T}
 
 composite block that combine blocks by kronecker product.
 """
-struct KronBlock{N, T, MT<:MatrixBlock} <: CompositeBlock{N, T}
+struct KronBlock{N, T, MT<:AbstractBlock} <: CompositeBlock{N, T}
     slots::Vector{Int}
     addrs::Vector{Int}
     blocks::Vector{MT}
 end
 
-KronBlock{N, T}(slots::Vector{Int}, addrs::Vector{Int}, blocks::Vector{MT}) where {N, T, MT <: MatrixBlock} =
+KronBlock{N, T}(slots::Vector{Int}, addrs::Vector{Int}, blocks::Vector{MT}) where {N, T, MT <: AbstractBlock} =
     KronBlock{N, T, MT}(slots, addrs, blocks)
 
-function KronBlock{N, T}(addrs::Vector{Int}, blocks::Vector{MT}) where {N, T, MT<:MatrixBlock}
+function KronBlock{N, T}(addrs::Vector{Int}, blocks::Vector{MT}) where {N, T, MT<:AbstractBlock}
     perm = sortperm(addrs)
     permute!(addrs, perm)
     permute!(blocks, perm)
@@ -28,7 +28,7 @@ function KronBlock{N, T}(addrs::Vector{Int}, blocks::Vector{MT}) where {N, T, MT
     return KronBlock{N, T, MT}(slots, addrs, blocks)
 end
 
-function KronBlock{N}(addrs::Vector{Int}, blocks::Vector{<:MatrixBlock}) where N
+function KronBlock{N}(addrs::Vector{Int}, blocks::Vector{<:AbstractBlock}) where N
     T = datatype(first(blocks))
     for k in 2:length(blocks)
         T == datatype(blocks[k]) || error("datatype mismatch, got $(datatype(each)) at $k-th block")
@@ -36,8 +36,8 @@ function KronBlock{N}(addrs::Vector{Int}, blocks::Vector{<:MatrixBlock}) where N
     return KronBlock{N, T}(addrs, blocks)
 end
 
-function KronBlock{N}(itr::Pair{Int,<:MatrixBlock}...) where N
-    blocks = MatrixBlock[]
+function KronBlock{N}(itr::Pair{Int,<:AbstractBlock}...) where N
+    blocks = AbstractBlock[]
     addrs = Int[]
 
     for (addr, block) in itr
@@ -47,7 +47,7 @@ function KronBlock{N}(itr::Pair{Int,<:MatrixBlock}...) where N
     return KronBlock{N}(addrs, blocks)
 end
 
-function KronBlock(itr::MatrixBlock...)
+function KronBlock(itr::AbstractBlock...)
     N = sum(nqubits, itr)
     addrs = Int[]
     count = 1
@@ -61,29 +61,29 @@ end
 KronBlock(blk::KronBlock) = copy(blk)
 
 """
-    kron(n, blocks::Pair{Int, <:MatrixBlock}...)
+    kron(n, blocks::Pair{Int, <:AbstractBlock}...)
 
 Return a [`KronBlock`](@ref), with total number of qubits `n` and pairs of blocks.
 
 # Example
 """
-Base.kron(total::Int, blocks::Pair{Int, <:MatrixBlock}...) = KronBlock{total}(blocks...)
+Base.kron(total::Int, blocks::Pair{Int, <:AbstractBlock}...) = KronBlock{total}(blocks...)
 
 """
-    kron(blocks::MatrixBlock...)
+    kron(blocks::AbstractBlock...)
     kron(n, itr)
 
 Return a [`KronBlock`](@ref), with total number of qubits `n`, and `blocks` should use all
 the locations on `n` wires in quantum circuits.
 """
-Base.kron(blocks::MatrixBlock...) = KronBlock(blocks...)
+Base.kron(blocks::AbstractBlock...) = KronBlock(blocks...)
 
-function Base.kron(total::Int, blocks::MatrixBlock...)
+function Base.kron(total::Int, blocks::AbstractBlock...)
     sum(nqubits, blocks) == total || error("total number of qubits mismatch")
     return kron(blocks...)
 end
 
-Base.kron(total::Int, blocks::Union{MatrixBlock, Pair}...) =
+Base.kron(total::Int, blocks::Union{AbstractBlock, Pair}...) =
     error("location of sparse distributed blocks must be explicit declared with pair (e.g 2=>X)")
 
 Base.kron(total::Int, blocks::Base.Generator) = kron(total, blocks...)
@@ -96,11 +96,11 @@ Return a lambda, which will take the total number of qubits as input.
 
 # Example
 """
-Base.kron(blocks::Pair{Int, <:MatrixBlock}...,) = @λ(n->kron(n, blocks...))
+Base.kron(blocks::Pair{Int, <:AbstractBlock}...,) = @λ(n->kron(n, blocks...))
 Base.kron(blocks::Base.Generator) = @λ(n->kron(n, blocks))
 
 occupied_locations(k::KronBlock) = Iterators.flatten(map(x-> x + i - 1, occupied_locations(b)) for (i, b) in zip(k.addrs, subblocks(k)))
-subblocks(x::KronBlock) = x.blocks
+subblocks(x::KronBlock) = SubBlockIt(x.blocks)
 chsubblocks(pb::KronBlock{N}, blocks) where N = KronBlock{N}(pb.addrs, blocks)
 cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
 color(::Type{T}) where {T <: KronBlock} = :cyan
@@ -161,7 +161,7 @@ function Base.iterate(k::KronBlock, st = 1)
     end
 end
 
-Base.eltype(k::KronBlock) = Tuple{Int, MatrixBlock}
+Base.eltype(k::KronBlock) = Tuple{Int, AbstractBlock}
 Base.length(k::KronBlock) = length(k.blocks)
 Base.eachindex(k::KronBlock) = k.addrs
 

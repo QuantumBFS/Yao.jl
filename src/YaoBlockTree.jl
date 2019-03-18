@@ -7,12 +7,10 @@ include("abstract_block.jl")
 include("block_map.jl")
 
 # concrete blocks
-include("matrix/matrix.jl")
+include("routines.jl")
+include("primitive/primitive.jl")
+include("composite/composite.jl")
 # include("symbolic/symbolic.jl")
-
-include("measure.jl")
-# include("sequencial.jl")
-include("function.jl")
 
 include("parse_block.jl")
 
