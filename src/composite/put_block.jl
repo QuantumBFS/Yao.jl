@@ -32,13 +32,8 @@ Lazy curried version of [`put`](@ref).
 """
 put(pa::Pair) = @λ(n -> put(n, pa))
 
-<<<<<<< HEAD:src/composite/put_block.jl
-OccupiedLocations(x::PutBlock) = x.addrs
-chcontained_block(x::PutBlock{N, M}, b::AbstractBlock{M}) where {N, M} = PutBlock{N}(b, x.addrs)
-=======
 occupied_locations(x::PutBlock) = x.addrs
-chcontained_block(x::PutBlock{N, M}, b::MatrixBlock{M}) where {N, M} = PutBlock{N}(b, x.addrs)
->>>>>>> master:src/matrix/composite/put_block.jl
+chcontained_block(x::PutBlock{N, M}, b::AbstractBlock{M}) where {N, M} = PutBlock{N}(b, x.addrs)
 PreserveStyle(::PutBlock) = PreserveAll()
 cache_key(pb::PutBlock) = cache_key(pb.block)
 
