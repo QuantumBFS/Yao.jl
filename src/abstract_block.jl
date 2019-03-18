@@ -42,11 +42,11 @@ julia> ArrayReg(bit"0") |> X |> Y
 Base.:(|>)(r::AbstractRegister, blk::AbstractBlock) = apply!(r, blk)
 
 """
-    OccupiedLocations(x)
+    occupied_locations(x)
 
 Return an iterator of occupied locations of `x`.
 """
-@interface OccupiedLocations(x::AbstractBlock) = 1:nqubits(x)
+@interface occupied_locations(x::AbstractBlock) = 1:nqubits(x)
 
 """
     applymatrix(g::AbstractBlock) -> Matrix

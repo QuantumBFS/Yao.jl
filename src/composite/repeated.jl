@@ -39,7 +39,7 @@ Lazy curried version of [`repeat`](@ref).
 """
 Base.repeat(x::AbstractBlock, addrs) = @λ(n->repeat(n, x, params...,))
 
-OccupiedLocations(x::RepeatedBlock) = Iterators.flatten(k:k+nqubits(x.block)-1 for k in x.addrs)
+occupied_locations(x::RepeatedBlock) = Iterators.flatten(k:k+nqubits(x.block)-1 for k in x.addrs)
 chcontained_block(x::RepeatedBlock{N}, blk) where N = RepeatedBlock{N}(blk, x.addrs)
 PreserveProperty(x::RepeatedBlock) = PreserveAll()
 
