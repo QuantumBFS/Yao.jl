@@ -8,10 +8,7 @@ end
     include("abstract_register.jl")
 end
 
-@testset "test math" begin
-    include("math.jl")
-end
-
 @testset "test utils" begin
+    include("math.jl")
     include("interface.jl")
 end
