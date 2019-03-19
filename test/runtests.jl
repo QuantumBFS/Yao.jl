@@ -11,3 +11,7 @@ end
 @testset "test math" begin
     include("math.jl")
 end
+
+@testset "test utils" begin
+    include("interface.jl")
+end
