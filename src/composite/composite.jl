@@ -23,7 +23,7 @@ subblocks(x::CompositeBlock) = ()
 
 Change the sub-blocks of a [`CompositeBlock`](@ref) with given iterator `itr`.
 """
-@interface chsubblocks(::CompositeBlock, itr)
+@interface chsubblocks(x::CompositeBlock, itr) = chsubblocks(x, itr...) # fallback
 
 YaoBase.isunitary(m::CompositeBlock) = all(isunitary, subblocks(m)) || isunitary(mat(m))
 YaoBase.ishermitian(m::CompositeBlock) = all(ishermitian, subblocks(m)) || ishermitian(mat(m))
@@ -35,25 +35,10 @@ YaoBase.isreflexive(m::CompositeBlock) = all(isreflexive, subblocks(m)) || isref
 Abstract type for container block. Container blocks are blocks contain a single
 block. Container block should have a
 """
-abstract type AbstractContainer{N, T} <: CompositeBlock{N, T} end
+abstract type AbstractContainer{N, T, BT <: AbstractBlock} <: CompositeBlock{N, T} end
 
-"""
-    contained_block(x::AbstractContainer)
-
-Return the contained block.
-"""
-@interface contained_block(x::AbstractContainer) = x.block
-subblocks(x::AbstractContainer) = (contained_block(x), )
-
-"""
-    chcontained_block(x::AbstractContainer, blk)
-
-Create a new [`AbstractContainer`](@ref) with given sub-block. This uses
-[`chsubblocks`](@ref) by default.
-"""
-@interface chcontained_block(x::AbstractContainer, blk)
-
-chsubblocks(x::AbstractContainer, itr) = chcontained_block(x, first(itr))
+Base.parent(x::AbstractContainer) = x.block
+subblocks(x::AbstractContainer) = (parent(x), )
 
 # NOTE: this is a holy trait, no overhead, don't use methods on this
 abstract type PreserveStyle end
@@ -67,18 +52,22 @@ for METHOD in (:ishermitian, :isreflexive, :isunitary)
     @eval begin
         # forward to trait
         YaoBase.$METHOD(x::AbstractContainer) = $METHOD(PreserveStyle(x), x)
-        # forward contained block property
-        YaoBase.$METHOD(::PreserveAll, c::AbstractContainer) = $METHOD(contained_block(c))
+        # forward parent block property
+        YaoBase.$METHOD(::PreserveAll, c::AbstractContainer) = $METHOD(parent(c))
         # forward to default property by calculating the matrix
         YaoBase.$METHOD(::PreserveNothing, c::AbstractContainer) = $METHOD(mat(c))
         # preseve each property
         YaoBase.$METHOD(::PreserveProperty{$(QuoteNode(METHOD))}, c::AbstractContainer) =
-            $METHOD(contained_block(c))
+            $METHOD(parent(c))
         # fallback
-        YaoBase.$METHOD(::PreserveStyle, c::AbstractContainer) = $METHOD(contained_block(c))
+        YaoBase.$METHOD(::PreserveStyle, c::AbstractContainer) = $METHOD(parent(c))
     end
 end
 
+function Base.:(==)(lhs::AbstractContainer{N, T, BT},
+        rhs::AbstractContainer{N, T, BT}) where {N, T, BT}
+    return parent(lhs) == parent(rhs)
+end
 
 include("chain.jl")
 include("kron.jl")
@@ -87,6 +76,4 @@ include("roller.jl")
 include("put_block.jl")
 include("repeated.jl")
 include("concentrator.jl")
-include("tag/tag.jl")
-include("tag/cache.jl")
-include("tag/dagger.jl")
+include("cache.jl")

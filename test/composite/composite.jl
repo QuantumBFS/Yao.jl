@@ -27,3 +27,7 @@ end
 @testset "test concentrate" begin
     include("concentrator.jl")
 end
+
+@testset "test cache" begin
+    include("cache.jl")
+end

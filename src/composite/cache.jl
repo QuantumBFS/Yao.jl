@@ -1,7 +1,7 @@
 using YaoBase, CacheServers
 import YaoBase: @interface
 export CacheFragment, CachedBlock, update_cache
-export cache, pull, update_cache, clearall!, iscached, iscacheable
+export cache, pull, update!, update_cache, clearall!, iscached, iscacheable
 
 """
     cache_type(::Type) -> DataType
@@ -54,14 +54,14 @@ CacheServers.pull(frag::CacheFragment) = frag.storage[cache_key(frag.ref)]
 CacheServers.clear!(frag::CacheFragment) = (empty!(frag.storage); frag)
 
 """
-    CachedBlock{ST, BT, N, T} <: TagBlock{N, T}
+    CachedBlock{ST, BT, N, T} <: AbstractContainer{N, T, BT}
 
 A label type that tags an instance of type `BT`. It forwards
 every methods of the block it contains, except [`mat`](@ref)
 and [`apply!`](@ref), it will cache the matrix form whenever
 the program has.
 """
-struct CachedBlock{ST, BT, N, T} <: TagBlock{N, T}
+struct CachedBlock{ST, BT, N, T} <: AbstractContainer{N, T, BT}
     server::ST
     block::BT
     level::Int
@@ -74,8 +74,8 @@ end
 
 CacheServers.iscached(c::CachedBlock) = iscached(c.server, c.block)
 iscacheable(c::CachedBlock) = iscacheable(c.server, c.block)
-chcontained_block(cb::CachedBlock, blk::AbstractBlock) = CachedBlock(cb.server, blk, cb.level)
-
+chsubblocks(cb::CachedBlock, blk::AbstractBlock) = CachedBlock(cb.server, blk, cb.level)
+occupied_locations(x::CachedBlock) = occupied_locations(parent(x))
 PreserveStyle(::CachedBlock) = PreserveAll()
 
 function update_cache(c::CachedBlock)
@@ -83,24 +83,26 @@ function update_cache(c::CachedBlock)
         m = dropzeros!(mat(c.block))
         push!(c.server, m, c.block)
     end
-    c
+    return c
 end
 
 CacheServers.clear!(x::AbstractBlock) = x
 CacheServers.clear!(c::CachedBlock) = (clear!(c.server, c.block); c)
 
 # forward methods
+cache_key(x::CachedBlock) = cache_key(parent(x))
+
 function mat(c::CachedBlock)
     if !iscached(c.server, c.block)
         m = dropzeros!(mat(c.block))
         push!(c.server, m, c.block)
         return m
     end
-    pull(c)
+    return pull(c)
 end
 
 function CacheServers.pull(c::CachedBlock)
-    pull(c.server, c.block)
+    return pull(c.server, c.block)
 end
 
 function apply!(r::AbstractRegister, c::CachedBlock, signal)
@@ -109,6 +111,7 @@ function apply!(r::AbstractRegister, c::CachedBlock, signal)
     else
         apply!(r, c.block)
     end
+    return r
 end
 apply!(r::AbstractRegister, c::CachedBlock) = (r.state .= mat(c) * r; r)
 
@@ -116,16 +119,16 @@ Base.similar(c::CachedBlock, level::Int) = CachedBlock(c.server, c.block, level)
 Base.copy(c::CachedBlock) = CachedBlock(c.server, copy(c.block), c.level)
 
 
-const DefaultCacheServer = get_server(MatrixBlock, CacheFragment)
+const DefaultCacheServer = get_server(AbstractBlock, CacheFragment)
 
 cache(x::Function, level::Int=1; recursive=false) = n->cache(x(n), level; recursive=recursive)
 
-function cache(x::MatrixBlock, level::Int=1; recursive=false)
-    cache(DefaultCacheServer, x, level, recursive=recursive)
+function cache(x::AbstractBlock, level::Int=1; recursive=false)
+    return cache(DefaultCacheServer, x, level, recursive=recursive)
 end
 
 function clearall!(x::CachedBlock)
-    clear!(x)
+    return clear!(x)
 end
 
 function clearall!(x::CachedBlock{ST, BT}) where {ST, BT <: CompositeBlock}
@@ -133,11 +136,11 @@ function clearall!(x::CachedBlock{ST, BT}) where {ST, BT <: CompositeBlock}
         clearall!(each)
     end
     clear!(x)
-    x
+    return x
 end
 
-function cache(server::AbstractCacheServer, x::MatrixBlock, level::Int; recursive::Bool=false)
-    CachedBlock(server, x, level)
+function cache(server::AbstractCacheServer, x::AbstractBlock, level::Int; recursive::Bool=false)
+    return CachedBlock(server, x, level)
 end
 
 function cache(server::AbstractCacheServer, x::ChainBlock, level::Int; recursive::Bool=false)
@@ -150,7 +153,7 @@ function cache(server::AbstractCacheServer, x::ChainBlock, level::Int; recursive
         chain = x
     end
 
-    CachedBlock(server, chain, level)
+    return CachedBlock(server, chain, level)
 end
 
 function cache(server::AbstractCacheServer, block::KronBlock, level::Int; recursive::Bool=false)
@@ -163,7 +166,7 @@ function cache(server::AbstractCacheServer, block::KronBlock, level::Int; recurs
         x = block
     end
 
-    CachedBlock(server, x, level)
+    return CachedBlock(server, x, level)
 end
 
 function cache(server::AbstractCacheServer, block::Roller, level::Int; recursive::Bool=false)
@@ -173,5 +176,11 @@ function cache(server::AbstractCacheServer, block::Roller, level::Int; recursive
         roller = block
     end
 
-    CachedBlock(server, roller, level)
+    return CachedBlock(server, roller, level)
 end
+
+# forward some interface in Base for convenience
+Base.getindex(c::CachedBlock, index...) = getindex(parent(c), index...)
+Base.setindex!(c::CachedBlock, val, index...) = setindex!(parent(c), val, index...)
+Base.iterate(c::CachedBlock) = iterate(parent(c))
+Base.iterate(c::CachedBlock, st) = iterate(parent(c), st)

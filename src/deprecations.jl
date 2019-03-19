@@ -7,5 +7,5 @@
 
 # NOTE: block is frequently used as variable name, to make sure there is
 #       no conflicts, this is commented.
-# @deprecate block(x::AbstractContainer) = contained_block(x)
-# @deprecate chblock(x::AbstractContainer) = chcontained_block(x)
+# @deprecate block(x::AbstractContainer) = parent(x)
+# @deprecate chblock(x::AbstractContainer, blk::AbstractBlock) = chsubblocks(x, blk)

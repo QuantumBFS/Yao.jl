@@ -6,7 +6,7 @@ export RepeatedBlock, repeat
 
 Repeat the same block on given locations.
 """
-struct RepeatedBlock{N, C, GT <: AbstractBlock, T} <: AbstractContainer{N, T}
+struct RepeatedBlock{N, C, GT <: AbstractBlock, T} <: AbstractContainer{N, T, GT}
     block::GT
     addrs::NTuple{C, Int}
 end
@@ -40,7 +40,7 @@ Lazy curried version of [`repeat`](@ref).
 Base.repeat(x::AbstractBlock, addrs) = @λ(n->repeat(n, x, params...,))
 
 occupied_locations(x::RepeatedBlock) = Iterators.flatten(k:k+nqubits(x.block)-1 for k in x.addrs)
-chcontained_block(x::RepeatedBlock{N}, blk) where N = RepeatedBlock{N}(blk, x.addrs)
+chsubblocks(x::RepeatedBlock{N}, blk::AbstractBlock) where N = RepeatedBlock{N}(blk, x.addrs)
 PreserveProperty(x::RepeatedBlock) = PreserveAll()
 
 mat(rb::RepeatedBlock{N}) where N = hilbertkron(N, fill(mat(rb.block), length(rb.addrs)), [rb.addrs...])

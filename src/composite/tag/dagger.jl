@@ -1,22 +1,21 @@
-export Daggered
+export Dag
 
 """
-    Daggered{N, T, BT} <: TagBlock{N, T}
+    Dag{N, T, BT} <: TagBlock{N, T}
 
 Wrapper block allowing to execute the inverse of a block of quantum circuit.
 """
-struct Daggered{N, T, BT <: AbstractBlock} <: TagBlock{N, T}
+struct Dag{N, T, BT <: AbstractBlock} <: TagBlock{N, T}
     block::BT
 end
 
-Daggered(x::BT) where {N, T, BT<:AbstractBlock{N, T}} =
-    Daggered{BT, N, T}(x)
+Dag(x::BT) where {N, T, BT<:AbstractBlock{N, T}} =
+    Dag{BT, N, T}(x)
 
-PreserveStyle(::Daggered) = PreserveAll()
-mat(blk::Daggered) = adjoint(mat(blk.block))
+PreserveStyle(::Dag) = PreserveAll()
+mat(blk::Dag) = adjoint(mat(blk.block))
 
-Base.parent(x::Daggered) = x.block
-Base.adjoint(x::AbstractBlock) = ishermitian(x) ? x : Daggered(x)
-Base.adjoint(x::Daggered) = x.block
-Base.similar(c::Daggered, level::Int) = Daggered(similar(c.block))
-Base.copy(c::Daggered, level::Int) = Daggered(copy(c.block))
+Base.adjoint(x::AbstractBlock) = ishermitian(x) ? x : Dag(x)
+Base.adjoint(x::Dag) = x.block
+Base.similar(c::Dag, level::Int) = Dag(similar(c.block))
+Base.copy(c::Dag, level::Int) = Dag(copy(c.block))

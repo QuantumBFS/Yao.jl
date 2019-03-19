@@ -3,7 +3,7 @@ using YaoArrayRegister: matvec
 
 export ControlBlock, control
 
-struct ControlBlock{N, BT<:AbstractBlock, C, M, T} <: AbstractContainer{N, T}
+struct ControlBlock{N, BT<:AbstractBlock, C, M, T} <: AbstractContainer{N, T, BT}
     ctrl_qubits::NTuple{C, Int}
     vals::NTuple{C, Int}
     block::BT
@@ -122,7 +122,7 @@ end
 PreserveStyle(::ControlBlock) = PreserveAll()
 
 occupied_locations(c::ControlBlock) = (c.ctrl_qubits..., map(x->c.addrs[x], occupied_locations(c.block))...)
-chcontained_block(pb::ControlBlock{N}, blk::AbstractBlock) where {N} = ControlBlock{N}(pb.ctrl_qubits, pb.vals, blk, pb.addrs)
+chsubblocks(pb::ControlBlock{N}, blk::AbstractBlock) where {N} = ControlBlock{N}(pb.ctrl_qubits, pb.vals, blk, pb.addrs)
 
 # NOTE: ControlBlock will forward parameters directly without loop
 cache_key(ctrl::ControlBlock) = cache_key(ctrl.block)

@@ -7,7 +7,7 @@ export Concentrator, concentrate
 concentrates serveral lines together in the circuit, and expose
 it to other blocks.
 """
-struct Concentrator{N, T, BT <: AbstractBlock, C} <: AbstractContainer{N, T}
+struct Concentrator{N, T, BT <: AbstractBlock, C} <: AbstractContainer{N, T, BT}
     block::BT
     locations::NTuple{C, Int}
 end
@@ -38,7 +38,7 @@ Lazy curried version of [`concentrate`](@ref).
 concentrate(block::AbstractBlock, addrs) = @λ(n->concentrate(n, block, addrs))
 
 occupied_locations(c::Concentrator) = c.locations
-chcontained_block(pb::Concentrator{N}, blk::AbstractBlock) where N =
+chsubblocks(pb::Concentrator{N}, blk::AbstractBlock) where N =
     Concentrator{N}(blk, occupied_locations(pb))
 PreserveStyle(::Concentrator) = PreserveAll()
 

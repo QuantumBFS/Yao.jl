@@ -33,8 +33,9 @@ end
 
 Print the title of given `block` of an [`AbstractBlock`](@ref).
 """
-print_title(io::IO, x::AbstractBlock) = summary(io, x)
-
+function print_title(io::IO, x::AbstractBlock)
+    printstyled(io, "nqubits: ", nqubits(x), ", datatype: ", datatype(x), ""; bold=false, color=:cyan)
+end
 
 """
     print_annotation(io, root, node, child, k)
@@ -49,10 +50,11 @@ print_annotation(io::IO, root, node, child, k) = nothing
 
 Print the block tree.
 """
-print_tree(root) = print_tree(stdout, root)
+print_tree(root; kwargs...) = print_tree(stdout, root; kwargs...)
 
 Base.show(io::IO, blk::AbstractBlock) = show(io, "plain/text", blk)
 Base.show(io::IO, ::MIME"plain/text", blk::AbstractBlock) = print_tree(io, blk)
+Base.show(io::IO, ::MIME"plain/text", blk::CachedBlock) = print_tree(io, blk; title=false, compact=true)
 Base.show(io::IO, ::MIME"plain/text", blk::PrimitiveBlock) = print_tree(io, blk; title=false, compact=true)
 
 """
@@ -71,6 +73,7 @@ function print_tree(
     root::AbstractBlock,
     node::AbstractBlock = root,
     depth::Int=1,
+    islast::Bool=false,
     active_levels=();
     maxdepth=5, charset=BlockTreeCharSet(), title=true, compact=false)
 
@@ -80,27 +83,52 @@ function print_tree(
     end
 
     print_block(io, node)
-    if !compact
+    if !compact && !islast
         println(io)
     end
 
+    kwargs = (maxdepth=maxdepth, charset=charset, title=false, compact=compact)
     for (k, each_node) in enumerate(subblocks(node))
         if k == lastindex(subblocks(node))
             print_prefix(io, depth, charset, active_levels)
             print(io, charset.terminator, charset.dash)
+            print(io, " ")
             print_annotation(io, root, node, each_node, k)
-            print_tree(io, root, each_node, depth+1, active_levels)
+            print_tree(io, root, each_node, depth+1, true, active_levels; kwargs...)
         else
             print_prefix(io, depth, charset, active_levels)
             print(io, charset.mid, charset.dash)
+            print(io, " ")
             print_annotation(io, root, node, each_node, k)
-            print_tree(io, root, each_node, depth+1, (active_levels..., depth+1))
+            print_tree(io, root, each_node, depth+1, (active_levels..., depth+1); kwargs...)
         end
     end
 
     return nothing
 end
 
+function print_tree(
+    io::IO,
+    root::AbstractBlock,
+    node::CachedBlock,
+    depth::Int=1,
+    islast::Bool=false,
+    active_levels=();
+    maxdepth=5, charset=BlockTreeCharSet(), title=true, compact=false)
+
+    if root === node && title
+        print_title(io, root)
+        println(io)
+    end
+    print_annotation(io, node)
+    print(io, " ")
+    print_block(io, node)
+    if !compact && !islast
+        println(io)
+    end
+
+    return nothing
+end
 
 # Custom layouts
 color(m::AbstractBlock) = color(typeof(m))
@@ -125,7 +153,7 @@ print_block(io::IO, x::Roller) = printstyled(io, "roller"; bold=true, color=colo
 print_block(io::IO, x::ReflectGate{N}) where N = print(io, "reflect: nqubits=$N")
 print_block(io::IO, c::Concentrator) = print(io, "Concentrator: ", occupied_locations(c))
 print_block(io::IO, c::CachedBlock) = print_block(io, c.block)
-print_block(io::IO, c::Daggered) = print_block(io, c.block)
+# print_block(io::IO, c::Dag) = print_block(io, c.block)
 
 
 # TODO: use OhMyREPL's default syntax highlighting for functions
@@ -177,10 +205,18 @@ function print_block(io::IO, rb::RepeatedBlock{N}) where N
     printstyled(io, ")"; bold=true, color=color(RepeatedBlock))
 end
 
-print_annotation(io::IO, c::Daggered) =
-    printstyled(io, " [†]"; bold=true, color=:yellow)
+# forward to simplify interfaces
+function print_annotation(io::IO,
+    root::AbstractBlock,
+    node::AbstractBlock,
+    child::AbstractBlock, k)
+    print_annotation(io, node)
+end
+
+print_annotation(io::IO, node::AbstractBlock) = nothing # skip
+# print_annotation(io::IO, c::Dag) = printstyled(io, " [†]"; bold=true, color=:yellow)
 print_annotation(io::IO, c::CachedBlock) =
-    printstyled(io, "[↺] "; bold=true, color=:yellow)
+    printstyled(io, "[cached]"; bold=true, color=:yellow)
 
 function print_annotation(
     io::IO,
