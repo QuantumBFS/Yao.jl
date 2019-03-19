@@ -2,6 +2,8 @@ using TupleTools
 
 export NotImplementedError, AddressConflictError, QubitMismatchError
 
+# NOTE: kwargs do not involve in multiple dispatch
+#       no need to store kwargs
 struct NotImplementedError{ArgsT} <: Exception
     name::Symbol
     args::ArgsT
@@ -9,11 +11,11 @@ end
 
 NotImplementedError(name::Symbol) = NotImplementedError(name, ())
 
-function Base.show(io::IO, e::NotImplementedError{<:Tuple})
+function Base.show(io::IO, e::NotImplementedError)
     str = join(map(typeof, e.args), ", ::")
     str = "::" * str
-    print(io, "$(e.name) is not implemented for (", str, "),
-        please implement this method for your custom type")
+    print(io, "NotImplementedError: $(e.name) is not implemented for (", str, "), ",
+              "please implement this method for your custom type")
 end
 
 function Base.show(io::IO, e::NotImplementedError{Tuple{}})

@@ -1,46 +1,83 @@
-using MacroTools
+macro interface(ex)
+    return interfacem(__module__, __source__, ex)
+end
 
-macro interface(ex::Expr)
-    if is_function_call(ex)
-        return define_abstract_api(ex, get_raw_name(eatwhere(ex).args[1]))
+function interfacem(__module__::Module, __source__::LineNumberNode, ex::Expr)
+    r = handle(ex)
+
+    if r === nothing
+        return :(error("expect a function definition or a function call as interface definition"))
+    end
+
+    name, args, body = r
+
+    if body === nothing && args === nothing
+        return quote
+            export $(esc(name))
+            Core.@__doc__ $(esc(ex)) = throw(NotImplementedError($(QuoteNode(name))))
+        end
+    elseif body === nothing
+        return quote
+            export $(esc(name))
+            Core.@__doc__ $(esc(ex)) = throw(NotImplementedError($(QuoteNode(name)), tuple($(esc.(args)...))))
+
+            # push!(METADATA, Interface($(QuoteNode(handle(ex))), $(Base.Docs.signature(ex))))
+        end
     else
-        try
-            def = splitdef(ex)
-            return export_api(ex, get_raw_name(def[:name]))
-        catch e
-            if !(e isa AssertionError)
-                rethrow(e)
-            end
+        return quote
+            export $(esc(name))
+            Core.@__doc__ $(esc(ex))
+
+            # push!(METADATA, Interface($(QuoteNode(handle(ex))), $(Base.Docs.signature(ex))))
         end
     end
-    throw(Meta.ParseError("Expect a function call or function definition"))
 end
 
-get_raw_name(ex::Expr) = (@capture(ex, m_.api_); api)
-get_raw_name(ex::Symbol) = ex
+struct Interface
+    name::Symbol
+    signatures::DataType
+end
 
-function eatwhere(ex::Expr)
-    if ex.head == :where
-        return ex.args[1]
+handle(ex::Expr, isvalid=false) = handle(Val(ex.head), ex, isvalid)
+handle(ex::Symbol, isvalid) = isvalid ? (ex, nothing, nothing, nothing) : error("expect a function")
+handle(::Val{:where}, ex::Expr, isvalid) = handle(ex.args[1], isvalid)
+
+# valid syntax
+function handle(::Val{:(=)}, ex::Expr, isvalid)
+    name, args, _ = handle(ex.args[1], isvalid)
+    return name, args, ex.args[2]
+end
+
+function handle(::Val{:function}, ex::Expr, isvalid)
+    name, args, _ = handle(ex.args[1], true)
+    if isempty(ex.args[2:end])
+        return name, args, nothing
     else
-        return ex
+        return name, args, ex.args[2:end]
     end
 end
 
-is_function_call(ex::Expr) = eatwhere(ex).head == :call
-
-function export_api(ex, api)
-    api_name = QuoteNode(api)
-    return quote
-        export $(api)
-        Core.@__doc__ $(esc(ex))
+function handle(::Val{:call}, ex::Expr, isvalid)
+    args = []
+    for each in ex.args[2:end]
+        if !(each isa Union{Expr, Symbol})
+            return nothing
+        end
+        if each isa Expr && each.head === :parameters
+            continue
+        else
+            push!(args, name_handle(each))
+        end
     end
+    return name_handle(ex.args[1]), args, nothing
 end
 
-function define_abstract_api(ex::Expr, api)
-    api_name = QuoteNode(api)
-    return quote
-        export $(api)
-        Core.@__doc__ $(esc(ex)) = throw(NotImplementedError($(api_name)))
-    end
-end
+name_handle(x::Symbol) = x
+name_handle(x::QuoteNode) = x.value
+name_handle(x::Expr) = name_handle(Val(x.head), x)
+# type annotation
+name_handle(::Val{:(::)}, x::Expr) = name_handle(x.args[1])
+name_handle(::Val{:(...)}, x::Expr) = Expr(:(...), name_handle(x.args[1]))
+name_handle(::Val{:(.)}, x::Expr) = name_handle(x.args[2])
+name_handle(::Val{:kw}, x::Expr) = name_handle(x.args[1])
+name_handle(::Val, x::Expr) = error("expect a valid variable name got $x")
