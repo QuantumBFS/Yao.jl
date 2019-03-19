@@ -7,17 +7,29 @@ ex = [
     :(foo(x, y::T) where T),
     :(foo(x, y::T) where T = x)]
 
-@test handle(ex[1]) == (:foo, nothing, nothing)
-name, args, body = handle(ex[2])
-@test (name, args) == (:foo, [:x])
-@test !isnothing(body)
+function check_handle(ex, name, args, body)
+    r = handle(ex)
+    r_name, r_args, r_body = r
 
-name, args, body = handle(ex[3])
-@test (name, args) == (:foo, [:x, :y])
-@test isnothing(body)
+    flag = name == r_name
+    if args == true
+        flag = flag && !isnothing(r_args)
+    else
+        flag = flag && (args == r_args)
+    end
 
-name, args, body = handle(ex[4])
-@test (name, args) == (:foo, [:x, :y])
-@test !isnothing(body)
+    if body == true
+        return flag && !isnothing(r_body)
+    else
+        return flag && isnothing(r_body)
+    end
+end
+
+@test check_handle(ex[1], :foo, nothing, false)
+@test check_handle(ex[2], :foo, [:x], true)
+@test check_handle(ex[3], :foo, [:x, :y], false)
+@test check_handle(ex[4], :foo, [:x, :y], true)
 
 @test_throws ErrorException @interface x + 1
+
+@test check_handle(:(cache_type(::Type{<:AbstractBlock})), :cache_type, true, false)

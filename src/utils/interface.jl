@@ -76,7 +76,17 @@ name_handle(x::Symbol) = x
 name_handle(x::QuoteNode) = x.value
 name_handle(x::Expr) = name_handle(Val(x.head), x)
 # type annotation
-name_handle(::Val{:(::)}, x::Expr) = name_handle(x.args[1])
+function name_handle(::Val{:(::)}, x::Expr)
+    if length(x.args) == 2
+        return name_handle(x.args[1])
+    else
+        temp = x.args[1]
+        x.args[1] = gensym(:x)
+        push!(x.args, temp)
+        return x.args[1]
+    end
+end
+
 name_handle(::Val{:(...)}, x::Expr) = Expr(:(...), name_handle(x.args[1]))
 name_handle(::Val{:(.)}, x::Expr) = name_handle(x.args[2])
 name_handle(::Val{:kw}, x::Expr) = name_handle(x.args[1])
