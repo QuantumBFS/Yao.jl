@@ -14,6 +14,10 @@ block can be decomposed into several primitive blocks.
 """
 abstract type PrimitiveBlock{N, T} <: AbstractBlock{N, T} end
 
+# NOTE: we cannot change subblocks of a primitive block
+#      since they are primitive, therefore we return themselves
+chsubblocks(x::PrimitiveBlock, it) = x
+
 # NOTE: all primitive block should name with postfix Gate
 #       and each primitive block should stay in a single
 #       file whose name is in lowercase and underscore.
