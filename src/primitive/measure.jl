@@ -1,6 +1,6 @@
 export measure, Measure
 
-mutable struct Measure{N, T, K} <: AbstractBlock{N, T}
+mutable struct Measure{N, T, K} <: PrimitiveBlock{N, T}
     locations::NTuple{K, Int}
     collapseto::Union{Int, Nothing}
     remove::Bool
