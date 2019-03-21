@@ -63,14 +63,14 @@ end
     @test g[1] isa XGate
     @test g[2] isa YGate
 
-    #@test iterate(g) == iterate(g.block)
-    #@test length(g) == length(g.block)
+    #@test iterate(g) == iterate(g.content)
+    #@test length(g) == length(g.content)
 
-    @test datatype(g) == datatype(g.block)
-    @test subblocks(g) == (g.block,)
+    @test datatype(g) == datatype(g.content)
+    @test subblocks(g) == (g.content,)
 
     gg = chain(g, g)
     cgg = CachedBlock(test_server, gg, 2)
     @test cgg isa CachedBlock
-    @test parent(cgg)[1] == g
+    @test content(cgg)[1] == g
 end
