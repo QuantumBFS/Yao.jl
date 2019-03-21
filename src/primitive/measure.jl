@@ -21,7 +21,7 @@ YaoBase.measure(locs::Int...; collapseto=nothing, remove=false) =
 
 mat(x::Measure) = error("use BlockMap to get its matrix.")
 
-function apply!(r::AbstractRegister, m::Measure{0})
+function apply!(r::AbstractRegister, m::Measure{N, T, 0}) where {N, T}
     if m.collapseto !== nothing
         m.results = measure_setto!(r; bit_config=r.collapseto)
     elseif m.remove
@@ -32,7 +32,7 @@ function apply!(r::AbstractRegister, m::Measure{0})
     return m
 end
 
-function apply!(r::AbstractRegister, m::Measure)
+function apply!(r::AbstractRegister, m::Measure{N, T}) where {N, T}
     if m.collapseto !== nothing
         m.results = measure_setto!(r, m.locations; bit_config=r.collapseto)
     elseif m.remove
