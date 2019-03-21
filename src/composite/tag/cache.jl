@@ -61,9 +61,9 @@ every methods of the block it contains, except [`mat`](@ref)
 and [`apply!`](@ref), it will cache the matrix form whenever
 the program has.
 """
-struct CachedBlock{ST, BT, N, T} <: AbstractContainer{N, T, BT}
+struct CachedBlock{ST, BT, N, T} <: TagBlock{N, T, BT}
     server::ST
-    block::BT
+    content::BT
     level::Int
 
     function CachedBlock(server::ST, x::BT, level::Int) where {ST, N, T, BT <: AbstractBlock{N, T}}
@@ -72,51 +72,48 @@ struct CachedBlock{ST, BT, N, T} <: AbstractContainer{N, T, BT}
     end
 end
 
-CacheServers.iscached(c::CachedBlock) = iscached(c.server, c.block)
-iscacheable(c::CachedBlock) = iscacheable(c.server, c.block)
+CacheServers.iscached(c::CachedBlock) = iscached(c.server, c.content)
+iscacheable(c::CachedBlock) = iscacheable(c.server, c.content)
 chsubblocks(cb::CachedBlock, blk::AbstractBlock) = CachedBlock(cb.server, blk, cb.level)
 occupied_locations(x::CachedBlock) = occupied_locations(parent(x))
 PreserveStyle(::CachedBlock) = PreserveAll()
 
 function update_cache(c::CachedBlock)
-    if !iscached(c.server, c.block)
-        m = dropzeros!(mat(c.block))
-        push!(c.server, m, c.block)
+    if !iscached(c.server, c.content)
+        m = dropzeros!(mat(c.content))
+        push!(c.server, m, c.content)
     end
     return c
 end
 
 CacheServers.clear!(x::AbstractBlock) = x
-CacheServers.clear!(c::CachedBlock) = (clear!(c.server, c.block); c)
-
-# forward methods
-cache_key(x::CachedBlock) = cache_key(parent(x))
+CacheServers.clear!(c::CachedBlock) = (clear!(c.server, c.content); c)
 
 function mat(c::CachedBlock)
-    if !iscached(c.server, c.block)
-        m = dropzeros!(mat(c.block))
-        push!(c.server, m, c.block)
+    if !iscached(c.server, c.content)
+        m = dropzeros!(mat(c.content))
+        push!(c.server, m, c.content)
         return m
     end
     return pull(c)
 end
 
 function CacheServers.pull(c::CachedBlock)
-    return pull(c.server, c.block)
+    return pull(c.server, c.content)
 end
 
 function apply!(r::AbstractRegister, c::CachedBlock, signal)
     if signal > c.level
         r.state .= mat(c) * r
     else
-        apply!(r, c.block)
+        apply!(r, c.content)
     end
     return r
 end
 apply!(r::AbstractRegister, c::CachedBlock) = (r.state .= mat(c) * r; r)
 
-Base.similar(c::CachedBlock, level::Int) = CachedBlock(c.server, c.block, level)
-Base.copy(c::CachedBlock) = CachedBlock(c.server, copy(c.block), c.level)
+Base.similar(c::CachedBlock, level::Int) = CachedBlock(c.server, c.content, level)
+Base.copy(c::CachedBlock) = CachedBlock(c.server, copy(c.content), c.level)
 
 
 const DefaultCacheServer = get_server(AbstractBlock, CacheFragment)
@@ -132,7 +129,7 @@ function clearall!(x::CachedBlock)
 end
 
 function clearall!(x::CachedBlock{ST, BT}) where {ST, BT <: CompositeBlock}
-    for each in subblocks(x.block)
+    for each in subblocks(x.content)
         clearall!(each)
     end
     clear!(x)
@@ -178,9 +175,3 @@ function cache(server::AbstractCacheServer, block::Roller, level::Int; recursive
 
     return CachedBlock(server, roller, level)
 end
-
-# forward some interface in Base for convenience
-Base.getindex(c::CachedBlock, index...) = getindex(parent(c), index...)
-Base.setindex!(c::CachedBlock, val, index...) = setindex!(parent(c), val, index...)
-Base.iterate(c::CachedBlock) = iterate(parent(c))
-Base.iterate(c::CachedBlock, st) = iterate(parent(c), st)

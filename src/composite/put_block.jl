@@ -6,7 +6,7 @@ export PutBlock, put
 Type for putting a block at given locations.
 """
 struct PutBlock{N, M, C, T, GT <: AbstractBlock} <: AbstractContainer{N, T, GT}
-    block::GT
+    content::GT
     addrs::NTuple{C, Int}
 
     function PutBlock{N}(block::GT, addrs::NTuple{C, Int}) where {N, M, C, T, GT <: AbstractBlock{M, T}}
@@ -35,14 +35,14 @@ put(pa::Pair) = @λ(n -> put(n, pa))
 occupied_locations(x::PutBlock) = x.addrs
 chsubblocks(x::PutBlock{N, M}, b::AbstractBlock{M}) where {N, M} = PutBlock{N}(b, x.addrs)
 PreserveStyle(::PutBlock) = PreserveAll()
-cache_key(pb::PutBlock) = cache_key(pb.block)
+cache_key(pb::PutBlock) = cache_key(pb.content)
 
-mat(pb::PutBlock{N, 1}) where N = u1mat(N, mat(pb.block), pb.addrs...)
-mat(pb::PutBlock{N, C}) where {N, C} = unmat(N, mat(pb.block), pb.addrs)
+mat(pb::PutBlock{N, 1}) where N = u1mat(N, mat(pb.content), pb.addrs...)
+mat(pb::PutBlock{N, C}) where {N, C} = unmat(N, mat(pb.content), pb.addrs)
 
 function apply!(r::ArrayReg, pb::PutBlock{N}) where N
     N == nactive(r) || throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
-    instruct!(matvec(r.state), mat(pb.block), pb.addrs)
+    instruct!(matvec(r.state), mat(pb.content), pb.addrs)
     return r
 end
 
@@ -57,14 +57,14 @@ for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
 end
 
 Base.adjoint(x::PutBlock{N}) where N = PutBlock{N}(adjoint(x), x.addrs)
-Base.copy(x::PutBlock{N}) where N = PutBlock{N}(x.block, x.addrs)
+Base.copy(x::PutBlock{N}) where N = PutBlock{N}(x.content, x.addrs)
 function Base.:(==)(lhs::PutBlock{N, C, GT, T}, rhs::PutBlock{N, C, GT, T}) where {N, T, C, GT}
-    return (lhs.block == rhs.block) && (lhs.addrs == rhs.addrs)
+    return (lhs.content == rhs.content) && (lhs.addrs == rhs.addrs)
 end
 
 function YaoBase.iscommute(x::PutBlock{N}, y::PutBlock{N}) where N
     if x.addrs == y.addrs
-        return iscommute(x.block, y.block)
+        return iscommute(x.content, y.content)
     else
         return iscommute_fallback(x, y)
     end

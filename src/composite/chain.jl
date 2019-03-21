@@ -51,9 +51,10 @@ chain() = @λ(n->chain(n))
 subblocks(c::ChainBlock) = c.blocks
 occupied_locations(c::ChainBlock) =
     unique(Iterators.flatten(occupied_locations(b) for b in subblocks(c)))
-chsubblocks(pb::ChainBlock, blocks) = ChainBlock(blocks)
+chsubblocks(pb::ChainBlock, blocks::Vector) = ChainBlock(blocks)
+chsubblocks(pb::ChainBlock, it) = chain(it...)
 
-mat(c::ChainBlock) = prod(x->mat(x), reverse(c.blocks))
+mat(c::ChainBlock) = prod(x->mat(x), Iterators.reverse(c.blocks))
 
 function apply!(r::AbstractRegister, c::ChainBlock)
     for each in c.blocks
@@ -62,7 +63,7 @@ function apply!(r::AbstractRegister, c::ChainBlock)
     return r
 end
 
-cache_key(c::ChainBlock) = [cache_key(each) for each in c.blocks]
+cache_key(c::ChainBlock) = Tuple(cache_key(each) for each in c.blocks)
 
 function Base.:(==)(lhs::ChainBlock{N, T}, rhs::ChainBlock{N, T}) where {N, T}
     (length(lhs.blocks) == length(rhs.blocks)) && all(lhs.blocks .== rhs.blocks)

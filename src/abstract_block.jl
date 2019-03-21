@@ -49,6 +49,20 @@ Return an iterator of occupied locations of `x`.
 @interface occupied_locations(x::AbstractBlock) = 1:nqubits(x)
 
 """
+    subblocks(x)
+
+Returns an iterator of the sub-blocks of a composite block. Default is empty.
+"""
+@interface subblocks(x::AbstractBlock) = ()
+
+"""
+    chsubblocks(composite_block, itr)
+
+Change the sub-blocks of a [`CompositeBlock`](@ref) with given iterator `itr`.
+"""
+@interface chsubblocks(x::AbstractBlock, itr)
+
+"""
     applymatrix(g::AbstractBlock) -> Matrix
 
 Transform the apply! function of specific block to dense matrix.

@@ -76,7 +76,7 @@ roll(blocks::Union{Function, AbstractBlock}...) = @λ(n->roll(n, blocks))
 roll(itr) = @λ(n->roll(n, itr))
 
 subblocks(m::Roller) = m.blocks
-chsubblocks(m::Roller{N, T}, itr) where {N, T} = Roller{N, T}(Tuple(itr))
+chsubblocks(m::Roller{N, T}, it) where {N, T} = Roller{N, T}(Tuple(it))
 mat(m::Roller) = mapreduce(mat, kron, reverse(m.blocks))
 
 function apply!(reg::ArrayReg{1, T}, m::Roller{N}) where {N, T}

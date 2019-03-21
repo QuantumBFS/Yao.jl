@@ -7,7 +7,7 @@ export RepeatedBlock, repeat
 Repeat the same block on given locations.
 """
 struct RepeatedBlock{N, C, GT <: AbstractBlock, T} <: AbstractContainer{N, T, GT}
-    block::GT
+    content::GT
     addrs::NTuple{C, Int}
 end
 
@@ -39,17 +39,17 @@ Lazy curried version of [`repeat`](@ref).
 """
 Base.repeat(x::AbstractBlock, addrs) = @λ(n->repeat(n, x, params...,))
 
-occupied_locations(x::RepeatedBlock) = Iterators.flatten(k:k+nqubits(x.block)-1 for k in x.addrs)
+occupied_locations(x::RepeatedBlock) = Iterators.flatten(k:k+nqubits(x.content)-1 for k in x.addrs)
 chsubblocks(x::RepeatedBlock{N}, blk::AbstractBlock) where N = RepeatedBlock{N}(blk, x.addrs)
 PreserveProperty(x::RepeatedBlock) = PreserveAll()
 
-mat(rb::RepeatedBlock{N}) where N = hilbertkron(N, fill(mat(rb.block), length(rb.addrs)), [rb.addrs...])
+mat(rb::RepeatedBlock{N}) where N = hilbertkron(N, fill(mat(rb.content), length(rb.addrs)), [rb.addrs...])
 mat(rb::RepeatedBlock{N, 0, GT, T}) where {N, GT, T} = IMatrix{1<<N, T}()
 
 function apply!(r::AbstractRegister, rp::RepeatedBlock)
-    m  = mat(rp.block)
+    m  = mat(rp.content)
     for addr in rp.addrs
-        instruct!(matvec(r.state), mat(rp.block), Tuple(addr:addr+nqubits(rp.block)-1))
+        instruct!(matvec(r.state), mat(rp.content), Tuple(addr:addr+nqubits(rp.content)-1))
     end
     return r
 end
@@ -59,7 +59,7 @@ for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GT = Symbol(G, :Gate)
     @eval function apply!(r::AbstractRegister, rp::RepeatedBlock{N, C, <:$GT}) where {N, C}
         for addr in rp.addrs
-            instruct!(matvec(r.state), Val($(QuoteNode(G))), Tuple(addr:addr+nqubits(rp.block)-1))
+            instruct!(matvec(r.state), Val($(QuoteNode(G))), Tuple(addr:addr+nqubits(rp.content)-1))
         end
         return r
     end
@@ -67,15 +67,15 @@ end
 
 apply!(reg::AbstractRegister, rp::RepeatedBlock{N, 0}) where N = reg
 
-cache_key(rb::RepeatedBlock) = (rb.addrs, cache_key(rb.block))
+cache_key(rb::RepeatedBlock) = (rb.addrs, cache_key(rb.content))
 
-Base.adjoint(blk::RepeatedBlock{N}) where N = RepeatedBlock{N}(adjoint(blk.block), blk.addrs)
-Base.copy(x::RepeatedBlock{N}) where N = RepeatedBlock{N}(x.block, x.addrs)
-Base.:(==)(A::RepeatedBlock, B::RepeatedBlock) = A.addrs == B.addrs && A.block == B.block
+Base.adjoint(blk::RepeatedBlock{N}) where N = RepeatedBlock{N}(adjoint(blk.content), blk.addrs)
+Base.copy(x::RepeatedBlock{N}) where N = RepeatedBlock{N}(x.content, x.addrs)
+Base.:(==)(A::RepeatedBlock, B::RepeatedBlock) = A.addrs == B.addrs && A.content == B.content
 
 function YaoBase.iscommute(x::RepeatedBlock{N}, y::RepeatedBlock{N}) where N
     if x.addrs == y.addrs
-        return iscommute(x.block, y.block)
+        return iscommute(x.content, y.content)
     else
         iscommute_fallback(x, y)
     end

@@ -101,7 +101,7 @@ Base.kron(blocks::Base.Generator) = @λ(n->kron(n, blocks))
 
 occupied_locations(k::KronBlock) = Iterators.flatten(map(x-> x + i - 1, occupied_locations(b)) for (i, b) in zip(k.addrs, subblocks(k)))
 subblocks(x::KronBlock) = x.blocks
-chsubblocks(pb::KronBlock{N}, blocks) where N = KronBlock{N}(pb.addrs, blocks)
+chsubblocks(pb::KronBlock{N}, it) where N = KronBlock{N}(pb.addrs, collect(it))
 cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
 color(::Type{T}) where {T <: KronBlock} = :cyan
 

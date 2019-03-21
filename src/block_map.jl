@@ -24,6 +24,7 @@ function LinearMaps.A_mul_B!(y::AbstractVecOrMat{T}, op::BlockMap{T}, v::Abstrac
     return y
 end
 
+content(x::BlockMap) = x.block
 
 # NOTE: do not overload operator on different element type
 #       we don't support this to error when there is performance
