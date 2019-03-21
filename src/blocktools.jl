@@ -1,13 +1,18 @@
-using YaoBase
+using YaoBase: @interface
 
-export prewalk, postwalk, blockfilter!
+parse_block(n::Int, x::Function) = x(n)
+
+function parse_block(n::Int, x::AbstractBlock{N}) where N
+    n == N || throw(ArgumentError("number of qubits does not match: $x"))
+    return x
+end
 
 """
     prewalk(f, src::AbstractBlock)
 
 Walk the tree and call `f` once the node is visited.
 """
-function prewalk(f::Base.Callable, src::AbstractBlock)
+@interface function prewalk(f::Base.Callable, src::AbstractBlock)
     out = f(src)
     for each in subblocks(src)
         prewalk(f, each)
@@ -20,12 +25,12 @@ end
 
 Walk the tree and call `f` after the children are visited.
 """
-function postwalk(f::Base.Callable, src::AbstractBlock)
+@interface function postwalk(f::Base.Callable, src::AbstractBlock)
     for each in subblocks(src)
         postwalk(f, each)
     end
     return f(src)
 end
 
-blockfilter!(f, v::Vector, blk::AbstractBlock) =
+@interface blockfilter!(f, v::Vector, blk::AbstractBlock) =
     postwalk(x -> f(x) ? push!(v, x) : v, blk)

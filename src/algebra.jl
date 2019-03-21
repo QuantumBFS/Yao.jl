@@ -1,3 +1,5 @@
+# A Simple Computational Algebra System
+
 # scale
 Base.:(-)(x::AbstractBlock{N, T}) where {N, T} = Scale(Val(-1), x)
 Base.:(-)(x::Scale{Val{-1}}) = content(x)

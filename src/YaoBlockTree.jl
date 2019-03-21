@@ -12,12 +12,8 @@ include("primitive/primitive.jl")
 include("composite/composite.jl")
 
 include("algebra.jl")
-include("parse_block.jl")
-
-# printings and tools to manipulate
-# the tree.
+include("blocktools.jl")
 include("layout.jl")
-include("blocktree.jl")
 
 include("deprecations.jl")
 
