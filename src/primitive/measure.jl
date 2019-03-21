@@ -19,6 +19,8 @@ YaoBase.measure(n::Int, locs::NTuple{K, Int}; collapseto=nothing, remove=false) 
 YaoBase.measure(locs::Int...; collapseto=nothing, remove=false) =
     @λ(n->measure(n, locs; collapseto=collapseto, remove=remove))
 
+mat(x::Measure) = error("use BlockMap to get its matrix.")
+
 function apply!(r::AbstractRegister, m::Measure{0})
     if m.collapseto !== nothing
         m.results = measure_setto!(r; bit_config=r.collapseto)
