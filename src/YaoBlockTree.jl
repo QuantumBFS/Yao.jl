@@ -10,8 +10,8 @@ include("block_map.jl")
 include("routines.jl")
 include("primitive/primitive.jl")
 include("composite/composite.jl")
-# include("symbolic/symbolic.jl")
 
+include("algebra.jl")
 include("parse_block.jl")
 
 # printings and tools to manipulate

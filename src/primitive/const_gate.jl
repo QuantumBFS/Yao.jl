@@ -15,3 +15,9 @@ include("const_gate_gen.jl")
 const PauliGate{T} = Union{I2Gate{T}, XGate{T}, YGate{T}, ZGate{T}}
 
 cache_key(x::ConstantGate) = 0x1
+
+struct IGate{N, T} <: ConstantGate{N, T} end
+mat(::IGate{N, T}) where {N, T} = IMatrix{N, T}()
+
+YaoBase.ishermitian(::IGate) = true
+YaoBase.isunitary(::IGate) = true

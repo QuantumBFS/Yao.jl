@@ -54,8 +54,16 @@ print_tree(root; kwargs...) = print_tree(stdout, root; kwargs...)
 
 Base.show(io::IO, blk::AbstractBlock) = show(io, "plain/text", blk)
 Base.show(io::IO, ::MIME"plain/text", blk::AbstractBlock) = print_tree(io, blk)
-Base.show(io::IO, ::MIME"plain/text", blk::CachedBlock) = print_tree(io, blk; title=false, compact=true)
+
+
+function Base.show(io::IO, ::MIME"plain/text",
+        blk::TagBlock{N, T, <:PrimitiveBlock}) where {N, T}
+    return print_tree(io, blk; title=false, compact=false)
+end
+
 Base.show(io::IO, ::MIME"plain/text", blk::PrimitiveBlock) = print_tree(io, blk; title=false, compact=true)
+
+print_tree(io::IO, root::AbstractBlock; kwargs...) = print_tree(io, root, root; kwargs...)
 
 """
     print_tree(io, root, node[, depth=1, active_levels=()]; kwargs...)
@@ -71,7 +79,7 @@ Print the block tree.
 function print_tree(
     io::IO,
     root::AbstractBlock,
-    node::AbstractBlock = root,
+    node::AbstractBlock,
     depth::Int=1,
     islast::Bool=false,
     active_levels=();
@@ -82,10 +90,13 @@ function print_tree(
         println(io)
     end
 
-    print_block(io, node)
-    if !compact && !islast
-        println(io)
+    if root === node
+        print_annotation(io, root, root, root, 1)
+        islast = true
     end
+
+    print_block(io, node)
+    _println(io, node, islast, compact)
 
     kwargs = (maxdepth=maxdepth, charset=charset, title=false, compact=compact)
     for (k, each_node) in enumerate(subblocks(node))
@@ -94,13 +105,13 @@ function print_tree(
             print(io, charset.terminator, charset.dash)
             print(io, " ")
             print_annotation(io, root, node, each_node, k)
-            print_tree(io, root, each_node, depth+1, true, active_levels; kwargs...)
+            print_tree(io, root, each_node, depth+1, islast && isempty(subblocks(each_node)), active_levels; kwargs...)
         else
             print_prefix(io, depth, charset, active_levels)
             print(io, charset.mid, charset.dash)
             print(io, " ")
             print_annotation(io, root, node, each_node, k)
-            print_tree(io, root, each_node, depth+1, (active_levels..., depth+1); kwargs...)
+            print_tree(io, root, each_node, depth+1, false, (active_levels..., depth+1); kwargs...)
         end
     end
 
@@ -110,7 +121,7 @@ end
 function print_tree(
     io::IO,
     root::AbstractBlock,
-    node::CachedBlock,
+    node::TagBlock,
     depth::Int=1,
     islast::Bool=false,
     active_levels=();
@@ -120,14 +131,25 @@ function print_tree(
         print_title(io, root)
         println(io)
     end
-    print_annotation(io, node)
-    print(io, " ")
-    print_block(io, node)
+
+    if root === node
+        print_annotation(io, root, root, root, 1)
+        islast = true
+    end
+
+    kwargs = (maxdepth=maxdepth, charset=charset, title=false, compact=compact)
+    child = content(node)
+    print_annotation(io, root, node, child, 1)
+    print_tree(io, root, child, depth+1, islast && isempty(subblocks(child)), active_levels; kwargs...)
+
+    return nothing
+end
+
+_println(io::IO, node::AbstractBlock, islast, compact) = !compact && println(io)
+function _println(io::IO, node::Union{TagBlock, PrimitiveBlock}, islast, compact)
     if !compact && !islast
         println(io)
     end
-
-    return nothing
 end
 
 # Custom layouts
@@ -145,16 +167,17 @@ color(::Type{<:RepeatedBlock}) = :cyan
 
 print_block(io::IO, g::PhaseGate) = print(io, "phase(", g.theta, ")")
 print_block(io::IO, S::ShiftGate) = print(io, "shift(", S.theta, ")")
-print_block(io::IO, R::RotationGate) = print(io, "rot(", R.block, ", ", R.theta, ")")
+print_block(io::IO, R::RotationGate) = print(io, "rot(", content(R), ", ", R.theta, ")")
 print_block(io::IO, swap::Swap) = printstyled(io, "swap", swap.locs; bold=true, color=color(Swap))
 print_block(io::IO, x::KronBlock) = printstyled(io, "kron"; bold=true, color=color(KronBlock))
 print_block(io::IO, x::ChainBlock) = printstyled(io, "chain"; bold=true, color=color(ChainBlock))
 print_block(io::IO, x::Roller) = printstyled(io, "roller"; bold=true, color=color(Roller))
 print_block(io::IO, x::ReflectGate{N}) where N = print(io, "reflect: nqubits=$N")
 print_block(io::IO, c::Concentrator) = print(io, "Concentrator: ", occupied_locations(c))
-print_block(io::IO, c::CachedBlock) = print_block(io, c.block)
-# print_block(io::IO, c::Dag) = print_block(io, c.block)
-
+print_block(io::IO, c::CachedBlock) = print_block(io, content(c))
+print_block(io::IO, c::Prod) = printstyled(io, "prod"; bold=true, color=color(ChainBlock))
+print_block(io::IO, c::Sum) = printstyled(io, "sum"; bold=true, color=color(ChainBlock))
+print_block(io::IO, c::TagBlock) = nothing
 
 # TODO: use OhMyREPL's default syntax highlighting for functions
 function print_block(io::IO, m::MathGate{N, <:LegibleLambda}) where N
@@ -167,7 +190,7 @@ end
 
 function print_block(io::IO, te::TimeEvolution)
     println(io, "Time Evolution Δt = $(te.dt), tol = $(te.tol)")
-    print_tree(io, te.H.block; title=false)
+    print_tree(io, content(te.H); title=false)
 end
 
 function print_block(io::IO, x::ControlBlock)
@@ -210,13 +233,33 @@ function print_annotation(io::IO,
     root::AbstractBlock,
     node::AbstractBlock,
     child::AbstractBlock, k)
-    print_annotation(io, node)
+    print_annotation(io, child)
 end
 
 print_annotation(io::IO, node::AbstractBlock) = nothing # skip
-# print_annotation(io::IO, c::Dag) = printstyled(io, " [†]"; bold=true, color=:yellow)
+# print_annotation(io::IO, c::Daggered) = printstyled(io, " [†]"; bold=true, color=:yellow)
 print_annotation(io::IO, c::CachedBlock) =
-    printstyled(io, "[cached]"; bold=true, color=:yellow)
+    printstyled(io, "[cached] "; bold=true, color=:yellow)
+
+function print_annotation(io::IO, x::Scale)
+    if x.alpha == im
+        printstyled(io, "[+im] "; bold=true, color=:yellow)
+    elseif x.alpha == -im
+        printstyled(io, "[-im] "; bold=true, color=:yellow)
+    elseif x.alpha == 1
+        printstyled(io, "[+] "; bold=true, color=:yellow)
+    elseif x.alpha == -1
+        printstyled(io, "[-] "; bold=true, color=:yellow)
+    elseif real(x.alpha) == 0
+        printstyled(io, "[scale: ", imag(x.alpha), "im] "; bold=true, color=:yellow)
+    else
+        printstyled(io, "[scale: ", x.alpha, "] "; bold=true, color=:yellow)
+    end
+end
+
+function print_annotation(io::IO, x::Scale{Val{S}}) where S
+    print_annotation(io, Scale(S, x))
+end
 
 function print_annotation(
     io::IO,
