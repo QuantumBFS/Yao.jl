@@ -14,7 +14,7 @@ function YaoBase.measure(::Type{T}, n::Int, locs::NTuple{K, Int}; collapseto=not
 end
 
 # NOTE: make sure this won't overwrite YaoBase.measure
-YaoBase.measure(n::Int, locs::NTuple{K, Int}; collapseto=nothing, remove=false) =
+YaoBase.measure(n::Int, locs::NTuple{K, Int}; collapseto=nothing, remove=false) where K =
     measure(ComplexF64, n, locs; collapseto=collapseto, remove=remove)
 YaoBase.measure(locs::Int...; collapseto=nothing, remove=false) =
     @λ(n->measure(n, locs; collapseto=collapseto, remove=remove))
