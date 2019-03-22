@@ -164,12 +164,12 @@ end
 ## Measurement
 
 """
-    measure(register[, locs]; ntimes=1) -> Vector{Int}
+    measure(register[, locs]; nshots=1) -> Vector{Int}
 
 Return measurement results of current active qubits (regarding to active qubits,
 see [`focus!`](@ref) and [`relax!`](@ref)).
 """
-@interface measure(::AbstractRegister; ntimes::Int=1)
+@interface measure(::AbstractRegister; nshots::Int=1)
 
 """
     measure!(register[, locs])
@@ -234,7 +234,7 @@ select!(bits...) = @λ(register->select!(register, bits...))
 
 Non-inplace version of [`select!`](@ref).
 """
-@interface select(register::AbstractRegister, bits...) = select!(copy(register), bits...)
+@interface select(register::AbstractRegister, bits...)
 
 """
     cat(::AbstractRegister...) -> register
