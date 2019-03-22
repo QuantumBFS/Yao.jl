@@ -59,7 +59,7 @@ function YaoBase.measure_collapseto!(reg::ArrayReg{B}; config::Integer=0) where 
     return res
 end
 
-YaoBase.select(r::ArrayReg{B}, bits...) = ArrayReg{B}(reg.state[[bits...].+1, :])
+YaoBase.select(r::ArrayReg{B}, bits...) where B = ArrayReg{B}(reg.state[[bits...].+1, :])
 
 function YaoBase.select!(r::ArrayReg, bits)
     to_address(x::Integer) = x + 1
