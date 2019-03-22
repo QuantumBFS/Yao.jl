@@ -193,7 +193,7 @@ Measure current active qubits or qubits at `locs` and set the register to specif
 @interface measure_collapseto!(::AbstractRegister; config::Int=0)
 
 # focus context
-for FUNC in [:measure!, :measure, :measure_collapseto!]
+for FUNC in [:measure!, :measure, :measure_collapseto!, :measure_remove!]
     @eval function $FUNC(reg::AbstractRegister, locs; kwargs...)
         focus!(reg, locs)
         res = $FUNC(reg; kwargs...)
