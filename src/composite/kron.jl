@@ -119,6 +119,21 @@ function mat(k::KronBlock{N}) where N
     end
 end
 
+function apply!(r::ArrayReg, k::KronBlock)
+    for (addrs, block) in zip(k.addrs, k.blocks)
+        _instruct!(state(r), block, Tuple(addrs:addrs+nqubits(block)-1))
+    end
+    return r
+end
+
+_instruct!(state::AbstractArray, block::AbstractBlock, addrs) = instruct!(state, mat(block), addrs)
+
+# specialization
+for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
+    GT = Symbol(G, :Gate)
+    @eval _instruct!(state::AbstractArray, block::$GT, addrs) = instruct!(state, Val($(QuoteNode(G))), addrs)
+end
+
 function Base.copy(k::KronBlock{N, T}) where {N, T}
     slots = copy(k.slots)
     addrs = copy(k.addrs)
