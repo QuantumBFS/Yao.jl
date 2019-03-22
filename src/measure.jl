@@ -6,21 +6,21 @@ export measure,
     select,
     select!
 
-_measure(pl::AbstractVector, ntimes::Int) = sample(0:length(pl)-1, Weights(pl), ntimes)
-function _measure(pl::AbstractMatrix, ntimes::Int)
+_measure(pl::AbstractVector, nshots::Int) = sample(0:length(pl)-1, Weights(pl), nshots)
+function _measure(pl::AbstractMatrix, nshots::Int)
     B = size(pl, 2)
-    res = Matrix{Int}(undef, ntimes, B)
+    res = Matrix{Int}(undef, nshots, B)
     for ib=1:B
-        @inbounds res[:,ib] = _measure(view(pl,:,ib), ntimes)
+        @inbounds res[:,ib] = _measure(view(pl,:,ib), nshots)
     end
     return res
 end
 
-YaoBase.measure(reg::ArrayReg{1}; ntimes::Int=1) = _measure(reg |> probs, ntimes)
+YaoBase.measure(reg::ArrayReg{1}; nshots::Int=1) = _measure(reg |> probs, nshots)
 
-function YaoBase.measure(reg::ArrayReg{B}; ntimes::Int=1) where B
+function YaoBase.measure(reg::ArrayReg{B}; nshots::Int=1) where B
     pl = dropdims(sum(reg |> rank3 .|> abs2, dims=2), dims=2)
-    return _measure(pl, ntimes)
+    return _measure(pl, nshots)
 end
 
 function YaoBase.measure_remove!(reg::ArrayReg{B}) where B
