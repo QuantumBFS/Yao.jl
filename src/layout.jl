@@ -160,6 +160,7 @@ color(::Type{<:ChainBlock}) = :blue
 color(::Type{<:Roller}) = :cyan
 color(::Type{<:MathGate}) = :red
 color(::Type{<:PutBlock}) = :cyan
+color(::Type{T}) where {T <: PauliString} = :cyan
 color(::Type{<:RepeatedBlock}) = :cyan
 
 # color(::Type{T}) where {T <: PauliString} = :cyan
@@ -226,6 +227,10 @@ function print_block(io::IO, rb::RepeatedBlock{N}) where N
         end
     end
     printstyled(io, ")"; bold=true, color=color(RepeatedBlock))
+end
+
+function print_block(io::IO, x::PauliString)
+    printstyled(io, "PauliString"; bold=true, color=color(PauliString))
 end
 
 # forward to simplify interfaces
