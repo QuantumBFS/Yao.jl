@@ -1,4 +1,4 @@
-using Test, YaoBlockTree, YaoArrayRegister, LuxurySparse, BitBasis
+using Test, YaoBlocks, YaoArrayRegister, LuxurySparse, BitBasis
 
 U = mat(X)
 ⊗ = kron

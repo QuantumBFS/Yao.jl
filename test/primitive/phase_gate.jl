@@ -1,4 +1,4 @@
-using Test, YaoBlockTree, YaoArrayRegister, LuxurySparse
+using Test, YaoBlocks, YaoArrayRegister, LuxurySparse
 
 
 @testset "test constructor" for T in [Float16, Float32, Float64]

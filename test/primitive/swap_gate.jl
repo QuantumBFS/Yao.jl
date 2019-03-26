@@ -1,4 +1,4 @@
-using Test, YaoBlockTree, YaoBase, LuxurySparse
+using Test, YaoBlocks, YaoBase, LuxurySparse
 
 @test_throws LocationConflictError swap(2, 1, 1)
 @test swap(2, 1, 2) isa Swap{2, ComplexF64}

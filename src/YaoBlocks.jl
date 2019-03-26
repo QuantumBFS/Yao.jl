@@ -1,4 +1,4 @@
-module YaoBlockTree
+module YaoBlocks
 
 include("utils.jl")
 # include("traits.jl")
@@ -17,4 +17,4 @@ include("layout.jl")
 
 include("deprecations.jl")
 
-end # YaoBlockTree
+end # YaoBlocks

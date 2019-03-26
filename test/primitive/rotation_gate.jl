@@ -1,4 +1,4 @@
-using Test, YaoBlockTree, YaoArrayRegister
+using Test, YaoBlocks, YaoArrayRegister
 
 @testset "test constructor" for T in [Float16, Float32, Float64]
     # NOTE: type should follow the axis

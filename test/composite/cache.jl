@@ -1,4 +1,4 @@
-using Test, YaoBlockTree, YaoArrayRegister, LuxurySparse, CacheServers
+using Test, YaoBlocks, YaoArrayRegister, LuxurySparse, CacheServers
 
 @testset "constructor" begin
     @test CacheFragment(X) isa CacheFragment{XGate{ComplexF64}, UInt8, Any}

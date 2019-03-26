@@ -1,4 +1,4 @@
-using Test, YaoBlockTree, YaoBase
+using Test, YaoBlocks, YaoBase
 
 rp = RepeatedBlock{5}(X, (1,2,3))
 @test isreflexive(rp)

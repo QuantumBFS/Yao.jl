@@ -107,8 +107,8 @@ function define_typed_binding(__module__::Module, __source__::LineNumberNode, na
                 throw(UndefVarError($(QuoteNode(name))))
             end
 
-            const $const_binding = YaoBlockTree.mat($gt_name{$type})
-            YaoBlockTree.mat(::Type{$gt_name{$type}}) = $const_binding
+            const $const_binding = YaoBlocks.mat($gt_name{$type})
+            YaoBlocks.mat(::Type{$gt_name{$type}}) = $const_binding
         end
     end
 end
@@ -133,7 +133,7 @@ function define_struct(__module__::Module, __source__::LineNumberNode, const_bin
         push!(ex.args, :(@warn $msg))
         push!(ex.args, :(@eval $__module__ @assert $N == BitBasis.log2i(size(mat($name), 1)) "new constant does not have the same size with previous definitions"))
     else
-        push!(ex.args, :(@eval $__module__ Base.@__doc__ struct $gt_name{T} <: YaoBlockTree.ConstGate.ConstantGate{$N, T} end))
+        push!(ex.args, :(@eval $__module__ Base.@__doc__ struct $gt_name{T} <: YaoBlocks.ConstGate.ConstantGate{$N, T} end))
     end
     push!(ex.args, :(@eval $__module__ Base.@__doc__ const $(name) = $(gt_name){eltype($const_binding)}()))
     return ex
@@ -166,18 +166,18 @@ function define_methods(__module__::Module, const_binding, name)
     gt_name = gatetype_name(name)
     return quote
         @eval $__module__ begin
-            YaoBlockTree.mat(::Type{$gt_name{eltype($const_binding)}}) = $const_binding
-            YaoBlockTree.mat(::GT) where GT <: $gt_name = YaoBlockTree.mat(GT)
+            YaoBlocks.mat(::Type{$gt_name{eltype($const_binding)}}) = $const_binding
+            YaoBlocks.mat(::GT) where GT <: $gt_name = YaoBlocks.mat(GT)
 
-            function YaoBlockTree.mat(::Type{$gt_name{T}}) where T
-                src = YaoBlockTree.mat($gt_name{eltype($const_binding)})
+            function YaoBlocks.mat(::Type{$gt_name{T}}) where T
+                src = YaoBlocks.mat($gt_name{eltype($const_binding)})
                 dst = similar(src, T)
                 copyto!(dst, src)
                 return dst
             end
 
             (::$gt_name)(::Type{T}) where T = $gt_name{T}()
-            function YaoBlockTree.print_block(io::IO, ::$gt_name)
+            function YaoBlocks.print_block(io::IO, ::$gt_name)
                 print(io, $(QuoteNode(name)), " gate")
             end
         end # eval
@@ -190,9 +190,9 @@ function define_properties(__module__::Module, const_binding, name)
         flag = gensym(:flag)
         return quote
             @eval $__module__ begin
-                const $flag = YaoBlockTree.$property($const_binding)
-                YaoBlockTree.$property(::$gt_name) = $flag
-                YaoBlockTree.$property(::Type{GT}) where GT <: $gt_name = $flag
+                const $flag = YaoBlocks.$property($const_binding)
+                YaoBlocks.$property(::$gt_name) = $flag
+                YaoBlocks.$property(::Type{GT}) where GT <: $gt_name = $flag
             end
         end
     end

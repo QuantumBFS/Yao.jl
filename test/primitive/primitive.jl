@@ -1,4 +1,4 @@
-using Test, YaoBlockTree
+using Test, YaoBlocks
 
 @testset "test constant gates" begin
     include("const_gate.jl")

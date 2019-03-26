@@ -1,4 +1,4 @@
-using Test, YaoBlockTree
+using Test, YaoBlocks
 
 hm = kron(3, 1=>X)
 

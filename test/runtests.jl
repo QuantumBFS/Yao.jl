@@ -1,4 +1,4 @@
-using Test, YaoBlockTree
+using Test, YaoBlocks
 
 @testset "test primitive block" begin
     include("primitive/primitive.jl")

@@ -1,4 +1,4 @@
-using Test, Random, YaoBase, YaoBlockTree, LuxurySparse
+using Test, Random, YaoBase, YaoBlocks, LuxurySparse
 
 function random_dense_kron(n; gateset)
     locs = randperm(n)

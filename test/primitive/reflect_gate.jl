@@ -1,4 +1,4 @@
-using Test, YaoArrayRegister, YaoBlockTree, LinearAlgebra
+using Test, YaoArrayRegister, YaoBlocks, LinearAlgebra
 
 @testset "test reflect gate" begin
     reg0 = rand_state(3)

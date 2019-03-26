@@ -1,4 +1,4 @@
-using Test, YaoBlockTree, YaoArrayRegister
+using Test, YaoBlocks, YaoArrayRegister
 
 @testset "apply!" begin
     n = 6

@@ -1,4 +1,4 @@
-using Test, YaoBlockTree, LuxurySparse, BitBasis, YaoBlockTree.ConstGate
+using Test, YaoBlocks, LuxurySparse, BitBasis, YaoBlocks.ConstGate
 
 @testset "test builtin gates" begin
 

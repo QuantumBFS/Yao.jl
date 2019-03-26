@@ -1,4 +1,4 @@
-using Test, YaoBlockTree, YaoArrayRegister
+using Test, YaoBlocks, YaoArrayRegister
 
 reg = rand_state(10)
 block = kron(4, 2=>X)

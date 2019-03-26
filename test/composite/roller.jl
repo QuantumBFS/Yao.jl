@@ -1,4 +1,4 @@
-using Test, YaoBase, YaoArrayRegister, YaoBlockTree
+using Test, YaoBase, YaoArrayRegister, YaoBlocks
 
 @testset "constructor" begin
     g = Roller(X, kron(X, Y), Z, Z)

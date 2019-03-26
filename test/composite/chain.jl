@@ -1,4 +1,4 @@
-using Test, YaoBase, YaoBlockTree, YaoArrayRegister
+using Test, YaoBase, YaoBlocks, YaoArrayRegister
 
 @testset "test constructors" begin
     g = ChainBlock(

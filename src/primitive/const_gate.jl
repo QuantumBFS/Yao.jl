@@ -9,7 +9,7 @@ export ConstGate,
 A module contains all constant gate definitions.
 """
 module ConstGate
-import ..YaoBlockTree
+import ..YaoBlocks
 export ConstantGate, PauliGate
 
 """
@@ -19,17 +19,17 @@ Abstract type for constant gates. Constant gates are
 quantum gates with constant value, e.g Pauli gates,
 T gate, Hadmard gates, etc.
 """
-abstract type ConstantGate{N, T} <: YaoBlockTree.PrimitiveBlock{N, T} end
+abstract type ConstantGate{N, T} <: YaoBlocks.PrimitiveBlock{N, T} end
 
 include("const_gate_tools.jl")
 include("const_gate_gen.jl")
 
 const PauliGate{T} = Union{I2Gate{T}, XGate{T}, YGate{T}, ZGate{T}}
 
-YaoBlockTree.cache_key(x::ConstantGate) = 0x1
+YaoBlocks.cache_key(x::ConstantGate) = 0x1
 
 struct IGate{N, T} <: ConstantGate{N, T} end
-YaoBlockTree.mat(::IGate{N, T}) where {N, T} = IMatrix{N, T}()
+YaoBlocks.mat(::IGate{N, T}) where {N, T} = IMatrix{N, T}()
 
 YaoBase.ishermitian(::IGate) = true
 YaoBase.isunitary(::IGate) = true

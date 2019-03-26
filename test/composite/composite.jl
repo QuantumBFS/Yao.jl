@@ -1,4 +1,4 @@
-using Test, YaoBlockTree
+using Test, YaoBlocks
 
 @testset "test chain" begin
     include("chain.jl")
