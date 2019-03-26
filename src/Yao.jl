@@ -17,8 +17,6 @@ Extensible Framework for Quantum Algorithm Design for Humans.
 const 幺 = Yao
 
 using Reexport
-
-
-using YaoBase, YaoArrayRegister, YaoBlocks
+@reexport using YaoBase, YaoArrayRegister, YaoBlocks
 
 end # module
