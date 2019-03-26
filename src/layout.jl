@@ -91,7 +91,6 @@ function print_tree(
     end
 
     if root === node
-        print_annotation(io, root, root, root, 1)
         islast = true
     end
 
@@ -197,10 +196,10 @@ end
 function print_block(io::IO, x::ControlBlock)
     printstyled(io, "control("; bold=true, color=color(ControlBlock))
 
-    for i in eachindex(x.ctrl_qubits)
-        printstyled(io, x.ctrl_qubits[i]; bold=true, color=color(ControlBlock))
+    for i in eachindex(x.ctrl_locs)
+        printstyled(io, x.ctrl_locs[i]; bold=true, color=color(ControlBlock))
 
-        if i != lastindex(x.ctrl_qubits)
+        if i != lastindex(x.ctrl_locs)
             printstyled(io, ", "; bold=true, color=color(ControlBlock))
         end
     end
