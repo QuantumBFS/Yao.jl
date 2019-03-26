@@ -236,8 +236,13 @@ for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     @eval YaoBase.instruct!(state::AbstractVecOrMat, g::Val{$(QuoteNode(G))},
         locs::NTuple{N, Int}, control_locs::Tuple{Int}, control_bits::Tuple{Int}) where N =
             instruct!(state, g, locs, control_locs..., control_bits...)
-end
 
+    # forward single location
+    @eval YaoBase.instruct!(state::AbstractVecOrMat, g::Val{$(QuoteNode(G))},
+        locs::Tuple{Int}, control_locs::Int, control_bits::Int) where N =
+            instruct!(state, g, locs..., control_locs, control_bits)
+
+end
 
 function YaoBase.instruct!(
         state::AbstractVecOrMat{T},
