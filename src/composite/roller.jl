@@ -10,7 +10,7 @@ Roller block.
 struct Roller{N, T, BT <: Tuple} <: CompositeBlock{N, T}
     blocks::BT
     function Roller{N, T}(blocks::BT) where {N, T, BT}
-        sum(nqubits, blocks) == N || throw(AddressConflictError("Size of blocks does not match roller size."))
+        sum(nqubits, blocks) == N || throw(LocationConflictError("Size of blocks does not match roller size."))
         new{N, T, BT}(blocks)
     end
 end
@@ -36,7 +36,7 @@ Return a [`Roller`](@ref) with total number of active qubits.
 roll(n::Int, blocks...,) = roll(n, blocks)
 
 function roll(n::Int, blocks::AbstractBlock...,)
-    sum(nqubits, blocks) == n || throw(AddressConflictError("Size of blocks does not match total size."))
+    sum(nqubits, blocks) == n || throw(LocationConflictError("Size of blocks does not match total size."))
     Roller(blocks...,)
 end
 

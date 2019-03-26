@@ -39,7 +39,7 @@ chain(blocks::Function...) = @λ(n->chain(n, blocks...))
 Return an empty [`ChainBlock`](@ref) which can be used like a list of blocks.
 """
 chain(n::Int) = chain(ComplexF64, n)
-chain(::Type{T}, n::Int) = chain(AbstractBlock{n, T}[])
+chain(::Type{T}, n::Int) where T = chain(AbstractBlock{n, T}[])
 
 """
     chain()

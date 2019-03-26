@@ -13,7 +13,7 @@ using Test, YaoBlockTree, YaoArrayRegister
 
     pb = PutBlock{n}(rot(CNOT, 0.3), (6, 3))
     @test pb |> applymatrix ≈ mat(pb)
-    pb = PutBlock{n}(matgate(mat(rot(CNOT, 0.3))|>Matrix), (6, 3))
+    pb = PutBlock{n}(matblock(mat(rot(CNOT, 0.3))|>Matrix), (6, 3))
     @test pb |> applymatrix ≈ mat(pb)
 
     Cb = control(n, (3,), 5=>X)

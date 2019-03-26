@@ -10,7 +10,7 @@ using Test, YaoBase, YaoArrayRegister, YaoBlockTree
     @test src.theta == 0.1
     @test g.blocks[2].theta == 0.1
     blks = [X, Y, kron(3, 2=>Rx(0.3))]
-    @test_throws AddressConflictError chsubblocks(g, blks)
+    @test_throws LocationConflictError chsubblocks(g, blks)
     blks = [X, Y, kron(2, 2=>Rx(0.3))]
     subblocks(chsubblocks(g, blks)) == blks
 end

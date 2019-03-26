@@ -1,8 +1,8 @@
 using Test, Random, YaoBase, YaoBlockTree, LuxurySparse
 
 function random_dense_kron(n; gateset)
-    addrs = randperm(n)
-    blocks = [i=>rand(gateset) for i in addrs]
+    locs = randperm(n)
+    blocks = [i=>rand(gateset) for i in locs]
     g = KronBlock{n}(blocks...)
     sorted_blocks = sort(blocks, by=x->x[1])
     t = mapreduce(x->mat(x[2]), kron, reverse(sorted_blocks), init=IMatrix(1))
@@ -11,11 +11,11 @@ end
 
 function rand_kron_test(n; gateset)
     firstn = rand(1:n)
-    addrs = randperm(n)
+    locs = randperm(n)
     blocks = [rand(gateset) for i = 1:firstn]
-    seq = [i=>each for (i, each) in zip(addrs[1:firstn], blocks)]
-    mats = Any[i=>mat(each) for (i, each) in zip(addrs[1:firstn], blocks)]
-    append!(mats, [i=>IMatrix(2) for i in addrs[firstn+1:end]])
+    seq = [i=>each for (i, each) in zip(locs[1:firstn], blocks)]
+    mats = Any[i=>mat(each) for (i, each) in zip(locs[1:firstn], blocks)]
+    append!(mats, [i=>IMatrix(2) for i in locs[firstn+1:end]])
     sorted = sort(mats, by=x->x.first)
     mats = map(x->x.second, reverse(sorted))
 
@@ -26,7 +26,7 @@ end
 
 
 @testset "test constructors" begin
-    @test_throws AddressConflictError KronBlock{5}(4=>CNOT, 5=>X)
+    @test_throws LocationConflictError KronBlock{5}(4=>CNOT, 5=>X)
     @test_throws ErrorException kron(3, 1=>X, Y)
 end
 
@@ -54,7 +54,7 @@ end
         m = kron(U2, Const.I2, U, Const.I2)
         g = KronBlock{5}(4=>CNOT, 2=>X)
         @test m == mat(g)
-        @test g.addrs == [2, 4]
+        @test g.locs == [2, 4]
         @test collect(occupied_locs(g)) == [2, 4, 5]
     end
 

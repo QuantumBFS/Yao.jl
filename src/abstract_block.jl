@@ -232,10 +232,15 @@ the block tree `block`. See also [`dispatch!`](@ref).
 """
 @interface popdispatch!(x::AbstractBlock, list::Vector) = popdispatch!(identity, x, list)
 
+render_params(r::AbstractBlock, params) = params
+render_params(r::AbstractBlock, params::Symbol) = render_params(r, Val(params))
+render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i=1:nparameters(r))
+render_params(r::AbstractBlock, ::Val{:zero}) = (zero(params_eltype(r)) for i in 1:nparameters(r))
+
 """
     HasParameters{X} <: SimpleTraits.Trait
 
-Block `X` has parameters.
+Trait that block `X` has parameters.
 """
 @traitdef HasParameters{X <: AbstractBlock}
 
@@ -243,7 +248,19 @@ Block `X` has parameters.
     hasmethod(parameters, Tuple{X}) ? :(HasParameters{X}) : :(Not{HasParameters{X}})
 end
 
-render_params(r::AbstractBlock, params) = params
-render_params(r::AbstractBlock, params::Symbol) = render_params(r, Val(params))
-render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i=1:nparameters(r))
-render_params(r::AbstractBlock, ::Val{:zero}) = (zero(params_eltype(r)) for i in 1:nparameters(r))
+
+"""
+    cache_type(::Type) -> DataType
+
+Return the element type that a [`CacheFragment`](@ref)
+will use.
+"""
+@interface cache_type(::Type{<:AbstractBlock}) = Any
+
+"""
+    cache_key(block)
+
+Returns the key that identify the matrix cache of this block. By default, we
+use the returns of [`parameters`](@ref) as its key.
+"""
+@interface cache_key(x::AbstractBlock)

@@ -130,7 +130,7 @@ _instruct!(state::AbstractArray, block::AbstractBlock, locs) = instruct!(state, 
 
 # specialization
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
-    GT = Symbol(G, :Gate)
+    GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
     @eval _instruct!(state::AbstractArray, block::$GT, locs) = instruct!(state, Val($(QuoteNode(G))), locs)
 end
 

@@ -48,7 +48,7 @@ end
 
 # specialization
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
-    GT = Symbol(G, :Gate)
+    GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
     @eval function apply!(r::ArrayReg, pb::PutBlock{N, C, T, <:$GT}) where {N, C, T}
         N == nactive(r) || throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
         instruct!(matvec(r.state), Val($(QuoteNode(G))), pb.locs)

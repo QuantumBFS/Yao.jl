@@ -14,7 +14,7 @@ end
 
 function Concentrator{N}(block::BT, locations::NTuple{C, Int}) where {N, M, C, T, BT<:AbstractBlock{M, T}}
     if !(length(locations) == M && N>=M)
-        throw(AddressConflictError("length of locations must be equal to the size of block, and smaller than size of itself."))
+        throw(LocationConflictError("length of locations must be equal to the size of block, and smaller than size of itself."))
     end
     return Concentrator{N, T, BT, C}(block, locations)
 end

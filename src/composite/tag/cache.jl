@@ -4,22 +4,6 @@ export CacheFragment, CachedBlock, update_cache
 export cache, pull, update!, update_cache, clearall!, iscached, iscacheable
 
 """
-    cache_type(::Type) -> DataType
-
-Return the element type that a [`CacheFragment`](@ref)
-will use.
-"""
-@interface cache_type(::Type{<:AbstractBlock}) = Any
-
-"""
-    cache_key(block)
-
-Returns the key that identify the matrix cache of this block. By default, we
-use the returns of [`parameters`](@ref) as its key.
-"""
-@interface cache_key(x::AbstractBlock)
-
-"""
     CacheFragment{BT, K, MT}
 
 A fragment that will be stored for each cached block (of type `BT`) on a cache server.
