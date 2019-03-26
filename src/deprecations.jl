@@ -1,5 +1,1 @@
-@deprecate addbit!(r::AbstractRegister, n::Int) increase!(r, n)
-@deprecate addbit!(n::Int) increase!(n)
-@deprecate reset!(r::AbstractRegister; val::Integer=0)  collapseto!(r, val)
-@deprecate measure_reset!(r::AbstractRegister; val::Int=0) measure_collapseto!(r; config=val)
-@deprecate measure_reset!(r::AbstractRegister, locs; val::Int=0) measure_collapseto!(r, locs; config=val)
+# deprecations
