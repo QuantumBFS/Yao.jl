@@ -1,6 +1,10 @@
 using Test, YaoBase
 using YaoBase: @interface, handle
 
+if VERSION < v"1.1.0"
+    isnothing(x) = x === nothing
+end
+
 ex = [
     :(function foo end),
     :(foo(x) = x),
