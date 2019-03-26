@@ -108,80 +108,80 @@ YaoBase.iscommute(op1::AbstractBlock{N}, op2::AbstractBlock{N}) where N =
 
 # parameters
 """
-    parameters(block)
+    getiparams(block)
 
-Returns the parameters of node `block`, default is an empty tuple.
+Returns the intrinsic parameters of node `block`, default is an empty tuple.
 """
-@interface parameters(x::AbstractBlock) = ()
+@interface getiparams(x::AbstractBlock) = ()
 
 """
-    setparameters!(block, itr)
-    setparameters!(block, params...)
+    setiparams!(block, itr)
+    setiparams!(block, params...)
 
 Set the parameters of `block`.
 """
-@interface setparameters!(x::AbstractBlock, it) = setparameters!(x, it...)
+@interface setiparams!(x::AbstractBlock, it) = setiparams!(x, it...)
 
 """
-    setparameters(f, block, collection)
+    setiparams(f, block, collection)
 
 Set parameters of `block` to the value in `collection` mapped by `f`.
 """
-@interface setparameters!(f::Function, x::AbstractBlock, it) = setparameters!(x, map(f, it))
+@interface setiparams!(f::Function, x::AbstractBlock, it) = setiparams!(x, map(f, it))
 
 """
-    setparameters(f, block, symbol)
+    setiparams(f, block, symbol)
 
 Set the parameters to a given symbol, which can be :zero, :random.
 """
-@interface setparameters!(f::Function, x::AbstractBlock, it::Symbol) = setparameters(f, x, render_params(x, it))
+@interface setiparams!(f::Function, x::AbstractBlock, it::Symbol) = setiparams(f, x, render_params(x, it))
 
 """
-    allparameters(block)
+    parameters(block)
 
 Returns all the parameters contained in block tree with given root `block`.
 """
-@interface allparameters(x::AbstractBlock) = allparameters!(allparam_eltype(x)[], x)
+@interface parameters(x::AbstractBlock) = parameters!(allparams_eltype(x)[], x)
 
 """
-    allparameters!(out, block)
+    parameters!(out, block)
 
 Append all the parameters contained in block tree with given root `block` to
 `out`.
 """
-@interface allparameters!(out, x::AbstractBlock) = prewalk(blk->append!(out, parameters(blk)), x)
+@interface parameters!(out, x::AbstractBlock) = prewalk(blk->append!(out, getiparams(blk)), x)
 
 """
     nparameters(block) -> Int
 
-Return number of parameters in `block`. See also [`nallparameters`](@ref).
+Return number of parameters in `block`. See also [`nparameters`](@ref).
 """
-@interface nparameters(x::AbstractBlock) = length(parameters(x))
+@interface niparams(x::AbstractBlock) = length(getiparams(x))
 
-@interface function nallparameters(x::AbstractBlock)
-    count = nparameters(x)
+@interface function nparameters(x::AbstractBlock)
+    count = niparams(x)
     for each in subblocks(x)
-        count += nallparameters(each)
+        count += nparameters(each)
     end
     return count
 end
 
 """
-    param_eltype(block)
+    params_eltype(block)
+
+Return the element type of [`getiparams`](@ref).
+"""
+@interface params_eltype(x::AbstractBlock) = eltype(getiparams(x))
+
+"""
+    allparams_eltype(x)
 
 Return the element type of [`parameters`](@ref).
 """
-@interface param_eltype(x::AbstractBlock) = eltype(parameters(x))
-
-"""
-    allparam_eltype(x)
-
-Return the element type of [`allparameters`](@ref).
-"""
-@interface function allparam_eltype(x::AbstractBlock)
-    T = param_eltype(x)
+@interface function allparams_eltype(x::AbstractBlock)
+    T = params_eltype(x)
     for each in subblocks(x)
-        T = promote_type(T, param_eltype(each))
+        T = promote_type(T, params_eltype(each))
     end
     return T
 end
@@ -192,7 +192,7 @@ end
 Dispatch parameters in collection to block tree `x`.
 """
 @interface function dispatch!(f::Function, x::AbstractBlock, it)
-    @assert length(it) == nallparameters(x) "expect $(nallparameters(x)) parameters, got $(length(it))"
+    @assert length(it) == nparameters(x) "expect $(nparameters(x)) parameters, got $(length(it))"
     setparameters!(f, x, Iterators.take(it, nparameters(x)))
     it = Iterators.drop(it, nparameters(x))
     for each in subblocks(x)
@@ -202,7 +202,7 @@ Dispatch parameters in collection to block tree `x`.
 end
 
 function dispatch!(f::Function, x::AbstractBlock, it::Symbol)
-    @assert length(it) == nallparameters(x) "expect $(nallparameters(x)) parameters, got $(length(it))"
+    @assert length(it) == nparameters(x) "expect $(nparameters(x)) parameters, got $(length(it))"
     setparameters!(f, x, it)
     for each in subblocks(x)
         dispatch!(f, each, it)
@@ -213,7 +213,7 @@ end
 """
     popdispatch!(f, block, list)
 
-Pop the first [`nallparameters`](@ref) parameters of list, map them with a function
+Pop the first [`nparameters`](@ref) parameters of list, map them with a function
 `f`, then dispatch them to the block tree `block`. See also [`dispatch!`](@ref).
 """
 @interface function popdispatch!(f::Function, x::AbstractBlock, list::Vector)
@@ -227,7 +227,7 @@ end
 """
     popdispatch!(block, list)
 
-Pop the first [`nallparameters`](@ref) parameters of list, then dispatch them to
+Pop the first [`nparameters`](@ref) parameters of list, then dispatch them to
 the block tree `block`. See also [`dispatch!`](@ref).
 """
 @interface popdispatch!(x::AbstractBlock, list::Vector) = popdispatch!(identity, x, list)
@@ -246,4 +246,4 @@ end
 render_params(r::AbstractBlock, params) = params
 render_params(r::AbstractBlock, params::Symbol) = render_params(r, Val(params))
 render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i=1:nparameters(r))
-render_params(r::AbstractBlock, ::Val{:zero}) = (zero(param_eltype(r)) for i in 1:nparameters(r))
+render_params(r::AbstractBlock, ::Val{:zero}) = (zero(params_eltype(r)) for i in 1:nparameters(r))

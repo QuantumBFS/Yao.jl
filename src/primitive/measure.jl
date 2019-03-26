@@ -1,4 +1,4 @@
-export measure, Measure
+export Measure
 
 mutable struct Measure{N, T, K} <: PrimitiveBlock{N, T}
     locations::NTuple{K, Int}
@@ -9,15 +9,13 @@ mutable struct Measure{N, T, K} <: PrimitiveBlock{N, T}
         new{N, T, K}(locations, collapseto, remove)
 end
 
-function YaoBase.measure(::Type{T}, n::Int, locs::NTuple{K, Int}; collapseto=nothing, remove=false) where {K, T}
+function Measure(::Type{T}, n::Int, locs::NTuple{K, Int}; collapseto=nothing, remove=false) where {K, T}
     Measure{n, T}(locs, collapseto, remove)
 end
 
 # NOTE: make sure this won't overwrite YaoBase.measure
-YaoBase.measure(n::Int, locs::NTuple{K, Int}; collapseto=nothing, remove=false) where K =
-    measure(ComplexF64, n, locs; collapseto=collapseto, remove=remove)
-YaoBase.measure(locs::Int...; collapseto=nothing, remove=false) =
-    @λ(n->measure(n, locs; collapseto=collapseto, remove=remove))
+Measure(n::Int, locs::NTuple{K, Int}; collapseto=nothing, remove=false) where K =
+    Measure(ComplexF64, n, locs; collapseto=collapseto, remove=remove)
 
 mat(x::Measure) = error("use BlockMap to get its matrix.")
 

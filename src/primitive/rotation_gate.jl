@@ -71,9 +71,9 @@ function apply!(r::ArrayReg, rb::RotationGate)
 end
 
 # parametric interface
-nparameters(::Type{<:RotationGate}) = 1
-parameters(x::RotationGate) = x.theta
-setparameters!(r::RotationGate, param::Real) = (r.theta = param; r)
+niparams(::Type{<:RotationGate}) = 1
+getiparams(x::RotationGate) = x.theta
+setiparams!(r::RotationGate, param::Real) = (r.theta = param; r)
 
 YaoBase.isunitary(r::RotationGate) = true
 

@@ -63,9 +63,9 @@ end
 cache_key(te::TimeEvolution) = (te.dt, cache_key(te.H))
 
 # parametric interface
-nparameters(::Type{<:TimeEvolution}) = 1
-parameters(x::TimeEvolution) = x.dt
-setparameters!(r::TimeEvolution, param::Real) = (r.dt = param; r)
+niparams(::Type{<:TimeEvolution}) = 1
+getiparams(x::TimeEvolution) = x.dt
+setiparams!(r::TimeEvolution, param::Real) = (r.dt = param; r)
 
 function Base.:(==)(lhs::TimeEvolution, rhs::TimeEvolution)
     return lhs.H == rhs.H && lhs.dt == rhs.dt
