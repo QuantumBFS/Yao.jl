@@ -8,12 +8,12 @@ Repeat the same block on given locations.
 """
 struct RepeatedBlock{N, C, GT <: AbstractBlock, T} <: AbstractContainer{N, T, GT}
     content::GT
-    addrs::NTuple{C, Int}
+    locs::NTuple{C, Int}
 end
 
-function RepeatedBlock{N}(block::AbstractBlock{M, T}, addrs::NTuple{C, Int}) where {N, M, T, C}
-    @assert_addrs N Tuple(i:i+M-1 for i in addrs)
-    return RepeatedBlock{N, C, typeof(block), T}(block, addrs)
+function RepeatedBlock{N}(block::AbstractBlock{M, T}, locs::NTuple{C, Int}) where {N, M, T, C}
+    @assert_locs N Tuple(i:i+M-1 for i in locs)
+    return RepeatedBlock{N, C, typeof(block), T}(block, locs)
 end
 
 function RepeatedBlock{N}(block::GT) where {N, M, T, GT <: AbstractBlock{M, T}}
@@ -21,34 +21,34 @@ function RepeatedBlock{N}(block::GT) where {N, M, T, GT <: AbstractBlock{M, T}}
 end
 
 """
-    repeat(n, x::AbstractBlock[, addrs]) -> RepeatedBlock{n}
+    repeat(n, x::AbstractBlock[, locs]) -> RepeatedBlock{n}
 
 Create a [`RepeatedBlock`](@ref) with total number of qubits `n` and the block
-to repeat on given address or on all the address.
+to repeat on given location or on all the locations.
 """
-Base.repeat(n::Int, x::AbstractBlock, addrs::Int...) =
-    repeat(n, x, addrs)
-Base.repeat(n::Int, x::AbstractBlock, addrs::NTuple{C, Int}) where C =
-    RepeatedBlock{n}(x, addrs)
+Base.repeat(n::Int, x::AbstractBlock, locs::Int...) =
+    repeat(n, x, locs)
+Base.repeat(n::Int, x::AbstractBlock, locs::NTuple{C, Int}) where C =
+    RepeatedBlock{n}(x, locs)
 Base.repeat(n::Int, x::AbstractBlock) = RepeatedBlock{n}(x)
 
 """
-    repeat(x::AbstractBlock, addrs)
+    repeat(x::AbstractBlock, locs)
 
 Lazy curried version of [`repeat`](@ref).
 """
-Base.repeat(x::AbstractBlock, addrs) = @λ(n->repeat(n, x, params...,))
+Base.repeat(x::AbstractBlock, locs) = @λ(n->repeat(n, x, params...,))
 
-occupied_locs(x::RepeatedBlock) = Iterators.flatten(k:k+nqubits(x.content)-1 for k in x.addrs)
-chsubblocks(x::RepeatedBlock{N}, blk::AbstractBlock) where N = RepeatedBlock{N}(blk, x.addrs)
+occupied_locs(x::RepeatedBlock) = Iterators.flatten(k:k+nqubits(x.content)-1 for k in x.locs)
+chsubblocks(x::RepeatedBlock{N}, blk::AbstractBlock) where N = RepeatedBlock{N}(blk, x.locs)
 PreserveProperty(x::RepeatedBlock) = PreserveAll()
 
-mat(rb::RepeatedBlock{N}) where N = hilbertkron(N, fill(mat(rb.content), length(rb.addrs)), [rb.addrs...])
+mat(rb::RepeatedBlock{N}) where N = hilbertkron(N, fill(mat(rb.content), length(rb.locs)), [rb.locs...])
 mat(rb::RepeatedBlock{N, 0, GT, T}) where {N, GT, T} = IMatrix{1<<N, T}()
 
 function apply!(r::AbstractRegister, rp::RepeatedBlock)
     m  = mat(rp.content)
-    for addr in rp.addrs
+    for addr in rp.locs
         instruct!(matvec(r.state), mat(rp.content), Tuple(addr:addr+nqubits(rp.content)-1))
     end
     return r
@@ -58,7 +58,7 @@ end
 for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GT = Symbol(G, :Gate)
     @eval function apply!(r::AbstractRegister, rp::RepeatedBlock{N, C, <:$GT}) where {N, C}
-        for addr in rp.addrs
+        for addr in rp.locs
             instruct!(matvec(r.state), Val($(QuoteNode(G))), Tuple(addr:addr+nqubits(rp.content)-1))
         end
         return r
@@ -67,14 +67,14 @@ end
 
 apply!(reg::AbstractRegister, rp::RepeatedBlock{N, 0}) where N = reg
 
-cache_key(rb::RepeatedBlock) = (rb.addrs, cache_key(rb.content))
+cache_key(rb::RepeatedBlock) = (rb.locs, cache_key(rb.content))
 
-Base.adjoint(blk::RepeatedBlock{N}) where N = RepeatedBlock{N}(adjoint(blk.content), blk.addrs)
-Base.copy(x::RepeatedBlock{N}) where N = RepeatedBlock{N}(x.content, x.addrs)
-Base.:(==)(A::RepeatedBlock, B::RepeatedBlock) = A.addrs == B.addrs && A.content == B.content
+Base.adjoint(blk::RepeatedBlock{N}) where N = RepeatedBlock{N}(adjoint(blk.content), blk.locs)
+Base.copy(x::RepeatedBlock{N}) where N = RepeatedBlock{N}(x.content, x.locs)
+Base.:(==)(A::RepeatedBlock, B::RepeatedBlock) = A.locs == B.locs && A.content == B.content
 
 function YaoBase.iscommute(x::RepeatedBlock{N}, y::RepeatedBlock{N}) where N
-    if x.addrs == y.addrs
+    if x.locs == y.locs
         return iscommute(x.content, y.content)
     else
         iscommute_fallback(x, y)

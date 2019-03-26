@@ -209,9 +209,9 @@ end
 
 function print_block(io::IO, pb::PutBlock{N}) where N
     printstyled(io, "put on ("; bold=true, color=color(PutBlock))
-    for i in eachindex(pb.addrs)
-        printstyled(io, pb.addrs[i]; bold=true, color=color(PutBlock))
-        if i != lastindex(pb.addrs)
+    for i in eachindex(pb.locs)
+        printstyled(io, pb.locs[i]; bold=true, color=color(PutBlock))
+        if i != lastindex(pb.locs)
             printstyled(io, ", "; bold=true, color=color(PutBlock))
         end
     end
@@ -220,9 +220,9 @@ end
 
 function print_block(io::IO, rb::RepeatedBlock{N}) where N
     printstyled(io, "repeat on ("; bold=true, color=color(RepeatedBlock))
-    for i in eachindex(rb.addrs)
-        printstyled(io, rb.addrs[i]; bold=true, color=color(RepeatedBlock))
-        if i != lastindex(rb.addrs)
+    for i in eachindex(rb.locs)
+        printstyled(io, rb.locs[i]; bold=true, color=color(RepeatedBlock))
+        if i != lastindex(rb.locs)
             printstyled(io, ", "; bold=true, color=color(RepeatedBlock))
         end
     end
@@ -273,7 +273,7 @@ function print_annotation(
     child::AbstractBlock,
     k::Int)
 
-    printstyled(io, node.addrs[k]; bold=true, color=:white)
+    printstyled(io, node.locs[k]; bold=true, color=:white)
     print(io, "=>")
 end
 
@@ -284,6 +284,6 @@ function print_annotation(
     child::AbstractBlock,
     k::Int)
 
-    printstyled(io, node.addrs; bold=true, color=:white)
+    printstyled(io, node.locs; bold=true, color=:white)
     print(io, "=>")
 end

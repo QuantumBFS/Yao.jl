@@ -20,22 +20,22 @@ function Concentrator{N}(block::BT, locations::NTuple{C, Int}) where {N, M, C, T
 end
 
 """
-    concentrate(n, block, addrs)
+    concentrate(n, block, locs)
 
 Create a [`Concentrator`](@ref) block with total number of current active qubits `n`,
-which concentrates given wire address together to `length(addrs)` active qubits,
+which concentrates given wire location together to `length(locs)` active qubits,
 and relax the concentration afterwards.
 """
-function concentrate(n::Int, block::AbstractBlock, addrs)
-    return Concentrator{n}(block, Tuple(addrs))
+function concentrate(n::Int, block::AbstractBlock, locs)
+    return Concentrator{n}(block, Tuple(locs))
 end
 
 """
-    concentrate(block, addrs) -> f(n)
+    concentrate(block, locs) -> f(n)
 
 Lazy curried version of [`concentrate`](@ref).
 """
-concentrate(block::AbstractBlock, addrs) = @λ(n->concentrate(n, block, addrs))
+concentrate(block::AbstractBlock, locs) = @λ(n->concentrate(n, block, locs))
 
 occupied_locs(c::Concentrator) = c.locations
 chsubblocks(pb::Concentrator{N}, blk::AbstractBlock) where N =

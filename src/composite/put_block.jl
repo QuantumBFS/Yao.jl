@@ -7,11 +7,11 @@ Type for putting a block at given locations.
 """
 struct PutBlock{N, M, C, T, GT <: AbstractBlock} <: AbstractContainer{N, T, GT}
     content::GT
-    addrs::NTuple{C, Int}
+    locs::NTuple{C, Int}
 
-    function PutBlock{N}(block::GT, addrs::NTuple{C, Int}) where {N, M, C, T, GT <: AbstractBlock{M, T}}
-        @assert_addrs N addrs
-        return new{N, M, C, T, GT}(block, addrs)
+    function PutBlock{N}(block::GT, locs::NTuple{C, Int}) where {N, M, C, T, GT <: AbstractBlock{M, T}}
+        @assert_locs N locs
+        return new{N, M, C, T, GT}(block, locs)
     end
 end
 
@@ -19,7 +19,7 @@ end
     put(total::Int, pair)
 
 Create a [`PutBlock`](@ref) with total number of active qubits, and a pair of
-address and block to put on.
+location and block to put on.
 """
 put(total::Int, pa::Pair{NTuple{M, Int}, <:AbstractBlock}) where M =
     PutBlock{total}(pa.second, pa.first)
@@ -32,17 +32,17 @@ Lazy curried version of [`put`](@ref).
 """
 put(pa::Pair) = @λ(n -> put(n, pa))
 
-occupied_locs(x::PutBlock) = x.addrs
-chsubblocks(x::PutBlock{N, M}, b::AbstractBlock{M}) where {N, M} = PutBlock{N}(b, x.addrs)
+occupied_locs(x::PutBlock) = x.locs
+chsubblocks(x::PutBlock{N, M}, b::AbstractBlock{M}) where {N, M} = PutBlock{N}(b, x.locs)
 PreserveStyle(::PutBlock) = PreserveAll()
 cache_key(pb::PutBlock) = cache_key(pb.content)
 
-mat(pb::PutBlock{N, 1}) where N = u1mat(N, mat(pb.content), pb.addrs...)
-mat(pb::PutBlock{N, C}) where {N, C} = unmat(N, mat(pb.content), pb.addrs)
+mat(pb::PutBlock{N, 1}) where N = u1mat(N, mat(pb.content), pb.locs...)
+mat(pb::PutBlock{N, C}) where {N, C} = unmat(N, mat(pb.content), pb.locs)
 
 function apply!(r::ArrayReg, pb::PutBlock{N}) where N
     N == nactive(r) || throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
-    instruct!(matvec(r.state), mat(pb.content), pb.addrs)
+    instruct!(matvec(r.state), mat(pb.content), pb.locs)
     return r
 end
 
@@ -51,19 +51,19 @@ for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
     GT = Symbol(G, :Gate)
     @eval function apply!(r::ArrayReg, pb::PutBlock{N, C, T, <:$GT}) where {N, C, T}
         N == nactive(r) || throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
-        instruct!(matvec(r.state), Val($(QuoteNode(G))), pb.addrs)
+        instruct!(matvec(r.state), Val($(QuoteNode(G))), pb.locs)
         return r
     end
 end
 
-Base.adjoint(x::PutBlock{N}) where N = PutBlock{N}(adjoint(x), x.addrs)
-Base.copy(x::PutBlock{N}) where N = PutBlock{N}(x.content, x.addrs)
+Base.adjoint(x::PutBlock{N}) where N = PutBlock{N}(adjoint(x), x.locs)
+Base.copy(x::PutBlock{N}) where N = PutBlock{N}(x.content, x.locs)
 function Base.:(==)(lhs::PutBlock{N, C, GT, T}, rhs::PutBlock{N, C, GT, T}) where {N, T, C, GT}
-    return (lhs.content == rhs.content) && (lhs.addrs == rhs.addrs)
+    return (lhs.content == rhs.content) && (lhs.locs == rhs.locs)
 end
 
 function YaoBase.iscommute(x::PutBlock{N}, y::PutBlock{N}) where N
-    if x.addrs == y.addrs
+    if x.locs == y.locs
         return iscommute(x.content, y.content)
     else
         return iscommute_fallback(x, y)
