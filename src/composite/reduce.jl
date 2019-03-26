@@ -1,21 +1,11 @@
-abstract type ReduceOperator{N, T, List} <: CompositeBlock{N, T} end
-
-subblocks(x::ReduceOperator) = x.list
-cache_key(x::ReduceOperator) = map(cache_key, x.list)
-
-Base.length(x::ReduceOperator) = length(x.list)
-Base.iterate(x::ReduceOperator) = iterate(x.list)
-Base.iterate(x::ReduceOperator, st) = iterate(x.list, st)
-Base.getindex(x::ReduceOperator, k) = getindex(x.list, k)
-
-struct Sum{N, T, List <: Tuple} <: ReduceOperator{N, T, List}
+struct Sum{N, T, List <: Tuple} <: CompositeBlock{N, T}
     list::List
 
     Sum{N, T}(list::Tuple) where {N, T} = new{N, T, typeof(list)}(list)
     Sum(list::AbstractBlock{N, T}...) where {N, T} = new{N, T, typeof(list)}(list)
 end
 
-struct Prod{N, T, List <: Tuple} <: ReduceOperator{N, T, List}
+struct Prod{N, T, List <: Tuple} <: CompositeBlock{N, T}
     list::List
 
     Prod{N, T}(list::Tuple) where {N, T} = new{N, T, typeof(list)}(list)
@@ -43,10 +33,6 @@ mat(x::Prod) = mapreduce(mat, *, Iterators.reverse(x.list))
 chsubblocks(x::Sum{N, T}, it) where {N, T} = Sum{N, T}(Tuple(it))
 chsubblocks(x::Prod{N, T}, it) where {N, T} = Prod{N, T}(Tuple(it))
 
-apply!(r::AbstractRegister, x::ReduceOperator{N, T, Tuple{}}) where {N, T} = r
-apply!(r::AbstractRegister, x::ReduceOperator{N, T, Tuple{<:AbstractBlock}}) where {N, T} =
-    apply!(r, first(x))
-
 function apply!(r::AbstractRegister{B, T}, x::Sum{N, T}) where {B, N, T}
     out = copy(r)
     apply!(out, first(x))
@@ -63,3 +49,19 @@ function apply!(r::AbstractRegister{B, T}, x::Prod{N, T}) where {B, N, T}
     end
     return r
 end
+
+export ReduceOperator
+
+const ReduceOperator{N, T, List} = Union{Sum{N, T, List}, Prod{N, T, List}}
+
+apply!(r::AbstractRegister, x::ReduceOperator{N, T, Tuple{}}) where {N, T} = r
+apply!(r::AbstractRegister, x::ReduceOperator{N, T, Tuple{<:AbstractBlock}}) where {N, T} =
+    apply!(r, first(x))
+
+subblocks(x::ReduceOperator) = x.list
+cache_key(x::ReduceOperator) = map(cache_key, x.list)
+
+Base.length(x::ReduceOperator) = length(x.list)
+Base.iterate(x::ReduceOperator) = iterate(x.list)
+Base.iterate(x::ReduceOperator, st) = iterate(x.list, st)
+Base.getindex(x::ReduceOperator, k) = getindex(x.list, k)
