@@ -2,7 +2,7 @@ using Test, YaoBase, YaoArrayRegister, YaoBlockTree
 
 @testset "constructor" begin
     g = Roller(X, kron(X, Y), Z, Z)
-    occupied_locations(g) == 1:5
+    occupied_locs(g) == 1:5
 
     src = phase(0.1)
     g = rollrepeat(4, src)

@@ -47,7 +47,7 @@ end
         m = kron(U, Const.I2)
         g = kron(2, 2=>X)
         @test m == mat(g)
-        @test collect(occupied_locations(g)) == [2]
+        @test collect(occupied_locs(g)) == [2]
         blks = [Rx(0.3)]
         @test chsubblocks(g, blks) |> subblocks |> collect == blks
 
@@ -55,7 +55,7 @@ end
         g = KronBlock{5}(4=>CNOT, 2=>X)
         @test m == mat(g)
         @test g.addrs == [2, 4]
-        @test collect(occupied_locations(g)) == [2, 4, 5]
+        @test collect(occupied_locs(g)) == [2, 4, 5]
     end
 
     @testset "case 2" begin

@@ -20,9 +20,9 @@ phase(θ::AbstractFloat) = PhaseGate(θ)
 mat(gate::PhaseGate{T}) where T = exp(im * gate.theta) * IMatrix{2, Complex{T}}()
 
 # parametric interface
-niparameters(::Type{<:PhaseGate}) = 1
-iparameters(x::PhaseGate) = x.theta
-setiparameters!(r::PhaseGate, param::Real) = (r.theta = param; r)
+nparameters(::Type{<:PhaseGate}) = 1
+parameters(x::PhaseGate) = x.theta
+setparameters!(r::PhaseGate, param::Real) = (r.theta = param; r)
 
 YaoBase.isunitary(r::PhaseGate) = true
 Base.adjoint(blk::PhaseGate) = PhaseGate(-blk.theta)

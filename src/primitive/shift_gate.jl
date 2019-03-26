@@ -22,9 +22,9 @@ mat(gate::ShiftGate{T}) where T = Diagonal(Complex{T}[1.0, exp(im * gate.theta)]
 cache_key(gate::ShiftGate) = gate.theta
 
 # parametric interface
-niparameters(::Type{<:ShiftGate}) = 1
-iparameters(x::ShiftGate) = x.theta
-setiparameters!(r::ShiftGate, param::Real) = (r.theta = param; r)
+nparameters(::Type{<:ShiftGate}) = 1
+parameters(x::ShiftGate) = x.theta
+setparameters!(r::ShiftGate, param::Real) = (r.theta = param; r)
 
 
 Base.adjoint(blk::ShiftGate) = ShiftGate(-blk.theta)

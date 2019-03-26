@@ -37,15 +37,15 @@ Lazy curried version of [`concentrate`](@ref).
 """
 concentrate(block::AbstractBlock, addrs) = @λ(n->concentrate(n, block, addrs))
 
-occupied_locations(c::Concentrator) = c.locations
+occupied_locs(c::Concentrator) = c.locations
 chsubblocks(pb::Concentrator{N}, blk::AbstractBlock) where N =
-    Concentrator{N}(blk, occupied_locations(pb))
+    Concentrator{N}(blk, occupied_locs(pb))
 PreserveStyle(::Concentrator) = PreserveAll()
 
 function apply!(r::AbstractRegister, c::Concentrator)
-    focus!(r, occupied_locations(c))
+    focus!(r, occupied_locs(c))
     apply!(r, c.content)
-    relax!(r, occupied_locations(c)) # to_nactive=nqubits(r)
+    relax!(r, occupied_locs(c)) # to_nactive=nqubits(r)
     return r
 end
 
@@ -53,7 +53,7 @@ mat(c::Concentrator{N, T, <:AbstractBlock}) where {N, T} =
     error("Not implemented, post an issue if you really need it.")
 
 Base.adjoint(blk::Concentrator{N}) where N =
-    Concentrator{N}(adjoint(blk.content), occupied_locations(blk))
+    Concentrator{N}(adjoint(blk.content), occupied_locs(blk))
 
 function Base.:(==)(a::Concentrator{N, T, BT}, b::Concentrator{N, T, BT}) where {N, T, BT}
     return a.content == b.content && a.locations == b.locations
@@ -63,7 +63,7 @@ YaoBase.nqubits(::Concentrator{N}) where N = N
 YaoBase.nactive(c::Concentrator) = length(c.locations)
 
 function YaoBase.iscommute(x::Concentrator{N}, y::Concentrator{N}) where N
-    if occupied_locations(x) == occupied_locations(y)
+    if occupied_locs(x) == occupied_locs(y)
         return iscommute(x.content, y.content)
     else
         return iscommute_fallback(x, y)

@@ -35,10 +35,6 @@ end
 @interface blockfilter!(f, v::Vector, blk::AbstractBlock) =
     postwalk(x -> f(x) ? push!(v, x) : v, blk)
 
-# TODO:
-# - expect
-
-
 """
     expect(op::AbstractBlock, reg::AbstractRegister{B}) -> Vector
     expect(op::AbstractBlock, dm::DensityMatrix{B}) -> Vector
@@ -47,5 +43,5 @@ expectation value of an operator.
 """
 @interface expect(op::AbstractBlock, r::AbstractRegister) = r' * apply!(copy(r), op)
 
-expect(op::MatrixBlock, dm::DensityMatrix) = mapslices(x->sum(mat(op).*x)[], dm.state, dims=[1,2]) |> vec
-expect(op::MatrixBlock, dm::DensityMatrix{1}) = sum(mat(op).*dropdims(dm.state, dims=3))
+expect(op::AbstractBlock, dm::DensityMatrix) = mapslices(x->sum(mat(op).*x)[], dm.state, dims=[1,2]) |> vec
+expect(op::AbstractBlock, dm::DensityMatrix{1}) = sum(mat(op).*dropdims(dm.state, dims=3))

@@ -32,7 +32,7 @@ Lazy curried version of [`put`](@ref).
 """
 put(pa::Pair) = @λ(n -> put(n, pa))
 
-occupied_locations(x::PutBlock) = x.addrs
+occupied_locs(x::PutBlock) = x.addrs
 chsubblocks(x::PutBlock{N, M}, b::AbstractBlock{M}) where {N, M} = PutBlock{N}(b, x.addrs)
 PreserveStyle(::PutBlock) = PreserveAll()
 cache_key(pb::PutBlock) = cache_key(pb.content)

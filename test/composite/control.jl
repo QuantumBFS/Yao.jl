@@ -45,7 +45,7 @@ end
 @testset "multi control with blank" begin
     g = ControlBlock{7}((6, 4, 2), X, (3,)) # -> [2, 4, 6]
     @test nqubits(g) == 7
-    @test collect(occupied_locations(g)) == [6, 4, 2, 3]
+    @test collect(occupied_locs(g)) == [6, 4, 2, 3]
 
     op = IMatrix(U) ⊗ mat(P0) + U ⊗ mat(P1) # 2, 3
     op = mat(P0) ⊗ IMatrix(op) + mat(P1) ⊗ op # 2, 3, 4
@@ -66,10 +66,10 @@ end
     @test_throws DimensionMismatch ControlBlock{3}((1, ), CNOT, (2,))
     g = ControlBlock{3}((1, ), CNOT, (2,3))
     @test applymatrix(g) ≈ mat(Toffoli)
-    @test collect(occupied_locations(g)) == [1, 2, 3]
+    @test collect(occupied_locs(g)) == [1, 2, 3]
     g = ControlBlock{3}((3, ), CNOT, (2,1))
     @test applymatrix(g) ≈ mat(Toffoli) |> invorder
-    @test collect(occupied_locations(g)) == [3, 2, 1]
+    @test collect(occupied_locs(g)) == [3, 2, 1]
     g = ControlBlock{3}((2, ), CNOT, (3,1))
     g2 = PutBlock{3}(Toffoli, (2,3,1))
     g3 = ControlBlock{3}((3,2), X, (1,))
