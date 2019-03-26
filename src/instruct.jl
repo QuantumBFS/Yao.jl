@@ -233,7 +233,7 @@ end
 ## single controlled paulis
 for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     # forward single controlled
-    @eval YaoBase.instruct!(state::AbstractVecOrMat, ::Val{$(QuoteNode(G))},
+    @eval YaoBase.instruct!(state::AbstractVecOrMat, g::Val{$(QuoteNode(G))},
         locs::NTuple{N, Int}, control_locs::Tuple{Int}, control_bits::Tuple{Int}) where N =
             instruct!(state, g, locs, control_locs..., control_bits...)
 end
