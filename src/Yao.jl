@@ -19,4 +19,6 @@ const 幺 = Yao
 using Reexport
 @reexport using YaoBase, YaoArrayRegister, YaoBlocks
 
+include("deprecations.jl")
+
 end # module
