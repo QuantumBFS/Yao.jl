@@ -267,14 +267,14 @@ Returns the probability distribution of computation basis, aka ``|<x|ψ>|^2``.
 """
     reorder!(reigster, orders)
 
-Reorder the address of register by input orders.
+Reorder the locations of register by input orders.
 """
 @interface reorder!(r::AbstractRegister, orders)
 
 """
     invorder(register)
 
-Inverse the address of register.
+Inverse the locations of register.
 """
 @interface invorder!(r::AbstractRegister) = reorder!(r, Tuple(nactive(reg):-1:1))
 

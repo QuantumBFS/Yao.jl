@@ -1,6 +1,6 @@
 using TupleTools
 
-export NotImplementedError, AddressConflictError, QubitMismatchError
+export NotImplementedError, LocationConflictError, QubitMismatchError
 
 # NOTE: kwargs do not involve in multiple dispatch
 #       no need to store kwargs
@@ -22,13 +22,13 @@ function Base.show(io::IO, e::NotImplementedError{Tuple{}})
     print(io, "$(e.name) is not implemented.")
 end
 
-struct AddressConflictError <: Exception
+struct LocationConflictError <: Exception
     msg::String
 end
 
-function Base.show(io::IO, e::AddressConflictError)
-    print(io, "AddressConflictError: ", e.msg)
-    # print(io, "address of $(e.blk1) and $(e.blk2) is conflict.")
+function Base.show(io::IO, e::LocationConflictError)
+    print(io, "LocationConflictError: ", e.msg)
+    # print(io, "locations of $(e.blk1) and $(e.blk2) is conflict.")
 end
 
 # NOTE: More detailed error msg?
@@ -46,7 +46,7 @@ function show(io::IO, e::QubitMismatchError)
 end
 
 
-export isaddrs_inbounds, isaddrs_conflict, isaddrs_contiguous
+export islocs_inbounds, islocs_conflict, islocs_contiguous
 
 _sort(x::Vector; by=identity) = sort(x, by=by)
 _sort(x::Tuple; by=identity) = TupleTools.sort(x, by=by)
@@ -62,41 +62,41 @@ const AddressNTuple{N, T} = NTuple{N, T} where {T <: Union{Integer, UnitRange}}
 const AddressList{T} = Union{AddressVector{T}, AddressNTuple{N, T} where N}
 
 """
-    isaddrs_inbounds(n, addrs) -> Bool
+    islocs_inbounds(n, locs) -> Bool
 
-Check if the input address are inside given bounds `n`.
+Check if the input locations are inside given bounds `n`.
 """
-function isaddrs_inbounds(n::Int, addrs::AddressList)
-    length(addrs) == 0 && return true
-    addrs = _sort(addrs, by=x->nonempty_minimum(x))
-    (minimum(first(addrs)) > 0 && maximum(last(addrs)) <= n) || return false
+function islocs_inbounds(n::Int, locs::AddressList)
+    length(locs) == 0 && return true
+    locs = _sort(locs, by=x->nonempty_minimum(x))
+    (minimum(first(locs)) > 0 && maximum(last(locs)) <= n) || return false
     return true
 end
 
 """
-    isaddrs_conflict(addrs) -> Bool
+    islocs_conflict(locs) -> Bool
 
-Check if the input address has conflicts.
+Check if the input locations has conflicts.
 """
-function isaddrs_conflict(addrs::AddressList)
-    addrs = _sort(addrs)
-    for (nxt, cur) in zip(addrs[2:end], addrs[1:end-1])
+function islocs_conflict(locs::AddressList)
+    locs = _sort(locs)
+    for (nxt, cur) in zip(locs[2:end], locs[1:end-1])
         nonempty_minimum(nxt) > nonempty_maximum(cur) || return true
     end
     return false
 end
 
 """
-    isaddrs_contiguous(n::Int, addrs) -> Bool
+    islocs_contiguous(n::Int, locs) -> Bool
 
-Check if the input address is contiguous in ``[1, n]``.
+Check if the input locations is contiguous in ``[1, n]``.
 """
-function isaddrs_contiguous(n::Int, addrs::AddressList)
-    nonempty_minimum(first(addrs)) == 1 || return false
-    for (nxt, cur) in zip(addrs[2:end], addrs[1:end-1])
+function islocs_contiguous(n::Int, locs::AddressList)
+    nonempty_minimum(first(locs)) == 1 || return false
+    for (nxt, cur) in zip(locs[2:end], locs[1:end-1])
         nonempty_minimum(nxt) == nonempty_maximum(cur) + 1 || return false
     end
-    nonempty_maximum(last(addrs)) == n || return false
+    nonempty_maximum(last(locs)) == n || return false
     return true
 end
 
@@ -120,51 +120,51 @@ end
 
 # NOTE: we may use @assert in the future
 #       these macro will help us keep original APIs
-export @assert_addrs, @assert_addrs_inbounds, @assert_addrs_contiguous
+export @assert_locs, @assert_locs_inbounds, @assert_locs_contiguous
 
 """
-    @assert_addrs_inbounds <number of total qubits> <address list> [<msg>]
+    @assert_locs_inbounds <number of total qubits> <locations list> [<msg>]
 
-Assert if all the address are inbounds.
+Assert if all the locations are inbounds.
 """
-macro assert_addrs_inbounds(n, addrs, msgs...)
-    msg = process_msgs(msgs...; default="address is out of bounds!")
+macro assert_locs_inbounds(n, locs, msgs...)
+    msg = process_msgs(msgs...; default="locations is out of bounds!")
 
     return quote
-        isaddrs_inbounds($(esc(n)), $(esc(addrs))) || error($msg)
+        islocs_inbounds($(esc(n)), $(esc(locs))) || error($msg)
         nothing
     end
 end
 
 """
-    @assert_addrs <number of total qubits> <address list> [<msg>]
+    @assert_locs <number of total qubits> <locations list> [<msg>]
 
-Assert if all the address are:
+Assert if all the locations are:
     - inbounds.
     - do not have any conflict.
 """
-macro assert_addrs(n, addrs, msgs...)
-    msg = process_msgs(msgs...; default="address conflict.")
+macro assert_locs(n, locs, msgs...)
+    msg = process_msgs(msgs...; default="locations conflict.")
     return quote
-        @assert_addrs_inbounds $(esc(n)) $(esc(addrs))
-        isaddrs_conflict($(esc(addrs))) && throw(AddressConflictError($msg))
+        @assert_locs_inbounds $(esc(n)) $(esc(locs))
+        islocs_conflict($(esc(locs))) && throw(LocationConflictError($msg))
         nothing
     end
 end
 
 """
-    @assert_addrs_contiguous <number of qubits> <address list> [<msg>]
+    @assert_locs_contiguous <number of qubits> <locations list> [<msg>]
 
-Assert if all the address are:
+Assert if all the locations are:
     - inbounds.
     - do not have any conflict.
-    - contiguous on address
+    - contiguous on locations
 """
-macro assert_addrs_contiguous(n, addrs, msgs...)
-    msg = process_msgs(msgs...; default="address is not contiguous.")
+macro assert_locs_contiguous(n, locs, msgs...)
+    msg = process_msgs(msgs...; default="locations is not contiguous.")
     quote
-        @assert_addrs $(esc(n)) $(esc(addrs))
-        isaddrs_contiguous($(esc(n)), $(esc(addrs))) || error($msg)
+        @assert_locs $(esc(n)) $(esc(locs))
+        islocs_contiguous($(esc(n)), $(esc(locs))) || error($msg)
         nothing
     end
 end
