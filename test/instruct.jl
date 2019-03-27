@@ -1,4 +1,4 @@
-using Test, YaoBase, YaoArrayRegister, LinearAlgebra, LuxurySparse
+using Test, YaoBase, YaoArrayRegister, LinearAlgebra, LuxurySparse, SparseArrays
 
 # NOTE: we don't have block here, feel safe to use
 using YaoBase.Const
@@ -21,6 +21,13 @@ using YaoBase.Const
 
     @test instruct!(reshape(copy(ST), :, 1), kron(U1, U1), (3, 1)) ≈
         instruct!(instruct!(reshape(copy(ST), :, 1), U1, 3), U1, 1)
+
+    U2 = sprand(ComplexF64, 8, 8, 0.1)
+    ST = randn(ComplexF64, 1<<5)
+    M = kron(I2, U2, I2) * ST
+    @test instruct!(copy(ST), U2, (2, 3, 4)) ≈ M
+
+    @test instruct!(copy(ST), I2, 1) ≈ ST
 end
 
 
@@ -48,6 +55,7 @@ end
 @testset "test Pauli instructions" begin
     @testset "test $G instructions" for (G, M) in zip((:X, :Y, :Z), (X, Y, Z))
         @test linop2dense(s->instruct!(s, Val(G), (1, )), 1) == M
+        @test linop2dense(s->instruct!(s, Val(G), (1, 2, 3)), 3) == kron(M, M, M)
     end
 
     @testset "test controlled $G instructions" for (G, M) in zip((:X, :Y, :Z), (X, Y, Z))
@@ -68,4 +76,9 @@ end
         instruct!(reshape(copy(ST), :, 1), Pm, 3)
     @test instruct!(copy(ST), Dv, 3) ≈ kron(I2, Dv, I2, I2) * ST ≈
         instruct!(reshape(copy(ST), :, 1), Dv, 3)
+end
+
+@testset "swap instruction" begin
+    ST = randn(ComplexF64, 1 << 2)
+    @test instruct!(copy(ST), Val(:SWAP), (1, 2)) ≈ SWAP * ST
 end
