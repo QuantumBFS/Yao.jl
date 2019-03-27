@@ -22,6 +22,7 @@ Apply a block (of quantum circuit) to a quantum register.
     return r
 end
 
+Base.:(|>)(r::AbstractRegister, b::AbstractBlock) = apply!(r, b)
 
 """
     |>(register, blk)
