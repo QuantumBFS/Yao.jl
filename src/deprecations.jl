@@ -1,3 +1,5 @@
+using YaoBase
+using BitBasis: BitStr
 # NOTE: this file should only exists in v0.4.x
 #       since in v0.4.x the conponent packages
 #       are all new packages and should not have
