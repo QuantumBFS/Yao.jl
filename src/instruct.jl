@@ -1,3 +1,8 @@
+# NOTE:
+# in principal we only allow one to input a tuple of address to instruct
+# but most of the instruct function in this file defines a forward method
+# for single qubit version with an int as input.
+
 using YaoBase, BitBasis, LuxurySparse, StaticArrays
 export instruct!
 
@@ -41,6 +46,7 @@ function _instruct!(state::AbstractVecOrMat{T}, U::SDSparseMatrixCSC{T}, locs_ra
 end
 
 YaoBase.instruct!(state::AbstractVecOrMat, U::IMatrix, locs::NTuple{N, Int}) where N = state
+YaoBase.instruct!(state::AbstractVecOrMat, U::IMatrix, locs::Int)  = state
 
 # one-qubit instruction
 YaoBase.instruct!(state::AbstractVecOrMat{T}, g::AbstractMatrix{T}, locs::Tuple{Int}) where T =

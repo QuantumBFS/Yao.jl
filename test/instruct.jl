@@ -27,7 +27,7 @@ using YaoBase.Const
     M = kron(I2, U2, I2) * ST
     @test instruct!(copy(ST), U2, (2, 3, 4)) ≈ M
 
-    @test instruct!(copy(ST), I2, 1) ≈ ST
+    @test instruct!(copy(ST), I2, (1, )) ≈ ST
 end
 
 
