@@ -6,8 +6,12 @@ mutable struct Measure{N, T, K} <: PrimitiveBlock{N, T}
     collapseto::Union{Int, Nothing}
     remove::Bool
     results::Vector{Int}
-    Measure{N, T}(locations::NTuple{K, Int}, collapseto, remove) where {N, K, T} =
+    function Measure{N, T}(locations::NTuple{K, Int}, collapseto, remove) where {N, K, T}
+        if collapseto !== nothing && remove == true
+            error("invalid keyword combination, expect collapseto or remove, got (collapseto=$collapseto, remove=true)")
+        end
         new{N, T, K}(locations, collapseto, remove)
+    end
 end
 
 function Measure(::Type{T}, n::Int, locs::NTuple{K, Int}; collapseto=nothing, remove=false) where {K, T}
