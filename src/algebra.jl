@@ -14,7 +14,7 @@ Base.:(*)(α::Val{S}, x::AbstractBlock) where S = Scale(α, x)
 
 function Base.:(*)(α::T, x::AbstractBlock) where T <: Number
     return α ==  one(T) ? x                 :
-    α == -one(T) ? Scale(Val(-one(T)), x)   :
+    α == -one(T) ? Scale(Val(-1), x)   :
     α ==      im ? Scale(Val(im), x)        :
     α ==     -im ? Scale(Val(-im), x)       :
     Scale(α, x)
@@ -105,6 +105,8 @@ eliminate_nested(ex::AbstractBlock) = ex
 function eliminate_nested(ex::Union{Prod, ChainBlock})
     _flatten(x) = (x, )
     _flatten(x::Union{Prod, ChainBlock}) = subblocks(x)
+
+    isone(length(ex)) && return first(subblocks(ex))
     return chsubblocks(ex, Iterators.flatten(map(_flatten, subblocks(ex))))
 end
 

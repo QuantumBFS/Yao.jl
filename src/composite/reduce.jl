@@ -15,6 +15,8 @@ end
 # merge prod & sum
 Sum(a::Sum{N, T}, blks::Union{Sum{N, T}, AbstractBlock{N, T}}...) where {N, T} =
     Sum{N, T}((a.list..., ), blks...)
+Sum(a::AbstractBlock{N, T}, blks::Union{Sum{N, T}, AbstractBlock{N, T}}...) where {N, T} =
+    Sum{N, T}((a, ), blks...)
 Sum{N, T}(a::Tuple, b::Sum, blks::Union{Sum{N, T}, AbstractBlock{N, T}}...) where {N, T} =
     Sum{N, T}((a..., b.list...), blks...)
 Sum{N, T}(a::Tuple, b::AbstractBlock{N, T}, blks::Union{Sum{N, T}, AbstractBlock{N, T}}...) where {N, T} =
@@ -22,6 +24,8 @@ Sum{N, T}(a::Tuple, b::AbstractBlock{N, T}, blks::Union{Sum{N, T}, AbstractBlock
 
 Prod(a::Prod{N, T}, blks::Union{Prod{N, T}, AbstractBlock{N, T}}...) where {N, T} =
     Prod{N, T}((a.list..., ), blks...)
+Prod(a::AbstractBlock{N, T}, blks::Union{Prod{N, T}, AbstractBlock{N, T}}...) where {N, T} =
+    Prod{N, T}((a, ), blks...)
 Prod{N, T}(a::Tuple, b::Prod, blks::Union{Prod{N, T}, AbstractBlock{N, T}}...) where {N, T} =
     Prod{N, T}((a..., b.list...), blks...)
 Prod{N, T}(a::Tuple, b::AbstractBlock{N, T}, blks::Union{Prod{N, T}, AbstractBlock{N, T}}...) where {N, T} =
