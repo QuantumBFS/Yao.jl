@@ -1,4 +1,4 @@
-using Test, Revise, YaoArrayRegister, YaoBase
+using Test, YaoArrayRegister, YaoBase
 
 @testset "select" begin
     reg = product_state(4, 6; nbatch=2)
