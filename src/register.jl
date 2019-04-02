@@ -331,7 +331,7 @@ zero_state(::Type{T}, n::Int; nbatch::Int=1) where T = product_state(T, n, 0; nb
 
 
 """
-    rand_state([T=ComplexF64], n::Int, nbatch::Int=1)
+    rand_state([T=ComplexF64], n::Int; nbatch::Int=1)
 
 Create a random [`ArrayReg`](@ref) with total number of qubits `n`.
 
