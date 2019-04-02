@@ -1,3 +1,4 @@
+using YaoBase, YaoArrayRegister
 export Measure
 
 mutable struct Measure{N, T, K} <: PrimitiveBlock{N, T}
@@ -17,11 +18,13 @@ end
 Measure(n::Int, locs::NTuple{K, Int}; collapseto=nothing, remove=false) where K =
     Measure(ComplexF64, n, locs; collapseto=collapseto, remove=remove)
 
+Measure(locs::NTuple{K, Int}; collapseto=nothing, remove=false) where K = @λ(n->Measure(n, locs; collapseto=collapseto, remove=remove))
+Measure(locs::Int...; collapseto=nothing, remove=false) = Measure(locs; collapseto=collapseto, remove=remove)
 mat(x::Measure) = error("use BlockMap to get its matrix.")
 
 function apply!(r::AbstractRegister, m::Measure{N, T, 0}) where {N, T}
     if m.collapseto !== nothing
-        m.results = measure_setto!(r; bit_config=r.collapseto)
+        m.results = measure_collapseto!(r; config=r.collapseto)
     elseif m.remove
         m.results = measure_remove!(r)
     else
@@ -32,7 +35,7 @@ end
 
 function apply!(r::AbstractRegister, m::Measure{N, T}) where {N, T}
     if m.collapseto !== nothing
-        m.results = measure_setto!(r, m.locations; bit_config=r.collapseto)
+        m.results = measure_collapseto!(r, m.locations; config=m.collapseto)
     elseif m.remove
         m.results = measure_remove!(r, m.locations)
     else
