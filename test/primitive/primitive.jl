@@ -27,3 +27,7 @@ end
 @testset "test math gate" begin
     include("math_gate.jl")
 end
+
+@testset "test reflect gate" begin
+   include("reflect_gate.jl") 
+end
