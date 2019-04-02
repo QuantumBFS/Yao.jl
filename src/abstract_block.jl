@@ -40,6 +40,14 @@ julia> ArrayReg(bit"0") |> X |> Y
 """
 Base.:(|>)(r::AbstractRegister, blk::AbstractBlock) = apply!(r, blk)
 
+function apply!(r::AbstractRegister, blk::Function)
+    if applicable(blk, nactive(r))
+        return apply!(r, blk(nactive(r)))
+    else
+        error("input function is not applicable, it should take a integer as number of current active qubits.")
+    end
+end
+
 """
     occupied_locs(x)
 
