@@ -18,5 +18,4 @@ include("measure.jl")
 
 include("deprecations.jl")
 
-
 end # module

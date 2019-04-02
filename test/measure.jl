@@ -1,4 +1,4 @@
-using Test, YaoArrayRegister
+using Test, Revise, YaoArrayRegister, YaoBase
 
 @testset "select" begin
     reg = product_state(4, 6; nbatch=2)
@@ -14,12 +14,14 @@ end
 
 @testset "measure and reset/remove" begin
     reg = rand_state(4)
-    res = measure_setto!(reg, (4,))
-    result = measure(reg; nshot=10)
+    res = measure_collapseto!(reg, (4,))
+    @test isnormalized(reg)
+    result = measure(reg; nshots=10)
     @test all(result .< 8)
 
     reg = rand_state(6) |> focus!(1,4,3)
     reg0 = copy(reg)
     res = measure_remove!(reg)
+    select(reg0, res)
     @test select(reg0, res) |> normalize! ≈ reg
 end

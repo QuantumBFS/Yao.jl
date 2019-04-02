@@ -1,4 +1,4 @@
-using StatsBase, StaticArrays
+using StatsBase, StaticArrays, BitBasis
 export measure,
     measure!,
     measure_remove!,
@@ -50,8 +50,8 @@ function YaoBase.measure!(reg::ArrayReg{B}) where B
 end
 
 function YaoBase.measure_collapseto!(reg::ArrayReg{B}; config::Integer=0) where B
-    state = reg |> rank3
-    M, N, B1 = state |> size
+    state = rank3(reg)
+    M, N, B1 = size(state)
     nstate = zero(state)
     res = measure_remove!(reg)
     nstate[config+1, :, :] = reshape(reg.state, :, B)
@@ -59,12 +59,10 @@ function YaoBase.measure_collapseto!(reg::ArrayReg{B}; config::Integer=0) where 
     return res
 end
 
-YaoBase.select(r::ArrayReg{B}, bits...) where B = ArrayReg{B}(reg.state[[bits...].+1, :])
+YaoBase.select(r::ArrayReg{B}, bits) where B = ArrayReg{B}(r.state[map(to_location, bits), :])
 
 function YaoBase.select!(r::ArrayReg, bits)
-    to_address(x::Integer) = x + 1
-    to_address(x) = x
-    r.state = r.state[map(to_address, bits), :]
+    r.state = r.state[map(to_location, bits), :]
     return r
 end
 

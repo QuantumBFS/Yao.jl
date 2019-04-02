@@ -14,3 +14,7 @@ end
 @testset "test instructions" begin
     include("instruct.jl")
 end
+
+@testset "test measure" begin
+    include("measure.jl")
+end
