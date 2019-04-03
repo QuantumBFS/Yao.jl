@@ -29,6 +29,15 @@ abstract type AbstractContainer{N, T, BT <: AbstractBlock} <: CompositeBlock{N, 
 Returns the content of `x`.
 """
 @interface content(x::AbstractContainer) = x.content
+
+
+"""
+    chcontent(x, blk)
+
+Create a similar block of `x` and change its content to blk.
+"""
+@interface chcontent(x::AbstractContainer, blk) = chsubblocks(x, blk)
+
 subblocks(x::AbstractContainer) = (content(x), )
 # NOTE: there's only one block inside, so we expand the iterator
 # this would error if there's more than one block in it. But will
