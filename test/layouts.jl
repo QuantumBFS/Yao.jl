@@ -11,3 +11,4 @@ print_annotation(io, g1, g1, g1[1])
 
 print_annotation(io, g2, g2, content(g2))
 @test String(take!(io)) == "(2,)[+im] "
+
