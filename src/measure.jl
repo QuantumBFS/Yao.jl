@@ -60,6 +60,7 @@ function YaoBase.measure_collapseto!(reg::ArrayReg{B}; config::Integer=0) where 
 end
 
 YaoBase.select(r::ArrayReg{B}, bits) where B = ArrayReg{B}(r.state[map(to_location, bits), :])
+YaoBase.select(r::ArrayReg{B}, bit::Union{Integer, BitStr}) where B = select(r, [bit])
 
 function YaoBase.select!(r::ArrayReg, bits)
     r.state = r.state[map(to_location, bits), :]
