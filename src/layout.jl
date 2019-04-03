@@ -235,8 +235,8 @@ end
 # forward to simplify interfaces
 function print_annotation(io::IO,
     root::AbstractBlock,
-    node::AbstractBlock,
-    child::AbstractBlock, k)
+    node::AbstractBlock=root,
+    child::AbstractBlock=node, k=1)
     print_annotation(io, child)
 end
 
@@ -274,6 +274,7 @@ function print_annotation(
 
     printstyled(io, node.locs[k]; bold=true, color=:white)
     print(io, "=>")
+    print_annotation(io, child)
 end
 
 function print_annotation(
@@ -284,5 +285,5 @@ function print_annotation(
     k::Int)
 
     printstyled(io, node.locs; bold=true, color=:white)
-    print(io, "=>")
+    print_annotation(io, child)
 end

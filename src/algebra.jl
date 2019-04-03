@@ -63,19 +63,19 @@ const PauliGroup{T} = Union{
     ImX{T}, ImY{T}, ImZ{T}, nImX{T}, nImY{T}, nImZ{T}, ImI2{T}, nImI2{T}}
 
 merge_pauli(x) = x
-merge_pauli(ex::Prod) = merge_pauli(ex, ex.list...)
+merge_pauli(ex::Prod{1}) = merge_pauli(ex, ex.list...)
 
 # Well, there should be some way to do this, but just
 # too lazy to implement this pass
-merge_pauli(ex::ChainBlock) = Prod(subblocks(ex)...)
+merge_pauli(ex::ChainBlock) = Prod(Iterators.reverse(subblocks(ex))...)
 
-merge_pauli(ex::Prod, blks::AbstractBlock...) = merge_pauli(ex, (), blks...)
+merge_pauli(ex::Prod{1}, blks::AbstractBlock...) = merge_pauli(ex, (), blks...)
 
-merge_pauli(ex::Prod, out::Tuple, a::AbstractBlock{1, T}, blks::AbstractBlock{1, T}...) where T =
+merge_pauli(ex::Prod{1}, out::Tuple, a::AbstractBlock{1, T}, blks::AbstractBlock{1, T}...) where T =
     merge_pauli(ex, (out..., a), blks...)
-merge_pauli(ex::Prod, out::Tuple, a::PauliGroup{T}, blks::AbstractBlock{1, T}...) where T =
+merge_pauli(ex::Prod{1}, out::Tuple, a::PauliGroup{T}, blks::AbstractBlock{1, T}...) where T =
     merge_pauli(ex, (out..., a), blks...)
-merge_pauli(ex::Prod, out::Tuple, a::PauliGroup{T}, b::PauliGroup{T}, blks::AbstractBlock{1, T}...) where T =
+merge_pauli(ex::Prod{1}, out::Tuple, a::PauliGroup{T}, b::PauliGroup{T}, blks::AbstractBlock{1, T}...) where T =
     merge_pauli(ex, (out..., merge_pauli(a, b)), blks...)
 
 merge_pauli(ex::Prod{N, T}, out::Tuple) where {N, T} = Prod(out...)

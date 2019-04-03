@@ -17,6 +17,7 @@ chsubblocks(x::Scale, blk::AbstractBlock) = Scale(x.alpha, blk)
 cache_key(x::Scale) = (x.alpha, cache_key(content(x)))
 
 mat(x::Scale) = x.alpha * mat(content(x))
+mat(x::Scale{Val{S}}) where S = S * mat(content(x))
 
 function apply!(r::ArrayReg{B, T}, x::Scale{S, N, T}) where {S, B, N, T}
     apply!(r, content(x))

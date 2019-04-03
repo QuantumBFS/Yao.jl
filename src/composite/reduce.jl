@@ -32,7 +32,7 @@ Prod{N, T}(a::Tuple, b::AbstractBlock{N, T}, blks::Union{Prod{N, T}, AbstractBlo
     Prod{N, T}((a..., b), blks...)
 
 mat(x::Sum) = mapreduce(mat, +, x.list)
-mat(x::Prod) = mapreduce(mat, *, Iterators.reverse(x.list))
+mat(x::Prod) = mapreduce(mat, *, x.list)
 
 chsubblocks(x::Sum{N, T}, it) where {N, T} = Sum{N, T}(Tuple(it))
 chsubblocks(x::Prod{N, T}, it) where {N, T} = Prod{N, T}(Tuple(it))
@@ -48,7 +48,7 @@ function apply!(r::AbstractRegister{B, T}, x::Sum{N, T}) where {B, N, T}
 end
 
 function apply!(r::AbstractRegister{B, T}, x::Prod{N, T}) where {B, N, T}
-    for each in x
+    for each in Iterators.reverse(x.list)
         apply!(r, each)
     end
     return r
