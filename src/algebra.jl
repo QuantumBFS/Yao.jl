@@ -102,7 +102,7 @@ merge_pauli(x::PauliGroup, y::PauliGroup) = x * y
 eliminate_nested(ex::AbstractBlock) = ex
 
 # TODO: eliminate nested expr e.g chain(X, chain(X, Y))
-function eliminate_nested(ex::Union{Prod, ChainBlock})
+function eliminate_nested(ex::Union{Prod, ChainBlock, Sum})
     _flatten(x) = (x, )
     _flatten(x::Union{Prod, ChainBlock}) = subblocks(x)
 

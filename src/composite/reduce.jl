@@ -69,3 +69,17 @@ Base.length(x::ReduceOperator) = length(x.list)
 Base.iterate(x::ReduceOperator) = iterate(x.list)
 Base.iterate(x::ReduceOperator, st) = iterate(x.list, st)
 Base.getindex(x::ReduceOperator, k) = getindex(x.list, k)
+
+function Base.:(==)(lhs::Prod{N, T}, rhs::Prod{N, T}) where {N, T}
+    for (a, b) in zip(lhs, rhs)
+        a == b || return false
+    end
+    return true
+end
+
+function Base.:(==)(lhs::Sum{N, T}, rhs::Sum{N, T}) where {N, T}
+    for (a, b) in zip(lhs, rhs)
+        a == b || return false
+    end
+    return true
+end
