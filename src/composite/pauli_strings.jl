@@ -1,24 +1,27 @@
-import StaticArrays: MVector
+import StaticArrays: SizedVector
 export PauliString
 
 # TODO: expand to Clifford?
-struct PauliString{N, T, BT <: ConstantGate{1, T}, VT <: MVector{N, BT}} <: CompositeBlock{N, T}
+struct PauliString{N, T, BT <: ConstantGate{1, T}, VT <: SizedVector{N, BT}} <: CompositeBlock{N, T}
     blocks::VT
-    PauliString(blocks::MVector{N, BT}) where {N, T, BT <: ConstantGate{1, T}} =
+    PauliString(blocks::SizedVector{N, BT}) where {N, T, BT <: ConstantGate{1, T}} =
         new{N, T, BT, typeof(blocks)}(blocks)
 end
 
 # NOTE: PauliString has a fixed size `N`, thus by default, it should use
-#       MVector, or this block could be actually not correct.
-PauliString(xs::PauliGate...) = PauliString(MVector(xs))
+#      SizedVector, or this block could be actually not correct.
+PauliString(xs::PauliGate{T}...) where T = PauliString(SizedVector{length(xs), PauliGate{T}}(xs))
 
 function PauliString(xs::Vector)
+    T = datatype(first(xs))
     for each in xs
         if !(each isa PauliGate)
             error("expect pauli gates")
         end
+
+        datatype(each) == T || error("expect data type to be $T")
     end
-    return PauliString(MVector{length(xs)}(xs))
+    return PauliString(SizedVector{length(xs), PauliGate{T}}(xs))
 end
 
 subblocks(ps::PauliString) = ps.blocks
@@ -35,7 +38,6 @@ YaoBase.isunitary(::PauliString) = true
 
 Base.copy(ps::PauliString) = PauliString(copy(ps.blocks))
 Base.getindex(ps::PauliString, x) = getindex(ps.blocks, x)
-Base.setindex!(ps::PauliString, x) = setindex!(ps, x)
 Base.lastindex(ps::PauliString, x) = lastindex(ps.blocks, x)
 Base.iterate(ps::PauliString) = iterate(ps.blocks)
 Base.iterate(ps::PauliString, st) = iterate(ps.blocks, st)
@@ -44,6 +46,10 @@ Base.eltype(ps::PauliString) = eltype(ps.blocks)
 Base.eachindex(ps::PauliString) = eachindex(ps.blocks)
 Base.getindex(ps::PauliString, index::Union{UnitRange, Vector}) =
     PauliString(getindex(ps.blocks, index))
+function Base.setindex!(ps::PauliString, v::PauliGate, index::Union{Int})
+    ps.blocks[index] = v
+    return ps
+end
 
 function Base.:(==)(lhs::PauliString{N, T}, rhs::PauliString{N, T}) where {N, T}
     (length(lhs.blocks) == length(rhs.blocks)) && all(lhs.blocks .== rhs.blocks)

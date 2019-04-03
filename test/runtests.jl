@@ -15,3 +15,7 @@ end
 @testset "test layouts" begin
     include("layouts.jl")
 end
+
+@testset "test matrix manipulation routines" begin
+    include("rountines.jl")
+end

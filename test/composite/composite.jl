@@ -31,3 +31,7 @@ end
 @testset "test cache" begin
     include("cache.jl")
 end
+
+@testset "test pauli string" begin
+    include("pauli_string.jl")
+end
