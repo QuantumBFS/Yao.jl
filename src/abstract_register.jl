@@ -198,6 +198,7 @@ for FUNC in [:measure!, :measure, :measure_collapseto!, :measure_remove!]
         focus!(reg, locs)
         res = $FUNC(reg; kwargs...)
         relax!(reg, locs)
+        normalize!(reg)
         return res
     end
 end
@@ -230,11 +231,11 @@ Lazy version of [`select!`](@ref). See also [`select`](@ref).
 select!(bits...) = @λ(register->select!(register, bits...))
 
 """
-    select(register, bits...) -> AbstractRegister
+    select(register, bits) -> AbstractRegister
 
 Non-inplace version of [`select!`](@ref).
 """
-@interface select(register::AbstractRegister, bits...)
+@interface select(register::AbstractRegister, bits)
 
 """
     cat(::AbstractRegister...) -> register
