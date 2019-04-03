@@ -1,4 +1,4 @@
-using Test, Revise, YaoBlocks
+using Test, YaoBlocks
 import YaoBlocks: print_annotation
 
 g1 = kron(2, 1=>(im * X))
