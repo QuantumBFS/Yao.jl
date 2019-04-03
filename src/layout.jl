@@ -235,8 +235,8 @@ end
 # forward to simplify interfaces
 function print_annotation(io::IO,
     root::AbstractBlock,
-    node::AbstractBlock=root,
-    child::AbstractBlock=node, k=1)
+    node::AbstractBlock,
+    child::AbstractBlock, k=1)
     print_annotation(io, child)
 end
 
