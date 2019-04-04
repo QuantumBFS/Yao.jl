@@ -10,6 +10,7 @@ struct ControlBlock{N, BT<:AbstractBlock, C, M, T} <: AbstractContainer{N, T, BT
     locs::NTuple{M, Int}
     function ControlBlock{N, BT, C, M, T}(ctrl_locs, ctrl_config, block, locs) where {N, C, M, T, BT<:AbstractBlock}
         @assert_locs N (ctrl_locs..., locs...)
+        @assert nqubits(block) == M "number of locations doesn't match the size of block"
         new{N, BT, C, M, T}(ctrl_locs, ctrl_config, block, locs)
     end
 end
