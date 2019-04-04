@@ -1,57 +1,44 @@
 using Documenter
 using Yao
 
-# preprocess tutorial scripts
-using Literate, Pkg
-tutorialpath = joinpath(@__DIR__, "src/tutorial")
-for jlfile in ["RegisterBasics.jl", "BlockBasics.jl", "BinaryBasics.jl", "QCBM.jl", "GHZ.jl"]
-    Literate.markdown(joinpath(tutorialpath, jlfile), tutorialpath)
-end
+const PAGES = [
+    "Home" => "index.md",
+    # "Tutorial" => Any[
+    #     "tutorial/registers.md",
+    #     "tutorial/blocks.md",
+    #     "tutorial/bit_operations.md",
+    # ],
+    "Examples" => Any[
+        "examples/GHZ.md",
+        "examples/QFT.md",
+        "examples/Grover.md",
+        "examples/QCBM.md",
+    ],
+    "Manual" => Any[
+        "man/base.md",
+        "man/registers.md",
+        "man/blocks.md",
+    ],
+    "Developer Guide" => Any[
+        "dev/customize_blocks.md",
+        "dev/benchmarking.md",
+    ],
+]
 
-# make documents
 makedocs(
-    modules = [Yao, Yao.Blocks, Yao.Intrinsics, Yao.Registers, Yao.Interfaces],
+    modules = [BitBasis],
+    format = Documenter.HTML(
+        prettyurls = ("deploy" in ARGS),
+        canonical = ("deploy" in ARGS) ? "https://quantumbfs.github.io/Yao.jl/latest/" : nothing,
+        assets = ["assets/favicon.ico"],
+        ),
     clean = false,
-    format = :html,
     sitename = "Yao.jl",
     linkcheck = !("skiplinks" in ARGS),
-    analytics = "UA-89508993-1",
-    pages = [
-        "Home" => "index.md",
-        "Tutorial" => Any[
-            "tutorial/RegisterBasics.md",
-            "tutorial/BlockBasics.md",
-            "tutorial/Diff.md",
-            "tutorial/BinaryBasics.md",
-        ],
-        "Examples" => Any[
-            "tutorial/GHZ.md",
-            "tutorial/QFT.md",
-            "tutorial/Grover.md",
-            "tutorial/QCBM.md",
-        ],
-        "Manual" => Any[
-            "man/yao.md",
-            "man/interfaces.md",
-            "man/registers.md",
-            "man/blocks.md",
-            "man/intrinsics.md",
-            "man/boost.md",
-        ],
-        "Developer Documentation" => Any[
-            "dev/extending-blocks.md"
-            "dev/benchmark.md"
-        ],
-    ],
-    html_prettyurls = !("local" in ARGS),
-    html_canonical = "https://quantumbfs.github.io/Yao.jl/latest/",
+    pages = PAGES
 )
 
 deploydocs(
     repo = "github.com/QuantumBFS/Yao.jl.git",
     target = "build",
-    julia = "1.0",
-    osname = "osx",
-    deps = nothing,
-    make = nothing,
 )
