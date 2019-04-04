@@ -1,6 +1,5 @@
 name = "Yao"
 uuid = "5872b779-8223-5990-8dd0-5abbb0748c8c"
-version = "0.3.1"
 
 [deps]
 CacheServers = "a921213e-d44a-5460-ac04-5d720a99ba71"
