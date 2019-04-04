@@ -16,15 +16,14 @@ matrix:
 jobs:
   include:
     - stage: "Documentation"
-      julia: 1.0
-      os: osx
+      julia: 1.1
+      os: linux
       script:
-        - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.add(PackageSpec(path=pwd()))'
-        - julia --project=docs/ docs/make.jl
+        - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+        - julia --project=docs/ docs/make.jl deploy
+      name: "HTML"
       after_success: skip
 
 after_success:
-  # push coverage results to Coveralls
-  - julia -e 'import Pkg; cd(Pkg.dir("Yao")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
-  # push coverage results to Codecov
-  - julia -e 'import Pkg; cd(Pkg.dir("Yao")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
+  - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder())'
