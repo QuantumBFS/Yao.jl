@@ -97,6 +97,7 @@ for G in [:X, :Y, :Z]
     @eval merge_pauli(::$GT{T}, ::$GT{T}) where T = I2(T)
 end
 
+merge_pauli(::I2Gate{T}, ::I2Gate{T}) where T = I2(T)
 merge_pauli(x::PauliGroup, y::PauliGroup) = x * y
 
 eliminate_nested(ex::AbstractBlock) = ex

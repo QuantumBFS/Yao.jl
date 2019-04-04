@@ -18,6 +18,9 @@ end
 
 @testset "merge pauli prod" begin
     @test mat(simplify(X * Y)) ≈ mat(im * Z)
+    @test mat(simplify(im * X * im * Y)) ≈ mat(-im * Z)
+    @test mat(simplify(I2 * im * I2)) ≈ mat(im * I2)
+
     @test mat(simplify(X * Y * Y)) ≈ mat(- X)
     @test mat(simplify(X * Y * Z)) ≈ mat(im * I2)
 end
