@@ -22,9 +22,11 @@ end
 autodiff(::Val{:QC}, block::RotationGate) = QDiff(block)
 # escape control blocks.
 autodiff(::Val{:QC}, block::ControlBlock) = block
+
 function autodiff(mode::Val{:QC}, blk::AbstractBlock)
-    chsubblocks(blk, autodiff.(mode, subblocks(blk)))
-end
+    blks = subblocks(blk)
+    isempty(blks) ? blk : chsubblocks(blk, autodiff.(mode, blks))
+ end
 
 @inline function _perturb(func, gate::AbstractDiff{<:RotationGate}, δ::Real)
     setiparameters!(-, gate |> parent, δ)
