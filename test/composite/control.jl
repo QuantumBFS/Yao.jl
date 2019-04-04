@@ -3,6 +3,11 @@ using Test, YaoBlocks, YaoArrayRegister, LuxurySparse, BitBasis
 U = mat(X)
 ⊗ = kron
 
+@testset "construct" begin
+    @test_throws DimensionMismatch control(3, 2, 1=>swap(2, 1, 2))
+    @test_throws LocationConflictError control(3, 2, (1, 2)=>swap(2, 1, 2))
+end
+
 @testset "single control" begin
     g = ControlBlock{2}((1, ), X, (2,))
     @test nqubits(g) == 2

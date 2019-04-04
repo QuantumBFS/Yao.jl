@@ -1,5 +1,9 @@
 using Test, YaoBlocks, YaoArrayRegister
 
+@testset "construct" begin
+    @test_throws AssertionError put(2, 1=>swap(2, 1, 2))
+end
+
 @testset "apply!" begin
     n = 6
     Reg = rand_state(n)
