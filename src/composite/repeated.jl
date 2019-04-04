@@ -37,7 +37,7 @@ Base.repeat(n::Int, x::AbstractBlock) = RepeatedBlock{n}(x)
 
 Lazy curried version of [`repeat`](@ref).
 """
-Base.repeat(x::AbstractBlock, locs) = @λ(n->repeat(n, x, params...,))
+Base.repeat(x::AbstractBlock, locs) = @λ(n->repeat(n, x, locs...,))
 
 occupied_locs(x::RepeatedBlock) = Iterators.flatten(k:k+nqubits(x.content)-1 for k in x.locs)
 chsubblocks(x::RepeatedBlock{N}, blk::AbstractBlock) where N = RepeatedBlock{N}(blk, x.locs)
