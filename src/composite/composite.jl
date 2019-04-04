@@ -1,6 +1,6 @@
 using YaoBase
 
-export CompositeBlock
+export CompositeBlock, AbstractContainer
 
 """
     CompositeBlock{N, T} <: AbstractBlock{N, T}

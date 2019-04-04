@@ -1,3 +1,5 @@
+export Sum, Prod
+
 struct Sum{N, T, List <: Tuple} <: CompositeBlock{N, T}
     list::List
 
