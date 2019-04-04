@@ -1,5 +1,5 @@
 using Documenter
-using Yao, Yao.Blocks, Yao.Intrinsics, Yao.Registers, Yao.Interfaces
+using Yao
 
 # preprocess tutorial scripts
 using Literate, Pkg
