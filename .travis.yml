@@ -20,7 +20,7 @@ jobs:
       os: linux
       script:
         - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-        - julia --project=docs/ docs/make.jl deploy
+        - julia --project=docs/ docs/make.jl deploy doctest=true
       name: "HTML"
       after_success: skip
 
