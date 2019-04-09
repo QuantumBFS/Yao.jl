@@ -13,7 +13,7 @@ First, you have to use this package in Julia.
 using Yao
 ```
 
-Now, we just define this the circuit according to the circuit image below:
+Now, we just define the circuit according to the circuit image below:
 
 ![ghz](../assets/figures/ghz4.png)
 
@@ -44,7 +44,7 @@ We use Julia's `Pair` to denote the gate and its location in the circuit,
 for two-qubit gate, you could also use a tuple of locations:
 
 ```julia
-put
+put(4, (1, 2)=>swap(2, 1, 2))
 ```
 
 But, wait, why there's no `4` in the definition above? This is because

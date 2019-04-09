@@ -1,31 +1,38 @@
-```@meta
-CurrentModule = Yao.Blocks
+# Blocks
+
+**Blocks** are the basic building blocks of a quantum circuit in Yao.
+It simply means a quantum operator, thus, all the blocks have matrices in principal and one can get its matrix by [`mat`](@ref). The basic blocks required to build an arbitrary quantum circuit is defined in the component package [`YaoBlocks`](@ref).
+
+Block Tree serves as an intermediate representation for Yao to analysis, optimize the circuit, then it will be lowered to instructions like for simulations, blocks will be lowered to [`instruct!`](@ref) calls.
+
+The structure of blocks is the same with a small type system, it consists of two basic kinds of blocks: [`CompositeBlock`](@ref) (like composite types), and [`PrimitiveBlock`](@ref) (like primitive types). By combining these two kinds of blocks together, we'll be able to
+construct a quantum circuit and represent it in a tree data structure.
+
+## Primitive Blocks
+
+Primitive blocks are subtypes of [`PrimitiveBlock`](@ref), they are the leaf nodes in a block tree, thus primitive types do not have subtypes.
+
+We provide the following primitive blocks:
+
+```@autodocs
+Modules = [YaoBlocks]
+Filter = t ->(t isa Type && t <: YaoBlocks.PrimitiveBlock)
 ```
-
-# Blocks System
-
-**Blocks** are the basic component of a quantum circuit in Yao.
-
-
-# Block System
-
-The whole framework is consist of a block system. The whole system characterize
-a quantum circuit into serveral kinds of blocks. The uppermost abstract type for the whole system is [`AbstractBlock`](@ref)
-
-![Block-System](../assets/figures/block_tree.svg)
 
 ## Composite Blocks
 
-### Roller
+Composite blocks are subtypes of [`CompositeBlock`](@ref), they are the composition of blocks.
 
-[`Roller`](@ref) is a special pattern of quantum circuits. Usually is equivalent to a [`KronBlock`](@ref), but we can optimize
-the computation by rotate the tensor form of a quantum state and apply each small block on it each time.
-
-![Block-System](../assets/figures/roller.svg)
-
-## Blocks
+We provide the following composite blocks:
 
 ```@autodocs
-Modules = [Yao.Blocks, Yao.Blocks.ConstGateTools]
-Order   = [:module, :constant, :type, :macro, :function]
+Modules = [YaoBlocks]
+Filter = t -> t isa Type && t <: YaoBlocks.CompositeBlock
+```
+
+## APIs
+
+```@autodocs
+Modules = [YaoBlocks]
+Order = [:function, :macro]
 ```
