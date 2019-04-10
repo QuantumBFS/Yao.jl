@@ -10,7 +10,7 @@ struct Daggered{N, T, BT <: AbstractBlock} <: TagBlock{N, T, BT}
 end
 
 Daggered(x::BT) where {N, T, BT<:AbstractBlock{N, T}} =
-    Daggered{BT, N, T}(x)
+    Daggered{N, T, BT}(x)
 
 PreserveStyle(::Daggered) = PreserveAll()
 mat(blk::Daggered) = adjoint(mat(content(blk)))
