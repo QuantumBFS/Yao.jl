@@ -8,6 +8,12 @@ options:
 
 # Quantum Fourier Transformation and Phase Estimation
 
+Let's use Yao first
+
+```julia
+using Yao
+```
+
 ## Quantum Fourier Transformation
 
 The Quantum Fourier Transformation (QFT) circuit is to repeat
