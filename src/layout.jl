@@ -241,7 +241,7 @@ function print_annotation(io::IO,
 end
 
 print_annotation(io::IO, node::AbstractBlock) = nothing # skip
-# print_annotation(io::IO, c::Daggered) = printstyled(io, " [†]"; bold=true, color=:yellow)
+print_annotation(io::IO, c::Daggered) = printstyled(io, " [†]"; bold=true, color=:yellow)
 print_annotation(io::IO, c::CachedBlock) =
     printstyled(io, "[cached] "; bold=true, color=:yellow)
 
