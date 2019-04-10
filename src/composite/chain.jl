@@ -32,7 +32,7 @@ chain(list::Vector) = ChainBlock(list)
 chain(n::Int, blocks...) = chain(map(x->parse_block(n, x), blocks)...)
 chain(n::Int, itr) = chain(map(x->parse_block(n, x), itr)...)
 chain(blocks::Function...) = @λ(n->chain(n, blocks...))
-chain(it) = @λ(n->chain(n, it))
+chain(it) = chain(it...) # forward iterator to vargs, so we could dispatch based on types
 chain(blocks...) = @λ(n->chain(n, blocks))
 
 """
