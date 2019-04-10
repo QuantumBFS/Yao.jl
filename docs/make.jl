@@ -4,7 +4,7 @@ using Yao, YaoBlocks, YaoArrayRegister, YaoBase, BitBasis
 # Preprocess weave
 
 # const Examples = ["GHZ", "QFT", "Grover", "QCBM"]
-const Examples = ["GHZ"]
+const Examples = ["GHZ", "QFT"]
 
 for each in Examples
     file_path = joinpath(@__DIR__, "src", "examples", join([each, ".jmd"]))
