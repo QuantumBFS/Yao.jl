@@ -1,4 +1,5 @@
 [deps]
+BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Latexify = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
 Literate = "98b081ad-f1c9-55d3-8b20-4c87d4299306"

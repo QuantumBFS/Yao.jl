@@ -1,5 +1,5 @@
 using Documenter, Weave
-using Yao, YaoBlocks, YaoArrayRegister, YaoBase
+using Yao, YaoBlocks, YaoArrayRegister, YaoBase, BitBasis
 
 # Preprocess weave
 
@@ -7,7 +7,9 @@ using Yao, YaoBlocks, YaoArrayRegister, YaoBase
 const Examples = ["GHZ"]
 
 for each in Examples
-    weave(joinpath(@__DIR__, "src", "examples", join([each, ".jmd"])))
+    file_path = joinpath(@__DIR__, "src", "examples", join([each, ".jmd"]))
+    @info "expanding $file_path to markdown"
+    weave(file_path)
 end
 
 const PAGES = [
@@ -23,6 +25,7 @@ const PAGES = [
         "man/blocks.md",
         "man/base.md",
         "man/registers.md",
+        "man/bitbasis.md",
         "man/extending_blocks.md",
         ],
     # "Developer Guide" => Any[
@@ -32,7 +35,7 @@ const PAGES = [
 ]
 
 makedocs(
-    modules = [Yao, YaoBase, YaoArrayRegister, YaoBlocks],
+    modules = [Yao, YaoBase, YaoArrayRegister, YaoBlocks, BitBasis],
     format = Documenter.HTML(
         prettyurls = ("deploy" in ARGS),
         canonical = ("deploy" in ARGS) ? "https://quantumbfs.github.io/Yao.jl/latest/" : nothing,
