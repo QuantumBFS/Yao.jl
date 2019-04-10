@@ -57,7 +57,7 @@ for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
     end
 end
 
-Base.adjoint(x::PutBlock{N}) where N = PutBlock{N}(adjoint(x), x.locs)
+Base.adjoint(x::PutBlock{N}) where N = PutBlock{N}(adjoint(content(x)), x.locs)
 Base.copy(x::PutBlock{N}) where N = PutBlock{N}(x.content, x.locs)
 function Base.:(==)(lhs::PutBlock{N, C, GT, T}, rhs::PutBlock{N, C, GT, T}) where {N, T, C, GT}
     return (lhs.content == rhs.content) && (lhs.locs == rhs.locs)
