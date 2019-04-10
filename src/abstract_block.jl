@@ -217,6 +217,8 @@ function dispatch!(f::Function, x::AbstractBlock, it::Symbol)
     return x
 end
 
+dispatch!(x::AbstractBlock, it) = dispatch!(identity, x, it)
+
 """
     popdispatch!(f, block, list)
 
