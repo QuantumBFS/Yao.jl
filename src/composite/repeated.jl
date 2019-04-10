@@ -30,6 +30,7 @@ Base.repeat(n::Int, x::AbstractBlock, locs::Int...) =
     repeat(n, x, locs)
 Base.repeat(n::Int, x::AbstractBlock, locs::NTuple{C, Int}) where C =
     RepeatedBlock{n}(x, locs)
+Base.repeat(n::Int, x::AbstractBlock, locs) = repeat(n, x, locs...)
 Base.repeat(n::Int, x::AbstractBlock) = RepeatedBlock{n}(x)
 
 """
