@@ -5,7 +5,7 @@ options:
     doctype: github
 ---
 
-# Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit
+# [Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit](@id example-ghz)
 
 First, you have to use this package in Julia.
 
