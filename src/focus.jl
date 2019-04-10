@@ -15,7 +15,7 @@ new merged shape and order.
 # Example
 
 ```jldoctest
-julia> contiguous_shape_order((2, 3, 4), (1, 2, 3))
+julia> YaoArrayRegister.contiguous_shape_order((2, 3, 4), (1, 2, 3))
 ([24], [1])
 ```
 """
@@ -70,12 +70,6 @@ end
     move_ahead(collection, orders)
 
 Move `orders` to the beginning of `collection`.
-
-# Example
-
-```jldoctest
-julia> move_ahead((2, 1, 3, 4), (3, 4))
-```
 """
 move_ahead(collection, orders) = (orders..., setdiff(collection, orders)...)
 move_ahead(ndim::Int, orders) = (orders..., setdiff(1:ndim, orders)...)
