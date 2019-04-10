@@ -41,6 +41,10 @@ Return a [`RotationGate`](@ref) on Z axis.
 """
 Rz(theta::T) where T <: AbstractFloat = RotationGate(Z(Complex{T}), theta)
 
+Rx(theta) = Rx(Float64(theta))
+Ry(theta) = Ry(Float64(theta))
+Rz(theta) = Rz(Float64(theta))
+
 """
     rot(U, theta)
 
