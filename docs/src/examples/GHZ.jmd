@@ -32,7 +32,7 @@ circuit = chain(
 
 Let me explain what happens here.
 
-# Put single qubit gate X to location 1
+## Put single qubit gate X to location 1
 
 we have an [`X`](@ref) gate applied to the first qubit.
 
