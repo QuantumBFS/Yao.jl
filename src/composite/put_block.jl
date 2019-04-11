@@ -25,6 +25,7 @@ location and block to put on.
 put(total::Int, pa::Pair{NTuple{M, Int}, <:AbstractBlock}) where M =
     PutBlock{total}(pa.second, pa.first)
 put(total::Int, pa::Pair{Int, <:AbstractBlock}) = PutBlock{total}(pa.second, (pa.first, ))
+put(total::Int, pa::Pair{<:Any, <:AbstractBlock}) = PutBlock{total}(pa.second, Tuple(pa.first))
 
 """
     put(pair) -> f(n)
