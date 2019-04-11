@@ -2,8 +2,7 @@ using YaoBase, TupleTools
 
 export focus!,
     relax!,
-    # YaoBase,
-    focus
+    partial_tr
 
 
 """
@@ -117,4 +116,9 @@ function YaoBase.relax!(r::ArrayReg{B}, locs; to_nactive::Int=nqubits(r)) where 
         r.state = reshape(group_permutedims(hypercubic(r), new_orders), 1 << to_nactive, :)
     end
     return r
+end
+
+function YaoBase.partial_tr(r::ArrayReg{B}, locs) where B
+    focus!(r, setdiff(1:nqubits(r), locs))
+    return ArrayReg(sum(rank3(r); dims=2))
 end
