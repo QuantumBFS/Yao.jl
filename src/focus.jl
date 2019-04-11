@@ -123,5 +123,5 @@ function YaoBase.partial_tr(r::ArrayReg{B}, locs) where B
     focus!(r, orders)
     state = sum(rank3(r); dims=2)
     relax!(r, orders)
-    return ArrayReg(state)
+    return normalize!(ArrayReg(state))
 end
