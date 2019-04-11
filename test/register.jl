@@ -110,4 +110,9 @@ end
     reg5 = focus!(repeat(r1, 3), 1:3)
     reg6 = focus!(repeat(r2, 3), 1:2)
     @test (cat(reg5, reg6) |> relaxedvec)[:,1] ≈ r4 |> relaxedvec
+
+    # manual trace
+    r = cat(zero_state(1), ArrayReg(bit"011"))
+    focus!(r, 2:4)
+    @test sum(r.state, dims=2) ≈ ArrayReg(bit"011").state
 end
