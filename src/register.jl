@@ -72,8 +72,8 @@ function ArrayReg{B}(raw::MT) where {B, T, MT <: AbstractMatrix{T}}
     return ArrayReg{B, T, MT}(raw)
 end
 
-ArrayReg(raw::AbstractVector) = ArrayReg(reshape(raw, :, 1))
-ArrayReg(raw::AbstractMatrix) = ArrayReg{size(raw, 2)}(raw)
+ArrayReg(raw::AbstractVector{<:Complex}) = ArrayReg(reshape(raw, :, 1))
+ArrayReg(raw::AbstractMatrix{<:Complex}) = ArrayReg{size(raw, 2)}(raw)
 
 # bit literal
 # NOTE: batch size B and element type T are 1 and ComplexF64 by default
