@@ -74,6 +74,7 @@ end
 
 ArrayReg(raw::AbstractVector{<:Complex}) = ArrayReg(reshape(raw, :, 1))
 ArrayReg(raw::AbstractMatrix{<:Complex}) = ArrayReg{size(raw, 2)}(raw)
+ArrayReg(raw::AbstractArray{<:Complex, 3}) = ArrayReg{size(raw, 3)}(reshape(raw, size(raw, 1), :))
 
 # bit literal
 # NOTE: batch size B and element type T are 1 and ComplexF64 by default
