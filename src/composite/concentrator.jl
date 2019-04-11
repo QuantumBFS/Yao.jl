@@ -30,12 +30,16 @@ function concentrate(n::Int, block::AbstractBlock, locs)
     return Concentrator{n}(block, Tuple(locs))
 end
 
+# support lazy qubits
+concentrate(n::Int, block::Function, locs) = concentrate(n, parse_block(length(locs), block), locs)
+
 """
     concentrate(block, locs) -> f(n)
 
 Lazy curried version of [`concentrate`](@ref).
 """
 concentrate(block::AbstractBlock, locs) = @λ(n->concentrate(n, block, locs))
+concentrate(block::Function, locs) = @λ(n->concentrate(n, block, locs))
 
 occupied_locs(c::Concentrator) = c.locations
 chsubblocks(pb::Concentrator{N}, blk::AbstractBlock) where N =
