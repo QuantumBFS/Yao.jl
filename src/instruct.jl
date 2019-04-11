@@ -57,7 +57,7 @@ function YaoBase.instruct!(state::AbstractVecOrMat{T}, U1::AbstractMatrix{T}, lo
     step = 1 << (loc - 1)
     step_2 = 1 << loc
     for j in 0:step_2:size(state, 1)-step
-        @inbounds @simd for i in j+1:j+step
+        @inbounds for i in j+1:j+step
             u1rows!(state, i, i+step, a, b, c, d)
         end
     end
@@ -74,7 +74,7 @@ function YaoBase.instruct!(state::AbstractVecOrMat{T}, U1::SDPermMatrix{T}, loc:
     step = 1<<(loc-1)
     step_2 = 1<<loc
     for j in 0:step_2:size(state, 1)-step
-        @inbounds @simd for i in j+1:j+step
+        @inbounds for i in j+1:j+step
             swaprows!(state, i, i+step, c, b)
         end
     end
@@ -90,7 +90,7 @@ function YaoBase.instruct!(state::AbstractVecOrMat{T}, U1::SDDiagonal{T}, loc::I
     step = 1<<(loc - 1)
     step_2 = 1 << loc
     for j in 0:step_2:size(state, 1)-step
-        @inbounds @simd for i in j+1:j+step
+        @inbounds for i in j+1:j+step
             mulrow!(state, i, a)
             mulrow!(state, i+step, d)
         end
@@ -103,8 +103,7 @@ end
 function YaoBase.instruct!(state::AbstractVecOrMat, ::Val{:X}, locs::NTuple{N, Int}) where N
     mask = bmask(locs)
     do_mask = bmask(first(locs))
-    @simd for b in basis(state)
-        local i_::Int
+    for b in basis(state)
         @inbounds if anyone(b, do_mask)
             i = b+1
             i_ = flip(b, mask) + 1
@@ -119,8 +118,7 @@ function YaoBase.instruct!(state::AbstractVecOrMat{T}, ::Val{:Y}, locs::NTuple{N
     bit_parity = iseven(length(locs)) ? 1 : -1
     factor = T(-im)^length(locs)
 
-    @simd for b in basis(Int, state)
-        local i::Int, i_::Int
+    for b in basis(Int, state)
         if anyone(b, do_mask)
             i = b + 1
             i_ = flip(b, mask) + 1
@@ -189,8 +187,7 @@ function YaoBase.instruct!(
 
     ctrl = controller((control_locs..., locs[1]), (control_bits..., 0))
     mask2 = bmask(locs)
-    @simd for b in basis(state)
-        local i_::Int
+    for b in basis(state)
         if ctrl(b)
             i = b + 1
             i_ = flip(b, mask2) + 1
@@ -208,7 +205,7 @@ function YaoBase.instruct!(
 
     ctrl = controller((control_locs..., locs[1]), (control_bits..., 0))
     mask2 = bmask(locs)
-    @simd for b in basis(state)
+    for b in basis(state)
         local i_::Int
         if ctrl(b)
             i = b + 1
@@ -260,8 +257,7 @@ function YaoBase.instruct!(
     step_2 = 1 << control_locs
     start = control_bits == 1 ? step : 0
     for j in start:step_2:size(state, 1)-step+start
-        local i_::Int
-        @simd for b in j:j+step-1
+        for b in j:j+step-1
             @inbounds if allone(b, mask2)
                 i = b+1
                 i_ = flip(b, mask2) + 1
@@ -282,8 +278,7 @@ function YaoBase.instruct!(
     step_2 = 1<<control_locs
     start = control_bits==1 ? step : 0
     for j in start:step_2:size(state, 1)-step+start
-        local i_::Int
-        @simd for b in j:j+step-1
+        for b in j:j+step-1
             @inbounds if allone(b, mask2)
                 i = b+1
                 i_ = flip(b, mask2) + 1
@@ -331,9 +326,7 @@ function YaoBase.instruct!(
     mask1 = bmask(locs[1])
     mask2 = bmask(locs[2])
     mask12 = mask1|mask2
-    @simd for b = basis(state)
-        local temp::T
-        local i_::Int
+    for b in basis(state)
         if b&mask1==0 && b&mask2==mask2
             i = b+1
             i_ = b ⊻ mask12 + 1
