@@ -127,21 +127,24 @@ Returns the intrinsic parameters of node `block`, default is an empty tuple.
 
 Set the parameters of `block`.
 """
-@interface setiparams!(x::AbstractBlock, it) = setiparams!(x, it...)
+@interface setiparams!(x::AbstractBlock, args...) = x
+
+setiparams!(x::AbstractBlock, it) = setiparams!(x, it...)
+setiparams!(x::AbstractBlock, it::Symbol) = setiparams!(x, render_params(x, it))
 
 """
     setiparams(f, block, collection)
 
 Set parameters of `block` to the value in `collection` mapped by `f`.
 """
-@interface setiparams!(f::Function, x::AbstractBlock, it) = setiparams!(x, map(f, it))
+setiparams!(f::Function, x::AbstractBlock, it) = setiparams!(x, map(f, it))
 
 """
     setiparams(f, block, symbol)
 
 Set the parameters to a given symbol, which can be :zero, :random.
 """
-@interface setiparams!(f::Function, x::AbstractBlock, it::Symbol) = setiparams(f, x, render_params(x, it))
+setiparams!(f::Function, x::AbstractBlock, it::Symbol) = setiparams!(f, x, render_params(x, it))
 
 """
     parameters(block)
@@ -200,7 +203,7 @@ Dispatch parameters in collection to block tree `x`.
 """
 @interface function dispatch!(f::Function, x::AbstractBlock, it)
     @assert length(it) == nparameters(x) "expect $(nparameters(x)) parameters, got $(length(it))"
-    setparameters!(f, x, Iterators.take(it, nparameters(x)))
+    setiparams!(f, x, Iterators.take(it, nparameters(x)))
     it = Iterators.drop(it, nparameters(x))
     for each in subblocks(x)
         dispatch!(f, each, it)
@@ -209,8 +212,7 @@ Dispatch parameters in collection to block tree `x`.
 end
 
 function dispatch!(f::Function, x::AbstractBlock, it::Symbol)
-    @assert length(it) == nparameters(x) "expect $(nparameters(x)) parameters, got $(length(it))"
-    setparameters!(f, x, it)
+    setiparams!(f, x, it)
     for each in subblocks(x)
         dispatch!(f, each, it)
     end
@@ -226,7 +228,7 @@ Pop the first [`nparameters`](@ref) parameters of list, map them with a function
 `f`, then dispatch them to the block tree `block`. See also [`dispatch!`](@ref).
 """
 @interface function popdispatch!(f::Function, x::AbstractBlock, list::Vector)
-    setparameters!(x, ntuple(()->f(popfirst!(list)), nparameters(x)))
+    setiparams!(x, ntuple(()->f(popfirst!(list)), nparameters(x)))
     for each in subblocks(x)
         popdispatch!(x, list)
     end
@@ -243,8 +245,8 @@ the block tree `block`. See also [`dispatch!`](@ref).
 
 render_params(r::AbstractBlock, params) = params
 render_params(r::AbstractBlock, params::Symbol) = render_params(r, Val(params))
-render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i=1:nparameters(r))
-render_params(r::AbstractBlock, ::Val{:zero}) = (zero(params_eltype(r)) for i in 1:nparameters(r))
+render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i=1:niparams(r))
+render_params(r::AbstractBlock, ::Val{:zero}) = (zero(params_eltype(r)) for i in 1:niparams(r))
 
 """
     HasParameters{X} <: SimpleTraits.Trait
