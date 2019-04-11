@@ -54,11 +54,14 @@ YaoBase.instruct!(state::AbstractVecOrMat{T}, g::AbstractMatrix{T}, locs::Tuple{
 
 function YaoBase.instruct!(state::AbstractVecOrMat{T}, U1::AbstractMatrix{T}, loc::Int) where T
     a, c, b, d = U1
-    step = 1 << (loc - 1)
-    step_2 = 1 << loc
-    for j in 0:step_2:size(state, 1)-step
-        @inbounds for i in j+1:j+step
-            u1rows!(state, i, i+step, a, b, c, d)
+    instruct_kernel(state, loc, 1<<(loc-1), 1<<loc, a, b, c, d)
+    return state
+end
+
+@inline function instruct_kernel(state::AbstractVecOrMat, loc, step1, step2, a, b, c, d)
+    for j in 0:step2:size(state, 1)-step1
+        @inbounds for i in j+1:j+step1
+            u1rows!(state, i, i+step1, a, b, c, d)
         end
     end
     return state
