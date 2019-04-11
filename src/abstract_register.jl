@@ -231,6 +231,13 @@ Lazy version of [`select!`](@ref). See also [`select`](@ref).
 select!(bits...) = @λ(register->select!(register, bits...))
 
 """
+    partial_tr(register, locs)
+
+Return a register which is the partial traced on `locs`.
+"""
+@interface partial_tr(r::AbstractRegister, locs)
+
+"""
     select(register, bits) -> AbstractRegister
 
 Non-inplace version of [`select!`](@ref).
