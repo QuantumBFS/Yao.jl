@@ -4,9 +4,10 @@ using Test, YaoArrayRegister, BitBasis, LinearAlgebra
     @test ArrayReg{3}(rand(4, 6)) isa ArrayReg{3}
     @test_throws DimensionMismatch ArrayReg{2}(rand(4, 3))
     @test_throws DimensionMismatch ArrayReg{2}(rand(5, 2))
+    @test_throws MethodError ArrayReg(rand(4, 3))
 
-    @test ArrayReg(rand(4, 3)) isa ArrayReg{3}
-    @test ArrayReg(rand(4)) isa ArrayReg{1}
+    @test ArrayReg(rand(ComplexF64, 4, 3)) isa ArrayReg{3}
+    @test ArrayReg(rand(ComplexF64, 4)) isa ArrayReg{1}
 
     @test state(ArrayReg(bit"101")) == reshape(onehot(bit"101"), :, 1)
     @test datatype(ArrayReg(ComplexF32, bit"101")) == ComplexF32

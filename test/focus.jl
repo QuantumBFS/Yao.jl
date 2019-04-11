@@ -49,7 +49,7 @@ end
     @test nactive(reg) == 8
     @test reg0  == relax!(reg, 1:8) == relax!(reg)
 
-    reg1 = focus(copy(reg0), (5, 3, 2)) do reg
+    reg1 = focus!(copy(reg0), (5, 3, 2)) do reg
         @test nactive(reg) == 3
         reg
     end
