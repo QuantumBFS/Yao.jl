@@ -232,7 +232,7 @@ rank3(r::ArrayRegOrAdjointArrayReg{B}) where B = reshape(state(r), size(state(r)
 concat a list of registers `regs` to a larger register, each register should
 have the same batch size. See also [`repeat`](@ref).
 """
-Base.cat(rs::ArrayReg{B}...) where B = _cat(cat_datatype(rs...), rs...)
+Base.cat(rs::ArrayReg{B}...) where B = _cat(cat_datatype(reverse(rs)...), reverse(rs)...)
 Base.cat(r::ArrayReg) = r
 
 function _cat(::Type{T}, rs::ArrayReg{B}...) where {T, B}
