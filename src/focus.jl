@@ -119,6 +119,9 @@ function YaoBase.relax!(r::ArrayReg{B}, locs; to_nactive::Int=nqubits(r)) where 
 end
 
 function YaoBase.partial_tr(r::ArrayReg{B}, locs) where B
-    focus!(r, setdiff(1:nqubits(r), locs))
-    return ArrayReg(sum(rank3(r); dims=2))
+    orders = setdiff(1:nqubits(r), locs)
+    focus!(r, orders)
+    state = sum(rank3(r); dims=2)
+    relax!(r, orders)
+    return ArrayReg(state)
 end
