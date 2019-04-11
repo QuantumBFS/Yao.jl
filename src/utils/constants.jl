@@ -19,7 +19,7 @@ macro def(ex)
     list = @capture($name = $m)(ex)
     quote
         export $(esc(list[:name]))
-        const $(esc(list[:name])) = $(list[:m])
+        Core.@__doc__ const $(esc(list[:name])) = $(list[:m])
     end
 end
 

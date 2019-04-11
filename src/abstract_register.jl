@@ -114,10 +114,10 @@ ArrayReg{1,Complex{Float64},Array...}
     active qubits: 2/6
 ```
 """
-@interface focus(f::Base.Callable, r::AbstractRegister, locs::Int...) = focus(f, r, locs)
+@interface focus!(f::Base.Callable, r::AbstractRegister, locs::Int...) = focus(f, r, locs)
 
-focus(f::Base.Callable, r::AbstractRegister, loc::Int) = focus(f, r, (loc, ))
-focus(f::Base.Callable, r::AbstractRegister, locs) =
+focus!(f::Base.Callable, r::AbstractRegister, loc::Int) = focus(f, r, (loc, ))
+focus!(f::Base.Callable, r::AbstractRegister, locs) =
     relax!(f(focus!(r, locs)), locs; to_nactive=nqubits(r))
 
 """
@@ -277,7 +277,7 @@ Reorder the locations of register by input orders.
 
 Inverse the locations of register.
 """
-@interface invorder!(r::AbstractRegister) = reorder!(r, Tuple(nactive(reg):-1:1))
+@interface invorder!(r::AbstractRegister) = reorder!(r, Tuple(nactive(r):-1:1))
 
 """
     collapseto!(register, bit_str)
