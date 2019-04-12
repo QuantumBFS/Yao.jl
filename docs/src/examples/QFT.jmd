@@ -56,12 +56,12 @@ R4(5)
 
 its matrix will be
 
-```
+```julia
 mat(R4(5))
 ```
 
 Then we repeat this control block over
-and over on different qubits, and put a Hadmard gate
+and over on different qubits, and put a Hadamard gate
 to `i`th qubit to construct `i`-th `B` block.
 
 ```julia
@@ -140,21 +140,21 @@ r2 = r |> copy |> circuit(QFT(5))
 r1 ≈ r2
 ```
 
-We can get IQFT (inverse QFT) directly by calling `adjoint`
+We can get iQFT (inverse QFT) directly by calling `adjoint`
 
 ```julia
 QFT(5)'
 ```
 
-QFT and IQFT are different from FFT and IFFT in three ways,
+QFT and iQFT are different from FFT and IFFT in three ways,
 
 1. they are different by a factor of ``\sqrt{2^n}`` with ``n`` the number of qubits.
-2. the [bit numbering](https://quantumbfs.github.io/BitBasis.jl/stable/tutorial/#Conventions-1) will exchange after applying QFT or IQFT.
+2. the [bit numbering](https://quantumbfs.github.io/BitBasis.jl/stable/tutorial/#Conventions-1) will exchange after applying QFT or iQFT.
 3. due to the convention, QFT is more related to IFFT rather than FFT.
 
 ## Phase Estimation
 
-Since we have QFT and IQFT blocks we can then use them to
+Since we have QFT and iQFT blocks we can then use them to
 realize phase estimation circuit, what we want to realize
 is the following circuit:
 
@@ -164,27 +164,30 @@ is the following circuit:
 using Yao
 ```
 
-First we call hadmard gates repeatly on first `n` qubits.
+First we call Hadamard gates repeatly on first `n` qubits.
 
 ```julia
-A(n) = repeat(H, 1:n)
+Hadamards(n) = repeat(H, 1:n)
 ```
 
 Then in dashed box `B`, we have controlled unitaries:
 
 ```julia
-B(n, m, U) = chain(n+m, control(k, n+1:n+m=>matblock(U^(2^(k-1)))) for k in 1:n)
+ControlU(n, m, U) = chain(n+m, control(k, n+1:n+m=>matblock(U^(2^(k-1)))) for k in 1:n)
 ```
 
 each of them is a `U` of power ``2^(k-1)``.
 
-Since we will only apply the qft and hadmard on first `n` qubits,
+Since we will only apply the qft and Hadamard on first `n` qubits,
 we could use [`Concentrator`](@ref), which creates a context of
 a sub-scope of the qubits.
 
 ```julia
 PE(n, m, U) =
-    chain(n+m, concentrate(A(n), 1:n), B(n, m, U), concentrate(QFT(n)', 1:n))
+    chain(n+m, # total number of the qubits
+        concentrate(Hadamards(n), 1:n), # apply H in local scope
+        ControlU(n, m, U),
+        concentrate(QFT(n)', 1:n))
 ```
 
 we use the first `n` qubits as the output space to store phase ``ϕ``, and the
@@ -196,7 +199,6 @@ a local scope of quantum circuit, and only active the first `n` qubits while app
 the block inside the concentrator context, and the scope will be [`relax!`](@ref)ed
 back, after the context. This is equivalent to manually [`focus!`](@ref)
 then [`relax!`](@ref)
-
 
 fullly activated
 
@@ -221,3 +223,49 @@ on the subset of the qubits.
 
 Details about the algorithm can be found here:
 [Quantum Phase Estimation Algorithm](ttps://en.wikipedia.org/wiki/Quantum_phase_estimation_algorithm)
+
+Now let's check the results of our phase estimation.
+
+
+First we need to set up a unitary with known phase, we set the phase to be
+0.75, which is `0.75 * 2^3 == 6 == 0b110` .
+
+```julia
+using LinearAlgebra
+
+N, M = 3, 5
+P = eigen(rand_unitary(1<<M)).vectors
+θ = Int(0b110) / 1<<N
+phases = rand(1<<M)
+phases[bit"010"] = θ
+U = P * Diagonal(exp.(2π * im * phases)) * P'
+```
+
+and then generate the state ``ψ``
+
+```julia
+psi = P[:, 3]
+```
+
+In the phase estimation process, we will feed the state to circuit and measure
+the first `n` qubits processed by iQFT.
+
+```julia
+r = cat(zero_state(N), ArrayReg(psi))
+r |> PE(N, M, U)
+```
+
+Since our phase can be represented by 3 qubits precisely, we only need to measure once
+
+```julia
+results = measure(r, 1:N; nshots=1)
+```
+
+Recall that our QFT's bit numbering is reversed, let's reverse it back
+
+```julia
+using BitBasis
+estimated_phase = bfloat(results[]; nbits=N)
+```
+
+the phase is exactly `0.75`!
