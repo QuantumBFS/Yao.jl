@@ -135,8 +135,41 @@ constant oracle. Let's see what will be constructed
 build_circuit(4, 1, [1=>2, 2=>3, 3=>4])
 ```
 
-[`RotationGate`](@ref)s inside this circuit are automatically marked by [̂∂], which means parameters inside are diferentiable.
-`autodiff` has two modes, one is `autodiff(:QC)`, which means quantum differentiation with simulation complexity $O(M^2)$ ($M$ is the number of parameters),
-the other is classical backpropagation `autodiff(:BP)` with simulation coplexity $O(M)$.
+## MMD Loss & Gradients
 
-Let's define a circuit to use later
+The MMD loss is describe below:
+
+```math
+\begin{aligned}
+\mathcal{L} &= \left| \sum_{x} p \theta(x) \phi(x) - \sum_{x} \pi(x) \phi(x) \right|^2\\
+            &= \langle K(x, y) \rangle_{x \sim p_{\theta}, y\sim p_{\theta}} - 2 \langle K(x, y) \rangle_{x\sim p_{\theta}, y\sim \pi} + \langle K(x, y) \rangle_{x\sim\pi, y\sim\pi}
+\end{aligned}
+```
+
+
+We will use a squared exponential kernel here.
+
+
+```julia
+struct RBFKernel
+    σ::Float64
+    m::Matrix{Float64}
+end
+
+function RBFKernel(σ::Float64, space)
+    dx2 = (space .- space').^2
+    return RBFKernel(σ, exp.(-1/2σ * dx2))
+end
+
+kexpect(κ, x) = x' * κ.m * x
+```
+
+Next, let's steup the training
+
+```julia
+const qcbm = build_circuit(6, 10, [1=>2, 3=>4, 5=>6, 2=>3, 4=>5, 6=>1])
+const κ = RBFKernel(0.25, 0:2^6-1)
+dispatch!(qcbm, :random) # initialize the parameters
+
+loss(r::ArrayReg, target) = kexpect(κ, probs(r) - target)
+```
