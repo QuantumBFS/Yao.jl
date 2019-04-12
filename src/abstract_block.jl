@@ -1,6 +1,6 @@
 export AbstractBlock
 
-using YaoBase, SimpleTraits
+using YaoBase, YaoArrayRegister, SimpleTraits
 import YaoBase: @interface
 
 export nqubits, datatype, isreflexive, isunitary, ishermitian
