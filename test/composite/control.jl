@@ -5,6 +5,7 @@ U = mat(X)
 
 @testset "construct" begin
     @test_throws DimensionMismatch control(3, 2, 1=>swap(2, 1, 2))
+    @test_throws ErrorException control(3, 1, 2:3=>rand(4, 4))
     @test_throws LocationConflictError control(3, 2, (1, 2)=>swap(2, 1, 2))
 end
 

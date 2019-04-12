@@ -29,9 +29,17 @@ function ControlBlock{N}(ctrl_locs::NTuple{C}, ctrl_config::NTuple{C}, block::BT
     return ControlBlock{N, BT, C, M, T}(ctrl_locs, ctrl_config, block, locs)
 end
 
+function ControlBlock{N}(ctrl_locs::NTuple{C}, ctrl_config::NTuple{C}, block, locs::NTuple{K}) where {N, M, C, K, T}
+    error("expect a block, got $(typeof(block))")
+end
+
 # control bit configs are 1 by default, it use sign to encode control bit code
 ControlBlock{N}(ctrl_locs::NTuple{C}, block::AbstractBlock, locs::NTuple) where {N, C} =
     ControlBlock{N}(decode_sign(ctrl_locs)..., block, locs)
+ControlBlock{N}(ctrl_locs::NTuple{C}, block::Function, locs::NTuple) where {N, C} =
+    ControlBlock{N}(decode_sign(ctrl_locs)..., parse_block(length(locs), block), locs)
+ControlBlock{N}(ctrl_locs::NTuple{C}, block, locs::NTuple) where {N, C} =
+    ControlBlock{N}(decode_sign(ctrl_locs)..., block, locs) # trigger error
 
 # use pair to represent block under control in a compact way
 ControlBlock{N}(ctrl_locs::NTuple{C}, target::Pair) where {N, C} =
