@@ -31,6 +31,10 @@ chain(list::Vector) = ChainBlock(list)
 # if not all matrix block, try to put the number of qubits.
 chain(n::Int, blocks...) = chain(map(x->parse_block(n, x), blocks)...)
 chain(n::Int, itr) = chain(map(x->parse_block(n, x), itr)...)
+function chain(n::Int, block::AbstractBlock)
+    @assert n == nqubits(block) "number of qubits mismatch"
+    return ChainBlock(block)
+end
 chain(blocks::Function...) = @λ(n->chain(n, blocks...))
 chain(it) = chain(it...) # forward iterator to vargs, so we could dispatch based on types
 chain(blocks...) = @λ(n->chain(n, blocks))
