@@ -14,7 +14,6 @@ struct ChainBlock{N, T, MT <: AbstractBlock{N, T}} <: CompositeBlock{N, T}
 end
 
 ChainBlock(blocks::AbstractBlock{N, T}...) where {N, T} = ChainBlock(collect(AbstractBlock{N, T}, blocks))
-ChainBlock(c::ChainBlock{N, T, MT}) where {N, T, MT} = copy(c)
 
 """
     chain(blocks...)
@@ -75,7 +74,7 @@ function Base.:(==)(lhs::ChainBlock{N, T}, rhs::ChainBlock{N, T}) where {N, T}
     (length(lhs.blocks) == length(rhs.blocks)) && all(lhs.blocks .== rhs.blocks)
 end
 
-Base.copy(c::ChainBlock) = ChainBlock{N, T, MT}(copy(c.blocks))
+Base.copy(c::ChainBlock{N, T, MT}) where {N, T, MT} = ChainBlock{N, T, MT}(copy(c.blocks))
 Base.similar(c::ChainBlock{N, T, MT}) where {N, T, MT} = ChainBlock{N, T}(empty!(similar(c.blocks)))
 Base.getindex(c::ChainBlock, index) = getindex(c.blocks, index)
 Base.getindex(c::ChainBlock, index::Union{UnitRange, Vector}) = ChainBlock(getindex(c.blocks, index))
