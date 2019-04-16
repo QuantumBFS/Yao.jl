@@ -170,6 +170,55 @@ Next, let's steup the training
 const qcbm = build_circuit(6, 10, [1=>2, 3=>4, 5=>6, 2=>3, 4=>5, 6=>1])
 const κ = RBFKernel(0.25, 0:2^6-1)
 dispatch!(qcbm, :random) # initialize the parameters
+```
 
+There are two different way to define the loss:
+
+In simulation we can use the probability distribution of the state directly
+
+```julia
 loss(r::ArrayReg, target) = kexpect(κ, probs(r) - target)
+```
+
+Or if you want to simulate the whole process with measurement (which is entirely
+physical), you should define the loss with measurement results, for convenience
+we directly use the simulated results as our loss
+
+### Gradients
+the gradient of MMD loss is
+
+```math
+\begin{aligned}
+\frac{\partial \mathcal{L}}{\partial \theta^i_l} &= \langle K(x, y) \rangle_{x\sim p_{\theta^+}, y\sim p_{\theta}} - \langle K(x, y) \rangle_{x\sim p_{\theta}^-, y\sim p_{\theta}}\\
+&- \langle K(x, y) \rangle _{x\sim p_{\theta^+}, y\sim\pi} + \langle K(x, y) \rangle_{x\sim p_{\theta^-}, y\sim\pi}
+\end{aligned}
+```
+
+which can be implemented as
+
+```julia
+function gradient(n, nlayers, qcbm, kernel, ptrain)
+    p = probs(zero_state(n) |> qcbm)
+    grad = zeros(real(datatype(qcbm)), nparameters(qcbm))
+    idx = 0
+    for ilayer = 1:2:(2 * nlayers + 1)
+        idx = grad_layer!(grad, idx, prob, qcbm, qcbm[ilayer], kernel, ptrain)
+    end
+    return grad
+end
+```
+
+for each layer we have
+
+```julia
+function grad_layer!(grad, idx, prob, qcbm, layer, kernel, ptrain)
+    count = idx
+    for each_line in subblocks(layer)
+        for each in subblocks(each_line)
+            gradient!(grad, count+1, prob, qcbm, each, kernel, ptrain)
+            count += 1
+        end
+    end
+    return count
+end
 ```
