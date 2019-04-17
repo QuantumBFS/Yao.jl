@@ -244,9 +244,9 @@ Pop the first [`nparameters`](@ref) parameters of list, map them with a function
 `f`, then dispatch them to the block tree `block`. See also [`dispatch!`](@ref).
 """
 @interface function popdispatch!(f::Function, x::AbstractBlock, list::Vector)
-    setiparams!(x, (f(popfirst!(list)) for k in 1:niparams(x))...)
+    setiparams!(f, x, (popfirst!(list) for k in 1:niparams(x))...)
     for each in subblocks(x)
-        popdispatch!(each, list)
+        popdispatch!(f, each, list)
     end
     return x
 end
@@ -257,7 +257,13 @@ end
 Pop the first [`nparameters`](@ref) parameters of list, then dispatch them to
 the block tree `block`. See also [`dispatch!`](@ref).
 """
-@interface popdispatch!(x::AbstractBlock, list::Vector) = popdispatch!(identity, x, list)
+@interface function popdispatch!(x::AbstractBlock, list::Vector)
+    setiparams!(x, (popfirst!(list) for k in 1:niparams(x))...)
+    for each in subblocks(x)
+        popdispatch!(each, list)
+    end
+    return x
+end
 
 render_params(r::AbstractBlock, params) = params
 render_params(r::AbstractBlock, params::Symbol) = render_params(r, Val(params))
