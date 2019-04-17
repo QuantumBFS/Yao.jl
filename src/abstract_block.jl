@@ -137,7 +137,7 @@ setiparams!(x::AbstractBlock, it::Symbol) = setiparams!(x, render_params(x, it))
 
 Set parameters of `block` to the value in `collection` mapped by `f`.
 """
-setiparams!(f::Function, x::AbstractBlock, it) = setiparams!(x, map(f, it))
+setiparams!(f::Function, x::AbstractBlock, it) = setiparams!(x, map(x->f(x...), zip(getiparams(x), it)))
 
 """
     setiparams(f, block, symbol)
@@ -191,7 +191,7 @@ Return the element type of [`parameters`](@ref).
 @interface function allparams_eltype(x::AbstractBlock)
     T = params_eltype(x)
     for each in subblocks(x)
-        T = promote_type(T, params_eltype(each))
+        T = promote_type(T, allparams_eltype(each))
     end
     return T
 end
@@ -219,7 +219,23 @@ function dispatch!(f::Function, x::AbstractBlock, it::Symbol)
     return x
 end
 
-dispatch!(x::AbstractBlock, it) = dispatch!(identity, x, it)
+@interface function dispatch!(x::AbstractBlock, it)
+    @assert length(it) == nparameters(x) "expect $(nparameters(x)) parameters, got $(length(it))"
+    setiparams!(x, Iterators.take(it, nparameters(x)))
+    it = Iterators.drop(it, nparameters(x))
+    for each in subblocks(x)
+        dispatch!(each, it)
+    end
+    return x
+end
+
+function dispatch!(x::AbstractBlock, it::Symbol)
+    setiparams!(x, it)
+    for each in subblocks(x)
+        dispatch!(each, it)
+    end
+    return x
+end
 
 """
     popdispatch!(f, block, list)
@@ -228,9 +244,9 @@ Pop the first [`nparameters`](@ref) parameters of list, map them with a function
 `f`, then dispatch them to the block tree `block`. See also [`dispatch!`](@ref).
 """
 @interface function popdispatch!(f::Function, x::AbstractBlock, list::Vector)
-    setiparams!(x, ntuple(()->f(popfirst!(list)), nparameters(x)))
+    setiparams!(x, (f(popfirst!(list)) for k in 1:niparams(x))...)
     for each in subblocks(x)
-        popdispatch!(x, list)
+        popdispatch!(each, list)
     end
     return x
 end
