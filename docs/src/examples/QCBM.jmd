@@ -1,3 +1,10 @@
+---
+options:
+    out_path: QCBM.md
+    fig_path: ../assets/figures
+    doctype: github
+---
+
 # [Quantum Circuit Born Machine](@id qcbm)
 
 Yao is designed with variational quantum circuits in mind, and this tutorial
@@ -161,15 +168,7 @@ function RBFKernel(σ::Float64, space)
     return RBFKernel(σ, exp.(-1/2σ * dx2))
 end
 
-kexpect(κ, x) = x' * κ.m * x
-```
-
-Next, let's steup the training
-
-```julia
-const qcbm = build_circuit(6, 10, [1=>2, 3=>4, 5=>6, 2=>3, 4=>5, 6=>1])
-const κ = RBFKernel(0.25, 0:2^6-1)
-dispatch!(qcbm, :random) # initialize the parameters
+kexpect(κ::RBFKernel, x, y) = x' * κ.m * y
 ```
 
 There are two different way to define the loss:
@@ -177,7 +176,12 @@ There are two different way to define the loss:
 In simulation we can use the probability distribution of the state directly
 
 ```julia
-loss(r::ArrayReg, target) = kexpect(κ, probs(r) - target)
+get_prob(qcbm) = probs(zero_state(nqubits(qcbm)) |> qcbm)
+
+function loss(κ, c, target)
+    p = get_prob(c) - target
+    return kexpect(κ, p, p)
+end
 ```
 
 Or if you want to simulate the whole process with measurement (which is entirely
@@ -197,28 +201,77 @@ the gradient of MMD loss is
 which can be implemented as
 
 ```julia
-function gradient(n, nlayers, qcbm, kernel, ptrain)
-    p = probs(zero_state(n) |> qcbm)
-    grad = zeros(real(datatype(qcbm)), nparameters(qcbm))
-    idx = 0
-    for ilayer = 1:2:(2 * nlayers + 1)
-        idx = grad_layer!(grad, idx, prob, qcbm, qcbm[ilayer], kernel, ptrain)
+function gradient(qcbm, κ, ptrain)
+    n = nqubits(qcbm)
+    prob = get_prob(qcbm)
+    grad = zeros(Float64, nparameters(qcbm))
+
+    count = 1
+    for k in 1:2:length(qcbm), each_line in qcbm[k], gate in content(each_line)
+        dispatch!(+, gate, π/2)
+        prob_pos = probs(zero_state(n) |> qcbm)
+
+        dispatch!(-, gate, π)
+        prob_neg = probs(zero_state(n) |> qcbm)
+
+        dispatch!(+, gate, π/2) # set back
+
+        grad_pos = kexpect(κ, prob, prob_pos) - kexpect(κ, prob, prob_neg)
+        grad_neg = kexpect(κ, ptrain, prob_pos) - kexpect(κ, ptrain, prob_neg)
+        grad[count] = grad_pos - grad_neg
+        count += 1
     end
     return grad
 end
 ```
 
-for each layer we have
+Now let's setup the training
 
 ```julia
-function grad_layer!(grad, idx, prob, qcbm, layer, kernel, ptrain)
-    count = idx
-    for each_line in subblocks(layer)
-        for each in subblocks(each_line)
-            gradient!(grad, count+1, prob, qcbm, each, kernel, ptrain)
-            count += 1
-        end
+using Flux.Optimise
+qcbm = build_circuit(6, 10, [1=>2, 3=>4, 5=>6, 2=>3, 4=>5, 6=>1])
+dispatch!(qcbm, :random) # initialize the parameters
+
+κ = RBFKernel(0.25, 0:2^6-1)
+pg = gaussian_pdf(1:1<<6, 1<<5-0.5, 1<<4);
+opt = ADAM()
+
+function train(qcbm, κ, opt, target)
+    history = Float64[]
+    for _ in 1:50
+        push!(history, loss(κ, qcbm, target))
+        ps = parameters(qcbm)
+        Optimise.update!(opt, ps, gradient(qcbm, κ, target))
+        popdispatch!(qcbm, ps)
     end
-    return count
+    return history
 end
+
+history = train(qcbm, κ, opt, pg)
+trained_pg = probs(zero_state(nqubits(qcbm)) |> qcbm)
 ```
+
+And we have the history of training which is
+
+```julia eval=false
+using Plots
+fig1 = plot(history; legend=nothing)
+title!("training history")
+xlabel!("steps"); ylabel!("loss")
+```
+
+![](../assets/figures/history.png)
+
+And let's check what we got
+
+```julia eval=false
+fig2 = plot(1:1<<6, trained_pg; label="trained")
+plot!(fig2, 1:1<<6, pg; label="target")
+title!("distribution")
+xlabel!("x"); ylabel!("p")
+```
+
+![](../assets/figures/distribution.png)
+
+So within 50 steps, we got a pretty close estimation of our
+target distribution!
