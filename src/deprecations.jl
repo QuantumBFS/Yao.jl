@@ -29,7 +29,6 @@ const ReflectBlock = ReflectGate
 const GeneralMatrixGate = GeneralMatrixBlock
 const AddBlock = Sum
 
-export sequence, matrixgate, ⊗
 @deprecate sequence(args...) chain(args...)
 @deprecate matrixgate(args...) matblock(args...)
 @deprecate join(A::AbstractRegister, B::AbstractRegister) cat(A, B)
