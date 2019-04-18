@@ -13,7 +13,7 @@ hm = kron(3, 1=>X)
 end
 
 @testset "test imaginary time evolution" begin
-    tei = TimeEvolution(hm, 0.2; is_itime=true)
+    tei = TimeEvolution(hm, 0.2im)
     @test applymatrix(tei) ≈ mat(tei)
     @test applymatrix(adjoint(tei)) ≈ applymatrix(tei)'
     @test !isunitary(tei)
