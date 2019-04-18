@@ -83,9 +83,9 @@ end
     @testset "test addbits!" begin
         @test addbits!(zero_state(3), 3) == zero_state(6)
         r = rand_state(3; nbatch=2)
-        @test addbits!(copy(r), 2) ≈ cat(r, zero_state(2; nbatch=2))
+        @test addbits!(copy(r), 2) ≈ join(r, zero_state(2; nbatch=2))
         r = rand_state(3; nbatch=1)
-        @test addbits!(copy(r), 2) ≈ cat(r, zero_state(2; nbatch=1))
+        @test addbits!(copy(r), 2) ≈ join(r, zero_state(2; nbatch=1))
     end
 end
 
@@ -101,18 +101,18 @@ end
 end
 
 # TODO: test concat multiple registers
-@testset "test cat" begin
+@testset "test join" begin
     r1 = rand_state(6)
     r2 = rand_state(6)
-    r3 = cat(r1, r2)
-    r4 = cat(focus!(copy(r1), 1:3), focus!(copy(r2), 1:2))
+    r3 = join(r1, r2)
+    r4 = join(focus!(copy(r1), 1:3), focus!(copy(r2), 1:2))
     @test r4 |> relaxedvec ≈ focus!(copy(r3), [1,2,3,7,8,4,5,6,9,10,11,12]) |> relaxedvec
     reg5 = focus!(repeat(r1, 3), 1:3)
     reg6 = focus!(repeat(r2, 3), 1:2)
-    @test (cat(reg5, reg6) |> relaxedvec)[:,1] ≈ r4 |> relaxedvec
+    @test (join(reg5, reg6) |> relaxedvec)[:,1] ≈ r4 |> relaxedvec
 
     # manual trace
-    r = cat(zero_state(1), ArrayReg(bit"011"))
+    r = join(zero_state(1), ArrayReg(bit"011"))
     focus!(r, 2:4)
     @test sum(r.state, dims=2) ≈ ArrayReg(bit"011").state
 end

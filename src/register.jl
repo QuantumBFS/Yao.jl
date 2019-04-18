@@ -228,23 +228,23 @@ See also [`rank3`](@ref).
 rank3(r::ArrayRegOrAdjointArrayReg{B}) where B = reshape(state(r), size(state(r), 1), :, B)
 
 """
-    cat(regs...)
+    join(regs...)
 
 concat a list of registers `regs` to a larger register, each register should
 have the same batch size. See also [`repeat`](@ref).
 """
-Base.cat(rs::ArrayReg{B}...) where B = _cat(cat_datatype(reverse(rs)...), reverse(rs)...)
-Base.cat(r::ArrayReg) = r
+Base.join(rs::ArrayReg{B}...) where B = _join(join_datatype(reverse(rs)...), reverse(rs)...)
+Base.join(r::ArrayReg) = r
 
-function _cat(::Type{T}, rs::ArrayReg{B}...) where {T, B}
+function _join(::Type{T}, rs::ArrayReg{B}...) where {T, B}
     state = batched_kron(rank3.(rs)...)
     return ArrayReg{B}(reshape(state, size(state, 1), :))
 end
 
-cat_datatype(r::ArrayReg{B, T}, rs::ArrayReg{B}...) where {B, T} = cat_datatype(T, r, rs...)
-cat_datatype(::Type{T}, r::ArrayReg{B, T1}, rs::ArrayReg{B}...) where {T, T1, B} =
-    cat_datatype(promote_type(T, T1), rs...)
-cat_datatype(::Type{T}) where T = T
+join_datatype(r::ArrayReg{B, T}, rs::ArrayReg{B}...) where {B, T} = join_datatype(T, r, rs...)
+join_datatype(::Type{T}, r::ArrayReg{B, T1}, rs::ArrayReg{B}...) where {T, T1, B} =
+    join_datatype(promote_type(T, T1), rs...)
+join_datatype(::Type{T}) where T = T
 
 
 # initialization methods

@@ -59,6 +59,6 @@ end
 end
 
 @testset "partial trace" begin
-    r = cat(zero_state(1), ArrayReg(bit"011"))
+    r = join(zero_state(1), ArrayReg(bit"011"))
     partial_tr(r, 1) ≈ ArrayReg(bit"011")
 end

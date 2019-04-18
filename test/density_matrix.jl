@@ -9,8 +9,8 @@ using Test, YaoArrayRegister
     @test fidelity(reg2, reg2) ≈ [1,1,1]
 
     # mix
-    reg4 = cat(reg, reg)
-    reg5 = cat(reg_, reg_)
+    reg4 = join(reg, reg)
+    reg5 = join(reg_, reg_)
     focus!(reg4, 1:3)
     focus!(reg5, 1:3)
     @test isapprox(fidelity(reg, reg_)[], fidelity(reg4, reg5)[], atol=1e-5)
@@ -30,8 +30,8 @@ end
     @test isapprox(tracedist(dm2, dm2), tracedist(reg2, reg2), atol=1e-5)
 
     # mix
-    reg4 = cat(reg, reg)
-    reg5 = cat(reg_, reg_)
+    reg4 = join(reg, reg)
+    reg5 = join(reg_, reg_)
     focus!(reg4, 1:3)
     focus!(reg5, 1:3)
     dm4 = reg4 |> density_matrix
