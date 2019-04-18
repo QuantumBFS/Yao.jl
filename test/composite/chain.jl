@@ -23,6 +23,9 @@ end
     @test chain(control(4, 2, 1=>X), kron(4, 1=>X)) |> nqubits == 4
 end
 
+@testset "#15" begin
+    @test chain(4, n->kron(n, 1=>H)) isa ChainBlock
+end
 
 @testset "test operations" begin
     g = ChainBlock(

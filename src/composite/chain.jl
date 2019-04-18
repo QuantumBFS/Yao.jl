@@ -30,6 +30,7 @@ chain(list::Vector) = ChainBlock(list)
 # if not all matrix block, try to put the number of qubits.
 chain(n::Int, blocks...) = chain(map(x->parse_block(n, x), blocks)...)
 chain(n::Int, itr) = chain(map(x->parse_block(n, x), itr)...)
+chain(n::Int, f::Function) = chain(n, parse_block(n, f))
 function chain(n::Int, block::AbstractBlock)
     @assert n == nqubits(block) "number of qubits mismatch"
     return ChainBlock(block)
