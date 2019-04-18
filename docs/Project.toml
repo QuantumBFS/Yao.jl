@@ -2,6 +2,7 @@
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 Latexify = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
 Literate = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
 Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
