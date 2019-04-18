@@ -49,10 +49,6 @@ psi = P[:, 3]
 r = join(zero_state(N), ArrayReg(psi))
 r |> PE(N, M, U)
 
-# isapprox(norm(statevec(partial_tr(r, N+1:N+M)) - r1), 0.0; atol=1e-8)
-
-r |> concentrate(N+M, QFT(N)', 1:N)
-
 p, a = findmax(probs(partial_tr(r, N+1:N+M)))
 @test p ≈ 1.0
-@test breflect(3, Int(0b110)) == a - 1
+@test breflect(Int(0b110); nbits=3) == a - 1
