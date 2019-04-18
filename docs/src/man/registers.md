@@ -1,20 +1,39 @@
-# Registers
+# [Abstract Registers](@id abstract_registers)
 Quantum circuits process quantum states. A quantum state being processing by a quantum circuit will be stored on a quantum register.
-In **Yao** we provide several types for registers. The default type for registers is the [`Yao.Registers.DefaultRegister`](@ref).
+In **Yao** we provide several types for registers. The default type for registers is the [`ArrayReg`](@ref) which is defined in [YaoArrayRegister.jl](https://github.com/QuantumBFS/YaoArrayRegister.jl).
 
-You can directly use factory method [`register`](@ref)
+The registers can be extended by subtyping [`AbstractRegister`](@ref) and define correspinding **register interfaces** defined in [YaoBase.jl](https://github.com/QuantumBFS/YaoBase.jl), which includes:
 
+## Minimal Required Interfaces
 
-## Storage
+The following interfaces are the minial required interfaces to make a register's printing work and be able to accept certain gates/blocks.
 
-#### LDT format
+But if you don't want to work with our default printing, you could define your custom printing with [`Base.show`](https://docs.julialang.org/en/v1/manual/types/#man-custom-pretty-printing-1).
+
+```@docs
+YaoBase.nqubits
+YaoBase.nactive
+```
+
+you can define [`instruct!`](@ref), to provide specialized instructions for the registers from plain storage types.
+
+## Qubit Management Interfaces
+
+```@docs
+YaoBase.addbits!
+YaoBase.reorder!
+```
+
+## Qubit Scope Management Interfaces
+
+### LDT format
 Concepturely, a wave function ``|\psi\rangle`` can be represented in a low dimentional tensor (LDT) format of order-3, L(f, r, b).
 
 * f: focused (i.e. operational) dimensions
 * r: remaining dimensions
 * b: batch dimension.
 
-For simplicity, let's ignore batch dimension for the momentum, we have
+For simplicity, let's ignore batch dimension for the now, we have
 ```math
 |\psi\rangle = \sum\limits_{x,y} L(x, y, .) |j\rangle|i\rangle
 ```
@@ -25,37 +44,30 @@ Given a configuration `x` (in operational space), we want get the i-th bit using
 
     **Why not the other convension**: Using the convention of putting 1st bit on the big end will need to know the total number of qubits `n` in order to know such positional information.
 
-#### HDT format
+### HDT format
 Julia storage is column major, if we reshape the wave function to a shape of ``2\times2\times ... \times2`` and get the HDT (high dimensional tensor) format representation H, we can use H(``x_1, x_2, ..., x_3``) to get ``\langle x|\psi\rangle``.
 
-## Operations
-#### Kronecker product of operators
-In order to put small bits on little end, the Kronecker product is ``O = o_n \otimes \ldots \otimes o_2 \otimes o_1`` where the subscripts are qubit indices.
-#### Measurements
-Measure means `sample` and `projection`.
 
-##### Sample
-Suppose we want to measure operational subspace, we can first get
-```math
-p(x) = \|\langle x|\psi\rangle\|^2 = \sum\limits_{y} \|L(x, y, .)\|^2.
-```
-Then we sample an ``a\sim p(x)``. If we just sample and don't really measure (change wave function), its over.
-
-##### Projection
-```math
-|\psi\rangle' = \sum_y L(a, y, .)/\sqrt{p(a)} |a\rangle |y\rangle
+```@docs
+YaoBase.focus!
+YaoBase.relax!
 ```
 
-Good! then we can just remove the operational qubit space since `x` and `y` spaces are totally decoupled and `x` is known as in state `a`, then we get
-```math
-|\psi\rangle'_r = \sum_y l(0, y, .) |y\rangle
+## Measurement Interfaces
+
+```@docs
+YaoBase.measure
+YaoBase.measure!
+YaoBase.measure_remove!
+YaoBase.measure_collapseto!
+YaoBase.select!
 ```
-where `l = L(a:a, :, :)/sqrt(p(a))`.
 
+## Others
 
-## Registers
-
-```@autodocs
-Modules = [Yao.Registers]
-Order   = [:module, :constant, :type, :macro, :function]
+```@docs
+YaoBase.fidelity
+YaoBase.tracedist
+YaoBase.density_matrix
+YaoBase.viewbatch
 ```

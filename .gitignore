@@ -6,11 +6,7 @@
 
 docs/build/
 docs/site/
-docs/src/tutorial/RegisterBasics.md
-docs/src/tutorial/BlockBasics.md
-docs/src/tutorial/BinaryBasics.md
-docs/src/tutorial/QCBM.md
-docs/src/tutorial/GHZ.md
+docs/src/examples/*.md
 
 *.ipynb_checkpoints
 **/*.ipynb_checkpoints
