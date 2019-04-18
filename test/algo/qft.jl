@@ -46,10 +46,10 @@ psi = P[:, 3]
 λ = exp(2π * im * θ)
 @test isapprox(U * psi, λ * psi; atol=1e-8)
 
-r = cat(zero_state(N), ArrayReg(psi))
+r = join(zero_state(N), ArrayReg(psi))
 r |> PE(N, M, U)
 
-isapprox(norm(statevec(partial_tr(r, N+1:N+M)) - x1), 0.0; atol=1e-8)
+# isapprox(norm(statevec(partial_tr(r, N+1:N+M)) - r1), 0.0; atol=1e-8)
 
 r |> concentrate(N+M, QFT(N)', 1:N)
 
