@@ -64,14 +64,15 @@ end</code></pre><pre><code class="language-none">loss (generic function with 1 m
         count += 1
     end
     return grad
-end</code></pre><pre><code class="language-none">gradient (generic function with 1 method)</code></pre><p>Now let&#39;s setup the training</p><pre><code class="language-julia">using Flux.Optimise</code></pre><pre><code class="language-none">Error: ArgumentError: Package Flux not found in current path:
-- Run `import Pkg; Pkg.add(&quot;Flux&quot;)` to install the Flux package.</code></pre><pre><code class="language-julia">qcbm = build_circuit(6, 10, [1=&gt;2, 3=&gt;4, 5=&gt;6, 2=&gt;3, 4=&gt;5, 6=&gt;1])</code></pre><pre><code class="language-none">Error: MethodError: no method matching Rx(::Int64)
+end</code></pre><pre><code class="language-none">gradient (generic function with 1 method)</code></pre><p>Now let&#39;s setup the training</p><pre><code class="language-julia">using Flux.Optimise
+qcbm = build_circuit(6, 10, [1=&gt;2, 3=&gt;4, 5=&gt;6, 2=&gt;3, 4=&gt;5, 6=&gt;1])</code></pre><pre><code class="language-none">Error: MethodError: no method matching Rx(::Int64)
 Closest candidates are:
   Rx(!Matched::T&lt;:AbstractFloat) where T&lt;:AbstractFloat at /home/travis/.ju
 lia/packages/YaoBlocks/yX0rL/src/primitive/rotation_gate.jl:28</code></pre><pre><code class="language-julia">dispatch!(qcbm, :random) # initialize the parameters</code></pre><pre><code class="language-none">Error: UndefVarError: qcbm not defined</code></pre><pre><code class="language-julia">
 κ = RBFKernel(0.25, 0:2^6-1)
 pg = gaussian_pdf(1:1&lt;&lt;6, 1&lt;&lt;5-0.5, 1&lt;&lt;4);
-opt = ADAM()</code></pre><pre><code class="language-none">Error: UndefVarError: ADAM not defined</code></pre><pre><code class="language-julia">
+opt = ADAM()
+
 function train(qcbm, κ, opt, target)
     history = Float64[]
     for _ in 1:50
