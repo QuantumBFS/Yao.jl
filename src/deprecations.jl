@@ -20,6 +20,23 @@ using BitBasis: BitStr
 
 @deprecate usedbits(block::AbstractBlock{N}) where N occupied_locs(block)
 
+################ Compatibility Code ###################
+export DefaultRegister, MatrixBlock, Sequential, ReflectBlock, GeneralMatrixBlock, AddBlock
+const DefaultRegister = ArrayReg
+const MatrixBlock = AbstractBlock
+const Sequential = ChainBlock
+const ReflectBlock = ReflectGate
+const GeneralMatrixGate = GeneralMatrixBlock
+const AddBlock = Sum
+
+export sequence, matrixgate, ⊗
+@deprecate sequence(args...) chain(args...)
+@deprecate matrixgate(args...) matblock(args...)
+@deprecate join(A::AbstractRegister, B::AbstractRegister) cat(A, B)
+# joining two registers
+⊗(reg::AbstractRegister, reg2::AbstractRegister) = join(reg, reg2)
+⊗(A::AbstractArray, B::AbstractArray) = kron(A, B)
+
 # Originally addrs means return the addression stored in a composite block
 # this is not necessary since not all composite block store the address, e.g
 # roller, etc.
