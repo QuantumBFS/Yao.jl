@@ -7,55 +7,47 @@ export TimeEvolution
 
 TimeEvolution, where GT is block type. input matrix should be hermitian.
 """
-struct TimeEvolution{N, T, Hamilton <: AbstractBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
+struct TimeEvolution{N, T, Tt, Hamilton <: AbstractBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
     H::BlockMap{Complex{T}, Hamilton}
-    dt::T
+    dt::Tt
     tol::T
-    is_itime::Bool
 
     function TimeEvolution(
         H::BlockMap{Complex{T}, TH},
-        dt::T, tol::T,
-        is_itime::Bool) where {N, T, TH <: AbstractBlock{N, Complex{T}}}
+        dt::Tt, tol::T) where {N, Tt, T, TH <: AbstractBlock{N, Complex{T}}}
         # The time evolution Hamiltonian has to be a Hermitian
         ishermitian(H) || error("Time evolution Hamiltonian has to be a Hermitian")
-        return new{N, T, TH}(H, dt, tol, is_itime)
+        return new{N, T, Tt, TH}(H, dt, tol)
     end
 end
 
 """
-    TimeEvolution(H, dt::Real[; tol::Real=1e-7, is_itime::Bool=false])
+    TimeEvolution(H, dt[; tol::Real=1e-7])
 
 Create a [`TimeEvolution`](@ref) block with Hamiltonian `H` and time step `dt`. The
 `TimeEvolution` block will use Krylove based `expv` to calculate time propagation.
 
 Optional keywords are tolerance `tol` (default is `1e-7`)
 `TimeEvolution` block can also be used for
-[imaginary time evolution](http://large.stanford.edu/courses/2008/ph372/behroozi2/)
-if `is_itime` is set to `true`.
+[imaginary time evolution](http://large.stanford.edu/courses/2008/ph372/behroozi2/) if dt is complex.
 """
-TimeEvolution(H::AbstractBlock, dt::Real; tol::Real=1e-7, is_itime::Bool=false) =
-    TimeEvolution(BlockMap(H), dt, tol, is_itime)
+TimeEvolution(H::AbstractBlock, dt; tol::Real=1e-7) =
+    TimeEvolution(BlockMap(H), dt, tol)
 
-TimeEvolution(M::BlockMap, dt::Real; tol::Real, is_itime::Bool=false) =
-    TimeEvolution(M, dt, tol, is_itime)
+TimeEvolution(M::BlockMap, dt; tol::Real) =
+    TimeEvolution(M, dt, tol)
 
 function mat(te::TimeEvolution{N}) where N
     A = Matrix(mat(te.H.block))
-    if te.is_itime
-        return exp(te.dt * A)
-    else
-        return exp(-im * te.dt * A)
-    end
+    return exp(te.dt * A)
 end
 
 function apply!(reg::ArrayReg, te::TimeEvolution)
     st = state(reg)
-    τ = te.is_itime ? te.dt : -im * te.dt
     @inbounds for j in 1:size(st, 2)
         v = view(st, :, j)
         Ks = arnoldi(te.H, v; tol=te.tol)
-        expv!(v, τ, Ks)
+        expv!(v, te.dt, Ks)
     end
     return reg
 end
@@ -72,12 +64,11 @@ function Base.:(==)(lhs::TimeEvolution, rhs::TimeEvolution)
 end
 
 function Base.adjoint(te::TimeEvolution)
-    nt = te.is_itime ? te.dt : -te.dt
-    return TimeEvolution(te.H, nt; tol=te.tol, is_itime=te.is_itime)
+    return TimeEvolution(te.H, adjoint(te.dt); tol=te.tol)
 end
 Base.copy(te::TimeEvolution) = TimeEvolution(te.H, te.dt, tol=te.tol)
 
 function YaoBase.isunitary(te::TimeEvolution)
-    te.is_itime && return false
+    iszero(imag(te.dt)) || return false
     return true
 end

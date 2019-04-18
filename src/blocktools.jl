@@ -36,6 +36,13 @@ end
     postwalk(x -> f(x) ? push!(v, x) : v, blk)
 
 """
+    collect_blocks(block_type, root)
+
+Return a [`ChainBlock`](@ref) with all block of `block_type` in root.
+"""
+@interface collect_blocks(::Type{T}, x::AbstractBlock) where T <: AbstractBlock = blockfilter!(x->x isa T, T[], x)
+
+"""
     expect(op::AbstractBlock, reg::AbstractRegister{B}) -> Vector
     expect(op::AbstractBlock, dm::DensityMatrix{B}) -> Vector
 
