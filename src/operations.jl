@@ -25,36 +25,37 @@ end
 # basic arithmatics
 
 # neg
-Base.:-(reg::ArrayRegOrAdjointArrayReg) = ArrayReg(-state(reg))
+Base.:-(reg::ArrayReg) = ArrayReg(-state(reg))
 
 # +, -
 for op in [:+, :-]
-    @eval function Base.$op(lhs::ArrayRegOrAdjointArrayReg{B}, rhs::ArrayRegOrAdjointArrayReg{B}) where B
+    @eval function Base.$op(lhs::ArrayReg{B}, rhs::ArrayReg{B}) where B
         return ArrayReg(($op)(state(lhs), state(rhs)))
     end
 end
 
 # *, /
 for op in [:*, :/]
-    @eval function Base.$op(lhs::RT, rhs::Number) where {B, RT <: ArrayRegOrAdjointArrayReg{B}}
+    @eval function Base.$op(lhs::RT, rhs::Number) where {B, RT <: ArrayReg{B}}
         ArrayReg{B}($op(state(lhs), rhs))
     end
 
     if op == :*
-        @eval function Base.$op(lhs::Number, rhs::RT) where {B, RT <: ArrayRegOrAdjointArrayReg{B}}
+        @eval function Base.$op(lhs::Number, rhs::RT) where {B, RT <: ArrayReg{B}}
             ArrayReg{B}(($op)(lhs, state(rhs)))
         end
     end
 end
 
 for op in [:(==), :≈]
-    @eval function Base.$op(lhs::ArrayRegOrAdjointArrayReg{B}, rhs::ArrayRegOrAdjointArrayReg{B}) where B
-        ($op)(state(lhs), state(rhs))
+    for AT in [:ArrayReg, :AdjointArrayReg]
+        @eval function Base.$op(lhs::$AT, rhs::$AT)
+            ($op)(state(lhs), state(rhs))
+        end
     end
 end
 
-Base.:*(op::AbstractMatrix, r::ArrayRegOrAdjointArrayReg) = op * state(r)
-Base.:*(bra::AdjointArrayReg{1}, ket::ArrayReg{1}) = dot(state(bra), state(ket))
+Base.:*(bra::AdjointArrayReg{1}, ket::ArrayReg{1}) = dot(parent(bra).state, state(ket))
 Base.:*(bra::AdjointArrayReg{B}, ket::ArrayReg{B}) where B = bra .* ket
 
 # broadcast
