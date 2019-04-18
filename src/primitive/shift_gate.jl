@@ -17,6 +17,7 @@ end
 Returns a shift gate.
 """
 shift(θ::AbstractFloat) = ShiftGate(θ)
+shift(θ::Real) = shift(Float64(θ))
 mat(gate::ShiftGate{T}) where T = Diagonal(Complex{T}[1.0, exp(im * gate.theta)])
 
 cache_key(gate::ShiftGate) = gate.theta

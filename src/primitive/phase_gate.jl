@@ -17,6 +17,8 @@ end
 Returns a global phase gate.
 """
 phase(θ::AbstractFloat) = PhaseGate(θ)
+phase(θ::Real) = phase(Float64(θ))
+
 mat(gate::PhaseGate{T}) where T = exp(im * gate.theta) * IMatrix{2, Complex{T}}()
 
 # parametric interface
