@@ -1,8 +1,0 @@
-julia 1.0
-
-BitBasis
-LuxurySparse
-StaticArrays
-StatsBase
-TupleTools
-YaoBase
