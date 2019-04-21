@@ -40,6 +40,7 @@ TimeEvolution(M::BlockMap, dt; tol::Real) =
 time_evolve(M::BlockMap, dt; tol::Real=1e-7) = TimeEvolution(M, dt; tol=tol)
 time_evolve(M::AbstractBlock, dt; tol::Real=1e-7) = TimeEvolution(M, dt; tol=tol)
 time_evolve(M::AbstractMatrix, dt; tol::Real=1e-7) = TimeEvolution(matblock(M), dt; tol=tol)
+time_evolve(dt; tol::Real=1e-7) = @λ(M->time_evolve(M, dt; tol=tol))
 
 function mat(te::TimeEvolution{N}) where N
     A = Matrix(mat(te.H.block))
