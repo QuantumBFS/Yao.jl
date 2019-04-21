@@ -46,7 +46,7 @@ end
         kron(2, 1=>phase(0.1)),
     )
     r = rand_state(2)
-    @test statevec(apply!(copy(r), g)) ≈ mat(g) * r
+    @test statevec(apply!(copy(r), g)) ≈ mat(g) * r.state
     apply!(copy(r), g)
 end
 
