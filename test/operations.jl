@@ -22,4 +22,7 @@ end
     reg = rand_state(4)
     @test all(state(reg + (-reg)).==0)
     @test all(state(reg*2 - reg/0.5) .== 0)
+
+    reg = rand_state(3)
+    @test reg'*reg ≈ 1
 end
