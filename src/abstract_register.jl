@@ -245,11 +245,11 @@ Non-inplace version of [`select!`](@ref).
 @interface select(register::AbstractRegister, bits)
 
 """
-    cat(::AbstractRegister...) -> register
+    join(::AbstractRegister...) -> register
 
 Merge several registers as one register via tensor product.
 """
-@interface Base.cat(::AbstractRegister...)
+@interface Base.join(::AbstractRegister...)
 
 """
     repeat(r::AbstractRegister, n::Int) -> register
