@@ -31,7 +31,6 @@ const AddBlock = Sum
 
 @deprecate sequence(args...) chain(args...)
 @deprecate matrixgate(args...) matblock(args...)
-@deprecate join(A::AbstractRegister, B::AbstractRegister) cat(A, B)
 # joining two registers
 ⊗(reg::AbstractRegister, reg2::AbstractRegister) = join(reg, reg2)
 ⊗(A::AbstractArray, B::AbstractArray) = kron(A, B)
