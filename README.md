@@ -7,8 +7,6 @@ alt="Yao Logo" width="210"></img>
 
 [![Build Status](https://travis-ci.org/QuantumBFS/Yao.jl.svg?branch=master)](https://travis-ci.org/QuantumBFS/Yao.jl)
 [![Build status](https://ci.appveyor.com/api/projects/status/kjagpnqoetugmuxt?svg=true)](https://ci.appveyor.com/project/Roger-luo/yao-jl)
-[![Coverage Status](https://coveralls.io/repos/github/QuantumBFS/Yao.jl/badge.svg?branch=master)](https://coveralls.io/github/QuantumBFS/Yao.jl?branch=master)
-[![codecov](https://codecov.io/gh/QuantumBFS/Yao.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/QuantumBFS/Yao.jl)
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://QuantumBFS.github.io/Yao.jl/stable)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://QuantumBFS.github.io/Yao.jl/latest)
 
@@ -22,11 +20,11 @@ Yao is an open source framework for
 - quantum [software 2.0](https://medium.com/@karpathy/software-2-0-a64152b37c35);
 - quantum computation education.
 
-We are in an early-release beta. Expect some adventures and rough edges.
+**We are in an early-release beta. Expect some adventures and rough edges.**
 
 ## Installation
 
-In **v0.7+**/**v1.0+**, please type `]` in the REPL to use the package mode, then type this command:
+Please type `]` in the REPL to use the package mode, then type this command:
 
 ```julia
 pkg> add Yao
@@ -71,8 +69,13 @@ Yao is a framework that is about to have the following features:
   - As a white-box simulator, rather than using a black box, users will be aware of what their simulation are doing right through the interface.
   - **Hierarchical APIs** from **low abstraction quantum operators** to **highly abstract** circuit block objects.
 
-![](docs/src/assets/figures/framework.png)
-The whole framework is highly **modularized**, researchers can extend this framework for different purposes.
+## Architecture
+
+Yao is a meta package based on several component packages in order to provide a highly modularized architecture, researchers and developers can extend the framework with different component packages for different purposes with minimal effort. The component packages includes:
+
+- [YaoBase](https://github.com/QuantumBFS/YaoBase.jl) Interface definition and basic toolkits for registers.
+- [YaoBlocks](https://github.com/QuantumBFS/YaoBlocks.jl) Standard basic quantum circuit simulator building blocks.
+- [YaoArrayRegister](https://github.com/QuantumBFS/YaoArrayRegister.jl) Simulated Full Amplitude Quantum Register
 
 ## Contribution
 
