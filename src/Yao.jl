@@ -1,7 +1,5 @@
 """
 Extensible Framework for Quantum Algorithm Design for Humans.
-
-简单易用可扩展的量子算法设计框架。
 """
 module Yao
 
