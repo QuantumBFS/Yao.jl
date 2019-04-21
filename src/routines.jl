@@ -56,19 +56,46 @@ end
     return U |> staticize, ic, locs_raw |> staticize
 end
 
-cunmat(nbit::Int, cbits::NTuple, cvals::NTuple, U::IMatrix, locs::NTuple) = IMatrix{1<<nbit}()
+adaptive_pow2(n::Int) = adaptive_pow2(UInt(n))
+
+function adaptive_pow2(n::UInt)
+    n < 62 ? Int64(1) << n :
+    n < 126 ? Int128(1) << n :
+    big(1) << n
+end
+
+const LARGE_MATRIX_WARN = 62
+
+function large_mat_check(n::Int)
+    if n > LARGE_MATRIX_WARN
+        error("matrix is too large, expect n <= $LARGE_MATRIX_WARN, got $n, integer overflows")
+    end
+    return nothing
+end
+
+function cunmat(n::Int, cbits::NTuple, cvals::NTuple, U::IMatrix, locs::NTuple)
+    large_mat_check(n)
+    IMatrix{1<<n}()
+end
 
 """
     unmat(nbit::Int, U::AbstractMatrix, locs::NTuple) -> AbstractMatrix
 
 Return the matrix representation of putting matrix at locs.
 """
-unmat(nbit::Int, U::AbstractMatrix, locs::NTuple) = cunmat(nbit::Int, (), (), U, locs)
+function unmat(nbit::Int, U::AbstractMatrix, locs::NTuple)
+    large_mat_check(nbit)
+    cunmat(nbit::Int, (), (), U, locs)
+end
 
 ############################### Dense Matrices ###########################
-u1mat(nbit::Int, U1::AbstractMatrix, ibit::Int) = unmat(nbit, U1, (ibit,))
+function u1mat(nbit::Int, U1::AbstractMatrix, ibit::Int)
+    large_mat_check(nbit)
+    unmat(nbit, U1, (ibit,))
+end
 
 function u1mat(nbit::Int, U1::SDMatrix, ibit::Int)
+    large_mat_check(nbit)
     mask = bmask(ibit)
     N = 1<<nbit
     a, c, b, d = U1
@@ -106,6 +133,7 @@ end
 end
 
 function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SDMatrix, locs::NTuple{M, Int}) where {C, M}
+    large_mat_check(nbit)
     U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
     N = 1<<nbit
     MM = size(U0, 1)
@@ -136,6 +164,7 @@ end
 
 ############################### SparseMatrix ##############################
 function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SparseMatrixCSC{Tv}, locs::NTuple{M, Int})::SparseMatrixCSC{Tv} where {C, M, Tv}
+    large_mat_check(nbit)
     U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
     N = 1<<nbit
     NNZ::Int = 1<<nbit + length(ic) * (nnz(U0) - size(U0,2))
@@ -180,6 +209,7 @@ end
 end
 
 function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SDPermMatrix, locs::NTuple{M, Int}) where {C, M}
+    large_mat_check(nbit)
     U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
     N = 1<<nbit
     pm = PermMatrix(collect(1:N), ones(eltype(U), N))
@@ -191,6 +221,7 @@ end
 
 ############################ Diagonal ##########################
 function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SDDiagonal, locs::NTuple{M, Int}) where {C, M}
+    large_mat_check(nbit)
     U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
     dg = Diagonal(ones(eltype(U0), 1<<nbit))
     controldo(ic) do i

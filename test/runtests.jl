@@ -20,6 +20,10 @@ end
     include("rountines.jl")
 end
 
+@testset "Yao/#166" begin
+    @test_throws ErrorException put(100, 1=>X) |> mat
+end
+
 # TODO
 # @testset "test demos" begin
 #     include("algo/qft.jl")
