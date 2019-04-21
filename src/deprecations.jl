@@ -43,5 +43,13 @@ const AddBlock = Sum
 
 # NOTE: block is frequently used as variable name, to make sure there is
 #       no conflicts, this is commented.
-# @deprecate block(x::AbstractContainer) = parent(x)
-# @deprecate chblock(x::AbstractContainer, blk::AbstractBlock) = chsubblocks(x, blk)
+@deprecate block(x::AbstractContainer) parent(x)
+@deprecate chblock(x::AbstractContainer, blk::AbstractBlock) chsubblocks(x, blk)
+
+function Base.collect(x::AbstractBlock, ::Type{T}) where {T <: AbstractBlock}
+    Base.depwarn("collect(block, block_type) is deprecated, use collect_blocks(block_type, block) instead", :collect)
+    return collect_blocks(T, x)
+end
+
+@deprecate timeevolve(block::MatrixBlock, t::Number; tol::Real=1e-7) time_evolve(block, t; tol=tol)
+@deprecate timeevolve(t::Number; tol::Real=1e-7) time_evolve(t; tol=tol)
