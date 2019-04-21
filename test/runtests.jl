@@ -20,6 +20,7 @@ end
     include("rountines.jl")
 end
 
-@testset "test demos" begin
-    include("algo/qft.jl")
-end
+# TODO
+# @testset "test demos" begin
+#     include("algo/qft.jl")
+# end
