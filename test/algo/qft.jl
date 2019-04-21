@@ -47,7 +47,7 @@ psi = P[:, 3]
 @test isapprox(U * psi, λ * psi; atol=1e-8)
 
 r = join(zero_state(N), ArrayReg(psi))
-r |> PE(N, M, U)
+apply!(r, PE(N, M, U))
 
 p, a = findmax(probs(partial_tr(r, N+1:N+M)))
 @test p ≈ 1.0
