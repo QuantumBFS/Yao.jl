@@ -1,6 +1,6 @@
 using ExponentialUtilities, YaoArrayRegister
 
-export TimeEvolution
+export TimeEvolution, time_evolve
 
 """
     TimeEvolution{N, TT, GT} <: PrimitiveBlock{N, ComplexF64}
@@ -36,6 +36,10 @@ TimeEvolution(H::AbstractBlock, dt; tol::Real=1e-7) =
 
 TimeEvolution(M::BlockMap, dt; tol::Real) =
     TimeEvolution(M, dt, tol)
+
+time_evolve(M::BlockMap, dt; tol::Real=1e-7) = TimeEvolution(M, dt; tol=tol)
+time_evolve(M::AbstractBlock, dt; tol::Real=1e-7) = TimeEvolution(M, dt; tol=tol)
+time_evolve(M::AbstractMatrix, dt; tol::Real=1e-7) = TimeEvolution(matblock(M), dt; tol=tol)
 
 function mat(te::TimeEvolution{N}) where N
     A = Matrix(mat(te.H.block))
