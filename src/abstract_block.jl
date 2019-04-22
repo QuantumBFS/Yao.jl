@@ -207,7 +207,8 @@ Dispatch parameters in collection to block tree `x`.
     setiparams!(f, x, Iterators.take(it, nparameters(x)))
     it = Iterators.drop(it, nparameters(x))
     for each in subblocks(x)
-        dispatch!(f, each, it)
+        dispatch!(f, each, Iterators.take(it, niparams(each)))
+        it = Iterators.drop(it, niparams(each))
     end
     return x
 end
@@ -225,7 +226,8 @@ end
     setiparams!(x, Iterators.take(it, niparams(x)))
     it = Iterators.drop(it, niparams(x))
     for each in subblocks(x)
-        dispatch!(each, it)
+        dispatch!(each, Iterators.take(it, niparams(each)))
+        it = Iterators.drop(it, niparams(each))
     end
     return x
 end

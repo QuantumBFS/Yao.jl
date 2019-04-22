@@ -24,6 +24,12 @@ end
     @test_throws ErrorException put(100, 1=>X) |> mat
 end
 
+@testset "dispatch" begin
+    g = dispatch!(chain(Rx(0.1), Rx(0.2)), [0.3, 0])
+    @test getiparams(g[1]) == 0.3
+    @test getiparams(g[2]) == 0.0
+end
+
 # TODO
 # @testset "test demos" begin
 #     include("algo/qft.jl")
