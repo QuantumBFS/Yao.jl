@@ -21,7 +21,7 @@ using BitBasis: BitStr
 @deprecate usedbits(block::AbstractBlock{N}) where N occupied_locs(block)
 
 ################ Compatibility Code ###################
-export DefaultRegister, MatrixBlock, Sequential, ReflectBlock, GeneralMatrixBlock, AddBlock
+export DefaultRegister, MatrixBlock, Sequential, ReflectBlock, GeneralMatrixGate, AddBlock
 const DefaultRegister = ArrayReg
 const MatrixBlock = AbstractBlock
 const Sequential = ChainBlock
@@ -31,6 +31,10 @@ const AddBlock = Sum
 
 @deprecate sequence(args...) chain(args...)
 @deprecate matrixgate(args...) matblock(args...)
+
+import Base: collect
+@deprecate collect(t::Type, x::AbstractBlock) collect_blocks(t, x)
+
 # joining two registers
 ⊗(reg::AbstractRegister, reg2::AbstractRegister) = join(reg, reg2)
 ⊗(A::AbstractArray, B::AbstractArray) = kron(A, B)
