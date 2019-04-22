@@ -5,14 +5,14 @@ export PutBlock, put
 
 Type for putting a block at given locations.
 """
-struct PutBlock{N, M, C, T, GT <: AbstractBlock} <: AbstractContainer{N, T, GT}
+struct PutBlock{N, C, T, GT <: AbstractBlock} <: AbstractContainer{N, T, GT}
     content::GT
     locs::NTuple{C, Int}
 
-    function PutBlock{N}(block::GT, locs::NTuple{C, Int}) where {N, M, C, T, GT <: AbstractBlock{M, T}}
+    function PutBlock{N}(block::GT, locs::NTuple{C, Int}) where {N, C, T, GT <: AbstractBlock{M, T}}
         @assert_locs N locs
         @assert nqubits(block) == C "number of locations doesn't match the size of block"
-        return new{N, M, C, T, GT}(block, locs)
+        return new{N, C, T, GT}(block, locs)
     end
 end
 
@@ -35,7 +35,7 @@ Lazy curried version of [`put`](@ref).
 put(pa::Pair) = @λ(n -> put(n, pa))
 
 occupied_locs(x::PutBlock) = x.locs
-chsubblocks(x::PutBlock{N, M}, b::AbstractBlock{M}) where {N, M} = PutBlock{N}(b, x.locs)
+chsubblocks(x::PutBlock{N}, b::AbstractBlock) where N = PutBlock{N}(b, x.locs)
 PreserveStyle(::PutBlock) = PreserveAll()
 cache_key(pb::PutBlock) = cache_key(pb.content)
 
