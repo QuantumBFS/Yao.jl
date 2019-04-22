@@ -9,7 +9,7 @@ struct PutBlock{N, C, T, GT <: AbstractBlock} <: AbstractContainer{N, T, GT}
     content::GT
     locs::NTuple{C, Int}
 
-    function PutBlock{N}(block::GT, locs::NTuple{C, Int}) where {N, C, T, GT <: AbstractBlock{M, T}}
+    function PutBlock{N}(block::GT, locs::NTuple{C, Int}) where {N, M, C, T, GT <: AbstractBlock{M, T}}
         @assert_locs N locs
         @assert nqubits(block) == C "number of locations doesn't match the size of block"
         return new{N, C, T, GT}(block, locs)
