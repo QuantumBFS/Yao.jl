@@ -251,7 +251,7 @@ In the phase estimation process, we will feed the state to circuit and measure
 the first `n` qubits processed by iQFT.
 
 ```julia
-r = cat(zero_state(N), ArrayReg(psi))
+r = join(ArrayReg(psi), zero_state(N))
 r |> PE(N, M, U)
 ```
 

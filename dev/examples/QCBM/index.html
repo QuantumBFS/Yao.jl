@@ -19,10 +19,49 @@ layer(nbit::Int, ::Val{:mid}) = chain(nbit, put(i=&gt;chain(Rz(0), Rx(0), Rz(0))
     push!(circuit, cache(entangler(pairs)))
     push!(circuit, layer(n, :last))
     return circuit
-end</code></pre><pre><code class="language-none">build_circuit (generic function with 1 method)</code></pre><p>We use the method <code>cache</code> here to tag the entangler block that it should be cached after its first run, because it is actually a constant oracle. Let&#39;s see what will be constructed</p><pre><code class="language-julia">build_circuit(4, 1, [1=&gt;2, 2=&gt;3, 3=&gt;4])</code></pre><pre><code class="language-none">Error: MethodError: no method matching Rx(::Int64)
-Closest candidates are:
-  Rx(!Matched::T&lt;:AbstractFloat) where T&lt;:AbstractFloat at /home/travis/.ju
-lia/packages/YaoBlocks/yX0rL/src/primitive/rotation_gate.jl:28</code></pre><h2><a class="nav-anchor" id="MMD-Loss-and-Gradients-1" href="#MMD-Loss-and-Gradients-1">MMD Loss &amp; Gradients</a></h2><p>The MMD loss is describe below:</p><div>\[\begin{aligned}
+end</code></pre><pre><code class="language-none">build_circuit (generic function with 1 method)</code></pre><p>We use the method <code>cache</code> here to tag the entangler block that it should be cached after its first run, because it is actually a constant oracle. Let&#39;s see what will be constructed</p><pre><code class="language-julia">build_circuit(4, 1, [1=&gt;2, 2=&gt;3, 3=&gt;4])</code></pre><pre><code class="language-none">nqubits: 4, datatype: Complex{Float64}
+chain
+├─ chain
+│  ├─ put on (1)
+│  │  └─ chain
+│  │     ├─ rot(X gate, 0.0)
+│  │     └─ rot(Z gate, 0.0)
+│  ├─ put on (2)
+│  │  └─ chain
+│  │     ├─ rot(X gate, 0.0)
+│  │     └─ rot(Z gate, 0.0)
+│  ├─ put on (3)
+│  │  └─ chain
+│  │     ├─ rot(X gate, 0.0)
+│  │     └─ rot(Z gate, 0.0)
+│  └─ put on (4)
+│     └─ chain
+│        ├─ rot(X gate, 0.0)
+│        └─ rot(Z gate, 0.0)
+├─ [cached] chain
+│     ├─ control(1)
+│     │  └─ (2,)X gate
+│     ├─ control(2)
+│     │  └─ (3,)X gate
+│     └─ control(3)
+│        └─ (4,)X gate
+└─ chain
+   ├─ put on (1)
+   │  └─ chain
+   │     ├─ rot(Z gate, 0.0)
+   │     └─ rot(X gate, 0.0)
+   ├─ put on (2)
+   │  └─ chain
+   │     ├─ rot(Z gate, 0.0)
+   │     └─ rot(X gate, 0.0)
+   ├─ put on (3)
+   │  └─ chain
+   │     ├─ rot(Z gate, 0.0)
+   │     └─ rot(X gate, 0.0)
+   └─ put on (4)
+      └─ chain
+         ├─ rot(Z gate, 0.0)
+         └─ rot(X gate, 0.0)</code></pre><h2><a class="nav-anchor" id="MMD-Loss-and-Gradients-1" href="#MMD-Loss-and-Gradients-1">MMD Loss &amp; Gradients</a></h2><p>The MMD loss is describe below:</p><div>\[\begin{aligned}
 \mathcal{L} &amp;= \left| \sum_{x} p \theta(x) \phi(x) - \sum_{x} \pi(x) \phi(x) \right|^2\\
             &amp;= \langle K(x, y) \rangle_{x \sim p_{\theta}, y\sim p_{\theta}} - 2 \langle K(x, y) \rangle_{x\sim p_{\theta}, y\sim \pi} + \langle K(x, y) \rangle_{x\sim\pi, y\sim\pi}
 \end{aligned}\]</div><p>We will use a squared exponential kernel here.</p><pre><code class="language-julia">struct RBFKernel
@@ -65,10 +104,9 @@ end</code></pre><pre><code class="language-none">loss (generic function with 1 m
     end
     return grad
 end</code></pre><pre><code class="language-none">gradient (generic function with 1 method)</code></pre><p>Now let&#39;s setup the training</p><pre><code class="language-julia">using Flux.Optimise
-qcbm = build_circuit(6, 10, [1=&gt;2, 3=&gt;4, 5=&gt;6, 2=&gt;3, 4=&gt;5, 6=&gt;1])</code></pre><pre><code class="language-none">Error: MethodError: no method matching Rx(::Int64)
-Closest candidates are:
-  Rx(!Matched::T&lt;:AbstractFloat) where T&lt;:AbstractFloat at /home/travis/.ju
-lia/packages/YaoBlocks/yX0rL/src/primitive/rotation_gate.jl:28</code></pre><pre><code class="language-julia">dispatch!(qcbm, :random) # initialize the parameters</code></pre><pre><code class="language-none">Error: UndefVarError: qcbm not defined</code></pre><pre><code class="language-julia">
+qcbm = build_circuit(6, 10, [1=&gt;2, 3=&gt;4, 5=&gt;6, 2=&gt;3, 4=&gt;5, 6=&gt;1])
+dispatch!(qcbm, :random) # initialize the parameters
+
 κ = RBFKernel(0.25, 0:2^6-1)
 pg = gaussian_pdf(1:1&lt;&lt;6, 1&lt;&lt;5-0.5, 1&lt;&lt;4);
 opt = ADAM()
@@ -84,7 +122,11 @@ function train(qcbm, κ, opt, target)
     return history
 end
 
-history = train(qcbm, κ, opt, pg)</code></pre><pre><code class="language-none">Error: UndefVarError: qcbm not defined</code></pre><pre><code class="language-julia">trained_pg = probs(zero_state(nqubits(qcbm)) |&gt; qcbm)</code></pre><pre><code class="language-none">Error: UndefVarError: qcbm not defined</code></pre><p>And we have the history of training which is</p><pre><code class="language-julia">
+history = train(qcbm, κ, opt, pg)</code></pre><pre><code class="language-none">Error: MethodError: no method matching depwarn(::String)
+Closest candidates are:
+  depwarn(::Any, !Matched::Any) at deprecated.jl:65</code></pre><pre><code class="language-julia">trained_pg = probs(zero_state(nqubits(qcbm)) |&gt; qcbm)</code></pre><pre><code class="language-none">Error: MethodError: no method matching depwarn(::String)
+Closest candidates are:
+  depwarn(::Any, !Matched::Any) at deprecated.jl:65</code></pre><p>And we have the history of training which is</p><pre><code class="language-julia">
 using Plots
 fig1 = plot(history; legend=nothing)
 title!(&quot;training history&quot;)
