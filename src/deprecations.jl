@@ -21,7 +21,7 @@ using BitBasis: BitStr
 @deprecate usedbits(block::AbstractBlock{N}) where N occupied_locs(block)
 
 ################ Compatibility Code ###################
-export DefaultRegister, MatrixBlock, Sequential, ReflectBlock, GeneralMatrixGate, AddBlock
+export DefaultRegister, MatrixBlock, Sequential, ReflectBlock, GeneralMatrixGate, AddBlock, ⊗
 const DefaultRegister = ArrayReg
 const MatrixBlock = AbstractBlock
 const Sequential = ChainBlock
@@ -46,7 +46,8 @@ import Base: collect
 
 # NOTE: block is frequently used as variable name, to make sure there is
 #       no conflicts, this is commented.
-@deprecate block(x::AbstractContainer) parent(x)
+@deprecate block(x::AbstractContainer) content(x)
+@deprecate parent(x::AbstractContainer) content(x)
 @deprecate chblock(x::AbstractContainer, blk::AbstractBlock) chsubblocks(x, blk)
 
 @deprecate timeevolve(block::MatrixBlock, t::Number; tol::Real=1e-7) time_evolve(block, t; tol=tol)
