@@ -5,7 +5,7 @@ export PutBlock, put
 
 Type for putting a block at given locations.
 """
-struct PutBlock{N, C, T, GT <: AbstractBlock} <: AbstractContainer{N, T, GT}
+struct PutBlock{N, C, T, GT <: AbstractBlock} <: AbstractContainer{GT, N, T}
     content::GT
     locs::NTuple{C, Int}
 

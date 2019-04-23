@@ -16,12 +16,12 @@ YaoBase.ishermitian(m::CompositeBlock) = all(ishermitian, subblocks(m)) || isher
 YaoBase.isreflexive(m::CompositeBlock) = all(isreflexive, subblocks(m)) || isreflexive(mat(m))
 
 """
-    AbstractContainer{N, T} <: CompositeBlock{N, T}
+    AbstractContainer{BT, N, T} <: CompositeBlock{N, T}
 
 Abstract type for container block. Container blocks are blocks contain a single
 block. Container block should have a
 """
-abstract type AbstractContainer{N, T, BT <: AbstractBlock} <: CompositeBlock{N, T} end
+abstract type AbstractContainer{BT <: AbstractBlock, N, T} <: CompositeBlock{N, T} end
 
 """
     content(x)
@@ -76,8 +76,8 @@ for METHOD in (:ishermitian, :isreflexive, :isunitary)
     end
 end
 
-function Base.:(==)(lhs::AbstractContainer{N, T, BT},
-        rhs::AbstractContainer{N, T, BT}) where {N, T, BT}
+function Base.:(==)(lhs::AbstractContainer{BT, N, T},
+        rhs::AbstractContainer{BT, N, T}) where {BT, N, T}
     return content(lhs) == content(rhs)
 end
 

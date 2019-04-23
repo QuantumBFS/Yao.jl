@@ -1,12 +1,12 @@
 export TagBlock
 
 """
-    TagBlock{N, T} <: AbstractContainer{N, T}
+    TagBlock{BT, N, T} <: AbstractContainer{BT, N, T}
 
 `TagBlock` is a special kind of Container block, it forwards most of the methods
 but tag the block with some extra information.
 """
-abstract type TagBlock{N, T, BT} <: AbstractContainer{N, T, BT} end
+abstract type TagBlock{BT, N, T} <: AbstractContainer{BT, N, T} end
 
 cache_key(tb::TagBlock) = cache_key(content(tb))
 occupied_locs(x::TagBlock) = occupied_locs(content(x))

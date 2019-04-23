@@ -57,7 +57,7 @@ Base.show(io::IO, ::MIME"plain/text", blk::AbstractBlock) = print_tree(io, blk)
 
 
 function Base.show(io::IO, ::MIME"plain/text",
-        blk::TagBlock{N, T, <:PrimitiveBlock}) where {N, T}
+        blk::TagBlock{<:PrimitiveBlock})
     return print_tree(io, blk; title=false, compact=false)
 end
 
