@@ -59,7 +59,7 @@ end
 CacheServers.iscached(c::CachedBlock) = iscached(c.server, c.content)
 iscacheable(c::CachedBlock) = iscacheable(c.server, c.content)
 chsubblocks(cb::CachedBlock, blk::AbstractBlock) = CachedBlock(cb.server, blk, cb.level)
-occupied_locs(x::CachedBlock) = occupied_locs(parent(x))
+occupied_locs(x::CachedBlock) = occupied_locs(content(x))
 PreserveStyle(::CachedBlock) = PreserveAll()
 
 function update_cache(c::CachedBlock)
@@ -94,6 +94,7 @@ function apply!(r::AbstractRegister, c::CachedBlock, signal)
     end
     return r
 end
+
 apply!(r::ArrayReg, c::CachedBlock) = (r.state .= mat(c) * r.state; r)
 
 Base.similar(c::CachedBlock, level::Int) = CachedBlock(c.server, c.content, level)
