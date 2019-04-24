@@ -38,14 +38,14 @@ CacheServers.pull(frag::CacheFragment) = frag.storage[cache_key(frag.ref)]
 CacheServers.clear!(frag::CacheFragment) = (empty!(frag.storage); frag)
 
 """
-    CachedBlock{ST, BT, N, T} <: AbstractContainer{N, T, BT}
+    CachedBlock{ST, BT, N, T} <: TagBlock{BT, N, T}
 
 A label type that tags an instance of type `BT`. It forwards
 every methods of the block it contains, except [`mat`](@ref)
 and [`apply!`](@ref), it will cache the matrix form whenever
 the program has.
 """
-struct CachedBlock{ST, BT, N, T} <: TagBlock{N, T, BT}
+struct CachedBlock{ST, BT, N, T} <: TagBlock{BT, N, T}
     server::ST
     content::BT
     level::Int
@@ -59,7 +59,7 @@ end
 CacheServers.iscached(c::CachedBlock) = iscached(c.server, c.content)
 iscacheable(c::CachedBlock) = iscacheable(c.server, c.content)
 chsubblocks(cb::CachedBlock, blk::AbstractBlock) = CachedBlock(cb.server, blk, cb.level)
-occupied_locs(x::CachedBlock) = occupied_locs(parent(x))
+occupied_locs(x::CachedBlock) = occupied_locs(content(x))
 PreserveStyle(::CachedBlock) = PreserveAll()
 
 function update_cache(c::CachedBlock)
@@ -94,7 +94,9 @@ function apply!(r::AbstractRegister, c::CachedBlock, signal)
     end
     return r
 end
-apply!(r::AbstractRegister, c::CachedBlock) = (r.state .= mat(c) * r.state; r)
+
+apply!(r::AbstractRegister, c::CachedBlock) = apply!(r, c.content)
+apply!(r::ArrayReg, c::CachedBlock) = (r.state .= mat(c) * r.state; r)
 
 Base.similar(c::CachedBlock, level::Int) = CachedBlock(c.server, c.content, level)
 Base.copy(c::CachedBlock) = CachedBlock(c.server, copy(c.content), c.level)

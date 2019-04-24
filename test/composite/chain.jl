@@ -10,8 +10,8 @@ using Test, YaoBase, YaoBlocks, YaoArrayRegister
     blks = [X, Y, Rx(0.3)]
     @test chsubblocks(g, blks) |> subblocks |> collect == blks
 
-    c1 = ChainBlock(put(500, 1=>X), put(500, 3=>Y))
-    c2 = ChainBlock(put(500, 4=>X), put(500, 5=>Y))
+    c1 = ChainBlock(put(5, 1=>X), put(5, 3=>Y))
+    c2 = ChainBlock(put(5, 4=>X), put(5, 5=>Y))
     @test iscommute(c1, c2)
     @test iscommute(c1, c2, c2)
     @test ishermitian(ChainBlock(c1, c2))

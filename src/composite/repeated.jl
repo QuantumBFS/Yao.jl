@@ -6,7 +6,7 @@ export RepeatedBlock, repeat
 
 Repeat the same block on given locations.
 """
-struct RepeatedBlock{N, C, GT <: AbstractBlock, T} <: AbstractContainer{N, T, GT}
+struct RepeatedBlock{N, C, GT <: AbstractBlock, T} <: AbstractContainer{GT, N, T}
     content::GT
     locs::NTuple{C, Int}
 end

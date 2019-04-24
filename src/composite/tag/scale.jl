@@ -2,7 +2,7 @@ using LinearAlgebra
 
 export Scale
 
-struct Scale{S <: Union{Number, Val}, N, T, BT <: AbstractBlock{N, T}} <: TagBlock{N, T, BT}
+struct Scale{S <: Union{Number, Val}, N, T, BT <: AbstractBlock{N, T}} <: TagBlock{BT, N, T}
     alpha::S
     content::BT
 end

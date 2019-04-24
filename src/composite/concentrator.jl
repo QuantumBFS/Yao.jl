@@ -2,12 +2,12 @@ using YaoBase
 export Concentrator, concentrate
 
 """
-    Concentrator{N, T, BT <: AbstractBlock} <: AbstractContainer{N, T}
+    Concentrator{N, T, BT <: AbstractBlock} <: AbstractContainer{BT, N, T}
 
 concentrates serveral lines together in the circuit, and expose
 it to other blocks.
 """
-struct Concentrator{N, T, BT <: AbstractBlock, C} <: AbstractContainer{N, T, BT}
+struct Concentrator{N, T, BT <: AbstractBlock, C} <: AbstractContainer{BT, N, T}
     content::BT
     locations::NTuple{C, Int}
 end

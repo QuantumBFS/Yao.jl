@@ -5,12 +5,12 @@ export Daggered
 
 Wrapper block allowing to execute the inverse of a block of quantum circuit.
 """
-struct Daggered{N, T, BT <: AbstractBlock} <: TagBlock{N, T, BT}
+struct Daggered{BT <: AbstractBlock, N, T} <: TagBlock{BT, N, T}
     content::BT
 end
 
 Daggered(x::BT) where {N, T, BT<:AbstractBlock{N, T}} =
-    Daggered{N, T, BT}(x)
+    Daggered{BT, N, T}(x)
 
 PreserveStyle(::Daggered) = PreserveAll()
 mat(blk::Daggered) = adjoint(mat(content(blk)))
