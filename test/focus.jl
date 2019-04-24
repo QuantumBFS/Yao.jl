@@ -47,7 +47,7 @@ end
     reg  = focus!(copy(reg0), 1:8)
     @test hypercubic(reg) == reshape(reg0.state, fill(2, 8)...,4)
     @test nactive(reg) == 8
-    @test reg0  == relax!(reg, 1:8) == relax!(reg)
+    @test reg0  == relax!(reg, 1:8)
 
     reg1 = focus!(copy(reg0), (5, 3, 2)) do reg
         @test nactive(reg) == 3
