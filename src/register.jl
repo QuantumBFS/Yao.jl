@@ -114,7 +114,13 @@ ArrayReg(r::ArrayReg{B}) where B = ArrayReg{B}(copy(r.state))
 Base.copy(r::ArrayReg) = ArrayReg(r)
 Base.similar(r::ArrayRegOrAdjointArrayReg{B}) where B = ArrayReg{B}(similar(state(r)))
 
-function Base.copyto!(dst::ArrayRegOrAdjointArrayReg, src::ArrayRegOrAdjointArrayReg)
+# NOTE: ket bra is not copyable
+function Base.copyto!(dst::ArrayReg, src::ArrayReg)
+    copyto!(state(dst), state(src))
+    return dst
+end
+
+function Base.copyto!(dst::AdjointArrayReg, src::AdjointArrayReg)
     copyto!(state(dst), state(src))
     return dst
 end
