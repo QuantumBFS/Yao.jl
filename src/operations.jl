@@ -10,7 +10,7 @@ export isnormalized,
 
 Check if the register is normalized.
 """
-isnormalized(r::ArrayReg) = all(sum(copy(r) |> relax! |> probs, dims=1) .≈ 1)
+isnormalized(r::ArrayReg) = all(sum(copy(r) |> relax!(to_nactive=nqubits(r)) |> probs, dims=1) .≈ 1)
 
 """
     normalize!(r::ArrayReg)

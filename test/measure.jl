@@ -3,9 +3,9 @@ using Test, YaoArrayRegister, YaoBase
 @testset "select" begin
     reg = product_state(4, 6; nbatch=2)
     # println(focus!(reg, [1,3]))
-    r1 = select!(focus!(copy(reg), [2,3]), 0b11) |> relax!
-    r2= select(focus!(copy(reg), [2,3]), 0b11) |> relax!
-    r3= copy(reg) |> focus!(2,3) |> select!(0b11) |> relax!
+    r1 = select!(focus!(copy(reg), [2,3]), 0b11) |> relax!(to_nactive=2)
+    r2= select(focus!(copy(reg), [2,3]), 0b11) |> relax!(to_nactive=2)
+    r3= copy(reg) |> focus!(2,3) |> select!(0b11) |> relax!(to_nactive=2)
 
     @test r1'*r1 ≈ ones(2)
     @test r1 ≈ r2
