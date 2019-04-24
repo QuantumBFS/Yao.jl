@@ -34,7 +34,7 @@ end
     @test reg |> nactive == 3
     @test copy(reg) |> addbits!(2) |> nactive == 5
     reg2 = copy(reg) |> addbits!(2) |> focus!(4,5)
-    @test (reg2 |> measure_remove!; reg2) |> relax! ≈ reg
+    @test (reg2 |> measure_remove!; reg2) |> relax!(1:nqubits(reg2)) ≈ reg
 end
 
 @testset "Focus 2" begin
