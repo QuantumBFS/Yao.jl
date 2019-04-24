@@ -114,7 +114,7 @@ ArrayReg(r::ArrayReg{B}) where B = ArrayReg{B}(copy(r.state))
 Base.copy(r::ArrayReg) = ArrayReg(r)
 Base.similar(r::ArrayRegOrAdjointArrayReg{B}) where B = ArrayReg{B}(similar(state(r)))
 
-function Base.copyto!(dst::R, src::R) where {R <: ArrayRegOrAdjointArrayReg}
+function Base.copyto!(dst::ArrayRegOrAdjointArrayReg, src::ArrayRegOrAdjointArrayReg)
     copyto!(state(dst), state(src))
     return dst
 end

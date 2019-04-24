@@ -116,3 +116,11 @@ end
     focus!(r, 2:4)
     @test sum(r.state, dims=2) ≈ ArrayReg(bit"011").state
 end
+
+@testset "YaoBlocks.jl/issues/21" begin
+    st = rand(ComplexF64, 16, 2)
+    r1 = ArrayReg(view(st, :, 1))
+    r2 = ArrayReg(rand(ComplexF64, 16, 1))
+    copyto!(r1, r2)
+    @test r1 == r2
+end
