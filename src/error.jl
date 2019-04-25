@@ -120,7 +120,7 @@ end
 
 # NOTE: we may use @assert in the future
 #       these macro will help us keep original APIs
-export @assert_locs, @assert_locs_inbounds, @assert_locs_contiguous, @assert_locs_fit
+export @assert_locs_safe, @assert_locs_inbounds, @assert_locs_contiguous, @assert_locs_fit
 
 """
     @assert_locs_inbounds <number of total qubits> <locations list> [<msg>]
@@ -137,13 +137,13 @@ macro assert_locs_inbounds(n, locs, msgs...)
 end
 
 """
-    @assert_locs <number of total qubits> <locations list> [<msg>]
+    @assert_locs_safe <number of total qubits> <locations list> [<msg>]
 
 Assert if all the locations are:
     - inbounds.
     - do not have any conflict.
 """
-macro assert_locs(n, locs, msgs...)
+macro assert_locs_safe(n, locs, msgs...)
     msg = process_msgs(msgs...; default="locations conflict.")
     return quote
         @assert_locs_inbounds $(esc(n)) $(esc(locs))
@@ -163,7 +163,7 @@ Assert if all the locations are:
 macro assert_locs_contiguous(n, locs, msgs...)
     msg = process_msgs(msgs...; default="locations is not contiguous.")
     quote
-        @assert_locs $(esc(n)) $(esc(locs))
+        @assert_locs_safe $(esc(n)) $(esc(locs))
         islocs_contiguous($(esc(n)), $(esc(locs))) || error($msg)
         nothing
     end
@@ -177,7 +177,7 @@ Assert if the location is exactly fit into n qubits.
 macro assert_locs_fit(n, locs, msgs...)
     msg = process_msgs(msgs...; default="locations is not contiguous.")
     quote
-        @assert_locs $(esc(n)) $(esc(locs))
+        @assert_locs_safe $(esc(n)) $(esc(locs))
         addrs |> first |> minimum == 1 || throw(AddressConflictError("addr not exact fit at 1"))
         islocs_contiguous($(esc(n)), $(esc(locs))) || error($msg)
         nothing
