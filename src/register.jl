@@ -143,10 +143,10 @@ function YaoBase.addbits!(r::ArrayReg, n::Int)
     return r
 end
 
-function YaoBase.insert_qubits!(reg::ArrayReg{B}, loc::Int; nbit::Int=1) where B
+function YaoBase.insert_qubits!(reg::ArrayReg{B}, loc::Int; nqubits::Int=1) where B
     na = nactive(reg)
     focus!(reg, 1:loc-1)
-    reg2 = join(zero_state(nbit, B), reg) |> relax! |> focus!((1:na+nbit)...)
+    reg2 = join(zero_state(nqubits; nbatch=B), reg) |> relax! |> focus!((1:na+nqubits)...)
     reg.state = reg2.state
     reg
 end
