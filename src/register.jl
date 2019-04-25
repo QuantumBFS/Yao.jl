@@ -11,6 +11,7 @@ export ArrayReg,
     nbatch,
     viewbatch,
     addbits!,
+    insert_qubits!,
     datatype,
     probs,
     reorder!,
@@ -72,9 +73,13 @@ function ArrayReg{B}(raw::MT) where {B, T, MT <: AbstractMatrix{T}}
     return ArrayReg{B, T, MT}(raw)
 end
 
-ArrayReg(raw::AbstractVector{<:Complex}) = ArrayReg(reshape(raw, :, 1))
-ArrayReg(raw::AbstractMatrix{<:Complex}) = ArrayReg{size(raw, 2)}(raw)
-ArrayReg(raw::AbstractArray{<:Complex, 3}) = ArrayReg{size(raw, 3)}(reshape(raw, size(raw, 1), :))
+function _warn_type(raw)
+    eltype(raw) <: Complex || @warn "Input type of `ArrayReg` is not Complex, got $(eltype(raw))"
+end
+
+ArrayReg(raw::AbstractVector) = (_warn_type(raw); ArrayReg(reshape(raw, :, 1)))
+ArrayReg(raw::AbstractMatrix) = (_warn_type(raw); ArrayReg{size(raw, 2)}(raw))
+ArrayReg(raw::AbstractArray{<:Any, 3}) = (_warn_type(raw); ArrayReg{size(raw, 3)}(reshape(raw, size(raw, 1), :)))
 
 # bit literal
 # NOTE: batch size B and element type T are 1 and ComplexF64 by default
@@ -136,6 +141,14 @@ function YaoBase.addbits!(r::ArrayReg, n::Int)
     fill!(r.state, 0)
     r.state[1:M, :] = raw
     return r
+end
+
+function YaoBase.insert_qubits!(reg::ArrayReg{B}, loc::Int; nbit::Int=1) where B
+    na = nactive(reg)
+    focus!(reg, 1:loc-1)
+    reg2 = join(zero_state(nbit, B), reg) |> relax! |> focus!((1:na+nbit)...)
+    reg.state = reg2.state
+    reg
 end
 
 function YaoBase.probs(r::ArrayReg{1})
