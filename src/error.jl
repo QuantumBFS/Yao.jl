@@ -178,8 +178,9 @@ macro assert_locs_fit(n, locs, msgs...)
     msg = process_msgs(msgs...; default="locations is not contiguous.")
     quote
         @assert_locs_safe $(esc(n)) $(esc(locs))
-        addrs |> first |> minimum == 1 || throw(AddressConflictError("addr not exact fit at 1"))
+        first(minimum($(esc(locs)))) == 1 || throw(AddressConflictError("addr not exact fit at 1"))
+        last(maximum($(esc(locs)))) == n || throw(AddressConflictError("addr not exact fit at end"))
         islocs_contiguous($(esc(n)), $(esc(locs))) || error($msg)
         nothing
-    end 
+    end
 end
