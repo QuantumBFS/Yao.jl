@@ -15,6 +15,19 @@ using Test, YaoBase, YaoBlocks, YaoArrayRegister
     @test iscommute(c1, c2)
     @test iscommute(c1, c2, c2)
     @test ishermitian(ChainBlock(c1, c2))
+
+    c = ChainBlock{1, ComplexF64}([X, Y])
+    c[1] = put(1, 1=>X)
+    @test c[1] == put(1, 1=>X)
+    c = ChainBlock([X, Y])
+    c[1] = put(1, 1=>X)
+    @test c[1] == put(1, 1=>X)
+
+    list = []
+    push!(list, X)
+    @test chain(list) == chain(X)
+
+    @test chain(4, []) == chain(4)
 end
 
 @testset "test chain" begin

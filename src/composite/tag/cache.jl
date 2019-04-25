@@ -95,6 +95,7 @@ function apply!(r::AbstractRegister, c::CachedBlock, signal)
     return r
 end
 
+apply!(r::AbstractRegister, c::CachedBlock) = apply!(r, c.content)
 apply!(r::ArrayReg, c::CachedBlock) = (r.state .= mat(c) * r.state; r)
 
 Base.similar(c::CachedBlock, level::Int) = CachedBlock(c.server, c.content, level)

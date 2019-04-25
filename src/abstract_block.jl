@@ -129,7 +129,7 @@ Set the parameters of `block`.
 """
 @interface setiparams!(x::AbstractBlock, args...) = x
 
-setiparams!(x::AbstractBlock, it) = setiparams!(x, it...)
+setiparams!(x::AbstractBlock, it::Union{Tuple, Vector, Base.Generator}) = setiparams!(x, it...)
 setiparams!(x::AbstractBlock, a::Number, xs::Number...) = error("setparams!(x, θ...) is not implemented")
 setiparams!(x::AbstractBlock, it::Symbol) = setiparams!(x, render_params(x, it))
 

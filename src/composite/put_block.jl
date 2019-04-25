@@ -5,14 +5,14 @@ export PutBlock, put
 
 Type for putting a block at given locations.
 """
-struct PutBlock{N, C, T, GT <: AbstractBlock} <: AbstractContainer{GT, N, T}
+struct PutBlock{N, C, GT <: AbstractBlock, T} <: AbstractContainer{GT, N, T}
     content::GT
     locs::NTuple{C, Int}
 
     function PutBlock{N}(block::GT, locs::NTuple{C, Int}) where {N, M, C, T, GT <: AbstractBlock{M, T}}
         @assert_locs N locs
         @assert nqubits(block) == C "number of locations doesn't match the size of block"
-        return new{N, C, T, GT}(block, locs)
+        return new{N, C, GT, T}(block, locs)
     end
 end
 
@@ -51,7 +51,7 @@ end
 # specialization
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
-    @eval function apply!(r::ArrayReg, pb::PutBlock{N, C, T, <:$GT}) where {N, C, T}
+    @eval function apply!(r::ArrayReg, pb::PutBlock{N, C, <:$GT, T}) where {N, C, T}
         N == nactive(r) || throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
         instruct!(matvec(r.state), Val($(QuoteNode(G))), pb.locs)
         return r
