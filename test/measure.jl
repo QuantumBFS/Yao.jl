@@ -24,4 +24,11 @@ end
     res = measure_remove!(reg)
     select(reg0, res)
     @test select(reg0, res) |> normalize! ≈ reg
+
+    r = rand_state(10)
+    r1 = copy(r) |> focus!(1, 4, 3)
+    res = measure_remove!(r, (1, 4, 3))
+    r2 = select(r1, res)
+    r2 = relax!(r2, (); to_nactive=nqubits(r2))
+    @test normalize!(r2) ≈ r
 end
