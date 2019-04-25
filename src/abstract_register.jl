@@ -140,7 +140,6 @@ Inverse transformation of [`focus!`](@ref), where `to_nactive` is the number
  of active bits for target register.
 """
 @interface relax!(r::AbstractRegister, locs; to_nactive::Int=nqubits(r))
-relax!(r::AbstractRegister; to_nactive::Int=nqubits(r)) = relax!(r, (); to_nactive=to_nactive)
 
 """
     relax!(locs::Int...; to_nactive=nqubits(register)) -> f(register) -> register
@@ -288,11 +287,11 @@ Non-inplace version of [`select!`](@ref).
 @interface select(register::AbstractRegister, bits)
 
 """
-    cat(::AbstractRegister...) -> register
+    join(::AbstractRegister...) -> register
 
 Merge several registers as one register via tensor product.
 """
-@interface Base.cat(::AbstractRegister...)
+@interface Base.join(::AbstractRegister...)
 
 """
     repeat(r::AbstractRegister, n::Int) -> register

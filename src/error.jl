@@ -46,7 +46,7 @@ function show(io::IO, e::QubitMismatchError)
 end
 
 
-export islocs_inbounds, islocs_conflict, islocs_contiguous
+export islocs_inbounds, islocs_conflict
 
 _sort(x::Vector; by=identity) = sort(x, by=by)
 _sort(x::Tuple; by=identity) = TupleTools.sort(x, by=by)
@@ -86,21 +86,6 @@ function islocs_conflict(locs::AddressList)
     return false
 end
 
-"""
-    islocs_contiguous(n::Int, locs) -> Bool
-
-Check if the input locations is contiguous in ``[1, n]``.
-"""
-function islocs_contiguous(n::Int, locs::AddressList)
-    nonempty_minimum(first(locs)) == 1 || return false
-    for (nxt, cur) in zip(locs[2:end], locs[1:end-1])
-        nonempty_minimum(nxt) == nonempty_maximum(cur) + 1 || return false
-    end
-    nonempty_maximum(last(locs)) == n || return false
-    return true
-end
-
-
 function process_msgs(msgs...; default="")
     msg = isempty(msgs) ? default : msgs[1]
     if isa(msg, AbstractString)
@@ -120,7 +105,7 @@ end
 
 # NOTE: we may use @assert in the future
 #       these macro will help us keep original APIs
-export @assert_locs, @assert_locs_inbounds, @assert_locs_contiguous
+export @assert_locs_safe, @assert_locs_inbounds
 
 """
     @assert_locs_inbounds <number of total qubits> <locations list> [<msg>]
@@ -137,34 +122,17 @@ macro assert_locs_inbounds(n, locs, msgs...)
 end
 
 """
-    @assert_locs <number of total qubits> <locations list> [<msg>]
+    @assert_locs_safe <number of total qubits> <locations list> [<msg>]
 
 Assert if all the locations are:
     - inbounds.
     - do not have any conflict.
 """
-macro assert_locs(n, locs, msgs...)
+macro assert_locs_safe(n, locs, msgs...)
     msg = process_msgs(msgs...; default="locations conflict.")
     return quote
         @assert_locs_inbounds $(esc(n)) $(esc(locs))
         islocs_conflict($(esc(locs))) && throw(LocationConflictError($msg))
-        nothing
-    end
-end
-
-"""
-    @assert_locs_contiguous <number of qubits> <locations list> [<msg>]
-
-Assert if all the locations are:
-    - inbounds.
-    - do not have any conflict.
-    - contiguous on locations
-"""
-macro assert_locs_contiguous(n, locs, msgs...)
-    msg = process_msgs(msgs...; default="locations is not contiguous.")
-    quote
-        @assert_locs $(esc(n)) $(esc(locs))
-        islocs_contiguous($(esc(n)), $(esc(locs))) || error($msg)
         nothing
     end
 end

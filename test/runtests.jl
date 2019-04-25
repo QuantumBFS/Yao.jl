@@ -1,6 +1,7 @@
 using Test, YaoBase
 
-@testset "test exceptions" begin
+@testset "test error & exceptions" begin
+    include("error.jl")
     include("exceptions.jl")
 end
 
