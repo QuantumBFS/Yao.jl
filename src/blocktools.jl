@@ -35,6 +35,8 @@ end
 @interface blockfilter!(f, v::Vector, blk::AbstractBlock) =
     postwalk(x -> f(x) ? push!(v, x) : v, blk)
 
+@interface blockfilter(f, blk) = blockfilter!(f, [], blk)
+
 """
     collect_blocks(block_type, root)
 
