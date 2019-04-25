@@ -74,6 +74,19 @@ If only an integer is provided, then returns a lambda function.
 addbits!(n::Int) = @λ(register -> addbits!(register, n))
 
 """
+    insert_qubits!(register, loc::Int; n::Int=1) -> register
+    insert_qubits!(loc::Int; n::Int=1) -> λ(register)
+
+Insert `n` qubits to given register in state |0>.
+i.e. |psi> -> |psi> ⊗ |000> ⊗ |psi>, increased bits have higher indices.
+
+If only an integer is provided, then returns a lambda function.
+"""
+@interface insert_qubits!(::AbstractRegister, loc::Int; n::Int=1)
+insert_qubits!(loc::Int, n::Int=1) = @λ(register -> insert_qubits!(register, loc; n=n))
+
+
+"""
     focus!(register, locs) -> register
 
 Focus the wires on specified location.
@@ -163,44 +176,68 @@ end
 
 ## Measurement
 
+export ComputationalBasis
+struct ComputationalBasis end
+
 """
-    measure(register[, locs]; nshots=1) -> Vector{Int}
+    measure([operator], register[, locs]; nshots=1) -> Vector{Int}
 
 Return measurement results of current active qubits (regarding to active qubits,
 see [`focus!`](@ref) and [`relax!`](@ref)).
 """
-@interface measure(::AbstractRegister; nshots::Int=1)
+@interface measure(op, ::AbstractRegister; nshots::Int=1)
 
 """
-    measure!(register[, locs])
+    measure!([operator], register[, locs])
 
 Measure current active qubits or qubits at `locs` and collapse to result state.
 """
-@interface measure!(::AbstractRegister)
+@interface measure!(op, ::AbstractRegister)
 
 """
-    measure_remove!(::AbstractRegister[, locs])
+    measure_remove!([operator], ::AbstractRegister[, locs])
 
 Measure current active qubits or qubits at `locs` and remove them.
 """
-@interface measure_remove!(::AbstractRegister)
+@interface measure_remove!(op, ::AbstractRegister)
 
 """
-    measure_collapseto!(reg::AbstractRegister[, locs]; config) -> Int
+    measure_collapseto!([operator], reg::AbstractRegister[, locs]; config) -> Int
 
 Measure current active qubits or qubits at `locs` and set the register to specific value.
 """
-@interface measure_collapseto!(::AbstractRegister; config::Int=0)
+@interface measure_collapseto!(op, ::AbstractRegister; config::Int=0)
 
 # focus context
-for FUNC in [:measure!, :measure, :measure_collapseto!, :measure_remove!]
-    @eval function $FUNC(reg::AbstractRegister, locs; kwargs...)
-        focus!(reg, locs)
+for FUNC in [:measure!, :measure_collapseto!, :measure_remove!, :measure]
+    rotback = FUNC == :measure! ? :(reg.state = V*reg.state) : :()
+    @eval function $FUNC(op::Eigen, reg::AbstractRegister{B}; kwargs...) where B
+        E, V = op
+        reg.state = V'*reg.state
         res = $FUNC(reg; kwargs...)
-        relax!(reg, locs)
-        normalize!(reg)
-        return res
+        $rotback
+        E[res.+1]
     end
+    @eval $FUNC(reg::AbstractRegister; kwargs...) = $FUNC(ComputationalBasis(), reg; kwargs...)
+    @eval $FUNC(reg::AbstractRegister, locs; kwargs...) = $FUNC(ComputationalBasis(), reg, locs; kwargs...)
+end
+
+for FUNC in [:measure_collapseto!, :measure!, :measure]
+    @eval function $FUNC(op, reg::AbstractRegister, locs; kwargs...)
+        nbit = nactive(reg)
+        focus!(reg, locs)
+        res = $FUNC(op, reg; kwargs...)
+        relax!(reg, locs; to_nactive=nbit)
+        res
+    end
+end
+
+function measure_remove!(op, reg::AbstractRegister, locs)
+    nbit = nactive(reg)
+    focus!(reg, locs)
+    res = measure_remove!(op, reg)
+    relax!(reg; to_nactive=nbit-length(locs))
+    res
 end
 
 """
