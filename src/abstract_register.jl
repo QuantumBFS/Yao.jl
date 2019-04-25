@@ -182,7 +182,7 @@ struct ComputationalBasis end
 export AllLocs
 struct AllLocs end
 
-export measure, measure!, measure_remove!, measure_collapse!
+export measure, measure!, measure_remove!, measure_collapseto!
 
 """
     measure(register[, operator][, locs]; nshots=1) -> Vector{Int}
