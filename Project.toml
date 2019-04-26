@@ -1,6 +1,6 @@
 name = "YaoArrayRegister"
 uuid = "e600142f-9330-5003-8abb-0ebd767abc51"
-version = "0.3.4"
+version = "0.3.5"
 
 [deps]
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
@@ -13,7 +13,7 @@ YaoBase = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
 
 [compat]
 LuxurySparse = ">=0.3.3"
-YaoBase = ">=0.3.0"
+YaoBase = ">=0.9.0"
 BitBasis = ">=0.2.0"
 
 [extras]
