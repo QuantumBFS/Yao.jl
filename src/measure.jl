@@ -16,14 +16,14 @@ function _measure(pl::AbstractMatrix, nshots::Int)
     return res
 end
 
-YaoBase.measure(reg::ArrayReg{1}; nshots::Int=1) = _measure(reg |> probs, nshots)
+YaoBase.measure(::ComputationalBasis, reg::ArrayReg{1}, ::AllLocs; nshots::Int=1) = _measure(reg |> probs, nshots)
 
-function YaoBase.measure(reg::ArrayReg{B}; nshots::Int=1) where B
+function YaoBase.measure(::ComputationalBasis, reg::ArrayReg{B}, ::AllLocs; nshots::Int=1) where B
     pl = dropdims(sum(reg |> rank3 .|> abs2, dims=2), dims=2)
     return _measure(pl, nshots)
 end
 
-function YaoBase.measure_remove!(reg::ArrayReg{B}) where B
+function YaoBase.measure_remove!(::ComputationalBasis, reg::ArrayReg{B}, ::AllLocs) where B
     state = reg |> rank3
     nstate = similar(reg.state, 1<<nremain(reg), B)
     pl = dropdims(sum(state .|> abs2, dims=2), dims=2)
@@ -37,7 +37,7 @@ function YaoBase.measure_remove!(reg::ArrayReg{B}) where B
     return res
 end
 
-function YaoBase.measure!(reg::ArrayReg{B}) where B
+function YaoBase.measure!(::ComputationalBasis, reg::ArrayReg{B}, ::AllLocs) where B
     state = reg |> rank3
     nstate = zero(state)
     res = measure_remove!(reg)
@@ -49,7 +49,7 @@ function YaoBase.measure!(reg::ArrayReg{B}) where B
     return res
 end
 
-function YaoBase.measure_collapseto!(reg::ArrayReg{B}; config::Integer=0) where B
+function YaoBase.measure_collapseto!(::ComputationalBasis, reg::ArrayReg{B}, ::AllLocs; config::Integer=0) where B
     state = rank3(reg)
     M, N, B1 = size(state)
     nstate = zero(state)
