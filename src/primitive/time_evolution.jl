@@ -10,7 +10,7 @@ TimeEvolution, where GT is block type. input matrix should be hermitian.
 !!!note:
     `TimeEvolution` contructor check hermicity of the input block by default, but sometimes it can be slow. Turn off the check manually by specifying optional parameter `check_hermicity = false`.
 """
-struct TimeEvolution{N, T, Tt, Hamilton <: AbstractBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
+mutable struct TimeEvolution{N, T, Tt, Hamilton <: AbstractBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
     H::BlockMap{Complex{T}, Hamilton}
     dt::Tt
     tol::T

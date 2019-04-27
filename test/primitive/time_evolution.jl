@@ -13,6 +13,22 @@ end
 
 const hm = heisenberg(4)
 
+@testset "constructor:time evolution" begin
+    te = TimeEvolution(hm, 0.2)
+    # copy
+    cte = copy(te)
+    @test cte == te
+    @test cte !== te
+
+    # dispatch
+    dispatch!(cte, [2.0])
+    @test cte != te
+    @test cte.dt == 2.0
+    @test setiparameters!(cte, 0.5).dt == 0.5
+    @test setiparameters!(cte, :random).dt != 0.5
+    @test setiparameters!(cte, :zero).dt == 0.0
+end
+
 @testset "test imaginary time evolution" begin
     tei = TimeEvolution(hm, 0.2im)
     r = rand_state(4)
