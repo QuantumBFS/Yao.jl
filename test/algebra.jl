@@ -8,6 +8,9 @@ import YaoBlocks: Sum, Prod
     @test X * Y * Z == prod(X, Y, Z)
     @test X * (Y * Z) == prod(X, prod(Y, Z)) == prod(X, Y, Z)
     @test im * X == Scale(Val(im), X)
+
+    @test mat(X-Y) ≈ mat(X) - mat(Y)
+    @test mat(X/2) ≈ 0.5*mat(X)
 end
 
 @testset "block operations" begin

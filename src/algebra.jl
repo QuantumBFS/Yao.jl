@@ -35,6 +35,7 @@ Base.:(*)(y::AbstractBlock, x::Scale) = x.alpha * Prod(y, content(x))
 
 Base.:(+)(xs::AbstractBlock...) = Sum(xs...)
 Base.:(*)(xs::AbstractBlock...) = Prod(xs...)
+Base.:(/)(A::AbstractBlock, x::Number) = (1/x)*A
 # reduce
 Base.sum(a::AbstractBlock{N, T}, blocks::AbstractBlock{N, T}...) where {N, T} = Sum(a, blocks...)
 Base.prod(a::AbstractBlock{N, T}, blocks::AbstractBlock{N, T}...) where {N, T} = Prod(a, blocks...)

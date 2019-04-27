@@ -9,7 +9,7 @@ struct ControlBlock{N, BT<:AbstractBlock, C, M, T} <: AbstractContainer{BT, N, T
     content::BT
     locs::NTuple{M, Int}
     function ControlBlock{N, BT, C, M, T}(ctrl_locs, ctrl_config, block, locs) where {N, C, M, T, BT<:AbstractBlock}
-        @assert_locs N (ctrl_locs..., locs...)
+        @assert_locs_safe N (ctrl_locs..., locs...)
         @assert nqubits(block) == M "number of locations doesn't match the size of block"
         @assert block isa AbstractBlock "expect a block, got $(typeof(block))"
         new{N, BT, C, M, T}(ctrl_locs, ctrl_config, block, locs)
@@ -125,6 +125,7 @@ cnot(ctrl_locs, location::Int) = @λ(n -> cnot(n, ctrl_locs, location))
 mat(c::ControlBlock{N, BT, C}) where {N, BT, C} = cunmat(N, c.ctrl_locs, c.ctrl_config, mat(c.content), c.locs)
 
 function apply!(r::ArrayReg, c::ControlBlock)
+    _check_size(r, c)
     instruct!(matvec(r.state), mat(c.content), c.locs, c.ctrl_locs, c.ctrl_config)
     return r
 end
@@ -134,6 +135,7 @@ for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
 
     @eval function apply!(r::ArrayReg, c::ControlBlock{N, <:$GT}) where N
+        _check_size(r, c)
         instruct!(matvec(r.state), Val($(QuoteNode(G))), c.locs, c.ctrl_locs, c.ctrl_config)
         return r
     end

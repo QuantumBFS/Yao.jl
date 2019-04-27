@@ -15,12 +15,16 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 SimpleTraits = "699a6c99-e7fa-54fc-8d76-47d257e15c1d"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 YaoArrayRegister = "e600142f-9330-5003-8abb-0ebd767abc51"
 YaoBase = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
 
+[compat]
+YaoBase = ">=0.9.1"
+
 [extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test", "FFTW"]

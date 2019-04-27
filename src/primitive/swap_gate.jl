@@ -7,7 +7,7 @@ struct Swap{N, T} <: PrimitiveBlock{N, T}
     locs::Tuple{Int, Int}
 
     function Swap{N, T}(locs::Tuple{Int, Int}) where {N, T}
-        @assert_locs N locs
+        @assert_locs_safe N locs
         return new{N, T}(locs)
     end
 end

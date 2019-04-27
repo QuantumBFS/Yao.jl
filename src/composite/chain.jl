@@ -10,11 +10,11 @@ user defined blocks horizontically. It is a `Vector`
 like composite type.
 """
 struct ChainBlock{N, T} <: CompositeBlock{N, T}
-    blocks::Vector{AbstractBlock{N, T}}
+    blocks::Vector{AbstractBlock{N}}
 end
 
-ChainBlock(blocks::Vector{<:AbstractBlock{N, T}}) where {N, T} = ChainBlock{N, T}(blocks)
-ChainBlock(blocks::AbstractBlock{N, T}...) where {N, T} = ChainBlock(collect(AbstractBlock{N, T}, blocks))
+ChainBlock(blocks::Vector{<:AbstractBlock{N}}) where N = ChainBlock{N, promote_type((datatype(b) for b in blocks)...)}(blocks)
+ChainBlock(blocks::AbstractBlock{N}...) where N = ChainBlock(collect(AbstractBlock{N}, blocks))
 
 """
     chain(blocks...)
@@ -24,16 +24,15 @@ Return a [`ChainBlock`](@ref) which chains a list of blocks with same
 block in `blocks`, chain can infer the number of qubits and create an
 instance itself.
 """
-chain(blocks::AbstractBlock{N, T}...) where {N, T} = ChainBlock(blocks...)
-chain(blocks::Union{AbstractBlock{N, T}, Function}...) where {N, T} = chain(map(x->parse_block(N, x), blocks)...)
+chain(blocks::AbstractBlock{N}...) where N = ChainBlock(blocks...)
+chain(blocks::Union{AbstractBlock{N}, Function}...) where N = chain(map(x->parse_block(N, x), blocks)...)
 
 function chain(list::Vector)
     for each in list # check type
         each isa AbstractBlock || error("expect a block, got $(typeof(each))")
     end
     N = nqubits(first(list))
-    T = datatype(first(list))
-    return ChainBlock(Vector{AbstractBlock{N, T}}(list))
+    return ChainBlock(Vector{AbstractBlock{N}}(list))
 end
 
 # if not all matrix block, try to put the number of qubits.
@@ -54,7 +53,7 @@ chain(blocks...) = @λ(n->chain(n, blocks))
 Return an empty [`ChainBlock`](@ref) which can be used like a list of blocks.
 """
 chain(n::Int) = chain(ComplexF64, n)
-chain(::Type{T}, n::Int) where T = ChainBlock(AbstractBlock{n, T}[])
+chain(::Type{T}, n::Int) where T = ChainBlock{n, T}(AbstractBlock{n}[])
 
 """
     chain()
@@ -67,7 +66,7 @@ subblocks(c::ChainBlock) = c.blocks
 occupied_locs(c::ChainBlock) =
     unique(Iterators.flatten(occupied_locs(b) for b in subblocks(c)))
 
-chsubblocks(pb::ChainBlock, blocks::Vector{<:AbstractBlock}) = ChainBlock(blocks)
+chsubblocks(pb::ChainBlock{N, T}, blocks::Vector{<:AbstractBlock}) where {N, T} = length(blocks) == 0 ? ChainBlock{N, T}([]) : ChainBlock(blocks)
 chsubblocks(pb::ChainBlock, it) = chain(it...)
 
 mat(c::ChainBlock) = prod(x->mat(x), Iterators.reverse(c.blocks))
@@ -81,7 +80,7 @@ end
 
 cache_key(c::ChainBlock) = Tuple(cache_key(each) for each in c.blocks)
 
-function Base.:(==)(lhs::ChainBlock{N, T}, rhs::ChainBlock{N, T}) where {N, T}
+function Base.:(==)(lhs::ChainBlock{N}, rhs::ChainBlock{N}) where {N}
     (length(lhs.blocks) == length(rhs.blocks)) && all(lhs.blocks .== rhs.blocks)
 end
 

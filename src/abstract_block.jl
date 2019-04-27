@@ -18,6 +18,7 @@ abstract type AbstractBlock{N, T} end
 Apply a block (of quantum circuit) to a quantum register.
 """
 @interface function apply!(r::AbstractRegister, b::AbstractBlock)
+    _check_size(r, b)
     r.state = mat(b) * r.state
     return r
 end
@@ -297,3 +298,7 @@ Returns the key that identify the matrix cache of this block. By default, we
 use the returns of [`parameters`](@ref) as its key.
 """
 @interface cache_key(x::AbstractBlock)
+
+function _check_size(r::ArrayReg, pb::AbstractBlock{N}) where N
+    N == nactive(r) || throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
+end
