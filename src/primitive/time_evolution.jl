@@ -6,6 +6,9 @@ export TimeEvolution, time_evolve
     TimeEvolution{N, TT, GT} <: PrimitiveBlock{N, ComplexF64}
 
 TimeEvolution, where GT is block type. input matrix should be hermitian.
+
+!!!note:
+    `TimeEvolution` contructor check hermicity of the input block by default, but sometimes it can be slow. Turn off the check manually by specifying optional parameter `check_hermicity = false`.
 """
 struct TimeEvolution{N, T, Tt, Hamilton <: AbstractBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
     H::BlockMap{Complex{T}, Hamilton}
@@ -14,9 +17,8 @@ struct TimeEvolution{N, T, Tt, Hamilton <: AbstractBlock{N, Complex{T}}} <: Prim
 
     function TimeEvolution(
         H::BlockMap{Complex{T}, TH},
-        dt::Tt, tol::T) where {N, Tt, T, TH <: AbstractBlock{N, Complex{T}}}
-        # The time evolution Hamiltonian has to be a Hermitian
-        ishermitian(H) || error("Time evolution Hamiltonian has to be a Hermitian")
+        dt::Tt, tol::T; check_hermicity::Bool=true) where {N, Tt, T, TH <: AbstractBlock{N, Complex{T}}}
+        (check_hermicity && !ishermitian(H)) && error("Time evolution Hamiltonian has to be a Hermitian")
         return new{N, T, Tt, TH}(H, dt, tol)
     end
 end
@@ -31,28 +33,28 @@ Optional keywords are tolerance `tol` (default is `1e-7`)
 `TimeEvolution` block can also be used for
 [imaginary time evolution](http://large.stanford.edu/courses/2008/ph372/behroozi2/) if dt is complex.
 """
-TimeEvolution(H::AbstractBlock, dt; tol::Real=1e-7) =
-    TimeEvolution(BlockMap(H), dt, tol)
+TimeEvolution(H::AbstractBlock, dt; tol::Real=1e-7, check_hermicity=true) =
+    TimeEvolution(BlockMap(H), dt, tol, check_hermicity=check_hermicity)
 
-TimeEvolution(M::BlockMap, dt; tol::Real) =
-    TimeEvolution(M, dt, tol)
+TimeEvolution(M::BlockMap, dt; tol::Real, check_hermicity=true) =
+    TimeEvolution(M, dt, tol, check_hermicity=check_hermicity)
 
-time_evolve(M::BlockMap, dt; tol::Real=1e-7) = TimeEvolution(M, dt; tol=tol)
-time_evolve(M::AbstractBlock, dt; tol::Real=1e-7) = TimeEvolution(M, dt; tol=tol)
-time_evolve(M::AbstractMatrix, dt; tol::Real=1e-7) = TimeEvolution(matblock(M), dt; tol=tol)
-time_evolve(dt; tol::Real=1e-7) = @λ(M->time_evolve(M, dt; tol=tol))
+time_evolve(M::BlockMap, dt; kwargs...) = TimeEvolution(M, dt; kwargs...)
+time_evolve(M::AbstractBlock, dt; kwargs...) = TimeEvolution(M, dt; kwargs...)
+time_evolve(dt; kwargs...) = @λ(M->time_evolve(M, dt; kwargs...))
 
 function mat(te::TimeEvolution{N}) where N
     A = Matrix(mat(te.H.block))
-    return exp(te.dt * A)
+    return exp(-im*te.dt * A)
 end
 
 function apply!(reg::ArrayReg, te::TimeEvolution)
     st = state(reg)
+    dt = real(te.dt) == 0 ? imag(te.dt) : -im*te.dt
     @inbounds for j in 1:size(st, 2)
         v = view(st, :, j)
         Ks = arnoldi(te.H, v; tol=te.tol)
-        expv!(v, te.dt, Ks)
+        expv!(v, dt, Ks)
     end
     return reg
 end
@@ -69,7 +71,7 @@ function Base.:(==)(lhs::TimeEvolution, rhs::TimeEvolution)
 end
 
 function Base.adjoint(te::TimeEvolution)
-    return TimeEvolution(te.H, adjoint(te.dt); tol=te.tol)
+    return TimeEvolution(te.H, -adjoint(te.dt); tol=te.tol)
 end
 Base.copy(te::TimeEvolution) = TimeEvolution(te.H, te.dt, tol=te.tol)
 
