@@ -1,4 +1,5 @@
 using Test, YaoBlocks, YaoArrayRegister
+using YaoBlocks.ConstGate
 
 @testset "construct" begin
     @test_throws AssertionError put(2, 1=>swap(2, 1, 2))

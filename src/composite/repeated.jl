@@ -12,7 +12,7 @@ struct RepeatedBlock{N, C, GT <: AbstractBlock, T} <: AbstractContainer{GT, N, T
 end
 
 function RepeatedBlock{N}(block::AbstractBlock{M, T}, locs::NTuple{C, Int}) where {N, M, T, C}
-    @assert_locs N Tuple(i:i+M-1 for i in locs)
+    @assert_locs_safe N Tuple(i:i+M-1 for i in locs)
     return RepeatedBlock{N, C, typeof(block), T}(block, locs)
 end
 
@@ -48,6 +48,7 @@ mat(rb::RepeatedBlock{N}) where N = hilbertkron(N, fill(mat(rb.content), length(
 mat(rb::RepeatedBlock{N, 0, GT, T}) where {N, GT, T} = IMatrix{1<<N, T}()
 
 function apply!(r::AbstractRegister, rp::RepeatedBlock)
+    _check_size(r, rp)
     m  = mat(rp.content)
     for addr in rp.locs
         instruct!(matvec(r.state), mat(rp.content), Tuple(addr:addr+nqubits(rp.content)-1))

@@ -64,7 +64,7 @@ PreserveStyle(::CachedBlock) = PreserveAll()
 
 function update_cache(c::CachedBlock)
     if !iscached(c.server, c.content)
-        m = dropzeros!(mat(c.content))
+        m = mat(c.content)
         push!(c.server, m, c.content)
     end
     return c
@@ -75,7 +75,7 @@ CacheServers.clear!(c::CachedBlock) = (clear!(c.server, c.content); c)
 
 function mat(c::CachedBlock)
     if !iscached(c.server, c.content)
-        m = dropzeros!(mat(c.content))
+        m = mat(c.content)
         push!(c.server, m, c.content)
         return m
     end

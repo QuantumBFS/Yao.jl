@@ -9,11 +9,12 @@ export ChainBlock, chain
 user defined blocks horizontically. It is a `Vector`
 like composite type.
 """
-struct ChainBlock{N, T, MT <: AbstractBlock{N, T}} <: CompositeBlock{N, T}
-    blocks::Vector{MT}
+struct ChainBlock{N, T} <: CompositeBlock{N, T}
+    blocks::Vector{AbstractBlock{N}}
 end
 
-ChainBlock(blocks::AbstractBlock{N, T}...) where {N, T} = ChainBlock(collect(AbstractBlock{N, T}, blocks))
+ChainBlock(blocks::Vector{<:AbstractBlock{N}}) where N = ChainBlock{N, promote_type((datatype(b) for b in blocks)...)}(blocks)
+ChainBlock(blocks::AbstractBlock{N}...) where N = ChainBlock(collect(AbstractBlock{N}, blocks))
 
 """
     chain(blocks...)
@@ -23,13 +24,20 @@ Return a [`ChainBlock`](@ref) which chains a list of blocks with same
 block in `blocks`, chain can infer the number of qubits and create an
 instance itself.
 """
-chain(blocks::AbstractBlock{N, T}...) where {N, T} = ChainBlock(blocks...)
-chain(blocks::Union{AbstractBlock{N, T}, Function}...) where {N, T} = chain(map(x->parse_block(N, x), blocks)...)
-chain(list::Vector) = ChainBlock(list)
+chain(blocks::AbstractBlock{N}...) where N = ChainBlock(blocks...)
+chain(blocks::Union{AbstractBlock{N}, Function}...) where N = chain(map(x->parse_block(N, x), blocks)...)
+
+function chain(list::Vector)
+    for each in list # check type
+        each isa AbstractBlock || error("expect a block, got $(typeof(each))")
+    end
+    N = nqubits(first(list))
+    return ChainBlock(Vector{AbstractBlock{N}}(list))
+end
 
 # if not all matrix block, try to put the number of qubits.
 chain(n::Int, blocks...) = chain(map(x->parse_block(n, x), blocks)...)
-chain(n::Int, itr) = chain(map(x->parse_block(n, x), itr)...)
+chain(n::Int, itr) = isempty(itr) ? chain(n) : chain(map(x->parse_block(n, x), itr)...)
 chain(n::Int, f::Function) = chain(n, parse_block(n, f))
 function chain(n::Int, block::AbstractBlock)
     @assert n == nqubits(block) "number of qubits mismatch"
@@ -45,7 +53,7 @@ chain(blocks...) = @λ(n->chain(n, blocks))
 Return an empty [`ChainBlock`](@ref) which can be used like a list of blocks.
 """
 chain(n::Int) = chain(ComplexF64, n)
-chain(::Type{T}, n::Int) where T = chain(AbstractBlock{n, T}[])
+chain(::Type{T}, n::Int) where T = ChainBlock{n, T}(AbstractBlock{n}[])
 
 """
     chain()
@@ -57,7 +65,8 @@ chain() = @λ(n->chain(n))
 subblocks(c::ChainBlock) = c.blocks
 occupied_locs(c::ChainBlock) =
     unique(Iterators.flatten(occupied_locs(b) for b in subblocks(c)))
-chsubblocks(pb::ChainBlock, blocks::Vector) = ChainBlock(blocks)
+
+chsubblocks(pb::ChainBlock{N, T}, blocks::Vector{<:AbstractBlock}) where {N, T} = length(blocks) == 0 ? ChainBlock{N, T}([]) : ChainBlock(blocks)
 chsubblocks(pb::ChainBlock, it) = chain(it...)
 
 mat(c::ChainBlock) = prod(x->mat(x), Iterators.reverse(c.blocks))
@@ -71,17 +80,17 @@ end
 
 cache_key(c::ChainBlock) = Tuple(cache_key(each) for each in c.blocks)
 
-function Base.:(==)(lhs::ChainBlock{N, T}, rhs::ChainBlock{N, T}) where {N, T}
+function Base.:(==)(lhs::ChainBlock{N}, rhs::ChainBlock{N}) where {N}
     (length(lhs.blocks) == length(rhs.blocks)) && all(lhs.blocks .== rhs.blocks)
 end
 
-Base.copy(c::ChainBlock{N, T, MT}) where {N, T, MT} = ChainBlock{N, T, MT}(copy(c.blocks))
-Base.similar(c::ChainBlock{N, T, MT}) where {N, T, MT} = ChainBlock{N, T}(empty!(similar(c.blocks)))
+Base.copy(c::ChainBlock{N, T}) where {N, T} = ChainBlock{N, T}(copy(c.blocks))
+Base.similar(c::ChainBlock{N, T}) where {N, T} = ChainBlock{N, T}(empty!(similar(c.blocks)))
 Base.getindex(c::ChainBlock, index) = getindex(c.blocks, index)
 Base.getindex(c::ChainBlock, index::Union{UnitRange, Vector}) = ChainBlock(getindex(c.blocks, index))
 Base.setindex!(c::ChainBlock{N}, val::AbstractBlock{N}, index::Integer) where N = (setindex!(c.blocks, val, index); c)
 Base.insert!(c::ChainBlock{N}, index::Integer, val::AbstractBlock{N}) where N = (insert!(c.blocks, index, val); c)
-Base.adjoint(blk::ChainBlock{N, T, MT}) where {N, T, MT} = ChainBlock{N, T, MT}(map(adjoint, reverse(subblocks(blk))))
+Base.adjoint(blk::ChainBlock{N, T}) where {N, T} = ChainBlock{N, T}(map(adjoint, reverse(subblocks(blk))))
 Base.lastindex(c::ChainBlock) = lastindex(c.blocks)
 ## Iterate contained blocks
 Base.iterate(c::ChainBlock, st=1) = iterate(c.blocks, st)
