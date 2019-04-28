@@ -30,11 +30,16 @@ Please type `]` in the REPL to use the package mode, then type this command:
 pkg> add Yao
 ```
 
+For CUDA support, see [CuYao.jl](https://github.com/QuantumBFS/CuYao.jl).
+
 ## Documentation
 
 - [**STABLE**](https://quantumbfs.github.io/Yao.jl/stable)
 - [**LATEST**](https://quantumbfs.github.io/Yao.jl/latest)
 
+## Algoritm Zoo
+
+Some quantum algorithms are implemented with Yao in [QuAlgorithmZoo](https://github.com/QuantumBFS/QuAlgorithmZoo.jl).
 
 ## Motivation
 Comparing with state of art quantum simulators, our library is inspired by quantum circuit optimization.
