@@ -6,8 +6,8 @@ using BitBasis: BitStr
 #       deprecation warning itself.
 
 # Base
-@deprecate addbit!(r::AbstractRegister, n::Int) increase!(r, n)
-@deprecate addbit!(n::Int) increase!(n)
+@deprecate addbit!(r::AbstractRegister, n::Int) addbits!(r, n)
+@deprecate addbit!(n::Int) addbits!(n)
 @deprecate reset!(r::AbstractRegister; val::Integer=0)  collapseto!(r, val)
 @deprecate measure_reset!(r::AbstractRegister; val::Int=0) measure_collapseto!(r; config=val)
 @deprecate measure_reset!(r::AbstractRegister, locs; val::Int=0) measure_collapseto!(r, locs; config=val)
@@ -32,7 +32,7 @@ const AddBlock = Sum
 @deprecate sequence(args...) chain(args...)
 @deprecate matrixgate(args...) matblock(args...)
 
-import Base: collect
+import Base: collect, parent
 @deprecate collect(t::Type, x::AbstractBlock) collect_blocks(t, x)
 
 # joining two registers
