@@ -122,11 +122,33 @@ function train(qcbm, κ, opt, target)
     return history
 end
 
-history = train(qcbm, κ, opt, pg)</code></pre><pre><code class="language-none">Error: MethodError: no method matching depwarn(::String)
+history = train(qcbm, κ, opt, pg)</code></pre><pre><code class="language-none">Error: MethodError: no method matching getindex(::Float64, ::UnitRange{Int6
+4})
 Closest candidates are:
-  depwarn(::Any, !Matched::Any) at deprecated.jl:65</code></pre><pre><code class="language-julia">trained_pg = probs(zero_state(nqubits(qcbm)) |&gt; qcbm)</code></pre><pre><code class="language-none">Error: MethodError: no method matching depwarn(::String)
-Closest candidates are:
-  depwarn(::Any, !Matched::Any) at deprecated.jl:65</code></pre><p>And we have the history of training which is</p><pre><code class="language-julia">
+  getindex(::Number) at number.jl:75
+  getindex(::Number, !Matched::Integer) at number.jl:77
+  getindex(::Number, !Matched::Integer...) at number.jl:82
+  ...</code></pre><pre><code class="language-julia">trained_pg = probs(zero_state(nqubits(qcbm)) |&gt; qcbm)</code></pre><pre><code class="language-none">64-element Array{Float64,1}:
+ 0.001262270074156884
+ 0.012973648452867581
+ 0.002076799078101038
+ 0.03108567611196475 
+ 0.007353057846471384
+ 0.022646639143471117
+ 0.019365810856020682
+ 0.019292293917755197
+ 0.016003021878025506
+ 0.008007062507054427
+ ⋮                   
+ 0.028466762532193535
+ 0.009734808156505686
+ 0.019886844516406276
+ 0.03486282026993849 
+ 0.051837505930494944
+ 0.023321135690963453
+ 0.000886959648271117
+ 0.01000422167170143 
+ 0.03129622676946261</code></pre><p>And we have the history of training which is</p><pre><code class="language-julia">
 using Plots
 fig1 = plot(history; legend=nothing)
 title!(&quot;training history&quot;)
