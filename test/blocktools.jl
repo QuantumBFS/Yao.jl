@@ -56,5 +56,5 @@ end
     reg = zero_state(1, nbatch=2)
     viewbatch(reg, 1) |> X
     @test reg.state[:,1] == [0, 1]
-    @test reg.state[:,0] == [1, 0]
+    @test reg.state[:,2] == [1, 0]
 end
