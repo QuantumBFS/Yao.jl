@@ -30,6 +30,11 @@ using YaoBase.Const
     @test instruct!(copy(ST), I2, (1, )) ≈ ST
 end
 
+@testset "test auto conversion" begin
+    v = rand(ComplexF32, 1<<8)
+    @test_logs (:warn,"Element Type Mismatch: register Complex{Float32}, operator Complex{Float64}. Converting operator to match, this may cause performance issue") instruct!(v, Const.Pd, (1, ))
+end
+
 
 @testset "test general control unitary operator" begin
     ST = randn(ComplexF64, 1<<5)
