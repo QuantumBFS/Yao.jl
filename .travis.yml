@@ -13,10 +13,17 @@ matrix:
   fast_finish: true
 notifications:
   email: false
-script:
-  - julia --project -e 'using Pkg; Pkg.test()'
-  - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-  - julia --project=docs/ docs/make.jl
+jobs:
+  include:
+    - stage: "DocTest"
+      julia: 1.0
+      julia: 1.1
+      os: linux
+      script:
+        - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+        - julia --project=docs/ docs/make.jl
+      name: "HTML"
+      after_success: skip
 after_success:
   - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
   - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder())'
