@@ -66,6 +66,18 @@ KronBlock(blk::KronBlock) = copy(blk)
 Return a [`KronBlock`](@ref), with total number of qubits `n` and pairs of blocks.
 
 # Example
+
+Use `kron` to construct a `KronBlock`, it will put an `X` gate on the `1`st qubit,
+and a `Y` gate on the `3`rd qubit.
+
+```jldoctest
+julia> kron(4, 1=>X, 3=>Y)
+nqubits: 4, datatype: Complex{Float64}
+kron
+├─ 1=>X gate
+└─ 3=>Y gate
+
+```
 """
 Base.kron(total::Int, blocks::Pair{Int, <:AbstractBlock}...) = KronBlock{total}(blocks...)
 
@@ -75,8 +87,24 @@ Base.kron(total::Int, blocks::Pair{Int, <:AbstractBlock}...) = KronBlock{total}(
 
 Return a [`KronBlock`](@ref), with total number of qubits `n`, and `blocks` should use all
 the locations on `n` wires in quantum circuits.
+
+# Example
+
+You can use kronecker product to composite small blocks to a large blocks.
+
+```jldoctest
+julia> kron(X, Y, Z, Z)
+nqubits: 4, datatype: Complex{Float64}
+kron
+├─ 1=>X gate
+├─ 2=>Y gate
+├─ 3=>Z gate
+└─ 4=>Z gate
+
+```
 """
 Base.kron(blocks::AbstractBlock...) = KronBlock(blocks...)
+Base.kron(fs::Union{Function, AbstractBlock}...) = @λ(n->kron(n, fs...))
 
 function Base.kron(total::Int, blocks::AbstractBlock...)
     sum(nqubits, blocks) == total || error("total number of qubits mismatch")
@@ -95,9 +123,25 @@ Base.kron(total::Int, blocks::Base.Generator) = kron(total, blocks...)
 Return a lambda, which will take the total number of qubits as input.
 
 # Example
+
+If you don't know the number of qubit yet, or you are just too lazy, it is fine.
+
+```jldoctest
+julia> kron(put(1=>X) for _ in 1:2)
+(n -> kron(n, (n  ->  put(n, 1 => X gate)), (n  ->  put(n, 1 => X gate))))
+
+julia> kron(X for _ in 1:2)
+nqubits: 2, datatype: Complex{Float64}
+kron
+├─ 1=>X gate
+└─ 2=>X gate
+
+julia> kron(1=>X, 3=>Y)
+(n -> kron(n, 1 => X gate, 3 => Y gate))
+```
 """
 Base.kron(blocks::Pair{Int, <:AbstractBlock}...,) = @λ(n->kron(n, blocks...))
-Base.kron(blocks::Base.Generator) = @λ(n->kron(n, blocks))
+Base.kron(blocks::Base.Generator) = kron(blocks...)
 
 occupied_locs(k::KronBlock) = Iterators.flatten(map(x-> x + i - 1, occupied_locs(b)) for (i, b) in zip(k.locs, subblocks(k)))
 subblocks(x::KronBlock) = x.blocks

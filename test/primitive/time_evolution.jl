@@ -24,9 +24,9 @@ const hm = heisenberg(4)
     dispatch!(cte, [2.0])
     @test cte != te
     @test cte.dt == 2.0
-    @test setiparameters!(cte, 0.5).dt == 0.5
-    @test setiparameters!(cte, :random).dt != 0.5
-    @test setiparameters!(cte, :zero).dt == 0.0
+    @test setiparams!(cte, 0.5).dt == 0.5
+    @test setiparams!(cte, :random).dt != 0.5
+    @test setiparams!(cte, :zero).dt == 0.0
 end
 
 @testset "test imaginary time evolution" begin
