@@ -81,7 +81,7 @@ rotorset(::Val{:Split}, nbit::Int, noleading::Bool=false, notrailing::Bool=false
 rotorset(mode::Symbol, nbit::Int, noleading::Bool=false, notrailing::Bool=false) = rotorset(Val(mode), nbit, noleading, notrailing)
 
 """
-    qdiff_circuit(n, nlayer, pairs) -> ChainBlock
+    random_diff_circuit(nbit, nlayer, pairs; mode=:Split, do_cache=false)
 
 A kind of widely used differentiable quantum circuit, angles in the circuit is randomely initialized.
 
@@ -90,10 +90,13 @@ ref:
        Hardware-efficient Quantum Optimizer for Small Molecules and Quantum Magnets. Nature Publishing Group, 549(7671), 242–246.
        https://doi.org/10.1038/nature23879.
 """
-function random_diff_circuit(nbit, nlayer, pairs; mode=:Split)
+function random_diff_circuit(nbit, nlayer, pairs; mode=:Split, do_cache=false)
     circuit = chain(nbit)
 
-    ent = cnot_entangler(pairs) |> cache
+    ent = cnot_entangler(pairs)
+    if do_cache
+        ent = ent |> cache
+    end
     for i = 1:(nlayer + 1)
         i!=1 && push!(circuit, ent)
         push!(circuit, rotorset(mode, nbit, i==1, i==nlayer+1))
