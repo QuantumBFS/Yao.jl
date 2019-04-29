@@ -51,3 +51,10 @@ end
     @test e1 ≈ e3
     @test e1 ≈ e4
 end
+
+@testset "viewbatch apply" begin
+    reg = zero_state(1, nbatch=2)
+    viewbatch(reg, 1) |> X
+    @test reg.state[:,1] == [0, 1]
+    @test reg.state[:,0] == [1, 0]
+end

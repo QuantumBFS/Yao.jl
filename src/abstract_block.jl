@@ -19,7 +19,7 @@ Apply a block (of quantum circuit) to a quantum register.
 """
 @interface function apply!(r::AbstractRegister, b::AbstractBlock)
     _check_size(r, b)
-    r.state = mat(b) * r.state
+    r.state .= mat(b) * r.state
     return r
 end
 
