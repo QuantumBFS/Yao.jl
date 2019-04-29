@@ -12,6 +12,17 @@ const Locations{T} = NTuple{N, T} where N
 const BitConfigs{T} = NTuple{N, T} where N
 
 function YaoBase.instruct!(
+    state::AbstractVecOrMat{T1},
+    operator::AbstractMatrix{T2},
+    locs::NTuple{M, Int},
+    control_locs::NTuple{C, Int}=(),
+    control_bits::NTuple{C, Int}=()) where {T1, T2, M, C}
+    
+    @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
+    return instruct!(state, copyto!(similar(operator, T1), operator), locs, control_locs, control_bits)
+end
+
+function YaoBase.instruct!(
     state::AbstractVecOrMat{T},
     operator::AbstractMatrix{T},
     locs::NTuple{M, Int},

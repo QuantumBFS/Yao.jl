@@ -73,8 +73,8 @@ function ArrayReg{B}(raw::MT) where {B, T, MT <: AbstractMatrix{T}}
     return ArrayReg{B, T, MT}(raw)
 end
 
-function _warn_type(raw)
-    eltype(raw) <: Complex || @warn "Input type of `ArrayReg` is not Complex, got $(eltype(raw))"
+function _warn_type(raw::AbstractArray{T}) where T
+    T <: Complex || @warn "Input type of `ArrayReg` is not Complex, got $(eltype(raw))"
 end
 
 ArrayReg(raw::AbstractVector) = (_warn_type(raw); ArrayReg(reshape(raw, :, 1)))
