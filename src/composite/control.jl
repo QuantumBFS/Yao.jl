@@ -1,7 +1,7 @@
 using YaoArrayRegister
 using YaoArrayRegister: matvec
 
-export ControlBlock, control, cnot
+export ControlBlock, control
 
 struct ControlBlock{N, BT<:AbstractBlock, C, M, T} <: AbstractContainer{BT, N, T}
     ctrl_locs::NTuple{C, Int}
@@ -55,14 +55,7 @@ Return a [`ControlBlock`](@ref) with number of active qubits `n` and control loc
 
 ```jldoctest
 julia> control(4, (1, 2), 3=>X)
-nqubits: 4, datatype: Complex{Float64}
-control(1, 2)
-└─ (3,) X gate
-
 julia> control(4, 1, 3=>X)
-nqubits: 4, datatype: Complex{Float64}
-control(1)
-└─ (3,) X gate
 ```
 """
 control(total::Int, ctrl_locs, target::Pair) = ControlBlock{total}(Tuple(ctrl_locs), target)
@@ -78,10 +71,7 @@ Return a lambda that takes the number of total active qubits as input. See also
 
 ```jldoctest
 julia> control((2, 3), 1=>X)
-(n -> control(n, (2, 3), 1 => X gate))
-
 julia> control(2, 1=>X)
-(n -> control(n, 2, 1 => X gate))
 ```
 """
 control(ctrl_locs, target::Pair) = @λ(n -> control(n, ctrl_locs, target))
@@ -97,10 +87,7 @@ Return a lambda that takes a `Tuple` of control qubits locs as input. See also
 
 ```jldoctest
 julia> control(1=>X)
-(ctrl_locs -> control(ctrl_locs, 1 => X gate))
-
-julia> control((2, 3) => ConstGate.CNOT)
-(ctrl_locs -> control(ctrl_locs, (2, 3) => CNOT gate))
+julia> control((2, 3) => CNOT)
 ```
 """
 control(target::Pair) = @λ(ctrl_locs -> control(ctrl_locs, target))
@@ -115,7 +102,6 @@ See also [`control`](@ref).
 
 ```jldoctest
 julia> control(1, 2)
-(target -> control((1, 2), target))
 ```
 """
 control(ctrl_locs::Int...) = @λ(target -> control(ctrl_locs, target))
@@ -129,17 +115,12 @@ Return a speical [`ControlBlock`](@ref), aka CNOT gate with number of active qub
 # Example
 
 ```jldoctest
-julia> cnot(3, (2, 3), 1)
-nqubits: 3, datatype: Complex{Float64}
-control(2, 3)
-└─ (1,) X gate
-
+julia> cnot(3, 2, 1)
 julia> cnot(2, 1)
-(n -> cnot(n, 2, 1))
 ```
 """
-cnot(total::Int, ctrl_locs, locs::Int) = control(total, ctrl_locs, locs=>X)
-cnot(ctrl_locs, loc::Int) = @λ(n -> cnot(n, ctrl_locs, loc))
+cnot(total::Int, ctrl_locs, location::Int) = control(total, control_location, locs=>X)
+cnot(ctrl_locs, location::Int) = @λ(n -> cnot(n, ctrl_locs, location))
 
 mat(c::ControlBlock{N, BT, C}) where {N, BT, C} = cunmat(N, c.ctrl_locs, c.ctrl_config, mat(c.content), c.locs)
 
