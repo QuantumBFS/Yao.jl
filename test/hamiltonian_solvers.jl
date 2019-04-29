@@ -1,4 +1,4 @@
-using Yao, Yao.Blocks
+using Yao
 using LinearAlgebra
 using Test
 using QuAlgorithmZoo

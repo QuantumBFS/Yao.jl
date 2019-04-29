@@ -5,7 +5,7 @@ using QuAlgorithmZoo: groveriter, inference_oracle, prob_match_oracle
 
 # ## Target Space and Evidense
 num_bit = 12
-oracle = matrixgate(Diagonal((v = ones(1<<num_bit); v[100:101]*=-1; v)))
+oracle = matblock(Diagonal((v = ones(1<<num_bit); v[100:101]*=-1; v)))
 target_state = zeros(1<<num_bit); target_state[100:101] .= sqrt(0.5)
 
 # now we want to search the subspace with [1,3,5,8,9,11,12] fixed to 1 and [4,6] fixed to 0.

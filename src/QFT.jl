@@ -5,7 +5,7 @@ end
 export QFTCircuit, QFTBlock, invorder_firstdim
 
 CRk(i::Int, j::Int, k::Int) = control([i, ], j=>shift(2π/(1<<k)))
-CRot(n::Int, i::Int) = chain(i==j ? kron(i=>H) : CRk(j, i, j-i+1) for j = i:n)
+CRot(n::Int, i::Int) = chain(n, i==j ? kron(i=>H) : CRk(j, i, j-i+1) for j = i:n)
 QFTCircuit(n::Int) = chain(n, CRot(n, i) for i = 1:n)
 
 struct QFTBlock{N} <: PrimitiveBlock{N,ComplexF64} end
@@ -20,7 +20,7 @@ isreflexive(q::QFTBlock{N}) where N = N==1
 isunitary(q::QFTBlock{N}) where N = true
 
 openbox(q::QFTBlock{N}) where N = QFTCircuit(N)
-openbox(q::Daggered{<:QFTBlock, N}) where {N} = adjoint(QFTCircuit(N))
+openbox(q::Daggered{<:QFTBlock, N}) where {N} = QFTCircuit(N)'
 
 function print_block(io::IO, pb::QFTBlock{N}) where N
     printstyled(io, "QFT(1-$N)"; bold=true, color=:blue)
@@ -36,7 +36,7 @@ function invorder_firstdim(v::Matrix)
     n_2 = n ÷ 2
     mask = [bmask(i, n-i+1) for i in 1:n_2]
     @simd for b in basis(n)
-        @inbounds w[breflect(n, b, mask)+1,:] = v[b+1,:]
+        @inbounds w[breflect(b, mask; nbits=n)+1,:] = v[b+1,:]
     end
     w
 end
@@ -48,7 +48,7 @@ function invorder_firstdim(v::Vector)
     #mask = SVector{n_2, Int}([bmask(i, n-i+1)::Int for i in 1:n_2])
     mask = [bmask(i, n-i+1)::Int for i in 1:n_2]
     @simd for b in basis(n)
-        @inbounds w[breflect(n, b, mask)+1] = v[b+1]
+        @inbounds w[breflect(b, mask; nbits=n)+1] = v[b+1]
     end
     w
 end

@@ -1,13 +1,14 @@
 using Test, Random, LinearAlgebra, SparseArrays, LuxurySparse
 
 using Yao
+using YaoArrayRegister: invorder
 using QuAlgorithmZoo
 using FFTW
 
 @testset "QFT" begin
     num_bit = 5
     fftblock = QFTCircuit(num_bit)
-    ifftblock = adjoint(fftblock)
+    ifftblock = fftblock'
     reg = rand_state(num_bit)
     rv = copy(statevec(reg))
 

@@ -1,6 +1,8 @@
-import Yao.Registers: tracedist
+using MacroTools: @forward
+import Yao: tracedist
 
 export QuGAN, psi, toy_qugan, QuGANGo!
+
 """
 Quantum GAN.
 
@@ -8,21 +10,21 @@ Reference:
     Benedetti, M., Grant, E., Wossnig, L., & Severini, S. (2018). Adversarial quantum circuit learning for pure state approximation, 1–14.
 """
 struct QuGAN{N} <: QCOptProblem
-    target::DefaultRegister
+    target::ArrayReg
     generator::MatrixBlock{N}
     discriminator::MatrixBlock
-    reg0::DefaultRegister
+    reg0::ArrayReg
     witness_op::MatrixBlock
     circuit::AbstractBlock
     gdiffs
     ddiffs
 
-    function QuGAN(target::DefaultRegister, gen::MatrixBlock, dis::MatrixBlock)
+    function QuGAN(target::ArrayReg, gen::MatrixBlock, dis::MatrixBlock)
         N = nqubits(target)
-        c = sequence(gen, addbit(1), dis)
+        c = Sequence([gen, addbits!(1), dis])
         witness_op = put(N+1, (N+1)=>P0)
-        gdiffs = collect(gen, AbstractDiff)
-        ddiffs = collect(dis, AbstractDiff)
+        gdiffs = collect_blocks(AbstractDiff, gen)
+        ddiffs = collect_blocks(AbstractDiff, dis)
         new{N}(target, gen, dis, zero_state(N), witness_op, c, gdiffs, ddiffs)
     end
 end
@@ -52,11 +54,11 @@ psi_disctarget(qg::QuGAN) = copy(qg.target) |> qg.circuit[2:end]
 tracedist(qg::QuGAN) = tracedist(qg.target, psi(qg))[]
 
 """
-    toy_qugan(target::DefaultRegister, depth_gen::Int, depth_disc::Int) -> QuGAN
+    toy_qugan(target::ArrayReg, depth_gen::Int, depth_disc::Int) -> QuGAN
 
 Construct a toy qugan.
 """
-function toy_qugan(target::DefaultRegister, depth_gen::Int, depth_disc::Int)
+function toy_qugan(target::ArrayReg, depth_gen::Int, depth_disc::Int)
     n = nqubits(target)
     generator = dispatch!(random_diff_circuit(n, depth_gen, pair_ring(n)), :random) |> autodiff(:QC)
     discriminator = dispatch!(random_diff_circuit(n+1, depth_disc, pair_ring(n+1)), :random) |> autodiff(:QC)

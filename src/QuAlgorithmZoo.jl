@@ -1,13 +1,12 @@
 module QuAlgorithmZoo
 
 using LuxurySparse, LinearAlgebra
-using Yao
-using Yao.Intrinsics
-using Yao.Registers
-using Yao.Blocks
-import Yao.Blocks: mat, dispatch!, niparameters, iparameters, setiparameters!, cache_key, print_block, _make_rot_mat, apply!, PrimitiveBlock
+using MacroTools: @forward
+using Yao, Yao.ConstGate, BitBasis
+using YaoArrayRegister: u1rows!
+import Yao: mat, dispatch!, niparams, getiparams, setiparams!, cache_key, print_block, apply!, PrimitiveBlock, ishermitian, isunitary, isreflexive
+import YaoBlocks: render_params
 import Base: ==, copy, hash
-import Yao.Intrinsics: ishermitian, isreflexive, isunitary
 
 export openbox
 
@@ -19,6 +18,8 @@ For a black box, like QFTBlock, you can get its white box (loyal simulation) usi
 function openbox end
 
 include("Miscellaneous.jl")
+include("sequence.jl")
+include("Diff.jl")
 include("Adam.jl")
 include("QFT.jl")
 include("CircuitBuild.jl")

@@ -1,4 +1,4 @@
-using Yao, Yao.Blocks
+using Yao, BitBasis
 using NLopt
 
 include("maxcut_gw.jl")
@@ -7,13 +7,13 @@ HB(nbit::Int) = sum([put(nbit, i=>X) for i=1:nbit])
 tb = TimeEvolution(HB(3), 0.1)
 function HC(W::AbstractMatrix)
     nbit = size(W, 1)
-    ab = add(nbit)
+    ab = Any[]
     for i=1:nbit,j=i+1:nbit
         if W[i,j] != 0
             push!(ab, 0.5*W[i,j]*repeat(nbit, Z, [i,j]))
         end
     end
-    ab
+    sum(ab)
 end
 
 function qaoa_circuit(W::AbstractMatrix, depth::Int; use_cache::Bool=false)
@@ -22,7 +22,7 @@ function qaoa_circuit(W::AbstractMatrix, depth::Int; use_cache::Bool=false)
     hc = HC(W)
 	use_cache && (hb = hb |> cache; hc = hc |> cache)
     c = chain(nbit, [repeat(nbit, H, 1:nbit)])
-    append!(c, [chain(nbit, [timeevolve(hc, 0.0, tol=1e-5), timeevolve(hb, 0.0, tol=1e-5)]) for i=1:depth])
+    append!(c, [chain(nbit, [time_evolve(hc, 0.0, tol=1e-5), time_evolve(hb, 0.0, tol=1e-5)]) for i=1:depth])
 end
 
 

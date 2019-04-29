@@ -26,8 +26,9 @@ Please notice, this package is still under development and needs further polish.
 - [x] QuGAN
 - [x] QCBM
 - [x] Hamiltonian Solver
-- [ ] QAOA
-- [ ] Quantum Chemistry
+- [x] QAOA
+- [x] Quantum Chemistry
+- [x] QuODE
 
 ## License
 

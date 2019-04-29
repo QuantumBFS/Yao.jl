@@ -14,47 +14,47 @@ inference_oracle(nbit::Int, locs::Vector{Int}) = inference_oracle(locs)(nbit)
 Return a mask, that disired subspace of an oracle are masked true.
 """
 function target_space(nbit::Int, oracle)
-    r = register(ones(ComplexF64, 1<<nbit))
-    apply!(r, oracle)
+    r = ArrayReg(ones(ComplexF64, 1<<nbit))
+    r |> oracle
     real(statevec(r)) .< 0
 end
 
-prob_inspace(psi::DefaultRegister, ts) = norm(statevec(psi)[ts])^2
+prob_inspace(psi::ArrayReg, ts) = norm(statevec(psi)[ts])^2
 
 """
     prob_match_oracle(psi, oracle) -> Float64
 
 Return the probability that `psi` matches oracle.
 """
-prob_match_oracle(psi::DefaultRegister, oracle) = prob_inspace(psi, target_space(nqubits(psi), oracle))
+prob_match_oracle(psi::ArrayReg, oracle) = prob_inspace(psi, target_space(nqubits(psi), oracle))
 
 """
-    num_grover_step(psi::DefaultRegister, oracle) -> Int
+    num_grover_step(psi::ArrayReg, oracle) -> Int
 
 Return number of grover steps needed to match the oracle.
 """
-num_grover_step(psi::DefaultRegister, oracle) = _num_grover_step(prob_match_oracle(psi, oracle))
+num_grover_step(psi::ArrayReg, oracle) = _num_grover_step(prob_match_oracle(psi, oracle))
 
 _num_grover_step(prob::Real) = Int(round(pi/4/sqrt(prob)))-1
 
 """
     GroverIter{N, T}
 
-    GroverIter(oracle, ref::ReflectBlock{N, T}, psi::DefaultRegister, niter::Int)
+    GroverIter(oracle, ref::ReflectBlock{N, T}, psi::ArrayReg, niter::Int)
 
 an iterator that perform Grover operations step by step.
 An Grover operation consists of applying oracle and Reflection.
 """
 struct GroverIter{N, T}
-    psi::DefaultRegister
+    psi::ArrayReg
     oracle
     ref::ReflectBlock{N, T}
     niter::Int
 end
 
-groveriter(psi::DefaultRegister, oracle, ref::ReflectBlock{N, T}, niter::Int) where {N, T} = GroverIter{N, T}(psi, oracle, ref, niter)
-groveriter(psi::DefaultRegister, oracle, niter::Int) = groveriter(psi, oracle, ReflectBlock(psi |> copy), niter)
-groveriter(psi::DefaultRegister, oracle) = groveriter(psi, oracle, ReflectBlock(psi |> copy), num_grover_step(psi, oracle))
+groveriter(psi::ArrayReg, oracle, ref::ReflectBlock{N, T}, niter::Int) where {N, T} = GroverIter{N, T}(psi, oracle, ref, niter)
+groveriter(psi::ArrayReg, oracle, niter::Int) = groveriter(psi, oracle, ReflectBlock(psi |> copy), niter)
+groveriter(psi::ArrayReg, oracle) = groveriter(psi, oracle, ReflectBlock(psi |> copy), num_grover_step(psi, oracle))
 
 function Base.iterate(it::GroverIter, st=1)
     if it.niter + 1 == st
@@ -69,7 +69,7 @@ Base.length(it::GroverIter) = it.niter
 
 """
     groverblock(oracle, ref::ReflectBlock{N, T}, niter::Int=-1)
-    groverblock(oracle, psi::DefaultRegister, niter::Int=-1)
+    groverblock(oracle, psi::ArrayReg, niter::Int=-1)
 
 Return a ChainBlock/Sequential as Grover Iteration, the default `niter` will stop at the first optimal step.
 """
@@ -83,4 +83,4 @@ function groverblock(oracle, ref::ReflectBlock{N, T}, niter::Int=-1) where {N, T
     sequence(sequence(oracle, ref) for i = 1:niter)
 end
 
-groverblock(oracle, psi::DefaultRegister, niter::Int=-1) = groverblock(oracle, ReflectBlock(psi |> copy), niter)
+groverblock(oracle, psi::ArrayReg, niter::Int=-1) = groverblock(oracle, ReflectBlock(psi |> copy), niter)

@@ -1,5 +1,5 @@
 using Test
-using Yao, Yao.Blocks, QuAlgorithmZoo
+using Yao, QuAlgorithmZoo
 
 @testset "pairs geometries" begin
     @test pair_ring(3) == [1=>2,2=>3,3=>1]
@@ -21,22 +21,22 @@ end
     @test length(c) == 45
 end
 
-@testset "rotter, collect_rotblocks, num_gradient, opgrad" begin
+@testset "rotter, collect_blocks, num_gradient, opgrad" begin
     @test  merged_rotor(true, true) == Rx(0)
     @test  merged_rotor(false, false) == merged_rotor() == chain(Rz(0), Rx(0), Rz(0))
     @test  merged_rotor(false, true) == chain(Rz(0), Rx(0))
     @test  merged_rotor(true, false) == chain(Rx(0), Rz(0))
-    @test collect(rotorset(:Merged, 5, true, false), RotationGate) |> length == 10
+    @test collect_blocks(RotationGate, rotorset(:Merged, 5, true, false)) |> length == 10
 
     @test rotor(5, 2, true, true) isa ChainBlock
     @test rotor(5, 2, true, true) |> length == 1
     @test rotor(5, 2, true, true) |> nqubits == 5
-    @test collect(rotorset(:Split, 5, true, false), PutBlock{<:Any, <:Any, <:RotationGate}) |> length == 10
+    @test collect_blocks(PutBlock{<:Any, <:Any, <:RotationGate}, rotorset(:Split, 5, true, false)) |> length == 10
 end
 
 @testset "random diff circuit" begin
     c = random_diff_circuit(4, 3, [1=>3, 2=>4, 2=>3, 4=>1])
-    rots = collect(c, RotationGate)
+    rots = collect_blocks(RotationGate, c)
     @test length(rots) == nparameters(c) == 40
     @test dispatch!(+, c, ones(40)*0.1) |> parameters == ones(40)*0.1
     @test dispatch!(+, c, :random) |> parameters != ones(40)*0.1
@@ -46,7 +46,7 @@ end
     reg = rand_state(4)
     dispatch!(c, randn(nparameters(c)))
 
-    dbs = collect(c, BPDiff)
+    dbs = collect_blocks(BPDiff, c)
     op = kron(4, 1=>Z, 2=>X)
     loss1z() = expect(op, copy(reg) |> c)  # return loss please
 

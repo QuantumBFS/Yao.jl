@@ -28,6 +28,9 @@ end
 @testset "HHL" begin
     include("HHL.jl")
 end
+@testset "diff Eq" begin
+    include("lin_diffEq_test.jl")
+end
 
 @testset "QCOptProblem" begin
     include("QCOptProblem.jl")
@@ -39,4 +42,12 @@ end
 
 @testset "hadamard test" begin
     include("HadamardTest.jl")
+end
+
+@testset "Sequence" begin
+    include("Sequence.jl")
+end
+
+@testset "Diff" begin
+    include("Diff.jl")
 end

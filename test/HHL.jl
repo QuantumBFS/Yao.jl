@@ -1,5 +1,5 @@
 using Yao
-using Yao.Intrinsics
+using BitBasis
 using QuAlgorithmZoo
 using Test, LinearAlgebra
 
@@ -11,7 +11,7 @@ function crot(n_reg::Int, C_value::Real)
         c_bit = Vector(2:n_rot)
         λ = 0.0
         for j = 1:n_reg
-            if (takebit(i,j) == 0)
+            if (readbit(i,j) == 0)
                 c_bit[j] = -c_bit[j]
             end
         end

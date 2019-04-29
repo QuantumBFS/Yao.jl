@@ -18,7 +18,7 @@ using QuAlgorithmZoo
     rb = roll(1, RotBasis(0.1, 0.3))#rot_basis(1)
     angles = randpolar(1)
     # prepair a state in the angles direction.
-    psi = angles |> polar2u |> register
+    psi = angles |> polar2u |> ArrayReg
 
     # rotate to the same direction for measurements.
     dispatch!(rb, vec(angles))

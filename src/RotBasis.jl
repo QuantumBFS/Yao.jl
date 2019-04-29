@@ -10,6 +10,7 @@ mutable struct RotBasis{T} <: PrimitiveBlock{1, Complex{T}}
     phi::T
 end
 
+_make_rot_mat(I, block, theta) = I * cos(theta / 2) - im * sin(theta / 2) * block
 # chain -> *
 # mat(rb::RotBasis{T}) where T = mat(Ry(-rb.theta))*mat(Rz(-rb.phi))
 function mat(x::RotBasis{T}) where T
@@ -23,12 +24,13 @@ end
 copy(block::RotBasis{T}) where T = RotBasis{T}(block.theta, block.phi)
 dispatch!(block::RotBasis, params::Vector) = ((block.theta, block.phi) = params; block)
 
-iparameters(rb::RotBasis) = (rb.theta, rb.phi)
-function setiparameters!(rb::RotBasis, theta::Real, phi::Real)
-    rb.theta, rb.phi = theta, phi
+getiparams(rb::RotBasis) = (rb.theta, rb.phi)
+function setiparams!(rb::RotBasis, θ::Real, ϕ::Real)
+    rb.theta, rb.phi = θ, ϕ
     rb
 end
-niparameters(::Type{<:RotBasis}) = 2
+niparams(::Type{<:RotBasis}) = 2
+niparams(::RotBasis) = 2
 render_params(r::RotBasis, ::Val{:random}) = rand()*π, rand()*2π
 
 function print_block(io::IO, R::RotBasis)

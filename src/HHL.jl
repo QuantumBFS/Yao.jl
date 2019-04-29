@@ -22,14 +22,14 @@ end
     a, -b, b, a
 end
 
-function apply!(reg::DefaultRegister, hr::HHLCRot{N, NC, T}) where {N, NC, T}
+function apply!(reg::ArrayReg, hr::HHLCRot{N, NC, T}) where {N, NC, T}
     mask = bmask(hr.ibit)
     step = 1<<(hr.ibit-1)
     step_2 = step*2
     nbit = nqubits(reg)
     for j = 0:step_2:size(reg.state, 1)-step
         for i = j+1:j+step
-            λ = bfloat(takebit(i-1, hr.cbits...), nbit=nbit-1)
+            λ = bfloat(readbit(i-1, hr.cbits...), nbits=nbit-1)
             if λ >= hr.C_value
                 u = hhlrotmat(λ, hr.C_value)
                 u1rows!(state(reg), i, i+step, u...)
@@ -40,11 +40,11 @@ function apply!(reg::DefaultRegister, hr::HHLCRot{N, NC, T}) where {N, NC, T}
 end
 
 """
-    hhlproject!(all_bit::DefaultRegister, n_reg::Int) -> Vector
+    hhlproject!(all_bit::ArrayReg, n_reg::Int) -> Vector
 
 project to aiming state |1>|00>|u>, and return |u> vector.
 """
-function hhlproject!(all_bit::DefaultRegister, n_reg::Int)
+function hhlproject!(all_bit::ArrayReg, n_reg::Int)
     all_bit |> focus!(1:(n_reg+1)...) |> select!(1) |> state |> vec
 end
 
@@ -61,17 +61,17 @@ end
 
 """
     hhlsolve(A::Matrix, b::Vector) -> Vector
-    
+
 solving linear system using HHL algorithm. Here, A must be hermitian.
 """
 function hhlsolve(A::Matrix, b::Vector, n_reg::Int, C_value::Real)
     if !ishermitian(A)
         throw(ArgumentError("Input matrix not hermitian!"))
     end
-    UG = matrixgate(exp(2π*im.*A))
+    UG = matblock(exp(2π*im.*A))
 
     # Generating input bits
-    all_bit =  register(b) ⊗ zero_state(n_reg) ⊗ zero_state(1)
+    all_bit =  ArrayReg(b) ⊗ zero_state(n_reg) ⊗ zero_state(1)
 
     # Construct HHL circuit.
     circuit = hhlcircuit(UG, n_reg, C_value)

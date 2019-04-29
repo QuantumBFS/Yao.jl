@@ -1,5 +1,6 @@
 using Yao
-using Yao.Intrinsics
+using BitBasis
+using Random
 using QuAlgorithmZoo
 using Test, LinearAlgebra
 using OrdinaryDiffEq
@@ -14,6 +15,7 @@ function diffeq_problem(nbit::Int)
 end
 
 @testset "Linear_differential_equations_HHL" begin
+    Random.seed!(2)
     N = 1
     h = 0.1
     tspan = (0.0,0.6)

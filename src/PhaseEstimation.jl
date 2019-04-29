@@ -8,7 +8,7 @@ phase estimation circuit.
     * `n_reg`: the number of bits to store phases,
     * `n_b`: the number of bits to store vector.
 """
-function PEBlock(UG::GeneralMatrixGate, n_reg::Int, n_b::Int)
+function PEBlock(UG::GeneralMatrixBlock, n_reg::Int, n_b::Int)
     nbit = n_b + n_reg
     # Apply Hadamard Gate.
     hs = repeat(nbit, H, 1:n_reg)
@@ -18,22 +18,22 @@ function PEBlock(UG::GeneralMatrixGate, n_reg::Int, n_b::Int)
     for i = 1:n_reg
         push!(control_circuit, control(nbit, (i,), (n_reg+1:nbit...,)=>UG))
         if i != n_reg
-            UG = matrixgate(mat(UG) * mat(UG))
+            UG = matblock(mat(UG) * mat(UG))
         end
     end
 
     # Inverse QFT Block.
-    iqft = concentrate(nbit, QFTBlock{n_reg}() |> adjoint,[1:n_reg...,])
+    iqft = concentrate(nbit, QFTBlock{n_reg}()',[1:n_reg...,])
     chain(hs, control_circuit, iqft)
 end
 
 """
-    projection_analysis(evec::Matrix, reg::DefaultRegister) -> Tuple
+    projection_analysis(evec::Matrix, reg::ArrayReg) -> Tuple
 
 Analyse using state projection.
 It returns a tuple of (most probable configuration, the overlap matrix, the relative probability for this configuration)
 """
-function projection_analysis(evec::Matrix, reg::DefaultRegister)
+function projection_analysis(evec::Matrix, reg::ArrayReg)
     overlap = evec'*state(reg)
     amp_relative = Float64[]
     bs = Int[]
