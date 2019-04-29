@@ -33,6 +33,9 @@ end
 @testset "test auto conversion" begin
     v = rand(ComplexF32, 1<<8)
     @test_logs (:warn,"Element Type Mismatch: register Complex{Float32}, operator Complex{Float64}. Converting operator to match, this may cause performance issue") instruct!(v, Const.Pd, (1, ))
+    @test_logs (:warn,"Element Type Mismatch: register Complex{Float32}, operator Complex{Float64}. Converting operator to match, this may cause performance issue") instruct!(v, Const.Pd, 1)
+    @test_logs (:warn,"Element Type Mismatch: register Complex{Float32}, operator Complex{Float64}. Converting operator to match, this may cause performance issue") instruct!(v, Const.Z, 1)
+    @test_logs (:warn,"Element Type Mismatch: register Complex{Float32}, operator Complex{Float64}. Converting operator to match, this may cause performance issue") instruct!(v, Const.X, 1)
 end
 
 

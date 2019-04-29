@@ -22,6 +22,21 @@ function YaoBase.instruct!(
     return instruct!(state, copyto!(similar(operator, T1), operator), locs, control_locs, control_bits)
 end
 
+function YaoBase.instruct!(state::AbstractVecOrMat{T1}, U1::AbstractMatrix{T2}, loc::Int) where {T1, T2}
+    @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
+    return instruct!(state, copyto!(similar(U1, T1), U1), loc)
+end
+
+function YaoBase.instruct!(state::AbstractVecOrMat{T1}, U1::SDPermMatrix{T2}, loc::Int) where {T1, T2}
+    @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
+    return instruct!(state, copyto!(similar(U1, T1), U1), loc)
+end
+
+function YaoBase.instruct!(state::AbstractVecOrMat{T1}, U1::SDDiagonal{T2}, loc::Int) where {T1, T2}
+    @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
+    return instruct!(state, copyto!(similar(U1, T1), U1), loc)
+end
+
 function YaoBase.instruct!(
     state::AbstractVecOrMat{T},
     operator::AbstractMatrix{T},
