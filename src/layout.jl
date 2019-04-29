@@ -285,5 +285,6 @@ function print_annotation(
     k::Int)
 
     printstyled(io, node.locs; bold=true, color=:white)
+    print(io, " ")
     print_annotation(io, child)
 end
