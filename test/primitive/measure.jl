@@ -56,8 +56,8 @@ end
     @test size(res) == (10,)
     @test nqubits(reg2) == 3
 
-    reg = repeat(ArrayReg([1,-1]/sqrt(2.0)), 10)
+    reg = repeat(ArrayReg(ComplexF64[1,-1]/sqrt(2.0)), 10)
     @test measure!(X, reg) |> mean ≈ -1
-    reg = repeat(ArrayReg([1.0,0]), 1000)
+    reg = repeat(ArrayReg(ComplexF64[1.0,0]), 1000)
     @test abs(measure!(X, reg) |> mean) < 0.1
 end
