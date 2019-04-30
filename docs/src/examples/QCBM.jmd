@@ -208,13 +208,13 @@ function gradient(qcbm, κ, ptrain)
 
     count = 1
     for k in 1:2:length(qcbm), each_line in qcbm[k], gate in content(each_line)
-        dispatch!(+, gate, π/2)
+        dispatch!(+, gate, [π/2])
         prob_pos = probs(zero_state(n) |> qcbm)
 
-        dispatch!(-, gate, π)
+        dispatch!(-, gate, [π])
         prob_neg = probs(zero_state(n) |> qcbm)
 
-        dispatch!(+, gate, π/2) # set back
+        dispatch!(+, gate, [π/2]) # set back
 
         grad_pos = kexpect(κ, prob, prob_pos) - kexpect(κ, prob, prob_neg)
         grad_neg = kexpect(κ, ptrain, prob_pos) - kexpect(κ, ptrain, prob_neg)
