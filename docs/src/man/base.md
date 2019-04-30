@@ -1,3 +1,9 @@
+```@meta
+DocTestSetup = quote
+    using Yao, YaoBase, YaoBlocks, YaoArrayRegister
+end
+```
+
 # Base
 
 The Base module of Yao is defined in [YaoBase.jl](https://github.com/QuantumBFS/YaoBase.jl), it provides:

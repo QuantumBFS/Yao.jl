@@ -1,3 +1,9 @@
+```@meta
+DocTestSetup = quote
+    using Yao, YaoBase, YaoBlocks, YaoArrayRegister
+end
+```
+
 # Extending Blocks
 
 Blocks are defined as a sub-type system inside Julia, you could extend it by defining new Julia types by subtyping abstract types we provide. But we also provide some handy tools to help you create your own blocks.

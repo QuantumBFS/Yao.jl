@@ -1,3 +1,9 @@
+```@meta
+DocTestSetup = quote
+    using Yao, YaoBase, YaoBlocks, YaoArrayRegister
+end
+```
+
 # BitBasis
 
 Types and operations for basis represented by bits in linear algebra.
