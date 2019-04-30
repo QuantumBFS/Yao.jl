@@ -23,3 +23,13 @@ end
         @test mat(RotationGate(DIRECTION, theta)) ≈ MAT
     end
 end
+
+@testset "test dispatch" begin
+    @test dispatch!(Rx(0.1), 0.3) == Rx(0.3)
+
+    @testset "test $op" for op in [+, -, *, /]
+        @test dispatch!(op, Rx(0.1), π) == Rx(op(0.1, π))
+    end
+
+    @test_throws AssertionError dispatch!(Rx(0.1), (0.2, 0.3))
+end

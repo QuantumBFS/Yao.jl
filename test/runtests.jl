@@ -34,7 +34,7 @@ end
     @test getiparams(g[2]) == 0.0
 end
 
-# TODO
 # @testset "test demos" begin
 #     include("algo/qft.jl")
+#     include("algo/qcbm.jl")
 # end

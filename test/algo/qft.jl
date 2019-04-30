@@ -35,22 +35,24 @@ PE(n, m, U) = chain(n+m, # total number of the qubits
         ControlU(n, m, U),
         concentrate(QFT(n)', 1:n))
 
+
+
+using LinearAlgebra
+
 N, M = 3, 5
 P = eigen(rand_unitary(1<<M)).vectors
 θ = Int(0b110) / 1<<N
 phases = rand(1<<M)
 phases[bit"010"] = θ
 U = P * Diagonal(exp.(2π * im * phases)) * P'
+
 psi = P[:, 3]
 
 λ = exp(2π * im * θ)
 @test isapprox(U * psi, λ * psi; atol=1e-8)
 
-println(typeof(zero_state(N)))
-println(typeof(ArrayReg(psi)))
-r = join(zero_state(N), ArrayReg(psi))
-println(typeof())
-apply!(r, PE(N, M, U))
+r = join(ArrayReg(psi), zero_state(N))
+r |> PE(N, M, U)
 
 p, a = findmax(probs(partial_tr(r, N+1:N+M)))
 @test p ≈ 1.0

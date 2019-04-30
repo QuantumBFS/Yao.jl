@@ -1,4 +1,4 @@
-using YaoBlocks, YaoArrayRegister, Flux.Optimise
+using Test, YaoBlocks, YaoArrayRegister, Flux.Optimise
 
 function gaussian_pdf(x, μ::Real, σ::Real)
     pl = @. 1 / sqrt(2pi * σ^2) * exp(-(x - μ)^2 / (2 * σ^2))
@@ -88,4 +88,5 @@ end
 history = train(qcbm, κ, opt, pg)
 trained_pg = probs(zero_state(nqubits(qcbm)) |> qcbm)
 
-norm(trained_pg - pg)
+using LinearAlgebra
+@test norm(trained_pg - pg) < 0.1
