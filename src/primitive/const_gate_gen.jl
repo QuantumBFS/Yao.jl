@@ -42,3 +42,28 @@ Base.adjoint(::SGate) = Sdag
 Base.adjoint(::SdagGate) = S
 Base.adjoint(::TGate) = Tdag
 Base.adjoint(::TdagGate) = T
+
+# Docs
+"""
+    X
+    XGate{T} <: ConstantGate{1, T}
+
+Pauli X gate. `X` is the instance of `XGate`.
+"""
+X, XGate
+
+"""
+    Y
+    YGate{T}  <: ConstantGate{1, T}
+
+Pauli Y gate. `Y` is the instance of `YGate`.
+"""
+Y, YGate
+
+"""
+    Z
+    ZGate{T}  <: ConstantGate{1, T}
+
+Pauli Z gate. `Z` is the instance of `YGate`.
+"""
+Z, ZGate

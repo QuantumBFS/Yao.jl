@@ -26,6 +26,12 @@ GeneralMatrixBlock(m::AbstractMatrix) = GeneralMatrixBlock{log2i.(size(m))...}(m
     matblock(m::AbstractMatrix)
 
 Create a [`GeneralMatrixBlock`](@ref) with a matrix `m`.
+
+# Example
+
+```jldoctest
+
+```
 """
 matblock(m::AbstractMatrix) = GeneralMatrixBlock(m)
 

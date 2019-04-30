@@ -7,6 +7,8 @@ function parse_block(n::Int, x::AbstractBlock{N}) where N
     return x
 end
 
+parse_block(n::Int, x::Pair{Int, <:AbstractBlock{N}}) where N = x
+
 """
     prewalk(f, src::AbstractBlock)
 

@@ -25,6 +25,47 @@ end
 
 Create a [`RepeatedBlock`](@ref) with total number of qubits `n` and the block
 to repeat on given location or on all the locations.
+
+# Example
+
+This will create a repeat block which puts 4 X gates on each location.
+
+```jldoctest
+julia> repeat(4, X)
+nqubits: 4, datatype: Complex{Float64}
+repeat on (1, 2, 3, 4)
+└─ X gate
+```
+
+You can also specify the location
+
+```jldoctest
+julia> repeat(4, X, (1, 2))
+nqubits: 4, datatype: Complex{Float64}
+repeat on (1, 2)
+└─ X gate
+```
+
+But repeat won't copy the gate, thus, if it is a gate with parameter, e.g a `phase(0.1)`, the parameter
+will change simultaneously.
+
+```jldoctest
+julia> g = repeat(4, phase(0.1))
+nqubits: 4, datatype: Complex{Float64}
+repeat on (1, 2, 3, 4)
+└─ phase(0.1)
+
+julia> g.content
+phase(0.1)
+
+julia> g.content.theta = 0.2
+0.2
+
+julia> g
+nqubits: 4, datatype: Complex{Float64}
+repeat on (1, 2, 3, 4)
+└─ phase(0.2)
+```
 """
 Base.repeat(n::Int, x::AbstractBlock, locs::Int...) =
     repeat(n, x, locs)

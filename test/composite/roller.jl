@@ -12,7 +12,8 @@ using Test, YaoBase, YaoArrayRegister, YaoBlocks
     blks = [X, Y, kron(3, 2=>Rx(0.3))]
     @test_throws LocationConflictError chsubblocks(g, blks)
     blks = [X, Y, kron(2, 2=>Rx(0.3))]
-    subblocks(chsubblocks(g, blks)) == blks
+    @test collect(subblocks(chsubblocks(g, blks))) == blks
+    @test rollrepeat(4, X) == roll(4, i=>X for i in 1:4)
 end
 
 @testset "copy" begin

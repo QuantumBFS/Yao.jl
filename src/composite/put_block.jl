@@ -21,6 +21,32 @@ end
 
 Create a [`PutBlock`](@ref) with total number of active qubits, and a pair of
 location and block to put on.
+
+# Example
+
+```jldoctest
+julia> put(4, 1=>X)
+nqubits: 4, datatype: Complex{Float64}
+put on (1)
+└─ X gate
+```
+
+If you want to put a multi-qubit gate on specific locations, you need to write down all possible locations.
+
+```jldoctest
+julia> put(4, (1, 3)=>kron(X, Y))
+nqubits: 4, datatype: Complex{Float64}
+put on (1, 3)
+└─ kron
+   ├─ 1=>X gate
+   └─ 2=>Y gate
+```
+
+The outter locations creates a scope which make it seems to be a contiguous two qubits for the block inside `PutBlock`.
+
+!!! tips
+    It is better to use [`concentrate`](@ref) instead of `put` for large blocks, since put will use the matrix of its contents
+    directly instead of making use of what's in it. `put` is more efficient for small blocks.
 """
 put(total::Int, pa::Pair{NTuple{M, Int}, <:AbstractBlock}) where M =
     PutBlock{total}(pa.second, pa.first)
@@ -31,6 +57,13 @@ put(total::Int, pa::Pair{<:Any, <:AbstractBlock}) = PutBlock{total}(pa.second, T
     put(pair) -> f(n)
 
 Lazy curried version of [`put`](@ref).
+
+# Example
+
+```jldoctest
+julia> put(1=>X)
+(n -> put(n, 1 => X gate))
+```
 """
 put(pa::Pair) = @λ(n -> put(n, pa))
 

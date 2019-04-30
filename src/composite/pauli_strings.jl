@@ -10,8 +10,41 @@ end
 
 # NOTE: PauliString has a fixed size `N`, thus by default, it should use
 #      SizedVector, or this block could be actually not correct.
+
+"""
+    PauliString(xs::PauliGate...)
+
+Create a `PauliString` from some Pauli gates.
+
+# Example
+
+```jldoctest
+julia> PauliString(X, Y, Z)
+nqubits: 3, datatype: Complex{Float64}
+PauliString
+├─ X gate
+├─ Y gate
+└─ Z gate
+```
+"""
 PauliString(xs::PauliGate{T}...) where T = PauliString(SizedVector{length(xs), PauliGate{T}}(xs))
 
+"""
+    PauliString(list::Vector)
+
+Create a `PauliString` from a list of Pauli gates.
+
+# Example
+
+```jldoctest
+julia> PauliString([X, Y, Z])
+nqubits: 3, datatype: Complex{Float64}
+PauliString
+├─ X gate
+├─ Y gate
+└─ Z gate
+```
+"""
 function PauliString(xs::Vector)
     T = datatype(first(xs))
     for each in xs
@@ -38,7 +71,7 @@ YaoBase.isunitary(::PauliString) = true
 
 Base.copy(ps::PauliString) = PauliString(copy(ps.blocks))
 Base.getindex(ps::PauliString, x) = getindex(ps.blocks, x)
-Base.lastindex(ps::PauliString, x) = lastindex(ps.blocks, x)
+Base.lastindex(ps::PauliString) = lastindex(ps.blocks)
 Base.iterate(ps::PauliString) = iterate(ps.blocks)
 Base.iterate(ps::PauliString, st) = iterate(ps.blocks, st)
 Base.length(ps::PauliString) = length(ps.blocks)
