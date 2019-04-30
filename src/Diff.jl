@@ -1,5 +1,5 @@
 export Rotor, generator, AbstractDiff, BPDiff, QDiff, backward!, gradient, CPhaseGate, DiffBlock
-import Yao: expect, content, chcontent
+import Yao: expect, content, chcontent, mat, apply!
 using StatsBase
 
 ############# General Rotor ############
