@@ -21,3 +21,8 @@ blk = kron(4, 2=>Rx(0.3))
     r2 = copy(r) |> repeat(8, H, 1:5)
     @test r1 ≈ r2
 end
+
+@testset "mat" begin
+    cc = concentrate(5, kron(X,X), (1,3))
+    @test applymatrix(cc) ≈ mat(cc)
+end

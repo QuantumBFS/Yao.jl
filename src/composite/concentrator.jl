@@ -54,8 +54,9 @@ function apply!(r::AbstractRegister, c::Concentrator)
     return r
 end
 
-mat(c::Concentrator{N, T, <:AbstractBlock}) where {N, T} =
-    error("Not implemented, post an issue if you really need it.")
+function mat(c::Concentrator{N, T, <:AbstractBlock}) where {N, T}
+    mat(PutBlock{N}(c.content, c.locations))
+end
 
 Base.adjoint(blk::Concentrator{N}) where N =
     Concentrator{N}(adjoint(blk.content), occupied_locs(blk))
