@@ -258,7 +258,7 @@ r |> PE(N, M, U)
 Since our phase can be represented by 3 qubits precisely, we only need to measure once
 
 ```julia
-results = measure(r, 1:N; nshots=1)
+results = measure(r, 1:N; nshot=1)
 ```
 
 Recall that our QFT's bit numbering is reversed, let's reverse it back
