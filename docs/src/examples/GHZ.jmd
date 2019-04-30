@@ -150,7 +150,7 @@ or you can use pipe operator `|>`, when you want to chain several operations
 together, here we measure the state right after the circuit for `1000` times
 
 ```julia
-results = zero_state(4) |> circuit |> r->measure(r, nshots=1000)
+results = zero_state(4) |> circuit |> r->measure(r, nshot=1000)
 ```
 
 ![GHZ](../assets/figures/GHZ.png)
