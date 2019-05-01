@@ -47,7 +47,7 @@ Return the loss function f = <Zi> (means measuring the ibit-th bit in computatio
 """
 loss_Z1!(circuit::AbstractBlock; ibit::Int=1) = loss_expect!(circuit, put(nqubits(circuit), ibit=>Z))
 
-cnot_entangler(n::Int, pairs) = chain(n, control(n, [ctrl], target=>X) for (ctrl, target) in pairs)
+_cnot_entangler(n::Int, pairs) = chain(n, control(n, [ctrl], target=>X) for (ctrl, target) in pairs)
 
 function rotor(nbit::Int, ibit::Int, noleading::Bool=false, notrailing::Bool=false)
     rt = chain(nbit, [put(nbit, ibit=>Rz(0.0)), put(nbit, ibit=>Rx(0.0)), put(nbit, ibit=>Rz(0.0))])
@@ -61,7 +61,7 @@ rset(nbit::Int, noleading::Bool=false, notrailing::Bool=false) = chain(nbit, [ro
 function ibm_diff_circuit(nbit, nlayer, pairs)
     circuit = chain(nbit)
 
-    ent = cnot_entangler(nbit, pairs)
+    ent = _cnot_entangler(nbit, pairs)
     for i = 1:(nlayer + 1)
         i!=1 && push!(circuit, ent)
         push!(circuit, rset(nbit, i==1, i==nlayer+1))
