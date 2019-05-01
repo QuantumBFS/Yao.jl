@@ -15,7 +15,7 @@ QuAlgorithmZoo.jl is not registered yet, please use the following command:
 pkg> add https://github.com/QuantumBFS/QuAlgorithmZoo.jl.git
 ```
 
-Please notice, this package is still under development and needs further polish. A crazy refactor is coming!
+Disclaimer: **this package is still under development and needs further polish.**
 
 ## Contents
 
