@@ -1,3 +1,9 @@
+```@meta
+DocTestSetup = quote
+    using Yao, YaoBase, YaoBlocks, YaoArrayRegister
+end
+```
+
 # Blocks
 
 **Blocks** are the basic building blocks of a quantum circuit in Yao.

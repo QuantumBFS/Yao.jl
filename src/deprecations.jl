@@ -1,4 +1,4 @@
-using YaoBase
+using YaoBase, YaoBlocks, YaoArrayRegister
 using BitBasis: BitStr
 # NOTE: this file should only exists in v0.4.x
 #       since in v0.4.x the conponent packages
@@ -27,7 +27,7 @@ const MatrixBlock = AbstractBlock
 const Sequential = ChainBlock
 const ReflectBlock = ReflectGate
 const GeneralMatrixGate = GeneralMatrixBlock
-const AddBlock = Sum
+const AddBlock = YaoBlocks.Sum
 
 @deprecate sequence(args...) chain(args...)
 @deprecate matrixgate(args...) matblock(args...)

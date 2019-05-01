@@ -1,5 +1,8 @@
 ```@meta
 CurrentModule = YaoArrayRegister
+DocTestSetup = quote
+    using Yao, YaoBase, YaoBlocks, YaoArrayRegister
+end
 ```
 
 # Array Registers
