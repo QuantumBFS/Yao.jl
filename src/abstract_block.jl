@@ -216,10 +216,15 @@ function consume!(d::Dispatcher{<:Symbol}, n::Int)
     d.params
 end
 
-function consume!(d::Dispatcher{<:Number}, n::Int)
-    d.loc += n
-    n == 1 && return d.params
-    error("do not have enough parameters to consume")
+function consume!(d::Dispatcher{<:Number}, n::Int)    
+    if n == 0
+        return ()
+    elseif n == 1
+        d.loc += n
+        return d.params
+    else
+        error("do not have enough parameters to consume, expect 0, 1, got $n")
+    end
 end
 
 @interface function dispatch!(f::Union{Function, Nothing}, x::AbstractBlock, it::Dispatcher)

@@ -100,6 +100,12 @@ apply!(r::ArrayReg, c::CachedBlock) = (r.state .= mat(c) * r.state; r)
 
 Base.similar(c::CachedBlock, level::Int) = CachedBlock(c.server, c.content, level)
 Base.copy(c::CachedBlock) = CachedBlock(c.server, copy(c.content), c.level)
+Base.length(x::CachedBlock) = length(content(x))
+Base.getindex(c::CachedBlock, index...) = getindex(content(c), index...)
+Base.setindex!(c::CachedBlock, val, index...) = setindex!(content(c), val, index...)
+Base.iterate(c::CachedBlock) = iterate(content(c))
+Base.iterate(c::CachedBlock, st) = iterate(content(c), st)
+Base.eltype(x::CachedBlock) = eltype(content(x))
 
 
 const DefaultCacheServer = get_server(AbstractBlock, CacheFragment)

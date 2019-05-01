@@ -28,8 +28,9 @@ end
     include("concentrator.jl")
 end
 
-@testset "test cache" begin
-    include("cache.jl")
+@testset "test tag" begin
+    include("tag.jl")
+    include("cache.jl")    
 end
 
 @testset "test pauli string" begin

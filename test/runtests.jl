@@ -34,6 +34,11 @@ end
     @test getiparams(g[2]) == 0.0
 end
 
+@testset "abstract blocks" begin
+    include("abstract_blocks.jl")
+end
+
+
 # @testset "test demos" begin
 #     include("algo/qft.jl")
 #     include("algo/qcbm.jl")
