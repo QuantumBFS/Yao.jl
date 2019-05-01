@@ -238,7 +238,7 @@ opt = ADAM()
 
 function train(qcbm, κ, opt, target)
     history = Float64[]
-    for _ in 1:50
+    for _ in 1:100
         push!(history, loss(κ, qcbm, target))
         ps = parameters(qcbm)
         Optimise.update!(opt, ps, gradient(qcbm, κ, target))

@@ -113,7 +113,7 @@ opt = ADAM()
 
 function train(qcbm, κ, opt, target)
     history = Float64[]
-    for _ in 1:50
+    for _ in 1:100
         push!(history, loss(κ, qcbm, target))
         ps = parameters(qcbm)
         Optimise.update!(opt, ps, gradient(qcbm, κ, target))
@@ -129,26 +129,26 @@ Closest candidates are:
   getindex(::Number, !Matched::Integer) at number.jl:77
   getindex(::Number, !Matched::Integer...) at number.jl:82
   ...</code></pre><pre><code class="language-julia">trained_pg = probs(zero_state(nqubits(qcbm)) |&gt; qcbm)</code></pre><pre><code class="language-none">64-element Array{Float64,1}:
- 0.02556747985796142  
- 0.014751509052522982 
- 0.01994009909660929  
- 0.02491358295950044  
- 0.005582227425798031 
- 0.002973564879926696 
- 0.004962861177499842 
- 0.0009516981140208806
- 0.0035075189534503276
- 0.01635656597295053  
+ 0.03868892119593319  
+ 0.00246783086080522  
+ 0.002053067401390414 
+ 0.030026984232692653 
+ 0.009023958049633721 
+ 0.011642018609016931 
+ 0.012712171125848392 
+ 0.003085141127808285 
+ 0.03470448489779208  
+ 0.012580949510129072 
  ⋮                    
- 0.007814622735602185 
- 0.001069244740444355 
- 0.007551456064302477 
- 0.010918968781785558 
- 0.014104764344716601 
- 0.004179102782084491 
- 0.012688200847083182 
- 0.013450005037425031 
- 0.0431889409169337</code></pre><p>And we have the history of training which is</p><pre><code class="language-julia">
+ 0.0007836112765483347
+ 0.005220368630654058 
+ 0.005055656752623356 
+ 0.009230111535475956 
+ 0.02019902662974497  
+ 0.0030217872196400537
+ 0.0008579710273229668
+ 0.006557958991864813 
+ 0.03478682708346485</code></pre><p>And we have the history of training which is</p><pre><code class="language-julia">
 using Plots
 fig1 = plot(history; legend=nothing)
 title!(&quot;training history&quot;)
