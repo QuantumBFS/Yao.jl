@@ -58,6 +58,6 @@ import Base: collect, *
 @deprecate collect(x::AbstractBlock, ::Type{T}) where {T <: AbstractBlock} collect_blocks(T, x)
 
 function Base.:*(op::AbstractMatrix, r::ArrayRegOrAdjointArrayReg)
-    Base.depwarn("`matrix * register` is deprecated")
+    Base.depwarn("`matrix * register` is deprecated", :*)
     return op * state(r)
 end
