@@ -40,11 +40,11 @@ chain
 │        └─ rot(Z gate, 0.0)
 ├─ [cached] chain
 │     ├─ control(1)
-│     │  └─ (2,)X gate
+│     │  └─ (2,) X gate
 │     ├─ control(2)
-│     │  └─ (3,)X gate
+│     │  └─ (3,) X gate
 │     └─ control(3)
-│        └─ (4,)X gate
+│        └─ (4,) X gate
 └─ chain
    ├─ put on (1)
    │  └─ chain
@@ -122,33 +122,28 @@ function train(qcbm, κ, opt, target)
     return history
 end
 
-history = train(qcbm, κ, opt, pg)</code></pre><pre><code class="language-none">Error: MethodError: no method matching getindex(::Float64, ::UnitRange{Int6
-4})
-Closest candidates are:
-  getindex(::Number) at number.jl:75
-  getindex(::Number, !Matched::Integer) at number.jl:77
-  getindex(::Number, !Matched::Integer...) at number.jl:82
-  ...</code></pre><pre><code class="language-julia">trained_pg = probs(zero_state(nqubits(qcbm)) |&gt; qcbm)</code></pre><pre><code class="language-none">64-element Array{Float64,1}:
- 0.03868892119593319  
- 0.00246783086080522  
- 0.002053067401390414 
- 0.030026984232692653 
- 0.009023958049633721 
- 0.011642018609016931 
- 0.012712171125848392 
- 0.003085141127808285 
- 0.03470448489779208  
- 0.012580949510129072 
+history = train(qcbm, κ, opt, pg)
+trained_pg = probs(zero_state(nqubits(qcbm)) |&gt; qcbm)</code></pre><pre><code class="language-none">64-element Array{Float64,1}:
+ 0.007218872568138749 
+ 0.010791840237726363 
+ 0.0017093589491942705
+ 0.009201495494997424 
+ 0.010148200716711882 
+ 0.00813302987769113  
+ 0.009791451849347932 
+ 0.011032048777746203 
+ 0.013509621191560888 
+ 0.007174333008037271 
  ⋮                    
- 0.0007836112765483347
- 0.005220368630654058 
- 0.005055656752623356 
- 0.009230111535475956 
- 0.02019902662974497  
- 0.0030217872196400537
- 0.0008579710273229668
- 0.006557958991864813 
- 0.03478682708346485</code></pre><p>And we have the history of training which is</p><pre><code class="language-julia">
+ 0.010851219819503299 
+ 0.004258795646591362 
+ 0.012591378179649095 
+ 0.012655936143556451 
+ 0.011878456112004025 
+ 0.0025888546435347782
+ 0.006316914726374688 
+ 0.009005975023986833 
+ 0.002062204988506545</code></pre><p>And we have the history of training which is</p><pre><code class="language-julia">
 using Plots
 fig1 = plot(history; legend=nothing)
 title!(&quot;training history&quot;)

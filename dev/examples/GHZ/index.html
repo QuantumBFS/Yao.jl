@@ -15,13 +15,13 @@ chain
 ├─ repeat on (2, 3, 4)
 │  └─ H gate
 ├─ control(2)
-│  └─ (1,)X gate
+│  └─ (1,) X gate
 ├─ control(4)
-│  └─ (3,)X gate
+│  └─ (3,) X gate
 ├─ control(3)
-│  └─ (1,)X gate
+│  └─ (1,) X gate
 ├─ control(4)
-│  └─ (3,)X gate
+│  └─ (3,) X gate
 └─ repeat on (1, 2, 3, 4)
    └─ H gate</code></pre><p>Let me explain what happens here.</p><h2><a class="nav-anchor" id="Put-single-qubit-gate-X-to-location-1-1" href="#Put-single-qubit-gate-X-to-location-1-1">Put single qubit gate X to location 1</a></h2><p>we have an <a href="examples/@ref"><code>X</code></a> gate applied to the first qubit.</p><p>We need to tell <code>Yao</code> to put this gate on the first qubit by</p><pre><code class="language-julia">put(4, 1=&gt;X)</code></pre><pre><code class="language-none">nqubits: 4, datatype: Complex{Float64}
 put on (1)
@@ -31,7 +31,7 @@ put on (1, 2)
 put on (1)
 └─ X gate</code></pre><h2><a class="nav-anchor" id="Apply-the-same-gate-on-different-locations-1" href="#Apply-the-same-gate-on-different-locations-1">Apply the same gate on different locations</a></h2><p>next we should put Hadmard gates on all locations except the 1st qubits.</p><p>We provide <a href="../../man/array_registers/#Base.repeat"><code>repeat</code></a> to apply the same block repeatly, repeat can take an iterator of desired locations, and like <code>put</code>, we can also leave the total number of qubits there.</p><pre><code class="language-julia">repeat(H, 2:4)</code></pre><pre><code class="language-none">(n -&gt; repeat(n, H gate, 2, 3, 4))</code></pre><h2><a class="nav-anchor" id="Define-control-gates-1" href="#Define-control-gates-1">Define control gates</a></h2><p>In Yao, we could define controlled gates by feeding a gate to <a href="../../man/blocks/#YaoBlocks.control-Tuple{Any,Pair}"><code>control</code></a></p><pre><code class="language-julia">control(4, 2, 1=&gt;X)</code></pre><pre><code class="language-none">nqubits: 4, datatype: Complex{Float64}
 control(2)
-└─ (1,)X gate</code></pre><p>Like many others, you could leave the number of total qubits there, and infer it later.</p><pre><code class="language-julia">control(2, 1=&gt;X)</code></pre><pre><code class="language-none">(n -&gt; control(n, 2, 1 =&gt; X gate))</code></pre><h2><a class="nav-anchor" id="Composite-each-part-together-1" href="#Composite-each-part-together-1">Composite each part together</a></h2><p>This will create a <a href="examples/@ref"><code>ControlBlock</code></a>, the concept of block in Yao basically just means quantum operators, since the quantum circuit itself is a quantum operator, we could create a quantum circuit by composite each part of.</p><p>Here, we use <a href="../../man/blocks/#YaoBlocks.chain-Tuple{Int64}"><code>chain</code></a> to chain each part together, a chain of quantum operators means to apply each operators one by one in the chain. This will create a <a href="../../man/blocks/#YaoBlocks.ChainBlock"><code>ChainBlock</code></a>.</p><pre><code class="language-julia">circuit = chain(
+└─ (1,) X gate</code></pre><p>Like many others, you could leave the number of total qubits there, and infer it later.</p><pre><code class="language-julia">control(2, 1=&gt;X)</code></pre><pre><code class="language-none">(n -&gt; control(n, 2, 1 =&gt; X gate))</code></pre><h2><a class="nav-anchor" id="Composite-each-part-together-1" href="#Composite-each-part-together-1">Composite each part together</a></h2><p>This will create a <a href="examples/@ref"><code>ControlBlock</code></a>, the concept of block in Yao basically just means quantum operators, since the quantum circuit itself is a quantum operator, we could create a quantum circuit by composite each part of.</p><p>Here, we use <a href="../../man/blocks/#YaoBlocks.chain-Tuple{Int64}"><code>chain</code></a> to chain each part together, a chain of quantum operators means to apply each operators one by one in the chain. This will create a <a href="../../man/blocks/#YaoBlocks.ChainBlock"><code>ChainBlock</code></a>.</p><pre><code class="language-julia">circuit = chain(
     4,
     put(1=&gt;X),
     repeat(H, 2:4),
@@ -47,13 +47,13 @@ chain
 ├─ repeat on (2, 3, 4)
 │  └─ H gate
 ├─ control(2)
-│  └─ (1,)X gate
+│  └─ (1,) X gate
 ├─ control(4)
-│  └─ (3,)X gate
+│  └─ (3,) X gate
 ├─ control(3)
-│  └─ (1,)X gate
+│  └─ (1,) X gate
 ├─ control(4)
-│  └─ (3,)X gate
+│  └─ (3,) X gate
 └─ repeat on (1, 2, 3, 4)
    └─ H gate</code></pre><p>You can check the type of it with <code>typeof</code></p><pre><code class="language-julia">typeof(circuit)</code></pre><pre><code class="language-none">ChainBlock{4,Complex{Float64}}</code></pre><h2><a class="nav-anchor" id="Construct-GHZ-state-from-00...00-1" href="#Construct-GHZ-state-from-00...00-1">Construct GHZ state from 00...00</a></h2><p>For simulation, we provide a builtin register type called <a href="../../man/array_registers/#YaoArrayRegister.ArrayReg"><code>ArrayReg</code></a>, we will use the simulated register in this example.</p><p>First, let&#39;s create <span>$|00⋯00⟩$</span>, you can create it with <a href="../../man/array_registers/#YaoArrayRegister.zero_state"><code>zero_state</code></a></p><pre><code class="language-julia">zero_state(4)</code></pre><pre><code class="language-none">ArrayReg{1, Complex{Float64}, Array...}
     active qubits: 4/4</code></pre><p>Or we also provide bit string literals to create arbitrary eigen state</p><pre><code class="language-julia">ArrayReg(bit&quot;0000&quot;)</code></pre><pre><code class="language-none">ArrayReg{1, Complex{Float64}, Array...}
@@ -61,21 +61,21 @@ chain
     active qubits: 4/4</code></pre><p>or you can use pipe operator <code>|&gt;</code>, when you want to chain several operations together, here we measure the state right after the circuit for <code>1000</code> times</p><pre><code class="language-julia">results = zero_state(4) |&gt; circuit |&gt; r-&gt;measure(r, nshots=1000)</code></pre><pre><code class="language-none">1000-element Array{Int64,1}:
  15
  15
+ 15
   0
+ 15
  15
  15
   0
  15
-  0
-  0
   0
   ⋮
+  0
+  0
  15
  15
  15
-  0
-  0
-  0
+ 15
  15
  15
  15</code></pre><p><img src="../../assets/figures/GHZ.png" alt="GHZ"/></p><p>GHZ state will collapse to <span>$|0000⟩$</span> or <span>$|1111⟩$</span>.</p><footer><hr/><a class="previous" href="../../"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../QFT/"><span class="direction">Next</span><span class="title">Quantum Fourier Transformation and Phase Estimation</span></a></footer></article></body></html>

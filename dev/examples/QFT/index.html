@@ -4,7 +4,7 @@
 0 &amp; \exp\left(\frac{2\pi i}{2^k}\right)
 \end{bmatrix}\]</div><p>Let&#39;s define block <code>A</code> and block <code>B</code>, block <code>A</code> is actually a control block.</p><pre><code class="language-julia">A(i, j) = control(i, j=&gt;shift(2π/(1&lt;&lt;(i-j+1))))</code></pre><pre><code class="language-none">A (generic function with 1 method)</code></pre><p>Once you construct the blockl you can inspect its matrix using <a href="../../man/blocks/#YaoBlocks.mat-Tuple{AbstractBlock}"><code>mat</code></a> function. Let&#39;s construct the circuit in dash box A, and see the matrix of <span>$R_4$</span> gate.</p><pre><code class="language-julia">R4 = A(1, 4)</code></pre><pre><code class="language-none">(n -&gt; control(n, 1, 4 =&gt; shift(Inf)))</code></pre><p>If you have read about <a href="../GHZ/#example-ghz-1">preparing GHZ state</a>, you probably know that in Yao, we could just leave the number of qubits, and it will be evaluated when possible.</p><pre><code class="language-julia">R4(5)</code></pre><pre><code class="language-none">nqubits: 5, datatype: Complex{Float64}
 control(1)
-└─ (4,)shift(Inf)</code></pre><p>its matrix will be</p><pre><code class="language-julia">mat(R4(5))</code></pre><pre><code class="language-none">32×32 LinearAlgebra.Diagonal{Complex{Float64},Array{Complex{Float64},1}}:
+└─ (4,) shift(Inf)</code></pre><p>its matrix will be</p><pre><code class="language-julia">mat(R4(5))</code></pre><pre><code class="language-none">32×32 LinearAlgebra.Diagonal{Complex{Float64},Array{Complex{Float64},1}}:
  1.0+0.0im      ⋅          ⋅      …      ⋅           ⋅          ⋅     
      ⋅      1.0+0.0im      ⋅             ⋅           ⋅          ⋅     
      ⋅          ⋅      1.0+0.0im         ⋅           ⋅          ⋅     
@@ -32,23 +32,23 @@ chain
 │  ├─ put on (1)
 │  │  └─ H gate
 │  ├─ control(2)
-│  │  └─ (1,)shift(1.5707963267948966)
+│  │  └─ (1,) shift(1.5707963267948966)
 │  ├─ control(3)
-│  │  └─ (1,)shift(0.7853981633974483)
+│  │  └─ (1,) shift(0.7853981633974483)
 │  └─ control(4)
-│     └─ (1,)shift(0.39269908169872414)
+│     └─ (1,) shift(0.39269908169872414)
 ├─ chain
 │  ├─ put on (2)
 │  │  └─ H gate
 │  ├─ control(3)
-│  │  └─ (2,)shift(1.5707963267948966)
+│  │  └─ (2,) shift(1.5707963267948966)
 │  └─ control(4)
-│     └─ (2,)shift(0.7853981633974483)
+│     └─ (2,) shift(0.7853981633974483)
 ├─ chain
 │  ├─ put on (3)
 │  │  └─ H gate
 │  └─ control(4)
-│     └─ (3,)shift(1.5707963267948966)
+│     └─ (3,) shift(1.5707963267948966)
 └─ chain
    └─ put on (4)
       └─ H gate</code></pre><h2><a class="nav-anchor" id="Wrap-QFT-to-an-external-block-1" href="#Wrap-QFT-to-an-external-block-1">Wrap QFT to an external block</a></h2><p>In most cases, <code>function</code>s are enough to wrap quantum circuits, like <code>A</code> and <code>B</code> we defined above, but sometimes, we need to dispatch specialized methods on certain kinds of quantum circuit, or we want to define an external block to export, thus, it&#39;s useful to be able to wrap circuit to custom blocks.</p><p>First, we define a new type as subtype of <a href="../../man/blocks/#YaoBlocks.PrimitiveBlock"><code>PrimitiveBlock</code></a> since we are not going to use the subblocks of <code>QFT</code>, if you need to use its subblocks, it&#39;d be better to define it under <a href="../../man/blocks/#YaoBlocks.CompositeBlock"><code>CompositeBlock</code></a>.</p><pre><code class="language-julia">struct QFT{N, T} &lt;: PrimitiveBlock{N, T} end
@@ -79,46 +79,65 @@ P = eigen(rand_unitary(1&lt;&lt;M)).vectors
 phases = rand(1&lt;&lt;M)
 phases[bit&quot;010&quot;] = θ
 U = P * Diagonal(exp.(2π * im * phases)) * P&#39;</code></pre><pre><code class="language-none">32×32 Array{Complex{Float64},2}:
-   0.0878725+0.0098922im   …  -0.0799835-0.20211im   
-    0.352001+0.0103536im      -0.0734692+0.0288764im 
-     0.11588+0.118025im        0.0547831+0.0429838im 
-   0.0843754-0.113511im         0.156082+0.105049im  
-  0.00479954+0.217782im       -0.0106176-0.00249785im
-    0.100866-0.0644334im   …   -0.139488-0.0779031im 
-   -0.123073+0.211045im          0.18883-0.0336968im 
-  -0.0102548-0.0352751im       0.0473235+0.0227051im 
-    0.250258+0.133932im       -0.0543517-0.0957215im 
- 0.000367922+0.0242185im      -0.0528597-0.212433im  
-            ⋮              ⋱                         
- -0.00690115+0.0460369im       0.0197528-0.0306263im 
- -0.00201159-0.0377325im      0.00176261+0.115797im  
-  -0.0396952-0.063371im    …    0.028501+0.00998936im
-   -0.104757+0.144572im        -0.136645-0.232625im  
-   0.0877567+0.233316im         0.107311+0.0465326im 
-   -0.145045+0.222763im       -0.0100897+0.065386im  
-     -0.1626+0.00289663im       -0.28496+0.178099im  
-   0.0155954-0.191072im    …  -0.0326492-0.0352279im 
-   -0.208886+0.0648118im       -0.106911-0.297819im</code></pre><p>and then generate the state <span>$ψ$</span></p><pre><code class="language-julia">psi = P[:, 3]</code></pre><pre><code class="language-none">32-element Array{Complex{Float64},1}:
-  0.019095400066043707 + 0.031914167501781165im
-  0.009578900122793717 - 0.18964053229461558im 
-    0.1869599515307434 + 0.15145037619299478im 
-   0.29743173811186724 + 0.0im                 
-   0.07365821460358532 + 0.03336001716558036im 
-   0.07291747193593821 + 0.23654585206722462im 
-  -0.12112726367102751 - 0.1043065086168826im  
-  -0.11317056294161482 + 3.199829150566519e-6im
-  -0.09423758902330497 - 0.12152304605547222im 
-    0.1961824059014832 + 0.1190665573085963im  
-                       ⋮                       
-  -0.11581764275770262 + 0.1854358759419704im  
-  -0.10811569087983383 + 0.037041198420691104im
-  -0.01626628859229559 - 0.07642681256858994im 
-   0.18162458684024274 + 0.09036393768524065im 
-  -0.05252437595219304 - 0.09244386450860315im 
-   0.07594399572427796 - 0.02521743696030258im 
- -0.022769366428506972 - 0.2642272497940328im  
-  -0.20285686550964016 - 0.13093178037439543im 
-  -0.06500940400289945 + 0.17851943921063254im</code></pre><p>In the phase estimation process, we will feed the state to circuit and measure the first <code>n</code> qubits processed by iQFT.</p><pre><code class="language-julia">r = join(ArrayReg(psi), zero_state(N))
+   0.0484127-0.222606im      0.107119+0.0295159im  …  -0.0738482-0.0757368i
+m 
+   -0.013649+0.0568232im    -0.104502-0.172028im       0.0862298-0.0335349i
+m 
+    0.213914-0.170978im     -0.148547-0.0787596im       0.237168+0.0673459i
+m 
+  -0.0291835+0.0723461im   -0.0346442-0.0600165im     -0.0468484+0.0926774i
+m 
+    0.154639+0.0634777im     0.306769+0.0889244im      -0.225047-0.0709887i
+m 
+   0.0482121+0.0453256im     0.115231+0.192269im   …  0.00447756+0.130865im
+  
+   0.0171497-0.00124483im  -0.0174283-0.10939im        -0.145666-0.174609im
+  
+  0.00223964-0.0544215im    -0.138929+0.0317011im       0.115975-0.0578086i
+m 
+  -0.0397557+0.22645im      -0.150156+0.0309511im      -0.115141+0.146039im
+  
+  0.00933107-0.131672im     0.0238281-0.0423812im      -0.340512-0.193142im
+  
+            ⋮                                      ⋱                       
+  
+     0.11897-0.0305823im   -0.0578581-0.105899im      -0.0355423+0.163224im
+  
+    0.306295+0.252754im      0.078937+0.0506088im      0.0400817+0.0260842i
+m 
+    0.224906-0.0400138im    0.0733234+0.0464525im  …   -0.121015+0.199104im
+  
+ -0.00899192+0.00297158im   0.0612767+0.0594941im     0.00854445+0.164934im
+  
+   0.0868591+0.0179675im    -0.157394-0.0269648im       0.170466-0.00711892
+im
+   0.0726253-0.122529im     -0.133649-0.294629im       0.0382157-0.042885im
+  
+   -0.182899-0.213077im      0.147875-0.0498183im     -0.0575362+0.175663im
+  
+   0.0796886-0.1305im      -0.0774063+0.0582359im  …  -0.0356972-0.0267187i
+m 
+ -0.00818305+0.314254im      0.161358+0.0475948im     -0.0595897-0.295119im</code></pre><p>and then generate the state <span>$ψ$</span></p><pre><code class="language-julia">psi = P[:, 3]</code></pre><pre><code class="language-none">32-element Array{Complex{Float64},1}:
+   0.2139540523077696 - 0.1286879895118558im  
+   0.2917362378214253 + 0.0im                 
+  0.03497088010294642 - 0.1199873155845202im  
+  0.13531403566460212 - 0.19695718233788845im 
+ -0.10869664171785831 + 0.0951577455912917im  
+  0.05947179861767184 - 0.24606571682224354im 
+ 0.018995806696208276 + 0.2363705896899393im  
+  -0.1657799717113159 - 0.025346455253167414im
+ -0.13977103945051295 + 0.009315898346332674im
+  0.06931808239200768 - 0.17829984881075278im 
+                      ⋮                       
+  0.11900676975845167 - 0.08060076655076415im 
+  -0.1020063490919815 + 0.26744419189636753im 
+  0.16685112470722036 + 0.17008907404634946im 
+  0.10375888376678764 - 0.008118661834769829im
+  0.10848858280637974 - 0.11920417417915417im 
+ -0.07693527428996229 - 0.22302310655009763im 
+  0.16715816150229942 + 0.01688701726659305im 
+ 0.012898095247841319 - 0.009426205101386257im
+ -0.08854648788280473 + 0.03506274914316646im</code></pre><p>In the phase estimation process, we will feed the state to circuit and measure the first <code>n</code> qubits processed by iQFT.</p><pre><code class="language-julia">r = join(ArrayReg(psi), zero_state(N))
 r |&gt; PE(N, M, U)</code></pre><pre><code class="language-none">ArrayReg{1, Complex{Float64}, Array...}
     active qubits: 8/8</code></pre><p>Since our phase can be represented by 3 qubits precisely, we only need to measure once</p><pre><code class="language-julia">results = measure(r, 1:N; nshots=1)</code></pre><pre><code class="language-none">1-element Array{Int64,1}:
  3</code></pre><p>Recall that our QFT&#39;s bit numbering is reversed, let&#39;s reverse it back</p><pre><code class="language-julia">using BitBasis
