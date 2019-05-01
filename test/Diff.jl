@@ -49,14 +49,14 @@ loss_Z1!(circuit::AbstractBlock; ibit::Int=1) = loss_expect!(circuit, put(nqubit
 
 _cnot_entangler(n::Int, pairs) = chain(n, control(n, [ctrl], target=>X) for (ctrl, target) in pairs)
 
-function rotor(nbit::Int, ibit::Int, noleading::Bool=false, notrailing::Bool=false)
+function _rotor(nbit::Int, ibit::Int, noleading::Bool=false, notrailing::Bool=false)
     rt = chain(nbit, [put(nbit, ibit=>Rz(0.0)), put(nbit, ibit=>Rx(0.0)), put(nbit, ibit=>Rz(0.0))])
     noleading && popfirst!(rt)
     notrailing && pop!(rt)
     rt
 end
 
-rset(nbit::Int, noleading::Bool=false, notrailing::Bool=false) = chain(nbit, [rotor(nbit, j, noleading, notrailing) for j=1:nbit])
+rset(nbit::Int, noleading::Bool=false, notrailing::Bool=false) = chain(nbit, [_rotor(nbit, j, noleading, notrailing) for j=1:nbit])
 
 function ibm_diff_circuit(nbit, nlayer, pairs)
     circuit = chain(nbit)
