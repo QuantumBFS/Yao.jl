@@ -123,7 +123,7 @@ function define_struct(__module__::Module, __source__::LineNumberNode, const_bin
     end
     # calculate new shape
     N = gensym(:N)
-    push!(ex.args, :(@eval $__module__ $N = BitBasis.log2i(size($(const_binding), 1))))
+    push!(ex.args, :(@eval $__module__ $N = $log2i(size($(const_binding), 1))))
 
     # we allow overwrite in order to support the following syntax
     # @const_gate X = BLABLA
@@ -131,7 +131,7 @@ function define_struct(__module__::Module, __source__::LineNumberNode, const_bin
     if isdefined(__module__, gt_name)
         msg = "$(string(gt_name)) is already defined, overwritten by new definition at $__source__"
         push!(ex.args, :(@warn $msg))
-        push!(ex.args, :(@eval $__module__ @assert $N == BitBasis.log2i(size(mat($name), 1)) "new constant does not have the same size with previous definitions"))
+        push!(ex.args, :(@eval $__module__ @assert $N == $log2i(size(mat($name), 1)) "new constant does not have the same size with previous definitions"))
     else
         push!(ex.args, :(@eval $__module__ Base.@__doc__ struct $gt_name{T} <: YaoBlocks.ConstGate.ConstantGate{$N, T} end))
     end
