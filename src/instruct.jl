@@ -73,6 +73,7 @@ end
 
 YaoBase.instruct!(state::AbstractVecOrMat, U::IMatrix, locs::NTuple{N, Int}) where N = state
 YaoBase.instruct!(state::AbstractVecOrMat, U::IMatrix, locs::Int)  = state
+YaoBase.instruct!(state::AbstractVecOrMat, U::IMatrix, locs::Tuple{Int}) = state
 
 # one-qubit instruction
 YaoBase.instruct!(state::AbstractVecOrMat{T}, g::AbstractMatrix{T}, locs::Tuple{Int}) where T =
