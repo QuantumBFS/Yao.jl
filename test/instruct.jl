@@ -90,3 +90,8 @@ end
     ST = randn(ComplexF64, 1 << 2)
     @test instruct!(copy(ST), Val(:SWAP), (1, 2)) ≈ SWAP * ST
 end
+
+@testset "Yao.jl/#189" begin
+    st = rand(1<<4)
+    @test instruct!(st, IMatrix{2, Float64}(), 1) == st
+end
