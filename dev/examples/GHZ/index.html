@@ -59,23 +59,23 @@ chain
     active qubits: 4/4</code></pre><p>Or we also provide bit string literals to create arbitrary eigen state</p><pre><code class="language-julia">ArrayReg(bit&quot;0000&quot;)</code></pre><pre><code class="language-none">ArrayReg{1, Complex{Float64}, Array...}
     active qubits: 4/4</code></pre><p>They will both create a register with Julia&#39;s builtin <code>Array</code> as storage.</p><h2><a class="nav-anchor" id="Feed-Registers-to-Circuits-1" href="#Feed-Registers-to-Circuits-1">Feed Registers to Circuits</a></h2><p>Circuits can be applied to registers with <a href="../../man/blocks/#YaoBlocks.apply!-Tuple{AbstractRegister,AbstractBlock}"><code>apply!</code></a></p><pre><code class="language-julia">apply!(zero_state(4), circuit)</code></pre><pre><code class="language-none">ArrayReg{1, Complex{Float64}, Array...}
     active qubits: 4/4</code></pre><p>or you can use pipe operator <code>|&gt;</code>, when you want to chain several operations together, here we measure the state right after the circuit for <code>1000</code> times</p><pre><code class="language-julia">results = zero_state(4) |&gt; circuit |&gt; r-&gt;measure(r, nshots=1000)</code></pre><pre><code class="language-none">1000-element Array{Int64,1}:
-  0
-  0
-  0
-  0
- 15
  15
   0
  15
  15
   0
+  0
+ 15
+  0
+  0
+ 15
   ⋮
   0
- 15
-  0
- 15
   0
   0
  15
   0
-  0</code></pre><p><img src="../../assets/figures/GHZ.png" alt="GHZ"/></p><p>GHZ state will collapse to <span>$|0000⟩$</span> or <span>$|1111⟩$</span>.</p><footer><hr/><a class="previous" href="../../"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../QFT/"><span class="direction">Next</span><span class="title">Quantum Fourier Transformation and Phase Estimation</span></a></footer></article></body></html>
+ 15
+  0
+ 15
+ 15</code></pre><p><img src="../../assets/figures/GHZ.png" alt="GHZ"/></p><p>GHZ state will collapse to <span>$|0000⟩$</span> or <span>$|1111⟩$</span>.</p><footer><hr/><a class="previous" href="../../"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../QFT/"><span class="direction">Next</span><span class="title">Quantum Fourier Transformation and Phase Estimation</span></a></footer></article></body></html>
