@@ -73,6 +73,7 @@ Base.repeat(n::Int, x::AbstractBlock, locs::NTuple{C, Int}) where C =
     RepeatedBlock{n}(x, locs)
 Base.repeat(n::Int, x::AbstractBlock, locs) = repeat(n, x, locs...)
 Base.repeat(n::Int, x::AbstractBlock) = RepeatedBlock{n}(x)
+Base.repeat(x::AbstractBlock) = @λ(n->repeat(n, x))
 
 """
     repeat(x::AbstractBlock, locs)
@@ -92,7 +93,7 @@ function apply!(r::AbstractRegister, rp::RepeatedBlock)
     _check_size(r, rp)
     m  = mat(rp.content)
     for addr in rp.locs
-        instruct!(matvec(r.state), mat(rp.content), Tuple(addr:addr+nqubits(rp.content)-1))
+        instruct!(matvec(r.state), m, Tuple(addr:addr+nqubits(rp.content)-1))
     end
     return r
 end
