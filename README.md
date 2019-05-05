@@ -30,6 +30,8 @@ Yao is a [julia](https://julialang.org/) language package. To install Yao, pleas
 pkg> add Yao
 ```
 
+If you have problem to install the package, please [file us an issue](https://github.com/QuantumBFS/Yao.jl/issues/new).
+
 For CUDA support, see [CuYao.jl](https://github.com/QuantumBFS/CuYao.jl).
 
 ## Getting Started
