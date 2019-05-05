@@ -24,11 +24,13 @@ Yao is an open source framework for
 
 ## Installation
 
-Please type `]` in the REPL to use the package mode, then type this command:
+Yao is a [julia](https://julialang.org/) language package. To install Yao, please [open Julia's interactive session (known as REPL)](https://docs.julialang.org/en/v1/manual/getting-started/) and type `]` in the REPL to use the package mode, then type this command:
 
 ```julia
 pkg> add Yao
 ```
+
+If you have problem to install the package, please [file us an issue](https://github.com/QuantumBFS/Yao.jl/issues/new).
 
 For CUDA support, see [CuYao.jl](https://github.com/QuantumBFS/CuYao.jl).
 
