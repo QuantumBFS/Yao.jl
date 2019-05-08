@@ -30,7 +30,8 @@ Create a [`GeneralMatrixBlock`](@ref) with a matrix `m`.
 # Example
 
 ```jldoctest
-
+julia> matblock(ComplexF64[0 1;1 0])
+matblock(...)
 ```
 """
 matblock(m::AbstractMatrix) = GeneralMatrixBlock(m)

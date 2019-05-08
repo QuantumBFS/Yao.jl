@@ -6,6 +6,15 @@ export ShiftGate, shift
     ShiftGate <: PrimitiveBlock
 
 Phase shift gate.
+
+# Definition
+
+```math
+\\begin{pmatrix}
+1 & 0
+0 & e^(im θ)
+\\end{pmatrix}
+```
 """
 mutable struct ShiftGate{T} <: PrimitiveBlock{1, Complex{T}}
     theta::T
@@ -14,7 +23,14 @@ end
 """
     shift(θ)
 
-Returns a shift gate.
+Create a [`ShiftGate`](@ref) with phase `θ`.
+
+# Example
+
+```jldoctest
+julia> shift(0.1)
+shift(0.1)
+```
 """
 shift(θ::AbstractFloat) = ShiftGate(θ)
 shift(θ::Real) = shift(Float64(θ))

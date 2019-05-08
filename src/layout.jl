@@ -161,6 +161,7 @@ color(::Type{<:MathGate}) = :red
 color(::Type{<:PutBlock}) = :cyan
 color(::Type{T}) where {T <: PauliString} = :cyan
 color(::Type{<:RepeatedBlock}) = :cyan
+color(::Type{<:GeneralMatrixBlock}) = :red
 
 # color(::Type{T}) where {T <: PauliString} = :cyan
 # color(::Type{T}) where {T <: Sequential} = :blue
@@ -172,12 +173,41 @@ print_block(io::IO, swap::Swap) = printstyled(io, "swap", swap.locs; bold=true, 
 print_block(io::IO, x::KronBlock) = printstyled(io, "kron"; bold=true, color=color(KronBlock))
 print_block(io::IO, x::ChainBlock) = printstyled(io, "chain"; bold=true, color=color(ChainBlock))
 print_block(io::IO, x::Roller) = printstyled(io, "roller"; bold=true, color=color(Roller))
-print_block(io::IO, x::ReflectGate{N}) where N = print(io, "reflect: nqubits=$N")
+print_block(io::IO, x::ReflectGate{N}) where N = print(io, "reflect($(summary(x.psi)))")
 print_block(io::IO, c::Concentrator) = print(io, "Concentrator: ", occupied_locs(c))
 print_block(io::IO, c::CachedBlock) = print_block(io, content(c))
 print_block(io::IO, c::Prod) = printstyled(io, "prod"; bold=true, color=color(ChainBlock))
 print_block(io::IO, c::Sum) = printstyled(io, "sum"; bold=true, color=color(ChainBlock))
 print_block(io::IO, c::TagBlock) = nothing
+print_block(io::IO, c::GeneralMatrixBlock) = printstyled(io, "matblock(...)"; color=color(GeneralMatrixBlock))
+
+function print_block(io::IO, c::Measure{N, K, OT}) where {N, K, OT}
+    strs = String[]
+    if c.operator != ComputationalBasis()
+        push!(strs, "operator=$(repr(c.operator))")
+    end
+
+    if c.locations != AllLocs()
+        push!(strs, "locs=$(repr(c.locations))")
+    end
+    
+    if c.collapseto !== nothing
+        push!(strs, "collapseto=$(c.collapseto)")
+    end
+
+    if c.remove
+        push!(strs, "remove=true")
+    end
+
+    out = join(strs, ", ")
+    if !isempty(strs)
+        out = "Measure($N;" * out
+    else
+        out = "Measure($N" * out
+    end
+
+    return print(io, out, ")")
+end
 
 # TODO: use OhMyREPL's default syntax highlighting for functions
 function print_block(io::IO, m::MathGate{N, <:LegibleLambda}) where N

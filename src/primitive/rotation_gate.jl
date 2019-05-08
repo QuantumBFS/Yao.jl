@@ -6,6 +6,12 @@ export RotationGate, Rx, Ry, Rz, rot
     RotationGate{N, T, GT <: AbstractBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
 
 RotationGate, with GT both hermitian and isreflexive.
+
+# Definition
+
+```math
+\\mathbf{I} cos(θ / 2) - im sin(θ / 2) * mat(U)
+```
 """
 mutable struct RotationGate{N, T, GT <: AbstractBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
     block::GT
@@ -24,6 +30,13 @@ RotationGate(block::GT, theta) where {N, T, GT<:AbstractBlock{N, Complex{T}}} = 
     Rx(theta)
 
 Return a [`RotationGate`](@ref) on X axis.
+
+# Example
+
+```jldoctest
+julia> Rx(0.1)
+rot(X gate, 0.1)
+```
 """
 Rx(theta::T) where T <: AbstractFloat = RotationGate(X(Complex{T}), theta)
 
@@ -31,6 +44,13 @@ Rx(theta::T) where T <: AbstractFloat = RotationGate(X(Complex{T}), theta)
     Ry(theta)
 
 Return a [`RotationGate`](@ref) on Y axis.
+
+# Example
+
+```jldoctest
+julia> Ry(0.1)
+rot(Y gate, 0.1)
+```
 """
 Ry(theta::T) where T <: AbstractFloat = RotationGate(Y(Complex{T}), theta)
 
@@ -38,6 +58,13 @@ Ry(theta::T) where T <: AbstractFloat = RotationGate(Y(Complex{T}), theta)
     Rz(theta)
 
 Return a [`RotationGate`](@ref) on Z axis.
+
+# Example
+
+```jldoctest
+julia> Rz(0.1)
+rot(Z gate, 0.1)
+```
 """
 Rz(theta::T) where T <: AbstractFloat = RotationGate(Z(Complex{T}), theta)
 

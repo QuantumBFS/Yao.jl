@@ -14,7 +14,20 @@ end
 """
     phase(theta)
 
-Returns a global phase gate.
+Returns a global phase gate. Defined with following matrix form:
+
+```math
+exp(iθ) \\mathbf{I}
+```
+
+# Example
+
+You can create a global phase gate with a phase (a real number).
+
+```jldoctest
+julia> phase(0.1)
+phase(0.1)
+```
 """
 phase(θ::AbstractFloat) = PhaseGate(θ)
 phase(θ::Real) = phase(Float64(θ))

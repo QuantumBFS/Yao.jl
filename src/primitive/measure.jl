@@ -1,9 +1,8 @@
 using YaoBase, YaoArrayRegister
-export Measure
+export Measure, AllLocs, ComputationalBasis
 
 """
     Measure{N, K, OT} <: PrimitiveBlock{N, Bool}
-    Measure(n::Int; operator=ComputationalBasis(), locs=1:n, collapseto=nothing, remove=false)
 
 Measure operator.
 """
@@ -24,7 +23,71 @@ end
 
 @interface nqubits_measured(::Measure{N, K}) where {N, K} = K
 
-function Measure(n::Int; operator::OT=ComputationalBasis(), locs, collapseto=nothing, remove=false) where OT
+"""
+    Measure(n::Int; operator=ComputationalBasis(), locs=AllLocs(), collapseto=nothing, remove=false)
+
+Create a `Measure` block with number of qubits `n`.
+
+# Example
+
+You can create a `Measure` block on given basis (default is the computational basis).
+
+```jldoctest
+julia> Measure(4)
+Measure(4)
+```
+
+Or you could specify which qubits you are going to measure
+
+```jldoctest
+julia> Measure(4; locs=1:3)
+Measure(4; locs=(1, 2, 3))
+```
+
+by default this will collapse the current register to measure results.
+
+```julia
+julia> r = rand_state(3)
+ArrayReg{1, Complex{Float64}, Array...}
+    active qubits: 3/3
+
+julia> state(r)
+8×1 Array{Complex{Float64},2}:
+  0.19864933724343375 - 0.4740335956912438im
+  -0.2057912765333517 - 0.2262668486124923im
+ -0.41680007712245676 - 0.13759187422609387im
+ -0.24336704548326407 + 0.27343538360398184im
+ -0.09308092255704317 - 0.005308959093704435im
+  0.24555464152683212 + 0.02737969837364506im
+  -0.3828287267256825 + 0.02401578941643196im
+ 0.048647936794205926 + 0.31047610497928607im
+
+julia> r |> Measure(3)
+Measure(3)
+
+julia> state(r)
+8×1 Array{Complex{Float64},2}:
+                 0.0 + 0.0im
+                 0.0 + 0.0im
+ -0.9495962023170939 - 0.31347576069762273im
+                 0.0 + 0.0im
+                 0.0 + 0.0im
+                 0.0 + 0.0im
+                 0.0 + 0.0im
+                 0.0 + 0.0im
+```
+
+But you can also specify the target bit configuration you want to collapse to with keyword `collapseto`.
+
+```jldoctest
+julia> Measure(4; collapseto=0b101)
+Measure(4;collapseto=5)
+
+julia> m.collapseto
+5
+```
+"""
+function Measure(n::Int; operator::OT=ComputationalBasis(), locs=AllLocs(), collapseto=nothing, remove=false) where OT
     if locs isa AllLocs
         Measure{n, n, OT}(operator, locs, collapseto, remove)
     else

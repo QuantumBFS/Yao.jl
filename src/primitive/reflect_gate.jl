@@ -42,6 +42,13 @@ reflect(r::ArrayReg) = reflect(statevec(r))
     reflect(v::AbstractVector{<:Complex})
 
 Create a [`ReflectGate`](@ref) with an quantum state vector `v`.
+
+# Example
+
+```jldoctest
+julia> reflect(rand_state(3))
+reflect(ArrayReg{1, Complex{Float64}, Array...})
+```
 """
 reflect(v::AbstractVector{<:Complex}) = ReflectGate(v)
 
