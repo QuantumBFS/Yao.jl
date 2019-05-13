@@ -4,6 +4,7 @@ using Test, YaoBlocks, YaoArrayRegister
     @test ShiftGate(T(0.1)) isa ShiftGate{T}
     @test_throws TypeError ShiftGate{Complex{T}} # will not accept non-real type
     @test shift(T(0.1)) isa ShiftGate{T}
+    @test adjoint(shift(0.1)) == shift(-0.1)
 end
 
 @testset "test matrix" begin
@@ -35,4 +36,10 @@ end
     @test isreflexive(g) == false
     @test isunitary(g) == true
     @test ishermitian(g) == false
+end
+
+@testset "test parameters" begin
+    @test nparameters(shift(0.1)) == 1
+    @test parameters(shift(0.1)) == [0.1]
+    @test parameters(dispatch!(shift(0.1), 0.2)) == [0.2]
 end

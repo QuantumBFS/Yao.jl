@@ -3,14 +3,14 @@ export AbstractBlock
 using YaoBase, YaoArrayRegister, SimpleTraits
 import YaoBase: @interface
 
-export nqubits, datatype, isreflexive, isunitary, ishermitian
+export nqubits, isreflexive, isunitary, ishermitian
 
 """
     AbstractBlock
 
 Abstract type for quantum circuit blocks.
 """
-abstract type AbstractBlock{N, T} end
+abstract type AbstractBlock{N} end
 
 """
     apply!(register, block)
@@ -76,6 +76,7 @@ Change the sub-blocks of a [`CompositeBlock`](@ref) with given iterator `itr`.
 Transform the apply! function of specific block to dense matrix.
 """
 @interface applymatrix(g::AbstractBlock) = linop2dense(r->statevec(apply!(ArrayReg(r), g)), nqubits(g))
+# just use BlockMap maybe?
 
 @interface print_block(io::IO, blk::AbstractBlock) = print_block(io, MIME("text/plain"), blk)
 print_block(blk::AbstractBlock) = print_block(stdout, blk)
@@ -85,17 +86,18 @@ print_block(io::IO, ::MIME"text/plain", blk::AbstractBlock) = summary(io, blk)
 Base.copy(x::AbstractBlock) = x
 
 """
-    mat(blk)
+    mat([T=ComplexF64], blk)
 
 Returns the matrix form of given block.
 """
-@interface mat(::AbstractBlock)
+@interface mat(x::AbstractBlock) = mat(ComplexF64, x)
+@interface mat(::Type{T}, x::AbstractBlock) where T
+
+Base.Matrix{T}(x::AbstractBlock) where T = Matrix(mat(T, x))
 
 # YaoBase interface
 YaoBase.nqubits(::Type{<:AbstractBlock{N}}) where N = N
 YaoBase.nqubits(x::AbstractBlock{N}) where N = nqubits(typeof(x))
-YaoBase.datatype(x::AbstractBlock{N, T}) where {N, T} = T
-YaoBase.datatype(::Type{<:AbstractBlock{N, T}}) where {N, T} = T
 
 # properties
 for each_property in [:isunitary, :isreflexive, :ishermitian]

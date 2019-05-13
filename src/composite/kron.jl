@@ -6,16 +6,16 @@ export KronBlock, kron
 
 composite block that combine blocks by kronecker product.
 """
-struct KronBlock{N, T, MT<:AbstractBlock} <: CompositeBlock{N, T}
+struct KronBlock{N, MT<:AbstractBlock} <: CompositeBlock{N}
     slots::Vector{Int}
     locs::Vector{Int}
     blocks::Vector{MT}
 end
 
-KronBlock{N, T}(slots::Vector{Int}, locs::Vector{Int}, blocks::Vector{MT}) where {N, T, MT <: AbstractBlock} =
-    KronBlock{N, T, MT}(slots, locs, blocks)
+KronBlock{N}(slots::Vector{Int}, locs::Vector{Int}, blocks::Vector{MT}) where {N, MT <: AbstractBlock} =
+    KronBlock{N, MT}(slots, locs, blocks)
 
-function KronBlock{N, T}(locs::Vector{Int}, blocks::Vector{MT}) where {N, T, MT<:AbstractBlock}
+function KronBlock{N}(locs::Vector{Int}, blocks::Vector{MT}) where {N, MT<:AbstractBlock}
     perm = sortperm(locs)
     permute!(locs, perm)
     permute!(blocks, perm)
@@ -25,15 +25,7 @@ function KronBlock{N, T}(locs::Vector{Int}, blocks::Vector{MT}) where {N, T, MT<
     for (i, each) in enumerate(locs)
         slots[each] = i
     end
-    return KronBlock{N, T, MT}(slots, locs, blocks)
-end
-
-function KronBlock{N}(locs::Vector{Int}, blocks::Vector{<:AbstractBlock}) where N
-    T = datatype(first(blocks))
-    for k in 2:length(blocks)
-        T == datatype(blocks[k]) || error("datatype mismatch, got $(datatype(each)) at $k-th block")
-    end
-    return KronBlock{N, T}(locs, blocks)
+    return KronBlock{N, MT}(slots, locs, blocks)
 end
 
 function KronBlock{N}(itr::Pair{Int,<:AbstractBlock}...) where N
@@ -72,7 +64,7 @@ and a `Y` gate on the `3`rd qubit.
 
 ```jldoctest
 julia> kron(4, 1=>X, 3=>Y)
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 kron
 ├─ 1=>X gate
 └─ 3=>Y gate
@@ -94,7 +86,7 @@ You can use kronecker product to composite small blocks to a large blocks.
 
 ```jldoctest
 julia> kron(X, Y, Z, Z)
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 kron
 ├─ 1=>X gate
 ├─ 2=>Y gate
@@ -131,7 +123,7 @@ julia> kron(put(1=>X) for _ in 1:2)
 (n -> kron(n, (n  ->  put(n, 1 => X gate)), (n  ->  put(n, 1 => X gate))))
 
 julia> kron(X for _ in 1:2)
-nqubits: 2, datatype: Complex{Float64}
+nqubits: 2
 kron
 ├─ 1=>X gate
 └─ 2=>X gate
@@ -150,7 +142,7 @@ cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
 color(::Type{T}) where {T <: KronBlock} = :cyan
 
 
-function mat(k::KronBlock{N}) where N
+function mat(::Type{T}, k::KronBlock{N}) where {T, N}
     sizes = map(nqubits, subblocks(k))
     start_locs = @. N - $(k.locs) - sizes + 1
 
@@ -158,8 +150,8 @@ function mat(k::KronBlock{N}) where N
     sorted_start_locs = start_locs[order]
     num_bit_list = vcat(diff(push!(sorted_start_locs, N)) .- sizes[order])
 
-    return reduce(zip(subblocks(k)[order], num_bit_list), init=IMatrix(1 << sorted_start_locs[1])) do x, y
-        kron(x, mat(y[1]), IMatrix(1<<y[2]))
+    return reduce(zip(subblocks(k)[order], num_bit_list), init=IMatrix{1 << sorted_start_locs[1], T}()) do x, y
+        kron(x, mat(T, y[1]), IMatrix(1<<y[2]))
     end
 end
 
@@ -171,7 +163,7 @@ function apply!(r::ArrayReg, k::KronBlock)
     return r
 end
 
-_instruct!(state::AbstractArray, block::AbstractBlock, locs) = instruct!(state, mat(block), locs)
+_instruct!(state::AbstractArray{T}, block::AbstractBlock, locs) where T = instruct!(state, mat(T, block), locs)
 
 # specialization
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
@@ -179,18 +171,18 @@ for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
     @eval _instruct!(state::AbstractArray, block::$GT, locs) = instruct!(state, Val($(QuoteNode(G))), locs)
 end
 
-function Base.copy(k::KronBlock{N, T}) where {N, T}
+function Base.copy(k::KronBlock{N}) where N
     slots = copy(k.slots)
     locs = copy(k.locs)
     blocks = copy(k.blocks)
-    return KronBlock{N, T}(slots, locs, blocks)
+    return KronBlock{N}(slots, locs, blocks)
 end
 
-function Base.similar(k::KronBlock{N, T}) where {N, T}
+function Base.similar(k::KronBlock{N}) where N
     slots = zeros(Int, N)
     locs = empty!(similar(k.locs))
     blocks = empty!(similar(k.blocks))
-    return KronBlock{N, T}(slots, locs, blocks)
+    return KronBlock{N}(slots, locs, blocks)
 end
 
 function Base.getindex(k::KronBlock, addr)
@@ -225,11 +217,11 @@ Base.eltype(k::KronBlock) = Tuple{Int, AbstractBlock}
 Base.length(k::KronBlock) = length(k.blocks)
 Base.eachindex(k::KronBlock) = k.locs
 
-function Base.:(==)(lhs::KronBlock{N, T}, rhs::KronBlock{N, T}) where {N, T}
+function Base.:(==)(lhs::KronBlock{N}, rhs::KronBlock{N}) where N
     return all(lhs.locs .== rhs.locs) && all(lhs.blocks .== rhs.blocks)
 end
 
-Base.adjoint(blk::KronBlock{N, T}) where {N, T} = KronBlock{N, T}(blk.slots, blk.locs, map(adjoint, blk.blocks))
+Base.adjoint(blk::KronBlock{N}) where N = KronBlock{N}(blk.slots, blk.locs, map(adjoint, blk.blocks))
 
 YaoBase.ishermitian(k::KronBlock) = all(ishermitian, k.blocks) || ishermitian(mat(k))
 YaoBase.isunitary(k::KronBlock) = all(isunitary, k.blocks) || isunitary(mat(k))

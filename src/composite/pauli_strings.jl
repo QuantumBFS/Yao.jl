@@ -2,10 +2,10 @@ import StaticArrays: SizedVector
 export PauliString
 
 # TODO: expand to Clifford?
-struct PauliString{N, T, BT <: ConstantGate{1, T}, VT <: SizedVector{N, BT}} <: CompositeBlock{N, T}
+struct PauliString{N, BT <: ConstantGate{1}, VT <: SizedVector{N, BT}} <: CompositeBlock{N}
     blocks::VT
-    PauliString(blocks::SizedVector{N, BT}) where {N, T, BT <: ConstantGate{1, T}} =
-        new{N, T, BT, typeof(blocks)}(blocks)
+    PauliString(blocks::SizedVector{N, BT}) where {N, BT <: ConstantGate{1}} =
+        new{N, BT, typeof(blocks)}(blocks)
 end
 
 # NOTE: PauliString has a fixed size `N`, thus by default, it should use
@@ -20,14 +20,14 @@ Create a `PauliString` from some Pauli gates.
 
 ```jldoctest
 julia> PauliString(X, Y, Z)
-nqubits: 3, datatype: Complex{Float64}
+nqubits: 3
 PauliString
 ├─ X gate
 ├─ Y gate
 └─ Z gate
 ```
 """
-PauliString(xs::PauliGate{T}...) where T = PauliString(SizedVector{length(xs), PauliGate{T}}(xs))
+PauliString(xs::PauliGate...) = PauliString(SizedVector{length(xs), PauliGate}(xs))
 
 """
     PauliString(list::Vector)
@@ -38,7 +38,7 @@ Create a `PauliString` from a list of Pauli gates.
 
 ```jldoctest
 julia> PauliString([X, Y, Z])
-nqubits: 3, datatype: Complex{Float64}
+nqubits: 3
 PauliString
 ├─ X gate
 ├─ Y gate
@@ -46,15 +46,12 @@ PauliString
 ```
 """
 function PauliString(xs::Vector)
-    T = datatype(first(xs))
     for each in xs
         if !(each isa PauliGate)
             error("expect pauli gates")
         end
-
-        datatype(each) == T || error("expect data type to be $T")
     end
-    return PauliString(SizedVector{length(xs), PauliGate{T}}(xs))
+    return PauliString(SizedVector{length(xs), PauliGate}(xs))
 end
 
 subblocks(ps::PauliString) = ps.blocks
@@ -84,7 +81,7 @@ function Base.setindex!(ps::PauliString, v::PauliGate, index::Union{Int})
     return ps
 end
 
-function Base.:(==)(lhs::PauliString{N, T}, rhs::PauliString{N, T}) where {N, T}
+function Base.:(==)(lhs::PauliString{N}, rhs::PauliString{N}) where N
     (length(lhs.blocks) == length(rhs.blocks)) && all(lhs.blocks .== rhs.blocks)
 end
 
@@ -101,6 +98,6 @@ function apply!(reg::ArrayReg, ps::PauliString)
     return reg
 end
 
-function mat(ps::PauliString)
-    return mat(xgates(ps)) * mat(ygates(ps)) * mat(zgates(ps))
+function mat(::Type{T}, ps::PauliString) where T
+    return mat(T, xgates(ps)) * mat(T, ygates(ps)) * mat(T, zgates(ps))
 end

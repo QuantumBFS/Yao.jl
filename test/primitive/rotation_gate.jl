@@ -24,12 +24,27 @@ end
     end
 end
 
+@testset "test apply" begin
+    r = rand_state(1)
+    @test state(apply!(copy(r), Rx(0.1))) ≈ mat(Rx) * state(r)
+end
+
 @testset "test dispatch" begin
     @test dispatch!(Rx(0.1), 0.3) == Rx(0.3)
+    @test nparameters(Rx(0.1)) == 1
 
     @testset "test $op" for op in [+, -, *, /]
         @test dispatch!(op, Rx(0.1), π) == Rx(op(0.1, π))
     end
 
     @test_throws AssertionError dispatch!(Rx(0.1), (0.2, 0.3))
+end
+
+@testset "adjoints" begin
+    @test Rx(0.1)' == Rx(-0.1)
+    @test Rx(0.2)' == Rx(-0.2)
+    @test copy(Rx(0.1)) == Rx(0.1)
+    
+    g = Rx(0.1) # creates a new one
+    @test copy(g) !== g
 end

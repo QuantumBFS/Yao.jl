@@ -1,45 +1,28 @@
-export Sum, Prod
+using SimpleTraits.BaseTraits, SimpleTraits
 
-struct Sum{N, T, List <: Tuple} <: CompositeBlock{N, T}
-    list::List
+export Sum
 
-    Sum{N, T}(list::Tuple) where {N, T} = new{N, T, typeof(list)}(list)
-    Sum(list::AbstractBlock{N, T}...) where {N, T} = new{N, T, typeof(list)}(list)
+struct Sum{N} <: CompositeBlock{N}
+    list::Vector{AbstractBlock{N}}
+
+    Sum{N}(list::Vector{AbstractBlock{N}}) where N = new{N}(list)
+    Sum{N}(it::T) where {N, T} = Sum{N}(SimpleTraits.trait(IsIterator{T}), it)
+    Sum{N}(::Type{<:IsIterator}, it) where N = new{N}(collect(AbstractBlock{N}, it))
 end
 
-struct Prod{N, T, List <: Tuple} <: CompositeBlock{N, T}
-    list::List
+Sum{N}(::Not, it) where N = error("expect an iterator/collection")
 
-    Prod{N, T}(list::Tuple) where {N, T} = new{N, T, typeof(list)}(list)
-    Prod(list::AbstractBlock{N, T}...) where {N, T} = new{N, T, typeof(list)}(list)
-end
+Sum{N}() where N = Sum(AbstractBlock{N}[])
+Sum(blocks::Vector{<:AbstractBlock{N}}) where N = Sum{N}(blocks)
+Sum(blocks::AbstractBlock{N}...) where N = Sum(collect(AbstractBlock{N}, blocks))
 
-# merge prod & sum
-Sum(a::Sum{N, T}, blks::Union{Sum{N, T}, AbstractBlock{N, T}}...) where {N, T} =
-    Sum{N, T}((a.list..., ), blks...)
-Sum(a::AbstractBlock{N, T}, blks::Union{Sum{N, T}, AbstractBlock{N, T}}...) where {N, T} =
-    Sum{N, T}((a, ), blks...)
-Sum{N, T}(a::Tuple, b::Sum, blks::Union{Sum{N, T}, AbstractBlock{N, T}}...) where {N, T} =
-    Sum{N, T}((a..., b.list...), blks...)
-Sum{N, T}(a::Tuple, b::AbstractBlock{N, T}, blks::Union{Sum{N, T}, AbstractBlock{N, T}}...) where {N, T} =
-    Sum{N, T}((a..., b), blks...)
+mat(::Type{T}, x::Sum) where T = mapreduce(x->mat(T, x), +, x.list)
 
-Prod(a::Prod{N, T}, blks::Union{Prod{N, T}, AbstractBlock{N, T}}...) where {N, T} =
-    Prod{N, T}((a.list..., ), blks...)
-Prod(a::AbstractBlock{N, T}, blks::Union{Prod{N, T}, AbstractBlock{N, T}}...) where {N, T} =
-    Prod{N, T}((a, ), blks...)
-Prod{N, T}(a::Tuple, b::Prod, blks::Union{Prod{N, T}, AbstractBlock{N, T}}...) where {N, T} =
-    Prod{N, T}((a..., b.list...), blks...)
-Prod{N, T}(a::Tuple, b::AbstractBlock{N, T}, blks::Union{Prod{N, T}, AbstractBlock{N, T}}...) where {N, T} =
-    Prod{N, T}((a..., b), blks...)
+chsubblocks(x::Sum{N}, it) where N = Sum{N}(it)
 
-mat(x::Sum) = mapreduce(mat, +, x.list)
-mat(x::Prod) = mapreduce(mat, *, x.list)
+function apply!(r::AbstractRegister, x::Sum)
+    isempty(x.list) && return r
 
-chsubblocks(x::Sum{N, T}, it) where {N, T} = Sum{N, T}(Tuple(it))
-chsubblocks(x::Prod{N, T}, it) where {N, T} = Prod{N, T}(Tuple(it))
-
-function apply!(r::AbstractRegister{B, T}, x::Sum{N, T}) where {B, N, T}
     out = copy(r)
     apply!(out, first(x))
     for k in 2:length(x)
@@ -49,37 +32,17 @@ function apply!(r::AbstractRegister{B, T}, x::Sum{N, T}) where {B, N, T}
     return r
 end
 
-function apply!(r::AbstractRegister{B, T}, x::Prod{N, T}) where {B, N, T}
-    for each in Iterators.reverse(x.list)
-        apply!(r, each)
-    end
-    return r
-end
+export Sum
 
-export ReduceOperator
+subblocks(x::Sum) = x.list
+cache_key(x::Sum) = map(cache_key, x.list)
 
-const ReduceOperator{N, T, List} = Union{Sum{N, T, List}, Prod{N, T, List}}
+Base.length(x::Sum) = length(x.list)
+Base.iterate(x::Sum) = iterate(x.list)
+Base.iterate(x::Sum, st) = iterate(x.list, st)
+Base.getindex(x::Sum, k) = getindex(x.list, k)
 
-apply!(r::AbstractRegister, x::ReduceOperator{N, T, Tuple{}}) where {N, T} = r
-apply!(r::AbstractRegister, x::ReduceOperator{N, T, Tuple{<:AbstractBlock}}) where {N, T} =
-    apply!(r, first(x))
-
-subblocks(x::ReduceOperator) = x.list
-cache_key(x::ReduceOperator) = map(cache_key, x.list)
-
-Base.length(x::ReduceOperator) = length(x.list)
-Base.iterate(x::ReduceOperator) = iterate(x.list)
-Base.iterate(x::ReduceOperator, st) = iterate(x.list, st)
-Base.getindex(x::ReduceOperator, k) = getindex(x.list, k)
-
-function Base.:(==)(lhs::Prod{N, T}, rhs::Prod{N, T}) where {N, T}
-    for (a, b) in zip(lhs, rhs)
-        a == b || return false
-    end
-    return true
-end
-
-function Base.:(==)(lhs::Sum{N, T}, rhs::Sum{N, T}) where {N, T}
+function Base.:(==)(lhs::Sum{N}, rhs::Sum{N}) where N
     for (a, b) in zip(lhs, rhs)
         a == b || return false
     end

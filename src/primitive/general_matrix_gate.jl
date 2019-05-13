@@ -2,14 +2,14 @@ using YaoBase, YaoArrayRegister
 export GeneralMatrixBlock, matblock
 
 """
-    GeneralMatrixBlock{M, N, T, MT} <: PrimitiveBlock{N, T}
+    GeneralMatrixBlock{M, N, MT} <: PrimitiveBlock{N}
 
 General matrix gate wraps a matrix operator to quantum gates. This is the most
 general form of a quantum gate. `M` is the hilbert dimension (first dimension),
 `N` is the hilbert dimension (second dimension) of current quantum state. For
 most quantum gates, we have ``M = N``.
 """
-struct GeneralMatrixBlock{M, N, T, MT <: AbstractMatrix{T}} <: PrimitiveBlock{N, T}
+struct GeneralMatrixBlock{M, N, T, MT <: AbstractMatrix{T}} <: PrimitiveBlock{N}
     mat::MT
 
     function GeneralMatrixBlock{M, N}(m::MT) where {M, N, T, MT <: AbstractMatrix{T}}
@@ -43,7 +43,16 @@ Create a [`GeneralMatrixBlock`](@ref) with a matrix `m`.
 """
 matblock(m::AbstractBlock) = GeneralMatrixBlock(mat(m))
 
-mat(A::GeneralMatrixBlock) = A.mat
+function mat(::Type{T}, A::GeneralMatrixBlock) where T
+    if eltype(A.mat) == T
+        return A.mat
+    else
+        # this errors before, but since we allow one to specify T in mat
+        # this should be allowed but with a suggestion
+        @warn "converting $(eltype(A.mat)) to eltype $T, consider create another matblock with eltype $T"
+        return copyto!(similar(A.mat, T), A.mat)
+    end
+end
 
 Base.:(==)(A::GeneralMatrixBlock, B::GeneralMatrixBlock) = A.mat == B.mat
 Base.copy(A::GeneralMatrixBlock) = GeneralMatrixBlock(copy(A.mat))

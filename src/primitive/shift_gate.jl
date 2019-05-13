@@ -16,7 +16,7 @@ Phase shift gate.
 \\end{pmatrix}
 ```
 """
-mutable struct ShiftGate{T} <: PrimitiveBlock{1, Complex{T}}
+mutable struct ShiftGate{T <: Real} <: PrimitiveBlock{1}
     theta::T
 end
 
@@ -34,7 +34,7 @@ shift(0.1)
 """
 shift(θ::AbstractFloat) = ShiftGate(θ)
 shift(θ::Real) = shift(Float64(θ))
-mat(gate::ShiftGate{T}) where T = Diagonal(Complex{T}[1.0, exp(im * gate.theta)])
+mat(::Type{T}, gate::ShiftGate) where {T <: Complex} = Diagonal(T[1.0, exp(im * gate.theta)])
 
 cache_key(gate::ShiftGate) = gate.theta
 

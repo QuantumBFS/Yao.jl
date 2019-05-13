@@ -6,18 +6,18 @@ export RepeatedBlock, repeat
 
 Repeat the same block on given locations.
 """
-struct RepeatedBlock{N, C, GT <: AbstractBlock, T} <: AbstractContainer{GT, N, T}
+struct RepeatedBlock{N, C, GT <: AbstractBlock} <: AbstractContainer{GT, N}
     content::GT
     locs::NTuple{C, Int}
 end
 
-function RepeatedBlock{N}(block::AbstractBlock{M, T}, locs::NTuple{C, Int}) where {N, M, T, C}
+function RepeatedBlock{N}(block::AbstractBlock{M}, locs::NTuple{C, Int}) where {N, M, C}
     @assert_locs_safe N Tuple(i:i+M-1 for i in locs)
-    return RepeatedBlock{N, C, typeof(block), T}(block, locs)
+    return RepeatedBlock{N, C, typeof(block)}(block, locs)
 end
 
-function RepeatedBlock{N}(block::GT) where {N, M, T, GT <: AbstractBlock{M, T}}
-    return RepeatedBlock{N, N, GT, T}(block, Tuple(1:M:N-M+1))
+function RepeatedBlock{N}(block::GT) where {N, M, GT <: AbstractBlock{M}}
+    return RepeatedBlock{N, N, GT}(block, Tuple(1:M:N-M+1))
 end
 
 """
@@ -32,7 +32,7 @@ This will create a repeat block which puts 4 X gates on each location.
 
 ```jldoctest
 julia> repeat(4, X)
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 repeat on (1, 2, 3, 4)
 └─ X gate
 ```
@@ -41,7 +41,7 @@ You can also specify the location
 
 ```jldoctest
 julia> repeat(4, X, (1, 2))
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 repeat on (1, 2)
 └─ X gate
 ```
@@ -51,7 +51,7 @@ will change simultaneously.
 
 ```jldoctest
 julia> g = repeat(4, phase(0.1))
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 repeat on (1, 2, 3, 4)
 └─ phase(0.1)
 
@@ -62,7 +62,7 @@ julia> g.content.theta = 0.2
 0.2
 
 julia> g
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 repeat on (1, 2, 3, 4)
 └─ phase(0.2)
 ```
@@ -86,12 +86,12 @@ occupied_locs(x::RepeatedBlock) = Iterators.flatten(k:k+nqubits(x.content)-1 for
 chsubblocks(x::RepeatedBlock{N}, blk::AbstractBlock) where N = RepeatedBlock{N}(blk, x.locs)
 PreserveProperty(x::RepeatedBlock) = PreserveAll()
 
-mat(rb::RepeatedBlock{N}) where N = hilbertkron(N, fill(mat(rb.content), length(rb.locs)), [rb.locs...])
-mat(rb::RepeatedBlock{N, 0, GT, T}) where {N, GT, T} = IMatrix{1<<N, T}()
+mat(::Type{T}, rb::RepeatedBlock{N}) where {T, N} = hilbertkron(N, fill(mat(T, rb.content), length(rb.locs)), [rb.locs...])
+mat(::Type{T}, rb::RepeatedBlock{N, 0, GT}) where {T, N, GT} = IMatrix{1<<N, T}()
 
-function apply!(r::AbstractRegister, rp::RepeatedBlock)
+function apply!(r::ArrayReg{B, T}, rp::RepeatedBlock) where {B, T}
     _check_size(r, rp)
-    m  = mat(rp.content)
+    m  = mat(T, rp.content)
     for addr in rp.locs
         instruct!(matvec(r.state), m, Tuple(addr:addr+nqubits(rp.content)-1))
     end
@@ -101,7 +101,7 @@ end
 # specialization
 for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
-    @eval function apply!(r::AbstractRegister, rp::RepeatedBlock{N, C, <:$GT}) where {N, C}
+    @eval function apply!(r::ArrayReg, rp::RepeatedBlock{N, C, $GT}) where {N, C}
         for addr in rp.locs
             instruct!(matvec(r.state), Val($(QuoteNode(G))), Tuple(addr:addr+nqubits(rp.content)-1))
         end

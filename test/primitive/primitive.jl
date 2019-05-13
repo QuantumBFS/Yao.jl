@@ -35,3 +35,6 @@ end
 @testset "test measure" begin
     include("measure.jl")
 end
+
+# it does nothing
+@test chsubblocks(X, Y) === X

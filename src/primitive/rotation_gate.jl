@@ -13,17 +13,19 @@ RotationGate, with GT both hermitian and isreflexive.
 \\mathbf{I} cos(θ / 2) - im sin(θ / 2) * mat(U)
 ```
 """
-mutable struct RotationGate{N, T, GT <: AbstractBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
+mutable struct RotationGate{N, T, GT <: AbstractBlock{N}} <: PrimitiveBlock{N}
     block::GT
     theta::T
-    function RotationGate{N, T, GT}(block::GT, theta) where {N, T, GT <: AbstractBlock{N, Complex{T}}}
+    function RotationGate{N, T, GT}(block::GT, theta) where {N, T, GT <: AbstractBlock{N}}
         ishermitian(block) && isreflexive(block) ||
             throw(ArgumentError("Gate type $GT is not hermitian or not isreflexive."))
         new{N, T, GT}(block, T(theta))
     end
 end
 
-RotationGate(block::GT, theta) where {N, T, GT<:AbstractBlock{N, Complex{T}}} = RotationGate{N, T, GT}(block, T(theta))
+RotationGate(block::GT, theta::T) where {N, T <: AbstractFloat, GT<:AbstractBlock{N}} = RotationGate{N, T, GT}(block, theta)
+# convert to float if theta is not a floating point
+RotationGate(block::AbstractBlock, theta) = RotationGate(block, Float64(theta))
 
 # bindings
 """
@@ -38,7 +40,7 @@ julia> Rx(0.1)
 rot(X gate, 0.1)
 ```
 """
-Rx(theta::T) where T <: AbstractFloat = RotationGate(X(Complex{T}), theta)
+Rx(theta) = RotationGate(X, theta)
 
 """
     Ry(theta)
@@ -52,7 +54,7 @@ julia> Ry(0.1)
 rot(Y gate, 0.1)
 ```
 """
-Ry(theta::T) where T <: AbstractFloat = RotationGate(Y(Complex{T}), theta)
+Ry(theta) = RotationGate(Y, theta)
 
 """
     Rz(theta)
@@ -66,11 +68,7 @@ julia> Rz(0.1)
 rot(Z gate, 0.1)
 ```
 """
-Rz(theta::T) where T <: AbstractFloat = RotationGate(Z(Complex{T}), theta)
-
-Rx(theta) = Rx(Float64(theta))
-Ry(theta) = Ry(Float64(theta))
-Rz(theta) = Rz(Float64(theta))
+Rz(theta) = RotationGate(Z, theta)
 
 """
     rot(U, theta)
@@ -81,23 +79,25 @@ rot(axis::AbstractBlock, theta) = RotationGate(axis, theta)
 
 content(x::RotationGate) = x.block
 # General definition
-function mat(R::RotationGate{N, T}) where {N, T}
-    I = IMatrix{1<<N, Complex{T}}()
-    return I * cos(R.theta / 2) - im * sin(R.theta / 2) * mat(R.block)
+function mat(::Type{T}, R::RotationGate{N}) where {N, T <: ComplexF64}
+    I = IMatrix{1<<N, T}()
+    return I * cos(T(R.theta) / 2) - im * sin(T(R.theta) / 2) * mat(T, R.block)
 end
 
 # Specialized
-mat(R::RotationGate{1, T, XGate{Complex{T}}}) where T =
-    SMatrix{2, 2, Complex{T}}(cos(R.theta/2), -im * sin(R.theta/2), -im * sin(R.theta/2), cos(R.theta/2))
-mat(R::RotationGate{1, T, YGate{Complex{T}}}) where T =
-    SMatrix{2, 2, Complex{T}}(cos(R.theta/2), sin(R.theta/2), -sin(R.theta/2), cos(R.theta/2))
-mat(R::RotationGate{1, T, ZGate{Complex{T}}}) where T =
-    SMatrix{2, 2, Complex{T}}(cos(R.theta/2)-im*sin(R.theta/2), 0, 0, cos(R.theta/2)+im*sin(R.theta/2))
+# mat(R::RotationGate{1, T, XGate{Complex{T}}}) where T =
+#     SMatrix{2, 2, Complex{T}}(cos(R.theta/2), -im * sin(R.theta/2), -im * sin(R.theta/2), cos(R.theta/2))
+# mat(R::RotationGate{1, T, YGate{Complex{T}}}) where T =
+#     SMatrix{2, 2, Complex{T}}(cos(R.theta/2), sin(R.theta/2), -sin(R.theta/2), cos(R.theta/2))
+# mat(R::RotationGate{1, T, ZGate{Complex{T}}}) where T =
+#     SMatrix{2, 2, Complex{T}}(cos(R.theta/2)-im*sin(R.theta/2), 0, 0, cos(R.theta/2)+im*sin(R.theta/2))
 
 function apply!(r::ArrayReg, rb::RotationGate)
     v0 = copy(r.state)
     apply!(r, rb.block)
-    r.state = -im*sin(rb.theta/2)*r.state + cos(rb.theta/2)*v0
+    # NOTE: we should not change register's memory address,
+    # or batch operations may fail
+    r.state .= -im*sin(rb.theta/2)*r.state + cos(rb.theta/2)*v0
     return r
 end
 

@@ -7,16 +7,16 @@ export Concentrator, concentrate
 concentrates serveral lines together in the circuit, and expose
 it to other blocks.
 """
-struct Concentrator{N, T, BT <: AbstractBlock, C} <: AbstractContainer{BT, N, T}
+struct Concentrator{N, BT <: AbstractBlock, C} <: AbstractContainer{BT, N}
     content::BT
     locations::NTuple{C, Int}
 end
 
-function Concentrator{N}(block::BT, locations::NTuple{C, Int}) where {N, M, C, T, BT<:AbstractBlock{M, T}}
+function Concentrator{N}(block::BT, locations::NTuple{C, Int}) where {N, M, C, BT<:AbstractBlock{M}}
     if !(length(locations) == M && N>=M)
         throw(LocationConflictError("length of locations must be equal to the size of block, and smaller than size of itself."))
     end
-    return Concentrator{N, T, BT, C}(block, locations)
+    return Concentrator{N, BT, C}(block, locations)
 end
 
 """
@@ -48,14 +48,14 @@ ArrayReg{1, Complex{Float64}, Array...}
     active qubits: 4/4
 
 julia> cc = concentrate(4, kron(X, Y), (1, 3))
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 Concentrator: (1, 3)
 └─ kron
    ├─ 1=>X gate
    └─ 2=>Y gate
 
 julia> pp = chain(4, put(1=>X), put(3=>Y))
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 chain
 ├─ put on (1)
 │  └─ X gate
@@ -94,14 +94,14 @@ function apply!(r::AbstractRegister, c::Concentrator)
     return r
 end
 
-function mat(c::Concentrator{N, T, <:AbstractBlock}) where {N, T}
-    mat(PutBlock{N}(c.content, c.locations))
+function mat(::Type{T}, c::Concentrator{N, <:AbstractBlock}) where {N, T}
+    mat(T, PutBlock{N}(c.content, c.locations))
 end
 
 Base.adjoint(blk::Concentrator{N}) where N =
     Concentrator{N}(adjoint(blk.content), occupied_locs(blk))
 
-function Base.:(==)(a::Concentrator{N, T, BT}, b::Concentrator{N, T, BT}) where {N, T, BT}
+function Base.:(==)(a::Concentrator{N, BT}, b::Concentrator{N, BT}) where {N, BT}
     return a.content == b.content && a.locations == b.locations
 end
 

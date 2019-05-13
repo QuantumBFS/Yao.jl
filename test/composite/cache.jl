@@ -1,10 +1,10 @@
 using Test, YaoBlocks, YaoArrayRegister, LuxurySparse, CacheServers
 
 @testset "constructor" begin
-    @test CacheFragment(X) isa CacheFragment{XGate{ComplexF64}, UInt8, Any}
-    @test CacheFragment{XGate{ComplexF64}, Int, PermMatrix{ComplexF64, Int}}(X) isa
-        CacheFragment{XGate{ComplexF64}, Int, PermMatrix{ComplexF64, Int}}
-    @test CacheFragment{XGate{ComplexF64}, Int}(X) isa CacheFragment{XGate{ComplexF64}, Int, Any}
+    @test CacheFragment(X) isa CacheFragment{XGate, UInt8, Any}
+    @test CacheFragment{XGate, Int, PermMatrix{ComplexF64, Int}}(X) isa
+        CacheFragment{XGate, Int, PermMatrix{ComplexF64, Int}}
+    @test CacheFragment{XGate, Int}(X) isa CacheFragment{XGate, Int, Any}
 end
 
 @testset "CacheServer API" begin
@@ -19,7 +19,7 @@ test_server = DefaultServer{AbstractBlock, CacheFragment}()
 
 @testset "constructor" begin
     c = CachedBlock(test_server, X, 2)
-    @test c isa CachedBlock{DefaultServer{AbstractBlock, CacheFragment}, XGate{ComplexF64}, 1, ComplexF64}
+    @test c isa CachedBlock{DefaultServer{AbstractBlock, CacheFragment}, XGate, 1}
 
     blk = kron(4, 2=>Rx(0.3))
     @test first(chsubblocks(c, blk) |> subblocks) == blk
@@ -66,7 +66,6 @@ end
     #@test iterate(g) == iterate(g.content)
     #@test length(g) == length(g.content)
 
-    @test datatype(g) == datatype(g.content)
     @test subblocks(g) == (g.content,)
 
     gg = chain(g, g)

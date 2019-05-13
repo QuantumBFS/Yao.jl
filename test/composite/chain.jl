@@ -5,7 +5,7 @@ using Test, YaoBase, YaoBlocks, YaoArrayRegister
         kron(2, 1=>X, 2=>Y),
         kron(2, 1=>phase(0.1)))
 
-    @test g isa ChainBlock{2, ComplexF64} # default type
+    @test g isa ChainBlock{2} # default type
     @test g.blocks == [kron(2, X, Y), kron(2, 1=>phase(0.1))]
     blks = [X, Y, Rx(0.3)]
     @test chsubblocks(g, blks) |> subblocks |> collect == blks
@@ -17,7 +17,7 @@ using Test, YaoBase, YaoBlocks, YaoArrayRegister
     @test iscommute(c1, c2, c2)
     @test ishermitian(ChainBlock(c1, c2))
 
-    c = ChainBlock{1, ComplexF64}([X, Y])
+    c = ChainBlock{1}([X, Y])
     c[1] = put(1, 1=>X)
     @test c[1] == put(1, 1=>X)
     c = ChainBlock([X, Y])

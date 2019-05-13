@@ -8,7 +8,7 @@ g = PauliString(X, Y, Z)
 @test g[end] == Z
 
 @test collect(g) == [X, Y, Z]
-@test eltype(g) == ConstGate.PauliGate{ComplexF64}
+@test eltype(g) == ConstGate.PauliGate
 
 r = rand_state(3)
 @test apply!(copy(r), g) ≈ apply!(copy(r), kron(X, Y, Z))

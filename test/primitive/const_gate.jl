@@ -71,17 +71,31 @@ end
 
     @testset "bind new type" begin
         @test @allocated(mat(X)) == 0
-        @test @allocated(mat(XGate{ComplexF32}())) > 0
+        @test @allocated(mat(ComplexF32, X)) > 0
         @const_gate X::ComplexF32
-        @test @allocated(mat(XGate{ComplexF32}())) == 0
+        @test @allocated(mat(ComplexF32, XGate())) == 0
     end
 
     @testset "define new" begin
         @const_gate TEST = rand(ComplexF64, 2, 2)
-        @test_throws ErrorException @const_gate TEST::ComplexF32 = rand(2, 2)
+
+        # errors if given matrix is not a square matrix 
+        @test_throws DimensionMismatch @const_gate TEST::ComplexF32 = rand(2, 3)
 
         @const_gate TEST::ComplexF32
-        @test @allocated(TEST(ComplexF32)) == 0
+        @test @allocated(mat(ComplexF32, TEST)) == 0
     end
 
+end
+
+@testset "I gate" begin
+    g = ConstGate.IGate{2}()
+    @test mat(g) ≈ IMatrix{4, ComplexF64}()
+    @test ishermitian(g)
+    @test isunitary(g)
+end
+
+@testset "test adjoints" begin
+    adjoint(Pu) == Pd
+    adjoint(Pd) == Pu
 end

@@ -3,7 +3,7 @@ using YaoBase, YaoArrayRegister
 export ReflectGate, reflect
 
 """
-    ReflectGate{N, T, Tr} <: PrimitiveBlock{N, T}
+    ReflectGate{N, T, Tr} <: PrimitiveBlock{N}
 
 Reflection operator to target state `psi`.
 
@@ -13,7 +13,7 @@ Reflection operator to target state `psi`.
 |ψ⟩ → 2 |s⟩⟨s| - 1
 ```
 """
-struct ReflectGate{N, T, Tr <: AbstractRegister{1, T}} <: PrimitiveBlock{N, T}
+struct ReflectGate{N, T, Tr <: AbstractRegister{1, T}} <: PrimitiveBlock{N}
     psi::Tr
 end
 
@@ -58,9 +58,16 @@ function apply!(r::ArrayReg, g::ReflectGate{N, T, <:ArrayReg}) where {N, T}
     return r
 end
 
-function mat(r::ReflectGate)
+# target type is the same with block's
+function mat(::Type{T}, r::ReflectGate{N, T}) where {N, T}
     v = statevec(r.psi)
     return 2 * v * v' - IMatrix(length(v))
+end
+
+# different
+function mat(::Type{T1}, r::ReflectGate{N, T2}) where {N, T1, T2}
+    M = mat(T2, r)
+    return copyto!(similar(M, T1), M)
 end
 
 Base.:(==)(A::ReflectGate, B::ReflectGate) = A.psi == B.psi

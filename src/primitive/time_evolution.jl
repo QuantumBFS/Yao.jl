@@ -3,21 +3,21 @@ using ExponentialUtilities, YaoArrayRegister
 export TimeEvolution, time_evolve
 
 """
-    TimeEvolution{N, TT, GT} <: PrimitiveBlock{N, ComplexF64}
+    TimeEvolution{N, TT, GT} <: PrimitiveBlock{N}
 
 TimeEvolution, where GT is block type. input matrix should be hermitian.
 
 !!!note:
     `TimeEvolution` contructor check hermicity of the input block by default, but sometimes it can be slow. Turn off the check manually by specifying optional parameter `check_hermicity = false`.
 """
-mutable struct TimeEvolution{N, T, Tt, Hamilton <: AbstractBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
+mutable struct TimeEvolution{N, T, Tt, Hamilton <: AbstractBlock{N}} <: PrimitiveBlock{N}
     H::BlockMap{Complex{T}, Hamilton}
     dt::Tt
     tol::T
 
     function TimeEvolution(
         H::BlockMap{Complex{T}, TH},
-        dt::Tt, tol::T; check_hermicity::Bool=true) where {N, Tt, T, TH <: AbstractBlock{N, Complex{T}}}
+        dt::Tt, tol::T; check_hermicity::Bool=true) where {N, Tt, T, TH <: AbstractBlock{N}}
         (check_hermicity && !ishermitian(H)) && error("Time evolution Hamiltonian has to be a Hermitian")
         return new{N, T, Tt, TH}(H, dt, tol)
     end
@@ -43,9 +43,9 @@ time_evolve(M::BlockMap, dt; kwargs...) = TimeEvolution(M, dt; kwargs...)
 time_evolve(M::AbstractBlock, dt; kwargs...) = TimeEvolution(M, dt; kwargs...)
 time_evolve(dt; kwargs...) = @λ(M->time_evolve(M, dt; kwargs...))
 
-function mat(te::TimeEvolution{N}) where N
-    A = Matrix(mat(te.H.block))
-    return exp(-im*te.dt * A)
+function mat(::Type{T}, te::TimeEvolution{N}) where {T, N}
+    A = Matrix{T}(te.H.block)
+    return exp(-im*T(te.dt) * A)
 end
 
 function apply!(reg::ArrayReg, te::TimeEvolution)

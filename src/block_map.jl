@@ -2,12 +2,15 @@ using LinearAlgebra, LinearMaps
 
 export BlockMap
 
+# we probably don't need T for block map either, but need some upstream
+# modification in LinearMaps.jl
 struct BlockMap{T, GT <: AbstractBlock} <: LinearMap{T}
     block::GT
 
-    BlockMap(block::GT) where GT <: AbstractBlock =
-        new{datatype(block), GT}(block)
+    BlockMap(::Type{T}, block::GT) where {T, GT <: AbstractBlock} = new{T, GT}(block)
 end
+
+BlockMap(block::AbstractBlock) = BlockMap(ComplexF64, block)
 
 function Base.show(io::IO, A::BlockMap{T}) where T
     println(io, "Quantum Circuit Block as LinearMap{$T}")

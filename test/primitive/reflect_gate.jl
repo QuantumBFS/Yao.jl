@@ -12,4 +12,14 @@ using Test, YaoArrayRegister, YaoBlocks, LinearAlgebra
     @test statevec(rf.psi)' * v0 ≈ statevec(rf.psi)' * v1
     @test v0 - statevec(rf.psi)'*v0* statevec(rf.psi) ≈
         -(v1- statevec(rf.psi)' * v1 * statevec(rf.psi))
+
+    @test mat(ComplexF32, rf) == ComplexF32.(mat(rf))
+
+    @test rf == reflect(rf.psi)
+    # copy do not occur on register
+    @test copy(rf).psi === rf.psi
+
+    @test ishermitian(rf)
+    @test isreflexive(rf)
+    @test isunitary(rf)
 end

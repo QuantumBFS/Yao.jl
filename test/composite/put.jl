@@ -21,6 +21,11 @@ end
     pb = PutBlock{n}(matblock(mat(rot(CNOT, 0.3))|>Matrix), (6, 3))
     @test pb |> applymatrix ≈ mat(pb)
 
+    pb = PutBlock{n}(rot(X, 0.3), (3,))
+    @test pb |> applymatrix ≈ mat(pb)
+    pb = PutBlock{n}(matblock(mat(rot(X, 0.3))|>Matrix), (3,))
+    @test pb |> applymatrix ≈ mat(pb)
+
     Cb = control(n, (3,), 5=>X)
     pb = PutBlock{n}(CNOT, (3, 5))
     @test apply!(copy(Reg), Cb) ≈ apply!(copy(Reg), pb)

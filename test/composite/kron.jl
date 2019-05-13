@@ -1,4 +1,5 @@
 using Test, Random, YaoBase, YaoBlocks, LuxurySparse
+using YaoBlocks.ConstGate
 
 function random_dense_kron(n; gateset)
     locs = randperm(n)

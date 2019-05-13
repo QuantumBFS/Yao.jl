@@ -3,24 +3,24 @@ using YaoBase
 export ChainBlock, chain
 
 """
-    ChainBlock{N, T} <: CompositeBlock{N, T}
+    ChainBlock{N} <: CompositeBlock{N}
 
 `ChainBlock` is a basic construct tool to create
 user defined blocks horizontically. It is a `Vector`
 like composite type.
 """
-struct ChainBlock{N, T} <: CompositeBlock{N, T}
+struct ChainBlock{N} <: CompositeBlock{N}
     blocks::Vector{AbstractBlock{N}}
 end
 
-ChainBlock(blocks::Vector{<:AbstractBlock{N}}) where N = ChainBlock{N, promote_type((datatype(b) for b in blocks)...)}(blocks)
+ChainBlock(blocks::Vector{<:AbstractBlock{N}}) where N = ChainBlock{N}(blocks)
 ChainBlock(blocks::AbstractBlock{N}...) where N = ChainBlock(collect(AbstractBlock{N}, blocks))
 
 """
     chain(blocks...)
 
 Return a [`ChainBlock`](@ref) which chains a list of blocks with same
-[`nqubits`](@ref) and [`datatype`](@ref). If there is lazy evaluated
+[`nqubits`](@ref). If there is lazy evaluated
 block in `blocks`, chain can infer the number of qubits and create an
 instance itself.
 """
@@ -48,12 +48,11 @@ chain(it) = chain(it...) # forward iterator to vargs, so we could dispatch based
 chain(blocks...) = @λ(n->chain(n, blocks))
 
 """
-    chain([T=ComplexF64], n)
+    chain(n)
 
 Return an empty [`ChainBlock`](@ref) which can be used like a list of blocks.
 """
-chain(n::Int) = chain(ComplexF64, n)
-chain(::Type{T}, n::Int) where T = ChainBlock{n, T}(AbstractBlock{n}[])
+chain(n::Int) = ChainBlock{n}(AbstractBlock{n}[])
 
 """
     chain()
@@ -66,10 +65,10 @@ subblocks(c::ChainBlock) = c.blocks
 occupied_locs(c::ChainBlock) =
     unique(Iterators.flatten(occupied_locs(b) for b in subblocks(c)))
 
-chsubblocks(pb::ChainBlock{N, T}, blocks::Vector{<:AbstractBlock}) where {N, T} = length(blocks) == 0 ? ChainBlock{N, T}([]) : ChainBlock(blocks)
+chsubblocks(pb::ChainBlock{N}, blocks::Vector{<:AbstractBlock}) where N = length(blocks) == 0 ? ChainBlock{N}([]) : ChainBlock(blocks)
 chsubblocks(pb::ChainBlock, it) = chain(it...)
 
-mat(c::ChainBlock) = prod(x->mat(x), Iterators.reverse(c.blocks))
+mat(::Type{T}, c::ChainBlock) where T = prod(x->mat(T, x), Iterators.reverse(c.blocks))
 
 function apply!(r::AbstractRegister, c::ChainBlock)
     for each in c.blocks
@@ -84,13 +83,13 @@ function Base.:(==)(lhs::ChainBlock{N}, rhs::ChainBlock{N}) where {N}
     (length(lhs.blocks) == length(rhs.blocks)) && all(lhs.blocks .== rhs.blocks)
 end
 
-Base.copy(c::ChainBlock{N, T}) where {N, T} = ChainBlock{N, T}(copy(c.blocks))
-Base.similar(c::ChainBlock{N, T}) where {N, T} = ChainBlock{N, T}(empty!(similar(c.blocks)))
+Base.copy(c::ChainBlock{N}) where N = ChainBlock{N}(copy(c.blocks))
+Base.similar(c::ChainBlock{N}) where {N} = ChainBlock{N}(empty!(similar(c.blocks)))
 Base.getindex(c::ChainBlock, index) = getindex(c.blocks, index)
 Base.getindex(c::ChainBlock, index::Union{UnitRange, Vector}) = ChainBlock(getindex(c.blocks, index))
 Base.setindex!(c::ChainBlock{N}, val::AbstractBlock{N}, index::Integer) where N = (setindex!(c.blocks, val, index); c)
 Base.insert!(c::ChainBlock{N}, index::Integer, val::AbstractBlock{N}) where N = (insert!(c.blocks, index, val); c)
-Base.adjoint(blk::ChainBlock{N, T}) where {N, T} = ChainBlock{N, T}(map(adjoint, reverse(subblocks(blk))))
+Base.adjoint(blk::ChainBlock{N}) where {N} = ChainBlock{N}(map(adjoint, reverse(subblocks(blk))))
 Base.lastindex(c::ChainBlock) = lastindex(c.blocks)
 ## Iterate contained blocks
 Base.iterate(c::ChainBlock, st=1) = iterate(c.blocks, st)
@@ -101,6 +100,8 @@ Base.popfirst!(c::ChainBlock) = popfirst!(c.blocks)
 Base.pop!(c::ChainBlock) = pop!(c.blocks)
 Base.push!(c::ChainBlock{N}, m::AbstractBlock{N}) where N = (push!(c.blocks, m); c)
 Base.push!(c::ChainBlock{N}, f::Function) where N = (push!(c.blocks, f(N)); c)
+Base.pushfirst!(c::ChainBlock{N}, m::AbstractBlock{N}) where N = (pushfirst!(c.blocks, m); c)
+Base.pushfirst!(c::ChainBlock{N}, f::Function) where N = (pushfirst!(c.blocks, f(N)); c)
 Base.append!(c::ChainBlock{N}, list::Vector{<:AbstractBlock{N}}) where N = (append!(c.blocks, list); c)
 Base.append!(c1::ChainBlock{N}, c2::ChainBlock{N}) where N = (append!(c1.blocks, c2.blocks); c1)
 Base.prepend!(c1::ChainBlock{N}, list::Vector{<:AbstractBlock{N}}) where N = (prepend!(c1.blocks, list); c1)

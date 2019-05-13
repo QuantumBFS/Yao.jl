@@ -20,10 +20,6 @@ end
     include("repeated.jl")
 end
 
-@testset "test roll" begin
-    include("roller.jl")
-end
-
 @testset "test concentrate" begin
     include("concentrator.jl")
 end
@@ -40,7 +36,6 @@ end
 @testset "test single block chsubblocks" begin
     @test chsubblocks(chain(X), Y) == chain(Y)
     @test chsubblocks(kron(X), Y) == kron(Y)
-    @test chsubblocks(roll(X), Y) == roll(Y)
     @test chsubblocks(prod(X), Y) == prod(Y)
     @test chsubblocks(sum(X), Y) == sum(Y)
 end

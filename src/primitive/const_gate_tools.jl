@@ -107,8 +107,8 @@ function define_typed_binding(__module__::Module, __source__::LineNumberNode, na
                 throw(UndefVarError($(QuoteNode(name))))
             end
 
-            const $const_binding = YaoBlocks.mat($gt_name{$type})
-            YaoBlocks.mat(::Type{$gt_name{$type}}) = $const_binding
+            const $const_binding = YaoBlocks.mat($type, $gt_name)
+            YaoBlocks.mat(::Type{$type}, ::Type{$gt_name}) = $const_binding
         end
     end
 end
@@ -133,9 +133,9 @@ function define_struct(__module__::Module, __source__::LineNumberNode, const_bin
         push!(ex.args, :(@warn $msg))
         push!(ex.args, :(@eval $__module__ @assert $N == $log2i(size(mat($name), 1)) "new constant does not have the same size with previous definitions"))
     else
-        push!(ex.args, :(@eval $__module__ Base.@__doc__ struct $gt_name{T} <: YaoBlocks.ConstGate.ConstantGate{$N, T} end))
+        push!(ex.args, :(@eval $__module__ Base.@__doc__ struct $gt_name <: YaoBlocks.ConstGate.ConstantGate{$N} end))
     end
-    push!(ex.args, :(@eval $__module__ Base.@__doc__ const $(name) = $(gt_name){eltype($const_binding)}()))
+    push!(ex.args, :(@eval $__module__ Base.@__doc__ const $(name) = $(gt_name)()))
     return ex
 end
 
@@ -166,17 +166,17 @@ function define_methods(__module__::Module, const_binding, name)
     gt_name = gatetype_name(name)
     return quote
         @eval $__module__ begin
-            YaoBlocks.mat(::Type{$gt_name{eltype($const_binding)}}) = $const_binding
-            YaoBlocks.mat(::GT) where GT <: $gt_name = YaoBlocks.mat(GT)
+            YaoBlocks.mat(::Type{eltype($const_binding)}, ::Type{$gt_name}) = $const_binding
+            # forward instance to const gate type
+            YaoBlocks.mat(::Type{T}, ::GT) where {T, GT <: $gt_name} = YaoBlocks.mat(T, GT)
 
-            function YaoBlocks.mat(::Type{$gt_name{T}}) where T
-                src = YaoBlocks.mat($gt_name{eltype($const_binding)})
+            function YaoBlocks.mat(::Type{T}, ::Type{$gt_name}) where T
+                src = YaoBlocks.mat(eltype($const_binding), $gt_name)
                 dst = similar(src, T)
                 copyto!(dst, src)
                 return dst
             end
 
-            (::$gt_name)(::Type{T}) where T = $gt_name{T}()
             function YaoBlocks.print_block(io::IO, ::$gt_name)
                 print(io, $(QuoteNode(name)), " gate")
             end

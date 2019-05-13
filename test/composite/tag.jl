@@ -1,9 +1,9 @@
 using Test, YaoBlocks
 
-struct MockedTag{BT, N, T} <: TagBlock{BT, N, T}
+struct MockedTag{BT, N} <: TagBlock{BT, N}
     content::BT
 
-    MockedTag(x::BT) where {N, T, BT <: AbstractBlock{N, T}} = new{BT, N, T}(x)
+    MockedTag(x::BT) where {N, BT <: AbstractBlock{N}} = new{BT, N}(x)
 end
 
 @test nqubits(MockedTag(X)) == nqubits(X)

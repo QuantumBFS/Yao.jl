@@ -2,7 +2,7 @@ using YaoBase, YaoArrayRegister, BitBasis
 import LegibleLambdas: LegibleLambda, parse_lambda
 export MathGate, mathgate, @mathgate
 
-struct MathGate{N, F <: Union{LegibleLambda, Function}, Fv <: Function} <: PrimitiveBlock{N, Bool}
+struct MathGate{N, F <: Union{LegibleLambda, Function}, Fv <: Function} <: PrimitiveBlock{N}
     f::F
     v::Fv
 end
@@ -139,9 +139,9 @@ function apply!(r::ArrayReg, m::MathGate{N, F}) where {N, F}
         b2 = mathop(m, b)
         nstate[b2+1, :] = view(r.state, b+1, :)
     end
-    r.state = nstate
+    r.state .= nstate
     return r
 end
 
 # TODO: use trait to correct this
-mat(m::MathGate) = applymatrix(m)
+mat(::Type{T}, m::MathGate) where T = Matrix(BlockMap(T, m))

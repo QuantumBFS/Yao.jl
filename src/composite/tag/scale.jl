@@ -2,7 +2,7 @@ using LinearAlgebra
 
 export Scale
 
-struct Scale{S <: Union{Number, Val}, N, T, BT <: AbstractBlock{N, T}} <: TagBlock{BT, N, T}
+struct Scale{S <: Union{Number, Val}, N, BT <: AbstractBlock{N}} <: TagBlock{BT, N}
     alpha::S
     content::BT
 end
@@ -16,11 +16,11 @@ Base.:(==)(x::Scale, y::Scale) = (x.alpha == y.alpha) && (content(x) == content(
 chsubblocks(x::Scale, blk::AbstractBlock) = Scale(x.alpha, blk)
 cache_key(x::Scale) = (x.alpha, cache_key(content(x)))
 
-mat(x::Scale) = x.alpha * mat(content(x))
-mat(x::Scale{Val{S}}) where S = S * mat(content(x))
+mat(::Type{T}, x::Scale) where T = T(x.alpha) * mat(T, content(x))
+mat(::Type{T}, x::Scale{Val{S}}) where {T, S} = T(S) * mat(T, content(x))
 
-function apply!(r::ArrayReg{B, T}, x::Scale{S, N, T}) where {S, B, N, T}
+function apply!(r::ArrayReg{B}, x::Scale{S, N}) where {S, B, N}
     apply!(r, content(x))
-    r.state *= x.alpha
+    r.state .*= x.alpha
     return r
 end

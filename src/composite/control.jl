@@ -3,16 +3,16 @@ using YaoArrayRegister: matvec
 
 export ControlBlock, control, cnot
 
-struct ControlBlock{N, BT<:AbstractBlock, C, M, T} <: AbstractContainer{BT, N, T}
+struct ControlBlock{N, BT<:AbstractBlock, C, M} <: AbstractContainer{BT, N}
     ctrl_locs::NTuple{C, Int}
     ctrl_config::NTuple{C, Int}
     content::BT
     locs::NTuple{M, Int}
-    function ControlBlock{N, BT, C, M, T}(ctrl_locs, ctrl_config, block, locs) where {N, C, M, T, BT<:AbstractBlock}
+    function ControlBlock{N, BT, C, M}(ctrl_locs, ctrl_config, block, locs) where {N, C, M, BT<:AbstractBlock}
         @assert_locs_safe N (ctrl_locs..., locs...)
         @assert nqubits(block) == M "number of locations doesn't match the size of block"
         @assert block isa AbstractBlock "expect a block, got $(typeof(block))"
-        new{N, BT, C, M, T}(ctrl_locs, ctrl_config, block, locs)
+        new{N, BT, C, M}(ctrl_locs, ctrl_config, block, locs)
     end
 end
 
@@ -24,12 +24,12 @@ Decode signs into control sequence on control or inversed control.
 decode_sign(ctrls::Int...,) = decode_sign(ctrls)
 decode_sign(ctrls::NTuple{N, Int}) where N = tuple(ctrls .|> abs, ctrls .|> sign .|> (x->(1+x)÷2))
 
-function ControlBlock{N}(ctrl_locs::NTuple{C}, ctrl_config::NTuple{C}, block::BT, locs::NTuple{K}) where {N, M, C, K, T, BT<:AbstractBlock{M, T}}
+function ControlBlock{N}(ctrl_locs::NTuple{C}, ctrl_config::NTuple{C}, block::BT, locs::NTuple{K}) where {N, M, C, K, BT<:AbstractBlock{M}}
     M == K || throw(DimensionMismatch("block position not maching its size!"))
-    return ControlBlock{N, BT, C, M, T}(ctrl_locs, ctrl_config, block, locs)
+    return ControlBlock{N, BT, C, M}(ctrl_locs, ctrl_config, block, locs)
 end
 
-function ControlBlock{N}(ctrl_locs::NTuple{C}, ctrl_config::NTuple{C}, block, locs::NTuple{K}) where {N, M, C, K, T}
+function ControlBlock{N}(ctrl_locs::NTuple{C}, ctrl_config::NTuple{C}, block, locs::NTuple{K}) where {N, M, C, K}
     error("expect a block, got $(typeof(block))")
 end
 
@@ -55,12 +55,12 @@ Return a [`ControlBlock`](@ref) with number of active qubits `n` and control loc
 
 ```jldoctest
 julia> control(4, (1, 2), 3=>X)
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 control(1, 2)
 └─ (3,) X gate
 
 julia> control(4, 1, 3=>X)
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 control(1)
 └─ (3,) X gate
 ```
@@ -130,7 +130,7 @@ Return a speical [`ControlBlock`](@ref), aka CNOT gate with number of active qub
 
 ```jldoctest
 julia> cnot(3, (2, 3), 1)
-nqubits: 3, datatype: Complex{Float64}
+nqubits: 3
 control(2, 3)
 └─ (1,) X gate
 
@@ -141,11 +141,11 @@ julia> cnot(2, 1)
 cnot(total::Int, ctrl_locs, locs::Int) = control(total, ctrl_locs, locs=>X)
 cnot(ctrl_locs, loc::Int) = @λ(n -> cnot(n, ctrl_locs, loc))
 
-mat(c::ControlBlock{N, BT, C}) where {N, BT, C} = cunmat(N, c.ctrl_locs, c.ctrl_config, mat(c.content), c.locs)
+mat(::Type{T}, c::ControlBlock{N, BT, C}) where {T, N, BT, C} = cunmat(N, c.ctrl_locs, c.ctrl_config, mat(T, c.content), c.locs)
 
-function apply!(r::ArrayReg, c::ControlBlock)
+function apply!(r::ArrayReg{B, T}, c::ControlBlock) where {B, T}
     _check_size(r, c)
-    instruct!(matvec(r.state), mat(c.content), c.locs, c.ctrl_locs, c.ctrl_config)
+    instruct!(matvec(r.state), mat(T, c.content), c.locs, c.ctrl_locs, c.ctrl_config)
     return r
 end
 
@@ -168,15 +168,15 @@ chsubblocks(pb::ControlBlock{N}, blk::AbstractBlock) where {N} = ControlBlock{N}
 # NOTE: ControlBlock will forward parameters directly without loop
 cache_key(ctrl::ControlBlock) = cache_key(ctrl.content)
 
-function Base.:(==)(lhs::ControlBlock{N, BT, C, M, T}, rhs::ControlBlock{N, BT, C, M, T}) where {BT, N, C, M, T}
+function Base.:(==)(lhs::ControlBlock{N, BT, C, M}, rhs::ControlBlock{N, BT, C, M}) where {BT, N, C, M}
     return (lhs.ctrl_locs == rhs.ctrl_locs) && (lhs.content == rhs.content) && (lhs.locs == rhs.locs)
 end
 
 Base.adjoint(blk::ControlBlock{N}) where N = ControlBlock{N}(blk.ctrl_locs, blk.ctrl_config, adjoint(blk.content), blk.locs)
 
 # NOTE: we only copy one hierachy (shallow copy) for each block
-function Base.copy(ctrl::ControlBlock{N, BT, C, M, T}) where {BT, N, C, M, T}
-    return ControlBlock{N, BT, C, M, T}(ctrl.ctrl_locs, ctrl.ctrl_config, ctrl.content, ctrl.locs)
+function Base.copy(ctrl::ControlBlock{N, BT, C, M}) where {BT, N, C, M}
+    return ControlBlock{N, BT, C, M}(ctrl.ctrl_locs, ctrl.ctrl_config, ctrl.content, ctrl.locs)
 end
 
 function YaoBase.iscommute(x::ControlBlock{N}, y::ControlBlock{N}) where N

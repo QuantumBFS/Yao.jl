@@ -7,7 +7,7 @@ export PhaseGate, phase
 
 Global phase gate.
 """
-mutable struct PhaseGate{T} <: PrimitiveBlock{1, Complex{T}}
+mutable struct PhaseGate{T <: Real} <: PrimitiveBlock{1}
     theta::T
 end
 
@@ -32,7 +32,7 @@ phase(0.1)
 phase(θ::AbstractFloat) = PhaseGate(θ)
 phase(θ::Real) = phase(Float64(θ))
 
-mat(gate::PhaseGate{T}) where T = exp(im * gate.theta) * IMatrix{2, Complex{T}}()
+mat(::Type{T}, gate::PhaseGate) where T = exp(T(im * gate.theta)) * IMatrix{2, T}()
 
 # parametric interface
 niparams(::Type{<:PhaseGate}) = 1

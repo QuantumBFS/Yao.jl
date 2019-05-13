@@ -2,11 +2,12 @@ using YaoBase, YaoArrayRegister
 export Measure, AllLocs, ComputationalBasis
 
 """
-    Measure{N, K, OT} <: PrimitiveBlock{N, Bool}
+    Measure{N, K, OT} <: PrimitiveBlock{N}
+    Measure(n::Int; operator=ComputationalBasis(), locs=1:n, collapseto=nothing, remove=false)
 
 Measure operator.
 """
-mutable struct Measure{N, K, OT} <: PrimitiveBlock{N, Bool}
+mutable struct Measure{N, K, OT} <: PrimitiveBlock{N}
     operator::OT
     locations::Union{NTuple{K, Int}, AllLocs}
     collapseto::Union{Int, Nothing}
