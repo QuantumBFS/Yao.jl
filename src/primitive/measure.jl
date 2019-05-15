@@ -42,7 +42,7 @@ Or you could specify which qubits you are going to measure
 
 ```jldoctest
 julia> Measure(4; locs=1:3)
-Measure(4; locs=(1, 2, 3))
+Measure(4;locs=(1, 2, 3))
 ```
 
 by default this will collapse the current register to measure results.
@@ -81,7 +81,7 @@ julia> state(r)
 But you can also specify the target bit configuration you want to collapse to with keyword `collapseto`.
 
 ```jldoctest
-julia> Measure(4; collapseto=0b101)
+julia> m = Measure(4; collapseto=0b101)
 Measure(4;collapseto=5)
 
 julia> m.collapseto

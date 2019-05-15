@@ -2,6 +2,27 @@ using LinearAlgebra
 
 export Scale
 
+"""
+    Scale{S <: Union{Number, Val}, N, BT <: AbstractBlock{N}} <: TagBlock{BT, N}
+
+`Scale` a block with scalar. it can be either a `Number` or a compile time `Val`.
+
+# Example
+
+```jldoctest
+julia> 2 * X
+[scale: 2] X gate
+
+julia> im * Z
+[+im] Z gate
+
+julia> -im * Z
+[-im] Z gate
+
+julia> -Z
+[-] Z gate
+```
+"""
 struct Scale{S <: Union{Number, Val}, N, BT <: AbstractBlock{N}} <: TagBlock{BT, N}
     alpha::S
     content::BT

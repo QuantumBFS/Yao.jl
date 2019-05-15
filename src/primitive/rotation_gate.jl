@@ -13,7 +13,7 @@ RotationGate, with GT both hermitian and isreflexive.
 \\mathbf{I} cos(θ / 2) - im sin(θ / 2) * mat(U)
 ```
 """
-mutable struct RotationGate{N, T, GT <: AbstractBlock{N}} <: PrimitiveBlock{N}
+mutable struct RotationGate{N, T <: Real, GT <: AbstractBlock{N}} <: PrimitiveBlock{N}
     block::GT
     theta::T
     function RotationGate{N, T, GT}(block::GT, theta) where {N, T, GT <: AbstractBlock{N}}

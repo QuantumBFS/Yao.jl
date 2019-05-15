@@ -17,7 +17,7 @@ abstract type PrimitiveBlock{N} <: AbstractBlock{N} end
 # NOTE: we cannot change subblocks of a primitive block
 #      since they are primitive, therefore we return themselves
 chsubblocks(x::PrimitiveBlock, it) = x
-
+subblocks(x::PrimitiveBlock) = ()
 # NOTE: all primitive block should name with postfix Gate
 #       and each primitive block should stay in a single
 #       file whose name is in lowercase and underscore.

@@ -112,6 +112,31 @@ const DefaultCacheServer = get_server(AbstractBlock, CacheFragment)
 
 cache(x::Function, level::Int=1; recursive=false) = n->cache(x(n), level; recursive=recursive)
 
+"""
+    cache(x[, level=1; recursive=false])
+
+Create a [`CachedBlock`](@ref) with given block `x`, which will cache the matrix of `x` for the first time
+it calls [`mat`](@ref), and use the cached matrix in the following calculations.
+
+# Example
+
+```jldoctest
+julia> cache(control(3, 1, 2=>X))
+nqubits: 3
+[cached] control(1)
+   └─ (2,) X gate
+
+
+julia> chain(cache(control(3, 1, 2=>X)), repeat(H))
+nqubits: 3
+chain
+├─ [cached] control(1)
+│     └─ (2,) X gate
+└─ repeat on (1, 2, 3)
+   └─ H gate
+
+```
+"""
 function cache(x::AbstractBlock, level::Int=1; recursive=false)
     return cache(DefaultCacheServer, x, level, recursive=recursive)
 end

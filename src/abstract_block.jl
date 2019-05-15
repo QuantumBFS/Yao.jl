@@ -61,7 +61,7 @@ Return an iterator of occupied locations of `x`.
 
 Returns an iterator of the sub-blocks of a composite block. Default is empty.
 """
-@interface subblocks(x::AbstractBlock) = ()
+@interface subblocks(x::AbstractBlock)
 
 """
     chsubblocks(composite_block, itr)

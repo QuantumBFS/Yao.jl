@@ -11,10 +11,6 @@ as well.
 """
 abstract type CompositeBlock{N} <: AbstractBlock{N} end
 
-YaoBase.isunitary(m::CompositeBlock) = all(isunitary, subblocks(m)) || isunitary(mat(m))
-YaoBase.ishermitian(m::CompositeBlock) = all(ishermitian, subblocks(m)) || ishermitian(mat(m))
-YaoBase.isreflexive(m::CompositeBlock) = all(isreflexive, subblocks(m)) || isreflexive(mat(m))
-
 """
     AbstractContainer{BT, N} <: CompositeBlock{N}
 

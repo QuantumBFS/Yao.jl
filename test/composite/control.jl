@@ -7,6 +7,11 @@ U = mat(X)
     @test_throws DimensionMismatch control(3, 2, 1=>swap(2, 1, 2))
     @test_throws ErrorException control(3, 1, 2:3=>rand(4, 4))
     @test_throws LocationConflictError control(3, 2, (1, 2)=>swap(2, 1, 2))
+
+    @test cnot(4, (1, 2), 3) == control(4, (1, 2), 3=>X)
+    @test cnot((1, 2), 3)(4) == cnot(4, (1, 2), 3) # curried version
+
+    @test control(3=>X)((1, 2))(4) == control(4, (1, 2), 3=>X)
 end
 
 @testset "single control" begin

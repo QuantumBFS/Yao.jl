@@ -99,7 +99,7 @@ Return a lambda that takes a `Tuple` of control qubits locs as input. See also
 julia> control(1=>X)
 (ctrl_locs -> control(ctrl_locs, 1 => X gate))
 
-julia> control((2, 3) => ConstGate.CNOT)
+julia> control((2, 3) => YaoBlocks.ConstGate.CNOT)
 (ctrl_locs -> control(ctrl_locs, (2, 3) => CNOT gate))
 ```
 """

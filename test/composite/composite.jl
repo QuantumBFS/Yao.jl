@@ -1,4 +1,4 @@
-using Test, YaoBlocks
+using Test, YaoBase, YaoBlocks, YaoArrayRegister
 
 @testset "test chain" begin
     include("chain.jl")
@@ -39,3 +39,8 @@ end
     @test chsubblocks(prod(X), Y) == prod(Y)
     @test chsubblocks(sum(X), Y) == sum(Y)
 end
+
+# check extension fallback errors
+struct MockedQFT{N} <: CompositeBlock{N} end
+@test_throws NotImplementedError ishermitian(MockedQFT{2}())
+@test_throws NotImplementedError isunitary(MockedQFT{2}())
