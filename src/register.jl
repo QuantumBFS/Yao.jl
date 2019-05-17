@@ -105,7 +105,7 @@ ArrayReg{1,Complex{Float32},Array...}
 ArrayReg(bitstr::BitStr) = ArrayReg(ComplexF64, bitstr)
 ArrayReg(::Type{T}, bitstr::BitStr) where T = ArrayReg{1}(T, bitstr)
 ArrayReg{B}(bitstr::BitStr) where B = ArrayReg{B}(ComplexF64, bitstr)
-ArrayReg{B}(::Type{T}, bitstr::BitStr) where {B, T} = ArrayReg{B}(hcat((onehot(T, bitstr) for k in 1:B)...))
+ArrayReg{B}(::Type{T}, bitstr::BitStr) where {B, T} = ArrayReg{B}(onehot(T, bitstr, B))
 
 
 """
@@ -320,8 +320,7 @@ product_state(total::Int, bit_config::Integer; nbatch::Int=1) = product_state(Co
 product_state(::Type{T}, bit_str::BitStr; nbatch::Int=1) where T = ArrayReg{nbatch}(T, bit_str)
 
 function product_state(::Type{T}, total::Int, bit_config::Integer; nbatch::Int=1) where T
-    raw_state = hcat((onehot(T, total, bit_config) for k in 1:nbatch)...)
-    return ArrayReg{nbatch}(raw_state)
+    return ArrayReg{nbatch}(onehot(T, total, bit_config, nbatch))
 end
 
 """
