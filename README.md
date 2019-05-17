@@ -102,6 +102,16 @@ To contribute to this project, please open an [issue](https://github.com/Quantum
 
 This project is an effort of QuantumBFS, an open source organization for quantum science. All the contributors are listed in the [contributors](https://github.com/QuantumBFS/Yao.jl/graphs/contributors).
 
+## Papers Citing Yao
+
+> Variational Quantum Eigensolver with Fewer Qubits,
+> Jin-Guo Liu, Yi-Hong Zhang, Yuan Wan, Lei Wang,
+> https://arxiv.org/abs/1902.02663
+
+> Learning and inference on generative adversarial quantum circuits,
+> Jinfeng Zeng, Yufeng Wu, Jin-Guo Liu, Lei Wang, and Jiangping Hu,
+> Phys. Rev. A 99, 052306 – Published 6 May 2019
+
 ## License
 
 **Yao** is released under the Apache 2 license.
