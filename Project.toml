@@ -23,7 +23,7 @@ YaoBase = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
 julia = "^1.0.0"
 YaoBase = "~0.9.1"
 YaoArrayRegister = "~0.3.5"
-BitBasis = "~0.4.4"
+BitBasis = "~0.5"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
