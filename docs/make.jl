@@ -14,11 +14,6 @@ end
 
 const PAGES = [
     "Home" => "index.md",
-    # "Tutorial" => Any[
-    #     "tutorial/registers.md",
-    #     "tutorial/blocks.md",
-    #     "tutorial/bit_operations.md",
-    # ],
     "Examples" => map(x->joinpath("examples", x * ".md"), Examples),
     "Manual" => Any[
         "man/array_registers.md",
@@ -28,10 +23,6 @@ const PAGES = [
         "man/bitbasis.md",
         "man/extending_blocks.md",
         ],
-    # "Developer Guide" => Any[
-    #     "dev/customize_blocks.md",
-    #     "dev/benchmarking.md",
-    # ],
 ]
 
 makedocs(

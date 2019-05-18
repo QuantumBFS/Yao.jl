@@ -51,7 +51,7 @@ Primitive blocks are the most basic block to build a quantum circuit, if a primi
 ```julia
 using YaoBlocks
 
-mutable struct PhaseGate{T} <: PrimitiveBlock{1, Complex{T}}
+mutable struct PhaseGate{T <: Real} <: PrimitiveBlock{1}
     theta::T
 end
 ```
@@ -59,8 +59,8 @@ end
 If your insterested block is a composition of other blocks, you should define a [`CompositeBlock`](@ref), e.g
 
 ```julia
-struct ChainBlock{N, T, MT <: AbstractBlock{N, T}} <: CompositeBlock{N, T}
-    blocks::Vector{MT}
+struct ChainBlock{N} <: CompositeBlock{N}
+    blocks::Vector{AbstractBlock{N}}
 end
 ```
 
@@ -71,13 +71,13 @@ Besides types, there are several interfaces you could define for a block, but do
 The matrix form of a block is the minimal requirement to make a custom block functional, defining it is super simple, e.g for phase gate:
 
 ```julia
-mat(x::PhaseGate{T}) where T = exp(im * x.theta) * Matrix{Complex{T}}(I, 2, 2)
+mat(::Type{T}, gate::PhaseGate) where T = exp(T(im * gate.theta)) * Matrix{Complex{T}}(I, 2, 2)
 ```
 
 Or for composite blocks, you could just calculate the matrix by call `mat` on its subblocks.
 
 ```julia
-mat(c::ChainBlock) = prod(x->mat(x), reverse(c.blocks))
+mat(::Type{T}, c::ChainBlock) where T = prod(x->mat(T, x), reverse(c.blocks))
 ```
 
 The rest will just work, but might be slow since you didn't define any specification for this certain block.

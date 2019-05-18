@@ -129,36 +129,3 @@ d = make_table(registers, operators, nqubits_str, control_str)
 data = hcat(map(x->"`$x`", d["registers"]), map(x->"`$x`", d["operators"]), d["nqubits"], d["controls"])
 mdtable(data; latex=false, head=["registers", "operators", "nqubits", "controls"])
 ```
-
-## Measurement
-
-Simulation of measurement is mainly achieved by sampling and projection.
-
-#### Sample
-
-Suppose we want to measure operational subspace, we can first get
-```math
-p(x) = \|\langle x|\psi\rangle\|^2 = \sum\limits_{y} \|L(x, y, .)\|^2.
-```
-Then we sample an ``a\sim p(x)``. If we just sample and don't really measure (change wave function), its over.
-
-#### Projection
-```math
-|\psi\rangle' = \sum_y L(a, y, .)/\sqrt{p(a)} |a\rangle |y\rangle
-```
-
-Good! then we can just remove the operational qubit space since `x` and `y` spaces are totally decoupled and `x` is known as in state `a`, then we get
-
-```math
-|\psi\rangle'_r = \sum_y l(0, y, .) |y\rangle
-```
-
-where `l = L(a:a, :, :)/sqrt(p(a))`.
-
-
-## Others
-
-```@autodocs
-Modules = [YaoArrayRegister]
-Order = [:function]
-```

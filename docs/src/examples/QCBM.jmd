@@ -249,6 +249,7 @@ end
 
 history = train(qcbm, κ, opt, pg)
 trained_pg = probs(zero_state(nqubits(qcbm)) |> qcbm)
+history
 ```
 
 And we have the history of training which is
