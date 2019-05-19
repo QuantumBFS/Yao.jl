@@ -13,10 +13,6 @@ In Julia **v1.0+**, please type `]` in the REPL to use the package mode, then ty
 pkg> add YaoBase
 ```
 
-## Documentation
-
-Please read the documentation [here]()
-
 ## License
 
 Apache License 2.0
