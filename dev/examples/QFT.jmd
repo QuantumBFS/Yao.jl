@@ -91,10 +91,8 @@ going to use the subblocks of `QFT`, if you need to use its subblocks, it'd
 be better to define it under [`CompositeBlock`](@ref).
 
 ```julia
-struct QFT{N, T} <: PrimitiveBlock{N, T} end
-
-QFT(::Type{T}, n::Int) where T = QFT{n, T}()
-QFT(n::Int) = QFT(ComplexF64, n)
+struct QFT{N} <: PrimitiveBlock{N} end
+QFT(n::Int) = QFT{n}()
 ```
 
 Now, let's define its circuit
@@ -106,7 +104,7 @@ circuit(::QFT{N}) where N = qft(N)
 And forward [`mat`](@ref) to its circuit's matrix
 
 ```julia
-YaoBlocks.mat(x::QFT) = mat(circuit(x))
+YaoBlocks.mat(::Type{T}, x::QFT) where T = mat(T, circuit(x))
 ```
 
 You may notice, it is a little ugly to print `QFT` at the moment,
