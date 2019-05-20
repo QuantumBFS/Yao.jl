@@ -226,8 +226,8 @@ statevec(r::ArrayRegOrAdjointArrayReg) = matvec(state(r))
 Return a matrix (vector) for B>1 (B=1) as a vector representation of state, with all qubits activated.
 See also [`state`](@ref), [`statevec`](@ref).
 """
-relaxedvec(r::ArrayReg{B}) where B = reshape(r.state, :, B)
-relaxedvec(r::ArrayReg{1}) = vec(r.state)
+relaxedvec(r::ArrayReg{B}) where B = reshape(state(r), :, B)
+relaxedvec(r::ArrayReg{1}) = vec(state(r))
 
 """
     hypercubic(r::ArrayReg) -> AbstractArray
