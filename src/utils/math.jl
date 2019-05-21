@@ -233,8 +233,8 @@ rand_unitary(::Type{T}, N::Int) where T = qr(randn(T, N, N)).Q |> Matrix
 
 Create a random sparse unitary matrix.
 """
-sprand_unitary(N::Int, density) = sprand_unitary(ComplexF64, N, density)
-sprand_unitary(::Type{T}, N::Int, density) where T = SparseMatrixCSC(qr(sprandn(T, N, N, density)).Q)
+sprand_unitary(N::Int, density::Real) = sprand_unitary(ComplexF64, N, density)
+sprand_unitary(::Type{T}, N::Int, density::Real) where T = SparseMatrixCSC(qr(sprandn(T, N, N, density)).Q)
 
 """
     rand_hermitian([T=ComplexF64], N::Int) -> Matrix
@@ -253,7 +253,7 @@ end
 
 Create a sparse random hermitian matrix.
 """
-function sprand_hermitian(::Type{T}, N::Int, density) where T
+function sprand_hermitian(::Type{T}, N::Int, density::Real) where T
     A = sprandn(T, N, density)
     return A + A'
 end
