@@ -132,9 +132,9 @@ export eliminate_nested
 eliminate_nested(ex::AbstractBlock) = ex
 
 # TODO: eliminate nested expr e.g chain(X, chain(X, Y))
-function eliminate_nested(ex::Union{ChainBlock, Sum})
+function eliminate_nested(ex::T) where {T <: Union{ChainBlock, Sum}}
     _flatten(x) = (x, )
-    _flatten(x::ChainBlock) = subblocks(x)
+    _flatten(x::T) = subblocks(x)
 
     isone(length(ex)) && return first(subblocks(ex))
     return chsubblocks(ex, Iterators.flatten(map(_flatten, subblocks(ex))))
