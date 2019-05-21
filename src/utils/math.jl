@@ -253,6 +253,8 @@ end
 
 Create a sparse random hermitian matrix.
 """
+sprand_hermitian(N::Int, density) = sprand_hermitian(ComplexF64, N, density)
+
 function sprand_hermitian(::Type{T}, N::Int, density::Real) where T
     A = sprandn(T, N, N, density)
     return A + A'
