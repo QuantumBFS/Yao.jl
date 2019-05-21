@@ -53,7 +53,7 @@ function apply!(reg::ArrayReg, te::TimeEvolution)
     dt = real(te.dt) == 0 ? imag(te.dt) : -im*te.dt
     @inbounds for j in 1:size(st, 2)
         v = view(st, :, j)
-        Ks = arnoldi(te.H, v; tol=te.tol)
+        Ks = arnoldi(te.H, v; tol=te.tol, ishermitian=true)
         expv!(v, dt, Ks)
     end
     return reg

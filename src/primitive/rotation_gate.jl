@@ -79,7 +79,7 @@ rot(axis::AbstractBlock, theta) = RotationGate(axis, theta)
 
 content(x::RotationGate) = x.block
 # General definition
-function mat(::Type{T}, R::RotationGate{N}) where {N, T <: ComplexF64}
+function mat(::Type{T}, R::RotationGate{N}) where {N, T}
     I = IMatrix{1<<N, T}()
     return I * cos(T(R.theta) / 2) - im * sin(T(R.theta) / 2) * mat(T, R.block)
 end
