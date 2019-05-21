@@ -254,7 +254,7 @@ end
 Create a sparse random hermitian matrix.
 """
 function sprand_hermitian(::Type{T}, N::Int, density::Real) where T
-    A = sprandn(T, N, density)
+    A = sprandn(T, N, N, density)
     return A + A'
 end
 
