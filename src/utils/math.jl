@@ -3,6 +3,8 @@ export batch_normalize,
     rotmat,
     rand_hermitian,
     rand_unitary,
+    sprand_hermitian,
+    sprand_unitary,
     general_controlled_gates,
     general_c1_gates,
     linop2dense,
@@ -219,27 +221,46 @@ function purification_fidelity(m1::Matrix, m2::Matrix)
 end
 
 """
-    rand_unitary(N::Int) -> Matrix
+    rand_unitary([T=ComplexF64], N::Int) -> Matrix
 
-Random unitary matrix.
+Create a random unitary matrix.
 """
-function rand_unitary(N::Int)
-    qr(randn(ComplexF64, N, N)).Q |> Matrix
-end
+rand_unitary(N::Int) = rand_unitary(ComplexF64, N)
+rand_unitary(::Type{T}, N::Int) where T = qr(randn(T, N, N)).Q |> Matrix
 
 """
-    rand_hermitian(N::Int) -> Matrix
+    sprand_unitary([T=ComplexF64], N::Int, density) -> SparseMatrixCSC
 
-Random hermitian matrix.
+Create a random sparse unitary matrix.
 """
-function rand_hermitian(N::Int)
-    A = randn(ComplexF64, N, N)
+sprand_unitary(N::Int, density) = sprand_unitary(ComplexF64, N, density)
+sprand_unitary(::Type{T}, N::Int, density) where T = SparseMatrixCSC(qr(sprandn(T, N, N, density)).Q)
+
+"""
+    rand_hermitian([T=ComplexF64], N::Int) -> Matrix
+
+Create a random hermitian matrix.
+"""
+rand_hermitian(N::Int) = rand_hermitian(ComplexF64, N)
+
+function rand_hermitian(::Type{T}, N::Int) where T
+    A = randn(T, N, N)
     A + A'
 end
 
 """
-    autostatic(A)
+    sprand_hermitian([T=ComplexF64], N, density)
 
-Staticize dynamic array `A` by a constant `STATIC_THRESHOLD`.
+Create a sparse random hermitian matrix.
+"""
+function sprand_hermitian(::Type{T}, N::Int, density) where T
+    A = sprandn(T, N, density)
+    return A + A'
+end
+
+"""
+    autostatic(A[; threshold=8])
+
+Staticize dynamic array `A` by a `threshold`.
 """
 autostatic(A::AbstractVecOrMat; threshold::Int=8) = length(A) > (1 << threshold) ? A : staticize(A)
