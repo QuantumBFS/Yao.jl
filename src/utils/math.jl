@@ -23,7 +23,7 @@ export batch_normalize,
     # matrix tools
     autostatic
 
-using LuxurySparse, LinearAlgebra, BitBasis
+using LuxurySparse, LinearAlgebra, BitBasis, SparseArrays
 import LinearAlgebra: svdvals
 
 """
@@ -258,6 +258,16 @@ sprand_hermitian(N::Int, density) = sprand_hermitian(ComplexF64, N, density)
 function sprand_hermitian(::Type{T}, N::Int, density::Real) where T
     A = sprandn(T, N, N, density)
     return A + A'
+end
+
+@static if VERSION < v"1.1.0"
+    function SparseArrays.sprandn(::Type{T}, N, N, density) where T <: Real
+        return T.(sprandn(N, N, density))
+    end
+
+    function SparseArrays.sprandn(::Type{Complex{T}}, N, N, density) where T <: Real
+        return T.(sprandn(N, N, density)) + im * T.(sprandn(N, N, density))
+    end
 end
 
 """
