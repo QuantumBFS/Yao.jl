@@ -261,12 +261,12 @@ function sprand_hermitian(::Type{T}, N::Int, density::Real) where T
 end
 
 @static if VERSION < v"1.1.0"
-    function SparseArrays.sprandn(::Type{T}, N, N, density) where T <: Real
-        return T.(sprandn(N, N, density))
+    function SparseArrays.sprandn(::Type{T}, n::Int, m::Int, density::Real) where T <: Real
+        return T.(sprandn(n, m, density))
     end
 
-    function SparseArrays.sprandn(::Type{Complex{T}}, N, N, density) where T <: Real
-        return T.(sprandn(N, N, density)) + im * T.(sprandn(N, N, density))
+    function SparseArrays.sprandn(::Type{Complex{T}}, n::Int, m::Int, density::Real) where T <: Real
+        return T.(sprandn(n, m, density)) + im * T.(sprandn(n, m, density))
     end
 end
 
