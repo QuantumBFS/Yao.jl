@@ -21,6 +21,15 @@ const BitConfigs{T} = NTuple{N, T} where N
 function YaoBase.instruct!(
     state::AbstractVecOrMat{T1},
     operator::AbstractMatrix{T2},
+    locs::Tuple{},
+    control_locs::NTuple{C, Int}=(),
+    control_bits::NTuple{C, Int}=()) where {T1, T2, M, C}
+    return state
+end
+
+function YaoBase.instruct!(
+    state::AbstractVecOrMat{T1},
+    operator::AbstractMatrix{T2},
     locs::NTuple{M, Int},
     control_locs::NTuple{C, Int}=(),
     control_bits::NTuple{C, Int}=()) where {T1, T2, M, C}
@@ -42,6 +51,15 @@ end
 function YaoBase.instruct!(state::AbstractVecOrMat{T1}, U1::SDDiagonal{T2}, loc::Int) where {T1, T2}
     @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
     return instruct!(state, copyto!(similar(U1, T1), U1), loc)
+end
+
+function YaoBase.instruct!(
+    state::AbstractVecOrMat{T},
+    operator::AbstractMatrix{T},
+    locs::Tuple{},
+    control_locs::NTuple{C, Int} = (),
+    control_bits::NTuple{C, Int} = ()) where {T, M, C}
+    return state
 end
 
 function YaoBase.instruct!(
@@ -191,6 +209,9 @@ for (G, FACTOR) in zip([:Z, :S, :T, :Sdag, :Tdag], [:(-1), :(im), :($(exp(im*π/
     # forward single gate
     @eval YaoBase.instruct!(state::AbstractVecOrMat, g::Val{$(QuoteNode(G))}, locs::Tuple{Int}) =
         instruct!(state, g, locs...)
+
+    # no effect (to fix ambiguity)
+    @eval YaoBase.instruct!(st::AbstractVecOrMat, ::Val{$(QuoteNode(G))}, ::Tuple{}) = st
 
     @eval function YaoBase.instruct!(state::AbstractVecOrMat{T}, ::Val{$(QuoteNode(G))}, locs::Int) where T
         mask = bmask(locs)

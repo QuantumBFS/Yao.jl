@@ -95,3 +95,13 @@ end
     st = rand(1<<4)
     @test instruct!(st, IMatrix{2, Float64}(), 1) == st
 end
+
+@testset "test empty locs" begin
+    st = rand(ComplexF64, 1<<4)
+    pm = pmrand(ComplexF64, 2)
+    @test instruct!(copy(st), pm, ()) == st
+
+    for G in [:Z, :S, :T, :Sdag, :Tdag]
+        @test instruct!(copy(st), Val(G), ()) == st
+    end
+end
