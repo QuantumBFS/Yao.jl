@@ -28,12 +28,14 @@ end
         for k in 1:3
             @test st[:, k] ≈ onehot(T, 4, 0)
         end
+        @test eltype(product_state(Float64, 4, 0).state) == Float64
     end
     @testset "test zero state" begin
         st = state(zero_state(T, 4; nbatch=4))
         for k in 1:4
             @test st[:, k] ≈ onehot(T, 4, 0)
         end
+        @test eltype(zero_state(Float64, 4).state) == Float64
     end
     @testset "test rand state" begin
         # NOTE: we only check if the state is normalized
@@ -41,6 +43,7 @@ end
         for k in 1:2
             @test norm(st[:, k]) ≈ 1.0
         end
+        @test eltype(rand_state(Float64, 4).state) == Float64
     end
     @testset "test uniform state" begin
         st = state(uniform_state(T, 4; nbatch=2))
@@ -49,6 +52,7 @@ end
                 @test each ≈ 1/sqrt(16)
             end
         end
+        @test eltype(uniform_state(Float64, 4).state) == Float64
     end
     @testset "test oneto" begin
         r1 = uniform_state(ComplexF64, 4)

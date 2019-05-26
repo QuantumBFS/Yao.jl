@@ -373,7 +373,7 @@ ArrayReg{2,Complex{Float64},Array...}
 rand_state(n::Int; nbatch::Int=1) = rand_state(ComplexF64, n; nbatch=nbatch)
 
 function rand_state(::Type{T}, n::Int; nbatch::Int=1) where T
-    raw = randn(T, 1<<n, nbatch) + im * randn(T, 1<<n, nbatch)
+    raw = randn(T, 1<<n, nbatch)
     return normalize!(ArrayReg{nbatch}(raw))
 end
 

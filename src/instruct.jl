@@ -33,7 +33,7 @@ function YaoBase.instruct!(
     locs::NTuple{M, Int},
     control_locs::NTuple{C, Int}=(),
     control_bits::NTuple{C, Int}=()) where {T1, T2, M, C}
-    
+
     @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
     return instruct!(state, copyto!(similar(operator, T1), operator), locs, control_locs, control_bits)
 end
@@ -53,6 +53,17 @@ function YaoBase.instruct!(state::AbstractVecOrMat{T1}, U1::SDDiagonal{T2}, loc:
     return instruct!(state, copyto!(similar(U1, T1), U1), loc)
 end
 
+function _prepare_instruct(state, U, locs::NTuple{M}, control_locs, control_bits::NTuple{C}) where {M, C}
+    N, MM = log2dim1(state), size(U, 1)
+
+    locked_bits = MVector(control_locs..., locs...)
+    locked_vals = MVector(control_bits..., (0 for k in 1:M)...)
+    locs_raw_it = (b+1 for b in itercontrol(N, setdiff(1:N, locs), zeros(Int, N-M)))
+    locs_raw = SVector(locs_raw_it...)
+    ic = itercontrol(N, locked_bits, locked_vals)
+    return locs_raw, ic
+end
+
 function YaoBase.instruct!(
     state::AbstractVecOrMat{T},
     operator::AbstractMatrix{T},
@@ -70,13 +81,7 @@ function YaoBase.instruct!(
     control_bits::NTuple{C, Int} = ()) where {T, M, C}
 
     U = sort_unitary(operator, locs)
-    N, MM = log2dim1(state), size(U, 1)
-
-    locked_bits = MVector(control_locs..., locs...)
-    locked_vals = MVector(control_bits..., (0 for k in 1:M)...)
-    locs_raw_it = (b+1 for b in itercontrol(N, setdiff(1:N, locs), zeros(Int, N-M)))
-    locs_raw = SVector(locs_raw_it...)
-    ic = itercontrol(N, locked_bits, locked_vals)
+    locs_raw, ic = _prepare_instruct(state, U, locs, control_locs, control_bits)
 
     return _instruct!(state, autostatic(U), locs_raw, ic)
 end

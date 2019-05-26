@@ -55,7 +55,7 @@ for op in [:(==), :≈]
     end
 end
 
-Base.:*(bra::AdjointArrayReg{1}, ket::ArrayReg{1}) = dot(parent(bra).state, state(ket))
+Base.:*(bra::AdjointArrayReg{1}, ket::ArrayReg{1}) = dot(state(parent(bra)), state(ket))
 Base.:*(bra::AdjointArrayReg{B}, ket::ArrayReg{B}) where B = bra .* ket
 
 # broadcast
