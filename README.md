@@ -54,11 +54,11 @@ For CUDA support, see [CuYao.jl](https://github.com/QuantumBFS/CuYao.jl).
 Some quantum algorithms are implemented with Yao in [QuAlgorithmZoo](https://github.com/QuantumBFS/QuAlgorithmZoo.jl).
 
 ## Motivation
-Comparing with state of art quantum simulators, our library is inspired by quantum circuit optimization.
-Variational quantum optimization algorithms like quantum circuit Born machine ([QCBM](https://arxiv.org/abs/1804.04168)), quantum approximate optimization algorithm ([QAOA](http://arxiv.org/abs/1411.4028)), variational quantum eigensolver ([VQE](https://doi.org/10.1038/ncomms5213)) and quantum circuit learning ([QCL](http://arxiv.org/abs/1803.00745)) et. al. are promising killer apps on a near term quantum computers.
+Comparing with state of art quantum simulators, our package is inspired by variational quantum circuit optimization.
+Variational quantum optimization algorithms like quantum circuit Born machine ([QCBM](https://arxiv.org/abs/1804.04168)), quantum approximate optimization algorithm ([QAOA](http://arxiv.org/abs/1411.4028)), variational quantum eigensolver ([VQE](https://doi.org/10.1038/ncomms5213)) and quantum circuit learning ([QCL](http://arxiv.org/abs/1803.00745)) et. al. are promising killer apps on near term quantum devices.
 These algorithms require the flexibility to tune parameters and have well defined patterns such as "Arbitrary Rotation Block" and "CNOT Entangler".
 
-In Yao, we call these patterns "blocks". If we regard every gate or gate pattern as a "block", then the framework can
+In Yao, we call these patterns "blocks". If we treat gate or gate pattern as "block", then the framework can
 
 * be flexible to dispatch parameters,
 * cache matrices of blocks to speed up future runs,
@@ -73,7 +73,7 @@ Thanks to Julia's duck type and multiple dispatch features, user can
 
 ## Features
 
-Yao is a framework that is about to have the following features:
+Yao is a framework with the following features:
 
 - **Extensibility**
   - define new operations with a minimum number of methods in principle.
