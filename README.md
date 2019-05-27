@@ -40,8 +40,8 @@ For CUDA support, see [CuYao.jl](https://github.com/QuantumBFS/CuYao.jl).
 
 ## Documentation
 
-- [**STABLE**](https://quantumbfs.github.io/Yao.jl/stable)
-- [**LATEST**](https://quantumbfs.github.io/Yao.jl/latest)
+- [**STABLE**](https://quantumbfs.github.io/Yao.jl/stable) — most recently tagged version of the documentation.
+- [**LATEST**](https://quantumbfs.github.io/Yao.jl/latest) — in-development version of the documentation.
 
 ## Communication
 
