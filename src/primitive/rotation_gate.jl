@@ -85,10 +85,10 @@ function mat(::Type{T}, R::RotationGate{N}) where {N, T}
 end
 
 # Specialized
-# mat(R::RotationGate{1, T, XGate{Complex{T}}}) where T =
-#     SMatrix{2, 2, Complex{T}}(cos(R.theta/2), -im * sin(R.theta/2), -im * sin(R.theta/2), cos(R.theta/2))
-# mat(R::RotationGate{1, T, YGate{Complex{T}}}) where T =
-#     SMatrix{2, 2, Complex{T}}(cos(R.theta/2), sin(R.theta/2), -sin(R.theta/2), cos(R.theta/2))
+mat(::Type{T}, R::RotationGate{1, <:Any, <:XGate}) where T =
+    T[cos(R.theta/2) -im * sin(R.theta/2); -im * sin(R.theta/2) cos(R.theta/2)]
+mat(::Type{T}, R::RotationGate{1, <:Any, <:YGate}) where T =
+     T[cos(R.theta/2) -sin(R.theta/2); sin(R.theta/2) cos(R.theta/2)]
 # mat(R::RotationGate{1, T, ZGate{Complex{T}}}) where T =
 #     SMatrix{2, 2, Complex{T}}(cos(R.theta/2)-im*sin(R.theta/2), 0, 0, cos(R.theta/2)+im*sin(R.theta/2))
 

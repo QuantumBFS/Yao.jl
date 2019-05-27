@@ -76,7 +76,7 @@ function expect(op::Sum, reg::AbstractRegister)
 end
 
 function expect(op::Scale, reg::AbstractRegister)
-    op.alpha*expect(content(op), reg)
+    factor(op)*expect(content(op), reg)
 end
 
 expect(op::Sum, reg::AbstractRegister{1}) = invoke(expect, Tuple{Sum, AbstractRegister}, op, reg)

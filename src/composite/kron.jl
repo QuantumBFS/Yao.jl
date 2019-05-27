@@ -141,16 +141,20 @@ chsubblocks(pb::KronBlock{N}, it) where N = KronBlock{N}(pb.locs, collect(it))
 cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
 color(::Type{T}) where {T <: KronBlock} = :cyan
 
-
-function mat(::Type{T}, k::KronBlock{N}) where {T, N}
+function _prepair_kronmat(k::KronBlock{N}) where N
     sizes = map(nqubits, subblocks(k))
     start_locs = @. N - $(k.locs) - sizes + 1
 
     order = sortperm(start_locs)
     sorted_start_locs = start_locs[order]
     num_bit_list = vcat(diff(push!(sorted_start_locs, N)) .- sizes[order])
+    return order, num_bit_list, sorted_start_locs
+end
 
-    return reduce(zip(subblocks(k)[order], num_bit_list), init=IMatrix{1 << sorted_start_locs[1], T}()) do x, y
+function mat(::Type{T}, k::KronBlock{N}) where {T, N}
+    order, num_bit_list, sorted_start_locs = _prepair_kronmat(k)
+    blocks = subblocks(k)[order]
+    return reduce(zip(blocks, num_bit_list), init=IMatrix{1 << sorted_start_locs[1], T}()) do x, y
         kron(x, mat(T, y[1]), IMatrix(1<<y[2]))
     end
 end
