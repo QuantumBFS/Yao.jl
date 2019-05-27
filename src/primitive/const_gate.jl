@@ -1,4 +1,4 @@
-export @const_gate, ConstantGate,
+export @const_gate, ConstantGate, ConstGate,
     X, Y, Z, H, I2,
     XGate, YGate, ZGate, HGate, I2Gate
 

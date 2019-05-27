@@ -47,9 +47,11 @@ end
     e2 = expect(put(2, 2=>X), reg |> copy |> focus!(1,2))
     e3 = expect(put(3, 2=>X), reg |> ρ)
     e4 = expect(put(3, 2=>X), reg)
+    e5 = expect(put(3, 2=>-X), reg)
     @test e1 ≈ e2
     @test e1 ≈ e3
     @test e1 ≈ e4
+    @test e5 ≈ -e4
 end
 
 @testset "viewbatch apply" begin
