@@ -2,7 +2,7 @@ export Sequence
 import YaoBlocks: subblocks, chsubblocks, apply!
 using YaoBlocks: _check_size
 
-struct Sequence <: CompositeBlock{Any, Bool}
+struct Sequence <: CompositeBlock{Any}
     blocks::Vector
 end
 

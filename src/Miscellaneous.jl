@@ -16,13 +16,12 @@ function inverselines(nbit::Int; n_reg::Int=nbit)
     c
 end
 
-function singlet_block(::Type{T}, nbit::Int, i::Int, j::Int) where T
+function singlet_block(nbit::Int, i::Int, j::Int)
     unit = chain(nbit)
-    push!(unit, put(nbit, i=>chain(XGate{T}(), HGate{T}())))
-    push!(unit, control(nbit, -i, j=>XGate{T}()))
+    push!(unit, put(nbit, i=>chain(X, H)))
+    push!(unit, control(nbit, -i, j=>X))
 end
 
-singlet_block(nbit::Int, i::Int, j::Int) = singlet_block(ComplexF64, nbit, i, j)
 singlet_block() = singlet_block(2,1,2)
 
 Yao.mat(ρ::DensityMatrix{1}) = dropdims(state(ρ), dims=3)

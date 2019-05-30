@@ -4,7 +4,7 @@ using NLopt
 include("maxcut_gw.jl")
 
 HB(nbit::Int) = sum([put(nbit, i=>X) for i=1:nbit])
-tb = TimeEvolution(HB(3), 0.1)
+tb = TimeEvolution(HB(3) |> cache, 0.1; check_hermicity=false)
 function HC(W::AbstractMatrix)
     nbit = size(W, 1)
     ab = Any[]
@@ -22,11 +22,11 @@ function qaoa_circuit(W::AbstractMatrix, depth::Int; use_cache::Bool=false)
     hc = HC(W)
 	use_cache && (hb = hb |> cache; hc = hc |> cache)
     c = chain(nbit, [repeat(nbit, H, 1:nbit)])
-    append!(c, [chain(nbit, [time_evolve(hc, 0.0, tol=1e-5), time_evolve(hb, 0.0, tol=1e-5)]) for i=1:depth])
+    append!(c, [chain(nbit, [time_evolve(hc, 0.0, tol=1e-5, check_hermicity=false), time_evolve(hb, 0.0, tol=1e-5, check_hermicity=false)]) for i=1:depth])
 end
 
 
-function cobyla_optimize(circuit::MatrixBlock{N}, hc::MatrixBlock; niter::Int) where N
+function cobyla_optimize(circuit::AbstractBlock{N}, hc::AbstractBlock; niter::Int) where N
     function f(params, grad)
         reg = zero_state(N) |> dispatch!(circuit, params)
         loss = expect(hc, reg) |> real
@@ -60,7 +60,7 @@ using Random, Test
 	@test -expect(hc, product_state(5, bmask(sets[1]...)))+sum(W)/4 ≈ exact_cost
 
 	# build a QAOA circuit and start training.
-	qc = qaoa_circuit(W, 20; use_cache=false)
+	qc = qaoa_circuit(W, 20; use_cache=true)
 	opt_pl = nothing
 	opt_cost = Inf
 	for i = 1:10

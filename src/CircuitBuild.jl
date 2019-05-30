@@ -115,7 +115,7 @@ function rand_single_gate()
 end
 
 """
-    rand_gate(nbit::Int, mbit::Int, [ngate::Int]) -> MatrixBlock
+    rand_gate(nbit::Int, mbit::Int, [ngate::Int]) -> AbstractBlock
 
 random nbit gate.
 """

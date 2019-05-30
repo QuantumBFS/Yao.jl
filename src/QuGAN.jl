@@ -11,15 +11,15 @@ Reference:
 """
 struct QuGAN{N} <: QCOptProblem
     target::ArrayReg
-    generator::MatrixBlock{N}
-    discriminator::MatrixBlock
+    generator::AbstractBlock{N}
+    discriminator::AbstractBlock
     reg0::ArrayReg
-    witness_op::MatrixBlock
+    witness_op::AbstractBlock
     circuit::AbstractBlock
     gdiffs
     ddiffs
 
-    function QuGAN(target::ArrayReg, gen::MatrixBlock, dis::MatrixBlock)
+    function QuGAN(target::ArrayReg, gen::AbstractBlock, dis::AbstractBlock)
         N = nqubits(target)
         c = Sequence([gen, addbits!(1), dis])
         witness_op = put(N+1, (N+1)=>P0)

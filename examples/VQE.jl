@@ -2,7 +2,7 @@ using Yao
 using QuAlgorithmZoo
 using KrylovKit
 
-function ed_groundstate(h::MatrixBlock)
+function ed_groundstate(h::AbstractBlock)
     E, V = eigsolve(h |> mat, 1, :SR, ishermitian=true)
     println("Ground State Energy is $(E[1])")
     ArrayReg(V[1])

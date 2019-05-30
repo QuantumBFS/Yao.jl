@@ -1,7 +1,7 @@
 export hhlcircuit, hhlproject!, hhlsolve, HHLCRot
 
 """
-    HHLCRot{N, NC, T} <: PrimitiveBlock{N, Complex{T}}
+    HHLCRot{N, NC} <: PrimitiveBlock{N}
 
 Controlled rotation gate used in HHL algorithm, applied on N qubits.
 
@@ -9,7 +9,7 @@ Controlled rotation gate used in HHL algorithm, applied on N qubits.
     * ibit:: the ancilla bit.
     * C_value:: the value of constant "C", should be smaller than the spectrum "gap".
 """
-struct HHLCRot{N, NC, T} <: PrimitiveBlock{N, Complex{T}}
+struct HHLCRot{N, NC, T} <: PrimitiveBlock{N}
     cbits::Vector{Int}
     ibit::Int
     C_value::T

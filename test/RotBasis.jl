@@ -15,7 +15,7 @@ using QuAlgorithmZoo
     end
 
     # check consistency
-    rb = roll(1, RotBasis(0.1, 0.3))#rot_basis(1)
+    rb = put(1, 1=>RotBasis(0.1, 0.3))#rot_basis(1)
     angles = randpolar(1)
     # prepair a state in the angles direction.
     psi = angles |> polar2u |> ArrayReg

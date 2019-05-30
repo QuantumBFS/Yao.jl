@@ -1,5 +1,5 @@
 using Yao, QuAlgorithmZoo
-using Yao.ConstGate
+using YaoBlocks.ConstGate
 using LinearAlgebra, Test, Random
 
 @testset "BP diff" begin

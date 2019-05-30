@@ -2,7 +2,7 @@ using Yao
 using Test
 using LinearAlgebra
 using QuAlgorithmZoo
-using Yao.ConstGate
+using YaoBlocks.ConstGate
 
 single_swap_test_circuit(ϕ::Real) = hadamard_test_circuit(SWAP, ϕ)
 single_swap_test(reg::AbstractRegister, ϕ::Real) = hadamard_test(SWAP, reg, ϕ)

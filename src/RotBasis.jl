@@ -5,7 +5,7 @@ export RotBasis, randpolar, polar2u, u2polar, rot_basis
 
 A special rotation block that transform basis to angle θ and ϕ in bloch sphere.
 """
-mutable struct RotBasis{T} <: PrimitiveBlock{1, Complex{T}}
+mutable struct RotBasis{T} <: PrimitiveBlock{1}
     theta::T
     phi::T
 end
@@ -13,9 +13,9 @@ end
 _make_rot_mat(I, block, theta) = I * cos(theta / 2) - im * sin(theta / 2) * block
 # chain -> *
 # mat(rb::RotBasis{T}) where T = mat(Ry(-rb.theta))*mat(Rz(-rb.phi))
-function mat(x::RotBasis{T}) where T
-    R1 = _make_rot_mat(IMatrix{2, Complex{T}}(), mat(Z), -x.phi)
-    R2 = _make_rot_mat(IMatrix{2, Complex{T}}(), mat(Y), -x.theta)
+function mat(::Type{TM}, x::RotBasis{T}) where {TM, T}
+    R1 = _make_rot_mat(IMatrix{2, Complex{T}}(), mat(TM, Z), -x.phi)
+    R2 = _make_rot_mat(IMatrix{2, Complex{T}}(), mat(TM, Y), -x.theta)
     R2 * R1
 end
 

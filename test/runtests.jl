@@ -1,6 +1,4 @@
 using Test, Random, LinearAlgebra, SparseArrays
-
-
 using Yao
 using QuAlgorithmZoo
 

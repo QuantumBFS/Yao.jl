@@ -8,11 +8,11 @@ CRk(i::Int, j::Int, k::Int) = control([i, ], j=>shift(2π/(1<<k)))
 CRot(n::Int, i::Int) = chain(n, i==j ? kron(i=>H) : CRk(j, i, j-i+1) for j = i:n)
 QFTCircuit(n::Int) = chain(n, CRot(n, i) for i = 1:n)
 
-struct QFTBlock{N} <: PrimitiveBlock{N,ComplexF64} end
-mat(q::QFTBlock{N}) where N = applymatrix(q)
+struct QFTBlock{N} <: PrimitiveBlock{N} end
+mat(::Type{T}, q::QFTBlock{N}) where {T, N} = T.(applymatrix(q))
 
 apply!(reg::DefaultRegister{B}, ::QFTBlock) where B = (reg.state = ifft!(invorder_firstdim(reg |> state), 1)*sqrt(1<<nactive(reg)); reg)
-apply!(reg::DefaultRegister{B}, ::Daggered{N, T, <:QFTBlock}) where {B,N,T} = (reg.state = invorder_firstdim(fft!(reg|>state, 1)/sqrt(1<<nactive(reg))); reg)
+apply!(reg::DefaultRegister{B}, ::Daggered{N, <:QFTBlock}) where {B,N} = (reg.state = invorder_firstdim(fft!(reg|>state, 1)/sqrt(1<<nactive(reg))); reg)
 
 # traits
 ishermitian(q::QFTBlock{N}) where N = N==1
@@ -26,7 +26,7 @@ function print_block(io::IO, pb::QFTBlock{N}) where N
     printstyled(io, "QFT(1-$N)"; bold=true, color=:blue)
 end
 
-function print_block(io::IO, pb::Daggered{N, T,<:QFTBlock}) where {N, T}
+function print_block(io::IO, pb::Daggered{N,<:QFTBlock}) where {N, T}
     printstyled(io, "IQFT(1-$N)"; bold=true, color=:blue)
 end
 

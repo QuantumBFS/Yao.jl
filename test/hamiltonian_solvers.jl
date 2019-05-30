@@ -2,6 +2,7 @@ using Yao
 using LinearAlgebra
 using Test
 using QuAlgorithmZoo
+using YaoBlocks: ConstGate
 
 @testset "solving hamiltonian" begin
     nbit = 8

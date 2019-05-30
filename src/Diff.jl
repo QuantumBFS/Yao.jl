@@ -3,11 +3,11 @@ import Yao: expect, content, chcontent, mat, apply!
 using StatsBase
 
 ############# General Rotor ############
-const Rotor{N, T} = Union{RotationGate{N, T}, PutBlock{N, <:Any, <:RotationGate, <:Complex{T}}}
+const Rotor{N, T} = Union{RotationGate{N, T}, PutBlock{N, <:Any, <:RotationGate{<:Any, T}}}
 const CphaseGate{N, T} = ControlBlock{N,<:ShiftGate{T},<:Any}
 const DiffBlock{N, T} = Union{Rotor{N, T}, CphaseGate{N, T}}
 """
-    generator(rot::Rotor) -> MatrixBlock
+    generator(rot::Rotor) -> AbstractBlock
 
 Return the generator of rotation block.
 """
@@ -15,19 +15,19 @@ generator(rot::RotationGate) = rot.block
 generator(rot::PutBlock{N, C, GT}) where {N, C, GT<:RotationGate} = PutBlock{N}(generator(rot|>content), rot |> occupied_locs)
 generator(c::CphaseGate{N}) where N = ControlBlock(N, c.ctrol_locs, ctrl_config, control(2,1,2=>Z), c.locs)
 
-abstract type AbstractDiff{GT, N, T} <: TagBlock{GT, N, T} end
+abstract type AbstractDiff{GT, N, T} <: TagBlock{GT, N} end
 Base.adjoint(df::AbstractDiff) = Daggered(df)
 
 istraitkeeper(::AbstractDiff) = Val(true)
 
 #################### The Basic Diff #################
 """
-    QDiff{GT, N, T} <: AbstractDiff{GT, N, Complex{T}}
+    QDiff{GT, N} <: AbstractDiff{GT, N, T}
     QDiff(block) -> QDiff
 
 Mark a block as quantum differentiable.
 """
-mutable struct QDiff{GT, N, T} <: AbstractDiff{GT, N, Complex{T}}
+mutable struct QDiff{GT, N, T} <: AbstractDiff{GT, N, T}
     block::GT
     grad::T
     QDiff(block::DiffBlock{N, T}) where {N, T} = new{typeof(block), N, T}(block, T(0))
@@ -35,7 +35,8 @@ end
 content(cb::QDiff) = cb.block
 chcontent(cb::QDiff, blk::DiffBlock) = QDiff(blk)
 
-@forward QDiff.block mat, apply!
+@forward QDiff.block apply!
+mat(::Type{T}, df::QDiff) where T = mat(T, df.block)
 Base.adjoint(df::QDiff) = QDiff(content(df)')
 
 function YaoBlocks.print_annotation(io::IO, df::QDiff)
@@ -52,19 +53,19 @@ Mark a block as differentiable, here `GT`, `PT` is gate type, parameter type.
 Warning:
     please don't use the `adjoint` after `BPDiff`! `adjoint` is reserved for special purpose! (back propagation)
 """
-mutable struct BPDiff{GT, N, T, PT} <: AbstractDiff{GT, N, T}
+mutable struct BPDiff{GT, N, T} <: AbstractDiff{GT, N, T}
     block::GT
-    grad::PT
+    grad::T
     input::AbstractRegister
-    BPDiff(block::MatrixBlock{N, T}, grad::PT) where {N, T, PT} = new{typeof(block), N, T, typeof(grad)}(block, grad)
+    BPDiff(block::AbstractBlock{N}, grad::T) where {N, T} = new{typeof(block), N, T}(block, grad)
 end
-BPDiff(block::MatrixBlock) = BPDiff(block, zeros(parameters_eltype(block), nparameters(block)))
+BPDiff(block::AbstractBlock) = BPDiff(block, zeros(parameters_eltype(block), nparameters(block)))
 BPDiff(block::DiffBlock{N, T}) where {N, T} = BPDiff(block, T(0))
 
 content(cb::BPDiff) = cb.block
-chcontent(cb::BPDiff, blk::MatrixBlock) = BPDiff(blk)
+chcontent(cb::BPDiff, blk::AbstractBlock) = BPDiff(blk)
 
-@forward BPDiff.block mat
+mat(::Type{T}, df::BPDiff) where T = mat(T, df.block)
 function apply!(reg::AbstractRegister, df::BPDiff)
     if isdefined(df, :input)
         copyto!(df.input, reg)
@@ -105,7 +106,7 @@ autodiff(mode::Symbol, block::AbstractBlock) = autodiff(Val(mode), block)
 autodiff(::Val{:BP}, block::DiffBlock) = BPDiff(block)
 autodiff(::Val{:BP}, block::AbstractBlock) = block
 # Sequential, Roller and ChainBlock can propagate.
-function autodiff(mode::Val{:BP}, blk::Union{ChainBlock, Roller, Sequential})
+function autodiff(mode::Val{:BP}, blk::Union{ChainBlock, Sequential})
     chsubblocks(blk, autodiff.(mode, subblocks(blk)))
 end
 
@@ -148,11 +149,11 @@ Numeric differentiation.
 end
 
 """
-    opdiff(psifunc, diffblock::AbstractDiff, op::MatrixBlock)
+    opdiff(psifunc, diffblock::AbstractDiff, op::AbstractBlock)
 
 Operator differentiation.
 """
-@inline function opdiff(psifunc, diffblock::AbstractDiff, op::MatrixBlock)
+@inline function opdiff(psifunc, diffblock::AbstractDiff, op::AbstractBlock)
     r1, r2 = _perturb(()->expect(op, psifunc()) |> real, diffblock, π/2)
     diffblock.grad = (r2 - r1)/2
 end
@@ -215,14 +216,14 @@ end
 end
 
 """
-    backward!(δ::AbstractRegister, circuit::MatrixBlock) -> AbstractRegister
+    backward!(δ::AbstractRegister, circuit::AbstractBlock) -> AbstractRegister
 
 back propagate and calculate the gradient ∂f/∂θ = 2*Re(∂f/∂ψ*⋅∂ψ*/∂θ), given ∂f/∂ψ*.
 
 Note:
 Here, the input circuit should be a matrix block, otherwise the back propagate may not apply (like Measure operations).
 """
-backward!(δ::AbstractRegister, circuit::MatrixBlock) = apply!(δ, circuit')
+backward!(δ::AbstractRegister, circuit::AbstractBlock) = apply!(δ, circuit')
 
 """
     gradient(circuit::AbstractBlock, mode::Symbol=:ANY) -> Vector
