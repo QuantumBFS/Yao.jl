@@ -19,16 +19,20 @@ Disclaimer: **this package is still under development and needs further polish.*
 
 ## Contents
 
-- [x] QCBM tutorial
-- [x] grover search
+- [x] Quantum Circuit Born Machine
+- [x] Grover search
 - [x] HHL
 - [x] QFT
+- [x] Phase Estimation
 - [x] QuGAN
 - [x] QCBM
 - [x] Hamiltonian Solver
 - [x] QAOA
-- [x] Quantum Chemistry
+- [x] Variational quantum eigensolver
 - [x] QuODE
+- [x] Hadamard Test
+- [x] State Overlap Algorithms
+- [x] Quantum SVD
 
 ## License
 
