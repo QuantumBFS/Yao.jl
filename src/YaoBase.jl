@@ -3,7 +3,7 @@ Base module for Yao.
 """
 module YaoBase
 
-using LinearAlgebra, LuxurySparse, SparseArrays
+using LinearAlgebra, LuxurySparse, SparseArrays, Random
 
 include("utils/ast_tools.jl")
 

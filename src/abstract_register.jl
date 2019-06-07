@@ -185,7 +185,7 @@ struct AllLocs end
 export measure, measure!, measure_remove!, measure_collapseto!
 
 """
-    measure(register[, operator][, locs]; nshots=1) -> Vector{Int}
+    measure([rng,] register[, operator][, locs]; nshots=1) -> Vector{Int}
 
 Return measurement results of current active qubits (regarding to active qubits,
 see [`focus!`](@ref) and [`relax!`](@ref)).
@@ -193,21 +193,21 @@ see [`focus!`](@ref) and [`relax!`](@ref)).
 function measure end
 
 """
-    measure!([operator, ]register[, locs])
+    measure!([rng,] [operator, ]register[, locs])
 
 Measure current active qubits or qubits at `locs` and collapse to result state.
 """
 function measure! end
 
 """
-    measure_remove!([operator, ]reg::AbstractRegister[, locs])
+    measure_remove!([rng,] [operator, ]reg::AbstractRegister[, locs])
 
 Measure current active qubits or qubits at `locs` and remove them.
 """
 function measure_remove! end
 
 """
-    measure_collapseto!([operator, ]reg::AbstractRegister[, locs]; config) -> Int
+    measure_collapseto!([rng,] [operator, ]reg::AbstractRegister[, locs]; config) -> Int
 
 Measure current active qubits or qubits at `locs` and set the register to specific value.
 """
@@ -216,32 +216,33 @@ function measure_collapseto! end
 # focus context
 for FUNC in [:measure!, :measure_collapseto!, :measure_remove!, :measure]
     rotback = FUNC == :measure! ? :(reg.state = V*reg.state) : :()
-    @eval function $FUNC(op::Eigen, reg::AbstractRegister, locs::AllLocs; kwargs...)
+    @eval function $FUNC(rng::AbstractRNG, op::Eigen, reg::AbstractRegister, locs::AllLocs; kwargs...)
         E, V = op
         reg.state = V'*reg.state
-        res = $FUNC(ComputationalBasis(), reg, locs; kwargs...)
+        res = $FUNC(rng, ComputationalBasis(), reg, locs; kwargs...)
         $rotback
         E[res.+1]
     end
-    @eval $FUNC(op, reg::AbstractRegister; kwargs...) = $FUNC(op, reg, AllLocs(); kwargs...)
-    @eval $FUNC(reg::AbstractRegister, locs; kwargs...) = $FUNC(ComputationalBasis(), reg, locs; kwargs...)
-    @eval $FUNC(reg::AbstractRegister; kwargs...) = $FUNC(ComputationalBasis(), reg, AllLocs(); kwargs...)
+    @eval $FUNC(rng::AbstractRNG, op, reg::AbstractRegister; kwargs...) = $FUNC(rng, op, reg, AllLocs(); kwargs...)
+    @eval $FUNC(rng::AbstractRNG, reg::AbstractRegister, locs; kwargs...) = $FUNC(rng, ComputationalBasis(), reg, locs; kwargs...)
+    @eval $FUNC(rng::AbstractRNG, reg::AbstractRegister; kwargs...) = $FUNC(rng, ComputationalBasis(), reg, AllLocs(); kwargs...)
+    @eval $FUNC(args...; kwargs...) = $FUNC(Random.GLOBAL_RNG, args...; kwargs...)
 end
 
 for FUNC in [:measure_collapseto!, :measure!, :measure]
-    @eval function $FUNC(op, reg::AbstractRegister, locs; kwargs...)
+    @eval function $FUNC(rng::AbstractRNG, op, reg::AbstractRegister, locs::Union{Tuple, Vector, Integer, UnitRange}; kwargs...)
         nbit = nactive(reg)
         focus!(reg, locs)
-        res = $FUNC(op, reg, AllLocs(); kwargs...)
+        res = $FUNC(rng, op, reg, AllLocs(); kwargs...)
         relax!(reg, locs; to_nactive=nbit)
         res
     end
 end
 
-function measure_remove!(op, reg::AbstractRegister, locs)
+function measure_remove!(rng::AbstractRNG, op, reg::AbstractRegister, locs)
     nbit = nactive(reg)
     focus!(reg, locs)
-    res = measure_remove!(op, reg, AllLocs())
+    res = measure_remove!(rng, op, reg, AllLocs())
     relax!(reg; to_nactive=nbit-length(locs))
     res
 end
