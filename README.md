@@ -53,24 +53,6 @@ For CUDA support, see [CuYao.jl](https://github.com/QuantumBFS/CuYao.jl).
 
 Some quantum algorithms are implemented with Yao in [QuAlgorithmZoo](https://github.com/QuantumBFS/QuAlgorithmZoo.jl).
 
-## Motivation
-Comparing with state of art quantum simulators, our package is inspired by variational quantum circuit optimization.
-Variational quantum optimization algorithms like quantum circuit Born machine ([QCBM](https://arxiv.org/abs/1804.04168)), quantum approximate optimization algorithm ([QAOA](http://arxiv.org/abs/1411.4028)), variational quantum eigensolver ([VQE](https://doi.org/10.1038/ncomms5213)) and quantum circuit learning ([QCL](http://arxiv.org/abs/1803.00745)) et. al. are promising killer apps on near term quantum devices.
-These algorithms require the flexibility to tune parameters and have well defined patterns such as "Arbitrary Rotation Block" and "CNOT Entangler".
-
-In Yao, we call these patterns "blocks". If we treat gate or gate pattern as "block", then the framework can
-
-* be flexible to dispatch parameters,
-* cache matrices of blocks to speed up future runs,
-* allow hierarchical design of quantum algorithms
-
-Thanks to Julia's duck type and multiple dispatch features, user can
-
-* easily **extend** the block system by overloading specific interfaces
-* quantum circuit blocks can be dispatched to some **special method** to improve the performance in specific case (e.g. customized repeat block of H gate).
-
-
-
 ## Features
 
 Yao is a framework with the following features:
@@ -85,6 +67,18 @@ Yao is a framework with the following features:
 - **Easy to Use**
   - As a white-box simulator, rather than using a black box, users will be aware of what their simulation are doing right through the interface.
   - **Hierarchical APIs** from **low abstraction quantum operators** to **highly abstract** circuit block objects.
+
+## Motivation
+
+The study of variational quantum algorithms is gaining popularity. Variational quantum optimization algorithms like quantum circuit Born machine ([QCBM](https://arxiv.org/abs/1804.04168)), quantum approximate optimization algorithm ([QAOA](http://arxiv.org/abs/1411.4028)), variational quantum eigensolver ([VQE](https://doi.org/10.1038/ncomms5213)) and quantum circuit learning ([QCL](http://arxiv.org/abs/1803.00745)) et. al. are promising for near term quantum devices.
+These algorithms require the flexibility to tune parameters and to leverage circuit patterns such as "arbitrary rotation block" and "CNOT entangler". In a departure from traditional simulators and frameworks, we have designed and developed a framework along with an Intermediate Representation (IR) to represent, simulate and manipulate quantum circuits.
+
+Our design enables:
+
+* Hierarchical design of quantum algorithms and greater abstraction for quantum circuits
+* Heterogeneous computing
+* Flexibility in dispatch parameters
+* Caching matrix forms to speed up simulation
 
 ## Architecture
 
