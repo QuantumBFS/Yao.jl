@@ -22,6 +22,7 @@ const PAGES = [
         "man/registers.md",
         "man/bitbasis.md",
         "man/extending_blocks.md",
+        "man/benchmarks.md",
         ],
 ]
 
