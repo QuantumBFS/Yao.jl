@@ -56,3 +56,5 @@ end
 
 Base.:(==)(A::GeneralMatrixBlock, B::GeneralMatrixBlock) = A.mat == B.mat
 Base.copy(A::GeneralMatrixBlock) = GeneralMatrixBlock(copy(A.mat))
+Base.adjoint(x::GeneralMatrixBlock) = Daggered(x)
+

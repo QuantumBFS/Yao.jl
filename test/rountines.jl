@@ -48,3 +48,10 @@ end
     m2 = linop2dense(v-> instruct!(v, mmm, 2), nbit)
     @test m1 ≈ m2
 end
+
+@testset "fix-static and adjoint for mat" begin
+    G1 = matblock(rand_unitary( 2))
+    G6 = matblock(rand_unitary( 1<<6))
+    @test mat(put(3, 2=>G1')) ≈ mat(put(3, 2=>matblock(G1)))'
+    @test mat(put(7, (3,2,1,5,4,6)=>G6')) ≈ mat(put(7, (3,2,1,5,4,6)=>G6))'
+end

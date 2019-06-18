@@ -1,4 +1,4 @@
-using Test, Random, LinearAlgebra, YaoArrayRegister, YaoBlocks
+using Test, Random, LinearAlgebra, YaoArrayRegister, YaoBlocks, YaoBase
 
 A = rand(ComplexF64, 4, 4)
 mg = matblock(A)
@@ -16,3 +16,6 @@ reg = rand_state(2)
 @test apply!(copy(reg), mg) |> statevec == mat(mg) * reg.state |> vec
 
 @test matblock(X) == GeneralMatrixBlock(mat(X))
+
+a = rand_unitary(2)
+@test mat(matblock(a))' == mat(matblock(a)')

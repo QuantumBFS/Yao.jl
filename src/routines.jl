@@ -53,7 +53,7 @@ end
     locked_vals = [cvals..., zeros(Int, M)...]
     locs_raw = [i+1 for i in itercontrol(nbit, setdiff(1:nbit, locs), zeros(Int, nbit-M))]
     ic = itercontrol(nbit, locked_bits, locked_vals)
-    return U |> staticize, ic, locs_raw |> staticize
+    return U |> autostatic, ic, locs_raw |> staticize
 end
 
 adaptive_pow2(n::Int) = adaptive_pow2(UInt(n))
@@ -94,6 +94,8 @@ function u1mat(nbit::Int, U1::AbstractMatrix, ibit::Int)
     unmat(nbit, U1, (ibit,))
 end
 
+u1mat(nbit::Int, U1::Adjoint, ibit::Int) = u1mat(nbit, copy(U1), ibit)
+
 function u1mat(nbit::Int, U1::SDMatrix, ibit::Int)
     large_mat_check(nbit)
     mask = bmask(ibit)
@@ -130,6 +132,10 @@ end
         @inbounds setcol!(mat, locs[j], locs, view(U,:,j))
     end
     csc
+end
+
+function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::Adjoint, locs::NTuple{M, Int}) where {C, M}
+    cunmat(nbit, cbits, cvals, copy(U0), locs)
 end
 
 function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SDMatrix, locs::NTuple{M, Int}) where {C, M}
