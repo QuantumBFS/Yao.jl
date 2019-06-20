@@ -11,7 +11,7 @@ Phase shift gate.
 
 ```math
 \\begin{pmatrix}
-1 & 0
+1 & 0\\
 0 & e^(im θ)
 \\end{pmatrix}
 ```
