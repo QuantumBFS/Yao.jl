@@ -65,7 +65,7 @@ and over on different qubits, and put a Hadamard gate
 to `i`th qubit to construct `i`-th `B` block.
 
 ```julia
-B(n, k) = chain(n, j==k ? put(k=>H) : A(j, k) for j in i:n)
+B(n, k) = chain(n, j==k ? put(k=>H) : A(j, k) for j in k:n)
 ```
 
 We need to input the total number of qubits `n` here because we have to iterate
@@ -74,7 +74,7 @@ through from `k`-th location to the last.
 Now, let's construct the circuit by chaining all the `B` blocks together
 
 ```julia
-qft(n) = chain(B(n, i) for i in 1:n)
+qft(n) = chain(B(n, k) for k in 1:n)
 
 qft(4)
 ```
