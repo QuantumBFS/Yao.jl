@@ -43,7 +43,7 @@ function. Let's construct the circuit in dash box A, and see the matrix of
 ``R_4`` gate.
 
 ```julia
-R4 = A(1, 4)
+R4 = A(4, 1)
 ```
 
 If you have read about [preparing GHZ state](@ref example-ghz),
@@ -65,11 +65,11 @@ and over on different qubits, and put a Hadamard gate
 to `i`th qubit to construct `i`-th `B` block.
 
 ```julia
-B(n, i) = chain(n, i==j ? put(i=>H) : A(j, i) for j in i:n)
+B(n, k) = chain(n, j==k ? put(k=>H) : A(j, k) for j in i:n)
 ```
 
 We need to input the total number of qubits `n` here because we have to iterate
-through from `i`-th location to the last.
+through from `k`-th location to the last.
 
 Now, let's construct the circuit by chaining all the `B` blocks together
 
