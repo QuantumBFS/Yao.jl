@@ -12,7 +12,7 @@ struct QCBM{BT<:AbstractBlock, KT<:AbstractKernel} <: QCOptProblem
     dbs
 end
 function QCBM(circuit::AbstractBlock, kernel::AbstractKernel, ptrain::Vector)
-    QCBM(circuit, kernel, ptrain, collect_blocks(AbstractDiff, circuit))
+    QCBM(circuit, kernel, ptrain, collect_blocks(Diff, circuit))
 end
 
 # INTERFACES
@@ -40,12 +40,12 @@ psi(qcbm) = zero_state(qcbm.circuit |> nqubits) |> qcbm.circuit
 """generated probability distribution"""
 probs(qcbm::QCBM) = qcbm |> psi |> probs
 """
-    mmdgrad(qcbm::QCBM, db::AbstractDiff; p0::Vector) -> Float64
+    mmdgrad(qcbm::QCBM, db::Diff; p0::Vector) -> Float64
 
 gradient of MMD two sample test loss, `db` must be contained in qcbm.
 `p0` is current probability distribution.
 """
-function mmdgrad(qcbm::QCBM, db::AbstractDiff; p0::Vector)
+function mmdgrad(qcbm::QCBM, db::Diff; p0::Vector)
     statdiff(()->probs(qcbm) |> as_weights, db, StatFunctional(kmat(qcbm.kernel)), initial=p0 |> as_weights) -
         2*statdiff(()->probs(qcbm) |> as_weights, db, StatFunctional(kmat(qcbm.kernel)*qcbm.ptrain))
 end

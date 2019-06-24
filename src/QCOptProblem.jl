@@ -35,7 +35,7 @@ function gradient end
 
 collection of all differentiable units.
 """
-diff_blocks(qop::QCOptProblem) = collect_blocks(AbstractDiff, qop |> circuit)
+diff_blocks(qop::QCOptProblem) = collect_blocks(Diff, qop |> circuit)
 
 """
     num_gradient(qop::QCOptProblem) -> Vector

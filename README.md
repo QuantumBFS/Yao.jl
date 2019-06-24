@@ -33,6 +33,7 @@ Disclaimer: **this package is still under development and needs further polish.*
 - [x] Hadamard Test
 - [x] State Overlap Algorithms
 - [x] Quantum SVD
+- [x] Shor
 
 ## License
 

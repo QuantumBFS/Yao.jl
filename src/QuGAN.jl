@@ -23,8 +23,8 @@ struct QuGAN{N} <: QCOptProblem
         N = nqubits(target)
         c = Sequence([gen, addbits!(1), dis])
         witness_op = put(N+1, (N+1)=>P0)
-        gdiffs = collect_blocks(AbstractDiff, gen)
-        ddiffs = collect_blocks(AbstractDiff, dis)
+        gdiffs = collect_blocks(Diff, gen)
+        ddiffs = collect_blocks(Diff, dis)
         new{N}(target, gen, dis, zero_state(N), witness_op, c, gdiffs, ddiffs)
     end
 end

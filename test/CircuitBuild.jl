@@ -46,14 +46,14 @@ end
     reg = rand_state(4)
     dispatch!(c, randn(nparameters(c)))
 
-    dbs = collect_blocks(BPDiff, c)
+    dbs = collect_blocks(Diff, c)
     op = kron(4, 1=>Z, 2=>X)
     loss1z() = expect(op, copy(reg) |> c)  # return loss please
 
     # back propagation
     ψ = copy(reg) |> c
     δ = copy(ψ) |> op
-    backward!(δ, c)
+    backward!((ψ, δ), c)
     bd = gradient(c)
 
     # get num gradient

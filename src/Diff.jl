@@ -1,4 +1,4 @@
-export Rotor, generator, AbstractDiff, BPDiff, QDiff, backward!, gradient, CPhaseGate, DiffBlock
+export Rotor, generator, Diff, backward!, gradient, CPhaseGate, DiffBlock
 import Yao: expect, content, chcontent, mat, apply!
 using StatsBase
 
@@ -13,80 +13,32 @@ Return the generator of rotation block.
 """
 generator(rot::RotationGate) = rot.block
 generator(rot::PutBlock{N, C, GT}) where {N, C, GT<:RotationGate} = PutBlock{N}(generator(rot|>content), rot |> occupied_locs)
-generator(c::CphaseGate{N}) where N = ControlBlock(N, c.ctrol_locs, ctrl_config, control(2,1,2=>Z), c.locs)
-
-abstract type AbstractDiff{GT, N, T} <: TagBlock{GT, N} end
-Base.adjoint(df::AbstractDiff) = Daggered(df)
-
-istraitkeeper(::AbstractDiff) = Val(true)
+generator(c::CphaseGate{N}) where N = ControlBlock{N}(c.ctrl_locs, c.ctrl_config, Z, c.locs)
 
 #################### The Basic Diff #################
 """
-    QDiff{GT, N} <: AbstractDiff{GT, N, T}
-    QDiff(block) -> QDiff
+    Diff{GT, N, T} <: TagBlock{GT, N}
+    Diff(block) -> Diff
 
 Mark a block as quantum differentiable.
 """
-mutable struct QDiff{GT, N, T} <: AbstractDiff{GT, N, T}
+mutable struct Diff{GT, N, T} <: TagBlock{GT, N}
     block::GT
     grad::T
-    QDiff(block::DiffBlock{N, T}) where {N, T} = new{typeof(block), N, T}(block, T(0))
+    Diff(block::DiffBlock{N, T}) where {N, T} = new{typeof(block), N, T}(block, T(0))
 end
-content(cb::QDiff) = cb.block
-chcontent(cb::QDiff, blk::DiffBlock) = QDiff(blk)
+content(cb::Diff) = cb.block
+chcontent(cb::Diff, blk::DiffBlock) = Diff(blk)
 
-@forward QDiff.block apply!
-mat(::Type{T}, df::QDiff) where T = mat(T, df.block)
-Base.adjoint(df::QDiff) = QDiff(content(df)')
+istraitkeeper(::Diff) = Val(true)
 
-function YaoBlocks.print_annotation(io::IO, df::QDiff)
-    printstyled(io, "[̂∂] "; bold=true, color=:yellow)
-end
+@forward Diff.block apply!
+mat(::Type{T}, df::Diff) where T = mat(T, df.block)
+Base.adjoint(df::Diff) = chcontent(df, content(df)')
 
-#################### The Back Propagation Diff #################
-"""
-    BPDiff{GT, N, T, PT} <: AbstractDiff{GT, N, Complex{T}}
-    BPDiff(block, [grad]) -> BPDiff
-
-Mark a block as differentiable, here `GT`, `PT` is gate type, parameter type.
-
-Warning:
-    please don't use the `adjoint` after `BPDiff`! `adjoint` is reserved for special purpose! (back propagation)
-"""
-mutable struct BPDiff{GT, N, T} <: AbstractDiff{GT, N, T}
-    block::GT
-    grad::T
-    input::AbstractRegister
-    BPDiff(block::AbstractBlock{N}, grad::T) where {N, T} = new{typeof(block), N, T}(block, grad)
-end
-BPDiff(block::AbstractBlock) = BPDiff(block, zeros(parameters_eltype(block), nparameters(block)))
-BPDiff(block::DiffBlock{N, T}) where {N, T} = BPDiff(block, T(0))
-
-content(cb::BPDiff) = cb.block
-chcontent(cb::BPDiff, blk::AbstractBlock) = BPDiff(blk)
-
-mat(::Type{T}, df::BPDiff) where T = mat(T, df.block)
-function apply!(reg::AbstractRegister, df::BPDiff)
-    if isdefined(df, :input)
-        copyto!(df.input, reg)
-    else
-        df.input = copy(reg)
-    end
-    apply!(reg, content(df))
-    reg
-end
-
-function apply!(δ::AbstractRegister, adf::Daggered{<:BPDiff{<:Rotor}})
-    df = adf |> content
-    apply!(δ, content(df)')
-    df.grad = -statevec(df.input |> generator(content(df)))' * statevec(δ) |> imag
-    δ
-end
-
-function YaoBlocks.print_annotation(io::IO, df::BPDiff)
+function YaoBlocks.print_annotation(io::IO, df::Diff)
     printstyled(io, "[∂] "; bold=true, color=:yellow)
 end
-
 
 #### interface #####
 export autodiff, numdiff, opdiff, StatFunctional, statdiff, as_weights
@@ -103,7 +55,7 @@ autodiff(mode::Symbol) = block->autodiff(mode, block)
 autodiff(mode::Symbol, block::AbstractBlock) = autodiff(Val(mode), block)
 
 # for BP
-autodiff(::Val{:BP}, block::DiffBlock) = BPDiff(block)
+autodiff(::Val{:BP}, block::DiffBlock) = Diff(block)
 autodiff(::Val{:BP}, block::AbstractBlock) = block
 # Sequential, Roller and ChainBlock can propagate.
 function autodiff(mode::Val{:BP}, blk::Union{ChainBlock, Sequential})
@@ -111,16 +63,16 @@ function autodiff(mode::Val{:BP}, blk::Union{ChainBlock, Sequential})
 end
 
 # for QC
-autodiff(::Val{:QC}, block::Union{RotationGate, CphaseGate}) = QDiff(block)
+autodiff(::Val{:QC}, block::Union{RotationGate, CphaseGate}) = Diff(block)
 # escape control blocks.
 autodiff(::Val{:QC}, block::ControlBlock) = block
 
 function autodiff(mode::Val{:QC}, blk::AbstractBlock)
     blks = subblocks(blk)
     isempty(blks) ? blk : chsubblocks(blk, autodiff.(mode, blks))
- end
+end
 
-@inline function _perturb(func, gate::AbstractDiff{<:DiffBlock}, δ::Real)
+@inline function _perturb(func, gate::Diff{<:DiffBlock}, δ::Real)
     dispatch!(-, gate, (δ,))
     r1 = func()
     dispatch!(+, gate, (2δ,))
@@ -129,7 +81,7 @@ function autodiff(mode::Val{:QC}, blk::AbstractBlock)
     r1, r2
 end
 
-@inline function _perturb(func, gate::AbstractDiff{<:Rotor}, δ::Real)  # for put
+@inline function _perturb(func, gate::Diff{<:Rotor}, δ::Real)  # for put
     dispatch!(-, gate, (δ,))
     r1 = func()
     dispatch!(+, gate, (2δ,))
@@ -139,21 +91,21 @@ end
 end
 
 """
-    numdiff(loss, diffblock::AbstractDiff; δ::Real=1e-2)
+    numdiff(loss, diffblock::Diff; δ::Real=1e-2)
 
 Numeric differentiation.
 """
-@inline function numdiff(loss, diffblock::AbstractDiff; δ::Real=1e-2)
+@inline function numdiff(loss, diffblock::Diff; δ::Real=1e-2)
     r1, r2 = _perturb(loss, diffblock, δ)
     diffblock.grad = (r2 - r1)/2δ
 end
 
 """
-    opdiff(psifunc, diffblock::AbstractDiff, op::AbstractBlock)
+    opdiff(psifunc, diffblock::Diff, op::AbstractBlock)
 
 Operator differentiation.
 """
-@inline function opdiff(psifunc, diffblock::AbstractDiff, op::AbstractBlock)
+@inline function opdiff(psifunc, diffblock::Diff, op::AbstractBlock)
     r1, r2 = _perturb(()->expect(op, psifunc()) |> real, diffblock, π/2)
     diffblock.grad = (r2 - r1)/2
 end
@@ -201,45 +153,68 @@ expect(stat::StatFunctional{1, <:Function}, xs::AbstractVector) = mean(stat.data
 Base.ndims(stat::StatFunctional{N}) where N = N
 
 """
-    statdiff(probfunc, diffblock::AbstractDiff, stat::StatFunctional{<:Any, <:AbstractArray}; initial::AbstractVector=probfunc())
-    statdiff(samplefunc, diffblock::AbstractDiff, stat::StatFunctional{<:Any, <:Function}; initial::AbstractVector=samplefunc())
+    statdiff(probfunc, diffblock::Diff, stat::StatFunctional{<:Any, <:AbstractArray}; initial::AbstractVector=probfunc())
+    statdiff(samplefunc, diffblock::Diff, stat::StatFunctional{<:Any, <:Function}; initial::AbstractVector=samplefunc())
 
 Differentiation for statistic functionals.
 """
-@inline function statdiff(probfunc, diffblock::AbstractDiff, stat::StatFunctional{2}; initial::AbstractVector=probfunc())
+@inline function statdiff(probfunc, diffblock::Diff, stat::StatFunctional{2}; initial::AbstractVector=probfunc())
     r1, r2 = _perturb(()->expect(stat, probfunc(), initial), diffblock, π/2)
     diffblock.grad = (r2 - r1)*ndims(stat)/2
 end
-@inline function statdiff(probfunc, diffblock::AbstractDiff, stat::StatFunctional{1})
+@inline function statdiff(probfunc, diffblock::Diff, stat::StatFunctional{1})
     r1, r2 = _perturb(()->expect(stat, probfunc()), diffblock, π/2)
     diffblock.grad = (r2 - r1)*ndims(stat)/2
 end
 
 """
-    backward!(δ::AbstractRegister, circuit::AbstractBlock) -> AbstractRegister
+    backward!(state, circuit::AbstractBlock) -> AbstractRegister
 
 back propagate and calculate the gradient ∂f/∂θ = 2*Re(∂f/∂ψ*⋅∂ψ*/∂θ), given ∂f/∂ψ*.
+`state` is a pair of output_register => the corresponding adjoint.
 
 Note:
 Here, the input circuit should be a matrix block, otherwise the back propagate may not apply (like Measure operations).
 """
-backward!(δ::AbstractRegister, circuit::AbstractBlock) = apply!(δ, circuit')
+function backward!(state, block::AbstractBlock)
+    out, outδ = state
+    adjblock = block'
+    backward_params!((out, outδ), block)
+    in = apply!(out, adjblock)
+    inδ = apply!(outδ, adjblock)
+    return (in, inδ)
+end
+
+function backward!(state, circuit::Union{ChainBlock, Concentrator})
+    for blk in Base.Iterators.reverse(subblocks(circuit))
+        state = backward!(state, blk)
+    end
+    return state
+end
+
+backward!(state, block::Measure) = throw(MethodError(backward!, (state, block)))
+
+backward_params!(state, block::AbstractBlock) = nothing
+function backward_params!(state, block::Diff{<:DiffBlock})
+    in, outδ = state
+    Σ = generator(content(block))
+    block.grad = -statevec(in |> Σ)' * statevec(outδ) |> imag
+    in |> Σ
+    nothing
+end
 
 """
     gradient(circuit::AbstractBlock, mode::Symbol=:ANY) -> Vector
 
-collect all gradients in a circuit, mode can be :BP/:QC/:ANY, they will collect `grad` from BPDiff/QDiff/AbstractDiff respectively.
+collect all gradients in a circuit, mode can be :BP/:QC/:ANY, they will collect `grad` from Diff respectively.
 """
-gradient(circuit::AbstractBlock, mode::Symbol=:ANY) = gradient!(circuit, parameters_eltype(circuit)[], mode)
+gradient(circuit::AbstractBlock) = gradient!(circuit, parameters_eltype(circuit)[])
 
-gradient!(circuit::AbstractBlock, grad, mode::Symbol) = gradient!(circuit, grad, Val(mode))
-function gradient!(circuit::AbstractBlock, grad, mode::Val)
+function gradient!(circuit::AbstractBlock, grad)
     for block in subblocks(circuit)
-        gradient!(block, grad, mode)
+        gradient!(block, grad)
     end
     grad
 end
 
-gradient!(circuit::BPDiff, grad, mode::Val{:BP}) = append!(grad, circuit.grad)
-gradient!(circuit::QDiff, grad, mode::Val{:QC}) = push!(grad, circuit.grad)
-gradient!(circuit::AbstractDiff, grad, mode::Val{:ANY}) = append!(grad, circuit.grad)
+gradient!(circuit::Diff, grad) = append!(grad, circuit.grad)

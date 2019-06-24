@@ -49,3 +49,7 @@ end
 @testset "Diff" begin
     include("Diff.jl")
 end
+
+@testset "Shore" begin
+    include("shor.jl")
+end

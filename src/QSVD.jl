@@ -19,7 +19,7 @@ function train_qsvd!(reg, circuit_a::AbstractBlock{Na}, circuit_b::AbstractBlock
     obs = -mapreduce(i->put(nbit, i=>Z), +, (1:Na..., Na+Nc+1:Na+Nb...))
     params = parameters(c)
     for i = 1:maxiter
-        grad = opdiff.(() -> copy(reg) |> c, collect_blocks(AbstractDiff, c), Ref(obs))
+        grad = opdiff.(() -> copy(reg) |> c, collect_blocks(Diff, c), Ref(obs))
         QuAlgorithmZoo.update!(params, grad, optimizer)
         println("Iter $i, Loss = $(Na+expect(obs, copy(reg) |> c))")
         dispatch!(c, params)
