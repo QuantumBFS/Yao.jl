@@ -14,13 +14,23 @@ Extensible, Efficient Quantum Algorithm Design for Humans.
 
 ## Introduction
 
-Yao is an open source framework for
+Yao is an open source framework that aims to empower quantum information research with software tools. It is designed with following in mind:
 
 - quantum algorithm design;
 - quantum [software 2.0](https://medium.com/@karpathy/software-2-0-a64152b37c35);
 - quantum computation education.
 
 **We are in an early-release beta. Expect some adventures and rough edges.**
+
+## Try your first Yao program
+
+A 3 line [Quantum Fourier Transformation](https://quantumbfs.github.io/Yao.jl/latest/examples/QFT/) with [Quantum Blocks](https://quantumbfs.github.io/Yao.jl/latest/man/blocks/):
+
+```julia
+A(i, j) = control(i, j=>shift(2π/(1<<(i-j+1))))
+B(n, k) = chain(n, j==k ? put(k=>H) : A(j, k) for j in k:n)
+qft(n) = chain(B(n, k) for k in 1:n)
+```
 
 ## Installation
 
@@ -34,11 +44,17 @@ If you have problem to install the package, please [file us an issue](https://gi
 
 For CUDA support, see [CuYao.jl](https://github.com/QuantumBFS/CuYao.jl).
 
-## Getting Started
+## Documentation
+
+### Getting Started
 
 [Examples: understand Yao's code for quantum algorithms](https://quantumbfs.github.io/Yao.jl/stable/#Getting-Started-1)
 
-## Documentation
+### Algoritm Zoo
+
+Some quantum algorithms are implemented with Yao in [QuAlgorithmZoo](https://github.com/QuantumBFS/QuAlgorithmZoo.jl).
+
+### Online Documentation
 
 - [**STABLE**](https://quantumbfs.github.io/Yao.jl/stable) — most recently tagged version of the documentation.
 - [**LATEST**](https://quantumbfs.github.io/Yao.jl/latest) — in-development version of the documentation.
@@ -49,52 +65,13 @@ For CUDA support, see [CuYao.jl](https://github.com/QuantumBFS/CuYao.jl).
 - slack: you can [join julia's slack channel](https://slackinvite.julialang.org/) and ask Yao related questions in `#yao-dev` channel.
 - Julia discourse: You can also ask questions on [julia discourse](https://discourse.julialang.org/) or the [Chinese discourse](https://discourse.juliacn.com/)
 
-## Algoritm Zoo
-
-Some quantum algorithms are implemented with Yao in [QuAlgorithmZoo](https://github.com/QuantumBFS/QuAlgorithmZoo.jl).
-
-## Features
-
-Yao is a framework with the following features:
-
-- **Extensibility**
-  - define new operations with a minimum number of methods in principle.
-  - extend with new operations on different hardware should be easy, (e.g GPUs, near term quantum devices, FPGAs, etc.)
-- **Efficiency**
-  - comparing with python, julia have no significant overhead on small scale circuit.
-  - special optimized methods are dispatched to frequently used blocks.
-  - double interfaces "apply!" and "cache server + mat" allow us to choose freely when to sacrifice memory for faster simulation and when to sacrifice the speed to simulate more qubits.
-- **Easy to Use**
-  - As a white-box simulator, rather than using a black box, users will be aware of what their simulation are doing right through the interface.
-  - **Hierarchical APIs** from **low abstraction quantum operators** to **highly abstract** circuit block objects.
-
-## Motivation
-
-The study of variational quantum algorithms is gaining popularity. Variational quantum optimization algorithms like quantum circuit Born machine ([QCBM](https://arxiv.org/abs/1804.04168)), quantum approximate optimization algorithm ([QAOA](http://arxiv.org/abs/1411.4028)), variational quantum eigensolver ([VQE](https://doi.org/10.1038/ncomms5213)) and quantum circuit learning ([QCL](http://arxiv.org/abs/1803.00745)) et. al. are promising for near term quantum devices.
-These algorithms require the flexibility to tune parameters and to leverage circuit patterns such as "arbitrary rotation block" and "CNOT entangler". In a departure from traditional simulators and frameworks, we have designed and developed a framework along with an Intermediate Representation (IR) to represent, simulate and manipulate quantum circuits.
-
-Our design enables:
-
-* Hierarchical design of quantum algorithms and greater abstraction for quantum circuits
-* Heterogeneous computing
-* Flexibility in dispatch parameters
-* Caching matrix forms to speed up simulation
-
-## Architecture
-
-Yao is a meta package based on several component packages in order to provide a highly modularized architecture, researchers and developers can extend the framework with different component packages for different purposes with minimal effort. The component packages includes:
-
-- [YaoBase](https://github.com/QuantumBFS/YaoBase.jl) Interface definition and basic toolkits for registers.
-- [YaoBlocks](https://github.com/QuantumBFS/YaoBlocks.jl) Standard basic quantum circuit simulator building blocks.
-- [YaoArrayRegister](https://github.com/QuantumBFS/YaoArrayRegister.jl) Simulated Full Amplitude Quantum Register
-
 ## Contribution
 
-To contribute to this project, please open an [issue](https://github.com/QuantumBFS/Yao.jl/issues) first to discuss with us in case we may not accept your PR.
+Please read our [contribution guide]().
 
-## Author
+## The Team
 
-This project is an effort of QuantumBFS, an open source organization for quantum science. All the contributors are listed in the [contributors](https://github.com/QuantumBFS/Yao.jl/graphs/contributors).
+This project is an effort of QuantumBFS, an open source organization for quantum science. Yao is currently maintained by [Xiuzhe (Roger) luo](https://github.com/Roger-luo) and [Jin-guo Liu](https://github.com/GiggleLiu) with contributions from open source community. All the contributors are listed in the [contributors](https://github.com/QuantumBFS/Yao.jl/graphs/contributors).
 
 ## Papers Citing Yao
 
@@ -105,6 +82,10 @@ This project is an effort of QuantumBFS, an open source organization for quantum
 > Learning and inference on generative adversarial quantum circuits,
 > Jinfeng Zeng, Yufeng Wu, Jin-Guo Liu, Lei Wang, and Jiangping Hu,
 > Phys. Rev. A 99, 052306 – Published 6 May 2019
+
+> Parameterized quantum circuits as machine learning models,
+> Marcello Benedetti, Erika Lloyd, and Stefan Sack
+> https://arxiv.org/pdf/1906.07682.pdf
 
 ## License
 
