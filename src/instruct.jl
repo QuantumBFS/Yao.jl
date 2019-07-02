@@ -398,3 +398,29 @@ function YaoBase.instruct!(
     end
     return state
 end
+
+function YaoBase.instruct!(
+        state::AbstractVecOrMat{T},
+        ::Val{:PSWAP},
+        locs::Tuple{Int, Int},
+        theta::Real) where T
+    mask1 = bmask(locs[1])
+    mask2 = bmask(locs[2])
+    mask12 = mask1|mask2
+    a = T(cos(theta/2))
+    c = T(-im * sin(theta/2))
+    e = T(exp(-im/2*theta))
+    for b in basis(state)
+        if b&mask1==0
+            i = b+1
+            i_ = b ⊻ mask12 + 1
+            if b&mask2==mask2
+                u1rows!(state, i, i_, a, c, c, a)
+            else
+                mulrow!(state, i, e)
+                mulrow!(state, i_, e)
+            end
+        end
+    end
+    return state
+end

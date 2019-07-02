@@ -91,6 +91,12 @@ end
     @test instruct!(copy(ST), Val(:SWAP), (1, 2)) ≈ SWAP * ST
 end
 
+@testset "pswap instruction" begin
+    ST = randn(ComplexF64, 1 << 2)
+    θ = π/3
+    @test instruct!(copy(ST), Val(:PSWAP), (1, 2), θ) ≈ (cos(θ/2)*IMatrix{4}() - im*sin(θ/2)* SWAP) * ST
+end
+
 @testset "Yao.jl/#189" begin
     st = rand(1<<4)
     @test instruct!(st, IMatrix{2, Float64}(), 1) == st
