@@ -32,6 +32,7 @@ using Test, YaoBlocks, LuxurySparse, BitBasis, YaoBlocks.ConstGate
     end
 
     @test nqubits(CNOT) == 2
+    @test nqubits(CZ) == 2
     @test nqubits(SWAP) == 2
     @test nqubits(Toffoli) == 3
 
@@ -79,7 +80,7 @@ end
     @testset "define new" begin
         @const_gate TEST = rand(ComplexF64, 2, 2)
 
-        # errors if given matrix is not a square matrix 
+        # errors if given matrix is not a square matrix
         @test_throws DimensionMismatch @const_gate TEST::ComplexF32 = rand(2, 3)
 
         @const_gate TEST::ComplexF32

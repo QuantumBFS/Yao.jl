@@ -23,6 +23,7 @@ const SYM_LIST = [
     (:I2, IMatrix{2, ConstGateDefaultType}()),
     (:H, (elem = 1 / sqrt(2); ConstGateDefaultType[elem elem; elem -elem])),
     (:CNOT, PermMatrix([1, 4, 3, 2], ones(ConstGateDefaultType, 4))),
+    (:CZ, Diagonal(ConstGateDefaultType[1, 1, 1, -1])),
     (:SWAP, PermMatrix([1, 3, 2, 4], ones(ConstGateDefaultType, 4))),
     (:Toffoli, PermMatrix([1, 2, 3, 8, 5, 6, 7, 4], ones(ConstGateDefaultType, 8))),
     (:Pu, sparse([1], [2], ConstGateDefaultType[1+0im], 2, 2)),
