@@ -153,7 +153,6 @@ end
 
 # Custom layouts
 color(m::AbstractBlock) = color(typeof(m))
-color(::Type{<:Swap}) = :magenta
 color(::Type{<:ControlBlock}) = :red
 color(::Type{<:ChainBlock}) = :blue
 color(::Type{<:MathGate}) = :red
@@ -168,7 +167,6 @@ color(::Type{<:GeneralMatrixBlock}) = :red
 print_block(io::IO, g::PhaseGate) = print(io, "phase(", g.theta, ")")
 print_block(io::IO, S::ShiftGate) = print(io, "shift(", S.theta, ")")
 print_block(io::IO, R::RotationGate) = print(io, "rot(", content(R), ", ", R.theta, ")")
-print_block(io::IO, swap::Swap) = printstyled(io, "swap", swap.locs; bold=true, color=color(Swap))
 print_block(io::IO, x::KronBlock) = printstyled(io, "kron"; bold=true, color=color(KronBlock))
 print_block(io::IO, x::ChainBlock) = printstyled(io, "chain"; bold=true, color=color(ChainBlock))
 print_block(io::IO, x::ReflectGate{N}) where N = print(io, "reflect($(summary(x.psi)))")

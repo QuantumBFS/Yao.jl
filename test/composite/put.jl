@@ -38,3 +38,9 @@ end
     @test pb |> isunitary
     @test pb |> isreflexive
 end
+
+@testset "test swap gate" begin
+    include("swap_gate.jl")
+end
+
+

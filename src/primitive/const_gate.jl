@@ -1,6 +1,6 @@
 export @const_gate, ConstantGate, ConstGate,
-    X, Y, Z, H, I2,
-    XGate, YGate, ZGate, HGate, I2Gate
+    X, Y, Z, H, I2, SWAP,
+    XGate, YGate, ZGate, HGate, I2Gate, SWAPGate
 
 """
     ConstGate
@@ -36,5 +36,5 @@ end
 
 # import some frequently-used objects
 import .ConstGate:
-    XGate, YGate, ZGate, HGate, I2Gate, X, Y, Z, H, I2,
+    XGate, YGate, ZGate, HGate, I2Gate, SWAPGate, X, Y, Z, H, I2, SWAP,
     @const_gate, ConstantGate, PauliGate

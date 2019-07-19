@@ -16,10 +16,6 @@ end
     include("rotation_gate.jl")
 end
 
-@testset "test swap gate" begin
-    include("swap_gate.jl")
-end
-
 @testset "test time evolution" begin
     include("time_evolution.jl")
 end

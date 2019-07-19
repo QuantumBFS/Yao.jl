@@ -16,3 +16,19 @@ end
 @test isunitary(swap(3, 1, 2))
 @test ishermitian(swap(3, 1, 2))
 @test isreflexive(swap(3, 1, 2))
+
+@testset "pswap gate" begin
+    pb = pswap(6, 2, 4, 0.0)
+    @test pb isa PSwap{6, Float64}
+    @test pb == pswap(2, 4, 0.0)(6)
+    reg = rand_state(6)
+    @test copy(reg) |> pb ≈ invoke(apply!, Tuple{ArrayReg, PutBlock}, copy(reg), pb)
+    @test copy(reg) |> pb ≈ reg
+
+    dispatch!(pb, π)
+    @test copy(reg) |> pb ≈ -im*(copy(reg) |> swap(6, 2, 4))
+    @test copy(reg) |> pb |> isnormalized
+
+    dispatch!(pb, :random)
+    @test copy(reg) |> pb ≈ invoke(apply!, Tuple{ArrayReg, PutBlock}, copy(reg), pb)
+end

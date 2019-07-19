@@ -25,6 +25,8 @@ end
 for n in 5:5:25
     SUITE["composite"]["kron(rand_const)"] = bench(kron(rand([X, Y, Z, H]) for _ in 1:n))
     SUITE["composite"]["kron(sparse_const)"] = bench(kron(n, k=>rand([X, Y, Z, H]) for k in randperm(n)[1:n÷5]))
+    SUITE["composite"]["swap"] = bench(swap(n,2,4))
+    SUITE["composite"]["swap"] = bench(pswap(n,2,4,0.5))
 end
 
 function heisenberg(n::Int; periodic::Bool=true)
