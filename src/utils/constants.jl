@@ -35,6 +35,7 @@ end
 @def I2 = IMatrix{2, ComplexF64}();
 @def H = (elem = 1 / sqrt(2); ComplexF64[elem elem; elem -elem])
 @def CNOT = PermMatrix([1, 4, 3, 2], ones(ComplexF64, 4));
+@def CZ = Diagonal([1.0+0im, 1, 1, -1]);
 @def SWAP = PermMatrix([1, 3, 2, 4], ones(ComplexF64, 4));
 @def Toffoli = PermMatrix([1, 2, 3, 8, 5, 6, 7, 4], ones(ComplexF64, 8));
 @def Pu = sparse([1], [2], ComplexF64[1+0im], 2, 2);

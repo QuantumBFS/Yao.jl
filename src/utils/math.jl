@@ -21,7 +21,8 @@ export batch_normalize,
     density_fidelity,
     purification_fidelity,
     # matrix tools
-    autostatic
+    autostatic,
+    rot_mat
 
 using LuxurySparse, LinearAlgebra, BitBasis, SparseArrays
 import LinearAlgebra: svdvals
@@ -276,3 +277,16 @@ end
 Staticize dynamic array `A` by a `threshold`.
 """
 autostatic(A::AbstractVecOrMat; threshold::Int=8) = length(A) > (1 << threshold) ? A : staticize(A)
+
+# General definition
+function rot_mat(::Type{T}, gen::AbstractMatrix, theta::Real) where {N, T}
+    I = IMatrix{size(gen, 1), T}()
+    m = I * cos(theta / 2) - im * sin(theta / 2) * gen
+    if eltype(m) != T
+        m2 = similar(m, T)
+        copyto!(m2, m)
+        return m2
+    else
+        return m
+    end
+end

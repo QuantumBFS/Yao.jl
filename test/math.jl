@@ -52,3 +52,10 @@ end
     @test ishermitian(sprand_hermitian(8, 0.5))
     @test isunitary(sprand_unitary(8, 0.5))
 end
+
+@testset "rotmat" begin
+    theta = 0.5
+    @test rot_mat(ComplexF64, Const.X, theta) ≈ ComplexF64[cos(theta/2) -im * sin(theta/2); -im * sin(theta/2) cos(theta/2)]
+    @test rot_mat(ComplexF64, Const.X, theta) |> eltype == ComplexF64
+    @test rot_mat(ComplexF32, Const.X, theta) |> eltype == ComplexF32
+end
