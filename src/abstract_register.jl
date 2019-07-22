@@ -107,7 +107,7 @@ Lazy version of [`focus!`](@ref), this returns a lambda which requires a registe
 """
 focus!(locs::Int...) = focus!(locs)
 focus!(locs::NTuple{N, Int}) where N = @λ(register -> focus!(register, locs))
-
+focus!(locs::UnitRange) = @λ(register -> focus!(register, locs))
 """
     focus(f, register, locs...)
 
