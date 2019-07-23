@@ -156,6 +156,7 @@ color(m::AbstractBlock) = color(typeof(m))
 color(::Type{<:ControlBlock}) = :red
 color(::Type{<:ChainBlock}) = :blue
 color(::Type{<:MathGate}) = :red
+color(::Type{<:Add}) = :red
 color(::Type{<:PutBlock}) = :cyan
 color(::Type{T}) where {T <: PauliString} = :cyan
 color(::Type{<:RepeatedBlock}) = :cyan
@@ -172,7 +173,7 @@ print_block(io::IO, x::ChainBlock) = printstyled(io, "chain"; bold=true, color=c
 print_block(io::IO, x::ReflectGate{N}) where N = print(io, "reflect($(summary(x.psi)))")
 print_block(io::IO, c::Concentrator) = print(io, "Concentrator: ", occupied_locs(c))
 print_block(io::IO, c::CachedBlock) = print_block(io, content(c))
-print_block(io::IO, c::Sum) = printstyled(io, "sum"; bold=true, color=color(ChainBlock))
+print_block(io::IO, c::Add) = printstyled(io, "+"; bold=true, color=color(Add))
 print_block(io::IO, c::TagBlock) = nothing
 print_block(io::IO, c::GeneralMatrixBlock) = printstyled(io, "matblock(...)"; color=color(GeneralMatrixBlock))
 
@@ -185,7 +186,7 @@ function print_block(io::IO, c::Measure{N, K, OT}) where {N, K, OT}
     if c.locations != AllLocs()
         push!(strs, "locs=$(repr(c.locations))")
     end
-    
+
     if c.collapseto !== nothing
         push!(strs, "collapseto=$(c.collapseto)")
     end
@@ -215,7 +216,7 @@ end
 
 function print_block(io::IO, te::TimeEvolution)
     println(io, "Time Evolution Δt = $(te.dt), tol = $(te.tol)")
-    print_tree(io, content(te.H); title=false)
+    print_tree(io, te.H; title=false)
 end
 
 function print_block(io::IO, x::ControlBlock)

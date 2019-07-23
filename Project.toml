@@ -8,7 +8,6 @@ CacheServers = "a921213e-d44a-5460-ac04-5d720a99ba71"
 ExponentialUtilities = "d4d017d3-3776-5f7e-afef-a10c40355c18"
 LegibleLambdas = "f1f30506-32fe-5131-bd72-7c197988f9e5"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-LinearMaps = "7a12625a-238d-50fd-b39a-03d52299707e"
 LuxurySparse = "d05aeea4-b7d4-55ac-b691-9e7fabb07ba2"
 MLStyle = "d8e11817-5142-5d16-987a-aa16d5891078"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
@@ -20,10 +19,10 @@ YaoArrayRegister = "e600142f-9330-5003-8abb-0ebd767abc51"
 YaoBase = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
 
 [compat]
-julia = "^1.0.0"
-YaoBase = "~0.9.1"
-YaoArrayRegister = "~0.3.5"
 BitBasis = "~0.5"
+YaoArrayRegister = "~0.3.5"
+YaoBase = "~0.9.1"
+julia = "^1.0.0"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

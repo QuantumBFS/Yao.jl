@@ -38,3 +38,4 @@ end
 import .ConstGate:
     XGate, YGate, ZGate, HGate, I2Gate, SWAPGate, X, Y, Z, H, I2, SWAP,
     @const_gate, ConstantGate, PauliGate
+occupied_locs(::I2Gate) = ()

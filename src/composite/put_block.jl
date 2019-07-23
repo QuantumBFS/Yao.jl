@@ -67,7 +67,7 @@ julia> put(1=>X)
 """
 put(pa::Pair) = @λ(n -> put(n, pa))
 
-occupied_locs(x::PutBlock) = x.locs
+occupied_locs(x::PutBlock) = map(i->x.locs[i], x.content |> occupied_locs)
 chsubblocks(x::PutBlock{N}, b::AbstractBlock) where N = PutBlock{N}(b, x.locs)
 PreserveStyle(::PutBlock) = PreserveAll()
 cache_key(pb::PutBlock) = cache_key(pb.content)

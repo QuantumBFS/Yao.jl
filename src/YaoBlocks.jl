@@ -1,10 +1,11 @@
 module YaoBlocks
 
+using LinearAlgebra
+
 include("utils.jl")
 # include("traits.jl")
 
 include("abstract_block.jl")
-include("block_map.jl")
 
 # concrete blocks
 include("routines.jl")

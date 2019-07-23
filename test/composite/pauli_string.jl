@@ -19,7 +19,7 @@ g = PauliString([X, Y, Z])
 @test chsubblocks(g, [X, X, X]) == PauliString(X, X, X)
 
 g[3] = I2
-@test occupied_locs(g) == [1, 2]
+@test occupied_locs(g) == (1, 2)
 
 @test ishermitian(g) == ishermitian(mat(g))
 @test isreflexive(g) == isreflexive(mat(g))

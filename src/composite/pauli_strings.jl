@@ -58,7 +58,7 @@ subblocks(ps::PauliString) = ps.blocks
 chsubblocks(pb::PauliString, blocks::Vector) = PauliString(blocks)
 chsubblocks(pb::PauliString, it) = PauliString(collect(it))
 
-occupied_locs(ps::PauliString) = findall(x->!(x isa I2Gate), ps.blocks)
+occupied_locs(ps::PauliString) = (findall(x->!(x isa I2Gate), ps.blocks)...,)
 
 cache_key(ps::PauliString) = map(cache_key, ps.blocks)
 

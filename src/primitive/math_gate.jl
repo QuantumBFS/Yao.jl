@@ -144,4 +144,15 @@ function apply!(r::ArrayReg, m::MathGate{N, F}) where {N, F}
 end
 
 # TODO: use trait to correct this
-mat(::Type{T}, m::MathGate) where T = Matrix(BlockMap(T, m))
+function mat(::Type{T}, m::MathGate{N}) where {T, N}
+    L = 1<<N
+    vals = zeros(T, L)
+    perm = zeros(Int, L)
+    for b in basis(N)
+        b2 = mathop(m, b)
+        vals[b2+1] += 1
+        perm[b2+1] = b+1
+    end
+    any(==(0), vals) && throw(ArgumentError("This `MathGate` is not unitary! Failed converting to a `PermMatrix`! maybe use `applymatrix` to check your block?"))
+    return PermMatrix(perm, vals)
+end

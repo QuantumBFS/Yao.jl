@@ -10,6 +10,7 @@ c = concentrate(10, block, [1, 3, 9, 2])
 @test ishermitian(c) == true
 blk = kron(4, 2=>Rx(0.3))
 @test chsubblocks(c, [blk]) |> subblocks |> first == blk
+@test occupied_locs(c) == (3,)
 
 @test apply!(copy(reg), c) == apply!(copy(reg), kron(10, 3=>X))
 @test apply!(rand_state(12, nbatch=10) |> focus!(Tuple(1:10)...), c) |> nactive == 10

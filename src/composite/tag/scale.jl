@@ -36,6 +36,13 @@ Base.copy(x::Scale) = Scale(x.alpha, copy(x.content))
 Base.adjoint(x::Scale{<:Number}) = Scale(adjoint(x.alpha), adjoint(content(x)))
 Base.adjoint(x::Scale{Val{X}}) where X = Scale(Val(adjoint(X)), adjoint(content(x)))
 
+YaoBase.ishermitian(s::Scale) = (ishermitian(s |> content) && ishermitian(s |> factor)) || ishermitian(mat(s))
+YaoBase.isunitary(s::Scale) = (isunitary(s |> content) && isunitary(s |> factor)) || isunitary(mat(s))
+YaoBase.isreflexive(s::Scale) = (isreflexive(s |> content) && isreflexive(s |> factor)) || isreflexive(mat(s))
+YaoBase.iscommute(x::Scale, y::Scale) = iscommute(x |> content, y |> content)
+YaoBase.iscommute(x::AbstractBlock, y::Scale) = iscommute(x, y |> content)
+YaoBase.iscommute(x::Scale, y::AbstractBlock) = iscommute(x |> content, y)
+
 Base.:(==)(x::Scale, y::Scale) = (factor(x) == factor(y)) && (content(x) == content(y))
 
 chsubblocks(x::Scale, blk::AbstractBlock) = Scale(x.alpha, blk)

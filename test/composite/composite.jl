@@ -26,7 +26,7 @@ end
 
 @testset "test tag" begin
     include("tag.jl")
-    include("cache.jl")    
+    include("cache.jl")
 end
 
 @testset "test pauli string" begin
@@ -36,8 +36,8 @@ end
 @testset "test single block chsubblocks" begin
     @test chsubblocks(chain(X), Y) == chain(Y)
     @test chsubblocks(kron(X), Y) == kron(Y)
-    @test chsubblocks(prod(X), Y) == prod(Y)
-    @test chsubblocks(sum(X), Y) == sum(Y)
+    @test chsubblocks(*(X), Y) == *(Y)
+    @test chsubblocks(+(X), Y) == +(Y)
 end
 
 # check extension fallback errors

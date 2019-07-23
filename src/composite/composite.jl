@@ -88,7 +88,7 @@ include("pauli_strings.jl")
 
 chsubblocks(x::ChainBlock, it::AbstractBlock) = chsubblocks(x, (it, ))
 chsubblocks(x::KronBlock, it::AbstractBlock) = chsubblocks(x, (it, ))
-chsubblocks(x::Sum, it::AbstractBlock) = chsubblocks(x, (it, ))
+chsubblocks(x::Add, it::AbstractBlock) = chsubblocks(x, (it, ))
 
 # tag blocks
 include("tag/tag.jl")

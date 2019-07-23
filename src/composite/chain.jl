@@ -63,7 +63,7 @@ chain() = @λ(n->chain(n))
 
 subblocks(c::ChainBlock) = c.blocks
 occupied_locs(c::ChainBlock) =
-    unique(Iterators.flatten(occupied_locs(b) for b in subblocks(c)))
+    Tuple(unique(Iterators.flatten(occupied_locs(b) for b in subblocks(c))))
 
 chsubblocks(pb::ChainBlock{N}, blocks::Vector{<:AbstractBlock}) where N = length(blocks) == 0 ? ChainBlock{N}([]) : ChainBlock(blocks)
 chsubblocks(pb::ChainBlock, it) = chain(it...)

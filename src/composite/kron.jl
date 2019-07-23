@@ -135,7 +135,7 @@ julia> kron(1=>X, 3=>Y)
 Base.kron(blocks::Pair{Int, <:AbstractBlock}...,) = @λ(n->kron(n, blocks...))
 Base.kron(blocks::Base.Generator) = kron(blocks...)
 
-occupied_locs(k::KronBlock) = Iterators.flatten(map(x-> x + i - 1, occupied_locs(b)) for (i, b) in zip(k.locs, subblocks(k)))
+occupied_locs(k::KronBlock) = (Iterators.flatten(map(x-> x + i - 1, occupied_locs(b)) for (i, b) in zip(k.locs, subblocks(k)))...,)
 subblocks(x::KronBlock) = x.blocks
 chsubblocks(pb::KronBlock{N}, it) where N = KronBlock{N}(pb.locs, collect(it))
 cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]

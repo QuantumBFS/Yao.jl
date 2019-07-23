@@ -52,9 +52,9 @@ end
 """
     occupied_locs(x)
 
-Return an iterator of occupied locations of `x`.
+Return a tuple of occupied locations of `x`.
 """
-@interface occupied_locs(x::AbstractBlock) = 1:nqubits(x)
+@interface occupied_locs(x::AbstractBlock) = (1:nqubits(x)...,)
 
 """
     subblocks(x)
@@ -75,8 +75,9 @@ Change the sub-blocks of a [`CompositeBlock`](@ref) with given iterator `itr`.
 
 Transform the apply! function of specific block to dense matrix.
 """
-@interface applymatrix(g::AbstractBlock) = linop2dense(r->statevec(apply!(ArrayReg(r), g)), nqubits(g))
-# just use BlockMap maybe?
+@interface applymatrix(T, g::AbstractBlock) = linop2dense(T, r->statevec(apply!(ArrayReg(r), g)), nqubits(g))
+applymatrix(g::AbstractBlock) = applymatrix(ComplexF64, g)
+# just use BlockMap maybe? No!
 
 @interface print_block(io::IO, blk::AbstractBlock) = print_block(io, MIME("text/plain"), blk)
 print_block(blk::AbstractBlock) = print_block(stdout, blk)
@@ -218,7 +219,7 @@ function consume!(d::Dispatcher{<:Symbol}, n::Int)
     d.params
 end
 
-function consume!(d::Dispatcher{<:Number}, n::Int)    
+function consume!(d::Dispatcher{<:Number}, n::Int)
     if n == 0
         return ()
     elseif n == 1

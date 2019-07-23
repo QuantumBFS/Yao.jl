@@ -23,6 +23,7 @@ using Test, YaoBase, YaoBlocks, YaoArrayRegister
     c = ChainBlock([X, Y])
     c[1] = put(1, 1=>X)
     @test c[1] == put(1, 1=>X)
+    @test occupied_locs(chain(put(5, 2=>X), put(5, 3=>I2))) == (2,)
 end
 
 @testset "test chain" begin
@@ -57,7 +58,7 @@ end
         kron(4, 1=>X, 2=>Y),
         kron(4, 1=>phase(0.1)))
 
-    @test occupied_locs(g) |> collect == [1, 2]
+    @test occupied_locs(g) == (1, 2)
 
     g = ChainBlock(
         kron(2, X, Y),

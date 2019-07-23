@@ -10,16 +10,15 @@ TimeEvolution, where GT is block type. input matrix should be hermitian.
 !!!note:
     `TimeEvolution` contructor check hermicity of the input block by default, but sometimes it can be slow. Turn off the check manually by specifying optional parameter `check_hermicity = false`.
 """
-mutable struct TimeEvolution{N, T, Tt, Hamilton <: AbstractBlock{N}} <: PrimitiveBlock{N}
-    H::BlockMap{Complex{T}, Hamilton}
+mutable struct TimeEvolution{N, Tt, HT <: AbstractBlock{N}} <: PrimitiveBlock{N}
+    H::HT
     dt::Tt
-    tol::T
+    tol::Float64
 
-    function TimeEvolution(
-        H::BlockMap{Complex{T}, TH},
-        dt::Tt, tol::T; check_hermicity::Bool=true) where {N, Tt, T, TH <: AbstractBlock{N}}
+    function TimeEvolution(H::TH,
+        dt::Tt; tol::Real=1e-7, check_hermicity::Bool=true) where {N, Tt, TH <: AbstractBlock{N}}
         (check_hermicity && !ishermitian(H)) && error("Time evolution Hamiltonian has to be a Hermitian")
-        return new{N, T, Tt, TH}(H, dt, tol)
+        return new{N, Tt, TH}(H, dt, Float64(tol))
     end
 end
 
@@ -33,27 +32,35 @@ Optional keywords are tolerance `tol` (default is `1e-7`)
 `TimeEvolution` block can also be used for
 [imaginary time evolution](http://large.stanford.edu/courses/2008/ph372/behroozi2/) if dt is complex.
 """
-TimeEvolution(H::AbstractBlock, dt; tol::Real=1e-7, check_hermicity=true) =
-    TimeEvolution(BlockMap(H), dt, tol, check_hermicity=check_hermicity)
-
-TimeEvolution(M::BlockMap, dt; tol::Real, check_hermicity=true) =
-    TimeEvolution(M, dt, tol, check_hermicity=check_hermicity)
-
-time_evolve(M::BlockMap, dt; kwargs...) = TimeEvolution(M, dt; kwargs...)
 time_evolve(M::AbstractBlock, dt; kwargs...) = TimeEvolution(M, dt; kwargs...)
 time_evolve(dt; kwargs...) = @λ(M->time_evolve(M, dt; kwargs...))
 
 function mat(::Type{T}, te::TimeEvolution{N}) where {T, N}
-    A = Matrix{T}(te.H.block)
-    return exp(-im*T(te.dt) * A)
+    return exp(-im*T(te.dt) * Matrix(mat(T, te.H)))
 end
 
-function apply!(reg::ArrayReg, te::TimeEvolution)
+struct BlockMap{T, GT <: AbstractBlock} <: AbstractArray{T, 2}
+    block::GT
+    BlockMap(::Type{T}, block::GT) where {T, GT <: AbstractBlock} = new{T, GT}(block)
+end
+
+Base.size(bm::BlockMap{T, GT}, i::Int) where {T,N, GT<:AbstractBlock{N}} = 0<i<=2 ? 1<<N : DimensionMismatch("")
+Base.size(bm::BlockMap{T, GT}) where {T,N, GT<:AbstractBlock{N}} = (L=1<<N; (L, L))
+LinearAlgebra.ishermitian(bm::BlockMap) = ishermitian(bm.block)
+
+function LinearAlgebra.mul!(y::AbstractVector, A::BlockMap, x::AbstractVector)
+    copyto!(y, x)
+    apply!(ArrayReg(y), A.block)
+    return y
+end
+
+function apply!(reg::ArrayReg{B, T}, te::TimeEvolution) where {B, T}
     st = state(reg)
     dt = real(te.dt) == 0 ? imag(te.dt) : -im*te.dt
+    A = BlockMap(T, te.H)
     @inbounds for j in 1:size(st, 2)
         v = view(st, :, j)
-        Ks = arnoldi(te.H, v; tol=te.tol, ishermitian=true)
+        Ks = arnoldi(A, v; tol=te.tol, ishermitian=true, opnorm=1.0)
         expv!(v, dt, Ks)
     end
     return reg

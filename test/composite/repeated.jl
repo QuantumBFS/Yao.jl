@@ -5,5 +5,5 @@ rp = RepeatedBlock{5}(X, (1,2,3))
 @test ishermitian(rp)
 @test isunitary(rp)
 @test (chsubblocks(rp, [Z]) |> subblocks .== [Z]) |> all
-@test collect(occupied_locs(rp)) == [1,2,3]
+@test occupied_locs(rp) == (1,2,3)
 @test rp |> copy == rp

@@ -9,14 +9,14 @@ it to other blocks.
 """
 struct Concentrator{N, BT <: AbstractBlock, C} <: AbstractContainer{BT, N}
     content::BT
-    locations::NTuple{C, Int}
+    locs::NTuple{C, Int}
 end
 
-function Concentrator{N}(block::BT, locations::NTuple{C, Int}) where {N, M, C, BT<:AbstractBlock{M}}
-    if !(length(locations) == M && N>=M)
-        throw(LocationConflictError("length of locations must be equal to the size of block, and smaller than size of itself."))
+function Concentrator{N}(block::BT, locs::NTuple{C, Int}) where {N, M, C, BT<:AbstractBlock{M}}
+    if !(length(locs) == M && N>=M)
+        throw(LocationConflictError("length of locs must be equal to the size of block, and smaller than size of itself."))
     end
-    return Concentrator{N, BT, C}(block, locations)
+    return Concentrator{N, BT, C}(block, locs)
 end
 
 """
@@ -40,7 +40,7 @@ julia> apply!(copy(r), concentrate(X, 1)) ≈ apply!(copy(r), put(1=>X))
 true
 ```
 
-It works for in-contigious locations as well
+It works for in-contigious locs as well
 
 ```jldoctest
 julia> r = rand_state(4)
@@ -81,35 +81,36 @@ Lazy curried version of [`concentrate`](@ref).
 concentrate(block::AbstractBlock, locs) = @λ(n->concentrate(n, block, locs))
 concentrate(block::Function, locs) = @λ(n->concentrate(n, block, locs))
 
-occupied_locs(c::Concentrator) = c.locations
+occupied_locs(c::Concentrator) = map(i->c.locs[i], c.content |> occupied_locs)
 chsubblocks(pb::Concentrator{N}, blk::AbstractBlock) where N =
-    Concentrator{N}(blk, occupied_locs(pb))
+    Concentrator{N}(blk, pb.locs)
 PreserveStyle(::Concentrator) = PreserveAll()
 
 function apply!(r::AbstractRegister, c::Concentrator)
     _check_size(r, c)
-    focus!(r, occupied_locs(c))
+    focus!(r, c.locs)
     apply!(r, c.content)
-    relax!(r, occupied_locs(c), to_nactive=nqubits(c))
+    relax!(r, c.locs, to_nactive=nqubits(c))
     return r
 end
 
 function mat(::Type{T}, c::Concentrator{N, <:AbstractBlock}) where {N, T}
-    mat(T, PutBlock{N}(c.content, c.locations))
+    mat(T, PutBlock{N}(c.content, c.locs))
 end
 
 Base.adjoint(blk::Concentrator{N}) where N =
-    Concentrator{N}(adjoint(blk.content), occupied_locs(blk))
+    Concentrator{N}(adjoint(blk.content), blk.locs)
 
 function Base.:(==)(a::Concentrator{N, BT}, b::Concentrator{N, BT}) where {N, BT}
-    return a.content == b.content && a.locations == b.locations
+    return a.content == b.content && a.locs == b.locs
 end
 
 YaoBase.nqubits(::Concentrator{N}) where N = N
-YaoBase.nactive(c::Concentrator) = length(c.locations)
+YaoBase.nactive(c::Concentrator) = length(c.locs)
 
 function YaoBase.iscommute(x::Concentrator{N}, y::Concentrator{N}) where N
-    if occupied_locs(x) == occupied_locs(y)
+    isempty(setdiff(occupied_locs(x), occupied_locs(y))) && return true
+    if x.locs == y.locs
         return iscommute(x.content, y.content)
     else
         return iscommute_fallback(x, y)

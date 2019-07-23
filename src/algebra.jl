@@ -5,7 +5,6 @@ Base.:(-)(x::AbstractBlock{N}) where {N} = Scale(Val(-1), x)
 Base.:(-)(x::Scale{Val{-1}}) = content(x)
 Base.:(-)(x::Scale{Val{S}}) where S = Scale(Val(-S), content(x))
 Base.:(-)(x::Scale) = Scale(-x.alpha, content(x))
-Base.:(+)(x::AbstractBlock) = x
 
 Base.:(*)(x::AbstractBlock, α::Number) = α * x
 
@@ -33,14 +32,14 @@ Base.:(*)(x::Scale{Val{S}}, y::Scale) where S = (S * y.alpha) * (content(x) * co
 Base.:(*)(x::Scale, y::AbstractBlock) = x.alpha * chain(y, content(x))
 Base.:(*)(y::AbstractBlock, x::Scale) = x.alpha * chain(content(x), y)
 
-Base.:(+)(xs::AbstractBlock...) = Sum(xs...)
+Base.:(+)(xs::AbstractBlock...) = Add(xs...)
 Base.:(*)(xs::AbstractBlock...) = chain(Iterators.reverse(xs)...)
 Base.:(/)(A::AbstractBlock, x::Number) = (1/x)*A
 # reduce
-Base.sum(a::AbstractBlock{N}, blocks::AbstractBlock{N}...) where N = Sum(a, blocks...)
-Base.prod(a::AbstractBlock{N}, blocks::AbstractBlock{N}...) where N = chain(Iterators.reverse(blocks)..., a)
+Base.prod(blocks::AbstractVector{<:AbstractBlock{N}}) where N = chain(Iterators.reverse(blocks)...)
+Base.sum(blocks::AbstractVector{<:AbstractBlock{N}}) where N = +(blocks...)
 
-Base.:(-)(lhs::AbstractBlock, rhs::AbstractBlock) = Sum(lhs, -rhs)
+Base.:(-)(lhs::AbstractBlock, rhs::AbstractBlock) = Add(lhs, -rhs)
 Base.:(^)(x::AbstractBlock, n::Int) = chain((copy(x) for k in 1:n)...)
 
 """
@@ -132,7 +131,7 @@ export eliminate_nested
 eliminate_nested(ex::AbstractBlock) = ex
 
 # TODO: eliminate nested expr e.g chain(X, chain(X, Y))
-function eliminate_nested(ex::T) where {T <: Union{ChainBlock, Sum}}
+function eliminate_nested(ex::T) where {T <: Union{ChainBlock, Add}}
     _flatten(x) = (x, )
     _flatten(x::T) = subblocks(x)
 
@@ -184,7 +183,7 @@ combine_alpha(alpha, x::AbstractBlock) = alpha + 1
 combine_alpha(alpha, x::Scale) = alpha + x.alpha
 combine_alpha(alpha, x::Scale{Val{S}}) where S = alpha + S
 
-function combine_similar(ex::Sum{N}) where N
+function combine_similar(ex::Add{N}) where N
     table = zeros(Bool, length(ex))
     list = []; p = 1
     while p <= length(ex)
@@ -220,9 +219,9 @@ function combine_similar(ex::Sum{N}) where N
     end
 
     if isempty(list)
-        return Sum{N}(())
+        return Add{N}()
     else
-        return Sum(list...)
+        return Add(list...)
     end
 end
 
