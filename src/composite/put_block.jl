@@ -69,7 +69,7 @@ put(pa::Pair) = @λ(n -> put(n, pa))
 
 occupied_locs(x::PutBlock) = map(i->x.locs[i], x.content |> occupied_locs)
 chsubblocks(x::PutBlock{N}, b::AbstractBlock) where N = PutBlock{N}(b, x.locs)
-PreserveStyle(::PutBlock) = PreserveAll()
+PropertyTrait(::PutBlock) = PreserveAll()
 cache_key(pb::PutBlock) = cache_key(pb.content)
 
 mat(::Type{T}, pb::PutBlock{N, 1}) where {T, N} = u1mat(N, mat(T, pb.content), pb.locs...)

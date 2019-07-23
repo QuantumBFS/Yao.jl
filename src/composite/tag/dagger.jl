@@ -40,7 +40,7 @@ julia> QFT(2)'
 Daggered(x::BT) where {N, BT<:AbstractBlock{N}} =
     Daggered{BT, N}(x)
 
-PreserveStyle(::Daggered) = PreserveAll()
+PropertyTrait(::Daggered) = PreserveAll()
 mat(::Type{T}, blk::Daggered) where T = adjoint(mat(T, content(blk)))
 
 Base.adjoint(x::AbstractBlock) = ishermitian(x) ? x : Daggered(x)

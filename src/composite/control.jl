@@ -160,7 +160,7 @@ for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     end
 end
 
-PreserveStyle(::ControlBlock) = PreserveAll()
+PropertyTrait(::ControlBlock) = PreserveAll()
 
 occupied_locs(c::ControlBlock) = (c.ctrl_locs..., map(x->c.locs[x], occupied_locs(c.content))...)
 chsubblocks(pb::ControlBlock{N}, blk::AbstractBlock) where {N} = ControlBlock{N}(pb.ctrl_locs, pb.ctrl_config, blk, pb.locs)

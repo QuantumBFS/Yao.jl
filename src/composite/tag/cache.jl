@@ -60,7 +60,7 @@ CacheServers.iscached(c::CachedBlock) = iscached(c.server, c.content)
 iscacheable(c::CachedBlock) = iscacheable(c.server, c.content)
 chsubblocks(cb::CachedBlock, blk::AbstractBlock) = CachedBlock(cb.server, blk, cb.level)
 occupied_locs(x::CachedBlock) = occupied_locs(content(x))
-PreserveStyle(::CachedBlock) = PreserveAll()
+PropertyTrait(::CachedBlock) = PreserveAll()
 
 function update_cache(c::CachedBlock)
     if !iscached(c.server, c.content)
