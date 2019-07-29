@@ -6,6 +6,10 @@
 using YaoBase, BitBasis, LuxurySparse, StaticArrays
 export instruct!
 
+function YaoBase.instruct!(reg::ArrayReg, operator, args...; kwargs...)
+    instruct!(matvec(reg.state), operator, args...; kwargs...)
+end
+
 """
     SPECIALIZATION_LIST::Vector{Symbol}
 
@@ -242,6 +246,38 @@ for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
                 instruct!(state, g, (locs, ), control_locs, control_bits)
 end
 
+
+# Specialized
+import YaoBase: rot_mat
+
+rot_mat(::Type{T}, ::Val{:Rx}, theta::Real) where T =
+    T[cos(theta/2) -im * sin(theta/2); -im * sin(theta/2) cos(theta/2)]
+rot_mat(::Type{T}, ::Val{:Ry}, theta::Real) where T =
+    T[cos(theta/2) -sin(theta/2); sin(theta/2) cos(theta/2)]
+rot_mat(::Type{T}, ::Val{:Rz}, theta::Real) where T =
+    Diagonal(T[exp(-im*theta/2), exp(im*theta/2)])
+rot_mat(::Type{T}, ::Val{:CPHASE}, theta::Real) where T =
+    Diagonal(T[1, 1, 1, exp(im*theta)])
+rot_mat(::Type{T}, ::Val{:PSWAP}, theta::Real) where T =
+    rot_mat(T, Const.SWAP, theta)
+
+for G in [:Rx, :Ry, :Rz, :CPHASE]
+    # forward single gates
+    @eval function YaoBase.instruct!(state::AbstractVecOrMat{T}, g::Val{$(QuoteNode(G))},
+                            locs::Union{Int, NTuple{N3,Int}},
+                            control_locs::NTuple{N1, Int},
+                            control_bits::NTuple{N2, Int}, theta::Real) where {T, N1, N2, N3}
+        m = rot_mat(T, g, theta)
+        instruct!(state, m, locs, control_locs, control_bits)
+    end
+end
+
+# forward single gates
+@eval function YaoBase.instruct!(state::AbstractVecOrMat{T}, g::Val,
+                        locs::Union{Int, NTuple{N1, Int}}, theta::Real) where {T, N1}
+    instruct!(state, g, locs, (), (), theta)
+end
+
 function YaoBase.instruct!(
     state::AbstractVecOrMat{T}, ::Val{:X},
     locs::NTuple{N1, Int},
@@ -411,6 +447,34 @@ function YaoBase.instruct!(
     c = T(-im * sin(theta/2))
     e = T(exp(-im/2*theta))
     for b in basis(state)
+        if b&mask1==0
+            i = b+1
+            i_ = b ⊻ mask12 + 1
+            if b&mask2==mask2
+                u1rows!(state, i, i_, a, c, c, a)
+            else
+                mulrow!(state, i, e)
+                mulrow!(state, i_, e)
+            end
+        end
+    end
+    return state
+end
+
+function YaoBase.instruct!(
+        state::AbstractVecOrMat{T},
+        ::Val{:PSWAP},
+        locs::Tuple{Int, Int},
+        control_locs::NTuple{C, Int},
+        control_bits::NTuple{C, Int},
+        theta::Real) where {T, C}
+    mask1 = bmask(locs[1])
+    mask2 = bmask(locs[2])
+    mask12 = mask1|mask2
+    a = T(cos(theta/2))
+    c = T(-im * sin(theta/2))
+    e = T(exp(-im/2*theta))
+    for b in itercontrol(log2i(size(state, 1)), [control_locs...], [control_bits...])
         if b&mask1==0
             i = b+1
             i_ = b ⊻ mask12 + 1

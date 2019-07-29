@@ -62,5 +62,5 @@ end
 
 @testset "partial trace" begin
     r = join(ArrayReg(bit"111"), zero_state(1))
-    partial_tr(r, 1) ≈ ArrayReg(bit"111")
+    @test partial_tr(r, 1) ≈ ArrayReg(bit"111")
 end

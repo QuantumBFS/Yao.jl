@@ -1,4 +1,5 @@
 using Test, YaoBase, YaoArrayRegister, LinearAlgebra, LuxurySparse, SparseArrays
+using YaoBase.Const
 
 # NOTE: we don't have block here, feel safe to use
 using YaoBase.Const
@@ -6,6 +7,7 @@ using YaoBase.Const
 @testset "test general unitary instruction" begin
     U1 = randn(ComplexF64, 2, 2)
     ST = randn(ComplexF64, 1<<4)
+    REG = ArrayReg(ST)
     I2 = IMatrix(2)
     M = kron(I2, U1, I2, I2) * ST
 
@@ -18,6 +20,8 @@ using YaoBase.Const
 
     @test instruct!(copy(ST), kron(U1, U1), (3, 1)) ≈
         instruct!(instruct!(copy(ST), U1, 3), U1, 1)
+    @test instruct!(copy(REG), kron(U1, U1), (3, 1)) ≈
+        instruct!(instruct!(copy(REG), U1, 3), U1, 1)
 
     @test instruct!(reshape(copy(ST), :, 1), kron(U1, U1), (3, 1)) ≈
         instruct!(instruct!(reshape(copy(ST), :, 1), U1, 3), U1, 1)
@@ -95,6 +99,25 @@ end
     ST = randn(ComplexF64, 1 << 2)
     θ = π/3
     @test instruct!(copy(ST), Val(:PSWAP), (1, 2), θ) ≈ (cos(θ/2)*IMatrix{4}() - im*sin(θ/2)* SWAP) * ST
+
+    T = ComplexF64
+    theta = 0.5
+    for (R, G) in [(:Rx, X), (:Ry, Y), (:Rz, Z), (:PSWAP, SWAP)]
+        @test rot_mat(T, Val(R), theta) ≈ rot_mat(T, G, theta)
+    end
+    @test rot_mat(T, Val(:CPHASE), theta) ≈ rot_mat(T, Diagonal([1, 1, 1, -1]), theta)*exp(im*theta/2)
+    for ST in [randn(ComplexF64, 1 << 5), randn(ComplexF64, 1 << 5, 10)]
+        for R in [:Rx, :Ry, :Rz]
+            @test instruct!(copy(ST), Val(R), (4,), θ) ≈ instruct!(copy(ST), Matrix(rot_mat(T, Val(R), θ)), (4,))
+            @test instruct!(copy(ST), Val(R), (4,), (1,), (0,), θ) ≈ instruct!(copy(ST), Matrix(rot_mat(T, Val(R), θ)), (4,), (1,), (0,))
+        end
+        for R in [:CPHASE, :PSWAP]
+            @test instruct!(copy(ST), Val(R), (4,2), θ) ≈ instruct!(copy(ST), Matrix(rot_mat(T, Val(R), θ)), (4, 2))
+            instruct!(copy(ST), Val(R), (4,2), (1,), (0,), θ)
+            instruct!(copy(ST), Matrix(rot_mat(T, Val(R), θ)), (4, 2), (1,), (0,))
+            @test instruct!(copy(ST), Val(R), (4,2), (1,), (0,), θ) ≈ instruct!(copy(ST), Matrix(rot_mat(T, Val(R), θ)), (4, 2), (1,), (0,))
+        end
+    end
 end
 
 @testset "Yao.jl/#189" begin
