@@ -17,9 +17,9 @@ abstract type AbstractBlock{N} end
 
 Apply a block (of quantum circuit) to a quantum register.
 """
-@interface function apply!(r::AbstractRegister, b::AbstractBlock)
+@interface function apply!(r::AbstractRegister{B, T}, b::AbstractBlock) where {B, T}
     _check_size(r, b)
-    r.state .= mat(b) * r.state
+    r.state .= mat(T, b) * r.state
     return r
 end
 

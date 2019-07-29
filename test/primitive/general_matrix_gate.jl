@@ -19,3 +19,7 @@ reg = rand_state(2)
 
 a = rand_unitary(2)
 @test mat(matblock(a))' == mat(matblock(a)')
+
+# fallback test #59, return a correct matrix type for matblock
+a = rand_unitary(2) .|> ComplexF32
+@test eltype(mat(matblock(a))) == ComplexF32
