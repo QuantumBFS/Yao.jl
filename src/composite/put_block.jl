@@ -75,18 +75,18 @@ cache_key(pb::PutBlock) = cache_key(pb.content)
 mat(::Type{T}, pb::PutBlock{N, 1}) where {T, N} = u1mat(N, mat(T, pb.content), pb.locs...)
 mat(::Type{T}, pb::PutBlock{N, C}) where {T, N, C} = unmat(N, mat(T, pb.content), pb.locs)
 
-function apply!(r::ArrayReg{B, T}, pb::PutBlock{N}) where {B, T, N}
+function apply!(r::AbstractRegister{B, T}, pb::PutBlock{N}) where {B, T, N}
     _check_size(r, pb)
-    instruct!(matvec(r.state), mat(T, pb.content), pb.locs)
+    instruct!(r, mat(T, pb.content), pb.locs)
     return r
 end
 
 # specialization
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
-    @eval function apply!(r::ArrayReg, pb::PutBlock{N, C, <:$GT}) where {N, C}
+    @eval function apply!(r::AbstractRegister, pb::PutBlock{N, C, <:$GT}) where {N, C}
         _check_size(r, pb)
-        instruct!(matvec(r.state), Val($(QuoteNode(G))), pb.locs)
+        instruct!(r, Val($(QuoteNode(G))), pb.locs)
         return r
     end
 end
@@ -145,7 +145,7 @@ function mat(::Type{T}, g::Swap{N}) where {T, N}
     return PermMatrix(orders, ones(T, 1<<N))
 end
 
-apply!(r::ArrayReg, g::Swap) = (instruct!(matvec(state(r)), Val(:SWAP), g.locs); r)
+apply!(r::AbstractRegister, g::Swap) = (instruct!(r, Val(:SWAP), g.locs); r)
 occupied_locs(g::Swap) = g.locs
 
 """
@@ -157,7 +157,14 @@ parametrized swap gate.
 pswap(n::Int, i::Int, j::Int, α::Real) = PSwap{n}((i,j), α)
 pswap(i::Int, j::Int, α::Real) = n->pswap(n,i,j,α)
 
-function apply!(reg::ArrayReg, g::PSwap{N, T}) where {N,T}
-    instruct!(matvec(state(reg)), Val(:PSWAP), g.locs, g.content.theta)
-    return reg
+for (G, GT) in [
+                (:Rx, :(PutBlock{N, 1, RotationGate{1,T,XGate}} where {N, T})),
+                (:Ry, :(PutBlock{N, 1, RotationGate{1,T,YGate}} where {N, T})),
+                (:Rz, :(PutBlock{N, 1, RotationGate{1,T,ZGate}} where {N, T})),
+                (:PSWAP, :(PSwap)),
+               ]
+    @eval function apply!(reg::AbstractRegister, g::$GT)
+        instruct!(reg, Val($(QuoteNode(G))), g.locs, g.content.theta)
+        return reg
+    end
 end

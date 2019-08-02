@@ -83,7 +83,7 @@ expect(op::Add, reg::AbstractRegister{1}) = invoke(expect, Tuple{Add, AbstractRe
 expect(op::Scale, reg::AbstractRegister{1}) = invoke(expect, Tuple{Scale, AbstractRegister}, op, reg)
 
 for FUNC in [:measure!, :measure_collapseto!, :measure_remove!, :measure]
-    @eval function YaoBase.$FUNC(op::AbstractBlock, reg::AbstractRegister, locs::AllLocs; kwargs...) where B
-        $FUNC(eigen!(mat(op) |> Matrix), reg, locs; kwargs...)
+    @eval function YaoBase.$FUNC(rng::AbstractRNG, op::AbstractBlock, reg::AbstractRegister, locs::AllLocs; kwargs...) where B
+        $FUNC(rng::AbstractRNG, eigen!(mat(op) |> Matrix), reg, locs; kwargs...)
     end
 end

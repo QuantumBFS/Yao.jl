@@ -89,11 +89,11 @@ PropertyTrait(x::RepeatedBlock) = PreserveAll()
 mat(::Type{T}, rb::RepeatedBlock{N}) where {T, N} = hilbertkron(N, fill(mat(T, rb.content), length(rb.locs)), [rb.locs...])
 mat(::Type{T}, rb::RepeatedBlock{N, 0, GT}) where {T, N, GT} = IMatrix{1<<N, T}()
 
-function apply!(r::ArrayReg{B, T}, rp::RepeatedBlock) where {B, T}
+function apply!(r::AbstractRegister{B, T}, rp::RepeatedBlock) where {B, T}
     _check_size(r, rp)
     m  = mat(T, rp.content)
     for addr in rp.locs
-        instruct!(matvec(r.state), m, Tuple(addr:addr+nqubits(rp.content)-1))
+        instruct!(r, m, Tuple(addr:addr+nqubits(rp.content)-1))
     end
     return r
 end
@@ -101,9 +101,9 @@ end
 # specialization
 for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
-    @eval function apply!(r::ArrayReg, rp::RepeatedBlock{N, C, $GT}) where {N, C}
+    @eval function apply!(r::AbstractRegister, rp::RepeatedBlock{N, C, $GT}) where {N, C}
         for addr in rp.locs
-            instruct!(matvec(r.state), Val($(QuoteNode(G))), Tuple(addr:addr+nqubits(rp.content)-1))
+            instruct!(r, Val($(QuoteNode(G))), Tuple(addr:addr+nqubits(rp.content)-1))
         end
         return r
     end

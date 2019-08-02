@@ -38,6 +38,9 @@ end
     include("abstract_blocks.jl")
 end
 
+@testset "extending reg blocks" begin
+    include("extending_reg.jl")
+end
 
 # @testset "test demos" begin
 #     include("algo/qft.jl")

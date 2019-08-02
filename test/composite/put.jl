@@ -43,4 +43,9 @@ end
     include("swap_gate.jl")
 end
 
-
+@testset "rotation gate" begin
+    reg = rand_state(5)
+    @test apply!(copy(reg), put(5, 2=>Rx(0.3))) |> state ≈ mat(put(5, 2=>Rx(0.3)))*reg.state
+    @test apply!(copy(reg), put(5, 2=>Ry(0.3))) |> state ≈ mat(put(5, 2=>Ry(0.3)))*reg.state
+    @test apply!(copy(reg), put(5, 2=>Rz(0.3))) |> state ≈ mat(put(5, 2=>Rz(0.3)))*reg.state
+end

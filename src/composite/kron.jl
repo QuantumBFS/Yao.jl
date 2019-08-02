@@ -159,20 +159,20 @@ function mat(::Type{T}, k::KronBlock{N}) where {T, N}
     end
 end
 
-function apply!(r::ArrayReg, k::KronBlock)
+function apply!(r::AbstractRegister, k::KronBlock)
     _check_size(r, k)
     for (locs, block) in zip(k.locs, k.blocks)
-        _instruct!(state(r), block, Tuple(locs:locs+nqubits(block)-1))
+        _instruct!(r, block, Tuple(locs:locs+nqubits(block)-1))
     end
     return r
 end
 
-_instruct!(state::AbstractArray{T}, block::AbstractBlock, locs) where T = instruct!(state, mat(T, block), locs)
+_instruct!(reg::AbstractRegister{B,T}, block::AbstractBlock, locs) where {B, T} = instruct!(reg, mat(T, block), locs)
 
 # specialization
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
-    @eval _instruct!(state::AbstractArray, block::$GT, locs) = instruct!(state, Val($(QuoteNode(G))), locs)
+    @eval _instruct!(reg::AbstractRegister, block::$GT, locs) = instruct!(reg, Val($(QuoteNode(G))), locs)
 end
 
 function Base.copy(k::KronBlock{N}) where N
