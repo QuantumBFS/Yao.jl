@@ -1,6 +1,6 @@
 name = "YaoBase"
 uuid = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
-version = "0.10.0"
+version = "0.11.0"
 
 [deps]
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
