@@ -2,19 +2,19 @@ using YaoBase
 using Test
 
 # mocked registers
-struct TestRegister{B, T} <: AbstractRegister{B, T}
+struct TestRegister{B} <: AbstractRegister{B}
 end
 
-TestRegister() = TestRegister{1, Float64}()
+TestRegister() = TestRegister{1}()
 
 YaoBase.nqubits(::TestRegister) = 8
 YaoBase.nactive(::TestRegister) = 2
 
 export TestInterfaceRegister
-struct TestInterfaceRegister{B, T} <: AbstractRegister{B, T}
+struct TestInterfaceRegister{B} <: AbstractRegister{B}
 end
 
-TestInterfaceRegister() = TestInterfaceRegister{1, Float64}()
+TestInterfaceRegister() = TestInterfaceRegister{1}()
 
 @testset "Test general interface" begin
     @test_throws NotImplementedError nactive(TestInterfaceRegister())
@@ -35,12 +35,12 @@ end
 
 @testset "Test Printing" begin
     @test repr(TestRegister()) == """
-    TestRegister{1,Float64}
+    TestRegister{1}
         active qubits: 2/8"""
 end
 
 @testset "Test adjoint printing" begin
     @test repr(adjoint(TestRegister())) == """
-        adjoint(TestRegister{1,Float64})
+        adjoint(TestRegister{1})
             active qubits: 2/8"""
 end

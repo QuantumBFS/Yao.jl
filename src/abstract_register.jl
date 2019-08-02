@@ -3,12 +3,11 @@ using BitBasis, LegibleLambdas
 export AbstractRegister, @λ, @lambda
 
 """
-    AbstractRegister{B, T}
+    AbstractRegister{B}
 
-Abstract type for quantum registers. `B` is the batch size, `T` is the
-data type.
+Abstract type for quantum registers. `B` is the batch size.
 """
-abstract type AbstractRegister{B, T} end
+abstract type AbstractRegister{B} end
 
 # properties
 """
@@ -46,19 +45,6 @@ Returns the number of batches.
 
 # same with nbatch
 Base.length(r::AbstractRegister{B}) where B = B
-
-"""
-    datatype(register) -> Int
-
-Returns the numerical data type used by register.
-
-!!! note
-
-    `datatype` is not the same with `eltype`, since `AbstractRegister` family
-    is not exactly the same with `AbstractArray`, it is an iterator of several
-    registers.
-"""
-@interface datatype(r::AbstractRegister{B, T}) where {B, T} = T
 
 """
     addbits!(register, n::Int) -> register
