@@ -207,7 +207,7 @@ for FUNC in [:measure!, :measure_collapseto!, :measure_remove!, :measure]
         reg.state = V'*reg.state
         res = $FUNC(rng, ComputationalBasis(), reg, locs; kwargs...)
         $rotback
-        E[res.+1]
+        E[Int64.(res) .+ 1]
     end
     @eval $FUNC(rng::AbstractRNG, op, reg::AbstractRegister; kwargs...) = $FUNC(rng, op, reg, AllLocs(); kwargs...)
     @eval $FUNC(rng::AbstractRNG, reg::AbstractRegister, locs; kwargs...) = $FUNC(rng, ComputationalBasis(), reg, locs; kwargs...)
@@ -317,19 +317,13 @@ Inverse the locations of register.
 @interface invorder!(r::AbstractRegister) = reorder!(r, Tuple(nactive(r):-1:1))
 
 """
-    collapseto!(register, bit_str)
+    collapseto!(register, config)
 
-Set the `register` to bit string literal `bit_str`. About bit string literal,
+Set the `register` to bit string literal `bit_str` (or an equivalent integer). About bit string literal,
 see more in [`@bit_str`](@ref).
 """
-@interface collapseto!(r::AbstractRegister, bit_str::BitStr) = collapseto!(r, bit_str.val)
-
-"""
-    collapseto!(register, config::Integer)
-
-Set the `register` to bit configuration `config`.
-"""
-@interface collapseto!(r::AbstractRegister, config::Integer=0)
+collapseto!(r::AbstractRegister, config::Integer=0) = collapseto!(r, Int64(config))
+@interface collapseto!(r::AbstractRegister, config::BitStr) = collapseto!(r, config)
 
 """
     fidelity(register1, register2)
