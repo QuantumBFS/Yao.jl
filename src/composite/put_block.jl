@@ -75,9 +75,9 @@ cache_key(pb::PutBlock) = cache_key(pb.content)
 mat(::Type{T}, pb::PutBlock{N, 1}) where {T, N} = u1mat(N, mat(T, pb.content), pb.locs...)
 mat(::Type{T}, pb::PutBlock{N, C}) where {T, N, C} = unmat(N, mat(T, pb.content), pb.locs)
 
-function apply!(r::AbstractRegister{B, T}, pb::PutBlock{N}) where {B, T, N}
+function apply!(r::AbstractRegister, pb::PutBlock{N}) where {N}
     _check_size(r, pb)
-    instruct!(r, mat(T, pb.content), pb.locs)
+    instruct!(r, mat_matchreg(r, pb.content), pb.locs)
     return r
 end
 

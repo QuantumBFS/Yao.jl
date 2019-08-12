@@ -143,9 +143,9 @@ cnot(ctrl_locs, loc::Int) = @λ(n -> cnot(n, ctrl_locs, loc))
 
 mat(::Type{T}, c::ControlBlock{N, BT, C}) where {T, N, BT, C} = cunmat(N, c.ctrl_locs, c.ctrl_config, mat(T, c.content), c.locs)
 
-function apply!(r::AbstractRegister{B, T}, c::ControlBlock) where {B, T}
+function apply!(r::AbstractRegister, c::ControlBlock)
     _check_size(r, c)
-    instruct!(r, mat(T, c.content), c.locs, c.ctrl_locs, c.ctrl_config)
+    instruct!(r, mat_matchreg(r, c.content), c.locs, c.ctrl_locs, c.ctrl_config)
     return r
 end
 

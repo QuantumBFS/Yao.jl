@@ -13,7 +13,7 @@ Reflection operator to target state `psi`.
 |ψ⟩ → 2 |s⟩⟨s| - 1
 ```
 """
-struct ReflectGate{N, T, Tr <: AbstractRegister{1, T}} <: PrimitiveBlock{N}
+struct ReflectGate{N, T, Tr <: ArrayReg{1, T}} <: PrimitiveBlock{N}
     psi::Tr
 end
 

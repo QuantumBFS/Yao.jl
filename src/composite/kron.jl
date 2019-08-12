@@ -167,7 +167,7 @@ function apply!(r::AbstractRegister, k::KronBlock)
     return r
 end
 
-_instruct!(reg::AbstractRegister{B,T}, block::AbstractBlock, locs) where {B, T} = instruct!(reg, mat(T, block), locs)
+_instruct!(reg::AbstractRegister, block::AbstractBlock, locs) = instruct!(reg, mat_matchreg(reg, block), locs)
 
 # specialization
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]

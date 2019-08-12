@@ -101,6 +101,9 @@ Returns the matrix form of given block.
 @interface mat(x::AbstractBlock) = mat(ComplexF64, x)
 @interface mat(::Type{T}, x::AbstractBlock) where T
 
+mat_matchreg(reg::AbstractRegister, x::AbstractBlock) = mat(x)
+mat_matchreg(reg::ArrayReg{B,T}, x::AbstractBlock) where {B,T} = mat(T, x)
+
 Base.Matrix{T}(x::AbstractBlock) where T = Matrix(mat(T, x))
 
 # YaoBase interface

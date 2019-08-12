@@ -2,7 +2,7 @@ using YaoBase
 using YaoBlocks
 using Test
 
-mutable struct EchoReg{B} <: AbstractRegister{B, ComplexF64}
+mutable struct EchoReg{B} <: AbstractRegister{B}
     nactive::Int
     nqubits::Int
 end
