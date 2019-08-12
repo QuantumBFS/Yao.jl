@@ -16,7 +16,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [compat]
 julia = "^1.0.0"
 YaoBase = "~0.11"
-YaoArrayRegister = "~0.3.10"
+YaoArrayRegister = "~0.4"
 YaoBlocks = "~0.5"
 
 [targets]
