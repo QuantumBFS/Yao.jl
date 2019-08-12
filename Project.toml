@@ -1,6 +1,6 @@
 name = "Yao"
 uuid = "5872b779-8223-5990-8dd0-5abbb0748c8c"
-version = "0.5.0"
+version = "0.6.0"
 
 [deps]
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
@@ -15,9 +15,9 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 julia = "^1.0.0"
-YaoBase = "~0.9.1"
-YaoArrayRegister = "~0.3.5"
-YaoBlocks = "~0.4"
+YaoBase = "~0.11"
+YaoArrayRegister = "~0.3.10"
+YaoBlocks = "~0.5"
 
 [targets]
 test = ["Test"]
