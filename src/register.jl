@@ -39,18 +39,18 @@ export ArrayReg,
     oneto
 
 """
-    ArrayReg{B, T, MT <: AbstractMatrix{T}} <: AbstractRegister{B, T}
+    ArrayReg{B, T, MT <: AbstractMatrix{T}} <: AbstractRegister{B}
 
 Simulated full amplitude register type, it uses an array to represent
 corresponding one or a batch of quantum states. `B` is the batch size, `T`
 is the numerical type for each amplitude, it is `ComplexF64` by default.
 """
-mutable struct ArrayReg{B, T, MT <: AbstractMatrix{T}} <: AbstractRegister{B, T}
+mutable struct ArrayReg{B, T, MT <: AbstractMatrix{T}} <: AbstractRegister{B}
     state::MT
 end
 
-const AdjointArrayReg{B, T, MT} = AdjointRegister{B, T, ArrayReg{B, T, MT}}
-const ArrayRegOrAdjointArrayReg{B, T, MT} = Union{ArrayReg{B, T, MT}, AdjointRegister{B, T, ArrayReg{B, T, MT}}}
+const AdjointArrayReg{B, T, MT} = AdjointRegister{B, ArrayReg{B, T, MT}}
+const ArrayRegOrAdjointArrayReg{B, T, MT} = Union{ArrayReg{B, T, MT}, AdjointRegister{B, ArrayReg{B, T, MT}}}
 
 """
     ArrayReg{B}(raw)
@@ -72,6 +72,19 @@ function ArrayReg{B}(raw::MT) where {B, T, MT <: AbstractMatrix{T}}
     end
     return ArrayReg{B, T, MT}(raw)
 end
+
+"""
+    datatype(register) -> Int
+
+Returns the numerical data type used by register.
+
+!!! note
+
+    `datatype` is not the same with `eltype`, since `AbstractRegister` family
+    is not exactly the same with `AbstractArray`, it is an iterator of several
+    registers.
+"""
+YaoBase.@interface datatype(r::ArrayReg{B, T}) where {B, T} = T
 
 function _warn_type(raw::AbstractArray{T}) where T
     T <: Complex || @warn "Input type of `ArrayReg` is not Complex, got $(eltype(raw))"

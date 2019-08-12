@@ -8,7 +8,7 @@ Density Matrix.
 - `B`: batch size
 - `T`: element type
 """
-struct DensityMatrix{B, T, MT<:AbstractArray{T, 3}} <: AbstractRegister{B, T}
+struct DensityMatrix{B, T, MT<:AbstractArray{T, 3}} <: AbstractRegister{B}
     state::MT
 end
 
