@@ -20,8 +20,8 @@ YaoBase = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
 
 [compat]
 julia = "^1.0.0"
-YaoBase = "~0.11.0"
-YaoArrayRegister = "~0.4"
+YaoBase = "~0.10.0"
+YaoArrayRegister = "~0.3.10"
 BitBasis = "~0.5"
 
 [extras]
