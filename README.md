@@ -67,7 +67,7 @@ Some quantum algorithms are implemented with Yao in [QuAlgorithmZoo](https://git
 
 ## Contribution
 
-Please read our [contribution guide]().
+Please read our [contribution guide](https://github.com/QuantumBFS/Yao.jl/blob/master/CONTRIBUTING.md).
 
 ## The Team
 
