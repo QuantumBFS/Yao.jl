@@ -1,4 +1,5 @@
 export DensityMatrix, density_matrix, ρ
+export purify
 
 """
     DensityMatrix{B, T, MT}
@@ -60,3 +61,22 @@ function YaoBase.probs(m::DensityMatrix{B, T}) where {B, T}
 end
 
 YaoBase.probs(m::DensityMatrix{1})= diag(view(m.state, :,:,1))
+
+"""
+    purify(r::DensityMatrix{B}; nbit_env::Int=nactive(r)) -> ArrayReg
+
+Get a purification of target density matrix.
+"""
+function purify(r::DensityMatrix{B}; nbit_env::Int=nactive(r)) where B
+    Ne = 1<<nbit_env
+    Ns = size(r.state,1)
+    state = similar(r.state,Ns,Ne,B)
+    for ib in 1:B
+        R, U = eigen!(r.state[:,:,ib])
+        state[:,:,ib] .= view(U,:,Ns-Ne+1:Ns) .* sqrt.(abs.(view(R,Ns-Ne+1:Ns)'))
+    end
+    return ArrayReg(state)
+end
+
+# obtaining matrix from Yao.DensityMatrix{1}, `1` is the batch size.
+LinearAlgebra.Matrix(d::DensityMatrix{1}) = dropdims(d.state, dims=3)

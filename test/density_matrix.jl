@@ -39,3 +39,21 @@ end
     @test isapprox(tracedist(dm, dm_)[], tracedist(dm4, dm5)[], atol=1e-5)
     @test isapprox.(tracedist(dm, dm_)[], tracedist(repeat(reg4, 3)|>density_matrix, repeat(reg5, 3)|>density_matrix), atol=1e-5) |> all
 end
+
+@testset "purify" begin
+    reg = rand_state(6)
+    reg_p = purify(reg |> ρ)
+    @test reg_p |> isnormalized
+    @test reg_p |> exchange_sysenv |> probs |> maximum ≈ 1
+    reg_p = purify(reg |> ρ; nbit_env=0)
+    @test Yao.fidelity(reg, reg_p) ≈ [1]
+
+    reg = rand_state(6; nbatch=10)
+    reg_p = purify(reg |> ρ)
+    @test reg_p |> isnormalized
+    @test reg_p |> exchange_sysenv |> probs |> maximum ≈ 1
+    reg_p = purify(reg |> ρ; nbit_env=0)
+    @test Yao.fidelity(reg, reg_p) ≈ ones(10)
+    reg_p = purify(reg |> ρ; nbit_env=2)
+    @test reg_p |> nqubits == 8
+end

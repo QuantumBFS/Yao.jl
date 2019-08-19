@@ -13,7 +13,7 @@ TupleTools = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
 YaoBase = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
 
 [compat]
-BitBasis = "^0.5.0"
+BitBasis = "^0.6.0"
 LuxurySparse = "~0.4.0"
 YaoBase = "~0.11.0"
 julia = "^1.0.0"

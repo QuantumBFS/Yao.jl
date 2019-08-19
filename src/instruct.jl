@@ -17,11 +17,6 @@ A list of symbol for specialized gates/operators.
 """
 const SPECIALIZATION_LIST = Symbol[:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
 
-# to avoid potential ambiguity, we limit them to tuple for now
-# but they only has to be an iterator over integers
-const Locations{T} = NTuple{N, T} where N
-const BitConfigs{T} = NTuple{N, T} where N
-
 function YaoBase.instruct!(
     state::AbstractVecOrMat{T1},
     operator::AbstractMatrix{T2},

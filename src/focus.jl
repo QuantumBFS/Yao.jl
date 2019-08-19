@@ -2,7 +2,8 @@ using YaoBase, TupleTools
 
 export focus!,
     relax!,
-    partial_tr
+    partial_tr,
+    exchange_sysenv
 
 
 """
@@ -124,4 +125,13 @@ function YaoBase.partial_tr(r::ArrayReg{B}, locs) where B
     state = sum(rank3(r); dims=2)
     relax!(r, orders)
     return normalize!(ArrayReg(state))
+end
+
+"""
+    exchange_sysenv(reg::ArrayReg) -> ArrayReg
+
+Exchange system (focused qubits) and environment (remaining qubits).
+"""
+function exchange_sysenv(reg::ArrayReg{B}) where B
+    ArrayReg{B}(reshape(permutedims(rank3(reg), (2,1,3)), :,size(reg.state, 1)*B))
 end
