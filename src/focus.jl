@@ -14,8 +14,8 @@ new merged shape and order.
 
 # Example
 
-```jldoctest
-julia> YaoArrayRegister.contiguous_shape_order((2, 3, 4), (1, 2, 3))
+```jldoctest; setup=:(using YaoArrayRegister)
+julia> YaoArrayRegister.contiguous_shape_orders((2, 3, 4), (1, 2, 3))
 ([24], [1])
 ```
 """

@@ -8,3 +8,4 @@ docs/build/
 docs/site/
 docs/src/examples/*.md
 *.swp
+docs/Manifest.toml

@@ -105,13 +105,13 @@ For bit string literal please read [`@bit_str`](@ref).
 
 # Examples
 
-```jldoctest
+```jldoctest; setup=:(using YaoArrayRegister)
 julia> ArrayReg(bit"1010")
-ArrayReg{1,Complex{Float64},Array...}
+ArrayReg{1, Complex{Float64}, Array...}
     active qubits: 4/4
 
 julia> ArrayReg(ComplexF32, bit"1010")
-ArrayReg{1,Complex{Float32},Array...}
+ArrayReg{1, Complex{Float32}, Array...}
     active qubits: 4/4
 ```
 """
@@ -289,13 +289,13 @@ defined with [`@bit_str`](@ref). See also [`zero_state`](@ref),
 
 # Examples
 
-```jldoctest
+```jldoctest; setup=:(using YaoArrayRegister)
 julia> product_state(bit"100"; nbatch=2)
-ArrayReg{2,Complex{Float64},Array...}
+ArrayReg{2, Complex{Float64}, Array...}
     active qubits: 3/3
 
 julia> product_state(ComplexF32, bit"101"; nbatch=2)
-ArrayReg{2,Complex{Float32},Array...}
+ArrayReg{2, Complex{Float32}, Array...}
     active qubits: 3/3
 ```
 """
@@ -309,17 +309,17 @@ See also [`zero_state`](@ref), [`rand_state`](@ref), [`uniform_state`](@ref).
 
 # Examples
 
-```jldoctest
+```jldoctest; setup=:(using YaoArrayRegister)
 julia> product_state(4, 3; nbatch=2)
-ArrayReg{2,Complex{Float64},Array...}
+ArrayReg{2, Complex{Float64}, Array...}
     active qubits: 4/4
 
 julia> product_state(4, 0b1001; nbatch=2)
-ArrayReg{2,Complex{Float64},Array...}
+ArrayReg{2, Complex{Float64}, Array...}
     active qubits: 4/4
 
 julia> product_state(ComplexF32, 4, 0b101)
-ArrayReg{1,Complex{Float32},Array...}
+ArrayReg{1, Complex{Float32}, Array...}
     active qubits: 4/4
 ```
 
@@ -344,17 +344,17 @@ See also [`product_state`](@ref), [`rand_state`](@ref), [`uniform_state`](@ref).
 
 # Examples
 
-```jldoctest
+```jldoctest; setup=:(using YaoArrayRegister)
 julia> zero_state(4)
-ArrayReg{1,Complex{Float64},Array...}
+ArrayReg{1, Complex{Float64}, Array...}
     active qubits: 4/4
 
 julia> zero_state(ComplexF32, 4)
-ArrayReg{1,Complex{Float32},Array...}
+ArrayReg{1, Complex{Float32}, Array...}
     active qubits: 4/4
 
 julia> zero_state(ComplexF32, 4; nbatch=3)
-ArrayReg{3,Complex{Float32},Array...}
+ArrayReg{3, Complex{Float32}, Array...}
     active qubits: 4/4
 ```
 """
@@ -369,17 +369,17 @@ Create a random [`ArrayReg`](@ref) with total number of qubits `n`.
 
 # Examples
 
-```jldoctest
+```jldoctest; setup=:(using YaoArrayRegister)
 julia> rand_state(4)
-ArrayReg{1,Complex{Float64},Array...}
+ArrayReg{1, Complex{Float64}, Array...}
     active qubits: 4/4
 
 julia> rand_state(ComplexF64, 4)
-ArrayReg{1,Complex{Float64},Array...}
+ArrayReg{1, Complex{Float64}, Array...}
     active qubits: 4/4
 
 julia> rand_state(ComplexF64, 4; nbatch=2)
-ArrayReg{2,Complex{Float64},Array...}
+ArrayReg{2, Complex{Float64}, Array...}
     active qubits: 4/4
 ```
 """
@@ -398,13 +398,13 @@ can also be created by applying [`H`](@ref) (Hadmard gate) on ``|00⋯00⟩`` st
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoArrayRegister)
 julia> uniform_state(4; nbatch=2)
-ArrayReg{2,Complex{Float64},Array...}
+ArrayReg{2, Complex{Float64}, Array...}
     active qubits: 4/4
 
 julia> uniform_state(ComplexF32, 4; nbatch=2)
-ArrayReg{2,Complex{Float64},Array...}
+ArrayReg{2, Complex{Float64}, Array...}
     active qubits: 4/4
 ```
 """
@@ -433,9 +433,9 @@ batch dimension.
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoArrayRegister)
 julia> repeat(ArrayReg{3}(bit"101"), 4)
-ArrayReg{12,Complex{Float64},Array...}
+ArrayReg{12, Complex{Float64}, Array...}
     active qubits: 3/3
 ```
 """

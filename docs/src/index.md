@@ -1,5 +1,5 @@
 ```@meta
 DocTestSetup = quote
-    using YaoBase, YaoBlocks, YaoArrayRegister
+    using YaoBase, YaoArrayRegister
 end
 ```
