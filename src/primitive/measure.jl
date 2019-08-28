@@ -11,7 +11,7 @@ mutable struct Measure{N, K, OT, RNG} <: PrimitiveBlock{N}
     rng::RNG
     operator::OT
     locations::Union{NTuple{K, Int}, AllLocs}
-    collapseto::Union{Int, Nothing}
+    collapseto::Union{BitStr64{N}, Nothing}
     remove::Bool
     results::Vector{Int}
     function Measure{N, K, OT, RNG}(rng::RNG, operator, locations, collapseto, remove) where {RNG, N, K, OT}
@@ -34,59 +34,59 @@ Create a `Measure` block with number of qubits `n`.
 
 You can create a `Measure` block on given basis (default is the computational basis).
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> Measure(4)
 Measure(4)
 ```
 
 Or you could specify which qubits you are going to measure
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> Measure(4; locs=1:3)
 Measure(4;locs=(1, 2, 3))
 ```
 
 by default this will collapse the current register to measure results.
 
-```julia
+```jldoctest; setup=:(using YaoBlocks, YaoArrayRegister, BitBasis, Random; Random.seed!(2))
 julia> r = rand_state(3)
 ArrayReg{1, Complex{Float64}, Array...}
     active qubits: 3/3
 
 julia> state(r)
 8×1 Array{Complex{Float64},2}:
-  0.19864933724343375 - 0.4740335956912438im
-  -0.2057912765333517 - 0.2262668486124923im
- -0.41680007712245676 - 0.13759187422609387im
- -0.24336704548326407 + 0.27343538360398184im
- -0.09308092255704317 - 0.005308959093704435im
-  0.24555464152683212 + 0.02737969837364506im
-  -0.3828287267256825 + 0.02401578941643196im
- 0.048647936794205926 + 0.31047610497928607im
+    0.21633342515406265 - 0.21776267239802458im
+   -0.17798384008375148 - 0.5040979387214165im
+   -0.19761243345925425 + 0.16281482444784728im
+   -0.25200691415025867 + 0.15153595884416518im
+     0.3650977378140692 + 0.3419566592091794im
+  -0.027207023333497483 - 0.3780181361735894im
+ -0.0034728372576413743 + 0.1693915490059622im
+   -0.19898587237095824 - 0.07607057769761456im
 
 julia> r |> Measure(3)
 Measure(3)
 
 julia> state(r)
 8×1 Array{Complex{Float64},2}:
-                 0.0 + 0.0im
-                 0.0 + 0.0im
- -0.9495962023170939 - 0.31347576069762273im
-                 0.0 + 0.0im
-                 0.0 + 0.0im
-                 0.0 + 0.0im
-                 0.0 + 0.0im
-                 0.0 + 0.0im
+                0.0 + 0.0im
+                0.0 + 0.0im
+                0.0 + 0.0im
+                0.0 + 0.0im
+ 0.7298587746534583 + 0.6835979586433478im
+                0.0 + 0.0im
+                0.0 + 0.0im
+                0.0 + 0.0im
 ```
 
 But you can also specify the target bit configuration you want to collapse to with keyword `collapseto`.
 
-```jldoctest
-julia> m = Measure(4; collapseto=0b101)
-Measure(4;collapseto=5)
+```jldoctest; setup=:(using YaoBlocks; using BitBasis)
+julia> m = Measure(4; collapseto=bit"0101")
+Measure(4;collapseto=0101 ₍₂₎)
 
 julia> m.collapseto
-5
+0101 ₍₂₎
 ```
 """
 function Measure(n::Int; rng::RNG=Random.GLOBAL_RNG, operator::OT=ComputationalBasis(), locs=AllLocs(), collapseto=nothing, remove=false) where {OT, RNG}

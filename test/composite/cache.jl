@@ -29,7 +29,7 @@ end
     g = CachedBlock(test_server, X, 3)
     @test_throws KeyError pull(g)
 
-    update_cache(g)
+    update_cache(ComplexF64, g)
     @test pull(g) ≈ mat(X)
 
     clear!(g)

@@ -29,7 +29,7 @@ Create a [`GeneralMatrixBlock`](@ref) with a matrix `m`.
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> matblock(ComplexF64[0 1;1 0])
 matblock(...)
 ```

@@ -30,7 +30,7 @@ to repeat on given location or on all the locations.
 
 This will create a repeat block which puts 4 X gates on each location.
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> repeat(4, X)
 nqubits: 4
 repeat on (1, 2, 3, 4)
@@ -39,7 +39,7 @@ repeat on (1, 2, 3, 4)
 
 You can also specify the location
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> repeat(4, X, (1, 2))
 nqubits: 4
 repeat on (1, 2)
@@ -49,7 +49,7 @@ repeat on (1, 2)
 But repeat won't copy the gate, thus, if it is a gate with parameter, e.g a `phase(0.1)`, the parameter
 will change simultaneously.
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> g = repeat(4, phase(0.1))
 nqubits: 4
 repeat on (1, 2, 3, 4)

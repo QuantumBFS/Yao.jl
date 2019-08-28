@@ -35,7 +35,7 @@ Return a [`RotationGate`](@ref) on X axis.
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> Rx(0.1)
 rot(X gate, 0.1)
 ```
@@ -49,7 +49,7 @@ Return a [`RotationGate`](@ref) on Y axis.
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> Ry(0.1)
 rot(Y gate, 0.1)
 ```
@@ -63,7 +63,7 @@ Return a [`RotationGate`](@ref) on Z axis.
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> Rz(0.1)
 rot(Z gate, 0.1)
 ```

@@ -1,4 +1,5 @@
 using Test, YaoBlocks, YaoArrayRegister
+using YaoBase
 
 struct MockedTag{BT, N} <: TagBlock{BT, N}
     content::BT

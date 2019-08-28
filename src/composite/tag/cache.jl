@@ -62,9 +62,9 @@ chsubblocks(cb::CachedBlock, blk::AbstractBlock) = CachedBlock(cb.server, blk, c
 occupied_locs(x::CachedBlock) = occupied_locs(content(x))
 PropertyTrait(::CachedBlock) = PreserveAll()
 
-function update_cache(c::CachedBlock)
+function update_cache(::Type{T}, c::CachedBlock) where T
     if !iscached(c.server, c.content)
-        m = mat(c.content)
+        m = mat(T, c.content)
         push!(c.server, m, c.content)
     end
     return c
@@ -73,9 +73,9 @@ end
 CacheServers.clear!(x::AbstractBlock) = x
 CacheServers.clear!(c::CachedBlock) = (clear!(c.server, c.content); c)
 
-function mat(c::CachedBlock)
+function mat(::Type{T}, c::CachedBlock) where T
     if !iscached(c.server, c.content)
-        m = mat(c.content)
+        m = mat(T, c.content)
         push!(c.server, m, c.content)
         return m
     end
@@ -96,7 +96,7 @@ function apply!(r::ArrayReg{B, T}, c::CachedBlock, signal) where {B, T}
 end
 
 apply!(r::AbstractRegister, c::CachedBlock) = apply!(r, c.content)
-apply!(r::ArrayReg, c::CachedBlock) = (r.state .= mat(c) * r.state; r)
+apply!(r::ArrayReg{B,T}, c::CachedBlock) where {B,T} = (r.state .= mat(T, c) * r.state; r)
 
 Base.similar(c::CachedBlock, level::Int) = CachedBlock(c.server, c.content, level)
 Base.copy(c::CachedBlock) = CachedBlock(c.server, copy(c.content), c.level)
@@ -120,7 +120,7 @@ it calls [`mat`](@ref), and use the cached matrix in the following calculations.
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> cache(control(3, 1, 2=>X))
 nqubits: 3
 [cached] control(1)

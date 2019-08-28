@@ -18,7 +18,7 @@ Create a [`Daggered`](@ref) block with given block `x`.
 
 The inverse QFT is not hermitian, thus it will be tagged with a `Daggered` block.
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> A(i, j) = control(i, j=>shift(2π/(1<<(i-j+1))));
 
 julia> B(n, i) = chain(n, i==j ? put(i=>H) : A(j, i) for j in i:n);

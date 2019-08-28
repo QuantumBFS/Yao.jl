@@ -6,3 +6,4 @@
 @deprecate PreserveStyle(args...) PropertyTrait(args...)
 @deprecate Sum(args...) Add(args...)
 @deprecate Add(blocks::AbstractVector{<:AbstractBlock{N}}) where {N} Add{N}(blocks)
+@deprecate mathgate(f; nbits) mathgate(nbits, f)

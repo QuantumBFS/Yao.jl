@@ -31,7 +31,7 @@ and relax the concentration afterwards.
 Concentrator is equivalent to [`put`](@ref) a block on given position mathematically, but more efficient
 and convenient for large blocks.
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks; using YaoArrayRegister)
 julia> r = rand_state(3)
 ArrayReg{1, Complex{Float64}, Array...}
     active qubits: 3/3
@@ -42,7 +42,7 @@ true
 
 It works for in-contigious locs as well
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks; using YaoArrayRegister)
 julia> r = rand_state(4)
 ArrayReg{1, Complex{Float64}, Array...}
     active qubits: 4/4

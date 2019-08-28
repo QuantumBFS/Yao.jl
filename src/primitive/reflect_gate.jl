@@ -45,7 +45,7 @@ Create a [`ReflectGate`](@ref) with an quantum state vector `v`.
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks; using YaoArrayRegister)
 julia> reflect(rand_state(3))
 reflect(ArrayReg{1, Complex{Float64}, Array...})
 ```

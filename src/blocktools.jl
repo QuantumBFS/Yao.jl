@@ -87,3 +87,6 @@ for FUNC in [:measure!, :measure_collapseto!, :measure_remove!, :measure]
         $FUNC(rng::AbstractRNG, eigen!(mat(op) |> Matrix), reg, locs; kwargs...)
     end
 end
+
+# obtaining Dense Matrix of a block
+LinearAlgebra.Matrix(blk::AbstractBlock) = Matrix(mat(blk))

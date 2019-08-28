@@ -18,7 +18,7 @@ Create a `PauliString` from some Pauli gates.
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> PauliString(X, Y, Z)
 nqubits: 3
 PauliString
@@ -36,7 +36,7 @@ Create a `PauliString` from a list of Pauli gates.
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> PauliString([X, Y, Z])
 nqubits: 3
 PauliString

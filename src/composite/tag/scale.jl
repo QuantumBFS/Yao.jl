@@ -9,7 +9,7 @@ export Scale, factor
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> 2 * X
 [scale: 2] X gate
 

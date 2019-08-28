@@ -10,11 +10,10 @@ end
 
 return a peridoc shift function.
 """
-pshift(n::Int) = (b::Int, nbit::Int) -> mod(b+n, 1<<nbit)
-pshift(n::Float64) = (b::Float64, nbit::Int) -> mod(b+n, 1)
+pshift(n::Int) = function (b::BitStr{N}) where N mod(b+n, 1<<N) end
 
 @testset "test toffli" begin
-    g = mathgate(toffli; nbits=3)
+    g = mathgate(3, toffli)
     check_truth(b1, b2) = apply!(ArrayReg(b1), g) == ArrayReg(b2)
     @test check_truth(bit"000", bit"000")
     @test check_truth(bit"001", bit"001")
@@ -29,22 +28,14 @@ end
 @testset "test pshift" begin
     # bint
     nbits = 5
-    ab = mathgate(pshift(3); nbits=nbits)
-    mb = mathgate(pshift(-3); nbits=nbits)
+    ab = mathgate(nbits, pshift(3))
+    mb = mathgate(nbits, pshift(-3))
     @test apply!(zero_state(nbits), ab) == product_state(nbits, 3)
     @test apply!(zero_state(nbits), mb) == product_state(nbits, 1<<nbits-3)
+    @test applymatrix(ab) ≈ mat(ab)
     @test isunitary(ab)
 
-    ab = mathgate(pshift(3); nbits=nbits, bview=bint_r)
-    @test apply!(zero_state(nbits), ab) == product_state(nbits, 0b11000)
+    ab = mathgate(nbits, pshift(3))
+    @test apply!(zero_state(nbits), ab) == product_state(nbits, 0b00011)
     @test isunitary(ab)
-
-    af = mathgate(pshift(0.5); nbits=nbits, bview=bfloat)
-    @test isunitary(af)
-    @test apply!(zero_state(nbits), af) == product_state(nbits, 1)
-
-    # bfloat_r
-    af = mathgate(pshift(0.5); nbits=nbits, bview=bfloat_r)
-    @test isunitary(af)
-    @test apply!(zero_state(nbits), af) == ArrayReg(bit"10000")
 end

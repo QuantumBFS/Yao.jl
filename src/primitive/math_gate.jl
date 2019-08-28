@@ -1,25 +1,21 @@
 using YaoBase, YaoArrayRegister, BitBasis
-import LegibleLambdas: LegibleLambda, parse_lambda
-export MathGate, mathgate, @mathgate
+import LegibleLambdas: LegibleLambda
+export MathGate, mathgate
 
-struct MathGate{N, F <: Union{LegibleLambda, Function}, Fv <: Function} <: PrimitiveBlock{N}
+struct MathGate{N, F <: Union{LegibleLambda, Function}} <: PrimitiveBlock{N}
     f::F
-    v::Fv
 end
 
-function MathGate{N}(f::Union{LegibleLambda, Function}; bview::Function=bint) where N
-    return MathGate{N, typeof(f), typeof(bview)}(f, bview)
+function MathGate{N}(f::Union{LegibleLambda, Function}) where N
+    return MathGate{N, typeof(f)}(f)
 end
 
 """
-    mathgate(f; nbits[, bview=BitBasis.bint])
+    mathgate(nbits, f)
 
-Create a [`MathGate`](@ref) with a math function `f` and number of bits. You can
-select different kinds of view which this `MathGate` will be applied on. Possible
-values are [`BitBasis.bint`](@ref), [`BitBasis.bint_r`](@ref),
-[`BitBasis.bfloat`](@ref), [`BitBasis.bfloat_r`](@ref).
+Create a [`MathGate`](@ref) with a math function `f` and number of bits.
 
-    mathgate(f; bview=BitBasis.bint) -> f(n)
+    mathgate(f) -> f(n)
 
 Lazy curried version of `mathgate`.
 
@@ -27,7 +23,7 @@ Lazy curried version of `mathgate`.
 
 We can make a classical toffoli gate on quantum register.
 
-```julia
+```jldoctest; setup=:(using YaoBlocks, YaoArrayRegister, BitBasis)
 julia> r = ArrayReg(bit"110")
 ArrayReg{1, Complex{Float64}, Array...}
     active qubits: 3/3
@@ -38,106 +34,22 @@ julia> function toffli(b::BitStr)
        end
 toffli (generic function with 1 method)
 
-julia> g = mathgate(toffli; nbits=3)
-mathgate(toffli; nbits=3, bview=bint)
+julia> g = mathgate(3, toffli)
+mathgate(toffli; nbits=3)
 
 julia> apply!(r, g) == ArrayReg(bit"111")
 true
 
 ```
 """
-function mathgate(f; nbits::Union{Int, Nothing}=nothing, bview::Function=bint)
-    if nbits === nothing
-        @λ(n->matgate(f; nbits=n, bview=bview))
-    else
-        return MathGate{nbits}(f; bview=bview)
-    end
-end
-
-"""
-    @mathgate f <nbits> <bview=bint>
-
-Create a [`MathGate`](@ref) with a math function `f` and number of bits `nbits`,
-binary view `bview`. Unlike [`mathgate`](@ref), `f` will be automatically
-converted to a more legible form.
-
-# Example
-
-```jldoctest
-julia> @mathgate x->x + 0b11 nbits=4
-mathgate((x -> x + 0x03); nbits=4, bview=bint)
-```
-"""
-:(@mathgate)
-
-macro mathgate(f, nbits, bview)
-    if !(nbits.head === :(=) && nbits.args[1] === :nbits)
-        return :(error("expect keyword nbits, got $nbits"))
-    end
-
-    if !(bview.head === :(=) && bview.args[1] === :bview)
-        return :(error("expect keyword bview, got $bview"))
-    end
-
-    return quote
-        mathgate($(parse_lambda(f)); nbits=$(esc(nbits.args[2])), bview=$(esc(bview.args[2])))
-    end
-end
-
-macro mathgate(f, nbits)
-    if !(nbits.head === :(=) && nbits.args[1] === :nbits)
-        return :(error("expect keyword nbits, got $nbits"))
-    end
-
-    return quote
-        mathgate($(parse_lambda(f)); nbits=$(esc(nbits.args[2])))
-    end
-end
-
-macro mathgate(f)
-    return quote
-        mathgate($(parse_lambda(f)))
-    end
-end
-
-mathop(m::MathGate{N, F, typeof(bint)}, b::Int) where {N, F} = callmath(m)(b)
-
-function callmath(m::MathGate{N}) where N
-    @inline _value(x::BitStr) = x.val
-    @inline _value(x) = x
-
-    return function (x::T) where T
-        if hasmethod(m.f, Tuple{T})
-            return btruncate(m.f(x), N)
-        elseif hasmethod(m.f, Tuple{T, typeof(N)})
-            return m.f(x, N)
-        elseif hasmethod(m.f, Tuple{BitStr{T, N}})
-            return btruncate(_value(m.f(bit(x; len=N))), N)
-        elseif hasmethod(m.f, Tuple{BitStr{T, N}, typeof(N)})
-            return _value(m.f(bit(x; len=N), N))
-        else
-            error("Invalid math function call, math operation should be either f(x) or f(x, N::Int)")
-        end
-    end
-end
-
-function mathop(m::MathGate{N, F, typeof(bint_r)}, b::Int) where {N, F}
-    return b |> x->bint_r(x; nbits=N) |> callmath(m) |> x->bint_r(x; nbits=N)
-end
-
-function mathop(m::MathGate{N, F, typeof(bfloat)}, b::Int) where {N, F}
-    return b |> x->bfloat(x; nbits=N) |> callmath(m) |> x->bint(x; nbits=N)
-end
-
-function mathop(m::MathGate{N, F, typeof(bfloat_r)}, b::Int) where {N, F}
-    return b |> x->bfloat_r(x; nbits=N) |> callmath(m) |> x->bint_r(x; nbits=N)
-end
+mathgate(nbits::Int, f) = MathGate{nbits}(f)
+mathgate(f::Union{LegibleLambda, Function}) = @λ(nbits->matgate(nbits, f))
 
 function apply!(r::ArrayReg, m::MathGate{N, F}) where {N, F}
     nstate = zero(r.state)
-    for b in basis(r)
-        b2 = mathop(m, b)
-        nstate[b2+1, :] = view(r.state, b+1, :)
+    for b in basis(BitStr64{N})
+        b2 = m.f(b)
+        nstate[Int64(b2)+1, :] = view(r.state, Int64(b)+1, :)
     end
     r.state .= nstate
     return r
@@ -148,10 +60,10 @@ function mat(::Type{T}, m::MathGate{N}) where {T, N}
     L = 1<<N
     vals = zeros(T, L)
     perm = zeros(Int, L)
-    for b in basis(N)
-        b2 = mathop(m, b)
-        vals[b2+1] += 1
-        perm[b2+1] = b+1
+    for b in basis(BitStr64{N})
+        b2 = m.f(b)
+        vals[Int64(b2)+1] += 1
+        perm[Int64(b2)+1] = Int64(b) + 1
     end
     any(==(0), vals) && throw(ArgumentError("This `MathGate` is not unitary! Failed converting to a `PermMatrix`! maybe use `applymatrix` to check your block?"))
     return PermMatrix(perm, vals)

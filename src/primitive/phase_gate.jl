@@ -24,7 +24,7 @@ exp(iθ) \\mathbf{I}
 
 You can create a global phase gate with a phase (a real number).
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> phase(0.1)
 phase(0.1)
 ```
