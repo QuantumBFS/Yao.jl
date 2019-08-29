@@ -12,6 +12,9 @@ alt="Yao Logo" width="210"></img>
 
 Extensible, Efficient Quantum Algorithm Design for Humans.
 
+**Warning: Yao.jl breaks for Julia 1.2.0, due to a compiler bug, we are not going to fix this.
+Please use either [Julia 1.1 or 1.3](https://julialang.org/downloads/)**
+
 ## Introduction
 
 Yao is an open source framework that aims to empower quantum information research with software tools. It is designed with following in mind:
