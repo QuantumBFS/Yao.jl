@@ -12,7 +12,7 @@ alt="Yao Logo" width="210"></img>
 
 Extensible, Efficient Quantum Algorithm Design for Humans.
 
-**Warning: Yao.jl breaks sometime for Julia 1.2.0 due to a compiler bug, we will fix this ASAP.
+**Warning: Yao.jl breaks sometime for Julia 1.2.0 due to a compiler bug, The master branch is fixed.
 Please use [Julia 1.0, 1.1 or 1.3](https://julialang.org/downloads/) for the moment**
 
 ## Introduction
