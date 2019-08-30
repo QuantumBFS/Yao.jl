@@ -17,41 +17,6 @@ A list of symbol for specialized gates/operators.
 """
 const SPECIALIZATION_LIST = Symbol[:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
 
-function YaoBase.instruct!(
-    state::AbstractVecOrMat{T1},
-    operator::AbstractMatrix{T2},
-    locs::Tuple{},
-    control_locs::NTuple{C, Int}=(),
-    control_bits::NTuple{C, Int}=()) where {T1, T2, M, C}
-    return state
-end
-
-function YaoBase.instruct!(
-    state::AbstractVecOrMat{T1},
-    operator::AbstractMatrix{T2},
-    locs::NTuple{M, Int},
-    control_locs::NTuple{C, Int}=(),
-    control_bits::NTuple{C, Int}=()) where {T1, T2, M, C}
-
-    @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
-    return instruct!(state, copyto!(similar(operator, T1), operator), locs, control_locs, control_bits)
-end
-
-function YaoBase.instruct!(state::AbstractVecOrMat{T1}, U1::AbstractMatrix{T2}, loc::Int) where {T1, T2}
-    @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
-    return instruct!(state, copyto!(similar(U1, T1), U1), loc)
-end
-
-function YaoBase.instruct!(state::AbstractVecOrMat{T1}, U1::SDPermMatrix{T2}, loc::Int) where {T1, T2}
-    @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
-    return instruct!(state, copyto!(similar(U1, T1), U1), loc)
-end
-
-function YaoBase.instruct!(state::AbstractVecOrMat{T1}, U1::SDDiagonal{T2}, loc::Int) where {T1, T2}
-    @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
-    return instruct!(state, copyto!(similar(U1, T1), U1), loc)
-end
-
 function _prepare_instruct(state, U, locs::NTuple{M}, control_locs, control_bits::NTuple{C}) where {M, C}
     N, MM = log2dim1(state), size(U, 1)
 
@@ -64,25 +29,28 @@ function _prepare_instruct(state, U, locs::NTuple{M}, control_locs, control_bits
 end
 
 function YaoBase.instruct!(
-    state::AbstractVecOrMat{T},
-    operator::AbstractMatrix{T},
+    state::AbstractVecOrMat{T1},
+    operator::AbstractMatrix{T2},
     locs::Tuple{},
-    control_locs::NTuple{C, Int} = (),
-    control_bits::NTuple{C, Int} = ()) where {T, M, C}
+    control_locs::NTuple{C, Int}=(),
+    control_bits::NTuple{C, Int}=()) where {T1, T2, M, C}
     return state
 end
 
 function YaoBase.instruct!(
-    state::AbstractVecOrMat{T},
-    operator::AbstractMatrix{T},
+    state::AbstractVecOrMat{T1},
+    operator::AbstractMatrix{T2},
     locs::NTuple{M, Int},
-    control_locs::NTuple{C, Int} = (),
-    control_bits::NTuple{C, Int} = ()) where {T, M, C}
+    control_locs::NTuple{C, Int}=(),
+    control_bits::NTuple{C, Int}=()) where {T1, T2, M, C}
 
-    U = sort_unitary(operator, locs)
-    locs_raw, ic = _prepare_instruct(state, U, locs, control_locs, control_bits)
-
-    return _instruct!(state, autostatic(U), locs_raw, ic)
+    if T2!=T1
+        @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
+        operator = copyto!(similar(operator, T1), operator)
+    end
+    operator = sort_unitary(operator, locs)
+    locs_raw, ic = _prepare_instruct(state, operator, locs, control_locs, control_bits)
+    return _instruct!(state, autostatic(operator), locs_raw, ic)
 end
 
 function _instruct!(state::AbstractVecOrMat{T}, U::AbstractMatrix{T}, locs_raw::SVector, ic::IterControl) where T
@@ -108,9 +76,9 @@ YaoBase.instruct!(state::AbstractVecOrMat, U::IMatrix, locs::Tuple{Int}) = state
 YaoBase.instruct!(state::AbstractVecOrMat, g::AbstractMatrix, locs::Tuple{Int}) =
     instruct!(state, g, locs...)
 
-function YaoBase.instruct!(state::AbstractVecOrMat{T}, U1::AbstractMatrix{T}, loc::Int) where T
+function YaoBase.instruct!(state::AbstractVecOrMat{T1}, U1::AbstractMatrix{T2}, loc::Int) where {T1, T2}
     a, c, b, d = U1
-    instruct_kernel(state, loc, 1<<(loc-1), 1<<loc, a, b, c, d)
+    instruct_kernel(state, loc, 1<<(loc-1), 1<<loc, T1(a), T1(b), T1(c), T1(d))
     return state
 end
 
@@ -126,10 +94,10 @@ end
 YaoBase.instruct!(state::AbstractVecOrMat{T}, g::SDPermMatrix{T}, locs::Tuple{Int}) where T =
     instruct!(state, g, locs...)
 
-function YaoBase.instruct!(state::AbstractVecOrMat{T}, U1::SDPermMatrix{T}, loc::Int) where T
+function YaoBase.instruct!(state::AbstractVecOrMat{T1}, U1::SDPermMatrix{T2}, loc::Int) where {T1, T2}
     U1.perm[1] == 1 && return instruct!(state, Diagonal(U1), loc)
     mask = bmask(loc)
-    b, c = U1.vals
+    b, c = T1.(U1.vals)
     step = 1<<(loc-1)
     step_2 = 1<<loc
     for j in 0:step_2:size(state, 1)-step
@@ -143,9 +111,9 @@ end
 YaoBase.instruct!(state::AbstractVecOrMat{T}, g::SDDiagonal{T}, locs::Tuple{Int}) where T =
     instruct!(state, g, locs...)
 
-function YaoBase.instruct!(state::AbstractVecOrMat{T}, U1::SDDiagonal{T}, loc::Int) where T
+function YaoBase.instruct!(state::AbstractVecOrMat{T1}, U1::SDDiagonal{T2}, loc::Int) where {T1, T2}
     mask = bmask(loc)
-    a, d = U1.diag
+    a, d = T1.(U1.diag)
     step = 1<<(loc - 1)
     step_2 = 1 << loc
     for j in 0:step_2:size(state, 1)-step
