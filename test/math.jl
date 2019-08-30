@@ -31,15 +31,21 @@ end
 end
 
 @testset "batched kron" begin
-    A, B, C  = rand(4, 4, 3), rand(4, 4, 3), rand(4, 4, 3)
+    A, B, C  = rand(ComplexF64, 4, 4, 3), rand(ComplexF64, 4, 4, 3), rand(ComplexF64, 4, 4, 3)
     D = batched_kron(A, B, C)
 
-    tD = zeros(64, 64, 3)
+    tD = zeros(ComplexF64, 64, 64, 3)
     for k in 1:3
         tD[:, :, k] = kron(A[:, :, k], B[:, :, k], C[:, :, k])
     end
 
     @test tD ≈ D
+
+    B2 = reshape(transpose(reshape(permutedims(B, (3,1,2)), 3,16)), 4,4,3)
+    @test B2 isa Base.ReshapedArray
+    @test Array(B2) ≈ B
+    D2 = batched_kron(A, B2, C)
+    @test tD ≈ D2
 end
 
 

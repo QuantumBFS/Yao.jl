@@ -124,6 +124,10 @@ function batched_kron!(C::Array{T, 3}, A::Array{T1, 3}, B::Array{T2, 3}) where {
     return C
 end
 
+function batched_kron!(C::Array{T, 3}, A::AbstractArray{T1, 3}, B::AbstractArray{T2, 3}) where {T, T1, T2}
+    batched_kron!(C, convert(Array{T,3}, A), convert(Array{T,3}, B))
+end
+
 # NOTE: JuliaLang/julia/pull/31069 includes this function
 function kron!(C::AbstractMatrix{T}, A::AbstractMatrix{T1}, B::AbstractMatrix{T2}) where {T,T1,T2}
     @assert !Base.has_offset_axes(A, B)
