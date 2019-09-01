@@ -61,31 +61,3 @@ function Base.:*(op::AbstractMatrix, r::ArrayRegOrAdjointArrayReg)
     Base.depwarn("`matrix * register` is deprecated", :*)
     return op * state(r)
 end
-
-###### A emergent patch ############
-@static if VERSION == v"1.2"
-    function YaoBase.instruct!(
-        state::AbstractVecOrMat{T},
-        operator::AbstractMatrix{T},
-        locs::NTuple{M, Int},
-        control_locs::NTuple{C, Int} = (),
-        control_bits::NTuple{C, Int} = ()) where {T<:Number, M, C}
-
-        U = YaoArrayRegister.sort_unitary(operator, locs)
-        locs_raw, ic = YaoArrayRegister._prepare_instruct(state, U, locs, control_locs, control_bits)
-
-        return YaoArrayRegister._instruct!(state, autostatic(U), locs_raw, ic)
-    end
-
-    YaoBase.instruct!(state::AbstractVecOrMat{T}, g::AbstractMatrix{T}, locs::Tuple{Int}) where T<:Number =
-        instruct!(state, g, locs...)
-
-    function YaoBase.instruct!(
-        state::AbstractVecOrMat{T},
-        operator::AbstractMatrix{T},
-        locs::Tuple{},
-        control_locs::NTuple{C, Int}=(),
-        control_bits::NTuple{C, Int}=()) where {T<:Number, M, C}
-        return state
-    end
-end
