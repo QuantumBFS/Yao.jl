@@ -1,6 +1,5 @@
 name = "YaoSym"
 uuid = "3b27209a-d3d6-11e9-3c0f-41eb92b2cb9d"
-authors = ["Roger-luo"]
 version = "0.1.0"
 
 [deps]
