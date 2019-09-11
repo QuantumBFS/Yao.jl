@@ -13,5 +13,6 @@ include("register.jl")
 include("instruct.jl")
 include("blocks.jl")
 # include("dirac_str.jl")
+include("symengine_patch.jl")
 
 end # module
