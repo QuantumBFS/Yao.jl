@@ -9,6 +9,8 @@ YaoBlocks.RotationGate(block::GT, theta::T) where {N, T <: SymReal, GT<:Abstract
 YaoBlocks.phase(θ::SymReal) = PhaseGate(θ)
 YaoBlocks.shift(θ::SymReal) = ShiftGate(θ)
 
+YaoBlocks.mat(::Type{Basic}, ::HGate) = 1/sqrt(Basic(2)) * Basic[1 1;1 -1]
+
 YaoBlocks.mat(gate::ShiftGate{<:SymReal}) =
     Diagonal([1.0, exp(im * gate.theta)])
 YaoBlocks.mat(gate::PhaseGate{<:SymReal}) =

@@ -42,6 +42,10 @@ macro bra_str(s)
     bra_m(s)
 end
 
+function SymEngine.expand(x::SymReg{B}) where B
+    ArrayReg{B}(expand.(x.state))
+end
+
 function Base.show(io::IO, r::SymReg{1})
     rows = rowvals(r.state)
     nnz = nonzeros(r.state)

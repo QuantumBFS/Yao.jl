@@ -1,4 +1,4 @@
-using YaoSym
+using YaoSym, Yao, SymEngine
 using Test
 
 @testset "YaoSym.jl" begin

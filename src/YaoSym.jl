@@ -10,6 +10,7 @@ module YaoSym
 
 # include("numbers.jl")
 include("register.jl")
+include("instruct.jl")
 include("blocks.jl")
 # include("dirac_str.jl")
 
