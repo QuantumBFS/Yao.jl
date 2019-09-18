@@ -1,4 +1,3 @@
-using MacroTools: @forward
 import Yao: tracedist
 
 export QuGAN, psi, toy_qugan, QuGANGo!
@@ -9,7 +8,7 @@ Quantum GAN.
 Reference:
     Benedetti, M., Grant, E., Wossnig, L., & Severini, S. (2018). Adversarial quantum circuit learning for pure state approximation, 1–14.
 """
-struct QuGAN{N} <: QCOptProblem
+struct QuGAN{N}
     target::ArrayReg
     generator::AbstractBlock{N}
     discriminator::AbstractBlock
@@ -60,8 +59,8 @@ Construct a toy qugan.
 """
 function toy_qugan(target::ArrayReg, depth_gen::Int, depth_disc::Int)
     n = nqubits(target)
-    generator = dispatch!(random_diff_circuit(n, depth_gen, pair_ring(n)), :random) |> autodiff(:QC)
-    discriminator = dispatch!(random_diff_circuit(n+1, depth_disc, pair_ring(n+1)), :random) |> autodiff(:QC)
+    generator = dispatch!(variational_circuit(n, depth_gen, pair_ring(n)), :random) |> autodiff(:QC)
+    discriminator = dispatch!(variational_circuit(n+1, depth_disc, pair_ring(n+1)), :random) |> autodiff(:QC)
     return QuGAN(target, generator, discriminator)
 end
 
@@ -73,7 +72,7 @@ Iterative training of quantum generative optimization problem,
 QT is the type of quantum optimization problem,
 OT is the optimizer/learning_rate parameter type.
 """
-struct QuGANGo!{QT<:QuGAN, OT} <: QCOptGo!{QT}
+struct QuGANGo!{QT<:QuGAN, OT}
     qop::QT
     goptim::OT
     doptim::OT
@@ -93,13 +92,35 @@ function Base.iterate(qgg::QuGANGo!{<:Any, <:Real}, state=1)
     Dict("step"=>state,"gradient"=>grad), state+1
 end
 
-function Base.iterate(qgg::QuGANGo!{<:Any, <:Adam}, state=(1, parameters(qgg.qop.generator), parameters(qgg.qop.discriminator)))
+function Base.iterate(qgg::QuGANGo!{<:Any, <:QuAlgorithmZoo.Adam}, state=(1, parameters(qgg.qop.generator), parameters(qgg.qop.discriminator)))
     state[1] > qgg.niter && return nothing
 
     qg = qgg.qop
     ng = length(qg.gdiffs)
     grad = gradient(qg)
-    dispatch!(qg.generator, update!(state[2], grad[1:ng], qgg.goptim))
-    dispatch!(qg.discriminator, update!(state[3], -grad[ng+1:end], qgg.doptim))
+    dispatch!(qg.generator, QuAlgorithmZoo.update!(state[2], grad[1:ng], qgg.goptim))
+    dispatch!(qg.discriminator, QuAlgorithmZoo.update!(state[3], -grad[ng+1:end], qgg.doptim))
     Dict("step"=>state[1], "gradient"=>grad), (state[1]+1, state[2], state[3])
+end
+
+function run_test(nbit::Int, depth_gen::Int, depth_disc::Int; g_lr=0.1, d_lr=0.2, niter=1000)
+    qg = toy_qugan(rand_state(nbit), depth_gen, depth_disc)
+    for info in QuGANGo!(qg, g_lr, d_lr, niter) end
+    qg
+end
+
+num_gradient(qop::QuGAN) = numdiff.(()->loss(qop), qop |> diff_blocks)
+
+# to fix
+@testset "quantum circuit gan - opdiff" begin
+    Random.seed!(2)
+    N = 3
+    target = rand_state(N)
+    qcg = toy_qugan(target, 2, 2)
+    grad = gradient(qcg)
+    @test isapprox(grad, num_gradient(qcg), atol=1e-4)
+    qg = run_test(3, 4, 4, g_lr=0.2, d_lr=0.5, niter=300)
+    @test qg |> loss < 0.1
+    qg = run_test(3, 4, 4, g_lr=QuAlgorithmZoo.Adam(lr=0.005), d_lr=QuAlgorithmZoo.Adam(lr=0.5), niter=1000)
+    @test qg |> loss < 0.1
 end

@@ -22,7 +22,7 @@ end
     a, -b, b, a
 end
 
-function apply!(reg::ArrayReg, hr::HHLCRot{N, NC, T}) where {N, NC, T}
+function Yao.apply!(reg::ArrayReg, hr::HHLCRot{N, NC, T}) where {N, NC, T}
     mask = bmask(hr.ibit)
     step = 1<<(hr.ibit-1)
     step_2 = step*2
@@ -32,7 +32,7 @@ function apply!(reg::ArrayReg, hr::HHLCRot{N, NC, T}) where {N, NC, T}
             λ = bfloat(readbit(i-1, hr.cbits...), nbits=nbit-1)
             if λ >= hr.C_value
                 u = hhlrotmat(λ, hr.C_value)
-                u1rows!(state(reg), i, i+step, u...)
+                YaoArrayRegister.u1rows!(state(reg), i, i+step, u...)
             end
         end
     end

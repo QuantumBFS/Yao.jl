@@ -1,7 +1,10 @@
 using Yao
 using BitBasis
-using QuAlgorithmZoo
+using YaoArrayRegister
 using Test, LinearAlgebra
+using QuAlgorithmZoo: PEBlock
+
+include("HHLlib.jl")
 
 function crot(n_reg::Int, C_value::Real)
     n_rot = n_reg + 1

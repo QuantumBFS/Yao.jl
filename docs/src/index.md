@@ -9,9 +9,8 @@ A curated implementation of quantum algorithms with [Yao.jl](https://github.com/
 ## Tutorial
 ```@contents
 Pages = [
-    "tutorial/Grover.md",
-    "tutorial/QCBM.md",
-    "tutorial/QuGAN.md",
+    "tutorial/VQE.md",
+    "tutorial/Shor.md",
 ]
 Depth = 1
 ```

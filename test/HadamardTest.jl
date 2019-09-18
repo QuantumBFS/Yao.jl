@@ -14,15 +14,15 @@ single_swap_test(reg::AbstractRegister, ϕ::Real) = hadamard_test(SWAP, reg, ϕ)
     rho2 = reg2 |> ρ
     reg3 = rand_state(3) |> focus!(1,2)
     rho3 = reg3 |> ρ
-    desired = tr(mat(rho1)*mat(rho2))
+    desired = tr(Matrix(rho1)*Matrix(rho2))
     c = swap_test_circuit(2, 2, 0)
     res = expect(put(5, 1=>Z), join(join(reg2, reg1), zero_state(1)) |> c) |> tr
     @test desired ≈ res
-    desired = tr(mat(rho1)*mat(rho2)*mat(rho3)) |> real
+    desired = tr(Matrix(rho1)*Matrix(rho2)*Matrix(rho3)) |> real
     c = swap_test_circuit(2, 3, 0)
     res = expect(put(7, 1=>Z), reduce(⊗, [reg3, reg2, reg1, zero_state(1)]) |> c) |> tr |> real
     @test desired ≈ res
-    desired = tr(mat(rho1)*mat(rho2)*mat(rho3)) |> imag
+    desired = tr(Matrix(rho1)*Matrix(rho2)*Matrix(rho3)) |> imag
     c = swap_test_circuit(2, 3, -π/2)
     res = expect(put(7, 1=>Z), reduce(⊗, [reg3, reg2, reg1, zero_state(1)]) |> c) |> tr |> real
     @test desired ≈ res

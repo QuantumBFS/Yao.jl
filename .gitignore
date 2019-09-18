@@ -2,6 +2,7 @@
 *.jl.*.cov
 *.jl.mem
 
+build/
 docs/build/
 docs/site/
 docs/src/tutorial/

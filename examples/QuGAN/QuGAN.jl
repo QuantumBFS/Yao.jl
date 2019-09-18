@@ -1,6 +1,10 @@
 # # Quantum GAN
-using Yao
-using QuAlgorithmZoo
+using Yao, YaoExtensions
+using Yao.ConstGate: P0
+import QuAlgorithmZoo
+using Test, Random
+
+include("QuGANlib.jl")
 
 # ## DATA: Target Wave Function
 # here we learn a 3 qubit state
@@ -11,11 +15,11 @@ target_state = rand_state(nbit)
 # using a 4-layer random differential circuit for both generator and discriminator
 # we build the qcgan setup.
 depth_gen = 4
-generator = dispatch!(random_diff_circuit(nbit, depth_gen, pair_ring(nbit)), :random) |> autodiff(:QC);
+generator = dispatch!(variational_circuit(nbit, depth_gen, pair_ring(nbit)), :random) |> autodiff(:QC);
 
 #------------------------------
 depth_disc = 4
-discriminator = dispatch!(random_diff_circuit(nbit+1, depth_disc, pair_ring(nbit+1)), :random) |> autodiff(:QC)
+discriminator = dispatch!(variational_circuit(nbit+1, depth_disc, pair_ring(nbit+1)), :random) |> autodiff(:QC)
 qg = QuGAN(target_state, generator, discriminator);
 
 # ## TRAINING: Gradient Descent

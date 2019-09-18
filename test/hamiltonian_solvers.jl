@@ -1,7 +1,7 @@
 using Yao
 using LinearAlgebra
 using Test
-using QuAlgorithmZoo
+using QuAlgorithmZoo, YaoExtensions
 using YaoBlocks: ConstGate
 
 @testset "solving hamiltonian" begin
@@ -24,7 +24,7 @@ using YaoBlocks: ConstGate
     N = 4
     h = heisenberg(N)
     E = eigen(h |> mat |> Matrix).values[1]
-    c = random_diff_circuit(N, 5, [i=>mod(i,N)+1 for i=1:N], mode=:Merged) |> autodiff(:QC)
+    c = YaoExtensions.variational_circuit(N, 5, [i=>mod(i,N)+1 for i=1:N], mode=:Merged) |> autodiff(:QC)
     dispatch!(c, :random)
     vqe_solve!(c, h)
     E2 = expect(h, zero_state(N) |> c)

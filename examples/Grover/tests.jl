@@ -1,25 +1,23 @@
-using Test, Random, LinearAlgebra, SparseArrays
-using BitBasis
+include("Grover.jl")
+using Test, BitBasis
 
-using QuAlgorithmZoo
-import QuAlgorithmZoo: _num_grover_step
-using Yao
-
-function GroverSearch(oracle, num_bit::Int; psi::DefaultRegister = uniform_state(num_bit))
-    it = groveriter(psi, oracle)
-    for l_psi in it psi = l_psi end
-    return (it.niter, psi)
+"""traditional grover search algorithm."""
+function grover_search(oracle::AbstractBlock{N}, gen::AbstractBlock{N}=repeat(N,H,1:N)) where N
+    reg = zero_state(N) |> gen
+    for i = 1:num_grover_step(oracle, gen)
+        grover_step!(reg, oracle, gen)
+    end
+    return reg
 end
 
-function inference(psi::DefaultRegister, evidense::Vector{Int}, num_iter::Int)
-    oracle = inference_oracle(evidense)(nqubits(psi))
-    it = groveriter(psi, oracle)
-    for l_psi in it psi = l_psi end
-    it.niter, psi
+function grover_circuit(oracle::AbstractBlock{N}, gen::AbstractBlock{N}, niter::Int=num_grover_step(oracle, gen)) where {N}
+    chain(N, chain(oracle, reflect_circuit(gen)) for i = 1:niter)
 end
+
+#################### Tests ##################
 
 @testset "oracle" begin
-    oracle = inference_oracle([2,-1,3])(3)
+    oracle = inference_oracle(3, [2,-1,3])
     # ≈ method for Identity/PermuteMultiply/Sparse
     # add and mimus between sparse matrices.
     # alway use sorted CSC format.
@@ -32,26 +30,25 @@ end
 @testset "Grover Search" begin
     ####### Construct Grover Search Using Reflection Block
     num_bit = 12
-    oracle = inference_oracle(push!(collect(Int, 1:num_bit-1), num_bit))(num_bit)
+    oracle = inference_oracle(num_bit, push!(collect(Int, 1:num_bit-1), num_bit))
 
-    niter, psi = GroverSearch(oracle, 12)
+    psi = grover_search(oracle)
     target_state = zeros(1<<num_bit); target_state[end] = 1
     @test isapprox(abs(statevec(psi)'*target_state), 1, atol=1e-3)
 end
 
 @testset "groverblock" begin
-    psi = uniform_state(5)
+    gen = repeat(5, H, 1:5)
     or = inference_oracle(5, [-1,2,5,4,3])
-    func_or = or
-    gb = groverblock(or, psi)
-    gb2 = groverblock(func_or, psi)
-    @test apply!(copy(psi), gb) == (for l_psi in groveriter(copy(psi), func_or) psi = l_psi end; psi)
-    @test apply!(copy(psi), gb) == apply!(copy(psi), gb2)
+    gb = grover_circuit(or, gen)
+    @test apply!(zero_state(5) |> gen, gb) == grover_search(or)
 end
 
 @testset "test inference" begin
+    Random.seed!(2)
     num_bit = 12
-    psi0 = rand_state(num_bit)
+    gen = dispatch!(variational_circuit(num_bit), :random)
+    psi0 = zero_state(num_bit) |> gen
     #psi0 = uniform_state(num_bit)
     evidense = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     #evidense = collect(1:num_bit)
@@ -65,7 +62,6 @@ end
     v_desired[:] ./= sqrt(p)
 
     # search the subspace
-    num_iter = _num_grover_step(p)
-    niter, psi = inference(psi0, evidense, num_iter)
+    psi = grover_search(inference_oracle(num_bit, evidense), gen)
     @test isapprox((psi.state[subinds .+ 1]'*v_desired) |> abs2, 1, atol=3e-2)
 end

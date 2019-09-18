@@ -54,8 +54,8 @@ kwargs includes
     * `optimizer`, default is `Adam(lr=0.1)`.
 """
 function QuantumSVD(M::AbstractMatrix; Nc::Int=log2i(min(size(M)...)),
-        circuit_a=random_diff_circuit(log2i(size(M, 1)), 5, pair_ring(log2i(size(M, 1)))),
-        circuit_b=random_diff_circuit(log2i(size(M, 2)), 5, pair_ring(log2i(size(M, 2)))),
+        circuit_a=variational_circuit(log2i(size(M, 1)), 5, pair_ring(log2i(size(M, 1)))),
+        circuit_b=variational_circuit(log2i(size(M, 2)), 5, pair_ring(log2i(size(M, 2)))),
         maxiter=200, optimizer=Adam(lr=0.1))
 
     dispatch!(circuit_a, :random)

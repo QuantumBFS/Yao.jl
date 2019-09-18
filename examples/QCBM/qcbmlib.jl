@@ -4,7 +4,7 @@ export QCBM, QCBMGo!, psi, mmdgrad
 include("Kernels.jl")
 
 ##### QCBM methods #####
-struct QCBM{BT<:AbstractBlock, KT<:AbstractKernel} <: QCOptProblem
+struct QCBM{BT<:AbstractBlock, KT<:AbstractKernel}
     circuit::BT
     kernel::KT
     ptrain::Vector{Float64}
@@ -53,7 +53,7 @@ end
 """
 quantum circuit born machine trainer.
 """
-struct QCBMGo!{QT<:QCBM, OT} <: QCOptGo!{QT}
+struct QCBMGo!{QT<:QCBM, OT}
     qcbm::QT
     optimizer::OT
     niter::Int
@@ -67,7 +67,36 @@ function Base.iterate(qo::QCBMGo!, state=(1, parameters(qo.qcbm.circuit)))
     # initialize the parameters
     p0 = qo.qcbm |> probs
     grad = gradient(qo.qcbm, p0)
-    update!(state[2], grad, qo.optimizer)
+    QuAlgorithmZoo.update!(state[2], grad, qo.optimizer)
     dispatch!(qo.qcbm.circuit, state[2])
     Dict("probs"=>p0, "step"=>state[1], "gradient"=>grad), (state[1]+1, state[2])
+end
+
+"""
+    gaussian_pdf(x, μ::Real, σ::Real)
+
+gaussian probability density function.
+"""
+function gaussian_pdf(x, μ::Real, σ::Real)
+    pl = @. 1 / sqrt(2pi * σ^2) * exp(-(x - μ)^2 / (2 * σ^2))
+    pl / sum(pl)
+end
+
+@testset "qcbm" begin
+    # problem setup
+    n = 6
+    depth = 6
+
+    N = 1<<n
+    kernel = rbf_kernel(0:N-1, 0.25)
+    pg = gaussian_pdf(1:N, N/2-0.5, N/4)
+    circuit = variational_circuit(n, depth, pair_ring(n)) |> autodiff(:QC)
+    dispatch!(circuit, :random)
+    qcbm = QCBM(circuit, kernel, pg)
+
+    # training
+    niter = 100
+    optim = QuAlgorithmZoo.Adam(lr=0.1)
+    for info in QCBMGo!(qcbm, optim, niter) end
+    @test qcbm |> loss < 1e-4
 end
