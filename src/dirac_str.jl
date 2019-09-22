@@ -69,13 +69,17 @@ function Base.show(io::IO, x::Dot{<:KetStr, <:BraStr})
 end
 
 # operations
-
+Base.:(^)(x::KetStr{K}, n) where n = 
 Base.adjoint(x::KetStr{N}) where N = BraStr{N}(x.data)
 Base.adjoint(x::BraStr{N}) where N = KetStr{N}(x.data)
 
 Base.:(+)(xs::K...) where {K <: DiracStr} = SymExpr(+, collect(xs))
 Base.:(*)(x::Number, y::DiracStr) = Scale(x, y)
 Base.:(*)(x::DiracStr, y::Number) = y * x
+
+function Base.:(*)(x::KetStr{N}, y::KetStr{M}) where {N, M}
+        
+end
 
 function Base.:(*)(x::BraStr{N}, y::KetStr{N}) where N
     x.data == y.data ? 1 : 0
