@@ -10,7 +10,7 @@ using YaoSym: SymExpr
 end
 
 @sym x in Real, y in Real
-2x
+x * (2x + y)
 
 2 * x * y + 3x
 ex = x * (2y + x)

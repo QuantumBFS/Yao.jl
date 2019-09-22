@@ -47,6 +47,7 @@ function SymEngine.expand(x::SymReg{B}) where B
 end
 
 function Base.show(io::IO, r::SymReg{1})
+    dropzeros!(r.state)
     rows = rowvals(r.state)
     nnz = nonzeros(r.state)
     if size(r.state, 2) == 1 # all actived
@@ -67,6 +68,7 @@ function Base.show(io::IO, r::SymReg{1})
 end
 
 function Base.show(io::IO, r::AdjointSymReg{1})
+    dropzeros!(parent(state(r)))
     rows = rowvals(parent(state(r)))
     nnz = nonzeros(parent(state(r)))
     nzr = nzrange(parent(state(r)), 1)
