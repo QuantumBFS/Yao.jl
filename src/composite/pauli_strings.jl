@@ -4,8 +4,10 @@ export PauliString
 # TODO: expand to Clifford?
 struct PauliString{N, BT <: ConstantGate{1}, VT <: SizedVector{N, BT}} <: CompositeBlock{N}
     blocks::VT
-    PauliString(blocks::SizedVector{N, BT}) where {N, BT <: ConstantGate{1}} =
+    function PauliString(blocks::SizedVector{N, BT}) where {N, BT <: ConstantGate{1}}
+        @warn "`PauliString` will be moved to `YaoExtensions.jl` in the next release."
         new{N, BT, typeof(blocks)}(blocks)
+    end
 end
 
 # NOTE: PauliString has a fixed size `N`, thus by default, it should use
@@ -20,6 +22,8 @@ Create a `PauliString` from some Pauli gates.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> PauliString(X, Y, Z)
+┌ Warning: `PauliString` will be moved to `YaoExtensions.jl` in the next release.
+└ @ YaoBlocks ~/.julia/dev/YaoBlocks/src/composite/pauli_strings.jl:8
 nqubits: 3
 PauliString
 ├─ X gate
@@ -38,6 +42,8 @@ Create a `PauliString` from a list of Pauli gates.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> PauliString([X, Y, Z])
+┌ Warning: `PauliString` will be moved to `YaoExtensions.jl` in the next release.
+└ @ YaoBlocks ~/.julia/dev/YaoBlocks/src/composite/pauli_strings.jl:8
 nqubits: 3
 PauliString
 ├─ X gate

@@ -1,6 +1,6 @@
 export @const_gate, ConstantGate, ConstGate,
-    X, Y, Z, H, I2, SWAP,
-    XGate, YGate, ZGate, HGate, I2Gate, SWAPGate
+    X, Y, Z, H, I2, SWAP, T,
+    XGate, YGate, ZGate, HGate, I2Gate, SWAPGate, TGate
 
 """
     ConstGate
@@ -36,6 +36,7 @@ end
 
 # import some frequently-used objects
 import .ConstGate:
-    XGate, YGate, ZGate, HGate, I2Gate, SWAPGate, X, Y, Z, H, I2, SWAP,
+    XGate, YGate, ZGate, HGate, I2Gate, SWAPGate, TGate,
+    X, Y, Z, H, I2, SWAP, T,
     @const_gate, ConstantGate, PauliGate
 occupied_locs(::I2Gate) = ()

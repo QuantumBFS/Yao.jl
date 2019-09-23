@@ -42,6 +42,7 @@ Daggered(x::BT) where {N, BT<:AbstractBlock{N}} =
 
 PropertyTrait(::Daggered) = PreserveAll()
 mat(::Type{T}, blk::Daggered) where T = adjoint(mat(T, content(blk)))
+chsubblocks(blk::Daggered, target::AbstractBlock) = Daggered(target)
 
 Base.adjoint(x::AbstractBlock) = ishermitian(x) ? x : Daggered(x)
 Base.adjoint(x::Daggered) = content(x)

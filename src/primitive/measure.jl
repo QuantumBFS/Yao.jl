@@ -1,5 +1,5 @@
 using YaoBase, YaoArrayRegister, Random
-export Measure, AllLocs, ComputationalBasis
+export Measure, AllLocs, ComputationalBasis, chmeasureoperator
 
 """
     Measure{N, K, OT, RNG} <: PrimitiveBlock{N}
@@ -21,6 +21,23 @@ mutable struct Measure{N, K, OT, RNG} <: PrimitiveBlock{N}
         end
         new{N, K, OT, RNG}(rng, operator, locations, collapseto, remove)
     end
+end
+
+"""
+    chmeasureoperator(m::Measure, op::AbstractBlock)
+
+change the measuring `operator`. It will also discard existing measuring results.
+"""
+function chmeasureoperator(m::Measure{N}, op::AbstractBlock) where N
+    Measure(N; rng=m.rng, operator=op, locs=m.locations, collapseto=m.collapseto, remove=m.remove)
+end
+
+function Base.:(==)(m1::Measure, m2::Measure)
+    res = m1.rng == m2.rng && m1.operator == m2.operator &&
+    m1.locations == m2.locations && m1.collapseto == m2.collapseto &&
+    m1.remove == m2.remove
+    res = res && isdefined(m1, :results) == isdefined(m2, :results)
+    res && (!isdefined(m1, :results) || m1.results == m2.results)
 end
 
 @interface nqubits_measured(::Measure{N, K}) where {N, K} = K

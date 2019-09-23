@@ -1,5 +1,5 @@
 using Test, YaoBlocks, YaoArrayRegister
-using YaoBase
+using YaoBase, BitBasis
 
 struct MockedTag{BT, N} <: TagBlock{BT, N}
     content::BT
@@ -60,4 +60,11 @@ end
     @test_throws Exception !isunitary(2*xg)
     @test !iscommute(2*xg, 2*yg)
     @test iscommute(2*xg, 2*xg)
+end
+
+@testset "daggered" begin
+    dg = Daggered(ConstGate.T)
+    @test dg isa Daggered
+    @test apply!(product_state(bit"1"), dg) ≈ apply!(product_state(bit"1"), ConstGate.Tdag)
+    @test chsubblocks(dg, X) == Daggered(X)
 end

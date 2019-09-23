@@ -4,6 +4,10 @@ export MathGate, mathgate
 
 struct MathGate{N, F <: Union{LegibleLambda, Function}} <: PrimitiveBlock{N}
     f::F
+    function MathGate{N, F}(f) where {N,F}
+        @warn "`MathGate` will be moved to `YaoExtensions.jl` in the next release."
+        new{N,F}(f)
+    end
 end
 
 function MathGate{N}(f::Union{LegibleLambda, Function}) where N
@@ -35,6 +39,8 @@ julia> function toffli(b::BitStr)
 toffli (generic function with 1 method)
 
 julia> g = mathgate(3, toffli)
+┌ Warning: `MathGate` will be moved to `YaoExtensions.jl` in the next release.
+└ @ YaoBlocks ~/.julia/dev/YaoBlocks/src/primitive/math_gate.jl:8
 mathgate(toffli; nbits=3)
 
 julia> apply!(r, g) == ArrayReg(bit"111")

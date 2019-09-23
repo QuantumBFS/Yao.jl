@@ -1,4 +1,4 @@
-using Test, YaoBlocks, YaoArrayRegister, YaoBlocks.Optimise
+using Test, YaoBlocks, YaoArrayRegister
 import YaoBlocks.ConstGate: Toffoli
 using YaoBase: QubitMismatchError
 
@@ -62,35 +62,3 @@ end
     @test copy(r) |> X + Y + Z |> state ≈ mat(X + Y + Z) * state(r)
 end
 
-@testset "merge pauli *" begin
-    test_merge(a, b) = mat(merge_pauli(a, b)) ≈ (mat(a) * mat(b))
-
-    for a in [X, Y, Z], b in [X, Y, Z]
-        @test test_merge(a, b)
-    end
-
-    @test mat(simplify(X * Y)) ≈ mat(im * Z)
-    @test mat(simplify(im * X * im * Y)) ≈ mat(-im * Z)
-    @test mat(simplify(I2 * im * I2)) ≈ mat(im * I2)
-
-    @test mat(simplify(X * Y * Y)) ≈ mat(X) ≈ mat(X) * mat(Y) * mat(Y)
-    @test mat(simplify(X * Y * Z)) ≈ mat(im * I2) ≈ mat(X) * mat(Y) * mat(Z)
-end
-
-@testset "eliminate nested" begin
-    @test simplify(*(X, *(H))) == *(X, H)
-    @test simplify(*(X)) == X
-
-    @test simplify(Add(X, Add(X, X))) == 3X
-end
-
-@testset "reduce matrices" begin
-    @test mat(*(X, Y)) ≈ mat(X) * mat(Y)
-    @test mat(*(X, Y)) ≈ mat(simplify(*(X, Y)))
-    @test mat(Add(X, Y)) ≈ mat(X) + mat(Y)
-end
-
-@testset "composite strcuture" begin
-    g = chain(2, kron(1=>chain(X, Y), 2=>X), control(1, 2=>X))
-    @test simplify(g) == prod([control(2, 1, 2=>X), kron(2, 1=>(-im * Z), 2=>X)])
-end

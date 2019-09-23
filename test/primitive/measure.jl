@@ -96,4 +96,7 @@ end
     @test measure!(X, reg) |> mean ≈ -1
     reg = repeat(ArrayReg([1.0,0+0im]), 1000)
     @test abs(measure!(X, reg) |> mean) < 0.1
+
+    m = Measure(5)
+    @test chmeasureoperator(m, X) == Measure(5, operator=X)
 end

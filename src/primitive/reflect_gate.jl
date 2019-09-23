@@ -15,6 +15,10 @@ Reflection operator to target state `psi`.
 """
 struct ReflectGate{N, T, Tr <: ArrayReg{1, T}} <: PrimitiveBlock{N}
     psi::Tr
+    function ReflectGate{N, T, Tr}(psi) where {N,T,Tr}
+        @warn "`ReflectGate` will be moved to `YaoExtensions.jl` in the next release."
+        new{N, T, Tr}(psi)
+    end
 end
 
 """
@@ -47,6 +51,8 @@ Create a [`ReflectGate`](@ref) with an quantum state vector `v`.
 
 ```jldoctest; setup=:(using YaoBlocks; using YaoArrayRegister)
 julia> reflect(rand_state(3))
+┌ Warning: `ReflectGate` will be moved to `YaoExtensions.jl` in the next release.
+└ @ YaoBlocks ~/.julia/dev/YaoBlocks/src/primitive/reflect_gate.jl:19
 reflect(ArrayReg{1, Complex{Float64}, Array...})
 ```
 """
