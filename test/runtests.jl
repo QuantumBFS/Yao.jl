@@ -42,6 +42,10 @@ end
     include("extending_reg.jl")
 end
 
+@testset "autodiff" begin
+    include("autodiff/autodiff.jl")
+end
+
 # @testset "test demos" begin
 #     include("algo/qft.jl")
 #     include("algo/qcbm.jl")

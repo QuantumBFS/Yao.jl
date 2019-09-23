@@ -175,7 +175,15 @@ Returns all the parameters contained in block tree with given root `block`.
 Append all the parameters contained in block tree with given root `block` to
 `out`.
 """
-@interface parameters!(out, x::AbstractBlock) = prewalk(blk->append!(out, getiparams(blk)), x)
+@interface function parameters!(out, x::AbstractBlock)
+    append!(out, getiparams(x))
+    for blk in subblocks(x)
+        parameters!(out, blk)
+    end
+    return out
+end
+
+# = prewalk(blk->append!(out, getiparams(blk)), x)
 
 """
     nparameters(block) -> Int
@@ -260,7 +268,7 @@ Dispatch parameters in collection to block tree `x`.
 @interface function dispatch!(f::Union{Function, Nothing}, x::AbstractBlock, it)
     dp = Dispatcher(it)
     res = dispatch!(f, x, dp)
-    @assert (it isa Symbol || length(it) == dp.loc) "expect $(nparameters(x)) parameters, got $(length(it))"
+    @assert (it isa Symbol || length(it) == dp.loc) "expect $(dp.loc) parameters, got $(length(it))"
     return res
 end
 

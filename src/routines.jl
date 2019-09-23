@@ -103,7 +103,8 @@ function u1mat(nbit::Int, U1::SDMatrix, ibit::Int)
     a, c, b, d = U1
     step = 1<<(ibit-1)
     step_2 = 1<<ibit
-    mat = SparseMatrixCSC(N, N, collect(1:2:2*N+1), Vector{Int}(undef, 2*N), Vector{eltype(U1)}(undef, 2*N))
+    mat = _initialize_output(nbit, 0, U1)
+    mat.colptr .= 1:2:2*N+1
     for j = 0:step_2:N-step
         @inbounds @simd for i = j+1:j+step
             u1ij!(mat, i, i+step, a, b, c, d)
@@ -138,16 +139,25 @@ function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::Adj
     cunmat(nbit, cbits, cvals, copy(U0), locs)
 end
 
-function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SDMatrix, locs::NTuple{M, Int}) where {C, M}
-    large_mat_check(nbit)
-    U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
+function _initialize_output(nbit::Int, nctrl::Int, U::Union{SDMatrix{T}, SDSparseMatrixCSC{T}}) where T
     N = 1<<nbit
-    MM = size(U0, 1)
-    NNZ = 1<<nbit + length(ic) * (length(U0) - size(U0,2))
+    NNZ = 1<<nbit + (1<<(nbit-nctrl-log2dim1(U))) * (length(U) - size(U,2))
 
     colptr = Vector{Int}(undef, N+1)
     rowval = Vector{Int}(undef, NNZ)
-    colptr[1] = 1
+    nzval = Vector{T}(undef, NNZ)
+
+    SparseMatrixCSC(N, N, colptr, rowval, nzval)
+end
+
+function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SDMatrix, locs::NTuple{M, Int}) where {C, M}
+    large_mat_check(nbit)
+    MM = size(U0, 1)
+    U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
+    mat = _initialize_output(nbit, C, U0)
+    colptr, nzval, rowval = mat.colptr, mat.nzval, mat.rowval
+    nzval .= 1
+    @inbounds colptr[1] = 1
 
     ctest = controller(cbits, cvals)
     @inbounds @simd for b in basis(nbit)
@@ -158,7 +168,6 @@ function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SDM
             rowval[colptr[b+1]] = b+1
         end
     end
-    mat = SparseMatrixCSC(N, N, colptr, rowval, ones(eltype(U), NNZ))
 
     controldo(ic) do i
         unij!(mat, locs_raw+i, U)
@@ -166,24 +175,22 @@ function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SDM
     mat
 end
 
-
-
 ############################### SparseMatrix ##############################
 function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SparseMatrixCSC{Tv}, locs::NTuple{M, Int})::SparseMatrixCSC{Tv} where {C, M, Tv}
     large_mat_check(nbit)
-    U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
     N = 1<<nbit
-    NNZ::Int = 1<<nbit + length(ic) * (nnz(U0) - size(U0,2))
+    U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
+
+    mat = _initialize_output(nbit, C, U0)
+    colptr, nzval, rowval = mat.colptr, mat.nzval, mat.rowval
+    nzval .= 1
+    @inbounds colptr[1] = 1
+
     ns = diff(U.colptr) |> autostatic
-
-    rowval = Vector{Int}(undef, NNZ)
-    colptr = Vector{Int}(undef, N+1)
-
     Ns = ones(Int, N)
     controldo(ic) do i
         @inbounds Ns[locs_raw + i] = ns
     end
-    colptr[1] = 1
     @inbounds @simd for j = 1:N
         colptr[j+1] = colptr[j] + Ns[j]
         if Ns[j] == 1
@@ -191,7 +198,6 @@ function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::Spa
         end
     end
 
-    mat = SparseMatrixCSC(N, N, colptr, rowval, ones(Tv, NNZ))
     controldo(ic) do i
         unij!(mat, locs_raw+i, U)
     end
@@ -214,11 +220,15 @@ end
     return pm
 end
 
+function _initialize_output(nbit::Int, nctrl::Int, U::SDPermMatrix{T}) where T
+    N = 1<<nbit
+    PermMatrix(collect(1:N), ones(T, N))
+end
+
 function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SDPermMatrix, locs::NTuple{M, Int}) where {C, M}
     large_mat_check(nbit)
     U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
-    N = 1<<nbit
-    pm = PermMatrix(collect(1:N), ones(eltype(U), N))
+    pm = _initialize_output(nbit, C, U0)
     controldo(ic) do i
         unij!(pm, locs_raw+i, U)
     end
@@ -226,10 +236,14 @@ function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SDP
 end
 
 ############################ Diagonal ##########################
+function _initialize_output(nbit::Int, nctrl::Int, U::SDDiagonal{T}) where T
+    Diagonal(ones(T, 1<<nbit))
+end
+
 function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SDDiagonal, locs::NTuple{M, Int}) where {C, M}
     large_mat_check(nbit)
     U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
-    dg = Diagonal(ones(eltype(U0), 1<<nbit))
+    dg = _initialize_output(nbit, C, U0)
     controldo(ic) do i
         unij!(dg, locs_raw+i, U)
     end
