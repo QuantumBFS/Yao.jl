@@ -79,6 +79,10 @@ function expect(op::Scale, reg::AbstractRegister)
     factor(op)*expect(content(op), reg)
 end
 
+function expect(op, plan::Pair{<:AbstractRegister, <:AbstractBlock})
+    expect(op, plan.first |> plan.second)
+end
+
 expect(op::Add, reg::AbstractRegister{1}) = invoke(expect, Tuple{Add, AbstractRegister}, op, reg)
 expect(op::Scale, reg::AbstractRegister{1}) = invoke(expect, Tuple{Scale, AbstractRegister}, op, reg)
 
