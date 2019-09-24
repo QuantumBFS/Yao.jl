@@ -12,6 +12,7 @@ using LinearAlgebra: tr
     @test expect(obs2, ghz) ≈ 0
     @test expect(obs3, ghz) ≈ 1
 
+    @test expect(obs3, zero_state(4)=>kron(H, H, H, H)) ≈ expect(obs3, zero_state(4) |> kron(H, H, H, H))
     @test expect(obs1+obs2+obs3, ghz) ≈ 1
     @test expect(obs1+obs2+obs3, repeat(ghz, 3)) ≈ [1,1,1]
     @test expect(2*obs3, ghz) ≈ 2

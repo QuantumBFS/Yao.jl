@@ -55,12 +55,12 @@ function apply_back!(st, block::TimeEvolution{N}, collector) where N
     adjblock = block'
 
     out, outδ = st
-    in = apply!(out, adjblock)
+    input = apply!(out, adjblock)
     for o in outδ
         !all(x->x≈0.0im, o.state) && apply!(o, adjblock)
     end
-    pushfirst!(collector, -sum(imag(in'*apply!(copy(outδ), block.H))))
-    return (in, outδ)
+    pushfirst!(collector, -sum(imag(input' * apply!(copy(outδ), block.H))))
+    return (input, outδ)
 end
 
 function apply_back!(st, block::PutBlock{N}, collector) where N
