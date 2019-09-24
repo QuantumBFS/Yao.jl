@@ -133,7 +133,7 @@ uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 version = "1.1.0"
 
 [[Pkg]]
-deps = ["Dates", "LibGit2", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
+deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[Printf]]
@@ -240,9 +240,11 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 [[YaoArrayRegister]]
 deps = ["BitBasis", "LinearAlgebra", "LuxurySparse", "Random", "StaticArrays", "StatsBase", "TupleTools", "YaoBase"]
-git-tree-sha1 = "881041bde6d58efe299889df8663c96aaf0f6ffa"
+git-tree-sha1 = "91aa1cb1d20e305c71c07993421f0d2cd2040542"
+repo-rev = "symbolic"
+repo-url = "https://github.com/QuantumBFS/YaoArrayRegister.jl.git"
 uuid = "e600142f-9330-5003-8abb-0ebd767abc51"
-version = "0.4.0"
+version = "0.4.1"
 
 [[YaoBase]]
 deps = ["BitBasis", "LegibleLambdas", "LinearAlgebra", "LuxurySparse", "MLStyle", "MacroTools", "Random", "SparseArrays", "Test", "TupleTools"]

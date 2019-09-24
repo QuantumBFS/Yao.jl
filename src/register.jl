@@ -5,6 +5,7 @@ YaoArrayRegister._warn_type(raw::AbstractArray{Basic}) = nothing
 
 const SymReg{B, MT} = ArrayReg{B, Basic, MT}
 const AdjointSymReg{B, MT} = AdjointArrayReg{B, Basic, MT}
+const SymOrAdjointSymReg{B, MT} = Union{SymReg{B, MT}, AdjointSymReg{B, MT}}
 
 function parse_str(s::String)
     v = 0; k = 1
@@ -91,3 +92,6 @@ end
 
 Base.:(*)(x::SymReg{B, MT}, y::SymReg{B, MT}) where {B, MT} = SymReg{B, MT}(kron(state(x), state(y)))
 Base.:(^)(x::SymReg{B, MT}, n::Int) where {B, MT} = SymReg{B, MT}(kron(state(x) for _ in 1:n))
+
+Base.:(*)(x::AdjointSymReg{B, MT}, y::AdjointSymReg{B, MT}) where {B, MT} = adjoint(parent(y) * parent(x))
+Base.:(^)(x::AdjointSymReg{B, MT}, n::Int) where {B, MT} = adjoint(parent(x)^n)
