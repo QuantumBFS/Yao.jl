@@ -89,6 +89,5 @@ function Base.show(io::IO, r::AdjointSymReg{1})
     end
 end
 
-
 Base.:(*)(x::SymReg{B, MT}, y::SymReg{B, MT}) where {B, MT} = SymReg{B, MT}(kron(state(x), state(y)))
 Base.:(^)(x::SymReg{B, MT}, n::Int) where {B, MT} = SymReg{B, MT}(kron(state(x) for _ in 1:n))
