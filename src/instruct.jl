@@ -213,15 +213,15 @@ end
 # Specialized
 import YaoBase: rot_mat
 
-rot_mat(::Type{T}, ::Val{:Rx}, theta::Real) where T =
+rot_mat(::Type{T}, ::Val{:Rx}, theta::Number) where T =
     T[cos(theta/2) -im * sin(theta/2); -im * sin(theta/2) cos(theta/2)]
-rot_mat(::Type{T}, ::Val{:Ry}, theta::Real) where T =
+rot_mat(::Type{T}, ::Val{:Ry}, theta::Number) where T =
     T[cos(theta/2) -sin(theta/2); sin(theta/2) cos(theta/2)]
-rot_mat(::Type{T}, ::Val{:Rz}, theta::Real) where T =
+rot_mat(::Type{T}, ::Val{:Rz}, theta::Number) where T =
     Diagonal(T[exp(-im*theta/2), exp(im*theta/2)])
-rot_mat(::Type{T}, ::Val{:CPHASE}, theta::Real) where T =
+rot_mat(::Type{T}, ::Val{:CPHASE}, theta::Number) where T =
     Diagonal(T[1, 1, 1, exp(im*theta)])
-rot_mat(::Type{T}, ::Val{:PSWAP}, theta::Real) where T =
+rot_mat(::Type{T}, ::Val{:PSWAP}, theta::Number) where T =
     rot_mat(T, Const.SWAP, theta)
 
 for G in [:Rx, :Ry, :Rz, :CPHASE]
@@ -229,7 +229,7 @@ for G in [:Rx, :Ry, :Rz, :CPHASE]
     @eval function YaoBase.instruct!(state::AbstractVecOrMat{T}, g::Val{$(QuoteNode(G))},
                             locs::Union{Int, NTuple{N3,Int}},
                             control_locs::NTuple{N1, Int},
-                            control_bits::NTuple{N2, Int}, theta::Real) where {T, N1, N2, N3}
+                            control_bits::NTuple{N2, Int}, theta::Number) where {T, N1, N2, N3}
         m = rot_mat(T, g, theta)
         instruct!(state, m, locs, control_locs, control_bits)
     end
@@ -237,7 +237,7 @@ end
 
 # forward single gates
 @eval function YaoBase.instruct!(state::AbstractVecOrMat{T}, g::Val,
-                        locs::Union{Int, NTuple{N1, Int}}, theta::Real) where {T, N1}
+                        locs::Union{Int, NTuple{N1, Int}}, theta::Number) where {T, N1}
     instruct!(state, g, locs, (), (), theta)
 end
 
@@ -402,7 +402,7 @@ function YaoBase.instruct!(
         state::AbstractVecOrMat{T},
         ::Val{:PSWAP},
         locs::Tuple{Int, Int},
-        theta::Real) where T
+        theta::Number) where T
     mask1 = bmask(locs[1])
     mask2 = bmask(locs[2])
     mask12 = mask1|mask2
@@ -430,7 +430,7 @@ function YaoBase.instruct!(
         locs::Tuple{Int, Int},
         control_locs::NTuple{C, Int},
         control_bits::NTuple{C, Int},
-        theta::Real) where {T, C}
+        theta::Number) where {T, C}
     mask1 = bmask(locs[1])
     mask2 = bmask(locs[2])
     mask12 = mask1|mask2

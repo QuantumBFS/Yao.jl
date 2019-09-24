@@ -1,4 +1,5 @@
-using Test, YaoArrayRegister, Random, LinearAlgebra, SparseArrays
+using Test
+using YaoArrayRegister, Random, LinearAlgebra, SparseArrays, BitBasis
 
 
 @testset "broadcast register" begin
@@ -8,21 +9,34 @@ using Test, YaoArrayRegister, Random, LinearAlgebra, SparseArrays
     @test [rand_state(3)...] |> length == 1
 end
 
-@testset "Math Operations" begin
+@testset "arithmetics" begin
     nbit = 5
     reg1 = zero_state(5)
     reg2 = ArrayReg(bit"00100")
     @test reg1!=reg2
     @test statevec(reg2) == onehot(ComplexF64, nbit, 4)
     reg3 = reg1 + reg2
+    reg4 = (reg1 + reg2)'
+
     @test statevec(reg3) == onehot(ComplexF64, nbit, 4) + onehot(ComplexF64, nbit, 0)
     @test statevec(reg3 |> normalize!) == (onehot(ComplexF64, nbit, 4) + onehot(ComplexF64, nbit, 0))/sqrt(2)
+    @test statevec(reg4 |> normalize!) == (onehot(ComplexF64, nbit, 4) + onehot(ComplexF64, nbit, 0))'/sqrt(2)
     @test (reg1 + reg2 - reg1) == reg2
+    @test reg1' + reg2' - reg1' == reg2'
+    @test isnormalized(reg4)
+    @test isnormalized(reg3)
 
+    @test statevec(-reg4) == - statevec(reg4)
+    @test statevec(-reg3) == - statevec(reg3)
     reg = rand_state(4)
     @test all(state(reg + (-reg)).==0)
     @test all(state(reg*2 - reg/0.5) .== 0)
 
     reg = rand_state(3)
     @test reg'*reg ≈ 1
+
+    @test state(reg1 * 2) == state(reg1) * 2
+    @test state(reg1' * 2) == state(reg1') * 2
+    @test reg1 * 2 == 2 * reg1
+    @test reg1' * 2 == 2 * reg1'
 end
