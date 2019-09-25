@@ -74,7 +74,16 @@ for op in [:(==), :≈]
     end
 end
 
-Base.:*(bra::AdjointArrayReg{1}, ket::ArrayReg{1}) = dot(state(parent(bra)), state(ket))
+function Base.:*(bra::AdjointArrayReg{1}, ket::ArrayReg{1})
+    if nremain(bra) == nremain(ket) == 0 # all active
+        return dot(state(parent(bra)), state(ket))
+    elseif nremain(bra) == 0 # <s|active> |remain>
+        return ArrayReg{1}(state(bra) * state(ket))
+    else
+        error("partially contract ⟨bra|ket⟩ is not supported, expect ⟨bra| to be fully actived. nactive(bra)/nqubits(bra)=$(nactive(bra))/$(nqubits(bra))")
+    end
+end
+
 Base.:*(bra::AdjointArrayReg{B}, ket::ArrayReg{B}) where B = bra .* ket
 
 # broadcast

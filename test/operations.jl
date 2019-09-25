@@ -40,3 +40,18 @@ end
     @test reg1 * 2 == 2 * reg1
     @test reg1' * 2 == 2 * reg1'
 end
+
+@testset "partial ⟨bra|ket⟩" begin
+    bra = ArrayReg(bit"10")
+    ket = ArrayReg(bit"100") + 2ArrayReg(bit"110") + 3ArrayReg(bit"111")
+
+    focus!(ket, 2:3)
+    t = bra' * ket
+    relax!(t, 1)
+    @test state(t) ≈ [1, 0]
+
+    relax!(ket, 2:3)
+    focus!(ket, 1)
+    focus!(bra, 2)
+    @test_throws ErrorException bra' * ket
+end
