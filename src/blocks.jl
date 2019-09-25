@@ -26,3 +26,8 @@ end
 YaoBlocks.mat(::Type{<:Any}, gate::PhaseGate{<:SymReal}) = mat(gate)
 YaoBlocks.mat(::Type{<:Any}, gate::ShiftGate{<:SymReal}) = mat(gate)
 YaoBlocks.mat(::Type{<:Any}, gate::RotationGate{N, <:SymReal}) = mat(gate)
+
+YaoBlocks.PSwap{N}(locs::Tuple{Int, Int}, θ::SymReal) where N = YaoBlocks.PutBlock{N}(rot(ConstGate.SWAPGate(), θ), locs)
+
+YaoBlocks.pswap(n::Int, i::Int, j::Int, α::SymReal) = PSwap{n}((i,j), α)
+YaoBlocks.pswap(i::Int, j::Int, α::SymReal) = n->pswap(n,i,j,α)

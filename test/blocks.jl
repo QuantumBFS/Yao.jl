@@ -1,4 +1,4 @@
-using YaoSym, Yao, SymEngine
+using YaoSym, YaoBlocks, YaoArrayRegister, SymEngine
 using Test
 
 @testset "mat" begin
@@ -51,10 +51,8 @@ end
     CRot(::Type{T}, n::Int, i::Int) where T = chain(n, i==j ? put(i=>H) : CRk(T, j, i, j-i+1) for j = i:n)
     qft(::Type{T}, n::Int) where T = chain(n, CRot(T, n, i) for i = 1:n)
     res = ket"11" |> qft(Basic, 2)
-    @show res
     l1 = length(string(res.state.nzval[2]))
     res.state.nzval .= simplify_expi.(res.state.nzval)
-    @show res
     @test length(string(res.state.nzval[2])) < l1
     @test res ≈ ArrayReg(bit"11") |> qft(Float64, 2)
 end

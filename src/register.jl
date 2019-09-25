@@ -52,17 +52,36 @@ function Base.show(io::IO, r::SymReg{1})
     rows = rowvals(r.state)
     nnz = nonzeros(r.state)
     if size(r.state, 2) == 1 # all actived
-        for i in nzrange(r.state, 1)
+        nzr = nzrange(r.state, 1)
+        for i in nzr
             k = rows[i]
             v = nnz[i]
-            if isone(v)
-                print(io, "|", string(k-1, base=2, pad=nactive(r)), "⟩")
-            else
-                print(io, v, "|", string(k-1, base=2, pad=nactive(r)), "⟩")
+            if !isone(v)
+                print(io, v)
             end
+            print(io, "|", string(k-1, base=2, pad=nactive(r)), "⟩")
 
-            if i != last(nzrange(r.state, 1))
+            if i != last(nzr)
                 print(io, " + ")
+            end
+        end
+    else
+        m, n = size(r.state)
+        for j in 1:n
+            nzr = nzrange(r.state, j)
+            for i in nzr
+                row = rows[i]
+                val = nnz[i]
+
+                if !isone(val)
+                    print(io, val)
+                end
+                print(io, "|")
+                printstyled(io, string(j-1, base=2, pad=nremain(r)), color=:light_black)
+                print(io, string(row-1, base=2, pad=nactive(r)), "⟩")
+                if i != last(nzr) || j != n
+                    print(io, " + ")
+                end    
             end
         end
     end
@@ -77,14 +96,36 @@ function Base.show(io::IO, r::AdjointSymReg{1})
         for i in nzr
             k = rows[i]
             v = adjoint(nnz[i])
-            if isone(v)
-                print(io, "⟨", string(k-1, base=2, pad=nactive(r)), "|")
-            else
-                print(io, v, "⟨", string(k-1, base=2, pad=nactive(r)), "|")
+            if !isone(v)
+                print(io, v)
             end
+
+            print(io, "⟨", string(k-1, base=2, pad=nactive(r)), "|")
 
             if i != last(nzr)
                 print(io, " + ")
+            end
+        end
+    else
+        m, n = size(r.state)
+        for j in 1:n
+            nzr = nzrange(r.state, j)
+            for i in nzr
+                row = rows[i]
+                val = nnz[i]
+
+                if !isone(v)
+                    print(io, v)
+                end
+
+                print(io, "⟨")
+                print(io, string(row-1, base=2, pad=nactive(r)))
+                printstyled(io, string(j-1, base=2, pad=nremain(r)), color=:light_black)
+                print(io, "|")
+
+                if i != last(nzr)
+                    print(io, " + ")
+                end
             end
         end
     end
@@ -93,5 +134,5 @@ end
 Base.:(*)(x::SymReg{B, MT}, y::SymReg{B, MT}) where {B, MT} = SymReg{B, MT}(kron(state(x), state(y)))
 Base.:(^)(x::SymReg{B, MT}, n::Int) where {B, MT} = SymReg{B, MT}(kron(state(x) for _ in 1:n))
 
-Base.:(*)(x::AdjointSymReg{B, MT}, y::AdjointSymReg{B, MT}) where {B, MT} = adjoint(parent(y) * parent(x))
+Base.:(*)(x::AdjointSymReg{B, MT}, y::AdjointSymReg{B, MT}) where {B, MT} = adjoint(parent(x) * parent(y))
 Base.:(^)(x::AdjointSymReg{B, MT}, n::Int) where {B, MT} = adjoint(parent(x)^n)
