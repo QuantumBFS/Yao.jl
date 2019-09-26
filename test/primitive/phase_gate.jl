@@ -3,9 +3,7 @@ using Test, YaoBlocks, YaoArrayRegister, LuxurySparse
 
 @testset "test constructor" for T in [Float16, Float32, Float64]
     @test PhaseGate(0.1) isa PrimitiveBlock{1}
-    @test_throws TypeError PhaseGate{Complex{T}} # will not accept non-real type
     @test phase(T(0.1)) isa PrimitiveBlock{1}
-    @test phase(1) isa PhaseGate{Float64} # default we convert to float64
 end
 
 @testset "test copy" begin
@@ -46,4 +44,11 @@ end
     @test isreflexive(g) == false
     @test isunitary(g) == true
     @test ishermitian(g) == false
+
+
+    g = PhaseGate{ComplexF64}(1.0+0im)
+    @test @test_nowarn isunitary(g) == true
+
+    g = PhaseGate{ComplexF64}(1.0+1im)
+    @test @test_logs (:warn, "θ in phase(θ) is not real, got $(g.theta), fallback to matrix-based method") isunitary(g) == false
 end

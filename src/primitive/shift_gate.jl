@@ -16,7 +16,7 @@ Phase shift gate.
 \\end{pmatrix}
 ```
 """
-mutable struct ShiftGate{T <: Real} <: PrimitiveBlock{1}
+mutable struct ShiftGate{T} <: PrimitiveBlock{1}
     theta::T
 end
 
@@ -32,19 +32,26 @@ julia> shift(0.1)
 shift(0.1)
 ```
 """
-shift(θ::AbstractFloat) = ShiftGate(θ)
-shift(θ::Real) = shift(Float64(θ))
-mat(::Type{T}, gate::ShiftGate) where {T <: Complex} = Diagonal(T[1.0, exp(im * gate.theta)])
+shift(θ) = ShiftGate(θ)
+mat(::Type{T}, gate::ShiftGate) where T = Diagonal(T[1.0, exp(im * gate.theta)])
 
 cache_key(gate::ShiftGate) = gate.theta
 
 # parametric interface
 niparams(::Type{<:ShiftGate}) = 1
 getiparams(x::ShiftGate) = x.theta
-setiparams!(r::ShiftGate, param::Real) = (r.theta = param; r)
+setiparams!(r::ShiftGate, param::Number) = (r.theta = param; r)
 
 
 Base.adjoint(blk::ShiftGate) = ShiftGate(-blk.theta)
 Base.copy(block::ShiftGate{T}) where T = ShiftGate{T}(block.theta)
 Base.:(==)(lhs::ShiftGate, rhs::ShiftGate) = lhs.theta == rhs.theta
-YaoBase.isunitary(r::ShiftGate) = true
+
+# fallback to matrix method if it is not real
+YaoBase.isunitary(r::ShiftGate{<:Real}) = true
+
+function YaoBase.isunitary(r::ShiftGate)
+    isreal(r.theta) && return true
+    @warn "θ in ShiftGate is not real, got θ=$(r.theta), fallback to matrix-based method"
+    return isunitary(mat(r))
+end

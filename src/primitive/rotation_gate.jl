@@ -13,7 +13,7 @@ RotationGate, with GT both hermitian and isreflexive.
 \\mathbf{I} cos(θ / 2) - im sin(θ / 2) * mat(U)
 ```
 """
-mutable struct RotationGate{N, T <: Real, GT <: AbstractBlock{N}} <: PrimitiveBlock{N}
+mutable struct RotationGate{N, T, GT <: AbstractBlock{N}} <: PrimitiveBlock{N}
     block::GT
     theta::T
     function RotationGate{N, T, GT}(block::GT, theta) where {N, T, GT <: AbstractBlock{N}}
@@ -23,9 +23,7 @@ mutable struct RotationGate{N, T <: Real, GT <: AbstractBlock{N}} <: PrimitiveBl
     end
 end
 
-RotationGate(block::GT, theta::T) where {N, T <: AbstractFloat, GT<:AbstractBlock{N}} = RotationGate{N, T, GT}(block, theta)
-# convert to float if theta is not a floating point
-RotationGate(block::AbstractBlock, theta) = RotationGate(block, Float64(theta))
+RotationGate(block::GT, theta::T) where {N, T, GT<:AbstractBlock{N}} = RotationGate{N, T, GT}(block, theta)
 
 # bindings
 """
@@ -104,9 +102,17 @@ end
 # parametric interface
 niparams(::Type{<:RotationGate}) = 1
 getiparams(x::RotationGate) = x.theta
-setiparams!(r::RotationGate, param::Real) = (r.theta = param; r)
+# no need to specify the type of param, Julia will try to do the conversion
+setiparams!(r::RotationGate, param::Number) where {N, T} = (r.theta = param; r)
 
-YaoBase.isunitary(r::RotationGate) = true
+# fallback to matrix methods if it is not real
+YaoBase.isunitary(r::RotationGate{N, <:Real}) where N = true
+
+function YaoBase.isunitary(r::RotationGate)
+    isreal(r.theta) && return true
+    @warn "θ in RotationGate is not real, got θ=$(r.theta), fallback to matrix-based method"
+    return isunitary(mat(r))
+end
 
 Base.adjoint(blk::RotationGate) = RotationGate(blk.block, -blk.theta)
 Base.copy(R::RotationGate) = RotationGate(R.block, R.theta)
