@@ -7,7 +7,7 @@ export PhaseGate, phase
 
 Global phase gate.
 """
-mutable struct PhaseGate{T <: Real} <: PrimitiveBlock{1}
+mutable struct PhaseGate{T} <: PrimitiveBlock{1}
     theta::T
 end
 
@@ -29,17 +29,24 @@ julia> phase(0.1)
 phase(0.1)
 ```
 """
-phase(θ::AbstractFloat) = PhaseGate(θ)
-phase(θ::Real) = phase(Float64(θ))
+phase(θ::Real) = PhaseGate(θ)
 
 mat(::Type{T}, gate::PhaseGate) where T = exp(T(im * gate.theta)) * IMatrix{2, T}()
 
 # parametric interface
 niparams(::Type{<:PhaseGate}) = 1
 getiparams(x::PhaseGate) = x.theta
-setiparams!(r::PhaseGate, param::Real) = (r.theta = param; r)
+setiparams!(r::PhaseGate, param::Number) = (r.theta = param; r)
 
-YaoBase.isunitary(r::PhaseGate) = true
+# fallback to matrix method if it is not real
+YaoBase.isunitary(r::PhaseGate{<:Real}) = true
+
+function YaoBase.isunitary(r::PhaseGate)
+    isreal(r.theta) && return true
+    @warn "θ in phase(θ) is not real, got $(r.theta), fallback to matrix-based method"
+    return isunitary(mat(r))
+end
+
 Base.adjoint(blk::PhaseGate) = PhaseGate(-blk.theta)
 Base.copy(block::PhaseGate{T}) where T = PhaseGate{T}(block.theta)
 Base.:(==)(lhs::PhaseGate, rhs::PhaseGate) = lhs.theta == rhs.theta
