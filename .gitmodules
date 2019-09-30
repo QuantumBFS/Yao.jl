@@ -1,3 +1,4 @@
 [submodule "simplify"]
 	path = simplify
-	url = https://github.com/HarrisonGrodin/Simplify.jl.git
+	url = https://github.com/Roger-luo/Simplify.jl.git
+	branch = quantum
