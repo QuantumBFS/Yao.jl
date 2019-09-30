@@ -35,6 +35,26 @@ function bra_m(s)
     adjoint(ket_m(s))
 end
 
+"""
+    @ket_str
+
+Create a ket register. See also [`@bra_str`](@ref).
+
+# Example
+
+a symbolic quantum state can be created simply by
+
+```jldoctest
+julia> ket"110" + 2ket"111"
+|110⟩ + 2|111⟩
+```
+
+qubits can be partially actived by [`focus!`](@ref)
+
+```jldoctest
+```
+
+"""
 macro ket_str(s)
     ket_m(s)
 end
@@ -67,6 +87,9 @@ function Base.show(io::IO, r::SymReg{1})
         end
     else
         m, n = size(r.state)
+        nnz_count = 0
+        nnnz = length(nonzeros(r.state))
+
         for j in 1:n
             nzr = nzrange(r.state, j)
             for i in nzr
@@ -79,7 +102,8 @@ function Base.show(io::IO, r::SymReg{1})
                 print(io, "|")
                 printstyled(io, string(j-1, base=2, pad=nremain(r)), color=:light_black)
                 print(io, string(row-1, base=2, pad=nactive(r)), "⟩")
-                if i != last(nzr) || j != n
+                nnz_count += 1
+                if nnz_count != nnnz
                     print(io, " + ")
                 end    
             end
@@ -107,7 +131,10 @@ function Base.show(io::IO, r::AdjointSymReg{1})
             end
         end
     else
-        m, n = size(r.state)
+        m, n = size(state(r))
+        nnz_count = 0
+        nnnz = length(nonzeros(r.state))
+
         for j in 1:n
             nzr = nzrange(r.state, j)
             for i in nzr
