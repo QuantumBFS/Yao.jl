@@ -12,6 +12,10 @@ const SymbolicType = Union{SymInteger, SymReal, SymComplex, SymNumber}
 term(x) = x
 get_expr(x) = term(x).ex
 function track(f, x::T, xs::T...) where {T <: SymbolicType}
+    track(T, f, x, xs...)
+end
+
+function track(::Type{T}, f, x, xs...) where {T <: SymbolicType}
     ex = Expr(:call, f, map(get_expr, (x, xs...))...)
     t = Term(ex)
     return T(simplify(t))

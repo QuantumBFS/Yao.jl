@@ -58,6 +58,9 @@ Base.convert(::Type{<:SymComplex}, x::Irrational) = SymComplex(x)
 
 # complex number specialization
 Base.adjoint(x::SymComplex) = track(adjoint, x)
-Base.real(x::SymComplex) = track(real, x)
-Base.imag(x::SymComplex) = track(imag, x)
+Base.real(x::SymComplex) = track(SymReal, real, x)
+Base.imag(x::SymComplex) = track(SymReal, imag, x)
 Base.conj(x::SymComplex) = track(conj, x)
+
+Base.angle(x::SymReal) = SymReal(0)
+Base.angle(x::SymComplex) = track(SymReal, angle, x)

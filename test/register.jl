@@ -9,3 +9,4 @@ using YaoSym, YaoArrayRegister, YaoBlocks
 @test ket"101" * ket"111" == ket"101111"
 @test bra"110"^2 == bra"110110"
 @test bra"110" * bra"111" == bra"110111"
+
