@@ -1,11 +1,11 @@
-using YaoBase, SparseArrays, BitBasis, YaoArrayRegister, SymEngine
+using YaoBase, SparseArrays, BitBasis, YaoArrayRegister
 export @ket_str, @bra_str
 
-YaoArrayRegister._warn_type(raw::AbstractArray{Basic}) = nothing
+const SymReg{B, MT} = ArrayReg{B, SymComplex, MT}
+const AdjointSymReg{B, MT} = AdjointArrayReg{B, SymComplex, MT}
+const SymRegOrAdjointSymReg{B, MT} = Union{SymReg{B, MT}, AdjointSymReg{B, MT}}
 
-const SymReg{B, MT} = ArrayReg{B, Basic, MT}
-const AdjointSymReg{B, MT} = AdjointArrayReg{B, Basic, MT}
-const SymOrAdjointSymReg{B, MT} = Union{SymReg{B, MT}, AdjointSymReg{B, MT}}
+YaoArrayRegister._warn_type(raw::AbstractArray{SymComplex}) = nothing
 
 function parse_str(s::String)
     v = 0; k = 1
@@ -26,7 +26,7 @@ end
 
 function ket_m(s)
     v, N = parse_str(s)
-    st = spzeros(Basic, 1 << N, 1)
+    st = spzeros(SymComplex, 1 << N, 1)
     st[v+1] = 1
     return ArrayReg{1}(st)
 end
@@ -43,91 +43,83 @@ macro bra_str(s)
     bra_m(s)
 end
 
-function SymEngine.expand(x::SymReg{B}) where B
-    ArrayReg{B}(expand.(x.state))
+function print_braket(f, io::IO, r)
+    print(io, "|")
+    f()
+    print(io, "⟩")
 end
 
-function Base.show(io::IO, r::SymReg{1})
-    dropzeros!(r.state)
-    rows = rowvals(r.state)
-    nnz = nonzeros(r.state)
-    if size(r.state, 2) == 1 # all actived
-        nzr = nzrange(r.state, 1)
-        for i in nzr
-            k = rows[i]
-            v = nnz[i]
-            if !isone(v)
-                print(io, v)
-            end
-            print(io, "|", string(k-1, base=2, pad=nactive(r)), "⟩")
+function print_braket(f, io::IO, r::AdjointArrayReg)
+    print(io, "⟨")
+    f()
+    print(io, "|")
+end
 
-            if i != last(nzr)
-                print(io, " + ")
-            end
-        end
-    else
-        m, n = size(r.state)
-        for j in 1:n
-            nzr = nzrange(r.state, j)
-            for i in nzr
-                row = rows[i]
-                val = nnz[i]
-
-                if !isone(val)
-                    print(io, val)
-                end
-                print(io, "|")
-                printstyled(io, string(j-1, base=2, pad=nremain(r)), color=:light_black)
-                print(io, string(row-1, base=2, pad=nactive(r)), "⟩")
-                if i != last(nzr) || j != n
-                    print(io, " + ")
-                end    
-            end
-        end
+function print_basis(io, active::Int, remain::Int, r)
+    print_braket(io, r) do
+        printstyled(io, string(remain, base=2, pad=nremain(r)), color=:light_black)
+        print(io, string(active, base=2, pad=nactive(r)))
     end
 end
 
-function Base.show(io::IO, r::AdjointSymReg{1})
-    dropzeros!(parent(state(r)))
-    rows = rowvals(parent(state(r)))
-    nnz = nonzeros(parent(state(r)))
-    nzr = nzrange(parent(state(r)), 1)
-    if size(parent(state(r)), 2) == 1 # all actived
-        for i in nzr
-            k = rows[i]
-            v = adjoint(nnz[i])
-            if !isone(v)
-                print(io, v)
-            end
+function print_sym_state(io::IO, r::ArrayReg{1})
+    st = state(r)
+    m, n = size(st)
+    isfirst_nonzero = true
+    amp = st[1, 1]
+    if !iszero(amp)
+        isone(amp) || print(io, amp)
+        print_basis(io, 0, 0, r)
+        isfirst_nonzero = false
+    end
 
-            print(io, "⟨", string(k-1, base=2, pad=nactive(r)), "|")
-
-            if i != last(nzr)
-                print(io, " + ")
-            end
+    for j in 1:n, i in 1:m
+        i ==1 && j == 1 && continue
+        amp = st[i, j]
+        if iszero(amp)
+            continue
         end
+
+        isfirst_nonzero || print(io, " + ")
+        isone(amp) || print(io, st[i, j])
+        print_basis(io, i-1, j-1, r)
+        isfirst_nonzero = false
+    end
+end
+
+function print_sym_state(io::IO, r::AdjointArrayReg{1})
+    st = state(r)
+    m, n = size(st)
+    isfirst_nonzero = true
+    amp = st[1, 1]
+    if !iszero(amp)
+        isone(amp) || print(io, amp)
+        print_basis(io, 0, 0, r)
+        isfirst_nonzero = false
+    end
+
+    for j in 1:n, i in 1:m
+        i ==1 && j == 1 && continue
+        amp = st[i, j]
+        if iszero(amp)
+            continue
+        end
+
+        isfirst_nonzero || print(io, " + ")
+        isone(amp) || print(io, st[i, j])
+        print_basis(io, j-1, i-1, r)
+        isfirst_nonzero = false
+    end
+end
+
+const MAX_SYM_QUBITS = 10
+
+function Base.show(io::IO, r::SymRegOrAdjointSymReg{1})
+    if nqubits(r) < MAX_SYM_QUBITS
+        print_sym_state(io, r)
     else
-        m, n = size(r.state)
-        for j in 1:n
-            nzr = nzrange(r.state, j)
-            for i in nzr
-                row = rows[i]
-                val = nnz[i]
-
-                if !isone(v)
-                    print(io, v)
-                end
-
-                print(io, "⟨")
-                print(io, string(row-1, base=2, pad=nactive(r)))
-                printstyled(io, string(j-1, base=2, pad=nremain(r)), color=:light_black)
-                print(io, "|")
-
-                if i != last(nzr)
-                    print(io, " + ")
-                end
-            end
-        end
+        summary(io, r)
+        print(io, "\n    active qubits: ", nactive(r), "/", nqubits(r))
     end
 end
 
