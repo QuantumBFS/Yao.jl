@@ -35,6 +35,26 @@ function bra_m(s)
     adjoint(ket_m(s))
 end
 
+"""
+    @ket_str
+
+Create a ket register. See also [`@bra_str`](@ref).
+
+# Example
+
+a symbolic quantum state can be created simply by
+
+```jldoctest
+julia> ket"110" + 2ket"111"
+|110⟩ + 2|111⟩
+```
+
+qubits can be partially actived by [`focus!`](@ref)
+
+```jldoctest
+```
+
+"""
 macro ket_str(s)
     ket_m(s)
 end
