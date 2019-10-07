@@ -1,5 +1,5 @@
 using Test
-using YaoSym, YaoArrayRegister, YaoBlocks
+using YaoSym, YaoArrayRegister, YaoBlocks, SymEngine
 
 @test ket"111" + 2ket"111" == 3ket"111"
 @test bra"111" * ket"111" == 1
@@ -9,4 +9,3 @@ using YaoSym, YaoArrayRegister, YaoBlocks
 @test ket"101" * ket"111" == ket"101111"
 @test bra"110"^2 == bra"110110"
 @test bra"110" * bra"111" == bra"110111"
-
