@@ -1,5 +1,5 @@
 using YaoSym, YaoBlocks, YaoArrayRegister, SymEngine
-using YaoSym.SymEngineBackend: simplify_expi
+using YaoSym: simplify_expi
 using Test
 
 @testset "mat" begin
