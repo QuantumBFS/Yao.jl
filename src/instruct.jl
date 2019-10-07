@@ -8,6 +8,7 @@ export instruct!
 
 function YaoBase.instruct!(reg::ArrayReg, operator, args...; kwargs...)
     instruct!(matvec(reg.state), operator, args...; kwargs...)
+    return reg
 end
 
 """
