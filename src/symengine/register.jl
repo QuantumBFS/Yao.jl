@@ -7,9 +7,6 @@ const SymReg{B, MT} = ArrayReg{B, Basic, MT}
 const AdjointSymReg{B, MT} = AdjointArrayReg{B, Basic, MT}
 const SymRegOrAdjointSymReg{B, MT} = Union{SymReg{B, MT}, AdjointSymReg{B, MT}}
 
-using YaoSym: parse_str
-import YaoSym: ket_m, print_sym_state
-
 function ket_m(s)
     v, N = parse_str(s)
     st = spzeros(Basic, 1 << N, 1)
