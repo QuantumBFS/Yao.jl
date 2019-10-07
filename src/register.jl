@@ -1,12 +1,6 @@
 using YaoBase, SparseArrays, BitBasis, YaoArrayRegister
 export @ket_str, @bra_str
 
-const SymReg{B, MT} = ArrayReg{B, SymComplex, MT}
-const AdjointSymReg{B, MT} = AdjointArrayReg{B, SymComplex, MT}
-const SymRegOrAdjointSymReg{B, MT} = Union{SymReg{B, MT}, AdjointSymReg{B, MT}}
-
-YaoArrayRegister._warn_type(raw::AbstractArray{SymComplex}) = nothing
-
 function parse_str(s::String)
     v = 0; k = 1
     for each in reverse(filter(x->x!='_', s))
@@ -24,12 +18,7 @@ function parse_str(s::String)
     return v, k-1
 end
 
-function ket_m(s)
-    v, N = parse_str(s)
-    st = spzeros(SymComplex, 1 << N, 1)
-    st[v+1] = 1
-    return ArrayReg{1}(st)
-end
+function ket_m end
 
 function bra_m(s)
     adjoint(ket_m(s))
@@ -132,19 +121,9 @@ function print_sym_state(io::IO, r::AdjointArrayReg{1})
     end
 end
 
-const MAX_SYM_QUBITS = 10
+# TODO: need a more extensible implementation
+# Base.:(*)(x::SymReg{B, MT}, y::SymReg{B, MT}) where {B, MT} = SymReg{B, MT}(kron(state(x), state(y)))
+# Base.:(^)(x::SymReg{B, MT}, n::Int) where {B, MT} = SymReg{B, MT}(kron(state(x) for _ in 1:n))
 
-function Base.show(io::IO, r::SymRegOrAdjointSymReg{1})
-    if nqubits(r) < MAX_SYM_QUBITS
-        print_sym_state(io, r)
-    else
-        summary(io, r)
-        print(io, "\n    active qubits: ", nactive(r), "/", nqubits(r))
-    end
-end
-
-Base.:(*)(x::SymReg{B, MT}, y::SymReg{B, MT}) where {B, MT} = SymReg{B, MT}(kron(state(x), state(y)))
-Base.:(^)(x::SymReg{B, MT}, n::Int) where {B, MT} = SymReg{B, MT}(kron(state(x) for _ in 1:n))
-
-Base.:(*)(x::AdjointSymReg{B, MT}, y::AdjointSymReg{B, MT}) where {B, MT} = adjoint(parent(x) * parent(y))
-Base.:(^)(x::AdjointSymReg{B, MT}, n::Int) where {B, MT} = adjoint(parent(x)^n)
+# Base.:(*)(x::AdjointSymReg{B, MT}, y::AdjointSymReg{B, MT}) where {B, MT} = adjoint(parent(x) * parent(y))
+# Base.:(^)(x::AdjointSymReg{B, MT}, n::Int) where {B, MT} = adjoint(parent(x)^n)

@@ -1,11 +1,6 @@
 module YaoSym
 
-# load simplify
-include("../simplify/src/Simplify.jl")
-include("engine/engine.jl")
-
 include("register.jl")
-include("blocks.jl")
 
 using Requires
 
