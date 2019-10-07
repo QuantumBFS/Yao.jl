@@ -1,5 +1,6 @@
 using YaoBase, SparseArrays, BitBasis, YaoArrayRegister, SymEngine
 export @ket_str, @bra_str
+export SymReg, AdjointSymReg, SymRegOrAdjointSymReg
 
 YaoArrayRegister._warn_type(raw::AbstractArray{Basic}) = nothing
 

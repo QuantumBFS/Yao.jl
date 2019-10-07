@@ -28,3 +28,8 @@ end
                         locs::Union{Int, NTuple{N1, Int}}, theta::Basic) where {T, N1}
     instruct!(state, g, locs, (), (), theta)
 end
+
+@eval function YaoBase.instruct!(state::AbstractVecOrMat{T}, g::Val{:PSWAP},
+                        locs::Tuple{Int, Int}, theta::Basic) where {T, N1}
+    instruct!(state, g, locs, (), (), theta)
+end

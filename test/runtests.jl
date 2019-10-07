@@ -4,6 +4,6 @@ using Test
     include("register.jl")
 end
 
-@testset "blocks" begin
-    include("blocks.jl")
+@testset "symengine" begin
+    include("symengine/backend.jl")
 end
