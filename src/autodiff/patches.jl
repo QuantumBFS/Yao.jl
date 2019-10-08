@@ -1,4 +1,4 @@
-Base.zero(pm::PermMatrix) = PermMatrix(pm.perm, zero(pm.vals))
+# Base.zero(pm::PermMatrix) = PermMatrix(pm.perm, zero(pm.vals))
 
 # TODO
 # to make a mat block differentiable
