@@ -104,23 +104,15 @@ function batched_kron(A::AbstractArray{T, 3}, B::AbstractArray{S, 3}) where {T, 
     return batched_kron!(C, A, B)
 end
 
-function batched_kron!(C::Array{T, 3}, A::Array{T1, 3}, B::Array{T2, 3}) where {T, T1, T2}
-    ptrA = Base.unsafe_convert(Ptr{T}, A)
-    ptrB = Base.unsafe_convert(Ptr{T1}, B)
-    ptrC = Base.unsafe_convert(Ptr{T2}, C)
-
-    for k in 1:size(C, 3)
-        Ak = unsafe_wrap(Matrix{T1}, ptrA, (size(A, 1), size(A, 2)))
-        Bk = unsafe_wrap(Matrix{T2}, ptrB, (size(B, 1), size(B, 2)))
-        Ck = unsafe_wrap(Matrix{T}, ptrC, (size(C, 1), size(C, 2)))
-
-        kron!(Ck, Ak, Bk)
-
-        ptrA += size(A, 1) * size(A, 2) * sizeof(T)
-        ptrB += size(B, 1) * size(B, 2) * sizeof(T)
-        ptrC += size(C, 1) * size(C, 2) * sizeof(T)
+function batched_kron!(C::Array{T, 3}, A::AbstractArray{T1, 3}, B::AbstractArray{T2, 3}) where {T, T1, T2}
+    @assert !Base.has_offset_axes(A, B)
+    m, n = size(A)
+    p, q = size(B)
+    @inbounds for k in 1:size(C, 3)
+        for s in 1:n, r in 1:m, w in 1:q, v in 1:p
+            C[p * (r - 1) + v, q * (s - 1) + w, k] = A[r, s, k] * B[v, w, k]
+        end
     end
-
     return C
 end
 
