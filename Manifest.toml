@@ -241,8 +241,8 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 [[YaoArrayRegister]]
 deps = ["BitBasis", "LinearAlgebra", "LuxurySparse", "Random", "StaticArrays", "StatsBase", "TupleTools", "YaoBase"]
-git-tree-sha1 = "498a7eb99662c0156b4b7b48a8cc518bb0eda599"
-repo-rev = "master"
+git-tree-sha1 = "ed327a179e571e2c414705da42f6e08aed55a8f8"
+repo-rev = "roger-patch-1"
 repo-url = "https://github.com/QuantumBFS/YaoArrayRegister.jl.git"
 uuid = "e600142f-9330-5003-8abb-0ebd767abc51"
 version = "0.4.2"
@@ -255,7 +255,7 @@ version = "0.11.1"
 
 [[YaoBlocks]]
 deps = ["BitBasis", "CacheServers", "ExponentialUtilities", "InteractiveUtils", "LegibleLambdas", "LinearAlgebra", "LuxurySparse", "MLStyle", "Random", "SimpleTraits", "SparseArrays", "StaticArrays", "StatsBase", "YaoArrayRegister", "YaoBase"]
-git-tree-sha1 = "955b1042a200e48393397b4021fb8bf10280337f"
+git-tree-sha1 = "6fe1fdd4461323cffbf464c2f13192312c423047"
 repo-rev = "master"
 repo-url = "https://github.com/QuantumBFS/YaoBlocks.jl.git"
 uuid = "418bc28f-b43b-5e0b-a6e7-61bbc1a2c1df"
