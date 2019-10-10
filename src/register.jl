@@ -4,6 +4,7 @@ import BitBasis: BitStr, BitStr64
 export ArrayReg,
     AdjointArrayReg,
     ArrayRegOrAdjointArrayReg,
+    transpose_storage,
     # YaoBase
     nqubits,
     nactive,
@@ -128,6 +129,9 @@ Initialize a new `ArrayReg` by an existing `ArrayReg`. This is equivalent
 to `copy`.
 """
 ArrayReg(r::ArrayReg{B}) where B = ArrayReg{B}(copy(r.state))
+
+transpose_storage(reg::ArrayReg{B,T,<:Transpose}) where {B,T} = ArrayReg{B}(copy(reg.state))
+transpose_storage(reg::ArrayReg{B,T}) where {B,T} = ArrayReg{B}(transpose(copy(transpose(reg.state))))
 
 Base.copy(r::ArrayReg) = ArrayReg(r)
 Base.similar(r::ArrayRegOrAdjointArrayReg{B}) where B = ArrayReg{B}(similar(state(r)))
@@ -302,7 +306,7 @@ ArrayReg{2, Complex{Float32}, Array...}
 product_state(bit_str::BitStr; nbatch::Int=1) = product_state(ComplexF64, bit_str; nbatch=nbatch)
 
 """
-    product_state([T=ComplexF64], total::Int, bit_config::Integer; nbatch=1)
+    product_state([T=ComplexF64], total::Int, bit_config::Integer; nbatch=1, no_transpose_storage=false)
 
 Create an [`ArrayReg`](@ref) with bit configuration `bit_config`, total number of bits `total`.
 See also [`zero_state`](@ref), [`rand_state`](@ref), [`uniform_state`](@ref).
@@ -328,12 +332,19 @@ ArrayReg{1, Complex{Float32}, Array...}
     This interface will not check whether the number of required digits
     for the bit configuration matches the total number of bits.
 """
-product_state(total::Int, bit_config::Integer; nbatch::Int=1) = product_state(ComplexF64, total, bit_config; nbatch=nbatch)
+product_state(total::Int, bit_config::Integer; kwargs...) = product_state(ComplexF64, total, bit_config; kwargs...)
 
-product_state(::Type{T}, bit_str::BitStr; nbatch::Int=1) where T = ArrayReg{nbatch}(T, bit_str)
+product_state(::Type{T}, bit_str::BitStr{N}; kwargs...) where {T,N} = product_state(T, N, buffer(bit_str); kwargs...)
 
-function product_state(::Type{T}, total::Int, bit_config::Integer; nbatch::Int=1) where T
-    return ArrayReg{nbatch}(onehot(T, total, bit_config, nbatch))
+function product_state(::Type{T}, total::Int, bit_config::Integer; nbatch::Int=1, no_transpose_storage::Bool=false) where T
+    if nbatch == 1 || no_transpose_storage
+        raw = onehot(T, total, bit_config, nbatch)
+    else
+        raw = zeros(T, nbatch, 1<<total)
+        raw[:,Int(bit_config)+1] .= 1
+        raw = transpose(raw)
+    end
+    return ArrayReg{nbatch}(raw)
 end
 
 """
@@ -358,12 +369,12 @@ ArrayReg{3, Complex{Float32}, Array...}
     active qubits: 4/4
 ```
 """
-zero_state(n::Int; nbatch::Int=1) = zero_state(ComplexF64, n; nbatch=nbatch)
-zero_state(::Type{T}, n::Int; nbatch::Int=1) where T = product_state(T, n, 0; nbatch=nbatch)
+zero_state(n::Int; kwargs...) = zero_state(ComplexF64, n; kwargs...)
+zero_state(::Type{T}, n::Int; kwargs...) where T = product_state(T, n, 0; kwargs...)
 
 
 """
-    rand_state([T=ComplexF64], n::Int; nbatch::Int=1)
+    rand_state([T=ComplexF64], n::Int; nbatch=1, no_transpose_storage=false)
 
 Create a random [`ArrayReg`](@ref) with total number of qubits `n`.
 
@@ -383,15 +394,15 @@ ArrayReg{2, Complex{Float64}, Array...}
     active qubits: 4/4
 ```
 """
-rand_state(n::Int; nbatch::Int=1) = rand_state(ComplexF64, n; nbatch=nbatch)
+rand_state(n::Int; kwargs...) = rand_state(ComplexF64, n; kwargs...)
 
-function rand_state(::Type{T}, n::Int; nbatch::Int=1) where T
-    raw = randn(T, 1<<n, nbatch)
+function rand_state(::Type{T}, n::Int; nbatch::Int=1, no_transpose_storage::Bool=false) where T
+    raw = nbatch == 1 || no_transpose_storage ? randn(T, 1<<n, nbatch) : transpose(randn(T, nbatch, 1<<n))
     return normalize!(ArrayReg{nbatch}(raw))
 end
 
 """
-    uniform_state([T=ComplexF64], n; nbatch=1)
+    uniform_state([T=ComplexF64], n; nbatch=1, no_transpose_storage=false)
 
 Create a uniform state: ``\\frac{1}{2^n} \\sum_k |k⟩``. This state
 can also be created by applying [`H`](@ref) (Hadmard gate) on ``|00⋯00⟩`` state.
@@ -408,8 +419,11 @@ ArrayReg{2, Complex{Float64}, Array...}
     active qubits: 4/4
 ```
 """
-uniform_state(n::Int; nbatch::Int=1) = uniform_state(ComplexF64, n; nbatch=nbatch)
-uniform_state(::Type{T}, n::Int; nbatch::Int=1) where T = ArrayReg{nbatch}(ones(T, 1<<n, nbatch) ./ sqrt(1<<n))
+uniform_state(n::Int; kwargs...) = uniform_state(ComplexF64, n; kwargs...)
+function uniform_state(::Type{T}, n::Int; nbatch::Int=1, no_transpose_storage::Bool=false) where T
+    raw = nbatch == 1 || no_transpose_storage ? ones(T, 1<<n, nbatch) : transpose(ones(T, nbatch, 1<<n))
+    normalize!(ArrayReg{nbatch}(raw))
+end
 
 """
     oneto(r::ArrayReg, n::Int=nqubits(r))

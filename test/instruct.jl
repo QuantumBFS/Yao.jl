@@ -22,6 +22,10 @@ using YaoBase.Const
         instruct!(instruct!(copy(ST), U1, 3), U1, 1)
     @test instruct!(copy(REG), kron(U1, U1), (3, 1)) ≈
         instruct!(instruct!(copy(REG), U1, 3), U1, 1)
+    @test instruct!(transpose_storage(REG), kron(U1, U1), (3, 1)) ≈
+        instruct!(instruct!(copy(REG), U1, 3), U1, 1)
+    @test instruct!(transpose_storage(REG), kron(U1, U1), (3, 1)) ≈
+        instruct!(instruct!(transpose_storage(REG), U1, 3), U1, 1)
 
     @test instruct!(reshape(copy(ST), :, 1), kron(U1, U1), (3, 1)) ≈
         instruct!(instruct!(reshape(copy(ST), :, 1), U1, 3), U1, 1)

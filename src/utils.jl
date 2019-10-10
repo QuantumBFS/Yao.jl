@@ -228,3 +228,14 @@ Base.@propagate_inbounds function unrows!(state::AbstractMatrix, inds::AbstractV
     end
     state
 end
+
+#### Yao Base patch ####
+using YaoBase
+function YaoBase.batched_kron!(C::Array{T, 3}, A::AbstractArray{T1, 3}, B::AbstractArray{T2, 3}) where {T, T1, T2}
+    YaoBase.batched_kron!(C, convert(Array{T,3}, A), convert(Array{T,3}, B))
+end
+
+using LinearAlgebra: Transpose
+Base.convert(::Type{Transpose{T, Matrix{T}}}, arr::AbstractMatrix{T}) where T = transpose(Matrix(transpose(arr)))
+Base.convert(t::Type{Transpose{T, Matrix{T}}}, arr::Transpose{T}) where T = invoke(convert, Tuple{Type{Transpose{T, Matrix{T}}}, Transpose}, t, arr)
+
