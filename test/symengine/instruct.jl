@@ -1,30 +1,4 @@
-using YaoSym, YaoBlocks, YaoArrayRegister, SymEngine
-using Test
-
-@testset "mat" begin
-    @vars θ γ η
-    for G in [X, ConstGate.T, H]
-        @test Matrix(mat(Basic, G)) ≈ Matrix(mat(G))
-        @test Matrix(mat(Basic, control(4, 3, 2=>G))) ≈ Matrix(control(4, 3, 2=>G))
-    end
-
-    for GC in [Rx, shift, phase]
-        G = GC(θ)
-        m = mat(Basic, G)
-        m = subs.(m, θ, 0.5)
-        @test Matrix(mat(GC(0.5))) ≈ Matrix(m)
-        @test subs.(Matrix(mat(Basic, put(4, 2=>G))), θ, 0.5) ≈ Matrix(put(4, 2=>GC(0.5)))
-    end
-
-    G = Rz(θ)*Rx(γ)*Rz(θ)
-    m = mat(Basic, G)
-    m = subs.(m, Ref(θ=>Basic(π)/2), Ref(γ=>Basic(π)/6))
-    @test Matrix(mat(Rz(π/2)*Rx(π/6)*Rz(π/2))) ≈ Matrix(m)
-
-    A = randn(ComplexF64, 4,4)
-    mb = matblock(Basic.(A))
-    @test Matrix(mb) ≈ A
-end
+using Test, YaoSym
 
 @testset "apply" begin
     @vars θ γ η
@@ -38,10 +12,11 @@ end
 
     reg2 = ArrayReg(bit"0011")
     reg1 = ArrayReg(Basic.(state(reg2)))
-    for GC in [Rx, shift, phase]
+    for GC in [Rx, Ry, Rz, shift, phase, θ->rot(SWAP,θ)]
         G = GC(θ)
-        g1 = put(4, 2=>GC(θ))
-        g2 = put(4, 2=>GC(π/2))
+        locs = nqubits(G) == 1 ? 2 : (3,1)
+        g1 = put(4, locs=>GC(θ))
+        g2 = put(4, locs=>GC(π/2))
         regs = state(copy(reg1) |> g1)
         res = subs.(regs, θ, Basic(π)/2)
         @test  res ≈ state(copy(reg2) |> g2)
