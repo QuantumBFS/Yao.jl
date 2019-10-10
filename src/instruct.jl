@@ -438,7 +438,7 @@ function YaoBase.instruct!(
     a = T(cos(theta/2))
     c = T(-im * sin(theta/2))
     e = T(exp(-im/2*theta))
-    @inbounds for b in itercontrol(log2i(size(state, 1)), [control_locs...], [control_bits...])
+    @inbounds for b in itercontrol(log2i(size(state, 1)), collect(Int, control_locs), collect(Int, control_bits))
         if b&mask1==0
             i = b+1
             i_ = b ⊻ mask12 + 1
