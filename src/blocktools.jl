@@ -90,7 +90,7 @@ function expect(op::Scale, reg::AbstractRegister)
 end
 
 function expect(op, plan::Pair{<:AbstractRegister, <:AbstractBlock})
-    expect(op, plan.first |> plan.second)
+    expect(op, copy(plan.first) |> plan.second)
 end
 
 expect(op::Add, reg::AbstractRegister{1}) = invoke(expect, Tuple{Add, AbstractRegister}, op, reg)

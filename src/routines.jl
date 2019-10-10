@@ -34,6 +34,20 @@ set specific col of a CSC matrix
 end
 
 """
+    num_nonzero(nbits, nctrls, U)
+
+Return number of nonzero entries of the matrix form of control-U gate. `nbits`
+is the number of qubits, and `nctrls` is the number of control qubits.
+"""
+@inline function num_nonzero(nbits::Int, nctrls::Int, U, N::Int=1<<nbits)
+    return N + (1<<(nbits-nctrls-log2dim1(U))) * (length(U) - size(U,2))
+end
+
+@inline function num_nonzero(nbits::Int, U, N::Int=1<<nbits)
+    return N + (1<<(nbits-log2dim1(U))) * (length(U) - size(U,2))
+end
+
+"""
     getcol(csc::SDparseMatrixCSC, icol::Int) -> (View, View)
 
 get specific col of a CSC matrix, returns a slice of (rowval, nzval)
@@ -96,21 +110,26 @@ end
 
 u1mat(nbit::Int, U1::Adjoint, ibit::Int) = u1mat(nbit, copy(U1), ibit)
 
-function u1mat(nbit::Int, U1::SDMatrix, ibit::Int)
-    large_mat_check(nbit)
+function u1mat(nbits::Int, U1::SDMatrix, ibit::Int)
+    large_mat_check(nbits)
     mask = bmask(ibit)
-    N = 1<<nbit
+    N = 1<<nbits
     a, c, b, d = U1
     step = 1<<(ibit-1)
     step_2 = 1<<ibit
-    mat = _initialize_output(nbit, 0, U1)
-    mat.colptr .= 1:2:2*N+1
+    NNZ = num_nonzero(nbits, U1, N)
+
+    colptr = Vector{Int}(1:2:2*N+1)
+    rowval = Vector{Int}(undef, NNZ)
+    nzval = Vector{eltype(U1)}(undef, NNZ)
+
+    mat = SparseMatrixCSC(N, N, colptr, rowval, nzval)
     for j = 0:step_2:N-step
         @inbounds @simd for i = j+1:j+step
             u1ij!(mat, i, i+step, a, b, c, d)
         end
     end
-    mat
+    return mat
 end
 
 @inline function u1ij!(csc::SparseMatrixCSC, i::Int,j::Int, a, b, c, d)
@@ -139,26 +158,18 @@ function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::Adj
     cunmat(nbit, cbits, cvals, copy(U0), locs)
 end
 
-function _initialize_output(nbit::Int, nctrl::Int, U::Union{SDMatrix{T}, SDSparseMatrixCSC{T}}) where T
-    N = 1<<nbit
-    NNZ = 1<<nbit + (1<<(nbit-nctrl-log2dim1(U))) * (length(U) - size(U,2))
-
-    colptr = Vector{Int}(undef, N+1)
-    rowval = Vector{Int}(undef, NNZ)
-    nzval = Vector{T}(undef, NNZ)
-
-    SparseMatrixCSC(N, N, colptr, rowval, nzval)
-end
-
 function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SDMatrix, locs::NTuple{M, Int}) where {C, M}
     large_mat_check(nbit)
     MM = size(U0, 1)
     U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
-    mat = _initialize_output(nbit, C, U0)
-    colptr, nzval, rowval = mat.colptr, mat.nzval, mat.rowval
-    nzval .= 1
-    @inbounds colptr[1] = 1
 
+    N = 1 << nbit
+    NNZ = num_nonzero(nbit, C, U0, N)
+    colptr = Vector{Int}(undef, N+1)
+    rowval = Vector{Int}(undef, NNZ)
+    nzval = ones(eltype(U0), NNZ)
+
+    @inbounds colptr[1] = 1
     ctest = controller(cbits, cvals)
     @inbounds @simd for b in basis(nbit)
         if ctest(b)
@@ -169,10 +180,11 @@ function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::SDM
         end
     end
 
+    mat = SparseMatrixCSC(N, N, colptr, rowval, nzval)
     controldo(ic) do i
         unij!(mat, locs_raw+i, U)
     end
-    mat
+    return mat
 end
 
 ############################### SparseMatrix ##############################
@@ -181,9 +193,10 @@ function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::Spa
     N = 1<<nbit
     U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
 
-    mat = _initialize_output(nbit, C, U0)
-    colptr, nzval, rowval = mat.colptr, mat.nzval, mat.rowval
-    nzval .= 1
+    NNZ = num_nonzero(nbit, C, U0, N)
+    colptr = Vector{Int}(undef, N+1)
+    rowval = Vector{Int}(undef, NNZ)
+    nzval = ones(eltype(U0), NNZ)
     @inbounds colptr[1] = 1
 
     ns = diff(U.colptr) |> autostatic
@@ -198,6 +211,7 @@ function cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::Spa
         end
     end
 
+    mat = SparseMatrixCSC(N, N, colptr, rowval, nzval)
     controldo(ic) do i
         unij!(mat, locs_raw+i, U)
     end
