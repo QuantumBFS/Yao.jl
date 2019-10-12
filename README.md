@@ -39,7 +39,7 @@ qft(n) = chain(B(n, k) for k in 1:n)
 Yao is a [julia](https://julialang.org/) language package. To install Yao, please [open Julia's interactive session (known as REPL)](https://docs.julialang.org/en/v1/manual/getting-started/) and type `]` in the REPL to use the package mode, then type this command:
 
 ```julia
-pkg> add Yao
+pkg> add Yao#master YaoBlocks#master YaoArrayRegister#master
 ```
 
 If you have problem to install the package, please [file us an issue](https://github.com/QuantumBFS/Yao.jl/issues/new).
