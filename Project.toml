@@ -9,15 +9,15 @@ YaoArrayRegister = "e600142f-9330-5003-8abb-0ebd767abc51"
 YaoBase = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
 YaoBlocks = "418bc28f-b43b-5e0b-a6e7-61bbc1a2c1df"
 
+[compat]
+YaoArrayRegister = "~0.5"
+YaoBase = "~0.11.0"
+YaoBlocks = "~0.7"
+julia = "^1.0.0"
+
 [extras]
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[compat]
-julia = "^1.0.0"
-YaoBase = "~0.11.0"
-YaoArrayRegister = "~0.4"
-YaoBlocks = "~0.7"
 
 [targets]
 test = ["Test"]
