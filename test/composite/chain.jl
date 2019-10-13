@@ -172,3 +172,7 @@ end
     @test length(g) == 2
     @test eltype(g) == eltype(g.blocks)
 end
+
+@testset "Yao/#204" begin
+    @test mat(chain(2)) == IMatrix{2, ComplexF64}()
+end

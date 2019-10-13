@@ -68,7 +68,13 @@ occupied_locs(c::ChainBlock) =
 chsubblocks(pb::ChainBlock{N}, blocks::Vector{<:AbstractBlock}) where N = length(blocks) == 0 ? ChainBlock{N}([]) : ChainBlock(blocks)
 chsubblocks(pb::ChainBlock, it) = chain(it...)
 
-mat(::Type{T}, c::ChainBlock) where T = prod(x->mat(T, x), Iterators.reverse(c.blocks))
+function mat(::Type{T}, c::ChainBlock) where T
+    if isempty(c.blocks)
+        return IMatrix{nqubits(c), T}()
+    else
+        return prod(x->mat(T, x), Iterators.reverse(c.blocks))
+    end
+end
 
 function apply!(r::AbstractRegister, c::ChainBlock)
     for each in c.blocks
