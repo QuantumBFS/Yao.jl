@@ -70,7 +70,7 @@ chsubblocks(pb::ChainBlock, it) = chain(it...)
 
 function mat(::Type{T}, c::ChainBlock) where T
     if isempty(c.blocks)
-        return IMatrix{nqubits(c), T}()
+        return IMatrix{1<<nqubits(c), T}()
     else
         return prod(x->mat(T, x), Iterators.reverse(c.blocks))
     end
