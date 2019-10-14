@@ -24,20 +24,20 @@ chain
 ├─ chain
 │  ├─ put on (1)
 │  │  └─ chain
-│  │     ├─ rot(X gate, 0.0)
-│  │     └─ rot(Z gate, 0.0)
+│  │     ├─ rot(X gate, 0)
+│  │     └─ rot(Z gate, 0)
 │  ├─ put on (2)
 │  │  └─ chain
-│  │     ├─ rot(X gate, 0.0)
-│  │     └─ rot(Z gate, 0.0)
+│  │     ├─ rot(X gate, 0)
+│  │     └─ rot(Z gate, 0)
 │  ├─ put on (3)
 │  │  └─ chain
-│  │     ├─ rot(X gate, 0.0)
-│  │     └─ rot(Z gate, 0.0)
+│  │     ├─ rot(X gate, 0)
+│  │     └─ rot(Z gate, 0)
 │  └─ put on (4)
 │     └─ chain
-│        ├─ rot(X gate, 0.0)
-│        └─ rot(Z gate, 0.0)
+│        ├─ rot(X gate, 0)
+│        └─ rot(Z gate, 0)
 ├─ [cached] chain
 │     ├─ control(1)
 │     │  └─ (2,) X gate
@@ -48,20 +48,20 @@ chain
 └─ chain
    ├─ put on (1)
    │  └─ chain
-   │     ├─ rot(Z gate, 0.0)
-   │     └─ rot(X gate, 0.0)
+   │     ├─ rot(Z gate, 0)
+   │     └─ rot(X gate, 0)
    ├─ put on (2)
    │  └─ chain
-   │     ├─ rot(Z gate, 0.0)
-   │     └─ rot(X gate, 0.0)
+   │     ├─ rot(Z gate, 0)
+   │     └─ rot(X gate, 0)
    ├─ put on (3)
    │  └─ chain
-   │     ├─ rot(Z gate, 0.0)
-   │     └─ rot(X gate, 0.0)
+   │     ├─ rot(Z gate, 0)
+   │     └─ rot(X gate, 0)
    └─ put on (4)
       └─ chain
-         ├─ rot(Z gate, 0.0)
-         └─ rot(X gate, 0.0)</code></pre><h2><a class="nav-anchor" id="MMD-Loss-and-Gradients-1" href="#MMD-Loss-and-Gradients-1">MMD Loss &amp; Gradients</a></h2><p>The MMD loss is describe below:</p><div>\[\begin{aligned}
+         ├─ rot(Z gate, 0)
+         └─ rot(X gate, 0)</code></pre><h2><a class="nav-anchor" id="MMD-Loss-and-Gradients-1" href="#MMD-Loss-and-Gradients-1">MMD Loss &amp; Gradients</a></h2><p>The MMD loss is describe below:</p><div>\[\begin{aligned}
 \mathcal{L} &amp;= \left| \sum_{x} p \theta(x) \phi(x) - \sum_{x} \pi(x) \phi(x) \right|^2\\
             &amp;= \langle K(x, y) \rangle_{x \sim p_{\theta}, y\sim p_{\theta}} - 2 \langle K(x, y) \rangle_{x\sim p_{\theta}, y\sim \pi} + \langle K(x, y) \rangle_{x\sim\pi, y\sim\pi}
 \end{aligned}\]</div><p>We will use a squared exponential kernel here.</p><pre><code class="language-julia">struct RBFKernel
@@ -105,8 +105,7 @@ end</code></pre><pre><code class="language-none">loss (generic function with 1 m
     return grad
 end</code></pre><pre><code class="language-none">gradient (generic function with 1 method)</code></pre><p>Now let&#39;s setup the training</p><pre><code class="language-julia">using Flux.Optimise
 qcbm = build_circuit(6, 10, [1=&gt;2, 3=&gt;4, 5=&gt;6, 2=&gt;3, 4=&gt;5, 6=&gt;1])
-dispatch!(qcbm, :random) # initialize the parameters
-
+dispatch!(qcbm, :random) # initialize the parameters</code></pre><pre><code class="language-none">Error: InexactError: Int64(0.9928790245367864)</code></pre><pre><code class="language-julia">
 κ = RBFKernel(0.25, 0:2^6-1)
 pg = gaussian_pdf(1:1&lt;&lt;6, 1&lt;&lt;5-0.5, 1&lt;&lt;4);
 opt = ADAM()
@@ -122,29 +121,8 @@ function train(qcbm, κ, opt, target)
     return history
 end
 
-history = train(qcbm, κ, opt, pg)
-trained_pg = probs(zero_state(nqubits(qcbm)) |&gt; qcbm)
-history</code></pre><pre><code class="language-none">100-element Array{Float64,1}:
- 0.016591110401862574 
- 0.016158270290977335 
- 0.015736456906135975 
- 0.015325778255629178 
- 0.014925974706017326 
- 0.014536748959401716 
- 0.014157965118082856 
- 0.013789065605009278 
- 0.013429996220326344 
- 0.01307983874856827  
- ⋮                    
- 0.0009072487962553933
- 0.0008594480216127668
- 0.0008131741411744991
- 0.000768589227434002 
- 0.0007257468956102613
- 0.0006845642285980488
- 0.0006445799007762178
- 0.0006062776586726171
- 0.0005695649435314358</code></pre><p>And we have the history of training which is</p><pre><code class="language-julia">
+history = train(qcbm, κ, opt, pg)</code></pre><pre><code class="language-none">Error: InexactError: Int64(1.5707963267948966)</code></pre><pre><code class="language-julia">trained_pg = probs(zero_state(nqubits(qcbm)) |&gt; qcbm)
+history</code></pre><pre><code class="language-none">Error: UndefVarError: history not defined</code></pre><p>And we have the history of training which is</p><pre><code class="language-julia">
 using Plots
 fig1 = plot(history; legend=nothing)
 title!(&quot;training history&quot;)
