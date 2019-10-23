@@ -23,6 +23,7 @@ end
     Random.seed!(5)
     for use_outeradj in [false, true]
         # put block, diagonal
+        @test test_mat_back(ComplexF64, put(3, 1=>chain(Rz(0.5), Ry(0.9), Rz(0.3))), [0.5, 0.9,0.3]; δ=1e-5, use_outeradj=use_outeradj)
         @test test_mat_back(ComplexF64, put(3, 1=>Rz(0.5)), 0.5; δ=1e-5, use_outeradj=use_outeradj)
         @test test_mat_back(ComplexF64, control(3, (2,3), 1=>Rz(0.5)), 0.5; δ=1e-5, use_outeradj=use_outeradj)
         # dense matrix
