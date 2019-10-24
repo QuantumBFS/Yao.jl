@@ -22,7 +22,6 @@ Disclaimer: **this package is still under development and needs further polish.*
 ## Contents
 
 - [x] [QFT](https://github.com/QuantumBFS/YaoExtensions.jl)
-- [x] Grover search
 - [x] Phase Estimation
 - [x] Imaginary Time Evolution Quantum Eigensolver
 - [x] Variational Quantum Eigensolver
@@ -37,6 +36,7 @@ In examples folder, you will find
 - [x] Quantum Circuit Born Machine
 - [x] QuGAN
 - [x] Shor
+- [x] Grover search
 
 - [x] [QuODE](https://github.com/QuantumBFS/QuDiffEq.jl)
 - [x] [TensorNetwork Inspired Circuits](https://github.com/GiggleLiu/QuantumPEPS.jl)
