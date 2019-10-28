@@ -1,3 +1,4 @@
+# required packages: NLopt, SCS and Convex
 using Yao, BitBasis
 using NLopt
 

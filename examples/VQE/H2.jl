@@ -1,5 +1,4 @@
 using Yao
-
 using YaoExtensions
 
 # arXiv: 1704.05018, table S2
@@ -20,13 +19,13 @@ end
 
 using Flux: Optimise
 function train!(circ, hamiltonian; optimizer, niter::Int=100)
-     circ = circ |> autodiff(:BP)
      params = parameters(circ)
      dispatch!(circ, :random)
      for i=1:niter
-         Optimise.update!(optimizer, params, get_gradient(circ, hamiltonian))
+         _, grad = expect'(hamiltonian, zero_state(nqubits(circ)) => circ)
+         Optimise.update!(optimizer, params, grad)
          dispatch!(circ, params)
-         println("Energy = $(expect(hamiltonian, zero_state(nqubits(h)) |> circ))")
+         println("Energy = $(expect(hamiltonian, zero_state(nqubits(h)) |> circ) |> real)")
      end
      return expect(hamiltonian, zero_state(nqubits(h)) |> circ)
 end
