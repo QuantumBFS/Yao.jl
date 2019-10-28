@@ -1,7 +1,8 @@
 using YaoExtensions, Yao
 using Test, Random
-using QuAlgorithmZoo: Adam, update!
+using Optim: LBFGS, optimize
 
+# port the `Matrix` function to Yao's AD.
 include("zygote_patch.jl")
 
 function loss(u, ansatz)
@@ -9,23 +10,22 @@ function loss(u, ansatz)
     sum(abs.(u .- m))
 end
 
-function learn_su4(u::AbstractMatrix; optimizer=Adam(lr=0.1), niter=100)
+"""
+    learn_u4(u::AbstractMatrix; niter=100)
+
+Learn a general U4 gate. The optimizer is LBFGS.
+"""
+function learn_u4(u::AbstractMatrix; niter=100)
     ansatz = general_U4() * put(2, 1=>phase(0.0))  # initial values are 0, here, we attach a global phase.
     params = parameters(ansatz)
-    for i=1:1000
-        println("Step = $i, loss = $(loss(u,ansatz))")
-        grad = gradient(ansatz->loss(u, ansatz), ansatz)[1]
-        update!(params, grad, optimizer)
-        dispatch!(ansatz, params)
-    end
+    g!(G, x) = (dispatch!(ansatz, x); G .= gradient(ansatz->loss(u, ansatz), ansatz)[1])
+    optimize(x->(dispatch!(ansatz, x); loss(u, ansatz)), g!, parameters(ansatz),
+                    LBFGS(), Optim.Options(iterations=niter))
+    println("final loss = $(loss(u,ansatz))")
     return ansatz
 end
 
 using Random
 Random.seed!(2)
 u = rand_unitary(4)
-using LinearAlgebra
-#u[:,1] .*= -conj(det(u))
-#@show det(u)
-c = learn_su4(u; optimizer=Adam(lr=0.005))
-det(mat(c))
+c = learn_u4(u)
