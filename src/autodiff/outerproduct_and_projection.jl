@@ -38,8 +38,8 @@ Base.adjoint(op::OuterProduct) = OuterProduct(conj(op.right), conj(op.left))
 
 outerprod(left::AbstractVector, right::AbstractVector) = OuterProduct(left, right)
 outerprod(left::AbstractMatrix, right::AbstractMatrix) = OuterProduct(left, right)
-outerprod(in::ArrayReg{1}, outδ::ArrayReg{1}) = outerprod(conj(statevec(in)), statevec(outδ))
-outerprod(in::ArrayReg{B}, outδ::ArrayReg{B}) where B = outerprod(conj(statevec(in)), statevec(outδ))
+outerprod(outδ::ArrayReg{1}, in::ArrayReg{1}) = outerprod(statevec(outδ), conj(statevec(in)))
+outerprod(outδ::ArrayReg{B}, in::ArrayReg{B}) where B = outerprod(statevec(outδ), conj(statevec(in)))
 
 
 """

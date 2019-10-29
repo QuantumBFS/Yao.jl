@@ -70,7 +70,7 @@ function apply_back!(st, block::PutBlock{N}, collector) where N
     out, outδ = st
     adjblock = block'
     in = apply!(out, adjblock)
-    adjmat = outerprod(in, outδ)
+    adjmat = outerprod(outδ, in)
     mat_back!(datatype(in), block, adjmat, collector)
     inδ = apply!(outδ, adjblock)
     return (in, inδ)
@@ -85,7 +85,7 @@ function apply_back!(st, block::ControlBlock{N}, collector) where N
     adjblock = block'
     in = apply!(out, adjblock)
     #adjm = adjcunmat(outerprod(in, outδ), N, block.ctrl_locs, block.ctrl_config, mat(content(block)), block.locs)
-    adjmat = outerprod(in, outδ)
+    adjmat = outerprod(outδ, in)
     mat_back!(datatype(in),block,adjmat,collector)
     inδ = apply!(outδ, adjblock)
     return (in, inδ)
@@ -95,7 +95,7 @@ function apply_back!(st, block::Daggered, collector)
     out, outδ = st
     adjblock = block'
     in = apply!(out, adjblock)
-    adjmat = outerprod(outδ, in)
+    adjmat = outerprod(in, outδ)
     mat_back!(datatype(in), content(block),adjmat,collector)
     inδ = apply!(outδ, adjblock)
     return (in, inδ)

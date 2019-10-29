@@ -15,9 +15,13 @@ function mat_back!(::Type{T}, rb::TimeEvolution{N}, adjy, collector) where {N,T}
     pushfirst!(collector, projection(rb.dt, sum(im.*adjy .* conj.(mat(rb.H)*mat(rb)))))
 end
 
+#=
 function mat_back!(::Type{T}, A::GeneralMatrixBlock, adjy, collector) where T
-    pushfirst!(collector,adjy)
+    for i in length(adjy):-1:1
+        pushfirst!(collector, adjy[i])
+    end
 end
+=#
 
 function mat_back!(::Type{T}, rb::PhaseGate, adjy, collector) where {T}
     s = exp(-im*rb.theta)

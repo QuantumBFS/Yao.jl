@@ -12,6 +12,7 @@ using Random
         @test test_apply_back(reg0, control(3, 2, 1=>shift(0.5)), 0.5; δ=1e-5)
         # dense matrix
         @test test_apply_back(reg0, put(3, 1=>cache(Rx(0.5))), 0.5; δ=1e-5)
+        @test test_apply_back(reg0, put(3, 1=>chain(Rz(0.5), Rx(0.8))), [0.5, 0.8]; δ=1e-5)
         @test test_apply_back(reg0, control(3, (2,3), 1=>Rx(0.5)), 0.5; δ=1e-5)
         # sparse matrix csc
         @test test_apply_back(reg0, put(3, (1,2)=>rot(SWAP, 0.5)), 0.5; δ=1e-5)
