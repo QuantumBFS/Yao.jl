@@ -13,10 +13,13 @@ TupleTools = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
 YaoBase = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
 
 [compat]
-BitBasis = "^0.6.0"
-LuxurySparse = "~0.5.0"
-YaoBase = "~0.11.0"
-julia = "^1.0.0"
+BitBasis = "~0.6"
+LuxurySparse = "~0.5"
+StaticArrays = "~0.11"
+StatsBase = "~0.32"
+YaoBase = "~0.11.1"
+TupleTools = "~1.2"
+julia = "1"
 
 [extras]
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
