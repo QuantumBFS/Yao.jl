@@ -1,6 +1,11 @@
 # Yao v0.6.0 Release Notes
 
 ## New Features
+
+- Symbolic Computation Support via [SymEngine](https://github.com/symengine/SymEngine.jl).
+- automatic differentiation support with reversibility based optimization
+- better CUDA performance in [CuYao](https://github.com/QuantumBFS/CuYao.jl)
+
 ## Core component package changes
 ### YaoBase changes
 
