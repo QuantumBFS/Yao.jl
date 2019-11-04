@@ -1,6 +1,6 @@
 name = "YaoBlocks"
 uuid = "418bc28f-b43b-5e0b-a6e7-61bbc1a2c1df"
-version = "0.7.2"
+version = "0.7.3"
 
 [deps]
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
@@ -27,7 +27,7 @@ LegibleLambdas = "~0.2"
 LuxurySparse = "~0.5"
 MLStyle = "~0.3"
 SimpleTraits = "~0.9"
-StaticArrays = "~0.11"
+StaticArrays = "~0.12"
 StatsBase = "~0.32"
 YaoArrayRegister = "~0.5.0"
 YaoBase = "~0.11.1"
