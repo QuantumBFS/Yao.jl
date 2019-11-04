@@ -12,6 +12,9 @@ U = mat(X)
     @test cnot(4, (1, 2), 3) == control(4, (1, 2), 3=>X)
     @test cnot((1, 2), 3)(4) == cnot(4, (1, 2), 3) # curried version
 
+    @test cz(4, (1, 2), 3) == control(4, (1, 2), 3=>Z)
+    @test cz((1, 2), 3)(4) == cz(4, (1, 2), 3)
+
     @test control(3=>X)((1, 2))(4) == control(4, (1, 2), 3=>X)
 end
 

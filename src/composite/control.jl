@@ -1,7 +1,7 @@
 using YaoArrayRegister
 using YaoArrayRegister: matvec
 
-export ControlBlock, control, cnot
+export ControlBlock, control, cnot, cz
 
 struct ControlBlock{N, BT<:AbstractBlock, C, M} <: AbstractContainer{BT, N}
     ctrl_locs::NTuple{C, Int}
@@ -121,7 +121,7 @@ julia> control(1, 2)
 control(ctrl_locs::Int...) = @λ(target -> control(ctrl_locs, target))
 
 """
-    cnot(n, ctrl_locs, location)
+    cnot([n, ]ctrl_locs, location)
 
 Return a speical [`ControlBlock`](@ref), aka CNOT gate with number of active qubits
 `n` and locs of control qubits `ctrl_locs`, and `location` of `X` gate.
@@ -140,6 +140,17 @@ julia> cnot(2, 1)
 """
 cnot(total::Int, ctrl_locs, locs::Int) = control(total, ctrl_locs, locs=>X)
 cnot(ctrl_locs, loc::Int) = @λ(n -> cnot(n, ctrl_locs, loc))
+
+"""
+    cz([n, ]ctrl_locs, location)
+
+Return a speical [`ControlBlock`](@ref), aka CZ gate with number of active qubits
+`n` and locs of control qubits `ctrl_locs`, and `location` of `Z` gate. See also
+[`cnot`](@ref).
+"""
+cz(total::Int, ctrl_locs, locs::Int) = control(total, ctrl_locs, locs=>Z)
+cz(ctrl_locs, loc::Int) = @λ(n -> cz(n, ctrl_locs, loc))
+
 
 mat(::Type{T}, c::ControlBlock{N, BT, C}) where {T, N, BT, C} = cunmat(N, c.ctrl_locs, c.ctrl_config, mat(T, c.content), c.locs)
 
