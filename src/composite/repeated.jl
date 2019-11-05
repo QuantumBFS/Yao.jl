@@ -16,6 +16,12 @@ function RepeatedBlock{N}(block::AbstractBlock{M}, locs::NTuple{C, Int}) where {
     return RepeatedBlock{N, C, typeof(block)}(block, locs)
 end
 
+function RepeatedBlock{N}(block::AbstractBlock{M}, locs::UnitRange{Int}) where {N, M}
+    (0 < locs.start) && (locs.stop <= N) || throw(LocationConflictError("locations conflict."))
+    return RepeatedBlock{N, length(locs), typeof(block)}(block, Tuple(locs))
+end
+
+
 function RepeatedBlock{N}(block::GT) where {N, M, GT <: AbstractBlock{M}}
     return RepeatedBlock{N, N, GT}(block, Tuple(1:M:N-M+1))
 end
@@ -72,6 +78,7 @@ Base.repeat(n::Int, x::AbstractBlock, locs::Int...) =
 Base.repeat(n::Int, x::AbstractBlock, locs::NTuple{C, Int}) where C =
     RepeatedBlock{n}(x, locs)
 Base.repeat(n::Int, x::AbstractBlock, locs) = repeat(n, x, locs...)
+Base.repeat(n::Int, x::AbstractBlock, locs::UnitRange) = RepeatedBlock{n}(x, locs)
 Base.repeat(n::Int, x::AbstractBlock) = RepeatedBlock{n}(x)
 Base.repeat(x::AbstractBlock) = @λ(n->repeat(n, x))
 
