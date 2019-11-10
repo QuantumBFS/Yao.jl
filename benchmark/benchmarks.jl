@@ -24,17 +24,20 @@ end
 
 for n in 5:5:25
     SUITE["composite"]["kron(rand_const)"] = bench(kron(rand([X, Y, Z, H]) for _ in 1:n))
-    SUITE["composite"]["kron(sparse_const)"] = bench(kron(n, k=>rand([X, Y, Z, H]) for k in randperm(n)[1:n÷5]))
-    SUITE["composite"]["swap"] = bench(swap(n,2,4))
-    SUITE["composite"]["swap"] = bench(pswap(n,2,4,0.5))
+    SUITE["composite"]["kron(sparse_const)"] = bench(kron(
+        n,
+        k => rand([X, Y, Z, H]) for k in randperm(n)[1:n÷5]
+    ))
+    SUITE["composite"]["swap"] = bench(swap(n, 2, 4))
+    SUITE["composite"]["swap"] = bench(pswap(n, 2, 4, 0.5))
 end
 
-function heisenberg(n::Int; periodic::Bool=true)
-    Sx(i) = put(n, i=>X)
-    Sy(i) = put(n, i=>Y)
-    Sz(i) = put(n, i=>Z)
+function heisenberg(n::Int; periodic::Bool = true)
+    Sx(i) = put(n, i => X)
+    Sy(i) = put(n, i => Y)
+    Sz(i) = put(n, i => Z)
 
-    return sum(1:(periodic ? n : n-1)) do i
+    return sum(1:(periodic ? n : n - 1)) do i
         j = mod1(i, n)
         Sx(i) * Sx(j) + Sy(i) * Sy(j) + Sz(i) * Sz(j)
     end

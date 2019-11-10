@@ -11,16 +11,16 @@ using SparseArrays, LinearAlgebra, LuxurySparse
 # since both of them are reflexive.
 const ConstGateDefaultType = ComplexF64
 const SYM_LIST = [
-    (:P0, sparse(ConstGateDefaultType[1 0;0 0])),
-    (:P1, sparse(ConstGateDefaultType[0 0;0 1])),
-    (:X, PermMatrix([2,1], ConstGateDefaultType[1+0im, 1])),
-    (:Y, PermMatrix([2,1], ConstGateDefaultType[-im, im])),
+    (:P0, sparse(ConstGateDefaultType[1 0; 0 0])),
+    (:P1, sparse(ConstGateDefaultType[0 0; 0 1])),
+    (:X, PermMatrix([2, 1], ConstGateDefaultType[1+0im, 1])),
+    (:Y, PermMatrix([2, 1], ConstGateDefaultType[-im, im])),
     (:Z, Diagonal(ConstGateDefaultType[1+0im, -1])),
     (:S, Diagonal(ConstGateDefaultType[1, im])),
     (:Sdag, Diagonal(ConstGateDefaultType[1, -im])),
-    (:T, Diagonal(ConstGateDefaultType[1, exp(π*im/4)])),
-    (:Tdag, Diagonal(ConstGateDefaultType[1, exp(-π*im/4)])),
-    (:I2, IMatrix{2, ConstGateDefaultType}()),
+    (:T, Diagonal(ConstGateDefaultType[1, exp(π * im / 4)])),
+    (:Tdag, Diagonal(ConstGateDefaultType[1, exp(-π * im / 4)])),
+    (:I2, IMatrix{2,ConstGateDefaultType}()),
     (:H, (elem = 1 / sqrt(2); ConstGateDefaultType[elem elem; elem -elem])),
     (:CNOT, PermMatrix([1, 4, 3, 2], ones(ConstGateDefaultType, 4))),
     (:CZ, Diagonal(ConstGateDefaultType[1, 1, 1, -1])),

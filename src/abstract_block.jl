@@ -22,7 +22,8 @@ Apply a block (of quantum circuit) to a quantum register.
     _apply_fallback!(r, b)
 end
 
-_apply_fallback!(r::AbstractRegister, b::AbstractBlock) = throw(NotImplementedError(:_apply_fallback!, (r, b)))
+_apply_fallback!(r::AbstractRegister, b::AbstractBlock) =
+    throw(NotImplementedError(:_apply_fallback!, (r, b)))
 
 function _apply_fallback!(r::ArrayReg{B,T}, b::AbstractBlock) where {B,T}
     _check_size(r, b)
@@ -82,7 +83,8 @@ Change the sub-blocks of a [`CompositeBlock`](@ref) with given iterator `itr`.
 
 Transform the apply! function of specific block to dense matrix.
 """
-@interface applymatrix(T, g::AbstractBlock) = linop2dense(T, r->statevec(apply!(ArrayReg(r), g)), nqubits(g))
+@interface applymatrix(T, g::AbstractBlock) =
+    linop2dense(T, r -> statevec(apply!(ArrayReg(r), g)), nqubits(g))
 applymatrix(g::AbstractBlock) = applymatrix(ComplexF64, g)
 # just use BlockMap maybe? No!
 
@@ -99,24 +101,24 @@ Base.copy(x::AbstractBlock) = x
 Returns the matrix form of given block.
 """
 @interface mat(x::AbstractBlock) = mat(ComplexF64, x)
-@interface mat(::Type{T}, x::AbstractBlock) where T
+@interface mat(::Type{T}, x::AbstractBlock) where {T}
 
 mat_matchreg(reg::AbstractRegister, x::AbstractBlock) = mat(x)
 mat_matchreg(reg::ArrayReg{B,T}, x::AbstractBlock) where {B,T} = mat(T, x)
 
-Base.Matrix{T}(x::AbstractBlock) where T = Matrix(mat(T, x))
+Base.Matrix{T}(x::AbstractBlock) where {T} = Matrix(mat(T, x))
 
 # YaoBase interface
-YaoBase.nqubits(::Type{<:AbstractBlock{N}}) where N = N
-YaoBase.nqubits(x::AbstractBlock{N}) where N = nqubits(typeof(x))
+YaoBase.nqubits(::Type{<:AbstractBlock{N}}) where {N} = N
+YaoBase.nqubits(x::AbstractBlock{N}) where {N} = nqubits(typeof(x))
 
 # properties
 for each_property in [:isunitary, :isreflexive, :ishermitian]
     @eval YaoBase.$each_property(x::AbstractBlock) = $each_property(mat(x))
-    @eval YaoBase.$each_property(::Type{T}) where T <: AbstractBlock = $each_property(mat(T))
+    @eval YaoBase.$each_property(::Type{T}) where {T<:AbstractBlock} = $each_property(mat(T))
 end
 
-function iscommute_fallback(op1::AbstractBlock{N}, op2::AbstractBlock{N}) where N
+function iscommute_fallback(op1::AbstractBlock{N}, op2::AbstractBlock{N}) where {N}
     if length(intersect(occupied_locs(op1), occupied_locs(op2))) == 0
         return true
     else
@@ -124,7 +126,7 @@ function iscommute_fallback(op1::AbstractBlock{N}, op2::AbstractBlock{N}) where 
     end
 end
 
-YaoBase.iscommute(op1::AbstractBlock{N}, op2::AbstractBlock{N}) where N =
+YaoBase.iscommute(op1::AbstractBlock{N}, op2::AbstractBlock{N}) where {N} =
     iscommute_fallback(op1, op2)
 
 # parameters
@@ -143,8 +145,9 @@ Set the parameters of `block`.
 """
 @interface setiparams!(x::AbstractBlock, args...) = x
 
-setiparams!(x::AbstractBlock, it::Union{Tuple, AbstractArray, Base.Generator}) = setiparams!(x, it...)
-setiparams!(x::AbstractBlock, a::Number, xs::Number...) = error("setparams!(x, θ...) is not implemented")
+setiparams!(x::AbstractBlock, it::Union{Tuple,AbstractArray,Base.Generator}) = setiparams!(x, it...)
+setiparams!(x::AbstractBlock, a::Number, xs::Number...) =
+    error("setparams!(x, θ...) is not implemented")
 setiparams!(x::AbstractBlock, it::Symbol) = setiparams!(x, render_params(x, it))
 
 """
@@ -152,7 +155,8 @@ setiparams!(x::AbstractBlock, it::Symbol) = setiparams!(x, render_params(x, it))
 
 Set parameters of `block` to the value in `collection` mapped by `f`.
 """
-setiparams!(f::Function, x::AbstractBlock, it) = setiparams!(x, map(x->f(x...), zip(getiparams(x), it)))
+setiparams!(f::Function, x::AbstractBlock, it) =
+    setiparams!(x, map(x -> f(x...), zip(getiparams(x), it)))
 setiparams!(f::Nothing, x::AbstractBlock, it) = setiparams!(x, it)
 
 """
@@ -248,7 +252,7 @@ function consume!(d::Dispatcher{<:Number}, n::Int)
     end
 end
 
-@interface function dispatch!(f::Union{Function, Nothing}, x::AbstractBlock, it::Dispatcher)
+@interface function dispatch!(f::Union{Function,Nothing}, x::AbstractBlock, it::Dispatcher)
     setiparams!(f, x, consume!(it, niparams(x)))
     for each in subblocks(x)
         dispatch!(f, each, it)
@@ -265,7 +269,7 @@ Dispatch parameters in collection to block tree `x`.
 
     it will try to dispatch the parameters in collection first.
 """
-@interface function dispatch!(f::Union{Function, Nothing}, x::AbstractBlock, it)
+@interface function dispatch!(f::Union{Function,Nothing}, x::AbstractBlock, it)
     dp = Dispatcher(it)
     res = dispatch!(f, x, dp)
     @assert (it isa Symbol || length(it) == dp.loc) "expect $(dp.loc) parameters, got $(length(it))"
@@ -304,7 +308,7 @@ end
 
 render_params(r::AbstractBlock, params) = params
 render_params(r::AbstractBlock, params::Symbol) = render_params(r, Val(params))
-render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i=1:niparams(r))
+render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i in 1:niparams(r))
 render_params(r::AbstractBlock, ::Val{:zero}) = (zero(iparams_eltype(r)) for i in 1:niparams(r))
 
 """
@@ -312,9 +316,9 @@ render_params(r::AbstractBlock, ::Val{:zero}) = (zero(iparams_eltype(r)) for i i
 
 Trait that block `X` has parameters.
 """
-@traitdef HasParameters{X <: AbstractBlock}
+@traitdef HasParameters{X<:AbstractBlock}
 
-@generated function SimpleTraits.trait(::Type{HasParameters{X}}) where X
+@generated function SimpleTraits.trait(::Type{HasParameters{X}}) where {X}
     hasmethod(parameters, Tuple{X}) ? :(HasParameters{X}) : :(Not{HasParameters{X}})
 end
 
@@ -335,6 +339,6 @@ use the returns of [`parameters`](@ref) as its key.
 """
 @interface cache_key(x::AbstractBlock)
 
-function _check_size(r::AbstractRegister, pb::AbstractBlock{N}) where N
+function _check_size(r::AbstractRegister, pb::AbstractBlock{N}) where {N}
     N == nactive(r) || throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
 end

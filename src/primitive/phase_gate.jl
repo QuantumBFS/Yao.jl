@@ -31,7 +31,7 @@ phase(0.1)
 """
 phase(θ::Real) = PhaseGate(θ)
 
-mat(::Type{T}, gate::PhaseGate) where T = exp(T(im * gate.theta)) * IMatrix{2, T}()
+mat(::Type{T}, gate::PhaseGate) where {T} = exp(T(im * gate.theta)) * IMatrix{2,T}()
 
 # parametric interface
 niparams(::Type{<:PhaseGate}) = 1
@@ -48,7 +48,7 @@ function YaoBase.isunitary(r::PhaseGate)
 end
 
 Base.adjoint(blk::PhaseGate) = PhaseGate(-blk.theta)
-Base.copy(block::PhaseGate{T}) where T = PhaseGate{T}(block.theta)
+Base.copy(block::PhaseGate{T}) where {T} = PhaseGate{T}(block.theta)
 Base.:(==)(lhs::PhaseGate, rhs::PhaseGate) = lhs.theta == rhs.theta
 
 cache_key(gate::PhaseGate) = gate.theta

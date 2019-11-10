@@ -17,7 +17,7 @@ abstract type CompositeBlock{N} <: AbstractBlock{N} end
 Abstract type for container block. Container blocks are blocks contain a single
 block. Container block should have a
 """
-abstract type AbstractContainer{BT <: AbstractBlock, N} <: CompositeBlock{N} end
+abstract type AbstractContainer{BT<:AbstractBlock,N} <: CompositeBlock{N} end
 
 """
     content(x)
@@ -34,7 +34,7 @@ Create a similar block of `x` and change its content to blk.
 """
 @interface chcontent(x::AbstractContainer, blk) = chsubblocks(x, blk)
 
-subblocks(x::AbstractContainer) = (content(x), )
+subblocks(x::AbstractContainer) = (content(x),)
 # NOTE: there's only one block inside, so we expand the iterator
 # this would error if there's more than one block in it. But will
 # work if there exactly one block.
@@ -43,7 +43,8 @@ chsubblocks(x::AbstractContainer, it) = chsubblocks(x, it...)
 # throw better error msg when no chsubblocks is overloaded
 # for this container block
 # since every AbstractContainer should overload this method
-chsubblocks(x::AbstractContainer, it::AbstractBlock) = throw(NotImplementedError(:chsubblocks, (x, it)))
+chsubblocks(x::AbstractContainer, it::AbstractBlock) =
+    throw(NotImplementedError(:chsubblocks, (x, it)))
 
 # TODO:
 #   - use simple traits instead
@@ -72,8 +73,7 @@ for METHOD in (:ishermitian, :isreflexive, :isunitary)
     end
 end
 
-function Base.:(==)(lhs::AbstractContainer{BT, N},
-        rhs::AbstractContainer{BT, N}) where {BT, N}
+function Base.:(==)(lhs::AbstractContainer{BT,N}, rhs::AbstractContainer{BT,N}) where {BT,N}
     return content(lhs) == content(rhs)
 end
 
@@ -86,9 +86,9 @@ include("concentrator.jl")
 include("reduce.jl")
 include("pauli_strings.jl")
 
-chsubblocks(x::ChainBlock, it::AbstractBlock) = chsubblocks(x, (it, ))
-chsubblocks(x::KronBlock, it::AbstractBlock) = chsubblocks(x, (it, ))
-chsubblocks(x::Add, it::AbstractBlock) = chsubblocks(x, (it, ))
+chsubblocks(x::ChainBlock, it::AbstractBlock) = chsubblocks(x, (it,))
+chsubblocks(x::KronBlock, it::AbstractBlock) = chsubblocks(x, (it,))
+chsubblocks(x::Add, it::AbstractBlock) = chsubblocks(x, (it,))
 
 # tag blocks
 include("tag/tag.jl")

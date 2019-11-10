@@ -4,20 +4,20 @@ using Test, YaoBlocks, YaoArrayRegister
     # NOTE: type should follow the axis
     @test RotationGate(X, 0.1) isa PrimitiveBlock{1}
 
-    @test Rx(T(0.1)) isa RotationGate{1, T, XGate}
-    @test Ry(T(0.1)) isa RotationGate{1, T, YGate}
-    @test Rz(T(0.1)) isa RotationGate{1, T, ZGate}
+    @test Rx(T(0.1)) isa RotationGate{1,T,XGate}
+    @test Ry(T(0.1)) isa RotationGate{1,T,YGate}
+    @test Rz(T(0.1)) isa RotationGate{1,T,ZGate}
 end
 
 @testset "test matrix" begin
     theta = 2.0
     for (DIRECTION, MAT) in [
-        (X, [cos(theta/2) -im*sin(theta/2); -im*sin(theta/2) cos(theta/2)]),
-        (Y, [cos(theta/2) -sin(theta/2); sin(theta/2) cos(theta/2)]),
-        (Z, [exp(-im*theta/2) 0;0 exp(im*theta/2)]),
-        (CNOT, exp(-mat(CNOT)/2*theta*im |> Matrix)),
-        (control(2, (1,), 2=>X), exp(-mat(CNOT)/2*theta*im |> Matrix))]
-
+        (X, [cos(theta / 2) -im * sin(theta / 2); -im * sin(theta / 2) cos(theta / 2)]),
+        (Y, [cos(theta / 2) -sin(theta / 2); sin(theta / 2) cos(theta / 2)]),
+        (Z, [exp(-im * theta / 2) 0; 0 exp(im * theta / 2)]),
+        (CNOT, exp(-mat(CNOT) / 2 * theta * im |> Matrix)),
+        (control(2, (1,), 2 => X), exp(-mat(CNOT) / 2 * theta * im |> Matrix)),
+    ]
         @test mat(RotationGate(DIRECTION, theta)) ≈ MAT
     end
 end
@@ -42,7 +42,7 @@ end
     @test Rx(0.1)' == Rx(-0.1)
     @test Rx(0.2)' == Rx(-0.2)
     @test copy(Rx(0.1)) == Rx(0.1)
-    
+
     g = Rx(0.1) # creates a new one
     @test copy(g) !== g
 end
@@ -54,6 +54,6 @@ end
     g = Rx(0.1 + 1im)
     @test @test_logs (
         :warn,
-        "θ in RotationGate is not real, got θ=$(g.theta), fallback to matrix-based method"
-        ) isunitary(g) == false
+        "θ in RotationGate is not real, got θ=$(g.theta), fallback to matrix-based method",
+    ) isunitary(g) == false
 end

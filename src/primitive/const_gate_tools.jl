@@ -131,9 +131,15 @@ function define_struct(__module__::Module, __source__::LineNumberNode, const_bin
     if isdefined(__module__, gt_name)
         msg = "$(string(gt_name)) is already defined, overwritten by new definition at $__source__"
         push!(ex.args, :(@warn $msg))
-        push!(ex.args, :(@eval $__module__ @assert $N == $log2i(size(mat($name), 1)) "new constant does not have the same size with previous definitions"))
+        push!(
+            ex.args,
+            :(@eval $__module__ @assert $N == $log2i(size(mat($name), 1)) "new constant does not have the same size with previous definitions"),
+        )
     else
-        push!(ex.args, :(@eval $__module__ Base.@__doc__ struct $gt_name <: YaoBlocks.ConstGate.ConstantGate{$N} end))
+        push!(
+            ex.args,
+            :(@eval $__module__ Base.@__doc__ struct $gt_name <: YaoBlocks.ConstGate.ConstantGate{$N} end),
+        )
     end
     push!(ex.args, :(@eval $__module__ Base.@__doc__ const $(name) = $(gt_name)()))
     return ex
@@ -168,9 +174,9 @@ function define_methods(__module__::Module, const_binding, name)
         @eval $__module__ begin
             YaoBlocks.mat(::Type{eltype($const_binding)}, ::Type{$gt_name}) = $const_binding
             # forward instance to const gate type
-            YaoBlocks.mat(::Type{T}, ::GT) where {T, GT <: $gt_name} = YaoBlocks.mat(T, GT)
+            YaoBlocks.mat(::Type{T}, ::GT) where {T,GT<:$gt_name} = YaoBlocks.mat(T, GT)
 
-            function YaoBlocks.mat(::Type{T}, ::Type{$gt_name}) where T
+            function YaoBlocks.mat(::Type{T}, ::Type{$gt_name}) where {T}
                 src = YaoBlocks.mat(eltype($const_binding), $gt_name)
                 dst = similar(src, T)
                 copyto!(dst, src)
@@ -192,7 +198,7 @@ function define_properties(__module__::Module, const_binding, name)
             @eval $__module__ begin
                 const $flag = YaoBlocks.$property($const_binding)
                 YaoBlocks.$property(::$gt_name) = $flag
-                YaoBlocks.$property(::Type{GT}) where GT <: $gt_name = $flag
+                YaoBlocks.$property(::Type{GT}) where {GT<:$gt_name} = $flag
             end
         end
     end

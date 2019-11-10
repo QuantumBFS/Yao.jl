@@ -29,7 +29,7 @@ end
 end
 
 @testset "test reflect gate" begin
-   include("reflect_gate.jl") 
+    include("reflect_gate.jl")
 end
 
 @testset "test measure" begin

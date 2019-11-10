@@ -2,7 +2,7 @@ using Test, YaoBlocks, YaoArrayRegister
 using YaoBlocks.ConstGate
 
 @testset "construct" begin
-    @test_throws AssertionError put(2, 1=>swap(2, 1, 2))
+    @test_throws AssertionError put(2, 1 => swap(2, 1, 2))
 end
 
 @testset "apply!" begin
@@ -18,19 +18,19 @@ end
 
     pb = PutBlock{n}(rot(CNOT, 0.3), (6, 3))
     @test pb |> applymatrix ≈ mat(pb)
-    pb = PutBlock{n}(matblock(mat(rot(CNOT, 0.3))|>Matrix), (6, 3))
+    pb = PutBlock{n}(matblock(mat(rot(CNOT, 0.3)) |> Matrix), (6, 3))
     @test pb |> applymatrix ≈ mat(pb)
 
     pb = PutBlock{n}(rot(X, 0.3), (3,))
     @test pb |> applymatrix ≈ mat(pb)
-    pb = PutBlock{n}(matblock(mat(rot(X, 0.3))|>Matrix), (3,))
+    pb = PutBlock{n}(matblock(mat(rot(X, 0.3)) |> Matrix), (3,))
     @test pb |> applymatrix ≈ mat(pb)
 
-    Cb = control(n, (3,), 5=>X)
+    Cb = control(n, (3,), 5 => X)
     pb = PutBlock{n}(CNOT, (3, 5))
     @test apply!(copy(Reg), Cb) ≈ apply!(copy(Reg), pb)
 
-    blks = [control(2, 1, 2=>Z)]
+    blks = [control(2, 1, 2 => Z)]
     @test (chsubblocks(pb, blks) |> subblocks .== blks) |> all
 
     pb = PutBlock{1000}(X, (3,))
@@ -45,7 +45,7 @@ end
 
 @testset "rotation gate" begin
     reg = rand_state(5)
-    @test apply!(copy(reg), put(5, 2=>Rx(0.3))) |> state ≈ mat(put(5, 2=>Rx(0.3)))*reg.state
-    @test apply!(copy(reg), put(5, 2=>Ry(0.3))) |> state ≈ mat(put(5, 2=>Ry(0.3)))*reg.state
-    @test apply!(copy(reg), put(5, 2=>Rz(0.3))) |> state ≈ mat(put(5, 2=>Rz(0.3)))*reg.state
+    @test apply!(copy(reg), put(5, 2 => Rx(0.3))) |> state ≈ mat(put(5, 2 => Rx(0.3))) * reg.state
+    @test apply!(copy(reg), put(5, 2 => Ry(0.3))) |> state ≈ mat(put(5, 2 => Ry(0.3))) * reg.state
+    @test apply!(copy(reg), put(5, 2 => Rz(0.3))) |> state ≈ mat(put(5, 2 => Rz(0.3))) * reg.state
 end

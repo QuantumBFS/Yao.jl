@@ -33,7 +33,7 @@ shift(0.1)
 ```
 """
 shift(θ) = ShiftGate(θ)
-mat(::Type{T}, gate::ShiftGate) where T = Diagonal(T[1.0, exp(im * gate.theta)])
+mat(::Type{T}, gate::ShiftGate) where {T} = Diagonal(T[1.0, exp(im * gate.theta)])
 
 cache_key(gate::ShiftGate) = gate.theta
 
@@ -44,7 +44,7 @@ setiparams!(r::ShiftGate, param::Number) = (r.theta = param; r)
 
 
 Base.adjoint(blk::ShiftGate) = ShiftGate(-blk.theta)
-Base.copy(block::ShiftGate{T}) where T = ShiftGate{T}(block.theta)
+Base.copy(block::ShiftGate{T}) where {T} = ShiftGate{T}(block.theta)
 Base.:(==)(lhs::ShiftGate, rhs::ShiftGate) = lhs.theta == rhs.theta
 
 # fallback to matrix method if it is not real

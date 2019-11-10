@@ -5,7 +5,7 @@ struct AddressInfo
     addresses::Vector{Int}
 end
 Base.copy(info::AddressInfo) = AddressInfo(copy(info.addresses))
-Base.:/(locs, info::AddressInfo) = map(loc->info.addresses[loc], locs)
+Base.:/(locs, info::AddressInfo) = map(loc -> info.addresses[loc], locs)
 Base.:/(locs::AllLocs, info::AddressInfo) = info.addresses
 
 """
@@ -49,8 +49,14 @@ function map_address(block::AbstractBlock, info::AddressInfo)
 end
 
 function map_address(blk::Measure, info::AddressInfo)
-    m = Measure(info.nbits; rng=blk.rng, operator=blk.operator, locs=blk.locations/info,
-        collapseto=blk.collapseto, remove=blk.remove)
+    m = Measure(
+        info.nbits;
+        rng = blk.rng,
+        operator = blk.operator,
+        locs = blk.locations / info,
+        collapseto = blk.collapseto,
+        remove = blk.remove,
+    )
     if isdefined(blk, :results)
         m.results = blk.results
     end
@@ -58,26 +64,26 @@ function map_address(blk::Measure, info::AddressInfo)
 end
 
 map_address(blk::PrimitiveBlock, info::AddressInfo) = blk
-map_address(blk::PutBlock, info::AddressInfo) = put(info.nbits, blk.locs/info=>content(blk))
+map_address(blk::PutBlock, info::AddressInfo) = put(info.nbits, blk.locs / info => content(blk))
 
 function map_address(blk::ControlBlock, info::AddressInfo)
-    ControlBlock{info.nbits}(blk.ctrl_locs/info, blk.ctrl_config, content(blk), blk.locs/info)
+    ControlBlock{info.nbits}(blk.ctrl_locs / info, blk.ctrl_config, content(blk), blk.locs / info)
 end
 
 function map_address(blk::KronBlock, info::AddressInfo)
-    kron(info.nbits, [l=>G for (l,G) in zip(blk.locs/info, blk.blocks)]...)
+    kron(info.nbits, [l => G for (l, G) in zip(blk.locs / info, blk.blocks)]...)
 end
 
 function map_address(blk::RepeatedBlock, info::AddressInfo)
-    repeat(info.nbits, content(blk), blk.locs/info)
+    repeat(info.nbits, content(blk), blk.locs / info)
 end
 
 function map_address(blk::Concentrator, info::AddressInfo)
-    concentrate(info.nbits, content(blk), blk.locs/info)
+    concentrate(info.nbits, content(blk), blk.locs / info)
 end
 
 function map_address(blk::ChainBlock, info::AddressInfo)
-    chain(info.nbits, map(b->map_address(b, info), subblocks(blk)))
+    chain(info.nbits, map(b -> map_address(b, info), subblocks(blk)))
 end
 
 function map_address(blk::Daggered, info::AddressInfo)
@@ -93,5 +99,5 @@ function map_address(blk::Scale, info::AddressInfo)
 end
 
 function map_address(blk::Add, info::AddressInfo)
-    Add{info.nbits}(map(b->map_address(b, info), subblocks(blk)))
+    Add{info.nbits}(map(b -> map_address(b, info), subblocks(blk)))
 end

@@ -1,12 +1,12 @@
 using Test, YaoBlocks, YaoArrayRegister
 using YaoBlocks: BlockMap
 
-function heisenberg(n::Int; periodic::Bool=true)
-    Sx(i) = put(n, i=>X)
-    Sy(i) = put(n, i=>Y)
-    Sz(i) = put(n, i=>Z)
+function heisenberg(n::Int; periodic::Bool = true)
+    Sx(i) = put(n, i => X)
+    Sy(i) = put(n, i => Y)
+    Sz(i) = put(n, i => Z)
 
-    res = map(1:(periodic ? n : n-1)) do i
+    res = map(1:(periodic ? n : n - 1)) do i
         j = mod1(i, n)
         Sx(i) * Sx(j) + Sy(i) * Sy(j) + Sz(i) * Sz(j)
     end
@@ -59,7 +59,7 @@ end
 end
 
 @testset "block map" begin
-    @test BlockMap(ComplexF64, X) isa BlockMap{ComplexF64, typeof(X)}
+    @test BlockMap(ComplexF64, X) isa BlockMap{ComplexF64,typeof(X)}
 
     @test BlockMap(ComplexF64, X).block === X
 

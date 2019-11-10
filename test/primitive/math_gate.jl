@@ -10,7 +10,9 @@ end
 
 return a peridoc shift function.
 """
-pshift(n::Int) = function (b::BitStr{N}) where N mod(b+n, 1<<N) end
+pshift(n::Int) = function (b::BitStr{N}) where {N}
+    mod(b + n, 1 << N)
+end
 
 @testset "test toffli" begin
     g = mathgate(3, toffli)
@@ -31,7 +33,7 @@ end
     ab = mathgate(nbits, pshift(3))
     mb = mathgate(nbits, pshift(-3))
     @test apply!(zero_state(nbits), ab) == product_state(nbits, 3)
-    @test apply!(zero_state(nbits), mb) == product_state(nbits, 1<<nbits-3)
+    @test apply!(zero_state(nbits), mb) == product_state(nbits, 1 << nbits - 3)
     @test applymatrix(ab) ≈ mat(ab)
     @test isunitary(ab)
 

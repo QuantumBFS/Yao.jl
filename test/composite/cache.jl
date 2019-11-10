@@ -1,10 +1,13 @@
 using Test, YaoBlocks, YaoArrayRegister, LuxurySparse, CacheServers
 
 @testset "constructor" begin
-    @test CacheFragment(X) isa CacheFragment{XGate, UInt8, Any}
-    @test CacheFragment{XGate, Int, PermMatrix{ComplexF64, Int}}(X) isa
-        CacheFragment{XGate, Int, PermMatrix{ComplexF64, Int}}
-    @test CacheFragment{XGate, Int}(X) isa CacheFragment{XGate, Int, Any}
+    @test CacheFragment(X) isa CacheFragment{XGate,UInt8,Any}
+    @test CacheFragment{XGate,Int,PermMatrix{ComplexF64,Int}}(X) isa CacheFragment{
+        XGate,
+        Int,
+        PermMatrix{ComplexF64,Int},
+    }
+    @test CacheFragment{XGate,Int}(X) isa CacheFragment{XGate,Int,Any}
 end
 
 @testset "CacheServer API" begin
@@ -15,13 +18,13 @@ end
     @test_throws KeyError pull(frag)
 end
 
-test_server = DefaultServer{AbstractBlock, CacheFragment}()
+test_server = DefaultServer{AbstractBlock,CacheFragment}()
 
 @testset "constructor" begin
     c = CachedBlock(test_server, X, 2)
-    @test c isa CachedBlock{DefaultServer{AbstractBlock, CacheFragment}, XGate, 1}
+    @test c isa CachedBlock{DefaultServer{AbstractBlock,CacheFragment},XGate,1}
 
-    blk = kron(4, 2=>Rx(0.3))
+    blk = kron(4, 2 => Rx(0.3))
     @test first(chsubblocks(c, blk) |> subblocks) == blk
 end
 
@@ -48,7 +51,7 @@ end
 end
 
 @testset "direct inherited methods" begin
-    g = kron(4, 1=>X, 3=>Y)
+    g = kron(4, 1 => X, 3 => Y)
     g = CachedBlock(test_server, g, 2)
 
     @test g[1] isa XGate

@@ -44,18 +44,17 @@ end
     Toffoli_R = PermMatrix([1, 2, 3, 4, 5, 6, 8, 7], ones(ComplexF64, 8))
 
     for (each, MAT) in [
-        (X, [0 1;1 0]),
+        (X, [0 1; 1 0]),
         (Y, [0 -im; im 0]),
-        (Z, [1 0;0 -1]),
+        (Z, [1 0; 0 -1]),
         (H, (elem = 1 / sqrt(2); [elem elem; elem -elem])),
     ]
-
         @test mat(each) ≈ MAT
 
     end
     @test mat(CNOT) |> invorder == CNOT_R
     @test mat(Toffoli) |> invorder == Toffoli_R
-    @test mat(T)*mat(T) ≈ mat(S)
+    @test mat(T) * mat(T) ≈ mat(S)
 
     @test mat(T)' ≈ mat(T')
     @test mat(Tdag)' ≈ mat(Tdag')
@@ -91,7 +90,7 @@ end
 
 @testset "I gate" begin
     g = ConstGate.IGate{2}()
-    @test mat(g) ≈ IMatrix{4, ComplexF64}()
+    @test mat(g) ≈ IMatrix{4,ComplexF64}()
     @test ishermitian(g)
     @test isunitary(g)
 end

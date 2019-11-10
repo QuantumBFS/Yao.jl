@@ -25,8 +25,11 @@ function replace_block(actor, tree::AbstractBlock)
     end
 end
 
-function replace_block(pair::Pair{ST, TT}, tree::AbstractBlock) where {ST<:AbstractBlock, TT<:AbstractBlock}
-    replace_block(x->(x == pair.first ? pair.second : nothing), tree)
+function replace_block(
+    pair::Pair{ST,TT},
+    tree::AbstractBlock,
+) where {ST<:AbstractBlock,TT<:AbstractBlock}
+    replace_block(x -> (x == pair.first ? pair.second : nothing), tree)
 end
 
 
@@ -49,7 +52,7 @@ Check if `x` is an element of pauli group.
     this function is just a binding of `SimpleTraits.istrait`, it will not work
     if the type is not registered as a trait with `@traitimpl`.
 """
-is_pauli(x::T) where T = SimpleTraits.istrait(IsPauliGroup{T})
+is_pauli(x::T) where {T} = SimpleTraits.istrait(IsPauliGroup{T})
 is_pauli(xs...) = all(is_pauli, xs)
 
 for G in [:I2, :X, :Y, :Z]
@@ -112,8 +115,8 @@ export eliminate_nested
 eliminate_nested(ex::AbstractBlock) = ex
 
 # TODO: eliminate nested expr e.g chain(X, chain(X, Y))
-function eliminate_nested(ex::T) where {T <: Union{ChainBlock, Add}}
-    _flatten(x) = (x, )
+function eliminate_nested(ex::T) where {T<:Union{ChainBlock,Add}}
+    _flatten(x) = (x,)
     _flatten(x::T) = subblocks(x)
 
     isone(length(ex)) && return first(subblocks(ex))
@@ -125,24 +128,24 @@ _unscale(x::AbstractBlock) = x
 _unscale(x::Scale) = content(x)
 merge_alpha(alpha, x::AbstractBlock) = alpha
 merge_alpha(alpha, x::Scale) = alpha * x.alpha
-merge_alpha(alpha, x::Scale{Val{S}}) where S = alpha * S
+merge_alpha(alpha, x::Scale{Val{S}}) where {S} = alpha * S
 
 # since we don't have T in blocks, this is a workaround
 # to get correct identity in type stable term
 merge_alpha(::Nothing, x::Scale) = x.alpha
-merge_alpha(::Nothing, x::Scale{Val{S}}) where S = S
+merge_alpha(::Nothing, x::Scale{Val{S}}) where {S} = S
 merge_alpha(::Nothing, x::AbstractBlock) = nothing
 
 merge_scale(ex::AbstractBlock) = ex
 
 # a simple function to find one for Val and Number
 _one(x) = one(x)
-_one(::Type{Val{S}}) where S = one(S)
-_one(::Val{S}) where S = one(S)
+_one(::Type{Val{S}}) where {S} = one(S)
+_one(::Val{S}) where {S} = one(S)
 
 export merge_scale
 
-function merge_scale(ex::Union{Scale{S, N}, ChainBlock{N}}) where {S, N}
+function merge_scale(ex::Union{Scale{S,N},ChainBlock{N}}) where {S,N}
     alpha = nothing
     for each in subblocks(ex)
         alpha = merge_alpha(alpha, each)
@@ -162,11 +165,12 @@ combine_similar(ex::AbstractBlock) = ex
 combine_alpha(alpha, x) = alpha
 combine_alpha(alpha, x::AbstractBlock) = alpha + 1
 combine_alpha(alpha, x::Scale) = alpha + x.alpha
-combine_alpha(alpha, x::Scale{Val{S}}) where S = alpha + S
+combine_alpha(alpha, x::Scale{Val{S}}) where {S} = alpha + S
 
-function combine_similar(ex::Add{N}) where N
+function combine_similar(ex::Add{N}) where {N}
     table = zeros(Bool, length(ex))
-    list = []; p = 1
+    list = []
+    p = 1
     while p <= length(ex)
         if table[p] == true
             # checked term, skip
@@ -212,7 +216,8 @@ const __default_simplification_rules__ = Function[
     merge_pauli,
     eliminate_nested,
     merge_scale,
-    combine_similar]
+    combine_similar,
+]
 
 # Inspired by MasonPotter/Symbolics.jl
 """
@@ -221,7 +226,7 @@ const __default_simplification_rules__ = Function[
 Simplify a block tree accroding to given rules, default to use
 [`__default_simplification_rules__`](@ref).
 """
-function simplify(ex::AbstractBlock; rules=__default_simplification_rules__)
+function simplify(ex::AbstractBlock; rules = __default_simplification_rules__)
     out1 = simplify_pass(rules, ex)
     out2 = simplify_pass(rules, out1)
     counter = 1
@@ -238,7 +243,7 @@ function simplify(ex::AbstractBlock; rules=__default_simplification_rules__)
 end
 
 function simplify_pass(rules, ex)
-    ex = chsubblocks(ex, map(x->simplify_pass(rules, x), subblocks(ex)))
+    ex = chsubblocks(ex, map(x -> simplify_pass(rules, x), subblocks(ex)))
 
     for rule in rules
         ex = rule(ex)

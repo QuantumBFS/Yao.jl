@@ -2,11 +2,11 @@ import StaticArrays: SizedVector
 export PauliString
 
 # TODO: expand to Clifford?
-struct PauliString{N, BT <: ConstantGate{1}, VT <: SizedVector{N, BT}} <: CompositeBlock{N}
+struct PauliString{N,BT<:ConstantGate{1},VT<:SizedVector{N,BT}} <: CompositeBlock{N}
     blocks::VT
-    function PauliString(blocks::SizedVector{N, BT}) where {N, BT <: ConstantGate{1}}
+    function PauliString(blocks::SizedVector{N,BT}) where {N,BT<:ConstantGate{1}}
         @warn "`PauliString` will be moved to `YaoExtensions.jl` in the next release."
-        new{N, BT, typeof(blocks)}(blocks)
+        new{N,BT,typeof(blocks)}(blocks)
     end
 end
 
@@ -31,7 +31,7 @@ PauliString
 └─ Z gate
 ```
 """
-PauliString(xs::PauliGate...) = PauliString(SizedVector{length(xs), PauliGate}(xs))
+PauliString(xs::PauliGate...) = PauliString(SizedVector{length(xs),PauliGate}(xs))
 
 """
     PauliString(list::Vector)
@@ -57,14 +57,14 @@ function PauliString(xs::Vector)
             error("expect pauli gates")
         end
     end
-    return PauliString(SizedVector{length(xs), PauliGate}(xs))
+    return PauliString(SizedVector{length(xs),PauliGate}(xs))
 end
 
 subblocks(ps::PauliString) = ps.blocks
 chsubblocks(pb::PauliString, blocks::Vector) = PauliString(blocks)
 chsubblocks(pb::PauliString, it) = PauliString(collect(it))
 
-occupied_locs(ps::PauliString) = (findall(x->!(x isa I2Gate), ps.blocks)...,)
+occupied_locs(ps::PauliString) = (findall(x -> !(x isa I2Gate), ps.blocks)...,)
 
 cache_key(ps::PauliString) = map(cache_key, ps.blocks)
 
@@ -80,20 +80,23 @@ Base.iterate(ps::PauliString, st) = iterate(ps.blocks, st)
 Base.length(ps::PauliString) = length(ps.blocks)
 Base.eltype(ps::PauliString) = eltype(ps.blocks)
 Base.eachindex(ps::PauliString) = eachindex(ps.blocks)
-Base.getindex(ps::PauliString, index::Union{UnitRange, Vector}) =
+Base.getindex(ps::PauliString, index::Union{UnitRange,Vector}) =
     PauliString(getindex(ps.blocks, index))
 function Base.setindex!(ps::PauliString, v::PauliGate, index::Union{Int})
     ps.blocks[index] = v
     return ps
 end
 
-function Base.:(==)(lhs::PauliString{N}, rhs::PauliString{N}) where N
+function Base.:(==)(lhs::PauliString{N}, rhs::PauliString{N}) where {N}
     (length(lhs.blocks) == length(rhs.blocks)) && all(lhs.blocks .== rhs.blocks)
 end
 
-xgates(ps::PauliString{N}) where N = RepeatedBlock{N}(X, (findall(x->x isa XGate, (ps.blocks...,))...,))
-ygates(ps::PauliString{N}) where N = RepeatedBlock{N}(Y, (findall(x->x isa YGate, (ps.blocks...,))...,))
-zgates(ps::PauliString{N}) where N = RepeatedBlock{N}(Z, (findall(x->x isa ZGate, (ps.blocks...,))...,))
+xgates(ps::PauliString{N}) where {N} =
+    RepeatedBlock{N}(X, (findall(x -> x isa XGate, (ps.blocks...,))...,))
+ygates(ps::PauliString{N}) where {N} =
+    RepeatedBlock{N}(Y, (findall(x -> x isa YGate, (ps.blocks...,))...,))
+zgates(ps::PauliString{N}) where {N} =
+    RepeatedBlock{N}(Z, (findall(x -> x isa ZGate, (ps.blocks...,))...,))
 
 function apply!(reg::AbstractRegister, ps::PauliString)
     _check_size(reg, ps)
@@ -104,6 +107,6 @@ function apply!(reg::AbstractRegister, ps::PauliString)
     return reg
 end
 
-function mat(::Type{T}, ps::PauliString) where T
+function mat(::Type{T}, ps::PauliString) where {T}
     return mat(T, xgates(ps)) * mat(T, ygates(ps)) * mat(T, zgates(ps))
 end

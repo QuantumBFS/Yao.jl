@@ -8,20 +8,20 @@ export cache, pull, update!, update_cache, clearall!, iscached, iscacheable
 
 A fragment that will be stored for each cached block (of type `BT`) on a cache server.
 """
-struct CacheFragment{BT, K, MT}
+struct CacheFragment{BT,K,MT}
     ref::BT
-    storage::Dict{K, MT}
+    storage::Dict{K,MT}
 
-    function CacheFragment{BT, K, MT}(x::BT) where {BT, K, MT}
-        new{BT, K, MT}(x, Dict{K, MT}())
+    function CacheFragment{BT,K,MT}(x::BT) where {BT,K,MT}
+        new{BT,K,MT}(x, Dict{K,MT}())
     end
 
-    function CacheFragment{BT, K}(x::BT) where BT where K
-        new{BT, K, cache_type(BT)}(x, Dict{K, cache_type(BT)}())
+    function CacheFragment{BT,K}(x::BT) where {BT} where {K}
+        new{BT,K,cache_type(BT)}(x, Dict{K,cache_type(BT)}())
     end
 
-    function CacheFragment(x::BT) where BT
-        CacheFragment{BT, typeof(cache_key(x))}(x)
+    function CacheFragment(x::BT) where {BT}
+        CacheFragment{BT,typeof(cache_key(x))}(x)
     end
 end
 
@@ -45,14 +45,14 @@ every methods of the block it contains, except [`mat`](@ref)
 and [`apply!`](@ref), it will cache the matrix form whenever
 the program has.
 """
-struct CachedBlock{ST, BT, N} <: TagBlock{BT, N}
+struct CachedBlock{ST,BT,N} <: TagBlock{BT,N}
     server::ST
     content::BT
     level::Int
 
-    function CachedBlock(server::ST, x::BT, level::Int) where {ST, N, BT <: AbstractBlock{N}}
+    function CachedBlock(server::ST, x::BT, level::Int) where {ST,N,BT<:AbstractBlock{N}}
         alloc!(server, x, CacheFragment(x))
-        new{ST, BT, N}(server, x, level)
+        new{ST,BT,N}(server, x, level)
     end
 end
 
@@ -62,7 +62,7 @@ chsubblocks(cb::CachedBlock, blk::AbstractBlock) = CachedBlock(cb.server, blk, c
 occupied_locs(x::CachedBlock) = occupied_locs(content(x))
 PropertyTrait(::CachedBlock) = PreserveAll()
 
-function update_cache(::Type{T}, c::CachedBlock) where T
+function update_cache(::Type{T}, c::CachedBlock) where {T}
     if !iscached(c.server, c.content)
         m = mat(T, c.content)
         push!(c.server, m, c.content)
@@ -73,7 +73,7 @@ end
 CacheServers.clear!(x::AbstractBlock) = x
 CacheServers.clear!(c::CachedBlock) = (clear!(c.server, c.content); c)
 
-function mat(::Type{T}, c::CachedBlock) where T
+function mat(::Type{T}, c::CachedBlock) where {T}
     if !iscached(c.server, c.content)
         m = mat(T, c.content)
         push!(c.server, m, c.content)
@@ -86,7 +86,7 @@ function CacheServers.pull(c::CachedBlock)
     return pull(c.server, c.content)
 end
 
-function apply!(r::ArrayReg{B, T}, c::CachedBlock, signal) where {B, T}
+function apply!(r::ArrayReg{B,T}, c::CachedBlock, signal) where {B,T}
     if signal > c.level
         r.state .= mat(T, c) * r
     else
@@ -110,7 +110,7 @@ Base.eltype(x::CachedBlock) = eltype(content(x))
 
 const DefaultCacheServer = get_server(AbstractBlock, CacheFragment)
 
-cache(x::Function, level::Int=1; recursive=false) = n->cache(x(n), level; recursive=recursive)
+cache(x::Function, level::Int = 1; recursive = false) = n -> cache(x(n), level; recursive = recursive)
 
 """
     cache(x[, level=1; recursive=false])
@@ -137,15 +137,15 @@ chain
 
 ```
 """
-function cache(x::AbstractBlock, level::Int=1; recursive=false)
-    return cache(DefaultCacheServer, x, level, recursive=recursive)
+function cache(x::AbstractBlock, level::Int = 1; recursive = false)
+    return cache(DefaultCacheServer, x, level, recursive = recursive)
 end
 
 function clearall!(x::CachedBlock)
     return clear!(x)
 end
 
-function clearall!(x::CachedBlock{ST, BT}) where {ST, BT <: CompositeBlock}
+function clearall!(x::CachedBlock{ST,BT}) where {ST,BT<:CompositeBlock}
     for each in subblocks(x.content)
         clearall!(each)
     end
@@ -153,11 +153,11 @@ function clearall!(x::CachedBlock{ST, BT}) where {ST, BT <: CompositeBlock}
     return x
 end
 
-function cache(server::AbstractCacheServer, x::AbstractBlock, level::Int; recursive::Bool=false)
+function cache(server::AbstractCacheServer, x::AbstractBlock, level::Int; recursive::Bool = false)
     return CachedBlock(server, x, level)
 end
 
-function cache(server::AbstractCacheServer, x::ChainBlock, level::Int; recursive::Bool=false)
+function cache(server::AbstractCacheServer, x::ChainBlock, level::Int; recursive::Bool = false)
     if recursive
         chain = similar(x)
         for (i, each) in enumerate(block)
@@ -170,11 +170,11 @@ function cache(server::AbstractCacheServer, x::ChainBlock, level::Int; recursive
     return CachedBlock(server, chain, level)
 end
 
-function cache(server::AbstractCacheServer, block::KronBlock, level::Int; recursive::Bool=false)
+function cache(server::AbstractCacheServer, block::KronBlock, level::Int; recursive::Bool = false)
     if recursive
         x = similar(block)
         for (k, v) in block
-            x[k] = cache(server, v, level, recursive=recursive)
+            x[k] = cache(server, v, level, recursive = recursive)
         end
     else
         x = block

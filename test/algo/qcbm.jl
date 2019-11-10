@@ -6,12 +6,12 @@ function gaussian_pdf(x, μ::Real, σ::Real)
 end
 
 layer(nbit::Int, x::Symbol) = layer(nbit, Val(x))
-layer(nbit::Int, ::Val{:first}) = chain(nbit, put(i=>chain(Rx(0), Rz(0))) for i = 1:nbit)
+layer(nbit::Int, ::Val{:first}) = chain(nbit, put(i => chain(Rx(0), Rz(0))) for i in 1:nbit)
 
-layer(nbit::Int, ::Val{:last}) = chain(nbit, put(i=>chain(Rz(0), Rx(0))) for i = 1:nbit)
-layer(nbit::Int, ::Val{:mid}) = chain(nbit, put(i=>chain(Rz(0), Rx(0), Rz(0))) for i = 1:nbit)
+layer(nbit::Int, ::Val{:last}) = chain(nbit, put(i => chain(Rz(0), Rx(0))) for i in 1:nbit)
+layer(nbit::Int, ::Val{:mid}) = chain(nbit, put(i => chain(Rz(0), Rx(0), Rz(0))) for i in 1:nbit)
 
-entangler(pairs) = chain(control(ctrl, target=>X) for (ctrl, target) in pairs)
+entangler(pairs) = chain(control(ctrl, target => X) for (ctrl, target) in pairs)
 
 function build_circuit(n, nlayers, pairs)
     circuit = chain(n)
@@ -31,8 +31,8 @@ struct RBFKernel
 end
 
 function RBFKernel(σ::Float64, space)
-    dx2 = (space .- space').^2
-    return RBFKernel(σ, exp.(-1/2σ * dx2))
+    dx2 = (space .- space') .^ 2
+    return RBFKernel(σ, exp.(-1 / 2σ * dx2))
 end
 
 kexpect(κ::RBFKernel, x, y) = x' * κ.m * y
@@ -51,13 +51,13 @@ function gradient(qcbm, κ, ptrain)
 
     count = 1
     for k in 1:2:length(qcbm), each_line in qcbm[k], gate in content(each_line)
-        dispatch!(+, gate, π/2)
+        dispatch!(+, gate, π / 2)
         prob_pos = probs(zero_state(n) |> qcbm)
 
         dispatch!(-, gate, π)
         prob_neg = probs(zero_state(n) |> qcbm)
 
-        dispatch!(+, gate, π/2) # set back
+        dispatch!(+, gate, π / 2) # set back
 
         grad_pos = kexpect(κ, prob, prob_pos) - kexpect(κ, prob, prob_neg)
         grad_neg = kexpect(κ, ptrain, prob_pos) - kexpect(κ, ptrain, prob_neg)
@@ -67,11 +67,11 @@ function gradient(qcbm, κ, ptrain)
     return grad
 end
 
-qcbm = build_circuit(6, 10, [1=>2, 3=>4, 5=>6, 2=>3, 4=>5, 6=>1])
+qcbm = build_circuit(6, 10, [1 => 2, 3 => 4, 5 => 6, 2 => 3, 4 => 5, 6 => 1])
 dispatch!(qcbm, :random) # initialize the parameters
 
 κ = RBFKernel(0.25, 0:2^6-1)
-pg = gaussian_pdf(1:1<<6, 1<<5-0.5, 1<<4);
+pg = gaussian_pdf(1:1<<6, 1 << 5 - 0.5, 1 << 4);
 opt = ADAM()
 
 function train(qcbm, κ, opt, target)

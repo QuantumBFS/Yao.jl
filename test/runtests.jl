@@ -25,7 +25,7 @@ end
 end
 
 @testset "Yao/#166" begin
-    @test_throws ErrorException put(100, 1=>X) |> mat
+    @test_throws ErrorException put(100, 1 => X) |> mat
 end
 
 @testset "dispatch" begin

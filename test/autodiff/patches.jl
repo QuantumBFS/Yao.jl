@@ -6,8 +6,8 @@ using Test, Random
     T = ComplexF64
     D = 10
     Random.seed!(2)
-    for pm = [pmrand(T, D), Diagonal(randn(T, D)), sprand(T, D,D,0.4)]
+    for pm in [pmrand(T, D), Diagonal(randn(T, D)), sprand(T, D, D, 0.4)]
         z = zero(pm)
-        @test z == zeros(D,D)
+        @test z == zeros(D, D)
     end
 end

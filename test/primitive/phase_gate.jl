@@ -46,9 +46,12 @@ end
     @test ishermitian(g) == false
 
 
-    g = PhaseGate{ComplexF64}(1.0+0im)
+    g = PhaseGate{ComplexF64}(1.0 + 0im)
     @test @test_nowarn isunitary(g) == true
 
-    g = PhaseGate{ComplexF64}(1.0+1im)
-    @test @test_logs (:warn, "θ in phase(θ) is not real, got $(g.theta), fallback to matrix-based method") isunitary(g) == false
+    g = PhaseGate{ComplexF64}(1.0 + 1im)
+    @test @test_logs (
+        :warn,
+        "θ in phase(θ) is not real, got $(g.theta), fallback to matrix-based method",
+    ) isunitary(g) == false
 end

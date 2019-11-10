@@ -6,16 +6,16 @@ export KronBlock, kron
 
 composite block that combine blocks by kronecker product.
 """
-struct KronBlock{N, MT<:AbstractBlock} <: CompositeBlock{N}
+struct KronBlock{N,MT<:AbstractBlock} <: CompositeBlock{N}
     slots::Vector{Int}
     locs::Vector{Int}
     blocks::Vector{MT}
 end
 
-KronBlock{N}(slots::Vector{Int}, locs::Vector{Int}, blocks::Vector{MT}) where {N, MT <: AbstractBlock} =
-    KronBlock{N, MT}(slots, locs, blocks)
+KronBlock{N}(slots::Vector{Int}, locs::Vector{Int}, blocks::Vector{MT}) where {N,MT<:AbstractBlock} =
+    KronBlock{N,MT}(slots, locs, blocks)
 
-function KronBlock{N}(locs::Vector{Int}, blocks::Vector{MT}) where {N, MT<:AbstractBlock}
+function KronBlock{N}(locs::Vector{Int}, blocks::Vector{MT}) where {N,MT<:AbstractBlock}
     perm = sortperm(locs)
     permute!(locs, perm)
     permute!(blocks, perm)
@@ -25,10 +25,10 @@ function KronBlock{N}(locs::Vector{Int}, blocks::Vector{MT}) where {N, MT<:Abstr
     for (i, each) in enumerate(locs)
         slots[each] = i
     end
-    return KronBlock{N, MT}(slots, locs, blocks)
+    return KronBlock{N,MT}(slots, locs, blocks)
 end
 
-function KronBlock{N}(itr::Pair{Int,<:AbstractBlock}...) where N
+function KronBlock{N}(itr::Pair{Int,<:AbstractBlock}...) where {N}
     blocks = AbstractBlock[]
     locs = Int[]
 
@@ -71,7 +71,7 @@ kron
 
 ```
 """
-Base.kron(total::Int, blocks::Pair{Int, <:AbstractBlock}...) = KronBlock{total}(blocks...)
+Base.kron(total::Int, blocks::Pair{Int,<:AbstractBlock}...) = KronBlock{total}(blocks...)
 
 """
     kron(blocks::AbstractBlock...)
@@ -96,14 +96,14 @@ kron
 ```
 """
 Base.kron(blocks::AbstractBlock...) = KronBlock(blocks...)
-Base.kron(fs::Union{Function, AbstractBlock}...) = @λ(n->kron(n, fs...))
+Base.kron(fs::Union{Function,AbstractBlock}...) = @λ(n -> kron(n, fs...))
 
 function Base.kron(total::Int, blocks::AbstractBlock...)
     sum(nqubits, blocks) == total || error("total number of qubits mismatch")
     return kron(blocks...)
 end
 
-Base.kron(total::Int, blocks::Union{AbstractBlock, Pair}...) =
+Base.kron(total::Int, blocks::Union{AbstractBlock,Pair}...) =
     error("location of sparse distributed blocks must be explicit declared with pair (e.g 2=>X)")
 
 Base.kron(total::Int, blocks::Base.Generator) = kron(total, blocks...)
@@ -132,16 +132,17 @@ julia> kron(1=>X, 3=>Y)
 (n -> kron(n, 1 => X gate, 3 => Y gate))
 ```
 """
-Base.kron(blocks::Pair{Int, <:AbstractBlock}...,) = @λ(n->kron(n, blocks...))
+Base.kron(blocks::Pair{Int,<:AbstractBlock}...,) = @λ(n -> kron(n, blocks...))
 Base.kron(blocks::Base.Generator) = kron(blocks...)
 
-occupied_locs(k::KronBlock) = (Iterators.flatten(map(x-> x + i - 1, occupied_locs(b)) for (i, b) in zip(k.locs, subblocks(k)))...,)
+occupied_locs(k::KronBlock) = (Iterators.flatten(map(x -> x + i - 1, occupied_locs(b))
+        for (i, b) in zip(k.locs, subblocks(k)))...,)
 subblocks(x::KronBlock) = x.blocks
-chsubblocks(pb::KronBlock{N}, it) where N = KronBlock{N}(pb.locs, collect(it))
+chsubblocks(pb::KronBlock{N}, it) where {N} = KronBlock{N}(pb.locs, collect(it))
 cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
-color(::Type{T}) where {T <: KronBlock} = :cyan
+color(::Type{T}) where {T<:KronBlock} = :cyan
 
-function _prepair_kronmat(k::KronBlock{N}) where N
+function _prepair_kronmat(k::KronBlock{N}) where {N}
     sizes = map(nqubits, subblocks(k))
     start_locs = @. N - $(k.locs) - sizes + 1
 
@@ -151,11 +152,11 @@ function _prepair_kronmat(k::KronBlock{N}) where N
     return order, num_bit_list, sorted_start_locs
 end
 
-function mat(::Type{T}, k::KronBlock{N}) where {T, N}
+function mat(::Type{T}, k::KronBlock{N}) where {T,N}
     order, num_bit_list, sorted_start_locs = _prepair_kronmat(k)
     blocks = subblocks(k)[order]
-    return reduce(zip(blocks, num_bit_list), init=IMatrix{1 << sorted_start_locs[1], T}()) do x, y
-        kron(x, mat(T, y[1]), IMatrix(1<<y[2]))
+    return reduce(zip(blocks, num_bit_list), init = IMatrix{1 << sorted_start_locs[1],T}()) do x, y
+        kron(x, mat(T, y[1]), IMatrix(1 << y[2]))
     end
 end
 
@@ -167,22 +168,24 @@ function apply!(r::AbstractRegister, k::KronBlock)
     return r
 end
 
-_instruct!(reg::AbstractRegister, block::AbstractBlock, locs) = instruct!(reg, mat_matchreg(reg, block), locs)
+_instruct!(reg::AbstractRegister, block::AbstractBlock, locs) =
+    instruct!(reg, mat_matchreg(reg, block), locs)
 
 # specialization
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
-    @eval _instruct!(reg::AbstractRegister, block::$GT, locs) = instruct!(reg, Val($(QuoteNode(G))), locs)
+    @eval _instruct!(reg::AbstractRegister, block::$GT, locs) =
+        instruct!(reg, Val($(QuoteNode(G))), locs)
 end
 
-function Base.copy(k::KronBlock{N}) where N
+function Base.copy(k::KronBlock{N}) where {N}
     slots = copy(k.slots)
     locs = copy(k.locs)
     blocks = copy(k.blocks)
     return KronBlock{N}(slots, locs, blocks)
 end
 
-function Base.similar(k::KronBlock{N}) where N
+function Base.similar(k::KronBlock{N}) where {N}
     slots = zeros(Int, N)
     locs = empty!(similar(k.locs))
     blocks = empty!(similar(k.blocks))
@@ -217,15 +220,16 @@ function Base.iterate(k::KronBlock, st = 1)
     end
 end
 
-Base.eltype(k::KronBlock) = Tuple{Int, AbstractBlock}
+Base.eltype(k::KronBlock) = Tuple{Int,AbstractBlock}
 Base.length(k::KronBlock) = length(k.blocks)
 Base.eachindex(k::KronBlock) = k.locs
 
-function Base.:(==)(lhs::KronBlock{N}, rhs::KronBlock{N}) where N
+function Base.:(==)(lhs::KronBlock{N}, rhs::KronBlock{N}) where {N}
     return all(lhs.locs .== rhs.locs) && all(lhs.blocks .== rhs.blocks)
 end
 
-Base.adjoint(blk::KronBlock{N}) where N = KronBlock{N}(blk.slots, blk.locs, map(adjoint, blk.blocks))
+Base.adjoint(blk::KronBlock{N}) where {N} =
+    KronBlock{N}(blk.slots, blk.locs, map(adjoint, blk.blocks))
 
 YaoBase.ishermitian(k::KronBlock) = all(ishermitian, k.blocks) || ishermitian(mat(k))
 YaoBase.isunitary(k::KronBlock) = all(isunitary, k.blocks) || isunitary(mat(k))

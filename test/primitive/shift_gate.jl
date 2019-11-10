@@ -8,7 +8,7 @@ end
 
 @testset "test matrix" begin
     g = ShiftGate{Float64}(pi)
-    @test mat(g) ≈ exp(im * pi/2) * [exp(-im * pi/2) 0; 0  exp(im * pi/2)]
+    @test mat(g) ≈ exp(im * pi / 2) * [exp(-im * pi / 2) 0; 0 exp(im * pi / 2)]
 end
 
 @testset "test apply" begin
@@ -40,7 +40,10 @@ end
     @test @test_nowarn isunitary(g) == true
 
     g = ShiftGate{ComplexF64}(0.1 + 1im)
-    @test @test_logs (:warn, "θ in ShiftGate is not real, got θ=0.1 + 1.0im, fallback to matrix-based method") isunitary(g) == false
+    @test @test_logs (
+        :warn,
+        "θ in ShiftGate is not real, got θ=0.1 + 1.0im, fallback to matrix-based method",
+    ) isunitary(g) == false
 end
 
 @testset "test parameters" begin

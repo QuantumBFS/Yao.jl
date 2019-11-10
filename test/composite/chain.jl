@@ -1,35 +1,33 @@
 using Test, YaoBase, YaoBlocks, YaoArrayRegister
 
 @testset "test constructors" begin
-    g = ChainBlock(
-        kron(2, 1=>X, 2=>Y),
-        kron(2, 1=>phase(0.1)))
+    g = ChainBlock(kron(2, 1 => X, 2 => Y), kron(2, 1 => phase(0.1)))
 
     @test g isa ChainBlock{2} # default type
-    @test g.blocks == [kron(2, X, Y), kron(2, 1=>phase(0.1))]
+    @test g.blocks == [kron(2, X, Y), kron(2, 1 => phase(0.1))]
     blks = [X, Y, Rx(0.3)]
     @test chsubblocks(g, blks) |> subblocks |> collect == blks
     @test chsubblocks(chain(X, Y, Z), X for _ in 1:3) |> subblocks |> collect == [X, X, X]
 
-    c1 = ChainBlock(put(5, 1=>X), put(5, 3=>Y))
-    c2 = ChainBlock(put(5, 4=>X), put(5, 5=>Y))
+    c1 = ChainBlock(put(5, 1 => X), put(5, 3 => Y))
+    c2 = ChainBlock(put(5, 4 => X), put(5, 5 => Y))
     @test iscommute(c1, c2)
     @test iscommute(c1, c2, c2)
     @test ishermitian(ChainBlock(c1, c2))
 
     c = ChainBlock{1}([X, Y])
-    c[1] = put(1, 1=>X)
-    @test c[1] == put(1, 1=>X)
+    c[1] = put(1, 1 => X)
+    @test c[1] == put(1, 1 => X)
     c = ChainBlock([X, Y])
-    c[1] = put(1, 1=>X)
-    @test c[1] == put(1, 1=>X)
-    @test occupied_locs(chain(put(5, 2=>X), put(5, 3=>I2))) == (2,)
+    c[1] = put(1, 1 => X)
+    @test c[1] == put(1, 1 => X)
+    @test occupied_locs(chain(put(5, 2 => X), put(5, 3 => I2))) == (2,)
 end
 
 @testset "test chain" begin
-    @test chain(kron(1=>X), control(2, 1=>X))(4) |> nqubits == 4
-    @test chain(control(4, 2, 1=>X), kron(1=>X)) |> nqubits == 4
-    @test chain(control(4, 2, 1=>X), kron(4, 1=>X)) |> nqubits == 4
+    @test chain(kron(1 => X), control(2, 1 => X))(4) |> nqubits == 4
+    @test chain(control(4, 2, 1 => X), kron(1 => X)) |> nqubits == 4
+    @test chain(control(4, 2, 1 => X), kron(4, 1 => X)) |> nqubits == 4
 
     list = []
     push!(list, X)
@@ -37,33 +35,26 @@ end
 
     @test chain(4, []) == chain(4)
     @test chain(X for _ in 1:3) == chain(X, X, X)
-    @test chain(put(1=>X))(4) == chain(put(4, 1=>X))
-    @test chain(put(1=>X), put(2=>X))(4) == chain(put(4, 1=>X), put(4, 2=>X))
+    @test chain(put(1 => X))(4) == chain(put(4, 1 => X))
+    @test chain(put(1 => X), put(2 => X))(4) == chain(put(4, 1 => X), put(4, 2 => X))
     @test chain()(4) == chain(4)
 end
 
 @testset "#15" begin
-    @test chain(4, n->kron(n, 1=>H)) isa ChainBlock
+    @test chain(4, n -> kron(n, 1 => H)) isa ChainBlock
 end
 
 @testset "test operations" begin
-    g = ChainBlock(
-        kron(2, 1=>X, 2=>Y),
-        kron(2, 1=>phase(0.1)))
+    g = ChainBlock(kron(2, 1 => X, 2 => Y), kron(2, 1 => phase(0.1)))
 
-    m = mat(kron(2, 1=>phase(0.1))) * mat(kron(2, X, Y))
+    m = mat(kron(2, 1 => phase(0.1))) * mat(kron(2, X, Y))
     @test mat(g) ≈ m
 
-    g = ChainBlock(
-        kron(4, 1=>X, 2=>Y),
-        kron(4, 1=>phase(0.1)))
+    g = ChainBlock(kron(4, 1 => X, 2 => Y), kron(4, 1 => phase(0.1)))
 
     @test occupied_locs(g) == (1, 2)
 
-    g = ChainBlock(
-        kron(2, X, Y),
-        kron(2, 1=>phase(0.1)),
-    )
+    g = ChainBlock(kron(2, X, Y), kron(2, 1 => phase(0.1)))
     r = rand_state(2)
     @test statevec(apply!(copy(r), g)) ≈ mat(g) * r.state
     apply!(copy(r), g)
@@ -83,9 +74,9 @@ end
     end
 
     @testset "push!" begin
-        g = chain(2, put(1=>X))
-        push!(g, put(2=>X))
-        @test g == chain(2, put(1=>X), put(2=>X))
+        g = chain(2, put(1 => X))
+        push!(g, put(2 => X))
+        @test g == chain(2, put(1 => X), put(2 => X))
     end
 
     @testset "append!" begin
@@ -174,5 +165,5 @@ end
 end
 
 @testset "Yao/#204" begin
-    @test mat(chain(2)) == IMatrix{4, ComplexF64}()
+    @test mat(chain(2)) == IMatrix{4,ComplexF64}()
 end
