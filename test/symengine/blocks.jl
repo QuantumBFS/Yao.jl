@@ -19,6 +19,7 @@ using Test
 
     G = Rz(θ)*Rx(γ)*Rz(θ)
     m = mat(Basic, G)
+    @test smat(G) == m
     @test_throws ArgumentError mat(Float64, G)
     m = subs.(m, Ref(θ=>Basic(π)/2), Ref(γ=>Basic(π)/6))
     @test Matrix(mat(Rz(π/2)*Rx(π/6)*Rz(π/2))) ≈ Matrix(m)

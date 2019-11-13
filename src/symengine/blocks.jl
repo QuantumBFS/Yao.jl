@@ -1,5 +1,8 @@
 using YaoBlocks, SymEngine, LuxurySparse, LinearAlgebra
 
+export smat, @vars
+smat(block::AbstractBlock) = mat(Basic, block)
+
 Base.promote_rule(::Type{Bool}, ::Type{Basic}) = Basic
 Base.conj(x::Basic) = real(x) - imag(x)
 
