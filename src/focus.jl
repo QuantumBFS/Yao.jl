@@ -1,9 +1,6 @@
 using YaoBase, TupleTools
 
-export focus!,
-    relax!,
-    partial_tr,
-    exchange_sysenv
+export focus!, relax!, partial_tr, exchange_sysenv
 
 
 """
@@ -80,7 +77,7 @@ function group_permutedims(A::AbstractArray, orders)
 end
 
 # forward directly if the length is the same with ndims
-function group_permutedims(A::AbstractArray{T, N}, orders::NTuple{N, Int}) where {T, N}
+function group_permutedims(A::AbstractArray{T,N}, orders::NTuple{N,Int}) where {T,N}
     return unsafe_group_permutedims(A, orders)
 end
 
@@ -99,7 +96,7 @@ is_order_same(locs) = all(a == b for (a, b) in zip(locs, 1:length(locs)))
 # NOTE: locations is not the same with orders
 # locations: some location of the wire
 # orders: includes all the location of the wire in some order
-function YaoBase.focus!(r::ArrayReg{B}, locs) where B
+function YaoBase.focus!(r::ArrayReg{B}, locs) where {B}
     if is_order_same(locs)
         arr = r.state
     else
@@ -110,19 +107,19 @@ function YaoBase.focus!(r::ArrayReg{B}, locs) where B
     return r
 end
 
-function YaoBase.relax!(r::ArrayReg{B}, locs; to_nactive::Int=nqubits(r)) where B
+function YaoBase.relax!(r::ArrayReg{B}, locs; to_nactive::Int = nqubits(r)) where {B}
     r.state = reshape(state(r), 1 << to_nactive, :)
     if !is_order_same(locs)
-        new_orders = TupleTools.invperm(move_ahead(to_nactive+1, locs))
+        new_orders = TupleTools.invperm(move_ahead(to_nactive + 1, locs))
         r.state = reshape(group_permutedims(hypercubic(r), new_orders), 1 << to_nactive, :)
     end
     return r
 end
 
-function YaoBase.partial_tr(r::ArrayReg{B}, locs) where B
+function YaoBase.partial_tr(r::ArrayReg{B}, locs) where {B}
     orders = setdiff(1:nqubits(r), locs)
     focus!(r, orders)
-    state = sum(rank3(r); dims=2)
+    state = sum(rank3(r); dims = 2)
     relax!(r, orders)
     return normalize!(ArrayReg(state))
 end
@@ -132,6 +129,6 @@ end
 
 Exchange system (focused qubits) and environment (remaining qubits).
 """
-function exchange_sysenv(reg::ArrayReg{B}) where B
-    ArrayReg{B}(reshape(permutedims(rank3(reg), (2,1,3)), :,size(reg.state, 1)*B))
+function exchange_sysenv(reg::ArrayReg{B}) where {B}
+    ArrayReg{B}(reshape(permutedims(rank3(reg), (2, 1, 3)), :, size(reg.state, 1) * B))
 end

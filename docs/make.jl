@@ -6,5 +6,5 @@ makedocs(
     doctest = true,
     clean = false,
     sitename = "YaoArrayRegister.jl",
-    pages = ["index.md"]
+    pages = ["index.md"],
 )
