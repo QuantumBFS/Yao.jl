@@ -1,5 +1,6 @@
 using YaoSym, YaoBlocks, YaoArrayRegister, SymEngine
 using YaoSym: simplify_expi
+using SymEngine
 using Test
 
 @testset "mat" begin
@@ -30,4 +31,24 @@ using Test
 
     @test pswap(4,2,1,θ) == pswap(2,1,θ)(4)
     @test pswap(4,2,1,θ) isa PSwap{4,Basic}
+end
+
+@testset "Sym Engine Conj" begin
+    @vars a b
+    @test cos(exp(a+im*b))' == cos(exp(a-im*b))
+    @test cos(exp(a+im*b))' == cos(exp(a-im*b))
+    @test smat(Rx(a)) == [cos(a/2)  -im*sin(a/2);
+                -im*sin(a/2)     cos(a/2)]
+    @test smat(Rx(a)') == [cos(a/2)  im*sin(a/2);
+                im*sin(a/2)     cos(a/2)]
+end
+
+@testset "expect" begin
+    @vars a b
+    reg = ket"111" |> control(3,1,2=>Rx(a))
+    op = put(3, 2=>Z)
+    reg2 = ArrayReg(bit"111") |> control(3,1,2=>Rx(0.5))
+    ex = expect(op, reg)
+    ex = subs(ex, a=>0.5)
+    @test ComplexF64(ex) ≈ expect(op, reg2)
 end

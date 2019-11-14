@@ -1,10 +1,23 @@
 using YaoBlocks, SymEngine, LuxurySparse, LinearAlgebra
+using SymEngine: BasicType, BasicOp, BasicTrigFunction
+
+op_types = [:Mul, :Add, :Pow]
+const BiVarOp = Union{[SymEngine.BasicType{Val{i}} for i in op_types]...}
 
 export smat, @vars
 smat(block::AbstractBlock) = mat(Basic, block)
 
 Base.promote_rule(::Type{Bool}, ::Type{Basic}) = Basic
-Base.conj(x::Basic) = real(x) - imag(x)
+Base.conj(x::Basic) = Basic(conj(SymEngine.BasicType(x)))
+Base.conj(x::BasicType) = real(x) - im*imag(x)
+Base.conj(x::BiVarOp) = juliafunc(x)(conj.(get_args(x.x))...)
+Base.conj(x::BasicTrigFunction) = juliafunc(x)(conj.(get_args(x.x)...)...)
+Base.imag(x::BasicType{Val{:Constant}}) = Basic(0)
+Base.imag(x::BasicType{Val{:Symbol}}) = Basic(0)
+
+@generated function juliafunc(x::BasicType{Val{T}}) where T
+    SymEngine.map_fn(T, SymEngine.fn_map)
+end
 
 const SymReal = Union{Basic, SymEngine.BasicRealNumber}
 YaoBlocks.RotationGate(block::GT, theta::T) where {N, T <: SymReal, GT<:AbstractBlock{N}} = RotationGate{N, T, GT}(block, theta)
@@ -16,14 +29,20 @@ YaoBlocks.mat(::Type{Basic}, ::HGate) = 1/sqrt(Basic(2)) * Basic[1 1;1 -1]
 YaoBlocks.mat(::Type{Basic}, ::XGate) = Basic[0 1;1 0]
 YaoBlocks.mat(::Type{Basic}, ::YGate) = Basic[0 -1im;1im 0]
 YaoBlocks.mat(::Type{Basic}, ::ZGate) = Basic[1 0;0 -1]
-
-YaoBlocks.mat(gate::ShiftGate{<:SymReal}) =
-    Diagonal([1.0, exp(im * gate.theta)])
-YaoBlocks.mat(gate::PhaseGate{<:SymReal}) =
+YaoBlocks.mat(::Type{Basic}, gate::ShiftGate) =
+    Diagonal([1, exp(im * gate.theta)])
+YaoBlocks.mat(::Type{Basic}, gate::PhaseGate) =
     exp(im * gate.theta) * IMatrix{2}()
-function YaoBlocks.mat(R::RotationGate{N, <:SymReal}) where N
+function YaoBlocks.mat(::Type{Basic}, R::RotationGate{N}) where N
     I = IMatrix{1<<N}()
     return I * cos(R.theta / 2) - im * sin(R.theta / 2) * mat(Basic,R.block)
+end
+for GT in [:XGate, :YGate, :ZGate]
+    @eval YaoBlocks.mat(::Type{Basic}, R::RotationGate{1,T,<:$GT}) where T = invoke(mat, Tuple{Type{Basic}, RotationGate}, Basic, R)
+end
+
+for T in [:(RotationGate{N, <:SymReal}), :(PhaseGate{<:SymReal}), :(ShiftGate{<:SymReal})]
+    @eval YaoBlocks.mat(gate::$T) = mat(Basic, gate)
 end
 
 YaoBlocks.PSwap{N}(locs::Tuple{Int, Int}, θ::SymReal) where N = YaoBlocks.PutBlock{N}(rot(ConstGate.SWAPGate(), θ), locs)
