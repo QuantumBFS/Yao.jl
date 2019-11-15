@@ -52,3 +52,15 @@ end
     ex = subs(ex, a=>0.5)
     @test ComplexF64(ex) ≈ expect(op, reg2)
 end
+
+#=
+@testset "grad" begin
+    @vars a b
+    reg = ArrayReg(Basic, bit"111") => control(3,1,2=>Rx(a))
+    op = put(3, 2=>Z)
+    reg2 = ArrayReg(bit"111") => control(3,1,2=>Rx(0.5))
+    ex = expect'(op, reg)[2]
+    ex = subs(ex[], a=>0.5)
+    @test ComplexF64(ex) ≈ expect'(op, reg2)[2][]
+end
+=#

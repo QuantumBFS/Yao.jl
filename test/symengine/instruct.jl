@@ -1,6 +1,6 @@
 using Test, YaoSym
 using SymEngine
-using Yao, LuxurySparse
+using YaoBlocks, LuxurySparse
 
 @testset "apply" begin
     @vars θ γ η
