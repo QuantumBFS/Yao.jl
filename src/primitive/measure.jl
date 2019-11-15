@@ -2,24 +2,24 @@ using YaoBase, YaoArrayRegister, Random
 export Measure, AllLocs, ComputationalBasis, chmeasureoperator
 
 """
-    Measure{N, K, OT, RNG} <: PrimitiveBlock{N}
+    Measure{N, K, OT, RNG, IT<:Integer} <: PrimitiveBlock{N}
     Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=1:n, collapseto=nothing, remove=false)
 
 Measure operator.
 """
-mutable struct Measure{N,K,OT,RNG} <: PrimitiveBlock{N}
+mutable struct Measure{N,K,OT,RNG,IT<:Integer} <: PrimitiveBlock{N}
     rng::RNG
     operator::OT
     locations::Union{NTuple{K,Int},AllLocs}
     collapseto::Union{BitStr64{N},Nothing}
     remove::Bool
-    results::Vector{Int}
-    function Measure{N,K,OT,RNG}(rng::RNG, operator, locations, collapseto, remove) where {RNG,N,K,OT}
+    results::Vector{IT}
+    function Measure{N,K,OT,RNG,IT}(rng::RNG, operator, locations, collapseto, remove) where {RNG, N, K, OT, IT}
         locations isa AllLocs || @assert_locs_safe N locations
         if collapseto !== nothing && remove == true
             error("invalid keyword combination, expect collapseto or remove, got (collapseto=$collapseto, remove=true)")
         end
-        new{N,K,OT,RNG}(rng, operator, locations, collapseto, remove)
+        new{N,K,OT,RNG,IT}(rng, operator, locations, collapseto, remove)
     end
 end
 
@@ -113,18 +113,11 @@ julia> m.collapseto
 0101 ₍₂₎
 ```
 """
-function Measure(
-    n::Int;
-    rng::RNG = Random.GLOBAL_RNG,
-    operator::OT = ComputationalBasis(),
-    locs = AllLocs(),
-    collapseto = nothing,
-    remove = false,
-) where {OT,RNG}
+function Measure(n::Int; rng::RNG=Random.GLOBAL_RNG, operator::OT=ComputationalBasis(), locs=AllLocs(), collapseto=nothing, remove=false, result_dtype=BitStr64{n}) where {OT, RNG}
     if locs isa AllLocs
-        Measure{n,n,OT,RNG}(rng, operator, locs, collapseto, remove)
+        Measure{n, n, OT, RNG, result_dtype}(rng, operator, locs, collapseto, remove)
     else
-        Measure{n,length(locs),OT,RNG}(rng, operator, tuple(locs...), collapseto, remove)
+        Measure{n, length(locs), OT, RNG, result_dtype}(rng, operator, tuple(locs...), collapseto, remove)
     end
 end
 

@@ -12,7 +12,7 @@ function mat_back!(::Type{T}, rb::RotationGate{N,RT}, adjy, collector) where {T,
 end
 
 function mat_back!(::Type{T}, rb::TimeEvolution{N}, adjy, collector) where {N,T}
-    pushfirst!(collector, projection(rb.dt, sum(im .* adjy .* conj.(mat(rb.H) * mat(rb)))))
+    pushfirst!(collector, projection(rb.dt, sum(im .* adjy .* conj.(mat(T, rb.H) * mat(T, rb)))))
 end
 
 #=
@@ -42,13 +42,13 @@ end
 
 function mat_back!(::Type{T}, rb::PutBlock{N,C,RT}, adjy, collector) where {T,N,C,RT}
     nparameters(rb) == 0 && return collector
-    adjm = adjcunmat(adjy, N, (), (), mat(content(rb)), rb.locs)
+    adjm = adjcunmat(adjy, N, (), (), mat(T, content(rb)), rb.locs)
     mat_back!(T, content(rb), adjm, collector)
 end
 
 function mat_back!(::Type{T}, rb::Concentrator{N}, adjy, collector) where {T,N}
     nparameters(rb) == 0 && return collector
-    adjm = adjcunmat(adjy, N, (), (), mat(content(rb)), rb.locs)
+    adjm = adjcunmat(adjy, N, (), (), mat(T, content(rb)), rb.locs)
     mat_back!(T, content(rb), adjm, collector)
 end
 
@@ -62,7 +62,7 @@ end
 
 function mat_back!(::Type{T}, rb::ControlBlock{N,C,RT}, adjy, collector) where {T,N,C,RT}
     nparameters(rb) == 0 && return collector
-    adjm = adjcunmat(adjy, N, rb.ctrl_locs, rb.ctrl_config, mat(content(rb)), rb.locs)
+    adjm = adjcunmat(adjy, N, rb.ctrl_locs, rb.ctrl_config, mat(T, content(rb)), rb.locs)
     mat_back!(T, content(rb), adjm, collector)
 end
 
@@ -71,10 +71,10 @@ function mat_back!(::Type{T}, rb::ChainBlock{N}, adjy, collector) where {T,N}
     np == 0 && return collector
     length(rb) == 1 && return mat_back!(T, rb[1], adjy, collector)
 
-    mi = mat(rb[1])
+    mi = mat(T, rb[1])
     cache = Any[mi]
     for b in rb[2:end-1]
-        mi = mat(b) * mi
+        mi = mat(T, b) * mi
         push!(cache, mi)
     end
     adjb = adjy * cache[end]'
@@ -82,7 +82,7 @@ function mat_back!(::Type{T}, rb::ChainBlock{N}, adjy, collector) where {T,N}
         b = rb[ib]
         #adjb = ib==1 ? adjy : adjy*cache[ib]'
         mat_back!(T, b, adjb, collector)
-        ib != 1 && (adjb = mat(b)' * adjb * mat(rb[ib-1]))
+        ib != 1 && (adjb = mat(T, b)' * adjb * mat(T, rb[ib-1]))
     end
     return collector
 end
