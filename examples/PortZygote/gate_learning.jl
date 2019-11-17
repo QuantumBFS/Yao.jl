@@ -1,6 +1,7 @@
 using YaoExtensions, Yao
 using Test, Random
 using Optim: LBFGS, optimize
+using Optim
 
 # port the `Matrix` function to Yao's AD.
 include("zygote_patch.jl")
@@ -28,4 +29,4 @@ end
 using Random
 Random.seed!(2)
 u = rand_unitary(4)
-c = learn_u4(u)
+c = learn_u4(u; niter=150)

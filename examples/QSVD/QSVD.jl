@@ -1,6 +1,7 @@
-# Quantum SVD
-# Reference: https://arxiv.org/abs/1905.01353
-export QuantumSVD, circuit_qsvd, train_qsvd!, readout_qsvd
+using QuAlgorithmZoo, Yao,YaoExtensions
+using BitBasis: log2i
+using Test
+using Random, LinearAlgebra
 
 """
 Quantum singular value decomposition algorithm.
@@ -14,12 +15,12 @@ Quantum singular value decomposition algorithm.
 """
 function train_qsvd!(reg, circuit_a::AbstractBlock{Na}, circuit_b::AbstractBlock{Nb}, optimizer; Nc::Int=min(Na, Nb), maxiter::Int=100) where {Na, Nb}
     nbit = Na+Nb
-    c = circuit_qsvd(circuit_a, circuit_b, Nc) |> autodiff(:QC)   # construct a differentiable circuit for training
+    c = circuit_qsvd(circuit_a, circuit_b, Nc)
 
     obs = -mapreduce(i->put(nbit, i=>Z), +, (1:Na..., Na+Nc+1:Na+Nb...))
     params = parameters(c)
     for i = 1:maxiter
-        grad = opdiff.(() -> copy(reg) |> c, collect_blocks(Diff, c), Ref(obs))
+        grad = expect'(obs, reg => c).second
         QuAlgorithmZoo.update!(params, grad, optimizer)
         println("Iter $i, Loss = $(Na+expect(obs, copy(reg) |> c))")
         dispatch!(c, params)
@@ -54,8 +55,8 @@ kwargs includes
     * `optimizer`, default is `Adam(lr=0.1)`.
 """
 function QuantumSVD(M::AbstractMatrix; Nc::Int=log2i(min(size(M)...)),
-        circuit_a=variational_circuit(log2i(size(M, 1)), 5, pair_ring(log2i(size(M, 1)))),
-        circuit_b=variational_circuit(log2i(size(M, 2)), 5, pair_ring(log2i(size(M, 2)))),
+        circuit_a=variational_circuit(log2i(size(M, 1))),
+        circuit_b=variational_circuit(log2i(size(M, 2))),
         maxiter=200, optimizer=Adam(lr=0.1))
 
     dispatch!(circuit_a, :random)
@@ -63,4 +64,22 @@ function QuantumSVD(M::AbstractMatrix; Nc::Int=log2i(min(size(M)...)),
     reg = ArrayReg(vec(M))
     train_qsvd!(reg, circuit_a, circuit_b, optimizer, Nc=Nc, maxiter=maxiter)
     readout_qsvd(reg, circuit_a, circuit_b, Nc)
+end
+
+@testset "QSVD" begin
+    Random.seed!(2)
+    # define a matrix of size (2^Na, 2^Nb)
+    Na = 2
+    Nb = 2
+
+    # the exact result
+    M = reshape(rand_state(Na+Nb).state, 1<<Na, 1<<Nb)
+    U_exact, S_exact, V_exact = svd(M)
+
+    U, S, V = QuantumSVD(M; maxiter=400)
+
+    @test isapprox(U*Diagonal(S)*V', M, atol=1e-2)
+    @test isapprox(abs.(S), S_exact, atol=1e-2)
+    @test isapprox(U'*U_exact .|> abs2, I, atol=1e-2)
+    @test isapprox(V'*V_exact .|> abs2, I, atol=1e-2)
 end
