@@ -13,7 +13,7 @@ struct OuterProduct{T,AT<:AbstractArray{T}} <: LowRankMatrix{T}
 end
 
 function OuterProduct(left::AT, right::AT) where {T,AT<:AbstractMatrix{T}}
-    size(left[2]) != size(right[2]) && throw(DimensionMismatch("The seconds dimension of left ($(size(left,2))) and right $(size(right,2)) does not match."))
+    size(left,2) != size(right,2) && throw(DimensionMismatch("The seconds dimension of left ($(size(left,2))) and right $(size(right,2)) does not match."))
     return OuterProduct{T,AT}(left, right)
 end
 
