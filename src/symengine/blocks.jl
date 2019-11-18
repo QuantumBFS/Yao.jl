@@ -12,8 +12,60 @@ Base.conj(x::Basic) = Basic(conj(SymEngine.BasicType(x)))
 Base.conj(x::BasicType) = real(x) - im*imag(x)
 Base.conj(x::BiVarOp) = juliafunc(x)(conj.(get_args(x.x))...)
 Base.conj(x::BasicTrigFunction) = juliafunc(x)(conj.(get_args(x.x)...)...)
+# WARNING: symbols and constants are assumed real!
 Base.imag(x::BasicType{Val{:Constant}}) = Basic(0)
 Base.imag(x::BasicType{Val{:Symbol}}) = Basic(0)
+function Base.imag(x::BasicType{Val{:Add}})
+    args = get_args(x.x)
+    mapreduce(imag, +, args)
+end
+
+function Base.real(x::BasicType{Val{:Add}})
+    args = get_args(x.x)
+    mapreduce(real, +, args)
+end
+
+function Base.imag(x::BasicType{Val{:Mul}})
+    args = (get_args(x.x)...,)
+    get_mul_imag(args)
+    #@show a, b, res, "IM"
+    #return res
+end
+
+function Base.real(x::BasicType{Val{:Mul}})
+    args = (get_args(x.x)...,)
+    get_mul_real(args)
+    #@show a, b, res, "RE"
+    #return res
+end
+
+function get_mul_imag(args::NTuple{N,Any}) where N
+    imag(args[1])*get_mul_real(args[2:end]) + real(args[1])*get_mul_imag(args[2:end])
+end
+get_mul_imag(args::Tuple{Basic}) = imag(args[1])
+
+function get_mul_real(args::Tuple{N,Any}) where N
+    real(args[1])*get_mul_real(args[2:end]) - imag(args[1])*get_mul_imag(args[2:end])
+end
+get_mul_real(args::Tuple{Basic}) = real(args[1])
+
+function Base.real(x::BasicTrigFunction)
+    a, = get_args(x.x)
+    if imag(a) == 0
+        return x.x
+    else
+        error("The imag of triangular function $(typeof(x)) with complex argument is not yet implemented!")
+    end
+end
+
+function Base.imag(x::BasicTrigFunction)
+    a, = get_args(x.x)
+    if imag(a) == 0
+        return Basic(0)
+    else
+        error("The imag of triangular function $(typeof(x)) with complex argument is not yet implemented!")
+    end
+end
 
 @generated function juliafunc(x::BasicType{Val{T}}) where T
     SymEngine.map_fn(T, SymEngine.fn_map)

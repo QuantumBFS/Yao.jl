@@ -3,6 +3,14 @@ using YaoSym: simplify_expi
 using SymEngine
 using Test
 
+@testset "imag and conj" begin
+    @vars a b c
+    @test imag(Basic(2+im*a)) == a
+    @test imag(Basic((2+im)*(im*a+1))) == 2*a + 1
+    @test real(sin(a)) == sin(a)
+    @test imag(sin(a)) == 0
+end
+
 @testset "mat" begin
     @vars θ γ η
     for G in [X, Y, Z, ConstGate.T, H]
@@ -53,7 +61,6 @@ end
     @test ComplexF64(ex) ≈ expect(op, reg2)
 end
 
-#=
 @testset "grad" begin
     @vars a b
     reg = ArrayReg(Basic, bit"111") => control(3,1,2=>Rx(a))
@@ -63,4 +70,16 @@ end
     ex = subs(ex[], a=>0.5)
     @test ComplexF64(ex) ≈ expect'(op, reg2)[2][]
 end
-=#
+
+@testset "grad" begin
+    @vars a b
+    reg = ArrayReg(Basic, bit"000") => put(3,2=>Rx(a))
+    op = put(3, 2=>Z)
+    reg2 = ArrayReg(bit"000") => put(3,2=>Rx(0.9))
+    ex = expect(op, reg)
+    ex = subs(ex[], a=>0.9)
+    @test ComplexF64(ex) ≈ expect(op, reg2)
+    ex = expect'(op, reg)[2]
+    ex = subs(ex[], a=>0.9)
+    @test ComplexF64(ex) ≈ expect'(op, reg2)[2][]
+end
