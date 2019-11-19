@@ -1,4 +1,6 @@
 using Test, YaoSym
+using SymEngine
+using YaoBlocks, LuxurySparse
 
 @testset "apply" begin
     @vars θ γ η
@@ -30,4 +32,10 @@ using Test, YaoSym
     res.state.nzval .= simplify_expi.(res.state.nzval)
     @test length(string(res.state.nzval[2])) < l1
     @test res ≈ ArrayReg(bit"11") |> qft(Float64, 2)
+end
+
+@testset "apply rot SWAP" begin
+    @vars θ
+    res = ket"01" |> rot(SWAP, θ)
+    @test [ComplexF64(subs(si, θ=>0.5)) for si in res.state] ≈ (product_state(bit"01") |> rot(SWAP, 0.5)).state
 end
