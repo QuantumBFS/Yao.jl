@@ -268,6 +268,13 @@ Return a register which is the partial traced on `locs`.
 @interface partial_tr(r::AbstractRegister, locs)
 
 """
+    partial_tr(locs) -> f(register)
+
+Curried version of `partial_tr(register, locs)`.
+"""
+partial_tr(locs) = @λ(register->partial_tr(register, locs))
+
+"""
     select(register, bits) -> AbstractRegister
 
 Non-inplace version of [`select!`](@ref).
