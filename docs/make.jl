@@ -17,13 +17,13 @@ const PAGES = [
     "Examples" => map(x->joinpath("examples", x * ".md"), Examples),
     "Manual" => Any[
         "man/array_registers.md",
+        "man/symbolic.md",
         "man/blocks.md",
         "man/base.md",
         "man/registers.md",
         "man/bitbasis.md",
         "man/extending_blocks.md",
         "man/benchmarks.md",
-        "man/symbolic.md",
         ],
 ]
 
