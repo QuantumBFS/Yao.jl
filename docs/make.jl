@@ -23,6 +23,7 @@ const PAGES = [
         "man/bitbasis.md",
         "man/extending_blocks.md",
         "man/benchmarks.md",
+        "man/symbolic.md",
         ],
 ]
 
