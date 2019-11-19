@@ -4,7 +4,7 @@ using Yao, YaoBlocks, YaoArrayRegister, YaoBase, BitBasis, YaoSym
 # Preprocess weave
 
 # const Examples = ["GHZ", "QFT", "Grover", "QCBM"]
-const Examples = ["GHZ", "QFT", "QCBM"]
+const Examples = ["GHZ", "QFT", "QCBM", "ErrorCorrection"]
 
 for each in Examples
     file_path = joinpath(@__DIR__, "src", "examples", join([each, ".jmd"]))
@@ -27,7 +27,7 @@ const PAGES = [
 ]
 
 makedocs(
-    modules = [Yao, YaoBase, YaoArrayRegister, YaoBlocks, BitBasis],
+    modules = [Yao, YaoBase, YaoArrayRegister, YaoBlocks, YaoSym, BitBasis],
     format = Documenter.HTML(
         prettyurls = ("deploy" in ARGS),
         canonical = ("deploy" in ARGS) ? "https://quantumbfs.github.io/Yao.jl/latest/" : nothing,

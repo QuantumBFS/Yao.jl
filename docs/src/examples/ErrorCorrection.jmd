@@ -1,0 +1,8 @@
+---
+options:
+    out_path: ErrorCorrection.md
+    fig_path: ../assets/figures
+    doctype: github
+---
+
+# Shor's 9 qubit code
