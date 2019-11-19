@@ -1,5 +1,5 @@
 using Documenter, Weave
-using Yao, YaoBlocks, YaoArrayRegister, YaoBase, BitBasis
+using Yao, YaoBlocks, YaoArrayRegister, YaoBase, BitBasis, YaoSym
 
 # Preprocess weave
 
