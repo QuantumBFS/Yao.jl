@@ -3,7 +3,6 @@ uuid = "5872b779-8223-5990-8dd0-5abbb0748c8c"
 version = "0.6.0-DEV"
 
 [deps]
-BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 YaoArrayRegister = "e600142f-9330-5003-8abb-0ebd767abc51"
 YaoBase = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
