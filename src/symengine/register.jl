@@ -1,6 +1,6 @@
 using YaoBase, SparseArrays, BitBasis, YaoArrayRegister, SymEngine
 export @ket_str, @bra_str
-export SymReg, AdjointSymReg, SymRegOrAdjointSymReg
+export SymReg, AdjointSymReg, SymRegOrAdjointSymReg, expand
 
 YaoArrayRegister._warn_type(raw::AbstractArray{Basic}) = nothing
 
@@ -32,3 +32,5 @@ Base.:(^)(x::SymReg{B, MT}, n::Int) where {B, MT} = SymReg{B, MT}(kron(state(x) 
 
 Base.:(*)(x::AdjointSymReg{B, MT}, y::AdjointSymReg{B, MT}) where {B, MT} = adjoint(parent(x) * parent(y))
 Base.:(^)(x::AdjointSymReg{B, MT}, n::Int) where {B, MT} = adjoint(parent(x)^n)
+
+SymEngine.expand(x::SymReg{B}) where B = ArrayReg{B}(expand.(state(x)))
