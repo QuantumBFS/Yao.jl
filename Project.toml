@@ -20,7 +20,7 @@ LegibleLambdas = "0.2"
 LuxurySparse = "0.5"
 MLStyle = "0.3"
 MacroTools = "0.5"
-TupleTools = "1.2.0"
+TupleTools = "1.1.0"
 julia = "1"
 
 [extras]
