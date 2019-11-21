@@ -17,7 +17,7 @@ BitBasis = "~0.6"
 LuxurySparse = "~0.5"
 StaticArrays = "~0.12"
 StatsBase = "~0.32"
-YaoBase = "~0.11.1"
+YaoBase = "~0.11"
 TupleTools = "~1.2"
 julia = "1"
 
