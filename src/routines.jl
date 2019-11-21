@@ -198,7 +198,7 @@ function cunmat(
 
     mat = SparseMatrixCSC(N, N, colptr, rowval, nzval)
     controldo(ic) do i
-        unij!(mat, locs_raw + i, U)
+        unij!(mat, locs_raw .+ i, U)
     end
     return mat
 end
@@ -224,7 +224,7 @@ function cunmat(
     ns = diff(U.colptr) |> autostatic
     Ns = ones(Int, N)
     controldo(ic) do i
-        @inbounds Ns[locs_raw+i] = ns
+        @inbounds Ns[locs_raw .+ i] = ns
     end
     @inbounds @simd for j in 1:N
         colptr[j+1] = colptr[j] + Ns[j]
@@ -235,7 +235,7 @@ function cunmat(
 
     mat = SparseMatrixCSC(N, N, colptr, rowval, nzval)
     controldo(ic) do i
-        unij!(mat, locs_raw + i, U)
+        unij!(mat, locs_raw .+ i, U)
     end
     mat
 end
@@ -272,7 +272,7 @@ function cunmat(
     U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
     pm = _initialize_output(nbit, C, U0)
     controldo(ic) do i
-        unij!(pm, locs_raw + i, U)
+        unij!(pm, locs_raw .+ i, U)
     end
     return pm
 end
@@ -293,7 +293,7 @@ function cunmat(
     U, ic, locs_raw = reorder_unitary(nbit, cbits, cvals, U0, locs)
     dg = _initialize_output(nbit, C, U0)
     controldo(ic) do i
-        unij!(dg, locs_raw + i, U)
+        unij!(dg, locs_raw .+ i, U)
     end
     return dg
 end

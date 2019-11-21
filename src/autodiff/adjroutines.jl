@@ -55,7 +55,7 @@ function adjcunmat(
     adjU = _render_adjU(U)
 
     controldo(ic) do i
-        adjunij!(adjy, locs_raw + i, adjU)
+        adjunij!(adjy, locs_raw .+ i, adjU)
     end
 
     adjU = all(diff([locs...]) .> 0) ? adjU :
