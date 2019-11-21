@@ -15,7 +15,7 @@ YaoBase = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
 [compat]
 BitBasis = "~0.6"
 LuxurySparse = "~0.5"
-StaticArrays = "~0.11"
+StaticArrays = "~0.12"
 StatsBase = "~0.32"
 YaoBase = "~0.11.1"
 TupleTools = "~1.2"
