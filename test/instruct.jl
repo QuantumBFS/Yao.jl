@@ -149,6 +149,11 @@ end
     @test rot_mat(T, Val(:CPHASE), theta) ≈ rot_mat(T, Diagonal([1, 1, 1, -1]), theta) *
                                             exp(im * theta / 2)
     for ST in [randn(ComplexF64, 1 << 5), randn(ComplexF64, 1 << 5, 10)]
+        @test instruct!(copy(ST), Val(:H), (4,)) ≈ instruct!(
+            copy(ST),
+            Const.H,
+            (4,),
+        )
         for R in [:Rx, :Ry, :Rz]
             @test instruct!(copy(ST), Val(R), (4,), θ) ≈ instruct!(
                 copy(ST),

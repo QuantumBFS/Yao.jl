@@ -16,7 +16,7 @@ end
 
 A list of symbol for specialized gates/operators.
 """
-const SPECIALIZATION_LIST = Symbol[:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
+const SPECIALIZATION_LIST = Symbol[:X, :Y, :Z, :S, :T, :Sdag, :Tdag, :H, :SWAP, :PSWAP, :CPHASE]
 
 function _prepare_instruct(
     state,
@@ -163,6 +163,11 @@ function YaoBase.instruct!(state::AbstractVecOrMat, ::Val{:X}, locs::NTuple{N,In
     end
     return state
 end
+
+function YaoBase.instruct!(state::AbstractVecOrMat, ::Val{:H}, locs::NTuple{N, Int}) where {N}
+    instruct!(state, YaoBase.Const.H, locs)
+end
+
 
 function YaoBase.instruct!(state::AbstractVecOrMat{T}, ::Val{:Y}, locs::NTuple{N,Int}) where {T,N}
     mask = bmask(Int, locs)
