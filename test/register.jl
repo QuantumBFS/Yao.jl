@@ -155,3 +155,18 @@ end
     copyto!(r1, r2)
     @test r1 == r2
 end
+
+@testset "transpose copy" begin
+    reg = rand_state(5; nbatch=10)
+    reg1 = copy(reg)
+    reg2 = focus!(copy(reg), (3,5))
+    reg3 = relax!(copy(reg2), (3,5))
+    reg4 = oneto(reg1, 3)
+    @test reg1.state isa Transpose
+    @test reg2.state isa Transpose
+    @test reg3.state isa Transpose
+    @test reg4.state isa Transpose
+    @test reg4.state ≈ oneto(reg, 3).state
+    reg4.state[1] = 2.0
+    @test reg.state[1] != 2.0
+end

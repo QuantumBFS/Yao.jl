@@ -37,6 +37,10 @@ for op in [:+, :-]
         return ArrayReg(($op)(state(lhs), state(rhs)))
     end
 
+    @eval function Base.$op(lhs::ArrayReg{B,T1,<:Transpose}, rhs::ArrayReg{B,T2,<:Transpose}) where {B,T1,T2}
+        return ArrayReg(transpose(($op)(state(lhs).parent, state(rhs).parent)))
+    end
+
     @eval function Base.$op(lhs::AdjointArrayReg{B}, rhs::AdjointArrayReg{B}) where {B}
         r = $op(parent(lhs), parent(rhs))
         return adjoint(r)
