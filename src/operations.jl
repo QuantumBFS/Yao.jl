@@ -2,7 +2,7 @@
 
 using LinearAlgebra
 
-export isnormalized, normalize!
+export isnormalized, normalize!, regadd!, regsub!, regscale!
 
 """
     isnormalized(r::ArrayReg) -> Bool
@@ -47,6 +47,36 @@ for op in [:+, :-]
     end
 end
 
+function regadd!(lhs::ArrayReg{B}, rhs::ArrayReg{B}) where {B}
+    lhs.state .+= rhs.state
+    lhs
+end
+
+function regsub!(lhs::ArrayReg{B}, rhs::ArrayReg{B}) where {B}
+    lhs.state .-= rhs.state
+    lhs
+end
+
+function regadd!(lhs::ArrayReg{B,T1,<:Transpose}, rhs::ArrayReg{B,T2,<:Transpose}) where {B,T1,T2}
+    lhs.state.parent .+= rhs.state.parent
+    lhs
+end
+
+function regsub!(lhs::ArrayReg{B,T1,<:Transpose}, rhs::ArrayReg{B,T2,<:Transpose}) where {B,T1,T2}
+    lhs.state.parent .-= rhs.state.parent
+    lhs
+end
+
+function regscale!(reg::ArrayReg{B,T1,<:Transpose}, x) where {B,T1}
+    reg.state.parent .*= x
+    reg
+end
+
+function regscale!(reg::ArrayReg{B}, x) where {B,T1}
+    reg.state .*= x
+    reg
+end
+
 # *, /
 for op in [:*, :/]
     @eval function Base.$op(lhs::RT, rhs::Number) where {B,RT<:ArrayReg{B}}
@@ -89,6 +119,15 @@ function Base.:*(bra::AdjointArrayReg{1}, ket::ArrayReg{1})
 end
 
 Base.:*(bra::AdjointArrayReg{B}, ket::ArrayReg{B}) where {B} = bra .* ket
+function Base.:*(bra::AdjointArrayReg{B,T1,<:Transpose}, ket::ArrayReg{B,T2,<:Transpose}) where {B,T1,T2}
+    if nremain(bra) == nremain(ket) == 0 # all active
+        return mapreduce((x, y) -> conj(x) * y, +, parent(state(parent(bra))), parent(state(ket)); dims=2)
+    elseif nremain(bra) == 0 # <s|active> |remain>
+        bra .* ket
+    else
+        error("partially contract ⟨bra|ket⟩ is not supported, expect ⟨bra| to be fully actived. nactive(bra)/nqubits(bra)=$(nactive(bra))/$(nqubits(bra))")
+    end
+end
 
 # broadcast
 broadcastable(r::ArrayRegOrAdjointArrayReg{1}) = Ref(r)
