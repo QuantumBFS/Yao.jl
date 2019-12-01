@@ -121,7 +121,15 @@ end
 Base.:*(bra::AdjointArrayReg{B}, ket::ArrayReg{B}) where {B} = bra .* ket
 function Base.:*(bra::AdjointArrayReg{B,T1,<:Transpose}, ket::ArrayReg{B,T2,<:Transpose}) where {B,T1,T2}
     if nremain(bra) == nremain(ket) == 0 # all active
-        return mapreduce((x, y) -> conj(x) * y, +, parent(state(parent(bra))), parent(state(ket)); dims=2)
+        A, C = parent(state(parent(bra))), parent(state(ket))
+        res = zeros(eltype(promote_type(T1, T2)), B)
+        #return mapreduce((x, y) -> conj(x) * y, +, ; dims=2)
+        for j=1:size(A, 2)
+            for i=1:size(A, 1)
+                @inbounds res[i] += conj(A[i, j]) * C[i, j]
+            end
+        end
+        res
     elseif nremain(bra) == 0 # <s|active> |remain>
         bra .* ket
     else
