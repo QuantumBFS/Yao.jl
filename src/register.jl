@@ -130,6 +130,7 @@ Initialize a new `ArrayReg` by an existing `ArrayReg`. This is equivalent
 to `copy`.
 """
 ArrayReg(r::ArrayReg{B}) where {B} = ArrayReg{B}(copy(r.state))
+ArrayReg(r::ArrayReg{B,T,<:Transpose}) where {B,T} = ArrayReg{B}(Transpose(copy(r.state.parent)))
 
 transpose_storage(reg::ArrayReg{B,T,<:Transpose}) where {B,T} = ArrayReg{B}(copy(reg.state))
 transpose_storage(reg::ArrayReg{B,T}) where {B,T} = ArrayReg{B}(transpose(copy(transpose(reg.state))))
@@ -450,6 +451,7 @@ end
 Returns an `ArrayReg` with `1:n` qubits activated.
 """
 oneto(r::ArrayReg{B}, n::Int = nqubits(r)) where {B} = ArrayReg{B}(reshape(copy(r.state), 1 << n, :))
+oneto(r::ArrayReg{B,T,<:Transpose}, n::Int = nqubits(r)) where {B,T} = transpose_storage(ArrayReg{B}(reshape(r.state, 1 << n, :)))
 
 """
     oneto(n::Int) -> f(register)
