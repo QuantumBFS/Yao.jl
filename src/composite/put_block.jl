@@ -159,7 +159,10 @@ parametrized swap gate.
 pswap(n::Int, i::Int, j::Int, α::Real) = PSwap{n}((i, j), α)
 pswap(i::Int, j::Int, α::Real) = n -> pswap(n, i, j, α)
 
-for (G, GT) in [
+for (
+    G,
+    GT,
+) in [
     (:Rx, :(PutBlock{N,1,RotationGate{1,T,XGate}} where {N,T})),
     (:Ry, :(PutBlock{N,1,RotationGate{1,T,YGate}} where {N,T})),
     (:Rz, :(PutBlock{N,1,RotationGate{1,T,ZGate}} where {N,T})),

@@ -14,7 +14,13 @@ mutable struct Measure{N,K,OT,RNG,IT<:Integer} <: PrimitiveBlock{N}
     collapseto::Union{BitStr64{N},Nothing}
     remove::Bool
     results::Vector{IT}
-    function Measure{N,K,OT,RNG,IT}(rng::RNG, operator, locations, collapseto, remove) where {RNG, N, K, OT, IT}
+    function Measure{N,K,OT,RNG,IT}(
+        rng::RNG,
+        operator,
+        locations,
+        collapseto,
+        remove,
+    ) where {RNG,N,K,OT,IT}
         locations isa AllLocs || @assert_locs_safe N locations
         if collapseto !== nothing && remove == true
             error("invalid keyword combination, expect collapseto or remove, got (collapseto=$collapseto, remove=true)")
@@ -40,9 +46,9 @@ function chmeasureoperator(m::Measure{N}, op::AbstractBlock) where {N}
 end
 
 function Base.:(==)(m1::Measure, m2::Measure)
-    res = m1.rng == m2.rng &&
-          m1.operator == m2.operator &&
-          m1.locations == m2.locations && m1.collapseto == m2.collapseto && m1.remove == m2.remove
+    res =
+        m1.rng == m2.rng && m1.operator == m2.operator &&
+        m1.locations == m2.locations && m1.collapseto == m2.collapseto && m1.remove == m2.remove
     res = res && isdefined(m1, :results) == isdefined(m2, :results)
     res && (!isdefined(m1, :results) || m1.results == m2.results)
 end
@@ -113,16 +119,23 @@ julia> m.collapseto
 0101 ₍₂₎
 ```
 """
-function Measure(n::Int; rng::RNG=Random.GLOBAL_RNG, operator::OT=ComputationalBasis(), locs=AllLocs(), collapseto=nothing, remove=false, result_dtype=BitStr64{n}) where {OT, RNG}
+function Measure(
+    n::Int;
+    rng::RNG = Random.GLOBAL_RNG,
+    operator::OT = ComputationalBasis(),
+    locs = AllLocs(),
+    collapseto = nothing,
+    remove = false,
+    result_dtype = BitStr64{n},
+) where {OT,RNG}
     if locs isa AllLocs
-        Measure{n, n, OT, RNG, result_dtype}(rng, operator, locs, collapseto, remove)
+        Measure{n,n,OT,RNG,result_dtype}(rng, operator, locs, collapseto, remove)
     else
-        Measure{n, length(locs), OT, RNG, result_dtype}(rng, operator, tuple(locs...), collapseto, remove)
+        Measure{n,length(locs),OT,RNG,result_dtype}(rng, operator, tuple(locs...), collapseto, remove)
     end
 end
 
-Measure(
-    ;
+Measure(;
     rng = Random.GLOBAL_RNG,
     locs = AllLocs(),
     operator = ComputationalBasis(),
@@ -131,11 +144,7 @@ Measure(
 ) where {K} = @λ(
     n -> Measure(
         n;
-        rng = rng,
-        locs = locs,
-        operator = operator,
-        collapseto = collapseto,
-        remove = remove,
+        rng = rng, locs = locs, operator = operator, collapseto = collapseto, remove = remove,
     )
 )
 mat(x::Measure) = error("use BlockMap to get its matrix.")

@@ -26,7 +26,7 @@ end
 
 Decode signs into control sequence on control or inversed control.
 """
-decode_sign(ctrls::Int...,) = decode_sign(ctrls)
+decode_sign(ctrls::Int...) = decode_sign(ctrls)
 decode_sign(ctrls::NTuple{N,Int}) where {N} =
     tuple(ctrls .|> abs, ctrls .|> sign .|> (x -> (1 + x) ÷ 2))
 

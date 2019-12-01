@@ -13,7 +13,8 @@ struct GeneralMatrixBlock{M,N,T,MT<:AbstractMatrix{T}} <: PrimitiveBlock{N}
     mat::MT
 
     function GeneralMatrixBlock{M,N}(m::MT) where {M,N,T,MT<:AbstractMatrix{T}}
-        (1 << M, 1 << N) == size(m) || throw(DimensionMismatch("expect a $(1<<M) x $(1<<N) matrix, got $(size(m))"))
+        (1 << M, 1 << N) == size(m) ||
+        throw(DimensionMismatch("expect a $(1<<M) x $(1<<N) matrix, got $(size(m))"))
 
         return new{M,N,T,MT}(m)
     end

@@ -47,10 +47,14 @@ end
     @test length(ad4) == 0
 
     reg = rand_state(3)
-    @test apply!(copy(reg), ad) ≈ apply!(copy(reg), ad[1]) + apply!(copy(reg), ad[2]) +
-                                  apply!(copy(reg), ad[3])
-    @test mat(ad) * reg.state ≈ apply!(copy(reg), ad[1]) + apply!(copy(reg), ad[2]) +
-                                apply!(copy(reg), ad[3]) |> state
+    @test apply!(
+        copy(reg),
+        ad,
+    ) ≈ apply!(copy(reg), ad[1]) + apply!(copy(reg), ad[2]) + apply!(copy(reg), ad[3])
+    @test mat(ad) *
+          reg.state ≈ apply!(copy(reg), ad[1]) +
+                      apply!(copy(reg), ad[2]) +
+                      apply!(copy(reg), ad[3]) |> state
 
     @test Add{3}() isa Add
     @test Add{3}([put(3, 3 => X)]) isa Add

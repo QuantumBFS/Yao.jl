@@ -285,7 +285,7 @@ Pop the first [`nparameters`](@ref) parameters of list, map them with a function
 `f`, then dispatch them to the block tree `block`. See also [`dispatch!`](@ref).
 """
 @interface function popdispatch!(f::Function, x::AbstractBlock, list::Vector)
-    setiparams!(f, x, (popfirst!(list) for k in 1:niparams(x))...)
+    setiparams!(f, x, (popfirst!(list) for k = 1:niparams(x))...)
     for each in subblocks(x)
         popdispatch!(f, each, list)
     end
@@ -299,7 +299,7 @@ Pop the first [`nparameters`](@ref) parameters of list, then dispatch them to
 the block tree `block`. See also [`dispatch!`](@ref).
 """
 @interface function popdispatch!(x::AbstractBlock, list::Vector)
-    setiparams!(x, (popfirst!(list) for k in 1:niparams(x))...)
+    setiparams!(x, (popfirst!(list) for k = 1:niparams(x))...)
     for each in subblocks(x)
         popdispatch!(each, list)
     end
@@ -308,8 +308,8 @@ end
 
 render_params(r::AbstractBlock, params) = params
 render_params(r::AbstractBlock, params::Symbol) = render_params(r, Val(params))
-render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i in 1:niparams(r))
-render_params(r::AbstractBlock, ::Val{:zero}) = (zero(iparams_eltype(r)) for i in 1:niparams(r))
+render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i = 1:niparams(r))
+render_params(r::AbstractBlock, ::Val{:zero}) = (zero(iparams_eltype(r)) for i = 1:niparams(r))
 
 """
     HasParameters{X} <: SimpleTraits.Trait
@@ -340,5 +340,6 @@ use the returns of [`parameters`](@ref) as its key.
 @interface cache_key(x::AbstractBlock)
 
 function _check_size(r::AbstractRegister, pb::AbstractBlock{N}) where {N}
-    N == nactive(r) || throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
+    N == nactive(r) ||
+    throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
 end

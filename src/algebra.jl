@@ -38,4 +38,4 @@ Base.prod(blocks::AbstractVector{<:AbstractBlock{N}}) where {N} = chain(Iterator
 Base.sum(blocks::AbstractVector{<:AbstractBlock{N}}) where {N} = +(blocks...)
 
 Base.:(-)(lhs::AbstractBlock, rhs::AbstractBlock) = Add(lhs, -rhs)
-Base.:(^)(x::AbstractBlock, n::Int) = chain((copy(x) for k in 1:n)...)
+Base.:(^)(x::AbstractBlock, n::Int) = chain((copy(x) for k = 1:n)...)

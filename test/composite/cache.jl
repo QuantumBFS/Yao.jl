@@ -2,11 +2,9 @@ using Test, YaoBlocks, YaoArrayRegister, LuxurySparse, CacheServers
 
 @testset "constructor" begin
     @test CacheFragment(X) isa CacheFragment{XGate,UInt8,Any}
-    @test CacheFragment{XGate,Int,PermMatrix{ComplexF64,Int}}(X) isa CacheFragment{
-        XGate,
-        Int,
-        PermMatrix{ComplexF64,Int},
-    }
+    @test CacheFragment{XGate,Int,PermMatrix{ComplexF64,Int}}(
+        X,
+    ) isa CacheFragment{XGate,Int,PermMatrix{ComplexF64,Int}}
     @test CacheFragment{XGate,Int}(X) isa CacheFragment{XGate,Int,Any}
 end
 

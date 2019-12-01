@@ -71,9 +71,7 @@ function mat(::Type{T}, m::MathGate{N}) where {T,N}
         vals[Int64(b2)+1] += 1
         perm[Int64(b2)+1] = Int64(b) + 1
     end
-    any(
-        ==(0),
-        vals,
-    ) && throw(ArgumentError("This `MathGate` is not unitary! Failed converting to a `PermMatrix`! maybe use `applymatrix` to check your block?"))
+    any(==(0), vals) &&
+    throw(ArgumentError("This `MathGate` is not unitary! Failed converting to a `PermMatrix`! maybe use `applymatrix` to check your block?"))
     return PermMatrix(perm, vals)
 end

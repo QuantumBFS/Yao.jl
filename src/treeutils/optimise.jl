@@ -212,12 +212,8 @@ end
 
 export simplify
 
-const __default_simplification_rules__ = Function[
-    merge_pauli,
-    eliminate_nested,
-    merge_scale,
-    combine_similar,
-]
+const __default_simplification_rules__ =
+    Function[merge_pauli, eliminate_nested, merge_scale, combine_similar]
 
 # Inspired by MasonPotter/Symbolics.jl
 """

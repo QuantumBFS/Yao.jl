@@ -11,8 +11,10 @@ using Test, YaoArrayRegister, YaoBlocks, LinearAlgebra
     v0, v1 = vec(reg.state), vec(reg0.state)
     @test mat(rf) * statevec(reg0) ≈ statevec(apply!(copy(reg0), rf))
     @test statevec(rf.psi)' * v0 ≈ statevec(rf.psi)' * v1
-    @test v0 - statevec(rf.psi)' * v0 * statevec(rf.psi) ≈ -(v1 - statevec(rf.psi)' * v1 *
-                                                             statevec(rf.psi))
+    @test v0 -
+          statevec(rf.psi)' *
+          v0 *
+          statevec(rf.psi) ≈ -(v1 - statevec(rf.psi)' * v1 * statevec(rf.psi))
 
     @test mat(ComplexF32, rf) == ComplexF32.(mat(rf))
 

@@ -6,17 +6,17 @@ function gaussian_pdf(x, μ::Real, σ::Real)
 end
 
 layer(nbit::Int, x::Symbol) = layer(nbit, Val(x))
-layer(nbit::Int, ::Val{:first}) = chain(nbit, put(i => chain(Rx(0), Rz(0))) for i in 1:nbit)
+layer(nbit::Int, ::Val{:first}) = chain(nbit, put(i => chain(Rx(0), Rz(0))) for i = 1:nbit)
 
-layer(nbit::Int, ::Val{:last}) = chain(nbit, put(i => chain(Rz(0), Rx(0))) for i in 1:nbit)
-layer(nbit::Int, ::Val{:mid}) = chain(nbit, put(i => chain(Rz(0), Rx(0), Rz(0))) for i in 1:nbit)
+layer(nbit::Int, ::Val{:last}) = chain(nbit, put(i => chain(Rz(0), Rx(0))) for i = 1:nbit)
+layer(nbit::Int, ::Val{:mid}) = chain(nbit, put(i => chain(Rz(0), Rx(0), Rz(0))) for i = 1:nbit)
 
 entangler(pairs) = chain(control(ctrl, target => X) for (ctrl, target) in pairs)
 
 function build_circuit(n, nlayers, pairs)
     circuit = chain(n)
     push!(circuit, layer(n, :first))
-    for i in 2:nlayers
+    for i = 2:nlayers
         push!(circuit, cache(entangler(pairs)))
         push!(circuit, layer(n, :mid))
     end
@@ -50,7 +50,7 @@ function gradient(qcbm, κ, ptrain)
     grad = zeros(Float64, nparameters(qcbm))
 
     count = 1
-    for k in 1:2:length(qcbm), each_line in qcbm[k], gate in content(each_line)
+    for k = 1:2:length(qcbm), each_line in qcbm[k], gate in content(each_line)
         dispatch!(+, gate, π / 2)
         prob_pos = probs(zero_state(n) |> qcbm)
 
@@ -76,7 +76,7 @@ opt = ADAM()
 
 function train(qcbm, κ, opt, target)
     history = Float64[]
-    for _ in 1:100
+    for _ = 1:100
         push!(history, loss(κ, qcbm, target))
         ps = parameters(qcbm)
         Optimise.update!(opt, ps, gradient(qcbm, κ, target))

@@ -78,7 +78,7 @@ function mat_back!(::Type{T}, rb::ChainBlock{N}, adjy, collector) where {T,N}
         push!(cache, mi)
     end
     adjb = adjy * cache[end]'
-    for ib in length(rb):-1:1
+    for ib = length(rb):-1:1
         b = rb[ib]
         #adjb = ib==1 ? adjy : adjy*cache[ib]'
         mat_back!(T, b, adjb, collector)

@@ -20,7 +20,7 @@ end
     st = rand_state(5; nbatch = 3)
     g = Measure(5; locs = (1, 2), collapseto = bit"00011")
     st |> g
-    for k in 1:32
+    for k = 1:32
         if !(st.state[k] ≈ 0.0)
             @test all(BitStr64{5}(k - 1)[1:2] .== 1)
         end

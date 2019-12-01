@@ -43,7 +43,10 @@ end
     CNOT_R = PermMatrix([1, 2, 4, 3], ones(ComplexF64, 4))
     Toffoli_R = PermMatrix([1, 2, 3, 4, 5, 6, 8, 7], ones(ComplexF64, 8))
 
-    for (each, MAT) in [
+    for (
+        each,
+        MAT,
+    ) in [
         (X, [0 1; 1 0]),
         (Y, [0 -im; im 0]),
         (Z, [1 0; 0 -1]),

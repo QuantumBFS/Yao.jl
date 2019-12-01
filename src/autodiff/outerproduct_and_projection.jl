@@ -13,7 +13,8 @@ struct OuterProduct{T,AT<:AbstractArray{T}} <: LowRankMatrix{T}
 end
 
 function OuterProduct(left::AT, right::AT) where {T,AT<:AbstractMatrix{T}}
-    size(left,2) != size(right,2) && throw(DimensionMismatch("The seconds dimension of left ($(size(left,2))) and right $(size(right,2)) does not match."))
+    size(left, 2) != size(right, 2) &&
+    throw(DimensionMismatch("The seconds dimension of left ($(size(left,2))) and right $(size(right,2)) does not match."))
     return OuterProduct{T,AT}(left, right)
 end
 
@@ -54,7 +55,8 @@ outerprod(outδ::ArrayReg{B}, in::ArrayReg{B}) where {B} =
 Project `op` to sparse matrix with same sparsity as `y`.
 """
 function projection(y::AbstractMatrix, op::AbstractMatrix)
-    size(y) == size(op) || throw(DimensionMismatch("can not project a matrix of size $(size(op)) to target size $(size(y))"))
+    size(y) == size(op) ||
+    throw(DimensionMismatch("can not project a matrix of size $(size(op)) to target size $(size(y))"))
     out = zero(y)
     unsafe_projection!(out, op)
 end
@@ -73,7 +75,7 @@ unsafe_projection!(y::Matrix, adjy, v) = y .+= adjy .* v
 end
 
 @inline function unsafe_projection!(y::PermMatrix, m::AbstractMatrix)
-    for i in 1:size(y, 1)
+    for i = 1:size(y, 1)
         @inbounds y.vals[i] = m[i, y.perm[i]]
     end
     y

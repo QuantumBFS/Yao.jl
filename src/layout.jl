@@ -19,7 +19,7 @@ _charwidth(s) = sum(map(textwidth, collect(s)))
 print prefix of a tree node in a single line.
 """
 function print_prefix(io::IO, depth, charset, active_levels)
-    for current_depth in 2:depth
+    for current_depth = 2:depth
         if current_depth in active_levels
             print(io, charset.skip, " "^(_charwidth(charset.dash) + 1))
         else
