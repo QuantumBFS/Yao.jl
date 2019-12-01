@@ -108,9 +108,7 @@ end
 for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
     @eval function apply!(r::AbstractRegister, rp::RepeatedBlock{N,C,$GT}) where {N,C}
-        for addr in rp.locs
-            instruct!(r, Val($(QuoteNode(G))), Tuple(addr:addr+nqubits(rp.content)-1))
-        end
+        instruct!(r, Val($(QuoteNode(G))), rp.locs)
         return r
     end
 end
