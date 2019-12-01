@@ -9,4 +9,4 @@ jobs:
     - uses: actions/checkout@master
     - uses: julia-actions/julia-format@master
       with:
-        args: -v -m 102 .
+        args: -v .
