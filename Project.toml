@@ -3,6 +3,12 @@ uuid = "4dcc6239-e9fa-4a8f-8c05-0fe966d2abbe"
 authors = ["QuantumBFS"]
 version = "0.1.0"
 
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
+Yao = "5872b779-8223-5990-8dd0-5abbb0748c8c"
+YaoExtensions = "7a06699c-c960-11e9-3c98-9f78548b5f0f"
+
 [compat]
 julia = "1"
 
