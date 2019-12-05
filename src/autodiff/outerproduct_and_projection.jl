@@ -2,24 +2,23 @@ export LowRankMatrix, OuterProduct, projection, outerprod
 abstract type LowRankMatrix{T} <: AbstractMatrix{T} end
 
 """
-    OuterProduct{T,AT<:AbstractArray{T}} <: LowRankMatrix{T}
+    OuterProduct{T,ATL<:AbstractArray{T}, ATR<:AbstractArray{T}} <: LowRankMatrix{T}
 
-If `AT <: AbstractVector`, it represents an outer product `x.left*transpose(x.right)`.
-Else if `AT <: AbstractMatrix`, then it is an outer product `x.left*transpose(x.right)`.
+If `ATL(R) <: AbstractVector`, it represents an outer product `x.left*transpose(x.right)`.
+Else if `ATL(R) <: AbstractMatrix`, then it is an outer product `x.left*transpose(x.right)`.
 """
-struct OuterProduct{T,AT<:AbstractArray{T}} <: LowRankMatrix{T}
-    left::AT
-    right::AT
+struct OuterProduct{T,ATL<:AbstractArray{T}, ATR<:AbstractArray{T}} <: LowRankMatrix{T}
+    left::ATL
+    right::ATR
 end
 
-function OuterProduct(left::AT, right::AT) where {T,AT<:AbstractMatrix{T}}
-    size(left, 2) != size(right, 2) &&
-    throw(DimensionMismatch("The seconds dimension of left ($(size(left,2))) and right $(size(right,2)) does not match."))
-    return OuterProduct{T,AT}(left, right)
+function OuterProduct(left::ATL, right::ATR) where {T,ATL, ATR}
+    size(left,2) != size(right,2) && throw(DimensionMismatch("The seconds dimension of left ($(size(left,2))) and right $(size(right,2)) does not match."))
+    return OuterProduct{T,ATL, ATR}(left, right)
 end
 
-const BatchedOuterProduct{T,MT} = OuterProduct{T,MT} where {MT<:AbstractMatrix}
-const SimpleOuterProduct{T,VT} = OuterProduct{T,VT} where {VT<:AbstractVector}
+const BatchedOuterProduct{T,MTL,MTR} = OuterProduct{T,MTL,MTR} where {MTL<:AbstractMatrix, MTR<:AbstractMatrix}
+const SimpleOuterProduct{T,VTL,VTR} = OuterProduct{T,VTL,VTR} where {VTL<:AbstractVector, VTR<:AbstractVector}
 
 LinearAlgebra.rank(op::OuterProduct) = size(op.left, 2)
 Base.getindex(op::OuterProduct{T,<:AbstractVector}, i::Int, j::Int) where {T} =

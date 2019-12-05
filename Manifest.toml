@@ -1,0 +1,168 @@
+# This file is machine-generated - editing it directly is not advised
+
+[[Base64]]
+uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
+[[BitBasis]]
+deps = ["LinearAlgebra", "LuxurySparse", "StaticArrays"]
+git-tree-sha1 = "166e82590004c34afcc985ea9b633ebd6ec0292c"
+uuid = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
+version = "0.6.0"
+
+[[CacheServers]]
+deps = ["Distributed", "Test"]
+git-tree-sha1 = "b584b04f236d3677b4334fab095796a128445bf8"
+uuid = "a921213e-d44a-5460-ac04-5d720a99ba71"
+version = "0.2.0"
+
+[[DataAPI]]
+git-tree-sha1 = "674b67f344687a88310213ddfa8a2b3c76cc4252"
+uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
+version = "1.1.0"
+
+[[DataStructures]]
+deps = ["InteractiveUtils", "OrderedCollections"]
+git-tree-sha1 = "a1b652fb77ae8ca7ea328fa7ba5aa151036e5c10"
+uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+version = "0.17.6"
+
+[[Distributed]]
+deps = ["Random", "Serialization", "Sockets"]
+uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+
+[[ExponentialUtilities]]
+deps = ["LinearAlgebra", "Printf", "SparseArrays"]
+git-tree-sha1 = "85e1ce16aa9b98793df704e17e7a0ceadefe404f"
+uuid = "d4d017d3-3776-5f7e-afef-a10c40355c18"
+version = "1.5.1"
+
+[[FillArrays]]
+deps = ["LinearAlgebra", "Random", "SparseArrays"]
+git-tree-sha1 = "1a9fe4e1323f38de0ba4da49eafd15b25ec62298"
+uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
+version = "0.8.2"
+
+[[InteractiveUtils]]
+deps = ["Markdown"]
+uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+
+[[LegibleLambdas]]
+deps = ["MLStyle", "MacroTools", "Test"]
+git-tree-sha1 = "987298a681f4946b0d5d87ded1e89b53957d3b07"
+uuid = "f1f30506-32fe-5131-bd72-7c197988f9e5"
+version = "0.2.0"
+
+[[Libdl]]
+uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+
+[[LinearAlgebra]]
+deps = ["Libdl"]
+uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+
+[[Logging]]
+uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
+
+[[LuxurySparse]]
+deps = ["FillArrays", "LinearAlgebra", "Random", "SparseArrays", "StaticArrays"]
+git-tree-sha1 = "4ff579e234f12ca1a97124c194c3eaca873dd4fa"
+uuid = "d05aeea4-b7d4-55ac-b691-9e7fabb07ba2"
+version = "0.5.0"
+
+[[MLStyle]]
+git-tree-sha1 = "67f9a88611bc79f992aa705d9bbc833a2547dec7"
+uuid = "d8e11817-5142-5d16-987a-aa16d5891078"
+version = "0.3.1"
+
+[[MacroTools]]
+deps = ["DataStructures", "Markdown", "Random"]
+git-tree-sha1 = "e2fc7a55bb2224e203bbd8b59f72b91323233458"
+uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
+version = "0.5.3"
+
+[[Markdown]]
+deps = ["Base64"]
+uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
+
+[[Missings]]
+deps = ["DataAPI"]
+git-tree-sha1 = "de0a5ce9e5289f27df672ffabef4d1e5861247d5"
+uuid = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
+version = "0.4.3"
+
+[[OrderedCollections]]
+deps = ["Random", "Serialization", "Test"]
+git-tree-sha1 = "c4c13474d23c60d20a67b217f1d7f22a40edf8f1"
+uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
+version = "1.1.0"
+
+[[Printf]]
+deps = ["Unicode"]
+uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
+[[Random]]
+deps = ["Serialization"]
+uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[[Serialization]]
+uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+
+[[SimpleTraits]]
+deps = ["InteractiveUtils", "MacroTools"]
+git-tree-sha1 = "2bdf3b6300a9d66fe29ee8bb51ba100c4df9ecbc"
+uuid = "699a6c99-e7fa-54fc-8d76-47d257e15c1d"
+version = "0.9.1"
+
+[[Sockets]]
+uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
+
+[[SortingAlgorithms]]
+deps = ["DataStructures", "Random", "Test"]
+git-tree-sha1 = "03f5898c9959f8115e30bc7226ada7d0df554ddd"
+uuid = "a2af1166-a08f-5f64-846c-94a0d3cef48c"
+version = "0.3.1"
+
+[[SparseArrays]]
+deps = ["LinearAlgebra", "Random"]
+uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+
+[[StaticArrays]]
+deps = ["LinearAlgebra", "Random", "Statistics"]
+git-tree-sha1 = "5a3bcb6233adabde68ebc97be66e95dcb787424c"
+uuid = "90137ffa-7385-5640-81b9-e52037218182"
+version = "0.12.1"
+
+[[Statistics]]
+deps = ["LinearAlgebra", "SparseArrays"]
+uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+
+[[StatsBase]]
+deps = ["DataAPI", "DataStructures", "LinearAlgebra", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics"]
+git-tree-sha1 = "c53e809e63fe5cf5de13632090bc3520649c9950"
+uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+version = "0.32.0"
+
+[[Test]]
+deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]
+uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[[TupleTools]]
+git-tree-sha1 = "62a7a6cd5a608ff71cecfdb612e67a0897836069"
+uuid = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
+version = "1.2.0"
+
+[[Unicode]]
+uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+
+[[YaoArrayRegister]]
+deps = ["BitBasis", "LinearAlgebra", "LuxurySparse", "Random", "StaticArrays", "StatsBase", "TupleTools", "YaoBase"]
+git-tree-sha1 = "b854ce32c8997407577cdc2a09cee9ce1e736107"
+repo-rev = "master"
+repo-url = "https://github.com/QuantumBFS/YaoArrayRegister.jl.git"
+uuid = "e600142f-9330-5003-8abb-0ebd767abc51"
+version = "0.5.2"
+
+[[YaoBase]]
+deps = ["BitBasis", "LegibleLambdas", "LinearAlgebra", "LuxurySparse", "MLStyle", "MacroTools", "Random", "SparseArrays", "Test", "TupleTools"]
+git-tree-sha1 = "e241ca07798e5c2ccbef9edc0d1822dc3296a6ab"
+uuid = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
+version = "0.12.1"

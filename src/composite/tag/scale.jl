@@ -55,6 +55,6 @@ mat(::Type{T}, x::Scale{Val{S}}) where {T,S} = T(S) * mat(T, content(x))
 
 function apply!(r::ArrayReg{B}, x::Scale{S,N}) where {S,B,N}
     apply!(r, content(x))
-    r.state .*= factor(x)
+    regscale!(r, factor(x))
     return r
 end

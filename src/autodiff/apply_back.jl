@@ -105,8 +105,8 @@ end
 function apply_back!(st, block::Scale, collector)
     out, outδ = st
     apply_back!((out, outδ), content(block), collector)
-    outδ.state .= outδ.state .* conj(factor(block))
-    out.state .= out.state ./ factor(block)
+    regscale!(outδ, conj(factor(block)))
+    regscale!(out, 1/factor(block))
     return (out, outδ)
 end
 
@@ -144,7 +144,7 @@ apply_back!(st, block::Measure, collector) = throw(MethodError(apply_back!, (st,
 function backward_params!(st, block::Rotor, collector)
     in, outδ = st
     Σ = generator(block)
-    g = dropdims(sum(conj.(state(in |> Σ)) .* state(outδ), dims = (1, 2)), dims = (1, 2)) |> as_scalar
+    g = sum((in |> Σ)' * outδ)
     pushfirst!(collector, -imag(g) / 2)
     in |> Σ
     nothing

@@ -26,9 +26,9 @@ function apply!(r::AbstractRegister, x::Add)
     isempty(x.list) && return r
     length(x.list) == 1 && return apply!(r, x.list[])
 
-    res = mapreduce(blk -> apply!(copy(r), blk), +, x.list[1:end-1])
+    res = mapreduce(blk -> apply!(copy(r), blk), regadd!, x.list[1:end-1])
     apply!(r, x.list[end])
-    r.state .+= res.state
+    regadd!(r, res)
     r
 end
 

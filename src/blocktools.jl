@@ -76,12 +76,29 @@ expect(op::AbstractBlock, reg::AbstractRegister{1}) = reg' * apply!(copy(reg), o
 
 function expect(op::AbstractBlock, reg::AbstractRegister{B}) where {B}
     ket = apply!(copy(reg), op)
-    C = conj!(reshape(ket.state, :, B))
-    A = reshape(reg.state, :, B)
-    dropdims(sum(A .* C, dims = 1), dims = 1) |> conj
+    if !(reg.state isa Transpose)
+        C = conj!(reshape(ket.state, :, B))
+        A = reshape(reg.state, :, B)
+        dropdims(sum(A .* C, dims = 1), dims = 1) |> conj
+        #mapreduce((x,y) -> conj(x*y), +, A, C, dims=1)
+    elseif size(reg.state, 2) == B
+        Na = size(reg.state, 1)
+        C = conj!(reshape(ket.state.parent, B, Na))
+        A = reshape(reg.state.parent, B, Na)
+        dropdims(sum(A .* C, dims = 2), dims = 2) |> conj
+    else
+        Na = size(reg.state, 1)
+        C = conj!(reshape(ket.state.parent, :, B, Na))
+        A = reshape(reg.state.parent, :, B, Na)
+        dropdims(sum(A .* C, dims = (1,3)), dims = (1,3)) |> conj
+    end
 end
 
-function expect(op::Add, reg::AbstractRegister)
+#function expect(op::Add, reg::AbstractRegister{B}) where B
+    #sum(opi -> expect(opi, reg), op)
+#end
+
+function expect(op::Add, reg::AbstractRegister{1})
     sum(opi -> expect(opi, reg), op)
 end
 
@@ -93,7 +110,6 @@ function expect(op, plan::Pair{<:AbstractRegister,<:AbstractBlock})
     expect(op, copy(plan.first) |> plan.second)
 end
 
-expect(op::Add, reg::AbstractRegister{1}) = invoke(expect, Tuple{Add,AbstractRegister}, op, reg)
 expect(op::Scale, reg::AbstractRegister{1}) = invoke(expect, Tuple{Scale,AbstractRegister}, op, reg)
 
 for FUNC in [:measure!, :measure_collapseto!, :measure_remove!, :measure]
