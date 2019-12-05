@@ -25,6 +25,8 @@ end
 
 RotationGate(block::GT, theta::T) where {N,T,GT<:AbstractBlock{N}} =
     RotationGate{N,T,GT}(block, theta)
+RotationGate(block::GT, theta::Integer) where {N,GT<:AbstractBlock{N}} =
+    RotationGate{N,Float64,GT}(block, Float64(theta))
 
 # bindings
 """

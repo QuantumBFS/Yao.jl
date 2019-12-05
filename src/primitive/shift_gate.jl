@@ -20,6 +20,8 @@ mutable struct ShiftGate{T} <: PrimitiveBlock{1}
     theta::T
 end
 
+ShiftGate(theta::Integer) = ShiftGate(Float64(theta))
+
 """
     shift(θ)
 

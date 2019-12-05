@@ -1,5 +1,7 @@
 using Test, YaoBlocks, YaoArrayRegister
 
+@test shift(1) isa ShiftGate{Float64}
+
 @testset "test constructor" for T in [Float16, Float32, Float64]
     @test ShiftGate(T(0.1)) isa ShiftGate{T}
     @test shift(T(0.1)) isa ShiftGate{T}
