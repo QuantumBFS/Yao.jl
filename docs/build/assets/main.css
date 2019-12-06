@@ -1,0 +1,36 @@
+#documenter .docs-sidebar {
+    top: auto!important;
+}
+
+.breadcrumb {
+    background-color: inherit!important;
+    white-space: normal!important;
+}
+
+.navbar-brand img {
+    width: 40px!important;
+    height: 40px!important;
+    vertical-align: middle;
+}
+
+.navbar-wrapper {
+    min-height: 3.25rem;
+    position: sticky;
+    width: 100%;
+    height: 66px;
+    top: 0;
+}
+
+.navbar-wrapper .navbar {
+    height: inherit;
+    border-radius: 0!important;
+    background-color: #2b5797;
+}
+
+/* .documenter-wrapper {
+    margin-top: 66px;
+} */
+
+html.theme--documenter-dark body {
+    background-color: inherit!important;
+}
