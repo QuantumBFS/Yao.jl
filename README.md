@@ -1,3 +1,27 @@
-# YaoTutorials
+# Tutorials For Yao
 
 [![Build Status](https://travis-ci.com/QuantumBFS/YaoTutorials.jl.svg?branch=master)](https://travis-ci.com/QuantumBFS/YaoTutorials.jl)
+
+This repo hosts the tutorials for Yao.
+
+## Build Locally
+
+To build it locally, you can clone this repo by
+
+```
+git clone https://github.com/QuantumBFS/tutorials.git
+```
+
+then build it with the following command
+
+```sh
+# enter tutorial folder
+cd tutorials
+# build this tutorial into html format locally
+julia --project docs/make.jl build
+# open docs/build/index.html
+```
+
+## License
+
+Apache License 2.0
