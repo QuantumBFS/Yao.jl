@@ -63,7 +63,7 @@ For CUDA support, see [CuYao.jl](https://github.com/QuantumBFS/CuYao.jl).
 
 ## Documentation
 
-### [Tutorial](https://tutorials.yaoquantum.org)
+### [Tutorial](https://tutorials.yaoquantum.org) | Learn Quantum Computing with Yao
 
 ### Algoritm Zoo
 
