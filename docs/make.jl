@@ -21,7 +21,7 @@ const top_nav = """
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
-          <a class="nav-link" href="$base_url/tutorials">Tutorial</a>
+          <a class="nav-link" href="$base_url/tutorials/dev">Tutorial</a>
         </li>
 
         <li class="nav-item active">
