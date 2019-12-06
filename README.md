@@ -1,5 +1,5 @@
 <div align="center"> <img
-src="https://rawgit.com/QuantumBFS/Yao.jl/master/docs/src/assets/logo.svg"
+src="http://yaoquantum.org/assets/images/logo.png"
 alt="Yao Logo" width="210"></img>
 <h1>Yao</h1>
 </div>
