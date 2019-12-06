@@ -34,7 +34,15 @@ qft(n) = chain(B(n, k) for k in 1:n)
 
 ## Installation
 
-Yao is a [julia](https://julialang.org/) language package. To install Yao, please [open Julia's interactive session (known as REPL)](https://docs.julialang.org/en/v1/manual/getting-started/) and type `]` in the REPL to use the package mode, then type this command:
+<p>
+    Yao is a &nbsp;
+    <a href="https://julialang.org">
+        <img src="https://julialang.org/favicon.ico" width="16em">
+    Julia language
+    </a> package. To install Yao,
+    please <a href="https://docs.julialang.org/en/v1/manual/getting-started/">open
+    package mode, then type the following command
+</p>
 
 For stable release
 
