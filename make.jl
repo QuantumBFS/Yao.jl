@@ -5,7 +5,7 @@ using Documenter.Utilities.DOM
 using Documenter.Utilities.DOM: Tag, @tags
 # Evil Prirate
 
-const base_url = raw"https://yaoquantum.org/"
+const base_url = raw"https://yaoquantum.org"
 
 const top_nav = """
 <div id="top" class="navbar-wrapper">
@@ -19,9 +19,6 @@ const top_nav = """
   
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
-        <!-- <li class="nav-item active">
-          <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
-        </li> -->
         <li class="nav-item active">
           <a class="nav-link" href="$base_url/tutorials">Tutorial<span class="sr-only">(current)</span></a>
         </li>
