@@ -1,7 +1,5 @@
 # Tutorials For Yao
 
-[![Build Status](https://travis-ci.com/QuantumBFS/YaoTutorials.jl.svg?branch=master)](https://travis-ci.com/QuantumBFS/YaoTutorials.jl)
-
 This repo hosts the tutorials for Yao.
 
 ## Build Locally
