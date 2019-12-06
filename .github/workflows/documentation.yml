@@ -1,6 +1,6 @@
 name: Documentation
 
-on: [push, pull_request, created]
+on: [push, pull_request, create]
 
 jobs:
   build:
