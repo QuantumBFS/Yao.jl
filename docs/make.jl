@@ -87,7 +87,7 @@ makedocs(
         ),
     doctest = ("doctest=true" in ARGS),
     clean = false,
-    sitename = "Yao.jl",
+    sitename = "Documentation | Yao",
     linkcheck = !("skiplinks" in ARGS),
     pages = PAGES
 )
