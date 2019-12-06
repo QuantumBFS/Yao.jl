@@ -56,7 +56,7 @@ For CUDA support, see [CuYao.jl](https://github.com/QuantumBFS/CuYao.jl).
 
 ### Getting Started
 
-[Examples: understand Yao's code for quantum algorithms](https://quantumbfs.github.io/Yao.jl/stable/#Getting-Started-1)
+[Tutorial | Yao](https://tutorials.yaoquantum.org)
 
 ### Algoritm Zoo
 
