@@ -168,7 +168,7 @@ struct ComputationalBasis end
 export AllLocs
 struct AllLocs end
 
-export measure, measure!, measure_remove!, measure_collapseto!
+export measure, measure!, measure_remove!, measure_resetto!
 
 """
     measure([rng,] register[, operator][, locs]; nshots=1) -> Vector{Int}
@@ -193,29 +193,21 @@ Measure current active qubits or qubits at `locs` and remove them.
 function measure_remove! end
 
 """
-    measure_collapseto!([rng,] [operator, ]reg::AbstractRegister[, locs]; config) -> Int
+    measure_resetto!([rng,] [operator, ]reg::AbstractRegister[, locs]; config) -> Int
 
 Measure current active qubits or qubits at `locs` and set the register to specific value.
 """
-function measure_collapseto! end
+function measure_resetto! end
 
 # focus context
-for FUNC in [:measure!, :measure_collapseto!, :measure_remove!, :measure]
-    rotback = FUNC == :measure! ? :(reg.state = V*reg.state) : :()
-    @eval function $FUNC(rng::AbstractRNG, op::Eigen, reg::AbstractRegister, locs::AllLocs; kwargs...)
-        E, V = op
-        reg.state = V'*reg.state
-        res = $FUNC(rng, ComputationalBasis(), reg, locs; kwargs...)
-        $rotback
-        E[Int64.(res) .+ 1]
-    end
+for FUNC in [:measure!, :measure_resetto!, :measure_remove!, :measure]
     @eval $FUNC(rng::AbstractRNG, op, reg::AbstractRegister; kwargs...) = $FUNC(rng, op, reg, AllLocs(); kwargs...)
     @eval $FUNC(rng::AbstractRNG, reg::AbstractRegister, locs; kwargs...) = $FUNC(rng, ComputationalBasis(), reg, locs; kwargs...)
     @eval $FUNC(rng::AbstractRNG, reg::AbstractRegister; kwargs...) = $FUNC(rng, ComputationalBasis(), reg, AllLocs(); kwargs...)
     @eval $FUNC(args...; kwargs...) = $FUNC(Random.GLOBAL_RNG, args...; kwargs...)
 end
 
-for FUNC in [:measure_collapseto!, :measure!, :measure]
+for FUNC in [:measure_resetto!, :measure!, :measure]
     @eval function $FUNC(rng::AbstractRNG, op, reg::AbstractRegister, locs::Union{Tuple, Vector, Integer, UnitRange}; kwargs...)
         nbit = nactive(reg)
         focus!(reg, locs)
@@ -329,8 +321,7 @@ Inverse the locations of register.
 Set the `register` to bit string literal `bit_str` (or an equivalent integer). About bit string literal,
 see more in [`@bit_str`](@ref).
 """
-collapseto!(r::AbstractRegister, config::Integer=0) = collapseto!(r, Int64(config))
-@interface collapseto!(r::AbstractRegister, config::BitStr) = collapseto!(r, config)
+@interface collapseto!(r::AbstractRegister, config)
 
 """
     fidelity(register1, register2)
