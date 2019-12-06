@@ -6,9 +6,9 @@
 *.jl.*.cov
 *.jl.mem
 
-docs/build/
-docs/site/
-docs/src/examples/*.md
+build/
+site/
+src/examples/*.md
 
 *.ipynb_checkpoints
 **/*.ipynb_checkpoints

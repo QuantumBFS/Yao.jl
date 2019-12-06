@@ -63,12 +63,12 @@ end
 
 
 const Examples = ["GHZ", "QFT", "QCBM"]
-const fig_path = joinpath(@__DIR__, "src", "assets", "figures")
+const fig_path = joinpath("src", "assets", "figures")
 
 if "build" in ARGS || "deploy" in ARGS
     for each in Examples
-        file_path = joinpath(@__DIR__, "..", "examples", join([each, ".jmd"]))
-        out_path = joinpath(@__DIR__, "src", "examples", join([each, ".md"]))
+        file_path = joinpath("examples", join([each, ".jmd"]))
+        out_path = joinpath("src", "examples", join([each, ".md"]))
         @info "expanding $file_path to markdown"
         weave(file_path, doctype="github", out_path=out_path, fig_path=fig_path)
     end
