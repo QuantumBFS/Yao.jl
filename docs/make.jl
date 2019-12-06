@@ -65,7 +65,7 @@ end
 const Examples = ["GHZ", "QFT", "QCBM"]
 const fig_path = joinpath(@__DIR__, "src", "assets", "figures")
 
-if "build" in ARGS || 'deploy' in ARGS
+if "build" in ARGS || "deploy" in ARGS
     for each in Examples
         file_path = joinpath(@__DIR__, "..", "examples", join([each, ".jmd"]))
         out_path = joinpath(@__DIR__, "src", "examples", join([each, ".md"]))
