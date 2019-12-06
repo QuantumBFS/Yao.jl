@@ -79,6 +79,8 @@ const PAGES = [
     "Examples" => map(x->joinpath("examples", x * ".md"), Examples),
 ]
 
+@show pwd()
+
 makedocs(
     format = Documenter.HTML(
         prettyurls = ("deploy" in ARGS),
