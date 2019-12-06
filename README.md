@@ -16,8 +16,8 @@ then build it with the following command
 # enter tutorial folder
 cd tutorials
 # build this tutorial into html format locally
-julia --project docs/make.jl build
-# open docs/build/index.html
+julia --project make.jl build
+# open build/index.html
 ```
 
 ## License
