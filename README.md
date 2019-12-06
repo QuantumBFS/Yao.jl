@@ -1,7 +1,5 @@
 # Tutorials For Yao
 
-[![Build Status](https://travis-ci.com/QuantumBFS/YaoTutorials.jl.svg?branch=master)](https://travis-ci.com/QuantumBFS/YaoTutorials.jl)
-
 This repo hosts the tutorials for Yao.
 
 ## Build Locally
@@ -18,8 +16,8 @@ then build it with the following command
 # enter tutorial folder
 cd tutorials
 # build this tutorial into html format locally
-julia --project docs/make.jl build
-# open docs/build/index.html
+julia --project make.jl build
+# open build/index.html
 ```
 
 ## License
