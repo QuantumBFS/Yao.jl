@@ -20,5 +20,5 @@ jobs:
       os: linux
       script:
         - julia --project -e 'using Pkg; Pkg.instantiate()'
-        - julia --project make.jl
+        - julia --project make.jl depoly
       after_success: skip
