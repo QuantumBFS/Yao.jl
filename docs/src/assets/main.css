@@ -15,7 +15,6 @@
 
 .navbar-wrapper {
     min-height: 3.25rem;
-    position: sticky;
     width: 100%;
     height: 66px;
     top: 0;
@@ -23,6 +22,7 @@
 
 .navbar-wrapper .navbar {
     height: inherit;
+    position: fixed!important;
     border-radius: 0!important;
     background-color: #2b5797;
 }
