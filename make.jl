@@ -111,7 +111,8 @@ end
 
 const PAGES = [
     "Home" => "index.md",
-    "Examples" => build("examples"),
+    "Quick Start" => build("quick-start"),
+    "Developer Guide" => build("developer-guide")
 ]
 
 function make(;depoly=("deploy" in ARGS), skiplinks=!depoly)
@@ -141,7 +142,11 @@ function make(;depoly=("deploy" in ARGS), skiplinks=!depoly)
 end
 
 function scan_files!(dw::SimpleWatcher)
-    for (root, _, files) in walkdir("examples"), file in files
+    for (root, _, files) in walkdir("quick-start"), file in files
+        push!(dw.watchedfiles, WatchedFile(joinpath(root, file)))
+    end
+
+    for (root, _, files) in walkdir("developer-guide"), file in files
         push!(dw.watchedfiles, WatchedFile(joinpath(root, file)))
     end
 
@@ -158,7 +163,8 @@ function update_callback(fp::AbstractString)
     if splitext(fp)[2] == ".md"
         make()
     elseif splitext(fp)[2] == ".jl"
-        build_tutorial("examples", splitpath(fp)[2])
+        path = splitpath(fp)
+        build_tutorial(path[1], path[2])
         make()
     end
     file_changed_callback(fp)
