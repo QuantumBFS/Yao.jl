@@ -32,6 +32,14 @@ const top_nav = """
         </li>
 
         <li class="nav-item">
+          <a class="nav-link" href="http://yaoquantum.org/soc">SoC</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="http://yaoquantum.org/research">Research</a>
+        </li>
+
+        <li class="nav-item">
             <a class="nav-link" href="https://github.com/QuantumBFS/Yao.jl">GitHub</a>
         </li>
       </ul>
