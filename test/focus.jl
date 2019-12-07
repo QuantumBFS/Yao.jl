@@ -40,7 +40,7 @@ end
     @test reg |> nactive == 3
     @test copy(reg) |> addbits!(2) |> nactive == 5
     reg2 = copy(reg) |> addbits!(2) |> focus!(4, 5)
-    @test (reg2 |> measure_remove!; reg2) |> relax!(to_nactive = nqubits(reg2)) ≈ reg
+    @test (measure!(RemoveMeasured(), reg2); reg2) |> relax!(to_nactive = nqubits(reg2)) ≈ reg
 
     @test insert_qubits!(copy(reg), 2; nqubits = 2) |> nactive == 5
 end

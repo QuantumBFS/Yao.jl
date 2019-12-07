@@ -23,7 +23,6 @@ export ArrayReg,
     # YaoBase deprecated
        addbit!,
        reset!,
-       measure_reset!,
     # additional
        state,
        statevec,
