@@ -1,4 +1,5 @@
 using Test, YaoArrayRegister, BitBasis, LinearAlgebra
+using YaoBase
 
 @testset "test constructors" begin
     @test ArrayReg{3}(rand(4, 6)) isa ArrayReg{3}
@@ -169,4 +170,16 @@ end
     @test reg4.state ≈ oneto(reg, 3).state
     reg4.state[1] = 2.0
     @test reg.state[1] != 2.0
+end
+
+@testset "collapseto" begin
+    reg = rand_state(4)
+    reg2 = copy(reg)
+    focus!(reg, (4,2))
+    collapseto!(reg, bit"01")
+    relax!(reg, (4,2), to_nactive=4)
+    instruct!(reg2, Const.P0, (2,))
+    instruct!(reg2, Const.P1, (4,))
+    normalize!(reg2)
+    @test reg ≈ reg2
 end

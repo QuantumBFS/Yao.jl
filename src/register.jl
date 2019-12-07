@@ -195,9 +195,10 @@ function YaoBase.reorder!(r::ArrayReg, orders)
     return r
 end
 
-function YaoBase.collapseto!(r::ArrayReg, bit_config::BitStr = 0)
+function YaoBase.collapseto!(r::ArrayReg, bit_config::Integer)
+    st = normalize!(r.state[Int(bit_config)+1, :])
     fill!(r.state, 0)
-    r.state[Int64(bit_config)+1, :] .= 1
+    r.state[Int(bit_config)+1, :] .= st
     return r
 end
 
