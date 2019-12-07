@@ -18,4 +18,6 @@ _*.dat
 *.swp
 __pycache__/
 
+src/generated
+
 Manifest.toml
