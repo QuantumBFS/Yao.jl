@@ -575,21 +575,17 @@ version = "0.12.1"
 
 [[YaoBlocks]]
 deps = ["BitBasis", "CacheServers", "ExponentialUtilities", "InteractiveUtils", "LegibleLambdas", "LinearAlgebra", "LuxurySparse", "MLStyle", "Random", "SimpleTraits", "SparseArrays", "StaticArrays", "StatsBase", "YaoArrayRegister", "YaoBase"]
-git-tree-sha1 = "06648dcc883929e8b38f5362596c495bf1288873"
-repo-rev = "fix-rotation"
+git-tree-sha1 = "cde42112484a1db3583d5962b9a6c7a241fd736f"
+repo-rev = "master"
 repo-url = "https://github.com/QuantumBFS/YaoBlocks.jl.git"
 uuid = "418bc28f-b43b-5e0b-a6e7-61bbc1a2c1df"
-version = "0.7.5"
-
-[[YaoDocTools]]
-deps = ["Documenter", "URIParser"]
-path = "/Users/roger/.julia/dev/YaoDocTools"
-uuid = "db3dd5e1-3f94-4a51-85bf-314088492731"
-version = "0.1.0"
+version = "0.7.6"
 
 [[YaoExtensions]]
-deps = ["BitBasis", "FFTW", "LegibleLambdas", "LuxurySparse", "StaticArrays", "StatsBase", "SymEngine", "Yao", "YaoBlocks"]
-git-tree-sha1 = "9497011b380ccdccb99f7d3b7426ea8b9ec916a0"
+deps = ["BitBasis", "FFTW", "LegibleLambdas", "LinearAlgebra", "LuxurySparse", "Random", "StaticArrays", "StatsBase", "Yao", "YaoBlocks"]
+git-tree-sha1 = "de06df6ac736e6449f1be74d5ee4926b3fa99838"
+repo-rev = "master"
+repo-url = "https://github.com/QuantumBFS/YaoExtensions.jl.git"
 uuid = "7a06699c-c960-11e9-3c98-9f78548b5f0f"
 version = "0.1.1"
 
