@@ -91,6 +91,8 @@ function build(root)
     return pages
 end
 
+#######################################
+
 const PAGES = [
     "Home" => "index.md",
     "Examples" => build("examples"),
