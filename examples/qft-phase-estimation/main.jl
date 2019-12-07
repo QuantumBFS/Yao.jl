@@ -1,4 +1,4 @@
-# # Quantum Fourier Transformation and Phase Estimation
+# # [Quantum Fourier Transformation and Phase Estimation](@id example-qft)
 
 # Let's use Yao first
 
