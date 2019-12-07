@@ -162,68 +162,71 @@ end
 
 ## Measurement
 
-export ComputationalBasis
+export ComputationalBasis, AllLocs
+export ResetTo, RemoveMeasured, NoPostProcess, PostProcess
+
 struct ComputationalBasis end
 
-export AllLocs
 struct AllLocs end
 
-export measure, measure!, measure_remove!, measure_resetto!
+abstract type PostProcess end
+struct ResetTo{T} <: PostProcess  x::T end
+struct RemoveMeasured <:PostProcess end
+struct NoPostProcess <: PostProcess end
+
+export measure, measure!
 
 """
-    measure([rng,] register[, operator][, locs]; nshots=1) -> Vector{Int}
+    measure(register[, operator][, locs]; nshots=1, rng=Random.GLOBAL_RNG) -> Vector{Int}
 
-Return measurement results of current active qubits (regarding to active qubits,
+Return measurement results of qubits in `locs`.
+If `locs` is not provided, all current active qubits are measured (regarding to active qubits,
 see [`focus!`](@ref) and [`relax!`](@ref)).
 """
 function measure end
 
 """
-    measure!([rng,] [operator, ]register[, locs])
+    measure!([postprocess,] [operator, ]register[, locs]; rng=Random.GLOBAL_RNG)
 
-Measure current active qubits or qubits at `locs` and collapse to result state.
+Measure current active qubits or qubits at `locs`. After measure and collapse,
+
+    * do nothing if postprocess is `NoPostProcess`
+    * reset to result state to `postprocess.config` if `postprocess` is `ResetTo`.
+    * remove the qubit if `postprocess` is `RemoveMeasured`
 """
 function measure! end
 
-"""
-    measure_remove!([rng,] [operator, ]reg::AbstractRegister[, locs])
+measure!(postprocess::PostProcess, op, reg::AbstractRegister; kwargs...) = measure!(postprocess, op, reg, AllLocs(); kwargs...)
+measure!(postprocess::PostProcess, reg::AbstractRegister, locs; kwargs...) = measure!(postprocess, ComputationalBasis(), reg, locs; kwargs...)
+measure!(postprocess::PostProcess, reg::AbstractRegister; kwargs...) = measure!(postprocess, ComputationalBasis(), reg, AllLocs(); kwargs...)
+measure!(op, reg::AbstractRegister, args...; kwargs...) = measure!(NoPostProcess(), op, reg, args...; kwargs...)
+measure!(reg::AbstractRegister, args...; kwargs...) = measure!(NoPostProcess(), reg, args...; kwargs...)
 
-Measure current active qubits or qubits at `locs` and remove them.
-"""
-function measure_remove! end
+measure(op, reg::AbstractRegister; kwargs...) = measure(op, reg, AllLocs(); kwargs...)
+measure(reg::AbstractRegister, locs; kwargs...) = measure(ComputationalBasis(), reg, locs; kwargs...)
+measure(reg::AbstractRegister; kwargs...) = measure(ComputationalBasis(), reg, AllLocs(); kwargs...)
 
-"""
-    measure_resetto!([rng,] [operator, ]reg::AbstractRegister[, locs]; config) -> Int
-
-Measure current active qubits or qubits at `locs` and set the register to specific value.
-"""
-function measure_resetto! end
-
-# focus context
-for FUNC in [:measure!, :measure_resetto!, :measure_remove!, :measure]
-    @eval $FUNC(rng::AbstractRNG, op, reg::AbstractRegister; kwargs...) = $FUNC(rng, op, reg, AllLocs(); kwargs...)
-    @eval $FUNC(rng::AbstractRNG, reg::AbstractRegister, locs; kwargs...) = $FUNC(rng, ComputationalBasis(), reg, locs; kwargs...)
-    @eval $FUNC(rng::AbstractRNG, reg::AbstractRegister; kwargs...) = $FUNC(rng, ComputationalBasis(), reg, AllLocs(); kwargs...)
-    @eval $FUNC(args...; kwargs...) = $FUNC(Random.GLOBAL_RNG, args...; kwargs...)
-end
-
-for FUNC in [:measure_resetto!, :measure!, :measure]
-    @eval function $FUNC(rng::AbstractRNG, op, reg::AbstractRegister, locs::Union{Tuple, Vector, Integer, UnitRange}; kwargs...)
-        nbit = nactive(reg)
-        focus!(reg, locs)
-        res = $FUNC(rng, op, reg, AllLocs(); kwargs...)
-        relax!(reg, locs; to_nactive=nbit)
-        res
-    end
-end
-
-function measure_remove!(rng::AbstractRNG, op, reg::AbstractRegister, locs)
+# focus! to specify locations, we that we only need to consider full-space measure in the future.
+function measure!(postprocess::PostProcess, op, reg::AbstractRegister, locs::Union{Tuple, Vector, Integer, UnitRange}; kwargs...) where MODE
     nbit = nactive(reg)
     focus!(reg, locs)
-    res = measure_remove!(rng, op, reg, AllLocs())
-    relax!(reg; to_nactive=nbit-length(locs))
+    res = measure!(postprocess, op, reg, AllLocs(); kwargs...)
+    if postprocess isa RemoveMeasured
+        relax!(reg; to_nactive=nbit-length(locs))
+    else
+        relax!(reg, locs; to_nactive=nbit)
+    end
     res
 end
+
+function measure(op, reg::AbstractRegister, locs::Union{Tuple, Vector, Integer, UnitRange}; kwargs...) where MODE
+    nbit = nactive(reg)
+    focus!(reg, locs)
+    res = measure(op, reg, AllLocs(); kwargs...)
+    relax!(reg, locs; to_nactive = nbit)
+    res
+end
+
 
 """
     select!(dest::AbstractRegister, src::AbstractRegister, bits::Integer...) -> AbstractRegister
