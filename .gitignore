@@ -7,7 +7,6 @@
 docs/build/
 docs/site/
 docs/src/examples/*.md
-docs/Manifest.toml
 
 *.ipynb_checkpoints
 **/*.ipynb_checkpoints
