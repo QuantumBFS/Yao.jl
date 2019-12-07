@@ -12,9 +12,9 @@ using Test, YaoArrayRegister, YaoBase
     @test r3 ≈ r2
 end
 
-@testset "measure and collapseto/remove" begin
+@testset "measure and resetto/remove" begin
     reg = rand_state(4)
-    res = measure_collapseto!(reg, (4,))
+    res = measure_resetto!(reg, (4,))
     @test isnormalized(reg)
     result = measure(reg; nshots = 10)
     @test all(result .< 8)
@@ -33,6 +33,6 @@ end
     @test normalize!(r2) ≈ r
 
     reg = rand_state(6, nbatch = 5) |> focus!((1:5)...)
-    measure_collapseto!(reg, 1)
+    measure_resetto!(reg, 1)
     @test nactive(reg) == 5
 end

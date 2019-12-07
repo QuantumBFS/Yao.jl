@@ -1,5 +1,5 @@
 using StatsBase, StaticArrays, BitBasis, Random
-export measure, measure!, measure_remove!, measure_collapseto!, select, select!
+export measure, measure!, measure_remove!, measure_resetto!, select, select!
 
 function _measure(rng::AbstractRNG, pl::AbstractVector, nshots::Int)
     N = log2i(length(pl))
@@ -71,7 +71,7 @@ function YaoBase.measure!(
     return res
 end
 
-function YaoBase.measure_collapseto!(
+function YaoBase.measure_resetto!(
     rng::AbstractRNG,
     ::ComputationalBasis,
     reg::ArrayReg{B},
