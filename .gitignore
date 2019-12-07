@@ -6,6 +6,7 @@
 
 docs/build/
 docs/site/
+docs/Manifest.toml
 docs/src/examples/*.md
 
 *.ipynb_checkpoints
@@ -15,5 +16,3 @@ docs/src/examples/*.md
 _*.dat
 *.swp
 __pycache__/
-
-/Manifest.toml
