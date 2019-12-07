@@ -12,12 +12,22 @@ function parse_block end
 
 parse_block(n::Int, x::Function) = x(n)
 
+parse_block(n::Int, ex) = throw(Meta.ParseError("cannot parse expression $ex, expect a pair or quantum block"))
+
 function parse_block(n::Int, x::AbstractBlock{N}) where {N}
     n == N || throw(ArgumentError("number of qubits does not match: $x"))
     return x
 end
 
-parse_block(n::Int, x::Pair{Int,<:AbstractBlock{N}}) where {N} = x
+# if it is a single qubit pair, parse it to put block
+parse_block(n::Int, x::Pair{Int, <:AbstractBlock}) = error("got $x, do you mean put($x)?")
+# infer the number of qubits if the inner function was curried
+parse_block(n::Int, x::Pair{Int, <:Function}) = error("got $x, do you mean put($x)?")
+
+# error if it is not single qubit case
+function parse_block(n::Int, x::Pair)
+    error("please specifiy the block type of $x, consider to use concentrate for large block in local scope.")
+end
 
 """
     prewalk(f, src::AbstractBlock)

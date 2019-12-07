@@ -108,6 +108,15 @@ Base.kron(total::Int, blocks::Union{AbstractBlock,Pair}...) =
 
 Base.kron(total::Int, blocks::Base.Generator) = kron(total, blocks...)
 
+# handling errors
+Base.kron(blocks::Union{AbstractBlock, Pair{Int, <:AbstractBlock}}...) =
+    error("location of sparse distributed blocks must be explicit declared with pair (e.g 2=>X)")
+Base.kron(total::Int, blocks::Union{AbstractBlock, Pair{Int, <:AbstractBlock}}...) = kron(blocks...)
+Base.kron(blocks::Union{AbstractBlock, Pair{<:AbstractRange, <:AbstractBlock}}...) =
+    error("kron only supports contiguous location, specifiy the first qubit location with an integer, e.g kron(4, 2=>control(2, 2, 1=>X))")
+Base.kron(total::Int, blocks::Union{AbstractBlock, Pair{<:AbstractRange, <:AbstractBlock}}...) =
+    kron(blocks...)
+
 """
     kron(blocks...) -> f(n)
     kron(itr) -> f(n)

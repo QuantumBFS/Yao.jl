@@ -37,8 +37,11 @@ function chain(list::Vector)
 end
 
 # if not all matrix block, try to put the number of qubits.
-chain(n::Int, blocks...) = chain(map(x -> parse_block(n, x), blocks)...)
-chain(n::Int, itr) = isempty(itr) ? chain(n) : chain(map(x -> parse_block(n, x), itr)...)
+chain(n::Int, blocks...) = chain(map(x->parse_block(n, x), blocks)...)
+chain(n::Int, itr) = isempty(itr) ? chain(n) : chain(map(x->parse_block(n, x), itr)...)
+# disambiguity
+# NOTE: we use parse_block here to make sure the behaviour are the same
+chain(n::Int, it::Pair) = chain(n, parse_block(n, it))
 chain(n::Int, f::Function) = chain(n, parse_block(n, f))
 function chain(n::Int, block::AbstractBlock)
     @assert n == nqubits(block) "number of qubits mismatch"
@@ -46,6 +49,7 @@ function chain(n::Int, block::AbstractBlock)
 end
 chain(blocks::Function...) = @λ(n -> chain(n, blocks...))
 chain(it) = chain(it...) # forward iterator to vargs, so we could dispatch based on types
+chain(it::Pair) = error("got $it, do you mean put($it)?")
 chain(blocks...) = @λ(n -> chain(n, blocks))
 
 """
