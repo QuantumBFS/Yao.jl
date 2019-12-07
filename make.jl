@@ -1,4 +1,4 @@
-using Weave
+using Literate
 using Documenter
 using Documenter.Writers.HTMLWriter
 using Documenter.Utilities.DOM
@@ -66,25 +66,35 @@ function HTMLWriter.render_html(ctx, navnode, head, sidebar, navbar, article, fo
     )
 end
 
+function build_tutorial(root, name)
+    generated_path = joinpath("generated", root, name)
+    generated_abspath = joinpath(@__DIR__, "src", generated_path)
+    source_dir = joinpath(root, name)
+    source_path = joinpath(source_dir, "main.jl")
+    Literate.markdown(source_path, generated_abspath; config=Dict("execute"=>true, "name"=>"index"))
 
-const Examples = ["GHZ", "QFT", "QCBM"]
-const fig_path = joinpath("src", "assets", "figures")
-
-if "build" in ARGS || "deploy" in ARGS
-    for each in Examples
-        file_path = joinpath("examples", join([each, ".jmd"]))
-        out_path = joinpath("src", "examples", join([each, ".md"]))
-        @info "expanding $file_path to markdown"
-        weave(file_path, doctype="github", out_path=out_path, fig_path=fig_path)
+    # copy other things
+    for each in readdir(source_dir)
+        if each != "main.jl"
+            cp(joinpath(source_dir, each), joinpath(generated_abspath, each), force=true)
+        end
     end
-end    
+    return joinpath(generated_path, "index.md")
+end
+
+function build(root)
+    tutorials = readdir(root)
+    pages = String[]
+    for each in tutorials
+        push!(pages, build_tutorial(root, each))
+    end
+    return pages
+end
 
 const PAGES = [
     "Home" => "index.md",
-    "Examples" => map(x->joinpath("examples", x * ".md"), Examples),
+    "Examples" => build("examples"),
 ]
-
-@show pwd()
 
 makedocs(
     format = Documenter.HTML(
