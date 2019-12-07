@@ -1,5 +1,10 @@
+using Pkg
+pkg"add YaoBlocks#master YaoArrayRegister#master YaoBase#master BitBasis#master"
+
 using Documenter
-using Yao, YaoBlocks, YaoArrayRegister, YaoBase, BitBasis
+using Yao
+using Yao: YaoBlocks, YaoArrayRegister, YaoBase
+using YaoBase: BitBasis
 
 using Documenter.Writers.HTMLWriter
 using Documenter.Utilities.DOM
