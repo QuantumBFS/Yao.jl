@@ -85,7 +85,8 @@ function build_tutorial(root, name)
     source_dir = joinpath(root, name)
     source_path = joinpath(source_dir, "main.jl")
     Literate.markdown(source_path, generated_abspath; execute=true, name="index", preprocess = attach_notebook_badge(root, name))
-
+    Literate.notebook(source_path, generated_abspath; execute=false, name="main")
+    Literate.script(source_path, generated_abspath; execute=false, name="main")
     # copy other things
     for each in readdir(source_dir)
         if each != "main.jl"
