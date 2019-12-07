@@ -74,8 +74,8 @@ attach_notebook_badge(root, name) = str->attach_notebook_badge(root, name, str)
 function attach_notebook_badge(root, name, str)
     mybinder_badge_url = "https://mybinder.org/badge_logo.svg"
     nbviewer_badge_url = "https://img.shields.io/badge/show-nbviewer-579ACA.svg"
-    mybinder = "[![]($mybinder_badge_url)](@__BINDER_ROOT_URL__/generated/$root/$name.ipynb)"
-    nbviewer = "[![]($nbviewer_badge_url)](@__NBVIEWER_ROOT_URL__/generated/$root/$name.ipynb)"
+    mybinder = "[![]($mybinder_badge_url)](@__BINDER_ROOT_URL__/generated/$root/$name/main.ipynb)"
+    nbviewer = "[![]($nbviewer_badge_url)](@__NBVIEWER_ROOT_URL__/generated/$root/$name/main.ipynb)"
 
     markdown_only(x) = "#md # " * x
     return join(map(markdown_only, (mybinder, nbviewer)), "\n") * "\n\n" * str
