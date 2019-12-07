@@ -66,12 +66,25 @@ function HTMLWriter.render_html(ctx, navnode, head, sidebar, navbar, article, fo
     )
 end
 
+## Literate build
+attach_notebook_badge(root, name) = str->attach_notebook_badge(root, name, str)
+
+function attach_notebook_badge(root, name, str)
+    mybinder_badge_url = "https://mybinder.org/badge_logo.svg"
+    nbviewer_badge_url = "https://img.shields.io/badge/show-nbviewer-579ACA.svg"
+    mybinder = "[![]($mybinder_badge_url)](@__BINDER_ROOT_URL__/generated/$root/$name.ipynb)"
+    nbviewer = "[![]($nbviewer_badge_url)](@__NBVIEWER_ROOT_URL__/generated/$root/$name.ipynb)"
+
+    markdown_only(x) = "#md # " * x
+    return join(map(markdown_only, (mybinder, nbviewer)), "\n") * "\n\n" * str
+end
+
 function build_tutorial(root, name)
     generated_path = joinpath("generated", root, name)
     generated_abspath = joinpath(@__DIR__, "src", generated_path)
     source_dir = joinpath(root, name)
     source_path = joinpath(source_dir, "main.jl")
-    Literate.markdown(source_path, generated_abspath; config=Dict("execute"=>true, "name"=>"index"))
+    Literate.markdown(source_path, generated_abspath; execute=true, name="index", preprocess = attach_notebook_badge(root, name))
 
     # copy other things
     for each in readdir(source_dir)
