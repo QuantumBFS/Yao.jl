@@ -8,12 +8,12 @@
 using Yao
 
 shor(E) = chain(9,
-    # encode circuit
+    ## encode circuit
     cnot(1, 4), cnot(1, 7),
     put(1=>H), put(4=>H), put(7=>H),
     cnot(1,2), cnot(1,3), cnot(4,5), cnot(4,6), cnot(7,8), cnot(7,9),
     E, # the error
-    # decode circuit
+    ## decode circuit
     cnot(1,2), cnot(1,3), cnot((2, 3), 1),
     cnot(4,5), cnot(4,6), cnot((5, 6), 4),
     cnot(7,8), cnot(7,9), cnot((8, 9), 7),

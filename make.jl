@@ -1,8 +1,10 @@
 using Literate
+import LiveServer
 using Documenter
 using Documenter.Writers.HTMLWriter
 using Documenter.Utilities.DOM
 using Documenter.Utilities.DOM: Tag, @tags
+using LiveServer: SimpleWatcher, WatchedFile, set_callback!, file_changed_callback
 # Evil Prirate
 
 const base_url = raw"https://yaoquantum.org"
@@ -112,24 +114,68 @@ const PAGES = [
     "Examples" => build("examples"),
 ]
 
-makedocs(
-    format = Documenter.HTML(
-        prettyurls = ("deploy" in ARGS),
-        canonical = ("deploy" in ARGS) ? "https://tutorials.yaoquantum.org/" : nothing,
-        assets = [
-            "assets/main.css",
-            asset("https://yaoquantum.org/assets/main.css"),
-            asset("http://yaoquantum.org/favicon.ico"),
-            asset("https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"),
-            ],
-        ),
-    clean = false,
-    sitename = raw"Tutorial|Yao",
-    linkcheck = !("skiplinks" in ARGS),
-    pages = PAGES
-)
+function make(;depoly=("deploy" in ARGS), skiplinks=!depoly)
+    makedocs(
+        format = Documenter.HTML(
+            prettyurls = depoly,
+            canonical = depoly ? "https://tutorials.yaoquantum.org/" : nothing,
+            assets = [
+                "assets/main.css",
+                asset("https://yaoquantum.org/assets/main.css"),
+                asset("http://yaoquantum.org/favicon.ico"),
+                asset("https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"),
+                ],
+            ),
+        clean = false,
+        sitename = raw"Tutorial|Yao",
+        linkcheck = skiplinks,
+        pages = PAGES
+    )
 
-deploydocs(
-    repo = "github.com/QuantumBFS/tutorials.git",
-    target = "build",
-)
+    if depoly
+        deploydocs(
+            repo = "github.com/QuantumBFS/tutorials.git",
+            target = "build",
+        )
+    end
+end
+
+function scan_files!(dw::SimpleWatcher)
+    for (root, _, files) in walkdir("examples"), file in files
+        push!(dw.watchedfiles, WatchedFile(joinpath(root, file)))
+    end
+
+    for (root, _, files) in walkdir("src"), file in files
+        if occursin("generated", root)
+            continue
+        else
+            push!(dw.watchedfiles, WatchedFile(joinpath(root, file)))
+        end
+    end
+end
+
+function update_callback(fp::AbstractString)
+    if splitext(fp)[2] == ".md"
+        make()
+    elseif splitext(fp)[2] == ".jl"
+        build_tutorial("examples", splitpath(fp)[2])
+        make()
+    end
+    file_changed_callback(fp)
+    return nothing
+end
+
+function serve(verbose=false)
+    watcher = SimpleWatcher()
+    scan_files!(watcher)
+    set_callback!(watcher, update_callback)
+    make()
+    LiveServer.serve(watcher, dir="build", verbose=verbose)
+    return nothing
+end
+
+if "serve" in ARGS || "s" in ARGS
+    serve()
+else
+    make()
+end

@@ -22,7 +22,7 @@ circuit = chain(
 
 
 # ## Put single qubit gate X to location 1
-# we have an [`X`](@ref) gate applied to the first qubit.
+# we have an `X` gate applied to the first qubit.
 # We need to tell `Yao` to put this gate on the first qubit by
 
 put(4, 1=>X)
@@ -53,7 +53,7 @@ put(1=>X)(4)
 
 # next we should put Hadmard gates on all locations except the 1st qubits.
 
-# We provide [`repeat`](@ref) to apply the same block repeatly, repeat can take an
+# We provide `repeat` to apply the same block repeatly, repeat can take an
 # iterator of desired locations, and like `put`, we can also leave the total number
 # of qubits there.
 
@@ -63,7 +63,7 @@ repeat(H, 2:4)
 
 # ## Define control gates
 
-# In Yao, we could define controlled gates by feeding a gate to [`control`](@ref)
+# In Yao, we could define controlled gates by feeding a gate to `control`
 
 
 control(4, 2, 1=>X)
@@ -78,12 +78,12 @@ control(2, 1=>X)
 
 # ## Composite each part together
 
-# This will create a [`ControlBlock`](@ref), the concept of block in Yao basically
+# This will create a `ControlBlock`, the concept of block in Yao basically
 # just means quantum operators, since the quantum circuit itself is a quantum operator,
 # we could create a quantum circuit by composite each part of.
 
-# Here, we use [`chain`](@ref) to chain each part together, a chain of quantum operators
-# means to apply each operators one by one in the chain. This will create a [`ChainBlock`](@ref).
+# Here, we use `chain` to chain each part together, a chain of quantum operators
+# means to apply each operators one by one in the chain. This will create a `ChainBlock`.
 
 
 circuit = chain(
@@ -106,10 +106,10 @@ typeof(circuit)
 
 # ## Construct GHZ state from 00...00
 
-# For simulation, we provide a builtin register type called [`ArrayReg`](@ref),
+# For simulation, we provide a builtin register type called `ArrayReg`,
 # we will use the simulated register in this example.
 
-# First, let's create ``|00⋯00⟩``, you can create it with [`zero_state`](@ref)
+# First, let's create ``|00⋯00⟩``, you can create it with `zero_state`
 
 
 zero_state(4)
@@ -125,7 +125,7 @@ ArrayReg(bit"0000")
 
 # ## Feed Registers to Circuits
 
-# Circuits can be applied to registers with [`apply!`](@ref)
+# Circuits can be applied to registers with `apply!`
 
 
 apply!(zero_state(4), circuit)

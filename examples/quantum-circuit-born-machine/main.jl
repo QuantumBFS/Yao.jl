@@ -75,7 +75,7 @@ plot(pg)
 
 chain(Rz(0.0), Rx(0.0), Rz(0.0))
 
-# [`Rx`](@ref), [`Rz`](@ref) will construct new rotation gate,
+# `Rx`, `Rz` will construct new rotation gate,
 # which are just shorthands for `rot(X, 0.0)`, etc.
 
 # Then let's chain them up

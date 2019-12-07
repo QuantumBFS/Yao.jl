@@ -26,7 +26,7 @@ using Yao
 
 A(i, j) = control(i, j=>shift(2π/(1<<(i-j+1))))
 
-# Once you construct the blockl you can inspect its matrix using [`mat`](@ref)
+# Once you construct the blockl you can inspect its matrix using `mat`
 # function. Let's construct the circuit in dash box A, and see the matrix of
 # ``R_4`` gate.
 
@@ -63,9 +63,9 @@ qft(4)
 # methods on certain kinds of quantum circuit, or we want to define an external
 # block to export, thus, it's useful to be able to wrap circuit to custom blocks.
 
-# First, we define a new type as subtype of [`PrimitiveBlock`](@ref) since we are not
+# First, we define a new type as subtype of `PrimitiveBlock` since we are not
 # going to use the subblocks of `QFT`, if you need to use its subblocks, it'd
-# be better to define it under [`CompositeBlock`](@ref).
+# be better to define it under `CompositeBlock`.
 
 struct QFT{N} <: PrimitiveBlock{N} end
 QFT(n::Int) = QFT{n}()
@@ -74,18 +74,18 @@ QFT(n::Int) = QFT{n}()
 
 circuit(::QFT{N}) where N = qft(N)
 
-# And forward [`mat`](@ref) to its circuit's matrix
+# And forward `mat` to its circuit's matrix
 
 YaoBlocks.mat(::Type{T}, x::QFT) where T = mat(T, circuit(x))
 
 # You may notice, it is a little ugly to print `QFT` at the moment,
 # this is because we print the type summary by default, you can define
-# your own printing by overloading [`print_block`](@ref)
+# your own printing by overloading `print_block`
 
 YaoBlocks.print_block(io::IO, x::QFT{N}) where N = print(io, "QFT($N)")
 
 # Since it is possible to use FFT to simulate the results of QFT (like cheating),
-# we could define our custom [`apply!`](@ref) method:
+# we could define our custom `apply!` method:
 
 using FFTW, LinearAlgebra
 
@@ -134,7 +134,7 @@ ControlU(n, m, U) = chain(n+m, control(k, n+1:n+m=>matblock(U^(2^(k-1)))) for k 
 # each of them is a `U` of power ``2^(k-1)``.
 
 # Since we will only apply the qft and Hadamard on first `n` qubits,
-# we could use [`Concentrator`](@ref), which creates a context of
+# we could use `Concentrator`, which creates a context of
 # a sub-scope of the qubits.
 
 PE(n, m, U) =
@@ -147,11 +147,11 @@ PE(n, m, U) =
 # other `m` qubits as the input state which corresponds to an eigenvector of
 # oracle matrix `U`.
 
-# The concentrator here uses [`focus!`](@ref) and [`relax!`](@ref) to manage
+# The concentrator here uses `focus!` and `relax!` to manage
 # a local scope of quantum circuit, and only active the first `n` qubits while applying
-# the block inside the concentrator context, and the scope will be [`relax!`](@ref)ed
-# back, after the context. This is equivalent to manually [`focus!`](@ref)
-# then [`relax!`](@ref)
+# the block inside the concentrator context, and the scope will be `relax!`ed
+# back, after the context. This is equivalent to manually `focus!`
+# then `relax!`
 
 # fullly activated
 
