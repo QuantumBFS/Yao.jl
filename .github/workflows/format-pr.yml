@@ -23,7 +23,7 @@ jobs:
       - name: Install JuliaFormatter and format
         run: |
           julia  -e 'import Pkg; Pkg.add("JuliaFormatter")'
-          julia  -e 'using JuliaFormatter; format(".")'
+          julia  -e 'using JuliaFormatter; format(".", always_for_in=true, margin = 102)'
       # https://github.com/marketplace/actions/create-pull-request
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v1.9.0
