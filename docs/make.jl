@@ -54,22 +54,29 @@ const top_nav = """
 </div>
 """
 
-function HTMLWriter.render_html(ctx, navnode, head, sidebar, navbar, article, footer, scripts::Vector{DOM.Node}=DOM.Node[])
+function HTMLWriter.render_html(
+    ctx,
+    navnode,
+    head,
+    sidebar,
+    navbar,
+    article,
+    footer,
+    scripts::Vector{DOM.Node} = DOM.Node[],
+)
     @tags html body div
-    DOM.HTMLDocument(
-        html[:lang=>"en"](
-            head,
-            body(
-                Tag(Symbol("#RAW#"))(top_nav),
-                div[".documenter-wrapper#documenter"](
-                    sidebar,
-                    div[".docs-main"](navbar, article, footer),
-                    HTMLWriter.render_settings(ctx),
-                ),
+    DOM.HTMLDocument(html[:lang=>"en"](
+        head,
+        body(
+            Tag(Symbol("#RAW#"))(top_nav),
+            div[".documenter-wrapper#documenter"](
+                sidebar,
+                div[".docs-main"](navbar, article, footer),
+                HTMLWriter.render_settings(ctx),
             ),
-            scripts...
-        )
-    )
+        ),
+        scripts...,
+    ))
 end
 
 
@@ -83,7 +90,7 @@ const PAGES = [
         "man/bitbasis.md",
         "man/extending_blocks.md",
         "man/benchmarks.md",
-        ],
+    ],
 ]
 
 makedocs(
@@ -92,20 +99,17 @@ makedocs(
         prettyurls = ("deploy" in ARGS),
         canonical = ("deploy" in ARGS) ? "https://docs.yaoquantum.org/" : nothing,
         assets = [
-                "assets/main.css",
-                asset("https://yaoquantum.org/assets/main.css"),
-                asset("http://yaoquantum.org/favicon.ico"),
-                asset("https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"),
-            ],
-        ),
+            "assets/main.css",
+            asset("https://yaoquantum.org/assets/main.css"),
+            asset("http://yaoquantum.org/favicon.ico"),
+            asset("https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"),
+        ],
+    ),
     doctest = ("doctest=true" in ARGS),
     clean = false,
     sitename = "Documentation | Yao",
     linkcheck = !("skiplinks" in ARGS),
-    pages = PAGES
+    pages = PAGES,
 )
 
-deploydocs(
-    repo = "github.com/QuantumBFS/Yao.jl.git",
-    target = "build",
-)
+deploydocs(repo = "github.com/QuantumBFS/Yao.jl.git", target = "build")
