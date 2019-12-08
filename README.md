@@ -64,7 +64,7 @@ For CUDA support, see [CuYao.jl](https://github.com/QuantumBFS/CuYao.jl).
 
 ### [Tutorial](https://tutorials.yaoquantum.org) | Learning Yao by Examples
 
-### Algoritm Zoo
+### Algorithm Zoo
 
 Some quantum algorithms are implemented with Yao in [QuAlgorithmZoo](https://github.com/QuantumBFS/QuAlgorithmZoo.jl).
 
@@ -76,7 +76,7 @@ Some quantum algorithms are implemented with Yao in [QuAlgorithmZoo](https://git
 ## Communication
 
 - Github issues: Please feel free to ask questions and report bugs, feature request in issues
-- slack: you can [join julia's slack channel](https://slackinvite.julialang.org/) and ask Yao related questions in `#yao-dev` channel.
+- Slack: you can [join julia's slack channel](https://slackinvite.julialang.org/) and ask Yao related questions in `#yao-dev` channel.
 - Julia discourse: You can also ask questions on [julia discourse](https://discourse.julialang.org/) or the [Chinese discourse](https://discourse.juliacn.com/)
 
 ## Contribution
@@ -85,7 +85,7 @@ Please read our [contribution guide](https://github.com/QuantumBFS/Yao.jl/blob/m
 
 ## The Team
 
-This project is an effort of QuantumBFS, an open source organization for quantum science. Yao is currently maintained by [Xiuzhe (Roger) luo](https://github.com/Roger-luo) and [Jin-guo Liu](https://github.com/GiggleLiu) with contributions from open source community. All the contributors are listed in the [contributors](https://github.com/QuantumBFS/Yao.jl/graphs/contributors).
+This project is an effort of QuantumBFS, an open source organization for quantum science. Yao is currently maintained by [Xiu-Zhe (Roger) Luo](https://github.com/Roger-luo) and [Jin-Guo Liu](https://github.com/GiggleLiu) with contributions from open source community. All the contributors are listed in the [contributors](https://github.com/QuantumBFS/Yao.jl/graphs/contributors).
 
 ## Papers Citing Yao
 
