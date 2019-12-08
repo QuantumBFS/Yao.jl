@@ -235,31 +235,31 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 [[YaoArrayRegister]]
 deps = ["BitBasis", "LinearAlgebra", "LuxurySparse", "Random", "StaticArrays", "StatsBase", "TupleTools", "YaoBase"]
-git-tree-sha1 = "b854ce32c8997407577cdc2a09cee9ce1e736107"
+git-tree-sha1 = "74694fe451bf66ed7fb98b708525f09a478370f0"
 repo-rev = "master"
 repo-url = "https://github.com/QuantumBFS/YaoArrayRegister.jl.git"
 uuid = "e600142f-9330-5003-8abb-0ebd767abc51"
-version = "0.5.2"
+version = "0.6.0"
 
 [[YaoBase]]
 deps = ["BitBasis", "LegibleLambdas", "LinearAlgebra", "LuxurySparse", "MLStyle", "MacroTools", "Random", "SparseArrays", "Test", "TupleTools"]
-git-tree-sha1 = "78ac5318105d091d1f7fe447309cead9c8206c16"
+git-tree-sha1 = "28312f530cf0de422d9bf2021ead6262bd449ec6"
 repo-rev = "master"
 repo-url = "https://github.com/QuantumBFS/YaoBase.jl.git"
 uuid = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
-version = "0.12.2"
+version = "0.13.0"
 
 [[YaoBlocks]]
-deps = ["BitBasis", "CacheServers", "ExponentialUtilities", "InteractiveUtils", "LegibleLambdas", "LinearAlgebra", "LuxurySparse", "MLStyle", "Random", "SimpleTraits", "SparseArrays", "StaticArrays", "StatsBase", "YaoArrayRegister", "YaoBase"]
-git-tree-sha1 = "cde42112484a1db3583d5962b9a6c7a241fd736f"
+deps = ["BitBasis", "CacheServers", "ExponentialUtilities", "InteractiveUtils", "LegibleLambdas", "LinearAlgebra", "LuxurySparse", "MLStyle", "Random", "SimpleTraits", "SparseArrays", "StaticArrays", "StatsBase", "TupleTools", "YaoArrayRegister", "YaoBase"]
+git-tree-sha1 = "40c185e83398a94fea5711e1f15e0c1b114198ec"
 repo-rev = "master"
 repo-url = "https://github.com/QuantumBFS/YaoBlocks.jl.git"
 uuid = "418bc28f-b43b-5e0b-a6e7-61bbc1a2c1df"
-version = "0.7.6"
+version = "0.8.0"
 
 [[YaoSym]]
 deps = ["BitBasis", "LinearAlgebra", "LuxurySparse", "SparseArrays", "SymEngine", "YaoArrayRegister", "YaoBase", "YaoBlocks"]
-git-tree-sha1 = "e85edb9bdf13b36bbf4cf2ded6d875c128e5219e"
+git-tree-sha1 = "8af0ebf94620532d20fae0756a0c2072b2d4507e"
 repo-rev = "master"
 repo-url = "https://github.com/QuantumBFS/YaoSym.jl.git"
 uuid = "3b27209a-d3d6-11e9-3c0f-41eb92b2cb9d"
