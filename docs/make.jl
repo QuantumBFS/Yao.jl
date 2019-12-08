@@ -6,5 +6,5 @@ makedocs(
     doctest = true,
     clean = false,
     sitename = "YaoSym.jl",
-    pages = ["index.md"]
+    pages = ["index.md"],
 )

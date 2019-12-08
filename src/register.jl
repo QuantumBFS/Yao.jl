@@ -2,8 +2,9 @@ using YaoBase, SparseArrays, BitBasis, YaoArrayRegister
 export @ket_str, @bra_str
 
 function parse_str(s::String)
-    v = 0; k = 1
-    for each in reverse(filter(x->x!='_', s))
+    v = 0
+    k = 1
+    for each in reverse(filter(x -> x != '_', s))
         if each == '1'
             v += 1 << (k - 1)
             k += 1
@@ -15,7 +16,7 @@ function parse_str(s::String)
             error("expect 0 or 1, got $each at $k-th bit")
         end
     end
-    return v, k-1
+    return v, k - 1
 end
 
 function ket_m end
@@ -66,8 +67,8 @@ end
 
 function print_basis(io, active::Int, remain::Int, r)
     print_braket(io, r) do
-        printstyled(io, string(remain, base=2, pad=nremain(r)), color=:light_black)
-        print(io, string(active, base=2, pad=nactive(r)))
+        printstyled(io, string(remain, base = 2, pad = nremain(r)), color = :light_black)
+        print(io, string(active, base = 2, pad = nactive(r)))
     end
 end
 
@@ -83,7 +84,7 @@ function print_sym_state(io::IO, r::ArrayReg{1})
     end
 
     for j in 1:n, i in 1:m
-        i ==1 && j == 1 && continue
+        i == 1 && j == 1 && continue
         amp = st[i, j]
         if iszero(amp)
             continue
@@ -91,7 +92,7 @@ function print_sym_state(io::IO, r::ArrayReg{1})
 
         isfirst_nonzero || print(io, " + ")
         isone(amp) || print(io, st[i, j])
-        print_basis(io, i-1, j-1, r)
+        print_basis(io, i - 1, j - 1, r)
         isfirst_nonzero = false
     end
 end
@@ -108,7 +109,7 @@ function print_sym_state(io::IO, r::AdjointArrayReg{1})
     end
 
     for j in 1:n, i in 1:m
-        i ==1 && j == 1 && continue
+        i == 1 && j == 1 && continue
         amp = st[i, j]
         if iszero(amp)
             continue
@@ -116,7 +117,7 @@ function print_sym_state(io::IO, r::AdjointArrayReg{1})
 
         isfirst_nonzero || print(io, " + ")
         isone(amp) || print(io, st[i, j])
-        print_basis(io, j-1, i-1, r)
+        print_basis(io, j - 1, i - 1, r)
         isfirst_nonzero = false
     end
 end
