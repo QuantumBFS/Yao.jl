@@ -40,8 +40,7 @@ struct Interface
 end
 
 handle(ex::Expr, isvalid = false) = handle(Val(ex.head), ex, isvalid)
-handle(ex::Symbol, isvalid) =
-    isvalid ? (ex, nothing, nothing, nothing) : error("expect a function")
+handle(ex::Symbol, isvalid) = isvalid ? (ex, nothing, nothing, nothing) : error("expect a function")
 handle(::Val{:where}, ex::Expr, isvalid) = handle(ex.args[1], isvalid)
 
 # valid syntax

@@ -51,7 +51,7 @@ normalize a batch of vector.
 """
 function batch_normalize!(s::AbstractMatrix, p::Real = 2)
     B = size(s, 2)
-    for i = 1:B
+    for i in 1:B
         normalize!(view(s, :, i), p)
     end
     s
@@ -82,25 +82,17 @@ function hilbertkron(num_bit::Int, ops::Vector{<:AbstractMatrix}, start_locs::Ve
     order = sortperm(start_locs)
     sorted_ops = ops[order]
     sorted_start_locs = start_locs[order]
-    num_ids = vcat(
-        sorted_start_locs[1] - 1,
-        diff(push!(sorted_start_locs, num_bit + 1)) .- sizes[order],
-    )
+    num_ids =
+        vcat(sorted_start_locs[1] - 1, diff(push!(sorted_start_locs, num_bit + 1)) .- sizes[order])
 
     _wrap_identity(sorted_ops, num_ids)
 end
 
 # kron, and wrap matrices with identities.
-function _wrap_identity(
-    data_list::Vector{T},
-    num_bit_list::Vector{Int},
-) where {T<:AbstractMatrix}
+function _wrap_identity(data_list::Vector{T}, num_bit_list::Vector{Int}) where {T<:AbstractMatrix}
     length(num_bit_list) == length(data_list) + 1 || throw(ArgumentError())
     ⊗ = kron
-    reduce(
-        zip(data_list, num_bit_list[2:end]);
-        init = IMatrix(1 << num_bit_list[1]),
-    ) do x, y
+    reduce(zip(data_list, num_bit_list[2:end]); init = IMatrix(1 << num_bit_list[1])) do x, y
         x ⊗ y[1] ⊗ IMatrix(1 << y[2])
     end
 end
@@ -119,16 +111,12 @@ function batched_kron(A::AbstractArray{T,3}, B::AbstractArray{S,3}) where {T,S}
     return batched_kron!(C, A, B)
 end
 
-function batched_kron!(
-    C::Array{T,3},
-    A::AbstractArray{T1,3},
-    B::AbstractArray{T2,3},
-) where {T,T1,T2}
+function batched_kron!(C::Array{T,3}, A::AbstractArray{T1,3}, B::AbstractArray{T2,3}) where {T,T1,T2}
     @assert !Base.has_offset_axes(A, B)
     m, n = size(A)
     p, q = size(B)
-    @inbounds for k = 1:size(C, 3)
-        for s = 1:n, r = 1:m, w = 1:q, v = 1:p
+    @inbounds for k in 1:size(C, 3)
+        for s in 1:n, r in 1:m, w in 1:q, v in 1:p
             C[p*(r-1)+v, q*(s-1)+w, k] = A[r, s, k] * B[v, w, k]
         end
     end
@@ -136,16 +124,12 @@ function batched_kron!(
 end
 
 # NOTE: JuliaLang/julia/pull/31069 includes this function
-function kron!(
-    C::AbstractMatrix{T},
-    A::AbstractMatrix{T1},
-    B::AbstractMatrix{T2},
-) where {T,T1,T2}
+function kron!(C::AbstractMatrix{T}, A::AbstractMatrix{T1}, B::AbstractMatrix{T2}) where {T,T1,T2}
     @assert !Base.has_offset_axes(A, B)
     m = 1
-    @inbounds for j = 1:size(A, 2), l = 1:size(B, 2), i = 1:size(A, 1)
+    @inbounds for j in 1:size(A, 2), l in 1:size(B, 2), i in 1:size(A, 1)
         aij = A[i, j]
-        for k = 1:size(B, 1)
+        for k in 1:size(B, 1)
             C[m] = aij * B[k, l]
             m += 1
         end
@@ -290,12 +274,7 @@ end
         return T.(sprandn(n, m, density))
     end
 
-    function SparseArrays.sprandn(
-        ::Type{Complex{T}},
-        n::Int,
-        m::Int,
-        density::Real,
-    ) where {T<:Real}
+    function SparseArrays.sprandn(::Type{Complex{T}}, n::Int, m::Int, density::Real) where {T<:Real}
         return T.(sprandn(n, m, density)) + im * T.(sprandn(n, m, density))
     end
 end
@@ -305,8 +284,7 @@ end
 
 Staticize dynamic array `A` by a `threshold`.
 """
-autostatic(A::AbstractVecOrMat; threshold::Int = 8) =
-    length(A) > (1 << threshold) ? A : staticize(A)
+autostatic(A::AbstractVecOrMat; threshold::Int = 8) = length(A) > (1 << threshold) ? A : staticize(A)
 
 # General definition
 function rot_mat(::Type{T}, gen::AbstractMatrix, theta::Real) where {N,T}

@@ -5,12 +5,7 @@ if VERSION < v"1.1.0"
     isnothing(x) = x === nothing
 end
 
-ex = [
-    :(function foo end),
-    :(foo(x) = x),
-    :(foo(x, y::T) where {T}),
-    :(foo(x, y::T) where {T} = x),
-]
+ex = [:(function foo end), :(foo(x) = x), :(foo(x, y::T) where {T}), :(foo(x, y::T) where {T} = x)]
 
 function check_handle(ex, name, args, body)
     r = handle(ex)
