@@ -9,6 +9,11 @@ using Yao
 using LinearAlgebra
 using PyCall
 
+# Install OpenFermion and PySCF if you don't have them
+pip = pyimport("pip._internal.main")
+pip.main(["install", "pyscf", "openfermion"])
+
+
 # First we import hamiltonians from OpenFermion and PySCF
 
 of_hamil = pyimport("openfermion.hamiltonians")

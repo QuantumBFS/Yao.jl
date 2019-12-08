@@ -21,23 +21,24 @@ Yao.nqubits(reg::EchoReg) = reg.nqubits
 # And define some instructions, as an echo register, we will just keep printing what we are asked to exexcute
 
 function Yao.instruct!(::EchoReg{B}, args...) where {B, G}
-    println("calls: instruct!(reg, $\$$(join(string.(args), ", ")))")
+    str = join(string.(args), ", ")
+    println("calls: instruct!(reg, $str)")
 end
 
 function Yao.focus!(reg::EchoReg{B}, locs) where {B}
-    println("focus -> $\$$locs")
+    println("focus -> $locs")
     reg.nactive = length(locs)
     return true
 end
 
 function Yao.relax!(reg::EchoReg{B}, locs; to_nactive=nqubits(reg)) where {B}
     reg.nactive = to_nactive
-    println("relax -> $\$$locs/$\$$to_nactive")
+    println("relax -> $locs\\$to_nactive")
     return true
 end
 
 function Yao.measure!(rng, ::ComputationalBasis, reg::EchoReg{B}, locs) where {B}
-    println("measure -> $\$$locs")
+    println("measure -> $locs")
     return true
 end
 
