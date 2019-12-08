@@ -3,7 +3,7 @@ pkg"add YaoBlocks#master YaoArrayRegister#master YaoBase#master BitBasis#master"
 
 using Documenter
 using Yao
-using Yao: YaoBlocks, YaoArrayRegister, YaoBase
+using Yao: YaoBlocks, YaoArrayRegister, YaoBase, YaoSym
 using YaoBase: BitBasis
 
 using Documenter.Writers.HTMLWriter
@@ -84,6 +84,7 @@ const PAGES = [
     "Home" => "index.md",
     "Manual" => Any[
         "man/array_registers.md",
+        "man/symbolic.md",
         "man/blocks.md",
         "man/base.md",
         "man/registers.md",
@@ -94,7 +95,7 @@ const PAGES = [
 ]
 
 makedocs(
-    modules = [Yao, YaoBase, YaoArrayRegister, YaoBlocks, BitBasis],
+    modules = [Yao, YaoBase, YaoArrayRegister, YaoBlocks, BitBasis, YaoSym],
     format = Documenter.HTML(
         prettyurls = ("deploy" in ARGS),
         canonical = ("deploy" in ARGS) ? "https://docs.yaoquantum.org/" : nothing,
