@@ -6,3 +6,4 @@ _*.yao
 
 docs/build/
 docs/site/
+Manifest.toml
