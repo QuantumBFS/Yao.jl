@@ -19,7 +19,8 @@ function interfacem(__module__::Module, __source__::LineNumberNode, ex::Expr)
     elseif body === nothing
         return quote
             export $(esc(name))
-            Core.@__doc__ $(esc(ex)) = throw(NotImplementedError($(QuoteNode(name)), tuple($(esc.(args)...))))
+            Core.@__doc__ $(esc(ex)) =
+                throw(NotImplementedError($(QuoteNode(name)), tuple($(esc.(args)...))))
 
             # push!(METADATA, Interface($(QuoteNode(handle(ex))), $(Base.Docs.signature(ex))))
         end
@@ -38,8 +39,9 @@ struct Interface
     signatures::DataType
 end
 
-handle(ex::Expr, isvalid=false) = handle(Val(ex.head), ex, isvalid)
-handle(ex::Symbol, isvalid) = isvalid ? (ex, nothing, nothing, nothing) : error("expect a function")
+handle(ex::Expr, isvalid = false) = handle(Val(ex.head), ex, isvalid)
+handle(ex::Symbol, isvalid) =
+    isvalid ? (ex, nothing, nothing, nothing) : error("expect a function")
 handle(::Val{:where}, ex::Expr, isvalid) = handle(ex.args[1], isvalid)
 
 # valid syntax
@@ -60,7 +62,7 @@ end
 function handle(::Val{:call}, ex::Expr, isvalid)
     args = []
     for each in ex.args[2:end]
-        if !(each isa Union{Expr, Symbol})
+        if !(each isa Union{Expr,Symbol})
             return nothing
         end
         if each isa Expr && each.head === :parameters

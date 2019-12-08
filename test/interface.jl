@@ -8,8 +8,9 @@ end
 ex = [
     :(function foo end),
     :(foo(x) = x),
-    :(foo(x, y::T) where T),
-    :(foo(x, y::T) where T = x)]
+    :(foo(x, y::T) where {T}),
+    :(foo(x, y::T) where {T} = x),
+]
 
 function check_handle(ex, name, args, body)
     r = handle(ex)

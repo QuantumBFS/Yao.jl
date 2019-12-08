@@ -2,8 +2,7 @@ using YaoBase
 using Test
 
 # mocked registers
-struct TestRegister{B} <: AbstractRegister{B}
-end
+struct TestRegister{B} <: AbstractRegister{B} end
 
 TestRegister() = TestRegister{1}()
 
@@ -11,8 +10,7 @@ YaoBase.nqubits(::TestRegister) = 8
 YaoBase.nactive(::TestRegister) = 2
 
 export TestInterfaceRegister
-struct TestInterfaceRegister{B} <: AbstractRegister{B}
-end
+struct TestInterfaceRegister{B} <: AbstractRegister{B} end
 
 TestInterfaceRegister() = TestInterfaceRegister{1}()
 

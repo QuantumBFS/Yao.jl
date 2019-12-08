@@ -11,6 +11,10 @@ different types.
 function instruct! end
 
 # empty gates
-YaoBase.instruct!(state::AbstractVecOrMat, ::Any,
-    locs::Tuple{}, control_locs::NTuple{N1, Int}=(),
-    control_configs::NTuple{N2, Int}=()) where {N1, N2} = state
+YaoBase.instruct!(
+    state::AbstractVecOrMat,
+    ::Any,
+    locs::Tuple{},
+    control_locs::NTuple{N1,Int} = (),
+    control_configs::NTuple{N2,Int} = (),
+) where {N1,N2} = state

@@ -41,10 +41,10 @@ Returns the number of non-active qubits.
 
 Returns the number of batches.
 """
-@interface nbatch(r::AbstractRegister{B}) where B = B
+@interface nbatch(r::AbstractRegister{B}) where {B} = B
 
 # same with nbatch
-Base.length(r::AbstractRegister{B}) where B = B
+Base.length(r::AbstractRegister{B}) where {B} = B
 
 """
     addbits!(register, n::Int) -> register
@@ -68,8 +68,9 @@ i.e. |psi> -> |psi> ⊗ |000> ⊗ |psi>, increased bits have higher indices.
 
 If only an integer is provided, then returns a lambda function.
 """
-@interface insert_qubits!(::AbstractRegister, loc::Int; nqubits::Int=1)
-insert_qubits!(loc::Int; nqubits::Int=1) = @λ(register -> insert_qubits!(register, loc; nqubits=n))
+@interface insert_qubits!(::AbstractRegister, loc::Int; nqubits::Int = 1)
+insert_qubits!(loc::Int; nqubits::Int = 1) =
+    @λ(register -> insert_qubits!(register, loc; nqubits = n))
 
 
 """
@@ -92,7 +93,7 @@ julia> focus!(r, (1, 2, 4))
 Lazy version of [`focus!`](@ref), this returns a lambda which requires a register.
 """
 focus!(locs::Int...) = focus!(locs)
-focus!(locs::NTuple{N, Int}) where N = @λ(register -> focus!(register, locs))
+focus!(locs::NTuple{N,Int}) where {N} = @λ(register -> focus!(register, locs))
 focus!(locs::UnitRange) = @λ(register -> focus!(register, locs))
 """
     focus(f, register, locs...)
@@ -115,9 +116,9 @@ ArrayReg{1,Complex{Float64},Array...}
 """
 @interface focus!(f::Base.Callable, r::AbstractRegister, locs::Int...) = focus(f, r, locs)
 
-focus!(f::Base.Callable, r::AbstractRegister, loc::Int) = focus(f, r, (loc, ))
+focus!(f::Base.Callable, r::AbstractRegister, loc::Int) = focus(f, r, (loc,))
 focus!(f::Base.Callable, r::AbstractRegister, locs) =
-    relax!(f(focus!(r, locs)), locs; to_nactive=nqubits(r))
+    relax!(f(focus!(r, locs)), locs; to_nactive = nqubits(r))
 
 """
     relax!(register[, locs]; to_nactive=nqubits(register)) -> register
@@ -125,8 +126,9 @@ focus!(f::Base.Callable, r::AbstractRegister, locs) =
 Inverse transformation of [`focus!`](@ref), where `to_nactive` is the number
  of active bits for target register.
 """
-@interface relax!(r::AbstractRegister, locs; to_nactive::Int=nqubits(r))
-relax!(r::AbstractRegister; to_nactive::Int=nqubits(r)) = relax!(r, (); to_nactive=to_nactive)
+@interface relax!(r::AbstractRegister, locs; to_nactive::Int = nqubits(r))
+relax!(r::AbstractRegister; to_nactive::Int = nqubits(r)) =
+    relax!(r, (); to_nactive = to_nactive)
 
 """
     relax!(locs::Int...; to_nactive=nqubits(register)) -> f(register) -> register
@@ -134,28 +136,25 @@ relax!(r::AbstractRegister; to_nactive::Int=nqubits(r)) = relax!(r, (); to_nacti
 Lazy version of [`relax!`](@ref), it will be evaluated once you feed a register
 to its output lambda.
 """
-relax!(locs::Int...; to_nactive::Union{Nothing, Int}=nothing) =
-    relax!(locs; to_nactive=to_nactive)
+relax!(locs::Int...; to_nactive::Union{Nothing,Int} = nothing) =
+    relax!(locs; to_nactive = to_nactive)
 
-function relax!(locs::NTuple{N, Int}; to_nactive::Union{Nothing, Int}=nothing) where N
+function relax!(locs::NTuple{N,Int}; to_nactive::Union{Nothing,Int} = nothing) where {N}
     lambda = function (r::AbstractRegister)
         if to_nactive === nothing
-            return relax!(r, locs; to_nactive=nqubits(r))
+            return relax!(r, locs; to_nactive = nqubits(r))
         else
-            return relax!(r, locs; to_nactive=to_nactive)
+            return relax!(r, locs; to_nactive = to_nactive)
         end
     end
 
     @static if VERSION < v"1.1.0"
-        return LegibleLambda(
-            "(register->relax!(register, locs...; to_nactive))",
-            lambda
-            )
+        return LegibleLambda("(register->relax!(register, locs...; to_nactive))", lambda)
     else
         return LegibleLambda(
-                lambda,
-                :(register->relax!(register, locs...; to_nactive)),
-                Dict(:locs=>locs, :to_nactive=>to_nactive)
+            lambda,
+            :(register -> relax!(register, locs...; to_nactive)),
+            Dict(:locs => locs, :to_nactive => to_nactive),
         )
     end
 end
@@ -170,8 +169,10 @@ struct ComputationalBasis end
 struct AllLocs end
 
 abstract type PostProcess end
-struct ResetTo{T} <: PostProcess  x::T end
-struct RemoveMeasured <:PostProcess end
+struct ResetTo{T} <: PostProcess
+    x::T
+end
+struct RemoveMeasured <: PostProcess end
 struct NoPostProcess <: PostProcess end
 
 export measure, measure!
@@ -196,30 +197,48 @@ Measure current active qubits or qubits at `locs`. After measure and collapse,
 """
 function measure! end
 
-measure!(postprocess::PostProcess, op, reg::AbstractRegister; kwargs...) = measure!(postprocess, op, reg, AllLocs(); kwargs...)
-measure!(postprocess::PostProcess, reg::AbstractRegister, locs; kwargs...) = measure!(postprocess, ComputationalBasis(), reg, locs; kwargs...)
-measure!(postprocess::PostProcess, reg::AbstractRegister; kwargs...) = measure!(postprocess, ComputationalBasis(), reg, AllLocs(); kwargs...)
-measure!(op, reg::AbstractRegister, args...; kwargs...) = measure!(NoPostProcess(), op, reg, args...; kwargs...)
-measure!(reg::AbstractRegister, args...; kwargs...) = measure!(NoPostProcess(), reg, args...; kwargs...)
+measure!(postprocess::PostProcess, op, reg::AbstractRegister; kwargs...) =
+    measure!(postprocess, op, reg, AllLocs(); kwargs...)
+measure!(postprocess::PostProcess, reg::AbstractRegister, locs; kwargs...) =
+    measure!(postprocess, ComputationalBasis(), reg, locs; kwargs...)
+measure!(postprocess::PostProcess, reg::AbstractRegister; kwargs...) =
+    measure!(postprocess, ComputationalBasis(), reg, AllLocs(); kwargs...)
+measure!(op, reg::AbstractRegister, args...; kwargs...) =
+    measure!(NoPostProcess(), op, reg, args...; kwargs...)
+measure!(reg::AbstractRegister, args...; kwargs...) =
+    measure!(NoPostProcess(), reg, args...; kwargs...)
 
 measure(op, reg::AbstractRegister; kwargs...) = measure(op, reg, AllLocs(); kwargs...)
-measure(reg::AbstractRegister, locs; kwargs...) = measure(ComputationalBasis(), reg, locs; kwargs...)
-measure(reg::AbstractRegister; kwargs...) = measure(ComputationalBasis(), reg, AllLocs(); kwargs...)
+measure(reg::AbstractRegister, locs; kwargs...) =
+    measure(ComputationalBasis(), reg, locs; kwargs...)
+measure(reg::AbstractRegister; kwargs...) =
+    measure(ComputationalBasis(), reg, AllLocs(); kwargs...)
 
 # focus! to specify locations, we that we only need to consider full-space measure in the future.
-function measure!(postprocess::PostProcess, op, reg::AbstractRegister, locs::Union{Tuple, Vector, Integer, UnitRange}; kwargs...) where MODE
+function measure!(
+    postprocess::PostProcess,
+    op,
+    reg::AbstractRegister,
+    locs::Union{Tuple,Vector,Integer,UnitRange};
+    kwargs...,
+) where {MODE}
     nbit = nactive(reg)
     focus!(reg, locs)
     res = measure!(postprocess, op, reg, AllLocs(); kwargs...)
     if postprocess isa RemoveMeasured
-        relax!(reg; to_nactive=nbit-length(locs))
+        relax!(reg; to_nactive = nbit - length(locs))
     else
-        relax!(reg, locs; to_nactive=nbit)
+        relax!(reg, locs; to_nactive = nbit)
     end
     res
 end
 
-function measure(op, reg::AbstractRegister, locs::Union{Tuple, Vector, Integer, UnitRange}; kwargs...) where MODE
+function measure(
+    op,
+    reg::AbstractRegister,
+    locs::Union{Tuple,Vector,Integer,UnitRange};
+    kwargs...,
+) where {MODE}
     nbit = nactive(reg)
     focus!(reg, locs)
     res = measure(op, reg, AllLocs(); kwargs...)
@@ -253,7 +272,7 @@ After selection, the focused qubit space is 0, so you may want call `relax!` man
 
 Lazy version of [`select!`](@ref). See also [`select`](@ref).
 """
-select!(bits...) = @λ(register->select!(register, bits...))
+select!(bits...) = @λ(register -> select!(register, bits...))
 
 """
     partial_tr(register, locs)
@@ -267,7 +286,7 @@ Return a register which is the partial traced on `locs`.
 
 Curried version of `partial_tr(register, locs)`.
 """
-partial_tr(locs) = @λ(register->partial_tr(register, locs))
+partial_tr(locs) = @λ(register -> partial_tr(register, locs))
 
 """
     select(register, bits) -> AbstractRegister
@@ -397,7 +416,7 @@ Returns a view of the i-th slice on batch dimension.
 @interface viewbatch(::AbstractRegister, ::Int)
 
 
-function Base.iterate(it::AbstractRegister{B}, state=1) where B
+function Base.iterate(it::AbstractRegister{B}, state = 1) where {B}
     if state > B
         return nothing
     else
