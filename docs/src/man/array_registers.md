@@ -53,7 +53,7 @@ isnormalized
 
 We define some specialized instruction by specializing [`instruct!`](@ref) to improve the performance for simulation and dispatch them with multiple dispatch.
 
-<!-- Implemented `instruct!` is listed below: -->
+Implemented `instruct!` is listed below:
 
 ## Measurement
 
