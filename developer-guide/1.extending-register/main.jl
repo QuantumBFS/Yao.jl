@@ -42,11 +42,11 @@ function Yao.measure!(rng, ::ComputationalBasis, reg::EchoReg{B}, locs) where {B
 end
 
 # Now we can check what will happen!
-
-reg |> put(3, 2=>X) |> control(3, 3, 2=>X) |> concentrate(3, put(1, 1=>X), 2:2) |> measure!
+r = EchoReg{10}(3, 2)
+r |> put(3, 2=>X) |> control(3, 3, 2=>X) |> concentrate(3, put(1, 1=>X), 2:2) |> measure!
 
 # But when we still require some more information from you
 
-reg |> cache(X)
+r |> cache(X)
 
 # An `NotImplementedError` will be thrown, no worries!
