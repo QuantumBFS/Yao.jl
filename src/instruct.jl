@@ -81,7 +81,7 @@ function _instruct!(
     ic::IterControl,
 ) where {T}
     work = ndims(state) == 1 ? similar(state, length(locs_raw)) :
-           similar(state, length(locs_raw), size(state, 2))
+        similar(state, length(locs_raw), size(state, 2))
     controldo(ic) do i
         @inbounds unrows!(state, locs_raw .+ i, U, work)
     end
@@ -164,7 +164,7 @@ function YaoBase.instruct!(state::AbstractVecOrMat, ::Val{:X}, locs::NTuple{N,In
     return state
 end
 
-function YaoBase.instruct!(state::AbstractVecOrMat, ::Val{:H}, locs::NTuple{N, Int}) where {N}
+function YaoBase.instruct!(state::AbstractVecOrMat, ::Val{:H}, locs::NTuple{N,Int}) where {N}
     instruct!(state, YaoBase.Const.H, locs)
 end
 
@@ -197,10 +197,10 @@ function YaoBase.instruct!(state::AbstractVecOrMat{T}, ::Val{:Z}, locs::NTuple{N
     return state
 end
 
-for (G, FACTOR) in zip(
-    [:S, :T, :Sdag, :Tdag],
-    [:(im), :($(exp(im * π / 4))), :(-im), :($(exp(-im * π / 4)))],
-)
+for (
+    G,
+    FACTOR,
+) in zip([:S, :T, :Sdag, :Tdag], [:(im), :($(exp(im * π / 4))), :(-im), :($(exp(-im * π / 4)))])
     @eval function YaoBase.instruct!(
         state::AbstractVecOrMat{T},
         ::Val{$(QuoteNode(G))},
@@ -214,7 +214,10 @@ for (G, FACTOR) in zip(
     end
 end
 
-for (G, FACTOR) in zip(
+for (
+    G,
+    FACTOR,
+) in zip(
     [:Z, :S, :T, :Sdag, :Tdag],
     [:(-1), :(im), :($(exp(im * π / 4))), :(-im), :($(exp(-im * π / 4)))],
 )
@@ -334,7 +337,10 @@ function YaoBase.instruct!(
     return state
 end
 
-for (G, FACTOR) in zip(
+for (
+    G,
+    FACTOR,
+) in zip(
     [:Z, :S, :T, :Sdag, :Tdag],
     [:(-1), :(im), :($(exp(im * π / 4))), :(-im), :($(exp(-im * π / 4)))],
 )
@@ -434,7 +440,10 @@ function YaoBase.instruct!(
 end
 
 
-for (G, FACTOR) in zip(
+for (
+    G,
+    FACTOR,
+) in zip(
     [:Z, :S, :T, :Sdag, :Tdag],
     [:(-1), :(im), :($(exp(im * π / 4))), :(-im), :($(exp(-im * π / 4)))],
 )

@@ -37,7 +37,10 @@ for op in [:+, :-]
         return ArrayReg(($op)(state(lhs), state(rhs)))
     end
 
-    @eval function Base.$op(lhs::ArrayReg{B,T1,<:Transpose}, rhs::ArrayReg{B,T2,<:Transpose}) where {B,T1,T2}
+    @eval function Base.$op(
+        lhs::ArrayReg{B,T1,<:Transpose},
+        rhs::ArrayReg{B,T2,<:Transpose},
+    ) where {B,T1,T2}
         return ArrayReg(transpose(($op)(state(lhs).parent, state(rhs).parent)))
     end
 
@@ -119,13 +122,16 @@ function Base.:*(bra::AdjointArrayReg{1}, ket::ArrayReg{1})
 end
 
 Base.:*(bra::AdjointArrayReg{B}, ket::ArrayReg{B}) where {B} = bra .* ket
-function Base.:*(bra::AdjointArrayReg{B,T1,<:Transpose}, ket::ArrayReg{B,T2,<:Transpose}) where {B,T1,T2}
+function Base.:*(
+    bra::AdjointArrayReg{B,T1,<:Transpose},
+    ket::ArrayReg{B,T2,<:Transpose},
+) where {B,T1,T2}
     if nremain(bra) == nremain(ket) == 0 # all active
         A, C = parent(state(parent(bra))), parent(state(ket))
         res = zeros(eltype(promote_type(T1, T2)), B)
         #return mapreduce((x, y) -> conj(x) * y, +, ; dims=2)
-        for j=1:size(A, 2)
-            for i=1:size(A, 1)
+        for j in 1:size(A, 2)
+            for i in 1:size(A, 1)
                 @inbounds res[i] += conj(A[i, j]) * C[i, j]
             end
         end
