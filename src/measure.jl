@@ -20,7 +20,7 @@ YaoBase.measure(
     reg::ArrayReg{1},
     ::AllLocs;
     nshots::Int = 1,
-    rng::AbstractRNG=Random.GLOBAL_RNG
+    rng::AbstractRNG = Random.GLOBAL_RNG,
 ) = _measure(rng, reg |> probs, nshots)
 
 function YaoBase.measure(
@@ -28,7 +28,7 @@ function YaoBase.measure(
     reg::ArrayReg{B},
     ::AllLocs;
     nshots::Int = 1,
-    rng::AbstractRNG=Random.GLOBAL_RNG
+    rng::AbstractRNG = Random.GLOBAL_RNG,
 ) where {B}
     pl = dropdims(sum(reg |> rank3 .|> abs2, dims = 2), dims = 2)
     return _measure(rng, pl, nshots)
@@ -39,7 +39,7 @@ function YaoBase.measure!(
     ::ComputationalBasis,
     reg::ArrayReg{B},
     ::AllLocs;
-    rng::AbstractRNG=Random.GLOBAL_RNG
+    rng::AbstractRNG = Random.GLOBAL_RNG,
 ) where {B}
     state = reg |> rank3
     nstate = similar(reg.state, 1 << nremain(reg), B)
@@ -60,11 +60,11 @@ function YaoBase.measure!(
     ::ComputationalBasis,
     reg::ArrayReg{B},
     ::AllLocs;
-    rng::AbstractRNG=Random.GLOBAL_RNG
+    rng::AbstractRNG = Random.GLOBAL_RNG,
 ) where {B}
     state = reg |> rank3
     nstate = zero(state)
-    res = measure!(RemoveMeasured(), reg; rng=rng)
+    res = measure!(RemoveMeasured(), reg; rng = rng)
     _nstate = reshape(reg.state, :, B)
     for ib in 1:B
         @inbounds nstate[Int64(res[ib])+1, :, ib] .= view(_nstate, :, ib)
@@ -78,12 +78,12 @@ function YaoBase.measure!(
     ::ComputationalBasis,
     reg::ArrayReg{B},
     ::AllLocs;
-    rng::AbstractRNG=Random.GLOBAL_RNG
+    rng::AbstractRNG = Random.GLOBAL_RNG,
 ) where {B}
     state = rank3(reg)
     M, N, B1 = size(state)
     nstate = zero(state)
-    res = measure!(YaoBase.RemoveMeasured(), reg; rng=rng)
+    res = measure!(YaoBase.RemoveMeasured(), reg; rng = rng)
     nstate[Int(rst.x)+1, :, :] = reshape(reg.state, :, B)
     reg.state = reshape(nstate, M, N * B)
     return res
