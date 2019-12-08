@@ -11,7 +11,7 @@ using PyCall
 
 # Install OpenFermion and PySCF if you don't have them
 pip = pyimport("pip._internal.main")
-pip.main(["install", "pyscf", "openfermion"])
+pip.main(["install", "pyscf", "openfermion", "openfermionpyscf"])
 
 
 # First we import hamiltonians from OpenFermion and PySCF
