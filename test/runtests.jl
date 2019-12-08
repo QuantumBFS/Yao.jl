@@ -43,7 +43,7 @@ end
 end
 
 @testset "test tree utils" begin
-    include("treeutils.jl")
+    include("treeutils/treeutils.jl")
 end
 
 @testset "autodiff" begin

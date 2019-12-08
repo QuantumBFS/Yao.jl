@@ -1,59 +1,55 @@
 using YaoBase
+using TupleTools
 export KronBlock, kron
+
+const KronLocT = Union{Int, UnitRange{Int}}
 
 """
     KronBlock{N, T, MT<:AbstractBlock} <: CompositeBlock{N, T}
 
 composite block that combine blocks by kronecker product.
 """
-struct KronBlock{N,MT<:AbstractBlock} <: CompositeBlock{N}
-    slots::Vector{Int}
-    locs::Vector{Int}
-    blocks::Vector{MT}
+struct KronBlock{N,M,MT<:NTuple{M,Any}} <: CompositeBlock{N}
+    locs::NTuple{M,UnitRange{Int}}
+    blocks::MT
+
+    function KronBlock{N,M,MT}(locs::NTuple{M, UnitRange{Int}}, blocks::MT) where {N,M,MT<:NTuple{M,AbstractBlock}}
+        perm = TupleTools.sortperm(locs, by=first)
+        locs = TupleTools.permute(locs, perm)
+        blocks = TupleTools.permute(blocks, perm)
+        @assert_locs_safe N locs
+
+        for (each, b) in zip(locs, blocks)
+            length(each) != nqubits(b) && throw(LocationConflictError("locs $locs is inconsistent with target block $b"))
+        end
+        return new{N,M,typeof(blocks)}(locs, blocks)
+    end
 end
 
-KronBlock{N}(slots::Vector{Int}, locs::Vector{Int}, blocks::Vector{MT}) where {N,MT<:AbstractBlock} =
-    KronBlock{N,MT}(slots, locs, blocks)
+KronBlock{N}(locs::NTuple{M,UnitRange{Int}}, blocks::MT) where {N,M,MT<:NTuple{M,AbstractBlock}} =
+    KronBlock{N,M,MT}(locs, blocks)
 
-function KronBlock{N}(locs::Vector{Int}, blocks::Vector{MT}) where {N,MT<:AbstractBlock}
-    perm = sortperm(locs)
-    permute!(locs, perm)
-    permute!(blocks, perm)
-    @assert_locs_safe N collect(i:i+nqubits(b)-1 for (i, b) in zip(locs, blocks))
-
-    slots = zeros(Int, N)
-    for (i, each) in enumerate(locs)
-        slots[each] = i
+function KronBlock{N}(itr::Pair{<:Any,<:AbstractBlock}...) where {N}
+    locs = map(itr) do p
+        _render_kronloc(first(p))
     end
-    return KronBlock{N,MT}(slots, locs, blocks)
-end
-
-function KronBlock{N}(itr::Pair{Int,<:AbstractBlock}...) where {N}
-    blocks = AbstractBlock[]
-    locs = Int[]
-
-    for (addr, block) in itr
-        push!(locs, addr)
-        push!(blocks, block)
-    end
-    return KronBlock{N}(locs, blocks)
+    return KronBlock{N}(locs, last.(itr))
 end
 
 function KronBlock(itr::AbstractBlock...)
-    N = sum(nqubits, itr)
-    locs = Int[]
-    count = 1
+    locs = UnitRange{Int}[]
+    count = 0
     for each in itr
-        push!(locs, count)
         count += nqubits(each)
+        push!(locs, count-nqubits(each)+1:count)
     end
-    return KronBlock{N}(locs, collect(itr))
+    return KronBlock{count}((locs...,), itr)
 end
 
 KronBlock(blk::KronBlock) = copy(blk)
 
 """
-    kron(n, blocks::Pair{Int, <:AbstractBlock}...)
+    kron(n, blocks::Pair{<:Any, <:AbstractBlock}...)
 
 Return a [`KronBlock`](@ref), with total number of qubits `n` and pairs of blocks.
 
@@ -66,12 +62,12 @@ and a `Y` gate on the `3`rd qubit.
 julia> kron(4, 1=>X, 3=>Y)
 nqubits: 4
 kron
-├─ 1=>X gate
-└─ 3=>Y gate
+├─ 1:1=>X gate
+└─ 3:3=>Y gate
 
 ```
 """
-Base.kron(total::Int, blocks::Pair{Int,<:AbstractBlock}...) = KronBlock{total}(blocks...)
+Base.kron(total::Int, blocks::Pair{<:Any,<:AbstractBlock}...) = KronBlock{total}(blocks...)
 
 """
     kron(blocks::AbstractBlock...)
@@ -88,10 +84,10 @@ You can use kronecker product to composite small blocks to a large blocks.
 julia> kron(X, Y, Z, Z)
 nqubits: 4
 kron
-├─ 1=>X gate
-├─ 2=>Y gate
-├─ 3=>Z gate
-└─ 4=>Z gate
+├─ 1:1=>X gate
+├─ 2:2=>Y gate
+├─ 3:3=>Z gate
+└─ 4:4=>Z gate
 
 ```
 """
@@ -103,19 +99,17 @@ function Base.kron(total::Int, blocks::AbstractBlock...)
     return kron(blocks...)
 end
 
-Base.kron(total::Int, blocks::Union{AbstractBlock,Pair}...) =
-    error("location of sparse distributed blocks must be explicit declared with pair (e.g 2=>X)")
+function _render_kronloc(l)
+    for i=1:length(l)-1
+        l[i+1] == l[i]+1 || error("Non-Contiguous location in Kron!")
+    end
+    l[1]:l[end]
+end
 
 Base.kron(total::Int, blocks::Base.Generator) = kron(total, blocks...)
-
-# handling errors
-Base.kron(blocks::Union{AbstractBlock, Pair{Int, <:AbstractBlock}}...) =
-    error("location of sparse distributed blocks must be explicit declared with pair (e.g 2=>X)")
-Base.kron(total::Int, blocks::Union{AbstractBlock, Pair{Int, <:AbstractBlock}}...) = kron(blocks...)
-Base.kron(blocks::Union{AbstractBlock, Pair{<:AbstractRange, <:AbstractBlock}}...) =
-    error("kron only supports contiguous location, specifiy the first qubit location with an integer, e.g kron(4, 2=>control(2, 2, 1=>X))")
-Base.kron(total::Int, blocks::Union{AbstractBlock, Pair{<:AbstractRange, <:AbstractBlock}}...) =
-    kron(blocks...)
+function Base.kron(total::Int, blocks::Union{Pair{<:Any,<:AbstractBlock},AbstractBlock}...)
+    throw(MethodError(:kron, blocks))
+end
 
 """
     kron(blocks...) -> f(n)
@@ -134,40 +128,27 @@ julia> kron(put(1=>X) for _ in 1:2)
 julia> kron(X for _ in 1:2)
 nqubits: 2
 kron
-├─ 1=>X gate
-└─ 2=>X gate
+├─ 1:1=>X gate
+└─ 2:2=>X gate
 
 julia> kron(1=>X, 3=>Y)
 (n -> kron(n, 1 => X gate, 3 => Y gate))
 ```
 """
-Base.kron(blocks::Pair{Int,<:AbstractBlock}...) = @λ(n -> kron(n, blocks...))
+Base.kron(blocks::Pair{<:Any,<:AbstractBlock}...) = @λ(n -> kron(n, blocks...))
 Base.kron(blocks::Base.Generator) = kron(blocks...)
 
-occupied_locs(k::KronBlock) = (
-    Iterators.flatten(
-        map(x -> x + i - 1, occupied_locs(b)) for (i, b) in zip(k.locs, subblocks(k))
-    )...,
-)
+occupied_locs(k::KronBlock) = (Iterators.flatten(k.locs)...,)
 subblocks(x::KronBlock) = x.blocks
-chsubblocks(pb::KronBlock{N}, it) where {N} = KronBlock{N}(pb.locs, collect(it))
+chsubblocks(pb::KronBlock{N}, it) where {N} = KronBlock{N}(pb.locs, (it...,))
 cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
 color(::Type{T}) where {T<:KronBlock} = :cyan
 
-function _prepair_kronmat(k::KronBlock{N}) where {N}
-    sizes = map(nqubits, subblocks(k))
-    start_locs = @. N - $(k.locs) - sizes + 1
-
-    order = sortperm(start_locs)
-    sorted_start_locs = start_locs[order]
-    num_bit_list = vcat(diff(push!(sorted_start_locs, N)) .- sizes[order])
-    return order, num_bit_list, sorted_start_locs
-end
-
-function mat(::Type{T}, k::KronBlock{N}) where {T,N}
-    order, num_bit_list, sorted_start_locs = _prepair_kronmat(k)
-    blocks = subblocks(k)[order]
-    return reduce(zip(blocks, num_bit_list), init = IMatrix{1 << sorted_start_locs[1],T}()) do x, y
+function mat(::Type{T}, k::KronBlock{N,M}) where {T,N,M}
+    ntrail = N-last(last(k.locs))  # number of trailing bits
+    num_bit_list = map(i->first(k.locs[i])-(i>1 ? last(k.locs[i-1]) : 0)-1, 1:M)
+    return reduce(Iterators.reverse(zip(subblocks(k), num_bit_list)),
+                                init = IMatrix{1 << ntrail,T}()) do x, y
         kron(x, mat(T, y[1]), IMatrix(1 << y[2]))
     end
 end
@@ -175,7 +156,7 @@ end
 function apply!(r::AbstractRegister, k::KronBlock)
     _check_size(r, k)
     for (locs, block) in zip(k.locs, k.blocks)
-        _instruct!(r, block, Tuple(locs:locs+nqubits(block)-1))
+        _instruct!(r, block, Tuple(locs))
     end
     return r
 end
@@ -191,38 +172,16 @@ for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
 end
 
 function Base.copy(k::KronBlock{N}) where {N}
-    slots = copy(k.slots)
-    locs = copy(k.locs)
-    blocks = copy(k.blocks)
-    return KronBlock{N}(slots, locs, blocks)
+    locs = copy.(k.locs)
+    blocks = copy.(k.blocks)
+    return KronBlock{N}(locs, blocks)
 end
 
-function Base.similar(k::KronBlock{N}) where {N}
-    slots = zeros(Int, N)
-    locs = empty!(similar(k.locs))
-    blocks = empty!(similar(k.blocks))
-    return KronBlock{N}(slots, locs, blocks)
-end
-
-function Base.getindex(k::KronBlock, addr)
-    index = k.slots[addr]
-    index == 0 && throw(KeyError(addr))
+function Base.getindex(k::KronBlock, addr::UnitRange)
+    index = findfirst(==(addr), k.locs)
     return k.blocks[index]
 end
-
-function Base.setindex!(k::KronBlock, val, addr)
-    index = k.slots[addr]
-    index == 0 && return _insert_new!(k, val, addr)
-    k.blocks[index] = val
-    return k
-end
-
-function _insert_new!(k::KronBlock, val, addr)
-    push!(k.locs, addr)
-    push!(k.blocks, val)
-    k.slots[addr] = lastindex(k.locs)
-    return k
-end
+Base.getindex(k::KronBlock, addr::Integer) = getindex(k, addr:addr)
 
 function Base.iterate(k::KronBlock, st = 1)
     if st > length(k)
@@ -232,7 +191,7 @@ function Base.iterate(k::KronBlock, st = 1)
     end
 end
 
-Base.eltype(k::KronBlock) = Tuple{Int,AbstractBlock}
+Base.eltype(k::KronBlock) = Tuple{UnitRange{Int},AbstractBlock}
 Base.length(k::KronBlock) = length(k.blocks)
 Base.eachindex(k::KronBlock) = k.locs
 
@@ -241,7 +200,7 @@ function Base.:(==)(lhs::KronBlock{N}, rhs::KronBlock{N}) where {N}
 end
 
 Base.adjoint(blk::KronBlock{N}) where {N} =
-    KronBlock{N}(blk.slots, blk.locs, map(adjoint, blk.blocks))
+    KronBlock{N}(blk.locs, map(adjoint, blk.blocks))
 
 YaoBase.ishermitian(k::KronBlock) = all(ishermitian, k.blocks) || ishermitian(mat(k))
 YaoBase.isunitary(k::KronBlock) = all(isunitary, k.blocks) || isunitary(mat(k))

@@ -7,7 +7,7 @@ g3 = chain(im * X, X, Y)
 
 io = IOBuffer()
 print_annotation(io, g1, g1, g1[1])
-@test String(take!(io)) == "1=>[+im] "
+@test String(take!(io)) == "1:1=>[+im] "
 
 print_annotation(io, g2, g2, content(g2))
 @test String(take!(io)) == "(2,) [+im] "

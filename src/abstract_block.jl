@@ -100,7 +100,7 @@ Base.copy(x::AbstractBlock) = x
 
 Returns the matrix form of given block.
 """
-@interface mat(x::AbstractBlock) = mat(ComplexF64, x)
+@interface mat(x::AbstractBlock) = mat(promote_type(ComplexF64, parameters_eltype(x)), x)
 @interface mat(::Type{T}, x::AbstractBlock) where {T}
 
 mat_matchreg(reg::AbstractRegister, x::AbstractBlock) = mat(x)
@@ -143,7 +143,7 @@ Returns the intrinsic parameters of node `block`, default is an empty tuple.
 
 Set the parameters of `block`.
 """
-@interface setiparams!(x::AbstractBlock, args...) = x
+@interface setiparams!(x::AbstractBlock, args...) = niparams(x) == length(args) == 0 ? x : throw(NotImplementedError(:setiparams!, (x, args...)))
 
 setiparams!(x::AbstractBlock, it::Union{Tuple,AbstractArray,Base.Generator}) = setiparams!(x, it...)
 setiparams!(x::AbstractBlock, a::Number, xs::Number...) =

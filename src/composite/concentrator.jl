@@ -51,8 +51,8 @@ julia> cc = concentrate(4, kron(X, Y), (1, 3))
 nqubits: 4
 Concentrator: (1, 3)
 └─ kron
-   ├─ 1=>X gate
-   └─ 2=>Y gate
+   ├─ 1:1=>X gate
+   └─ 2:2=>Y gate
 
 julia> pp = chain(4, put(1=>X), put(3=>Y))
 nqubits: 4

@@ -26,8 +26,8 @@ chain
 ├─ put on (2)
 │  └─ X gate
 └─ kron
-   ├─ 1=>X gate
-   └─ 3=>Y gate
+   ├─ 1:1=>X gate
+   └─ 3:3=>Y gate
 
 
 julia> map_address(c, AddressInfo(10, [6,7,8,9,10]))
@@ -38,8 +38,8 @@ chain
 ├─ put on (7)
 │  └─ X gate
 └─ kron
-   ├─ 6=>X gate
-   └─ 8=>Y gate
+   ├─ 6:6=>X gate
+   └─ 8:8=>Y gate
 ```
 """
 function map_address end
@@ -49,13 +49,11 @@ function map_address(block::AbstractBlock, info::AddressInfo)
 end
 
 function map_address(blk::Measure, info::AddressInfo)
-    m = Measure(
-        info.nbits;
-        rng = blk.rng,
-        operator = blk.operator,
-        locs = blk.locations / info,
-        collapseto = blk.collapseto,
-        remove = blk.remove,
+    m = Measure{info.nbits}(
+        blk.rng,
+        blk.operator,
+        (blk.locations / info...,),
+        blk.postprocess
     )
     if isdefined(blk, :results)
         m.results = blk.results

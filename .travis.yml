@@ -6,8 +6,6 @@ os:
   - windows
 julia:
   - 1.0
-  - 1.1
-  - 1.2
   - 1.3
   - nightly
 matrix:
@@ -19,7 +17,7 @@ notifications:
 jobs:
   include:
     - stage: "DocTest"
-      julia: 1.1 # we only do doc test on latest stable release
+      julia: 1.3 # we only do doc test on latest stable release
       os: linux
       script:
         - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'

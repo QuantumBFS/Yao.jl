@@ -20,3 +20,12 @@ function print_subtypetree(t::Type, level = 1, indent = 4)
         print_subtypetree(s, level + 1, indent)
     end
 end
+
+rmlines(ex::Expr) = begin
+    hd = ex.head
+    hd == :macrocall && return ex
+    tl = map(rmlines, filter(!islinenumbernode, ex.args))
+    Expr(hd, tl...)
+end
+rmlines(@nospecialize(a)) = a
+islinenumbernode(@nospecialize(x)) = x isa LineNumberNode

@@ -12,25 +12,27 @@ using StatsBase: mean
     st |> g
 
     @test g.results[1] == 0 ? st.state[end] == 0 : st.state[1] == 0
+    g = Measure(4; locs = (1, 2), resetto=2)
+    @test g.postprocess isa ResetTo{BitStr64{2}}
 end
 
-@testset "collapseto" begin
+@testset "resetto" begin
     Random.seed!(1234)
 
     st = rand_state(5; nbatch = 3)
-    g = Measure(5; locs = (1, 2), collapseto = bit"00011")
+    g = Measure(5; locs = (1, 2), resetto = bit"00011")
     st |> g
     for k = 1:32
         if !(st.state[k] ≈ 0.0)
             @test all(BitStr64{5}(k - 1)[1:2] .== 1)
         end
     end
-    @test Measure(5; locs = (1, 2), collapseto = 0b0011).collapseto isa BitStr64{5}
+    @test Measure(5; locs = (1, 2), resetto = 0b0011).postprocess isa ResetTo{BitStr64{2}}
 end
 
 @testset "error handling" begin
-    @test_throws ErrorException Measure(5; locs = (1, 2), collapseto = bit"00011", remove = true)
-    @test_throws ErrorException mat(Measure(5; locs = (1, 2), collapseto = bit"00011"))
+    @test_throws ErrorException Measure(5; locs = (1, 2), resetto = bit"00011", remove = true)
+    @test_throws ErrorException mat(Measure(5; locs = (1, 2), resetto = bit"00011"))
 end
 
 
@@ -47,17 +49,17 @@ end
     @test size(res) == (10,)
     @test res2 == res
 
-    # measure_collapseto!
+    # measure_resetto!
     reg2 = reg |> copy
-    res = measure_collapseto!(op, reg2, 2:4)
+    res = measure!(ResetTo(0), op, reg2, 2:4)
     reg2 |> repeat(6, H, 2:4)
-    res2 = measure_collapseto!(op, reg2, 2:4)
+    res2 = measure!(ResetTo(0), op, reg2, 2:4)
     @test size(res) == (10,) == size(res2)
     @test all(res2 .== 1)
 
     # measure_remove!
     reg2 = reg |> copy
-    res = measure_remove!(op, reg2, 2:4)
+    res = measure!(RemoveMeasured(), op, reg2, 2:4)
     reg2 |> repeat(3, H, 2:3)
     @test size(res) == (10,)
     @test nqubits(reg2) == 3
@@ -79,17 +81,23 @@ end
     @test size(res) == (32,)
     @test res2 == res
 
-    # measure_collapseto!
+    # measure
     reg2 = reg |> copy
-    res = measure_collapseto!(op, reg2, 2:6)
+    res = measure(op, reg2, 2:6; nshots=100)
+    @test size(res) == (100,32)
+    @test reg ≈ reg2
+
+    # measure_resetto!
+    reg2 = reg |> copy
+    res = measure!(ResetTo(0), op, reg2, 2:6)
     reg2 |> repeat(8, H, 2:6)
-    res2 = measure_collapseto!(op, reg2, 2:6)
+    res2 = measure!(ResetTo(0), op, reg2, 2:6)
     @test size(res) == (32,) == size(res2)
     @test all(res2 .== 1)
 
     # measure_remove!
     reg2 = reg |> copy
-    res = measure_remove!(op, reg2, 2:6)
+    res = measure!(RemoveMeasured(), op, reg2, 2:6)
     @test size(res) == (32,)
 
     reg = repeat(ArrayReg([1, -1 + 0im] / sqrt(2.0)), 10)

@@ -49,7 +49,7 @@ end
 end
 
 @testset "direct inherited methods" begin
-    g = kron(4, 1 => X, 3 => Y)
+    g = chain([X, Z, Y, I2])
     g = CachedBlock(test_server, g, 2)
 
     @test g[1] isa XGate

@@ -72,10 +72,20 @@ Return a [`ChainBlock`](@ref) with all block of `block_type` in root.
 expect(op::AbstractBlock, dm::DensityMatrix{1}) = sum(mat(op) .* dropdims(dm.state, dims = 3))
 
 """
-    expect(op::AbstractBlock, reg::AbstractRegister{B}) -> Vector
-    expect(op::AbstractBlock, dm::DensityMatrix{B}) -> Vector
+    expect(op::AbstractBlock, reg) -> Vector
+    expect(op::AbstractBlock, reg => circuit) -> Vector
+    expect(op::AbstractBlock, density_matrix) -> Vector
 
-expectation value of an operator.
+Get the expectation value of an operator, the second parameter can be a register `reg` or a pair of input register and circuit `reg => circuit`.
+
+    expect'(op::AbstractBlock, reg=>circuit) -> Vector
+
+Obtain the gradient with respect to circuit parameters.
+The return value is a pair of `gψ=>gparams`, with `gψ` the gradient of input state and `gparams` the gradients of circuit parameters.
+
+!!! note
+
+    For batched register, `expect(op, reg=>circuit)` returns a vector of size number of batch as output. However, one can not differentiate over a vector loss, so `expect'(op, reg=>circuit)` accumulates the gradient over batch, rather than returning a batched gradient of parameters.
 """
 @interface function expect(op::AbstractBlock, dm::DensityMatrix{B}) where {B}
     mop = mat(op)
@@ -122,16 +132,48 @@ end
 
 expect(op::Scale, reg::AbstractRegister{1}) = invoke(expect, Tuple{Scale,AbstractRegister}, op, reg)
 
-for FUNC in [:measure!, :measure_collapseto!, :measure_remove!, :measure]
-    @eval function YaoBase.$FUNC(
-        rng::AbstractRNG,
-        op::AbstractBlock,
-        reg::AbstractRegister,
-        locs::AllLocs;
-        kwargs...,
-    ) where {B}
-        $FUNC(rng::AbstractRNG, eigen!(mat(op) |> Matrix), reg, locs; kwargs...)
+function YaoBase.measure(
+    op::AbstractBlock,
+    reg::AbstractRegister,
+    locs::AllLocs;
+    kwargs...) where {B}
+    measure(eigen!(mat(op) |> Matrix), reg, locs; kwargs...)
+end
+
+function YaoBase.measure!(
+    postprocess::YaoBase.PostProcess,
+    op::AbstractBlock,
+    reg::AbstractRegister,
+    locs::AllLocs;
+    kwargs...) where {B}
+    measure!(postprocess, eigen!(mat(op) |> Matrix), reg, locs; kwargs...)
+end
+
+function YaoBase.measure!(
+    postprocess::YaoBase.PostProcess,
+    op::Eigen,
+    reg::AbstractRegister,
+    locs::AllLocs;
+    kwargs...)
+    E, V = op
+    reg.state = V'*reg.state
+    res = measure!(postprocess, ComputationalBasis(), reg, locs; kwargs...)
+    if postprocess isa YaoBase.NoPostProcess
+        reg.state = V*reg.state
     end
+    E[Int64.(res) .+ 1]
+end
+
+function YaoBase.measure(
+    op::Eigen,
+    reg::AbstractRegister,
+    locs::AllLocs;
+    kwargs...)
+    E, V = op
+    reg.state = V'*reg.state
+    res = measure(ComputationalBasis(), reg, locs; kwargs...)
+    reg.state = V*reg.state
+    E[Int64.(res) .+ 1]
 end
 
 # obtaining Dense Matrix of a block

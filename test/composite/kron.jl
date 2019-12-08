@@ -28,8 +28,11 @@ end
 
 @testset "test constructors" begin
     @test_throws LocationConflictError KronBlock{5}(4=>CNOT, 5=>X)
-    @test_throws ErrorException kron(3, 1=>X, Y)
-    @test_throws ErrorException kron(1:2=>kron(X, Y), Y)
+    @test_throws MethodError kron(3, 1=>X, Y)
+    @test kron(2=>X)(4) == kron(4, 2=>X)
+    @test_throws LocationConflictError kron(10, (2,3)=>CNOT, [3]=>Y)
+    @test kron(10, (2,3)=>CNOT, [5]=>Y) isa KronBlock
+    @test_throws ErrorException kron(5, (5,3)=>CNOT, [3]=>Y)
 end
 
 @testset "test mat" begin
@@ -51,9 +54,10 @@ end
         @test chsubblocks(g, blks) |> subblocks |> collect == blks
 
         m = kron(U2, Const.I2, U, Const.I2)
-        g = KronBlock{5}(4 => CNOT, 2 => X)
+        @test_throws LocationConflictError KronBlock{5}(4 => CNOT, 2 => X)
+        g = KronBlock{5}(4:5 => CNOT, 2 => X)
         @test m == mat(g)
-        @test g.locs == [2, 4]
+        @test g.locs == (2:2, 4:5)
         @test occupied_locs(g) == (2, 4, 5)
     end
 
@@ -80,38 +84,24 @@ end
 
 @testset "test allocation" begin
     g = kron(4, 1 => X, 2 => phase(0.1))
-    # deep copy
-    cg = deepcopy(g)
-    cg[2].theta = 0.2
-    @test g[2].theta == 0.1
 
-    # shallow copy
+    # copy
     cg = copy(g)
     cg[2].theta = 0.2
-    @test g[2].theta == 0.2
+    @test g[2].theta == 0.1
+    @test cg[2].theta == 0.2
 
-    sg = similar(g)
-    @test_throws KeyError sg[2]
-    @test_throws KeyError sg[1]
-end
-
-@testset "test insertion" begin
-    g = KronBlock{4}(1 => X, 2 => phase(0.1))
-    g[4] = rot(X, 0.2)
-    @test g[4].theta == 0.2
-
-    g[2] = Y
-    @test mat(g[2]) == mat(Y)
+    @test cache_key(cg) != cache_key(g)
 end
 
 @testset "test iteration" begin
     g = kron(5, 1 => X, 3 => Y, 4 => rot(X, 0.0), 5 => rot(Y, 0.0))
-    for (src, tg) in zip(g, [1 => X, 3 => Y, 4 => rot(X, 0.0), 5 => rot(Y, 0.0)])
+    for (src, tg) in zip(g, [1:1 => X, 3:3 => Y, 4:4 => rot(X, 0.0), 5:5 => rot(Y, 0.0)])
         @test src[1] == tg[1]
         @test src[2] == tg[2]
     end
 
-    for (src, tg) in zip(eachindex(g), [1, 3, 4, 5])
+    for (src, tg) in zip(eachindex(g), [1:1, 3:3, 4:4, 5:5])
         @test src == tg
     end
 end
