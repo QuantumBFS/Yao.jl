@@ -13,7 +13,7 @@ function dump_gate(blk::ConstantGate)
 end
 
 function dump_gate(blk::ControlBlock)
-    pairs = [:($b=>C($c)) for (b,c) in zip(blk.ctrl_locs, blk.ctrl_config)]
+    pairs = [:($b => C($c)) for (b, c) in zip(blk.ctrl_locs, blk.ctrl_config)]
     :($(pairs...), $(blk.locs) => $(dump_gate(blk.content)))
 end
 
@@ -33,14 +33,14 @@ function dump_gate(blk::PutBlock)
     :($(blk.locs) => $(dump_gate(blk.content)))
 end
 
-function dump_gate(blk::KronBlock{N}) where N
-    if any(x->nqubits(x)!=1, subblocks(blk))
+function dump_gate(blk::KronBlock{N}) where {N}
+    if any(x -> nqubits(x) != 1, subblocks(blk))
         error("unsupported multi-qubit in kron while dumping to Yao script.")
     end
     if length(occupied_locs(blk)) == N
-        :(kron($([dump_gate(blk[i]) for i=1:N]...)))
+        :(kron($([dump_gate(blk[i]) for i in 1:N]...)))
     else
-        :(($([:($i=>$(dump_gate(g))) for (i,g) in blk]...),))
+        :(($([:($i => $(dump_gate(g))) for (i, g) in blk]...),))
     end
 end
 
@@ -61,7 +61,7 @@ function dump_gate(blk::CachedBlock)
 end
 
 function dump_gate(blk::Scale)
-    :($(factor(blk))*$(dump_gate(blk.content)))
+    :($(factor(blk)) * $(dump_gate(blk.content)))
 end
 
 function dump_gate(blk::Measure{N,M}) where {M,N}
@@ -84,10 +84,11 @@ function dump_gate(blk::Concentrator)
     :(focus($(blk.locs...)) => $(dump_gate(blk.content)))
 end
 
-yaotoscript(block::AbstractBlock{N}) where N = Expr(:block, :(nqubits=$N), dump_gate(block)) |> rmlines
-function yaotoscript(block::ChainBlock{N}) where N
+yaotoscript(block::AbstractBlock{N}) where {N} =
+    Expr(:block, :(nqubits = $N), dump_gate(block)) |> rmlines
+function yaotoscript(block::ChainBlock{N}) where {N}
     ex = dump_gate(block)
-    Expr(:let, Expr(:block, :(nqubits=$N), :(version="0.6")), ex)
+    Expr(:let, Expr(:block, :(nqubits = $N), :(version = "0.6")), ex)
 end
 yaotofile(filename::String, block) = write(filename, string(yaotoscript(block)))
 

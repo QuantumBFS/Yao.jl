@@ -1,8 +1,8 @@
 using Test, YaoBase, BitBasis, YaoArrayRegister, YaoBlocks, LinearAlgebra
 
 A(i, j) = control(i, j => shift(2π / (1 << (i - j + 1))))
-B(n, i) = chain(n, i == j ? put(i => H) : A(j, i) for j = i:n)
-qft(n) = chain(B(n, i) for i = 1:n)
+B(n, i) = chain(n, i == j ? put(i => H) : A(j, i) for j in i:n)
+qft(n) = chain(B(n, i) for i in 1:n)
 
 struct QFT{N,T} <: PrimitiveBlock{N,T} end
 
@@ -29,7 +29,7 @@ r2 = r |> copy |> circuit(QFT(5))
 
 
 Hadamards(n) = repeat(H, 1:n)
-ControlU(n, m, U) = chain(n + m, control(k, n+1:n+m => matblock(U^(2^(k - 1)))) for k = 1:n)
+ControlU(n, m, U) = chain(n + m, control(k, n+1:n+m => matblock(U^(2^(k - 1)))) for k in 1:n)
 PE(n, m, U) = chain(
     n + m, # total number of the qubits
     concentrate(Hadamards(n), 1:n), # apply H in local scope

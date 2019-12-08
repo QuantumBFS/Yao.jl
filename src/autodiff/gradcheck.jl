@@ -3,7 +3,7 @@ export test_apply_back, test_mat_back
 
 function ng(f, θ, δ = 1e-5)
     res = []
-    for i = 1:length(θ)
+    for i in 1:length(θ)
         push!(res, (f(ireplace(θ, i => θ[i] + δ / 2)) - f(ireplace(θ, i => θ[i] - δ / 2))) / δ)
     end
     cat(res..., dims = 3)
@@ -18,8 +18,8 @@ function mat_back_jacobian(T, block, θ; use_outeradj = false)
     N = size(m, 1)
     jac = zeros(T, size(m)..., length(θ))
     zm = use_outeradj ? OuterProduct(zeros(T, N), zeros(T, N)) : zero(m)
-    for j = 1:size(m, 2)
-        @inbounds for i = 1:size(m, 1)
+    for j in 1:size(m, 2)
+        @inbounds for i in 1:size(m, 1)
             if m[i, j] != 0
                 _setval(zm, i, j, 1)
                 jac[i, j, :] = mat_back(ComplexF64, block, zm)
@@ -41,8 +41,8 @@ function apply_back_jacobian(reg0::ArrayReg{B}, block, θ; kwargs...) where {B}
     m = out.state
     zm = zero(m)
     jac = zeros(eltype(m), size(m)..., length(θ))
-    for j = 1:size(m, 2)
-        @inbounds for i = 1:size(m, 1)
+    for j in 1:size(m, 2)
+        @inbounds for i in 1:size(m, 1)
             if m[i, j] != 0
                 zm[i, j] = 1
                 (in, inδ), col = apply_back((copy(out), ArrayReg{B}(copy(zm))), block; kwargs...)

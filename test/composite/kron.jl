@@ -13,7 +13,7 @@ end
 function rand_kron_test(n; gateset)
     firstn = rand(1:n)
     locs = randperm(n)
-    blocks = [rand(gateset) for i = 1:firstn]
+    blocks = [rand(gateset) for i in 1:firstn]
     seq = [i => each for (i, each) in zip(locs[1:firstn], blocks)]
     mats = Any[i => mat(each) for (i, each) in zip(locs[1:firstn], blocks)]
     append!(mats, [i => IMatrix(2) for i in locs[firstn+1:end]])
@@ -27,12 +27,12 @@ end
 
 
 @testset "test constructors" begin
-    @test_throws LocationConflictError KronBlock{5}(4=>CNOT, 5=>X)
-    @test_throws MethodError kron(3, 1=>X, Y)
-    @test kron(2=>X)(4) == kron(4, 2=>X)
-    @test_throws LocationConflictError kron(10, (2,3)=>CNOT, [3]=>Y)
-    @test kron(10, (2,3)=>CNOT, [5]=>Y) isa KronBlock
-    @test_throws ErrorException kron(5, (5,3)=>CNOT, [3]=>Y)
+    @test_throws LocationConflictError KronBlock{5}(4 => CNOT, 5 => X)
+    @test_throws MethodError kron(3, 1 => X, Y)
+    @test kron(2 => X)(4) == kron(4, 2 => X)
+    @test_throws LocationConflictError kron(10, (2, 3) => CNOT, [3] => Y)
+    @test kron(10, (2, 3) => CNOT, [5] => Y) isa KronBlock
+    @test_throws ErrorException kron(5, (5, 3) => CNOT, [3] => Y)
 end
 
 @testset "test mat" begin
@@ -73,11 +73,11 @@ end
         @test m == mat(g)
     end
 
-    @testset "random dense sequence, n=$i" for i = 2:8
+    @testset "random dense sequence, n=$i" for i in 2:8
         @test random_dense_kron(i; gateset = TestGateSet)
     end
 
-    @testset "random mat sequence, n=$i" for i = 4:8
+    @testset "random mat sequence, n=$i" for i in 4:8
         @test rand_kron_test(i; gateset = TestGateSet)
     end
 end

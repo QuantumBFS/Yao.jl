@@ -106,7 +106,7 @@ function apply_back!(st, block::Scale, collector)
     out, outδ = st
     apply_back!((out, outδ), content(block), collector)
     regscale!(outδ, conj(factor(block)))
-    regscale!(out, 1/factor(block))
+    regscale!(out, 1 / factor(block))
     return (out, outδ)
 end
 

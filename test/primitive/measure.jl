@@ -12,7 +12,7 @@ using StatsBase: mean
     st |> g
 
     @test g.results[1] == 0 ? st.state[end] == 0 : st.state[1] == 0
-    g = Measure(4; locs = (1, 2), resetto=2)
+    g = Measure(4; locs = (1, 2), resetto = 2)
     @test g.postprocess isa ResetTo{BitStr64{2}}
 end
 
@@ -22,7 +22,7 @@ end
     st = rand_state(5; nbatch = 3)
     g = Measure(5; locs = (1, 2), resetto = bit"00011")
     st |> g
-    for k = 1:32
+    for k in 1:32
         if !(st.state[k] ≈ 0.0)
             @test all(BitStr64{5}(k - 1)[1:2] .== 1)
         end
@@ -83,8 +83,8 @@ end
 
     # measure
     reg2 = reg |> copy
-    res = measure(op, reg2, 2:6; nshots=100)
-    @test size(res) == (100,32)
+    res = measure(op, reg2, 2:6; nshots = 100)
+    @test size(res) == (100, 32)
     @test reg ≈ reg2
 
     # measure_resetto!

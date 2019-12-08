@@ -143,7 +143,8 @@ Returns the intrinsic parameters of node `block`, default is an empty tuple.
 
 Set the parameters of `block`.
 """
-@interface setiparams!(x::AbstractBlock, args...) = niparams(x) == length(args) == 0 ? x : throw(NotImplementedError(:setiparams!, (x, args...)))
+@interface setiparams!(x::AbstractBlock, args...) =
+    niparams(x) == length(args) == 0 ? x : throw(NotImplementedError(:setiparams!, (x, args...)))
 
 setiparams!(x::AbstractBlock, it::Union{Tuple,AbstractArray,Base.Generator}) = setiparams!(x, it...)
 setiparams!(x::AbstractBlock, a::Number, xs::Number...) =
@@ -285,7 +286,7 @@ Pop the first [`nparameters`](@ref) parameters of list, map them with a function
 `f`, then dispatch them to the block tree `block`. See also [`dispatch!`](@ref).
 """
 @interface function popdispatch!(f::Function, x::AbstractBlock, list::Vector)
-    setiparams!(f, x, (popfirst!(list) for k = 1:niparams(x))...)
+    setiparams!(f, x, (popfirst!(list) for k in 1:niparams(x))...)
     for each in subblocks(x)
         popdispatch!(f, each, list)
     end
@@ -299,7 +300,7 @@ Pop the first [`nparameters`](@ref) parameters of list, then dispatch them to
 the block tree `block`. See also [`dispatch!`](@ref).
 """
 @interface function popdispatch!(x::AbstractBlock, list::Vector)
-    setiparams!(x, (popfirst!(list) for k = 1:niparams(x))...)
+    setiparams!(x, (popfirst!(list) for k in 1:niparams(x))...)
     for each in subblocks(x)
         popdispatch!(each, list)
     end
@@ -308,8 +309,8 @@ end
 
 render_params(r::AbstractBlock, params) = params
 render_params(r::AbstractBlock, params::Symbol) = render_params(r, Val(params))
-render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i = 1:niparams(r))
-render_params(r::AbstractBlock, ::Val{:zero}) = (zero(iparams_eltype(r)) for i = 1:niparams(r))
+render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i in 1:niparams(r))
+render_params(r::AbstractBlock, ::Val{:zero}) = (zero(iparams_eltype(r)) for i in 1:niparams(r))
 
 """
     HasParameters{X} <: SimpleTraits.Trait

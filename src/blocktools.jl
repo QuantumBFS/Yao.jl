@@ -12,7 +12,8 @@ function parse_block end
 
 parse_block(n::Int, x::Function) = x(n)
 
-parse_block(n::Int, ex) = throw(Meta.ParseError("cannot parse expression $ex, expect a pair or quantum block"))
+parse_block(n::Int, ex) =
+    throw(Meta.ParseError("cannot parse expression $ex, expect a pair or quantum block"))
 
 function parse_block(n::Int, x::AbstractBlock{N}) where {N}
     n == N || throw(ArgumentError("number of qubits does not match: $x"))
@@ -20,9 +21,9 @@ function parse_block(n::Int, x::AbstractBlock{N}) where {N}
 end
 
 # if it is a single qubit pair, parse it to put block
-parse_block(n::Int, x::Pair{Int, <:AbstractBlock}) = error("got $x, do you mean put($x)?")
+parse_block(n::Int, x::Pair{Int,<:AbstractBlock}) = error("got $x, do you mean put($x)?")
 # infer the number of qubits if the inner function was curried
-parse_block(n::Int, x::Pair{Int, <:Function}) = error("got $x, do you mean put($x)?")
+parse_block(n::Int, x::Pair{Int,<:Function}) = error("got $x, do you mean put($x)?")
 
 # error if it is not single qubit case
 function parse_block(n::Int, x::Pair)
@@ -89,7 +90,7 @@ The return value is a pair of `gψ=>gparams`, with `gψ` the gradient of input s
 """
 @interface function expect(op::AbstractBlock, dm::DensityMatrix{B}) where {B}
     mop = mat(op)
-    [tr(view(dm.state, :, :, i) * mop) for i = 1:B]
+    [tr(view(dm.state, :, :, i) * mop) for i in 1:B]
 end
 
 expect(op::AbstractBlock, reg::AbstractRegister{1}) = reg' * apply!(copy(reg), op)
@@ -110,7 +111,7 @@ function expect(op::AbstractBlock, reg::AbstractRegister{B}) where {B}
         Na = size(reg.state, 1)
         C = conj!(reshape(ket.state.parent, :, B, Na))
         A = reshape(reg.state.parent, :, B, Na)
-        dropdims(sum(A .* C, dims = (1,3)), dims = (1,3)) |> conj
+        dropdims(sum(A .* C, dims = (1, 3)), dims = (1, 3)) |> conj
     end
 end
 
@@ -132,11 +133,7 @@ end
 
 expect(op::Scale, reg::AbstractRegister{1}) = invoke(expect, Tuple{Scale,AbstractRegister}, op, reg)
 
-function YaoBase.measure(
-    op::AbstractBlock,
-    reg::AbstractRegister,
-    locs::AllLocs;
-    kwargs...) where {B}
+function YaoBase.measure(op::AbstractBlock, reg::AbstractRegister, locs::AllLocs; kwargs...) where {B}
     measure(eigen!(mat(op) |> Matrix), reg, locs; kwargs...)
 end
 
@@ -145,7 +142,8 @@ function YaoBase.measure!(
     op::AbstractBlock,
     reg::AbstractRegister,
     locs::AllLocs;
-    kwargs...) where {B}
+    kwargs...,
+) where {B}
     measure!(postprocess, eigen!(mat(op) |> Matrix), reg, locs; kwargs...)
 end
 
@@ -154,26 +152,23 @@ function YaoBase.measure!(
     op::Eigen,
     reg::AbstractRegister,
     locs::AllLocs;
-    kwargs...)
+    kwargs...,
+)
     E, V = op
-    reg.state = V'*reg.state
+    reg.state = V' * reg.state
     res = measure!(postprocess, ComputationalBasis(), reg, locs; kwargs...)
     if postprocess isa YaoBase.NoPostProcess
-        reg.state = V*reg.state
+        reg.state = V * reg.state
     end
-    E[Int64.(res) .+ 1]
+    E[Int64.(res).+1]
 end
 
-function YaoBase.measure(
-    op::Eigen,
-    reg::AbstractRegister,
-    locs::AllLocs;
-    kwargs...)
+function YaoBase.measure(op::Eigen, reg::AbstractRegister, locs::AllLocs; kwargs...)
     E, V = op
-    reg.state = V'*reg.state
+    reg.state = V' * reg.state
     res = measure(ComputationalBasis(), reg, locs; kwargs...)
-    reg.state = V*reg.state
-    E[Int64.(res) .+ 1]
+    reg.state = V * reg.state
+    E[Int64.(res).+1]
 end
 
 # obtaining Dense Matrix of a block

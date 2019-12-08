@@ -113,8 +113,8 @@ end
 end
 
 AA(i, j) = control(i, j => shift(2π / (1 << (i - j + 1))))
-B(n, i) = chain(n, i == j ? put(i => H) : AA(j, i) for j = i:n)
-qft(n) = chain(B(n, i) for i = 1:n)
+B(n, i) = chain(n, i == j ? put(i => H) : AA(j, i) for j in i:n)
+qft(n) = chain(B(n, i) for i in 1:n)
 
 @testset "system test" begin
     nbit = 4

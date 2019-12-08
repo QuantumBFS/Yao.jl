@@ -128,8 +128,8 @@ function u1mat(nbits::Int, U1::SDMatrix, ibit::Int)
     nzval = Vector{eltype(U1)}(undef, NNZ)
 
     mat = SparseMatrixCSC(N, N, colptr, rowval, nzval)
-    for j = 0:step_2:N-step
-        @inbounds @simd for i = j+1:j+step
+    for j in 0:step_2:N-step
+        @inbounds @simd for i in j+1:j+step
             u1ij!(mat, i, i + step, a, b, c, d)
         end
     end
@@ -152,7 +152,7 @@ end
 end
 
 @inline function unij!(mat::SparseMatrixCSC, locs, U::SDMatrix)
-    @simd for j = 1:size(U, 2)
+    @simd for j in 1:size(U, 2)
         @inbounds setcol!(mat, locs[j], locs, view(U, :, j))
     end
     csc
@@ -224,9 +224,9 @@ function cunmat(
     ns = diff(U.colptr) |> autostatic
     Ns = ones(Int, N)
     controldo(ic) do i
-        @inbounds Ns[locs_raw .+ i] = ns
+        @inbounds Ns[locs_raw.+i] = ns
     end
-    @inbounds @simd for j = 1:N
+    @inbounds @simd for j in 1:N
         colptr[j+1] = colptr[j] + Ns[j]
         if Ns[j] == 1
             rowval[colptr[j]] = j
@@ -241,7 +241,7 @@ function cunmat(
 end
 
 @inline function unij!(mat::SparseMatrixCSC, locs, U::SDSparseMatrixCSC)
-    @simd for j = 1:size(U, 2)
+    @simd for j in 1:size(U, 2)
         rows, vals = getcol(U, j)
         @inbounds setcol!(mat, locs[j], view(locs, rows), vals)
     end

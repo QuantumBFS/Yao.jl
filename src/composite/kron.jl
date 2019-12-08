@@ -2,7 +2,7 @@ using YaoBase
 using TupleTools
 export KronBlock, kron
 
-const KronLocT = Union{Int, UnitRange{Int}}
+const KronLocT = Union{Int,UnitRange{Int}}
 
 """
     KronBlock{N, T, MT<:AbstractBlock} <: CompositeBlock{N, T}
@@ -13,14 +13,18 @@ struct KronBlock{N,M,MT<:NTuple{M,Any}} <: CompositeBlock{N}
     locs::NTuple{M,UnitRange{Int}}
     blocks::MT
 
-    function KronBlock{N,M,MT}(locs::NTuple{M, UnitRange{Int}}, blocks::MT) where {N,M,MT<:NTuple{M,AbstractBlock}}
-        perm = TupleTools.sortperm(locs, by=first)
+    function KronBlock{N,M,MT}(
+        locs::NTuple{M,UnitRange{Int}},
+        blocks::MT,
+    ) where {N,M,MT<:NTuple{M,AbstractBlock}}
+        perm = TupleTools.sortperm(locs, by = first)
         locs = TupleTools.permute(locs, perm)
         blocks = TupleTools.permute(blocks, perm)
         @assert_locs_safe N locs
 
         for (each, b) in zip(locs, blocks)
-            length(each) != nqubits(b) && throw(LocationConflictError("locs $locs is inconsistent with target block $b"))
+            length(each) != nqubits(b) &&
+            throw(LocationConflictError("locs $locs is inconsistent with target block $b"))
         end
         return new{N,M,typeof(blocks)}(locs, blocks)
     end
@@ -100,8 +104,8 @@ function Base.kron(total::Int, blocks::AbstractBlock...)
 end
 
 function _render_kronloc(l)
-    for i=1:length(l)-1
-        l[i+1] == l[i]+1 || error("Non-Contiguous location in Kron!")
+    for i in 1:length(l)-1
+        l[i+1] == l[i] + 1 || error("Non-Contiguous location in Kron!")
     end
     l[1]:l[end]
 end
@@ -145,10 +149,12 @@ cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
 color(::Type{T}) where {T<:KronBlock} = :cyan
 
 function mat(::Type{T}, k::KronBlock{N,M}) where {T,N,M}
-    ntrail = N-last(last(k.locs))  # number of trailing bits
-    num_bit_list = map(i->first(k.locs[i])-(i>1 ? last(k.locs[i-1]) : 0)-1, 1:M)
-    return reduce(Iterators.reverse(zip(subblocks(k), num_bit_list)),
-                                init = IMatrix{1 << ntrail,T}()) do x, y
+    ntrail = N - last(last(k.locs))  # number of trailing bits
+    num_bit_list = map(i -> first(k.locs[i]) - (i > 1 ? last(k.locs[i-1]) : 0) - 1, 1:M)
+    return reduce(
+        Iterators.reverse(zip(subblocks(k), num_bit_list)),
+        init = IMatrix{1 << ntrail,T}(),
+    ) do x, y
         kron(x, mat(T, y[1]), IMatrix(1 << y[2]))
     end
 end
@@ -199,8 +205,7 @@ function Base.:(==)(lhs::KronBlock{N}, rhs::KronBlock{N}) where {N}
     return all(lhs.locs .== rhs.locs) && all(lhs.blocks .== rhs.blocks)
 end
 
-Base.adjoint(blk::KronBlock{N}) where {N} =
-    KronBlock{N}(blk.locs, map(adjoint, blk.blocks))
+Base.adjoint(blk::KronBlock{N}) where {N} = KronBlock{N}(blk.locs, map(adjoint, blk.blocks))
 
 YaoBase.ishermitian(k::KronBlock) = all(ishermitian, k.blocks) || ishermitian(mat(k))
 YaoBase.isunitary(k::KronBlock) = all(isunitary, k.blocks) || isunitary(mat(k))

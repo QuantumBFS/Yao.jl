@@ -1,6 +1,6 @@
 @inline function adjunij!(mat::AbstractMatrix, locs, U::Matrix)
-    for j = 1:size(U, 2)
-        for i = 1:size(U, 2)
+    for j in 1:size(U, 2)
+        for i in 1:size(U, 2)
             @inbounds U[i, j] += mat[locs[i], locs[j]]
         end
     end
@@ -8,10 +8,10 @@
 end
 
 @inline function adjunij!(mat::AbstractMatrix, locs, U::SparseMatrixCSC)
-    @inbounds for j = 1:size(U, 2)
+    @inbounds for j in 1:size(U, 2)
         S = U.colptr[j]
         E = U.colptr[j+1] - 1
-        for ii = S:E
+        for ii in S:E
             @inbounds U.nzval[ii] += mat[locs[U.rowval[ii]], locs[j]]
         end
     end
@@ -24,7 +24,7 @@ end
 end
 
 @inline function adjunij!(mat::AbstractMatrix, locs, U::Diagonal)
-    @inbounds for i = 1:size(U, 1)
+    @inbounds for i in 1:size(U, 1)
         li = locs[i]
         U.diag[i] += mat[li, li]
     end
@@ -37,7 +37,7 @@ end
 end
 
 @inline function adjunij!(mat::AbstractMatrix, locs, U::PermMatrix)
-    for i = 1:size(U, 1)
+    for i in 1:size(U, 1)
         @inbounds U.vals[i] += mat[locs[i], locs[U.perm[i]]]
     end
     return U
@@ -81,8 +81,8 @@ function adju1mat(adjy, nbit::Int, U1::SDMatrix, ibit::Int)
     adjy = projection(YaoBlocks._initialize_output(nbit, 0, U1), adjy)
     adjU = _render_adjU(U1)
 
-    for j = 0:step_2:1<<nbit-step
-        @inbounds @simd for i = j+1:j+step
+    for j in 0:step_2:1<<nbit-step
+        @inbounds @simd for i in j+1:j+step
             adju1ij!(adjy, i, i + step, adjU)
         end
     end
