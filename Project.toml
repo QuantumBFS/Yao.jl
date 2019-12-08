@@ -31,7 +31,7 @@ SimpleTraits = "0.9"
 StaticArrays = "0.12"
 StatsBase = "0.32"
 YaoArrayRegister = "0.5.0"
-YaoBase = "0.12"
+YaoBase = "0.13"
 julia = "1"
 
 [extras]
