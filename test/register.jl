@@ -158,10 +158,10 @@ end
 end
 
 @testset "transpose copy" begin
-    reg = rand_state(5; nbatch=10)
+    reg = rand_state(5; nbatch = 10)
     reg1 = copy(reg)
-    reg2 = focus!(copy(reg), (3,5))
-    reg3 = relax!(copy(reg2), (3,5))
+    reg2 = focus!(copy(reg), (3, 5))
+    reg3 = relax!(copy(reg2), (3, 5))
     reg4 = oneto(reg1, 3)
     @test reg1.state isa Transpose
     @test reg2.state isa Transpose
@@ -175,9 +175,9 @@ end
 @testset "collapseto" begin
     reg = rand_state(4)
     reg2 = copy(reg)
-    focus!(reg, (4,2))
+    focus!(reg, (4, 2))
     collapseto!(reg, bit"01")
-    relax!(reg, (4,2), to_nactive=4)
+    relax!(reg, (4, 2), to_nactive = 4)
     instruct!(reg2, Const.P0, (2,))
     instruct!(reg2, Const.P1, (4,))
     normalize!(reg2)

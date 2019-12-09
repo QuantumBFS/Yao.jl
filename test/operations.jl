@@ -19,10 +19,12 @@ end
     reg4 = (reg1 + reg2)'
 
     @test statevec(reg3) == onehot(ComplexF64, nbit, 4) + onehot(ComplexF64, nbit, 0)
-    @test statevec(reg3 |> normalize!) == (onehot(ComplexF64, nbit, 4) +
-                                           onehot(ComplexF64, nbit, 0)) / sqrt(2)
-    @test statevec(reg4 |> normalize!) == (onehot(ComplexF64, nbit, 4) +
-                                           onehot(ComplexF64, nbit, 0))' / sqrt(2)
+    @test statevec(
+        reg3 |> normalize!,
+    ) == (onehot(ComplexF64, nbit, 4) + onehot(ComplexF64, nbit, 0)) / sqrt(2)
+    @test statevec(
+        reg4 |> normalize!,
+    ) == (onehot(ComplexF64, nbit, 4) + onehot(ComplexF64, nbit, 0))' / sqrt(2)
     @test (reg1 + reg2 - reg1) == reg2
     @test reg1' + reg2' - reg1' == reg2'
     @test isnormalized(reg4)
@@ -57,28 +59,28 @@ end
     focus!(bra, 2)
     @test_throws ErrorException bra' * ket
 
-    reg1 = rand_state(5; nbatch=10)
-    reg2 = rand_state(5; nbatch=10)
+    reg1 = rand_state(5; nbatch = 10)
+    reg2 = rand_state(5; nbatch = 10)
     @test reg1' * reg2 ≈ reg1' .* reg2
-    reg1 = rand_state(2; nbatch=10)
-    reg2 = rand_state(5; nbatch=10)
+    reg1 = rand_state(2; nbatch = 10)
+    reg2 = rand_state(5; nbatch = 10)
     focus!(reg2, 2:3)
     @test all(reg1' * reg2 .≈ reg1' .* reg2)
 end
 
 @testset "inplace funcs" begin
     for nbatch in [1, 10]
-        reg = rand_state(5; nbatch=nbatch)
+        reg = rand_state(5; nbatch = nbatch)
         reg0 = copy(reg)
-        @test regscale!(reg, 0.3) ≈ 0.3*reg0
-        reg1 = rand_state(5; nbatch=nbatch)
-        reg2 = rand_state(5; nbatch=nbatch)
+        @test regscale!(reg, 0.3) ≈ 0.3 * reg0
+        reg1 = rand_state(5; nbatch = nbatch)
+        reg2 = rand_state(5; nbatch = nbatch)
         reg10 = copy(reg1)
         regsub!(reg1, reg2)
         @test reg1 ≈ reg10 - reg2
 
-        reg1 = rand_state(5; nbatch=nbatch)
-        reg2 = rand_state(5; nbatch=nbatch)
+        reg1 = rand_state(5; nbatch = nbatch)
+        reg2 = rand_state(5; nbatch = nbatch)
         reg10 = copy(reg1)
         regadd!(reg1, reg2)
         @test reg1 ≈ reg10 + reg2

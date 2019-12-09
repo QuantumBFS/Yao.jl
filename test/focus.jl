@@ -25,8 +25,8 @@ end
     @test copy(reg0) |> focus!(1, 4, 2) |> focus!(2) |> relax!(2, to_nactive = 3) |>
           relax!(1, 4, 2) == reg0
     reg = focus!(copy(reg0), 2:3)
-    @test reg |> probs ≈ hcat([sum(abs2.(reshape(reg.state[i, :], :, 3)), dims = 1)[1, :]
-        for i in 1:4]...)'
+    @test reg |>
+          probs ≈ hcat([sum(abs2.(reshape(reg.state[i, :], :, 3)), dims = 1)[1, :] for i in 1:4]...)'
     @test size(state(reg)) == (2^2, 2^3 * 3)
     @test nactive(reg) == 2
     @test nremain(reg) == 3
@@ -40,7 +40,7 @@ end
     @test reg |> nactive == 3
     @test copy(reg) |> addbits!(2) |> nactive == 5
     reg2 = copy(reg) |> addbits!(2) |> focus!(4, 5)
-    @test (reg2 |> measure_remove!; reg2) |> relax!(to_nactive = nqubits(reg2)) ≈ reg
+    @test (measure!(RemoveMeasured(), reg2); reg2) |> relax!(to_nactive = nqubits(reg2)) ≈ reg
 
     @test insert_qubits!(copy(reg), 2; nqubits = 2) |> nactive == 5
 end

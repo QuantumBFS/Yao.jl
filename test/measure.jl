@@ -14,25 +14,33 @@ end
 
 @testset "measure and resetto/remove" begin
     reg = rand_state(4)
-    res = measure_resetto!(reg, (4,))
+    res = measure!(YaoBase.ResetTo(0), reg, (4,))
     @test isnormalized(reg)
     result = measure(reg; nshots = 10)
     @test all(result .< 8)
 
     reg = rand_state(6) |> focus!(1, 4, 3)
     reg0 = copy(reg)
-    res = measure_remove!(reg)
+    res = measure!(YaoBase.RemoveMeasured(), reg)
+    @test nqubits(reg) == 3
     select(reg0, res)
     @test select(reg0, res) |> normalize! ≈ reg
 
     r = rand_state(10)
     r1 = copy(r) |> focus!(1, 4, 3)
-    res = measure_remove!(r, (1, 4, 3))
+    res = measure!(YaoBase.RemoveMeasured(), r, (1, 4, 3))
     r2 = select(r1, res)
     r2 = relax!(r2, (); to_nactive = nqubits(r2))
     @test normalize!(r2) ≈ r
 
     reg = rand_state(6, nbatch = 5) |> focus!((1:5)...)
-    measure_resetto!(reg, 1)
+    measure!(YaoBase.ResetTo(0), reg, 1)
     @test nactive(reg) == 5
+end
+
+@testset "fix measure kwargs error" begin
+    r = rand_state(10)
+    @test length(measure(r; nshots = 10)) == 10
+    @test_throws MethodError measure!(r; nshots = 10)
+    @test_throws MethodError measure!(YaoBase.RemoveMeasured(), r; nshots = 10)
 end

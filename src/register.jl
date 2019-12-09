@@ -2,42 +2,41 @@ using YaoBase, BitBasis
 import BitBasis: BitStr, BitStr64
 
 export ArrayReg,
-       AdjointArrayReg,
-       ArrayRegOrAdjointArrayReg,
-       transpose_storage,
+    AdjointArrayReg,
+    ArrayRegOrAdjointArrayReg,
+    transpose_storage,
     # YaoBase
-       nqubits,
-       nactive,
-       nremain,
-       nbatch,
-       viewbatch,
-       addbits!,
-       insert_qubits!,
-       datatype,
-       probs,
-       reorder!,
-       invorder!,
-       collapseto!,
-       fidelity,
-       tracedist,
+    nqubits,
+    nactive,
+    nremain,
+    nbatch,
+    viewbatch,
+    addbits!,
+    insert_qubits!,
+    datatype,
+    probs,
+    reorder!,
+    invorder!,
+    collapseto!,
+    fidelity,
+    tracedist,
     # YaoBase deprecated
-       addbit!,
-       reset!,
-       measure_reset!,
+    addbit!,
+    reset!,
     # additional
-       state,
-       statevec,
-       relaxedvec,
-       rank3,
+    state,
+    statevec,
+    relaxedvec,
+    rank3,
     # BitBasis
-       @bit_str,
-       hypercubic,
+    @bit_str,
+    hypercubic,
     # initialization
-       product_state,
-       zero_state,
-       rand_state,
-       uniform_state,
-       oneto
+    product_state,
+    zero_state,
+    rand_state,
+    uniform_state,
+    oneto
 
 """
     ArrayReg{B, T, MT <: AbstractMatrix{T}} <: AbstractRegister{B}
@@ -412,7 +411,7 @@ rand_state(n::Int; kwargs...) = rand_state(ComplexF64, n; kwargs...)
 
 function rand_state(::Type{T}, n::Int; nbatch::Int = 1, no_transpose_storage::Bool = false) where {T}
     raw = nbatch == 1 || no_transpose_storage ? randn(T, 1 << n, nbatch) :
-          transpose(randn(T, nbatch, 1 << n))
+        transpose(randn(T, nbatch, 1 << n))
     return normalize!(ArrayReg{nbatch}(raw))
 end
 
@@ -442,7 +441,7 @@ function uniform_state(
     no_transpose_storage::Bool = false,
 ) where {T}
     raw = nbatch == 1 || no_transpose_storage ? ones(T, 1 << n, nbatch) :
-          transpose(ones(T, nbatch, 1 << n))
+        transpose(ones(T, nbatch, 1 << n))
     normalize!(ArrayReg{nbatch}(raw))
 end
 
@@ -452,7 +451,8 @@ end
 Returns an `ArrayReg` with `1:n` qubits activated.
 """
 oneto(r::ArrayReg{B}, n::Int = nqubits(r)) where {B} = ArrayReg{B}(reshape(copy(r.state), 1 << n, :))
-oneto(r::ArrayReg{B,T,<:Transpose}, n::Int = nqubits(r)) where {B,T} = transpose_storage(ArrayReg{B}(reshape(r.state, 1 << n, :)))
+oneto(r::ArrayReg{B,T,<:Transpose}, n::Int = nqubits(r)) where {B,T} =
+    transpose_storage(ArrayReg{B}(reshape(r.state, 1 << n, :)))
 
 """
     oneto(n::Int) -> f(register)

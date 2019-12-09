@@ -1,5 +1,5 @@
 using StatsBase, StaticArrays, BitBasis, Random
-export measure, measure!, measure_remove!, measure_resetto!, select, select!
+export measure, measure!, select, select!
 
 function _measure(rng::AbstractRNG, pl::AbstractVector, nshots::Int)
     N = log2i(length(pl))
@@ -16,29 +16,30 @@ function _measure(rng::AbstractRNG, pl::AbstractMatrix, nshots::Int)
 end
 
 YaoBase.measure(
-    rng::AbstractRNG,
     ::ComputationalBasis,
     reg::ArrayReg{1},
     ::AllLocs;
     nshots::Int = 1,
+    rng::AbstractRNG = Random.GLOBAL_RNG,
 ) = _measure(rng, reg |> probs, nshots)
 
 function YaoBase.measure(
-    rng::AbstractRNG,
     ::ComputationalBasis,
     reg::ArrayReg{B},
     ::AllLocs;
     nshots::Int = 1,
+    rng::AbstractRNG = Random.GLOBAL_RNG,
 ) where {B}
     pl = dropdims(sum(reg |> rank3 .|> abs2, dims = 2), dims = 2)
     return _measure(rng, pl, nshots)
 end
 
-function YaoBase.measure_remove!(
-    rng::AbstractRNG,
+function YaoBase.measure!(
+    ::YaoBase.RemoveMeasured,
     ::ComputationalBasis,
     reg::ArrayReg{B},
-    ::AllLocs,
+    ::AllLocs;
+    rng::AbstractRNG = Random.GLOBAL_RNG,
 ) where {B}
     state = reg |> rank3
     nstate = similar(reg.state, 1 << nremain(reg), B)
@@ -55,14 +56,15 @@ function YaoBase.measure_remove!(
 end
 
 function YaoBase.measure!(
-    rng::AbstractRNG,
+    ::YaoBase.NoPostProcess,
     ::ComputationalBasis,
     reg::ArrayReg{B},
-    ::AllLocs,
+    ::AllLocs;
+    rng::AbstractRNG = Random.GLOBAL_RNG,
 ) where {B}
     state = reg |> rank3
     nstate = zero(state)
-    res = measure_remove!(rng, reg)
+    res = measure!(RemoveMeasured(), reg; rng = rng)
     _nstate = reshape(reg.state, :, B)
     for ib in 1:B
         @inbounds nstate[Int64(res[ib])+1, :, ib] .= view(_nstate, :, ib)
@@ -71,18 +73,18 @@ function YaoBase.measure!(
     return res
 end
 
-function YaoBase.measure_resetto!(
-    rng::AbstractRNG,
+function YaoBase.measure!(
+    rst::YaoBase.ResetTo,
     ::ComputationalBasis,
     reg::ArrayReg{B},
     ::AllLocs;
-    config::Integer = 0,
+    rng::AbstractRNG = Random.GLOBAL_RNG,
 ) where {B}
     state = rank3(reg)
     M, N, B1 = size(state)
     nstate = zero(state)
-    res = measure_remove!(rng, reg)
-    nstate[Int(config)+1, :, :] = reshape(reg.state, :, B)
+    res = measure!(YaoBase.RemoveMeasured(), reg; rng = rng)
+    nstate[Int(rst.x)+1, :, :] = reshape(reg.state, :, B)
     reg.state = reshape(nstate, M, N * B)
     return res
 end
