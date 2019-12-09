@@ -1,6 +1,3 @@
-using Pkg
-pkg"add YaoBlocks#master YaoArrayRegister#master YaoBase#master BitBasis#master"
-
 using Documenter
 using Yao
 using Yao: YaoBlocks, YaoArrayRegister, YaoBase, YaoSym
