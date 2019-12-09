@@ -52,7 +52,7 @@ function YaoBase.measure!(
         res[ib] = ires
     end
     reg.state = reshape(nstate, 1, :)
-    return B==1 ? res[] : res
+    return B == 1 ? res[] : res
 end
 
 function YaoBase.measure!(
