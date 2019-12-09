@@ -74,11 +74,13 @@ attach_notebook_badge(root, name) = str->attach_notebook_badge(root, name, str)
 function attach_notebook_badge(root, name, str)
     mybinder_badge_url = "https://mybinder.org/badge_logo.svg"
     nbviewer_badge_url = "https://img.shields.io/badge/show-nbviewer-579ACA.svg"
+    download_badge_url = "https://img.shields.io/badge/download-project-orange"
     mybinder = "[![]($mybinder_badge_url)](@__BINDER_ROOT_URL__/generated/$root/$name/main.ipynb)"
     nbviewer = "[![]($nbviewer_badge_url)](@__NBVIEWER_ROOT_URL__/generated/$root/$name/main.ipynb)"
+    download = "[![]($download_badge_url)](https://github.com/QuantumBFS/tutorials/tree/gh-pages/dev/generated/$root/$name)"
 
     markdown_only(x) = "#md # " * x
-    return join(map(markdown_only, (mybinder, nbviewer)), "\n") * "\n\n" * str
+    return join(map(markdown_only, (mybinder, nbviewer, download)), "\n") * "\n\n" * str
 end
 
 function build_tutorial(root, name)
