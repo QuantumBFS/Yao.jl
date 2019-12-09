@@ -14,15 +14,53 @@ future, before quantum computer being used in large-scale.
 
 ## Installation
 
-Yao is a [Julia language package](https://julialang.org/), to install Yao, [you need to install Julia first](https://julialang.org/downloads/).
+## Try your first Yao program
 
-After you have Julia installed, simply open [Julia's interactive session](https://docs.julialang.org/en/v1/manual/getting-started/) and type `]` and then type the following:
+A 3 line [Quantum Fourier Transformation](https://quantumbfs.github.io/Yao.jl/latest/examples/QFT/) with [Quantum Blocks](https://quantumbfs.github.io/Yao.jl/latest/man/blocks/):
 
 ```julia
-(v1.1) pkg> add Yao
+A(i, j) = control(i, j=>shift(2π/(1<<(i-j+1))))
+B(n, k) = chain(n, j==k ? put(k=>H) : A(j, k) for j in k:n)
+qft(n) = chain(B(n, k) for k in 1:n)
 ```
 
-If you have problem with installation, please [file us an issue](https://github.com/QuantumBFS/Yao.jl/issues/new)!
+## Installation
+
+Yao is a &nbsp;
+<a href="https://julialang.org">
+    <img src="https://julialang.org/favicon.ico" width="16em">
+    Julia Language &nbsp;
+</a> package. To install Yao,
+please <a href="https://docs.julialang.org/en/v1/manual/getting-started/">open
+    Julia's interactive session (known as REPL)</a> and press <kbd>]</kbd> key in the REPL to use the package mode, then type the following command
+
+To install **stable** release
+
+```julia
+add Yao
+```
+
+To install CUDA version
+
+```
+add CuYao
+```
+
+To install **current master**
+
+```julia
+add Yao#master
+```
+
+A [Python binding of Yao](https://github.com/QuantumBFS/yao-python) is also provided via [pyjulia](https://github.com/JuliaPy/pyjulia). You can
+install it via the following command after you have [Julia language compiler installed](https://julialang.org/downloads/).
+However, to use the full feature and power of Yao, we **highly recommend you to use it from Julia language natively**.
+
+```sh
+pip install yao-framework
+```
+
+If you have problem to install the package, please [file us an issue](https://github.com/QuantumBFS/Yao.jl/issues/new).
 
 ## Getting Started
 
