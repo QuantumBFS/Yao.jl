@@ -81,11 +81,11 @@ end
     # ignore identity matrix.
 end
 
-@testset "mat concentrate" begin
+@testset "mat subroutine" begin
     Random.seed!(5)
     @test test_mat_back(
         ComplexF64,
-        concentrate(3, control(2, 2, 1 => shift(0.0)), (3, 1)),
+        subroutine(3, control(2, 2, 1 => shift(0.0)), (3, 1)),
         0.5;
         δ = 1e-5,
     )

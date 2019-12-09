@@ -2,7 +2,7 @@ using Test, YaoBlocks, YaoArrayRegister
 
 reg = rand_state(10)
 block = kron(4, 2 => X)
-c = concentrate(10, block, [1, 3, 9, 2])
+c = subroutine(10, block, [1, 3, 9, 2])
 @test nqubits(c) == 10
 @test nactive(c) == 4
 @test isunitary(c) == true
@@ -16,7 +16,7 @@ blk = kron(4, 2 => Rx(0.3))
 @test apply!(rand_state(12, nbatch = 10) |> focus!(Tuple(1:10)...), c) |> nactive == 10
 
 @testset "test repeat" begin
-    c = concentrate(8, repeat(5, H), 1:5)
+    c = subroutine(8, repeat(5, H), 1:5)
     r = rand_state(8)
     r1 = copy(r) |> c
     r2 = copy(r) |> repeat(8, H, 1:5)
@@ -24,6 +24,6 @@ blk = kron(4, 2 => Rx(0.3))
 end
 
 @testset "mat" begin
-    cc = concentrate(5, kron(X, X), (1, 3))
+    cc = subroutine(5, kron(X, X), (1, 3))
     @test applymatrix(cc) ≈ mat(cc)
 end

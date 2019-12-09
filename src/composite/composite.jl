@@ -82,7 +82,7 @@ include("kron.jl")
 include("control.jl")
 include("put_block.jl")
 include("repeated.jl")
-include("concentrator.jl")
+include("subroutine.jl")
 include("reduce.jl")
 include("pauli_strings.jl")
 

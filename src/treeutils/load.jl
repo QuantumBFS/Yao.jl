@@ -75,7 +75,7 @@ function parse_ex(ex, info::ParseInfo)
         :(+($(args...))) => :(+($(parse_ex.(args, Ref(info))...)))
         :(focus($(exloc...)) => $g) => begin
             loc = render_loc((exloc...,), info.nbit)
-            :(concentrate($(info.nbit), $(parse_ex(g, ParseInfo(length(loc), info.version))), $loc))
+            :(subroutine($(info.nbit), $(parse_ex(g, ParseInfo(length(loc), info.version))), $loc))
         end
         :(begin
             $(cargs...)

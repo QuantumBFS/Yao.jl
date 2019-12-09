@@ -20,8 +20,8 @@ end
     include("repeated.jl")
 end
 
-@testset "test concentrate" begin
-    include("concentrator.jl")
+@testset "test subroutine" begin
+    include("subroutine.jl")
 end
 
 @testset "test tag" begin

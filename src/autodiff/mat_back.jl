@@ -46,7 +46,7 @@ function mat_back!(::Type{T}, rb::PutBlock{N,C,RT}, adjy, collector) where {T,N,
     mat_back!(T, content(rb), adjm, collector)
 end
 
-function mat_back!(::Type{T}, rb::Concentrator{N}, adjy, collector) where {T,N}
+function mat_back!(::Type{T}, rb::Subroutine{N}, adjy, collector) where {T,N}
     nparameters(rb) == 0 && return collector
     adjm = adjcunmat(adjy, N, (), (), mat(T, content(rb)), rb.locs)
     mat_back!(T, content(rb), adjm, collector)

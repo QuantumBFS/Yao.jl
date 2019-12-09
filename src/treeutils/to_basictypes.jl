@@ -21,13 +21,13 @@ function to_basictypes(block::RepeatedBlock{N}) where {N}
 end
 
 to_basictypes(block::CachedBlock) = content(block)
-function to_basictypes(block::Concentrator{N,<:PrimitiveBlock}) where {N}
+function to_basictypes(block::Subroutine{N,<:PrimitiveBlock}) where {N}
     put(N, block.locs => content(block))
 end
-function to_basictypes(block::Concentrator{N}) where {N}
+function to_basictypes(block::Subroutine{N}) where {N}
     to_basictypes(map_address(content(block), AddressInfo(N, [block.locs...])))
 end
-function to_basictypes(block::Concentrator{N,<:Measure}) where {N}
+function to_basictypes(block::Subroutine{N,<:Measure}) where {N}
     map_address(content(block), AddressInfo(N, [block.locs...]))
 end
 to_basictypes(block::Daggered) where {N} = Daggered(block.content)

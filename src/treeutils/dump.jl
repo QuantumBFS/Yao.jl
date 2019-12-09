@@ -80,7 +80,7 @@ function dump_gate(blk::Measure{N,M}) where {M,N}
     end
 end
 
-function dump_gate(blk::Concentrator)
+function dump_gate(blk::Subroutine)
     :(focus($(blk.locs...)) => $(dump_gate(blk.content)))
 end
 

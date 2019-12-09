@@ -32,9 +32,9 @@ Hadamards(n) = repeat(H, 1:n)
 ControlU(n, m, U) = chain(n + m, control(k, n+1:n+m => matblock(U^(2^(k - 1)))) for k in 1:n)
 PE(n, m, U) = chain(
     n + m, # total number of the qubits
-    concentrate(Hadamards(n), 1:n), # apply H in local scope
+    subroutine(Hadamards(n), 1:n), # apply H in local scope
     ControlU(n, m, U),
-    concentrate(QFT(n)', 1:n),
+    subroutine(QFT(n)', 1:n),
 )
 
 

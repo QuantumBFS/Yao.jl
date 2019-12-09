@@ -35,7 +35,7 @@ function apply_back!(st, block::AbstractBlock, collector) #,AbstractContainer{<:
     end
 end
 
-function apply_back!(st, block::Concentrator{N}, collector) where {N}
+function apply_back!(st, block::Subroutine{N}, collector) where {N}
     out, outδ = st
     focus!(out, block.locs)
     focus!(outδ, block.locs)

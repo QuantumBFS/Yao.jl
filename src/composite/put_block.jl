@@ -45,7 +45,7 @@ put on (1, 3)
 The outter locations creates a scope which make it seems to be a contiguous two qubits for the block inside `PutBlock`.
 
 !!! tips
-    It is better to use [`concentrate`](@ref) instead of `put` for large blocks, since put will use the matrix of its contents
+    It is better to use [`subroutine`](@ref) instead of `put` for large blocks, since put will use the matrix of its contents
     directly instead of making use of what's in it. `put` is more efficient for small blocks.
 """
 put(total::Int, pa::Pair{NTuple{M,Int},<:AbstractBlock}) where {M} =

@@ -71,8 +71,8 @@ function map_address(blk::RepeatedBlock, info::AddressInfo)
     repeat(info.nbits, content(blk), blk.locs / info)
 end
 
-function map_address(blk::Concentrator, info::AddressInfo)
-    concentrate(info.nbits, content(blk), blk.locs / info)
+function map_address(blk::Subroutine, info::AddressInfo)
+    subroutine(info.nbits, content(blk), blk.locs / info)
 end
 
 function map_address(blk::ChainBlock, info::AddressInfo)

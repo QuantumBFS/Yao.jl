@@ -10,10 +10,10 @@ qft(n) = chain(block_B(n, i) for i in 1:n)
 @testset "map address" begin
     # chain, put, concentrator
     c2 = map_address(
-        chain(5, concentrate(5, put(2, 2 => X), (4, 1)), put(5, 3 => X)),
+        chain(5, subroutine(5, put(2, 2 => X), (4, 1)), put(5, 3 => X)),
         AddressInfo(10, [2, 1, 4, 6, 3]),
     )
-    @test c2 == chain(10, concentrate(10, put(2, 2 => X), (6, 2)), put(10, 4 => X))
+    @test c2 == chain(10, subroutine(10, put(2, 2 => X), (6, 2)), put(10, 4 => X))
 
     # control, kron, rot
     c3 = map_address(
@@ -43,7 +43,7 @@ qft(n) = chain(block_B(n, i) for i in 1:n)
 
     # qft
     c = qft(4)
-    @test mat(concentrate(10, c, (6, 2, 3, 7))) ≈ mat(map_address(c, AddressInfo(10, [6, 2, 3, 7])))
+    @test mat(subroutine(10, c, (6, 2, 3, 7))) ≈ mat(map_address(c, AddressInfo(10, [6, 2, 3, 7])))
 end
 
 
@@ -86,10 +86,10 @@ end
 
     # chain, put, concentrator
     @test to_basictypes(chain(5, put(5, 3 => X))) == chain(5, put(5, 3 => X))
-    @test to_basictypes(concentrate(5, put(2, 2 => X), (4, 1))) == put(5, 1 => X)
-    @test to_basictypes(concentrate(5, Measure(2, locs = (2,)), (4, 1))) == Measure(5; locs = (1,))
-    @test to_basictypes(concentrate(5, Measure(2), (4, 1))) == Measure(5; locs = (4, 1))
-    @test to_basictypes(concentrate(5, X, (1,))) == put(5, 1 => X)
+    @test to_basictypes(subroutine(5, put(2, 2 => X), (4, 1))) == put(5, 1 => X)
+    @test to_basictypes(subroutine(5, Measure(2, locs = (2,)), (4, 1))) == Measure(5; locs = (1,))
+    @test to_basictypes(subroutine(5, Measure(2), (4, 1))) == Measure(5; locs = (4, 1))
+    @test to_basictypes(subroutine(5, X, (1,))) == put(5, 1 => X)
     @test to_basictypes(put(5, 3 => X)) == put(5, 3 => X)
 
     # control, kron, rot
@@ -117,10 +117,10 @@ end
         Daggered(put(5, 4 => Rx(0.5)) * 2),
         put(5, 3 => ConstGate.P0 + ConstGate.P1),
         kron(5, 3 => X, 4 => Y),
-        concentrate(5, kron(X, Z), (3, 2)),
+        subroutine(5, kron(X, Z), (3, 2)),
         Measure(5, operator = X, locs = 1),
     )
-    c = chain(10, repeat(10, H, 1:10), concentrate(10, sub, 6:10))
+    c = chain(10, repeat(10, H, 1:10), subroutine(10, sub, 6:10))
 
     sub2 = chain(
         10,
@@ -133,13 +133,13 @@ end
     c2 = chain(10, chain(10, [put(10, i => H) for i in 1:10]), sub2)
     @test simplify(c, rules = [to_basictypes]) == c2
 
-    # concentrate, chain, put, kron and control
+    # subroutine, chain, put, kron and control
     c = chain(
         6,
         [
             put(6, 3 => X),
             kron(6, 2 => X, 4 => X),
-            chain(6, [concentrate(6, control(2, 1, 2 => Y), (6, 1))]),
+            chain(6, [subroutine(6, control(2, 1, 2 => Y), (6, 1))]),
         ],
     )
     @test zero_state(6) |> c ≈ zero_state(6) |> simplify(c, rules = [to_basictypes])

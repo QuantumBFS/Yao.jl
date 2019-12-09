@@ -63,12 +63,12 @@ end
     end
 end
 
-@testset "apply concentrate" begin
+@testset "apply subroutine" begin
     Random.seed!(5)
     for reg0 in [rand_state(3), rand_state(3, nbatch = 10)]
         @test test_apply_back(
             reg0,
-            chain(3, put(3, 1 => Rx(0.0)), concentrate(3, control(2, 2, 1 => shift(0.0)), (3, 1))),
+            chain(3, put(3, 1 => Rx(0.0)), subroutine(3, control(2, 2, 1 => shift(0.0)), (3, 1))),
             [0.5, 0.5];
             δ = 1e-5,
         )
