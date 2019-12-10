@@ -1,7 +1,6 @@
 <div align="center"> <img
 src="http://yaoquantum.org/assets/images/logo.png"
 alt="Yao Logo" width="210"></img>
-<h1>Yao</h1>
 </div>
 
 
@@ -9,7 +8,7 @@ alt="Yao Logo" width="210"></img>
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://QuantumBFS.github.io/Yao.jl/stable)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://QuantumBFS.github.io/Yao.jl/latest)
 
-Extensible, Efficient Quantum Algorithm Design for Humans.
+**Yao** Extensible, Efficient Quantum Algorithm Design for Humans.
 
 ## Introduction
 
