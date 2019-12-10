@@ -16,3 +16,5 @@ docs/src/examples/*.md
 _*.dat
 *.swp
 __pycache__/
+
+Manifest.toml
