@@ -5,3 +5,5 @@
 .DS_Store
 /dev/
 .vscode
+
+Manifest.toml
