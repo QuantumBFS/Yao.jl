@@ -325,8 +325,11 @@ function print_annotation(io::IO, x::Scale{Val{S}}) where {S}
 end
 
 function print_annotation(io::IO, root::AbstractBlock, node::KronBlock, child::AbstractBlock, k::Int)
-
-    printstyled(io, node.locs[k]; bold = true, color = :white)
+    if length(node.locs[k]) == 1
+        printstyled(io, node.locs[k].start; bold = true, color = :white)
+    else
+        printstyled(io, node.locs[k]; bold = true, color = :white)
+    end
     print(io, "=>")
     print_annotation(io, child)
 end

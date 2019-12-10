@@ -39,7 +39,7 @@ The unitary channel is defined as below in Kraus representation
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks, YaoArrayRegister)
 julia> UnitaryChannel([X, Y, Z])
 nqubits: 1
 unitary_channel
@@ -50,7 +50,7 @@ unitary_channel
 
 Or with weights
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks, YaoArrayRegister)
 julia> UnitaryChannel([X, Y, Z], [0.1, 0.2, 0.7])
 nqubits: 1
 unitary_channel

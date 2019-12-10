@@ -39,8 +39,8 @@ julia> put(4, (1, 3)=>kron(X, Y))
 nqubits: 4
 put on (1, 3)
 └─ kron
-   ├─ 1:1=>X gate
-   └─ 2:2=>Y gate
+   ├─ 1=>X gate
+   └─ 2=>Y gate
 ```
 
 The outter locations creates a scope which make it seems to be a contiguous two qubits for the block inside `PutBlock`.
