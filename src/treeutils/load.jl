@@ -12,6 +12,14 @@ end
 
 function yaofromstring(x::String)
     ex = Meta.parse(x)
+    parse_yaoscript(ex)
+end
+
+macro yaoscript(ex)
+    parse_yaoscript(ex)
+end
+
+function parse_yaoscript(ex)
     @match ex begin
         Expr(:let, header, body) => begin
             info = ParseInfo(-1, "")

@@ -4,6 +4,8 @@ struct AddressInfo
     nbits::Int
     addresses::Vector{Int}
 end
+AddressInfo(nbits::Int, ::AllLocs) = AddressInfo(nbits, collect(1:nbits))
+AddressInfo(nbits::Int, iter) = AddressInfo(nbits, collect(iter))
 Base.copy(info::AddressInfo) = AddressInfo(copy(info.addresses))
 Base.:/(locs, info::AddressInfo) = map(loc -> info.addresses[loc], locs)
 Base.:/(locs::AllLocs, info::AddressInfo) = info.addresses

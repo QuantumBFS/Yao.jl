@@ -22,6 +22,7 @@ subblocks(x::PrimitiveBlock) = ()
 #       and each primitive block should stay in a single
 #       file whose name is in lowercase and underscore.
 include("const_gate.jl")
+include("identity_gate.jl")
 include("phase_gate.jl")
 include("shift_gate.jl")
 include("rotation_gate.jl")

@@ -1,5 +1,3 @@
-export dump_gate
-
 """
     dump_gate(blk::AbstractBlock) -> Expr
 

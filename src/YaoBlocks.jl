@@ -14,6 +14,7 @@ include("composite/composite.jl")
 
 include("algebra.jl")
 include("blocktools.jl")
+include("measure_ops.jl")
 include("layout.jl")
 include("treeutils/treeutils.jl")
 

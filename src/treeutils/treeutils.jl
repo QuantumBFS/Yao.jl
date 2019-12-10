@@ -1,5 +1,5 @@
-export load_gate, yaotofile, yaotoscript
-export yaofromfile, yaofromstring, @yao_str
+export dump_gate, yaotofile, yaotoscript
+export yaofromfile, yaofromstring, @yao_str, @yaoscript
 using MLStyle: @match
 
 include("dump.jl")

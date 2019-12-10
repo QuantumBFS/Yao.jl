@@ -4,6 +4,10 @@ using Test, YaoBlocks
     include("const_gate.jl")
 end
 
+@testset "test identity gates" begin
+    include("identity_gate.jl")
+end
+
 @testset "test phase gate" begin
     include("phase_gate.jl")
 end

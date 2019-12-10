@@ -79,6 +79,7 @@ Return a [`RotationGate`](@ref) on U axis.
 rot(axis::AbstractBlock, theta) = RotationGate(axis, theta)
 
 content(x::RotationGate) = x.block
+chcontent(x::RotationGate, gen::AbstractBlock) = RotationGate(gen, x.theta)
 # General definition
 function mat(::Type{T}, R::RotationGate{N}) where {N,T}
     I = IMatrix{1 << N,T}()
