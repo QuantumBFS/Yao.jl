@@ -144,7 +144,7 @@ apply_back!(st, block::Measure, collector) = throw(MethodError(apply_back!, (st,
 function backward_params!(st, block::Rotor, collector)
     in, outδ = st
     Σ = generator(block)
-    g = sum((in |> Σ)' * outδ)
+    g = dropdims(sum(conj.(state(in |> Σ)) .* state(outδ), dims = (1, 2)), dims = (1, 2)) |> as_scalar
     pushfirst!(collector, -imag(g) / 2)
     in |> Σ
     nothing
