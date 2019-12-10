@@ -239,7 +239,9 @@ function simplify(ex::AbstractBlock; rules = __default_simplification_rules__)
 end
 
 function simplify_pass(rules, ex)
-    ex = chsubblocks(ex, map(x -> simplify_pass(rules, x), subblocks(ex)))
+    if length(subblocks(ex)) > 0
+        ex = chsubblocks(ex, map(x -> simplify_pass(rules, x), subblocks(ex)))
+    end
 
     for rule in rules
         ex = rule(ex)
