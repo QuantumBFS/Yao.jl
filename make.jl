@@ -77,7 +77,7 @@ function attach_notebook_badge(root, name, str)
     download_badge_url = "https://img.shields.io/badge/download-project-orange"
     mybinder = "[![]($mybinder_badge_url)](@__BINDER_ROOT_URL__/generated/$root/$name/main.ipynb)"
     nbviewer = "[![]($nbviewer_badge_url)](@__NBVIEWER_ROOT_URL__/generated/$root/$name/main.ipynb)"
-    download = "[![]($download_badge_url)](https://github.com/QuantumBFS/tutorials/tree/gh-pages/dev/generated/$root/$name)"
+    download = "[![]($download_badge_url)](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/QuantumBFS/tutorials/tree/gh-pages/dev/generated/$root/$name)"
 
     markdown_only(x) = "#md # " * x
     return join(map(markdown_only, (mybinder, nbviewer, download)), "\n") * "\n\n" * str
