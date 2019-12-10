@@ -41,7 +41,7 @@ time_evolve(M::AbstractBlock, dt; kwargs...) = TimeEvolution(M, dt; kwargs...)
 time_evolve(dt; kwargs...) = @λ(M -> time_evolve(M, dt; kwargs...))
 
 content(te::TimeEvolution) = te.H
-chcontent(te::TimeEvolution, blk::AbstractBlock) = time_evolve(blk, te.dt; tol=te.tol)
+chcontent(te::TimeEvolution, blk::AbstractBlock) = time_evolve(blk, te.dt; tol = te.tol)
 
 function mat(::Type{T}, te::TimeEvolution{N}) where {T,N}
     return exp(-im * T(te.dt) * Matrix(mat(T, te.H)))

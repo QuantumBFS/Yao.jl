@@ -41,7 +41,7 @@ end
 
     y = chain(5, put(3 => rot(X, 0.3)), put(2 => X))
     @test c == y
-    @test c==c2
+    @test c == c2
     @test check_dumpload(y)
     yaotofile("_test.yao", y)
     yy = @eval $(yaofromfile("_test.yao"))

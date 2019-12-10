@@ -13,13 +13,15 @@ end
 
 function RepeatedBlock{N}(block::AbstractBlock{M}, locs::NTuple{C,Int}) where {N,M,C}
     @assert_locs_safe N Tuple(i:i+M-1 for i in locs)
-    M > 1 && throw(ArgumentError("RepeatedBlock does not support multi-qubit content for the moment."))
+    M > 1 &&
+    throw(ArgumentError("RepeatedBlock does not support multi-qubit content for the moment."))
     return RepeatedBlock{N,C,typeof(block)}(block, locs)
 end
 
 function RepeatedBlock{N}(block::AbstractBlock{M}, locs::UnitRange{Int}) where {N,M}
     (0 < locs.start) && (locs.stop <= N) || throw(LocationConflictError("locations conflict."))
-    M > 1 && throw(ArgumentError("RepeatedBlock does not support multi-qubit content for the moment."))
+    M > 1 &&
+    throw(ArgumentError("RepeatedBlock does not support multi-qubit content for the moment."))
     return RepeatedBlock{N,length(locs),typeof(block)}(block, Tuple(locs))
 end
 

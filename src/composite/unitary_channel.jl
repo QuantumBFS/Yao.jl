@@ -59,25 +59,25 @@ unitary_channel
 └─ [0.7] Z gate
 ```
 """
-struct UnitaryChannel{N, W <: AbstractWeights} <: CompositeBlock{N}
+struct UnitaryChannel{N,W<:AbstractWeights} <: CompositeBlock{N}
     operators::Vector{AbstractBlock{N}}
     weights::W
 
     function UnitaryChannel(operators::Vector)
         w = _uweights(length(operators))
         N = check_nqubits(operators)
-        new{N, typeof(w)}(operators, w)
+        new{N,typeof(w)}(operators, w)
     end
 
     function UnitaryChannel(operators::Vector, w::AbstractWeights)
         N = check_nqubits(operators)
-        new{N, typeof(w)}(operators, w)
+        new{N,typeof(w)}(operators, w)
     end
 
     function UnitaryChannel(operators::Vector, w::AbstractVector)
         w = weights(w)
         N = check_nqubits(operators)
-        new{N, typeof(w)}(operators, w)
+        new{N,typeof(w)}(operators, w)
     end
 end
 
@@ -88,7 +88,7 @@ function apply!(r::AbstractRegister, x::UnitaryChannel)
     apply!(r, sample(x.operators, x.weights))
 end
 
-function mat(::Type{T}, x::UnitaryChannel) where T
+function mat(::Type{T}, x::UnitaryChannel) where {T}
     U = sample(x.operators, x.weights)
     return mat(T, U)
 end
@@ -105,7 +105,7 @@ function cache_key(x::UnitaryChannel)
     return key
 end
 
-function Base.:(==)(lhs::UnitaryChannel{N}, rhs::UnitaryChannel{N}) where N
+function Base.:(==)(lhs::UnitaryChannel{N}, rhs::UnitaryChannel{N}) where {N}
     return (lhs.weights == rhs.weights) && (lhs.operators == rhs.operators)
 end
 

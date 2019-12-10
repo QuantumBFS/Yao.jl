@@ -13,7 +13,7 @@ mutable struct Measure{
     OT,
     LT<:Union{NTuple{K,Int},AllLocs},
     PT<:PostProcess,
-    RNG
+    RNG,
 } <: PrimitiveBlock{N}
     rng::RNG
     operator::OT
@@ -144,12 +144,7 @@ function Measure(
         locs = (locs...,)
         K = length(locs)
     end
-    Measure{n,K,OT,typeof(locs),typeof(postprocess),RNG}(
-        rng,
-        operator,
-        locs,
-        postprocess,
-    )
+    Measure{n,K,OT,typeof(locs),typeof(postprocess),RNG}(rng, operator, locs, postprocess)
 end
 
 Measure(;

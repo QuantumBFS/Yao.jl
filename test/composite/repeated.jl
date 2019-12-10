@@ -10,4 +10,4 @@ rp = RepeatedBlock{5}(X, (1, 2, 3))
 @test YaoBlocks.PropertyTrait(rp) == YaoBlocks.PreserveAll()
 
 @test repeat(10, H, 1:10) == repeat(10, H, Tuple(1:10))
-@test_throws ArgumentError repeat(10, SWAP, (1,3))
+@test_throws ArgumentError repeat(10, SWAP, (1, 3))

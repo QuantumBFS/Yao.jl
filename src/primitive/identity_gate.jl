@@ -2,7 +2,7 @@ export TrivilGate, IdentityGate, igate
 
 abstract type TrivilGate{N} <: PrimitiveBlock{N} end
 
-mat(::Type{T}, d::TrivilGate{N}) where {T,N} = IMatrix{1<<N,T}()
+mat(::Type{T}, d::TrivilGate{N}) where {T,N} = IMatrix{1 << N,T}()
 Base.adjoint(g::TrivilGate) = g
 
 """

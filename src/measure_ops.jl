@@ -9,7 +9,7 @@ By applying `eigenvector`' to target state,
 one can swith the basis to the eigenbasis of this operator.
 However, `eigenvalues` does not have a specific form.
 """
-function eigenbasis(op::AbstractBlock{N}) where N
+function eigenbasis(op::AbstractBlock{N}) where {N}
     m = mat(op)
     if m isa Diagonal || m isa IMatrix
         op, IdentityGate{N}()
@@ -19,8 +19,7 @@ function eigenbasis(op::AbstractBlock{N}) where N
     end
 end
 
-for GT in [:PutBlock, :RepeatedBlock, :ControlBlock,
-        :Daggered]
+for GT in [:PutBlock, :RepeatedBlock, :ControlBlock, :Daggered]
     @eval function eigenbasis(op::$GT)
         E, V = eigenbasis(content(op))
         chcontent(op, E), chcontent(op, V)
@@ -40,13 +39,13 @@ for GT in [:CachedBlock]
     end
 end
 
-function eigenbasis(op::KronBlock{N}) where N
+function eigenbasis(op::KronBlock{N}) where {N}
     E = []
     blks = []
-    for (k,b) in op
+    for (k, b) in op
         Ei, Vi = eigenbasis(b)
-        push!(E, k=>Ei)
-        push!(blks, k=>Vi)
+        push!(E, k => Ei)
+        push!(blks, k => Vi)
     end
     kron(N, E...), kron(N, blks...)
 end
@@ -56,24 +55,29 @@ function eigenbasis(op::XGate)
 end
 
 function eigenbasis(op::YGate)
-    Z, ConstGate.S*H
+    Z, ConstGate.S * H
 end
 
-function measure!(postprocess::PostProcess, op::AbstractBlock,
-        reg::AbstractRegister, locs::AllLocs; kwargs...)
+function measure!(
+    postprocess::PostProcess,
+    op::AbstractBlock,
+    reg::AbstractRegister,
+    locs::AllLocs;
+    kwargs...,
+)
     _check_msize(op, reg, locs)
     E, V = eigenbasis(op)
     res = measure!(postprocess, ComputationalBasis(), reg |> V', locs; kwargs...)
     res2 = measure!(postprocess, ComputationalBasis(), reg, locs; kwargs...)
     postprocess isa NoPostProcess && apply!(reg, V)
-    diag(mat(E))[Int64.(res) .+ 1]
+    diag(mat(E))[Int64.(res).+1]
 end
 
 function measure(op::AbstractBlock, reg::AbstractRegister, locs::AllLocs; kwargs...)
     _check_msize(op, reg, locs)
     E, V = eigenbasis(op)
     res = measure(ComputationalBasis(), copy(reg) |> V', locs; kwargs...)
-    diag(mat(E))[Int64.(res) .+ 1]
+    diag(mat(E))[Int64.(res).+1]
 end
 
 render_mlocs(alllocs::AllLocs, locs) = locs
@@ -103,7 +107,7 @@ function measure(ab::Add, reg::AbstractRegister, locs::AllLocs; kwargs...)
     end
 end
 
-function measure(op::PutBlock{N}, reg::AbstractRegister, locs; kwargs...) where N
+function measure(op::PutBlock{N}, reg::AbstractRegister, locs; kwargs...) where {N}
     _check_msize(op, reg, locs)
 
     # get eigen basis
@@ -116,9 +120,9 @@ function measure(op::PutBlock{N}, reg::AbstractRegister, locs; kwargs...) where 
     # perform equivalent measure
     E = diag(mat(content(_E)))
     res = measure(ComputationalBasis(), _reg, _E.locs; kwargs...)
-    map(ri->E[Int64(ri) + 1], res)
+    map(ri -> E[Int64(ri)+1], res)
 end
 
-function measure(op::PutBlock{N}, reg::AbstractRegister, locs::AllLocs; kwargs...) where N
-    invoke(measure, Tuple{PutBlock, AbstractRegister, Any}, op, reg, locs; kwargs...)
+function measure(op::PutBlock{N}, reg::AbstractRegister, locs::AllLocs; kwargs...) where {N}
+    invoke(measure, Tuple{PutBlock,AbstractRegister,Any}, op, reg, locs; kwargs...)
 end
