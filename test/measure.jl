@@ -18,6 +18,7 @@ end
     @test isnormalized(reg)
     result = measure(reg; nshots = 10)
     @test all(result .< 8)
+    @test ndims(res) == 0
 
     reg = rand_state(6) |> focus!(1, 4, 3)
     reg0 = copy(reg)
@@ -25,6 +26,7 @@ end
     @test nqubits(reg) == 3
     select(reg0, res)
     @test select(reg0, res) |> normalize! ≈ reg
+    @test ndims(res) == 0
 
     r = rand_state(10)
     r1 = copy(r) |> focus!(1, 4, 3)
@@ -32,10 +34,24 @@ end
     r2 = select(r1, res)
     r2 = relax!(r2, (); to_nactive = nqubits(r2))
     @test normalize!(r2) ≈ r
+    @test ndims(res) == 0
 
     reg = rand_state(6, nbatch = 5) |> focus!((1:5)...)
-    measure!(YaoBase.ResetTo(0), reg, 1)
+    res = measure!(YaoBase.ResetTo(0), reg, 1)
     @test nactive(reg) == 5
+    @test ndims(res) == 1
+end
+
+@testset "fix measure kwargs error" begin
+    r = rand_state(10)
+    @test length(measure(r; nshots = 10)) == 10
+    @test_throws MethodError measure!(r; nshots = 10)
+    @test_throws MethodError measure!(YaoBase.RemoveMeasured(), r; nshots = 10)
+end
+
+@testset "fix measure output type error" begin
+    res = measure(rand_state(1; nbatch = 10))
+    @test res isa Matrix{BitStr64{1}}
 end
 
 @testset "fix measure kwargs error" begin
