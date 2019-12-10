@@ -31,12 +31,12 @@ end
 function circuit_qsvd(circuit_a::AbstractBlock{Na}, circuit_b::AbstractBlock{Nb}, Nc::Int) where {Na, Nb}
     nbit = Na+Nb
     cnots = chain(control(nbit, i+Na, i=>X) for i=1:Nc)
-    c = chain(concentrate(nbit, circuit_a, 1:Na), concentrate(nbit, circuit_b, Na+1:nbit), cnots)
+    c = chain(subroutine(nbit, circuit_a, 1:Na), subroutine(nbit, circuit_b, Na+1:nbit), cnots)
 end
 
 """read QSVD results"""
 function readout_qsvd(reg::AbstractRegister, circuit_a::AbstractBlock{Na}, circuit_b::AbstractBlock{Nb}, Nc::Int) where {Na, Nb}
-    reg = copy(reg) |> concentrate(Na+Nb, circuit_a, 1:Na) |> concentrate(Na+Nb, circuit_b, Na+1:Na+Nb)
+    reg = copy(reg) |> subroutine(Na+Nb, circuit_a, 1:Na) |> subroutine(Na+Nb, circuit_b, Na+1:Na+Nb)
     _S = [select(reg, b|b<<Na).state[] for b in basis(Nc)]
     S = abs.(_S)
     order = sortperm(S, rev=true)
@@ -45,7 +45,7 @@ function readout_qsvd(reg::AbstractRegister, circuit_a::AbstractBlock{Na}, circu
 end
 
 """
-    QuantumSVD(M; kwargs...)
+    quantumSVD(M; kwargs...)
 Quantum SVD.
     * `M`, the matrix to decompose, size should be (2^Na × 2^Nb), the sum of squared spectrum must be 1.
 kwargs includes
@@ -54,7 +54,7 @@ kwargs includes
     * `maxiter`, maximum number of iterations,
     * `optimizer`, default is `Adam(lr=0.1)`.
 """
-function QuantumSVD(M::AbstractMatrix; Nc::Int=log2i(min(size(M)...)),
+function quantumSVD(M::AbstractMatrix; Nc::Int=log2i(min(size(M)...)),
         circuit_a=variational_circuit(log2i(size(M, 1))),
         circuit_b=variational_circuit(log2i(size(M, 2))),
         maxiter=200, optimizer=Adam(lr=0.1))
@@ -76,7 +76,7 @@ end
     M = reshape(rand_state(Na+Nb).state, 1<<Na, 1<<Nb)
     U_exact, S_exact, V_exact = svd(M)
 
-    U, S, V = QuantumSVD(M; maxiter=400)
+    U, S, V = quantumSVD(M; maxiter=400)
 
     @test isapprox(U*Diagonal(S)*V', M, atol=1e-2)
     @test isapprox(abs.(S), S_exact, atol=1e-2)

@@ -108,7 +108,7 @@ feeding input `|1>⊗|0>` will get the resulting quantum register with the desir
 function order_finding_circuit(x::Int, L::Int; nbit::Int, ncbit::Int)
     N = nbit+ncbit
     chain(N, repeat(N, H, 1:ncbit), KMod{N, ncbit}(x, L),
-        concentrate(N, QFTCircuit(ncbit)', 1:ncbit))
+        subroutine(N, QFTCircuit(ncbit)', 1:ncbit))
 end
 
 # The circuit for order finding is consisted of three parts

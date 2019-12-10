@@ -63,7 +63,7 @@ function single_try(oracle, gen::AbstractBlock{N}, nstep::Int; nbatch::Int) wher
         return r
     end
     reg |> checker
-    res = measure_remove!(reg, (N+1))
+    res = measure!(RemoveMeasured(), reg, (N+1))
     return res, reg
 end
 
@@ -76,7 +76,7 @@ checker = control(num_bit+1,ctrl, num_bit+1=>X)
 
 # The register is batched, with batch dimension `nshot`.
 # [`focus!`](@ref Yao.focus!) views the first 1-N qubts as system.
-# For a batched register, [`measure_remove!`](@ref Yao.measure_remove!)
+# For a batched register, [`measure!`](@ref Yao.measure!)
 # returns a vector of bitstring as output.
 
 # #### Run
