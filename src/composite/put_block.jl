@@ -1,3 +1,4 @@
+using StatsBase
 export PutBlock, put, Swap, swap, PSwap, pswap
 
 """
@@ -81,6 +82,8 @@ function apply!(r::AbstractRegister, pb::PutBlock{N}) where {N}
     return r
 end
 
+# NOTE: Roger: these specialization should be removed after the new interpret
+# mechanism is implemented
 # specialization
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))

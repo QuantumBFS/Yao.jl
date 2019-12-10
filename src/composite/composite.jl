@@ -85,6 +85,7 @@ include("repeated.jl")
 include("subroutine.jl")
 include("reduce.jl")
 include("pauli_strings.jl")
+include("unitary_channel.jl")
 
 chsubblocks(x::ChainBlock, it::AbstractBlock) = chsubblocks(x, (it,))
 chsubblocks(x::KronBlock, it::AbstractBlock) = chsubblocks(x, (it,))

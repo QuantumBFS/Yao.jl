@@ -202,6 +202,7 @@ print_block(io::IO, S::ShiftGate) = print(io, "shift(", S.theta, ")")
 print_block(io::IO, R::RotationGate) = print(io, "rot(", content(R), ", ", R.theta, ")")
 print_block(io::IO, x::KronBlock) = printstyled(io, "kron"; bold = true, color = color(KronBlock))
 print_block(io::IO, x::ChainBlock) = printstyled(io, "chain"; bold = true, color = color(ChainBlock))
+print_block(io::IO, x::UnitaryChannel) = printstyled(io, "unitary_channel"; bold=true)
 print_block(io::IO, x::ReflectGate{N}) where {N} = print(io, "reflect($(summary(x.psi)))")
 print_block(io::IO, c::Subroutine) = print(io, "Subroutine: ", occupied_locs(c))
 print_block(io::IO, c::CachedBlock) = print_block(io, content(c))
@@ -341,4 +342,9 @@ function print_annotation(
     printstyled(io, node.locs; bold = true, color = :white)
     print(io, " ")
     print_annotation(io, child)
+end
+
+function print_annotation(io::IO, root::AbstractBlock, node::UnitaryChannel, child::AbstractBlock, k::Int)
+    print_annotation(io, child)
+    printstyled(io, "[", node.weights[k], "] "; color = :cyan)
 end
