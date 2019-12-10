@@ -16,7 +16,7 @@ Reexport = "0.2"
 YaoArrayRegister = "0.6"
 YaoBase = "0.13"
 YaoBlocks = "0.8"
-YaoSym = "0.2"
+YaoSym = "0.3"
 julia = "1"
 
 [extras]
