@@ -88,18 +88,9 @@ function apply!(r::AbstractRegister, x::UnitaryChannel)
     apply!(r, sample(x.operators, x.weights))
 end
 
-# unitary channel
-function apply!(r::AbstractRegister, pb::PutBlock{N, C, <:UnitaryChannel}) where {N, C}
-    _check_size(r, pb)
-    x = pb.content
-    U = sample(x.operators, x.weights)
-    apply!(r, PutBlock{N}(U, pb.locs))
-    return r
-end
-
-
 function mat(::Type{T}, x::UnitaryChannel) where T
-    error("unitary channel can not have a matrix")
+    U = sample(x.operators, x.weights)
+    return mat(T, U)
 end
 
 subblocks(x::UnitaryChannel) = x.operators

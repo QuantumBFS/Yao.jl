@@ -11,7 +11,9 @@ using Test
 end
 
 @testset "check mat" begin
-    @test_throws ErrorException mat(UnitaryChannel([X, Y, Z], [1, 0, 0]))
+    @test mat(UnitaryChannel([X, Y, Z], [1, 0, 0])) == mat(X)
+    @test mat(UnitaryChannel([X, Y, Z], [0, 1, 0])) == mat(Y)
+    @test mat(UnitaryChannel([X, Y, Z], [0, 0, 1])) == mat(Z)
 end
 
 @testset "check compare" begin
