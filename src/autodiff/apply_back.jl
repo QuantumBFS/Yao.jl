@@ -164,10 +164,8 @@ end
 Base.adjoint(::typeof(expect)) = Adjoint(expect)
 Base.show(io::IO, ::Adjoint{Any,typeof(expect)}) = print(io, "expect'")
 Base.show(io::IO, ::MIME"text/plain", ::Adjoint{Any,typeof(expect)}) = print(io, "expect'")
-"""
-expect')(op::AbstractBlock, circuit::Pair{<:ArrayReg, <:AbstractBlock})
 
-"""
+
 function (::Adjoint{Any,typeof(expect)})(op::AbstractBlock, circuit::Pair{<:ArrayReg,<:AbstractBlock})
     reg, c = circuit
     out = copy(reg) |> c
@@ -175,3 +173,15 @@ function (::Adjoint{Any,typeof(expect)})(op::AbstractBlock, circuit::Pair{<:Arra
     (in, inδ), paramsδ = apply_back((out, outδ), c)
     return outδ => paramsδ .* 2
 end
+
+"""
+expect'(op::AbstractBlock, reg=>circuit) -> Vector
+
+Obtain the gradient with respect to circuit parameters.
+The return value is a pair of `gψ=>gparams`, with `gψ` the gradient of input state and `gparams` the gradients of circuit parameters.
+
+!!! note
+
+    For batched register, `expect(op, reg=>circuit)` returns a vector of size number of batch as output. However, one can not differentiate over a vector loss, so `expect'(op, reg=>circuit)` accumulates the gradient over batch, rather than returning a batched gradient of parameters.
+"""
+adjoint(expect)
