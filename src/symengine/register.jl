@@ -36,6 +36,12 @@ Base.:(*)(x::AdjointSymReg{B,MT}, y::AdjointSymReg{B,MT}) where {B,MT} =
 Base.:(^)(x::AdjointSymReg{B,MT}, n::Int) where {B,MT} = adjoint(parent(x)^n)
 
 SymEngine.expand(x::SymReg{B}) where {B} = ArrayReg{B}(expand.(state(x)))
+
+"""
+    szero_state(n; nbatch=1)
+
+Create a symbolic zero state, same as `ket"000"`, but allows you use an integer.
+"""
 szero_state(args...; kwargs...) = zero_state(Basic, args...; kwargs...)
 
 function YaoBase.partial_tr(r::SymReg{B}, locs) where {B}
