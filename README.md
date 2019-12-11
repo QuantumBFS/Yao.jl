@@ -1,8 +1,6 @@
 # QuAlgorithmZoo
 
-A curated implementation of quantum algorithms with [Yao.jl](https://github.com/QuantumBFS/Yao.jl)
-
-*Note*: part of functionalities has been moved to [YaoExtensions](https://github.com/QuantumBFS/YaoExtensions.jl).
+A curated implementation of quantum algorithms with [Yao.jl](https://github.com/QuantumBFS/Yao.jl) @0.6
 
 ## Installation
 
