@@ -7,10 +7,10 @@ A curated implementation of quantum algorithms with [Yao.jl](https://github.com/
 QuAlgorithmZoo.jl is not registered yet, please use the following command:
 
 ```julia
-pkg> add https://github.com/QuantumBFS/QuAlgorithmZoo.jl.git
+pkg> dev https://github.com/QuantumBFS/QuAlgorithmZoo.jl.git
 ```
 
-Disclaimer: **this package is still under development and needs further polish.**
+Then open directory '~/.julia/dev/QuAlgorithmZoo/examples' to find algorithms.
 
 ## Contents
 
