@@ -112,8 +112,8 @@ for op in [:(==), :≈]
 end
 
 function Base.:*(bra::AdjointArrayReg{1}, ket::ArrayReg{1})
-    if nremain(bra) == nremain(ket) == 0 # all active
-        return dot(state(parent(bra)), state(ket))
+    if nremain(bra) == nremain(ket)
+        return dot(relaxedvec(parent(bra)), relaxedvec(ket))
     elseif nremain(bra) == 0 # <s|active> |remain>
         return ArrayReg{1}(state(bra) * state(ket))
     else
