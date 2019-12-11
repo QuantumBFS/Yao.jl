@@ -21,6 +21,11 @@ function print_subtypetree(t::Type, level = 1, indent = 4)
     end
 end
 
+"""
+    rmlines(ex)
+
+Remove `LineNumberNode` from an `Expr`.
+"""
 rmlines(ex::Expr) = begin
     hd = ex.head
     hd == :macrocall && return ex
