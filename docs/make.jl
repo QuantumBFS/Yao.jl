@@ -46,6 +46,10 @@ const top_nav = """
         <li class="nav-item">
             <a class="nav-link" href="https://github.com/QuantumBFS/Yao.jl">GitHub</a>
         </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/QuantumBFS/Yao.jl/blob/master/CONTRIBUTING.md">Contribute</a>
+        </li>
       </ul>
     </div>
 </nav>
