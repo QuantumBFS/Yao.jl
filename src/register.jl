@@ -42,6 +42,8 @@ julia> ket"110" + 2ket"111"
 qubits can be partially actived by [`focus!`](@ref)
 
 ```jldoctest
+julia> ket"100" + ket"111" |> focus!(1:2)
+|100⟩ + |111⟩
 ```
 
 """
@@ -49,6 +51,24 @@ macro ket_str(s)
     ket_m(s)
 end
 
+"""
+    @bra_str
+
+Create a bra register. See also [`@ket_str`](@ref).
+
+# Example
+
+Similar to `@ket_str` literal, a symbolic quantum state can be created
+by
+
+```jldoctest
+julia> bra"111" + 2bra"101"
+2⟨101| + ⟨111|
+
+julia> bra"111" * (ket"101" + ket"111")
+1
+```
+"""
 macro bra_str(s)
     bra_m(s)
 end
