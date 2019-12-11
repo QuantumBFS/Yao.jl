@@ -1,4 +1,5 @@
 ```@meta
+CurrentModule = YaoSym
 DocTestSetup = quote
     using Yao
     using Yao: YaoBase, YaoBlocks, YaoArrayRegister, YaoSym
@@ -9,11 +10,13 @@ DocTestSetup = quote
 end
 ```
 
-# YaoSym
+# Symbolic Computation
 
 Symbolic Computation support for Yao
 
-```@autodocs
-Modules = [YaoSym]
-Order = [:macro, :function, :type, :module]
+```@docs
+@ket_str
+@bra_str
+@vars
+szero_state
 ```
