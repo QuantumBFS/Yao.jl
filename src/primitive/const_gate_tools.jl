@@ -184,7 +184,7 @@ function define_methods(__module__::Module, const_binding, name)
             end
 
             function YaoBlocks.print_block(io::IO, ::$gt_name)
-                print(io, $(QuoteNode(name)), " gate")
+                print(io, $(QuoteNode(name)))
             end
         end # eval
     end # quote
