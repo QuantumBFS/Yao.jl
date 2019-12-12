@@ -1,4 +1,4 @@
-export print_tree
+export print_tree, print_annotation, print_prefix, print_title, print_block
 
 struct BlockTreeCharSet
     mid
