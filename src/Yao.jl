@@ -18,8 +18,7 @@ using Reexport
 @reexport using YaoBase, YaoArrayRegister, YaoBlocks, YaoSym
 
 using YaoBlocks:
-    color, PropertyTrait, render_params,
-    print_annotation, print_prefix, print_title, print_block
+    color, PropertyTrait, render_params, print_annotation, print_prefix, print_title, print_block
 
 include("deprecations.jl")
 
