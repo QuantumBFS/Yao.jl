@@ -28,14 +28,6 @@ end
     include("general_matrix_gate.jl")
 end
 
-@testset "test math gate" begin
-    include("math_gate.jl")
-end
-
-@testset "test reflect gate" begin
-    include("reflect_gate.jl")
-end
-
 @testset "test measure" begin
     include("measure.jl")
 end

@@ -29,10 +29,6 @@ end
     include("cache.jl")
 end
 
-@testset "test pauli string" begin
-    include("pauli_string.jl")
-end
-
 @testset "test unitary channel" begin
     include("unitary_channel.jl")
 end
