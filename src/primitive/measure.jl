@@ -1,4 +1,5 @@
 using YaoBase, YaoArrayRegister, Random
+using BitBasis
 export Measure, MeasureAndReset, AllLocs, ComputationalBasis, chmeasureoperator
 
 """

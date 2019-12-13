@@ -187,15 +187,10 @@ end
 color(m::AbstractBlock) = color(typeof(m))
 color(::Type{<:ControlBlock}) = :red
 color(::Type{<:ChainBlock}) = :blue
-color(::Type{<:MathGate}) = :red
 color(::Type{<:Add}) = :red
 color(::Type{<:PutBlock}) = :cyan
-color(::Type{T}) where {T<:PauliString} = :cyan
 color(::Type{<:RepeatedBlock}) = :cyan
 color(::Type{<:GeneralMatrixBlock}) = :red
-
-# color(::Type{T}) where {T <: PauliString} = :cyan
-# color(::Type{T}) where {T <: Sequential} = :blue
 
 print_block(io::IO, g::PhaseGate) = print(io, "phase(", g.theta, ")")
 print_block(io::IO, S::ShiftGate) = print(io, "shift(", S.theta, ")")
@@ -203,7 +198,6 @@ print_block(io::IO, R::RotationGate) = print(io, "rot(", summary(content(R)), ",
 print_block(io::IO, x::KronBlock) = printstyled(io, "kron"; bold = true, color = color(KronBlock))
 print_block(io::IO, x::ChainBlock) = printstyled(io, "chain"; bold = true, color = color(ChainBlock))
 print_block(io::IO, x::UnitaryChannel) = printstyled(io, "unitary_channel"; bold = true)
-print_block(io::IO, x::ReflectGate{N}) where {N} = print(io, "reflect($(summary(x.psi)))")
 print_block(io::IO, c::Subroutine) = print(io, "Subroutine: ", occupied_locs(c))
 print_block(io::IO, c::CachedBlock) = print_block(io, content(c))
 print_block(io::IO, c::Add) = printstyled(io, "+"; bold = true, color = color(Add))
@@ -236,14 +230,6 @@ function print_block(io::IO, c::Measure{N,K,OT}) where {N,K,OT}
 end
 
 # TODO: use OhMyREPL's default syntax highlighting for functions
-function print_block(io::IO, m::MathGate{N,<:LegibleLambda}) where {N}
-    printstyled(io, "mathgate($(m.f); nbits=$N)"; bold = true, color = color(m))
-end
-
-function print_block(io::IO, m::MathGate{N,<:Function}) where {N}
-    printstyled(io, "mathgate($(nameof(m.f)); nbits=$N)"; bold = true, color = color(m))
-end
-
 function print_block(io::IO, te::TimeEvolution)
     println(io, "Time Evolution Δt = $(te.dt), tol = $(te.tol)")
     print_tree(io, te.H; title = false)
@@ -283,10 +269,6 @@ function print_block(io::IO, rb::RepeatedBlock{N}) where {N}
         end
     end
     printstyled(io, ")"; bold = true, color = color(RepeatedBlock))
-end
-
-function print_block(io::IO, x::PauliString)
-    printstyled(io, "PauliString"; bold = true, color = color(PauliString))
 end
 
 # forward to simplify interfaces
