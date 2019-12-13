@@ -1,16 +1,16 @@
-export TrivilGate, IdentityGate, igate
+export TrivialGate, IdentityGate, igate
 
-abstract type TrivilGate{N} <: PrimitiveBlock{N} end
+abstract type TrivialGate{N} <: PrimitiveBlock{N} end
 
-mat(::Type{T}, d::TrivilGate{N}) where {T,N} = IMatrix{1 << N,T}()
-Base.adjoint(g::TrivilGate) = g
+mat(::Type{T}, d::TrivialGate{N}) where {T,N} = IMatrix{1 << N,T}()
+Base.adjoint(g::TrivialGate) = g
 
 """
-    IdentityGate{N} <: TrivilGate{N}
+    IdentityGate{N} <: TrivialGate{N}
 
 The identity gate.
 """
-struct IdentityGate{N} <: TrivilGate{N} end
+struct IdentityGate{N} <: TrivialGate{N} end
 
 """
     igate(n::Int)
