@@ -18,7 +18,7 @@ LuxurySparse = "0.5"
 SymEngine = "0.7"
 YaoArrayRegister = "0.6"
 YaoBase = "0.13"
-YaoBlocks = "0.8"
+YaoBlocks = "0.8, 0.9"
 julia = "1"
 
 [extras]
