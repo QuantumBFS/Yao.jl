@@ -124,16 +124,16 @@ it calls [`mat`](@ref), and use the cached matrix in the following calculations.
 julia> cache(control(3, 1, 2=>X))
 nqubits: 3
 [cached] control(1)
-   └─ (2,) X gate
+   └─ (2,) X
 
 
 julia> chain(cache(control(3, 1, 2=>X)), repeat(H))
 nqubits: 3
 chain
 ├─ [cached] control(1)
-│     └─ (2,) X gate
+│     └─ (2,) X
 └─ repeat on (1, 2, 3)
-   └─ H gate
+   └─ H
 
 ```
 """

@@ -38,7 +38,7 @@ Return a [`RotationGate`](@ref) on X axis.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> Rx(0.1)
-rot(XGate, 0.1)
+rot(X, 0.1)
 ```
 """
 Rx(theta) = RotationGate(X, theta)
@@ -52,7 +52,7 @@ Return a [`RotationGate`](@ref) on Y axis.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> Ry(0.1)
-rot(YGate, 0.1)
+rot(Y, 0.1)
 ```
 """
 Ry(theta) = RotationGate(Y, theta)
@@ -66,7 +66,7 @@ Return a [`RotationGate`](@ref) on Z axis.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> Rz(0.1)
-rot(ZGate, 0.1)
+rot(Z, 0.1)
 ```
 """
 Rz(theta) = RotationGate(Z, theta)

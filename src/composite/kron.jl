@@ -66,8 +66,8 @@ and a `Y` gate on the `3`rd qubit.
 julia> kron(4, 1=>X, 3=>Y)
 nqubits: 4
 kron
-├─ 1=>X gate
-└─ 3=>Y gate
+├─ 1=>X
+└─ 3=>Y
 
 ```
 """
@@ -88,10 +88,10 @@ You can use kronecker product to composite small blocks to a large blocks.
 julia> kron(X, Y, Z, Z)
 nqubits: 4
 kron
-├─ 1=>X gate
-├─ 2=>Y gate
-├─ 3=>Z gate
-└─ 4=>Z gate
+├─ 1=>X
+├─ 2=>Y
+├─ 3=>Z
+└─ 4=>Z
 
 ```
 """
@@ -127,16 +127,16 @@ If you don't know the number of qubit yet, or you are just too lazy, it is fine.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> kron(put(1=>X) for _ in 1:2)
-(n -> kron(n, (n  ->  put(n, 1 => X gate)), (n  ->  put(n, 1 => X gate))))
+(n -> kron(n, (n  ->  put(n, 1 => X)), (n  ->  put(n, 1 => X))))
 
 julia> kron(X for _ in 1:2)
 nqubits: 2
 kron
-├─ 1=>X gate
-└─ 2=>X gate
+├─ 1=>X
+└─ 2=>X
 
 julia> kron(1=>X, 3=>Y)
-(n -> kron(n, 1 => X gate, 3 => Y gate))
+(n -> kron(n, 1 => X, 3 => Y))
 ```
 """
 Base.kron(blocks::Pair{<:Any,<:AbstractBlock}...) = @λ(n -> kron(n, blocks...))

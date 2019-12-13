@@ -44,7 +44,7 @@ This will create a repeat block which puts 4 X gates on each location.
 julia> repeat(4, X)
 nqubits: 4
 repeat on (1, 2, 3, 4)
-└─ X gate
+└─ X
 ```
 
 You can also specify the location
@@ -53,7 +53,7 @@ You can also specify the location
 julia> repeat(4, X, (1, 2))
 nqubits: 4
 repeat on (1, 2)
-└─ X gate
+└─ X
 ```
 
 But repeat won't copy the gate, thus, if it is a gate with parameter, e.g a `phase(0.1)`, the parameter

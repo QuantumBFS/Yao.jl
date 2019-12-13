@@ -51,16 +51,16 @@ julia> cc = subroutine(4, kron(X, Y), (1, 3))
 nqubits: 4
 Subroutine: (1, 3)
 └─ kron
-   ├─ 1=>X gate
-   └─ 2=>Y gate
+   ├─ 1=>X
+   └─ 2=>Y
 
 julia> pp = chain(4, put(1=>X), put(3=>Y))
 nqubits: 4
 chain
 ├─ put on (1)
-│  └─ X gate
+│  └─ X
 └─ put on (3)
-   └─ Y gate
+   └─ Y
 
 julia> apply!(copy(r), cc) ≈ apply!(copy(r), pp)
 true

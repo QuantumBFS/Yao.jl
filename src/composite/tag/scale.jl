@@ -11,16 +11,16 @@ export Scale, factor
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> 2 * X
-[scale: 2] X gate
+[scale: 2] X
 
 julia> im * Z
-[+im] Z gate
+[+im] Z
 
 julia> -im * Z
-[-im] Z gate
+[-im] Z
 
 julia> -Z
-[-] Z gate
+[-] Z
 ```
 """
 struct Scale{S<:Union{Number,Val},N,BT<:AbstractBlock{N}} <: TagBlock{BT,N}

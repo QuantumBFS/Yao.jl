@@ -73,12 +73,12 @@ Return a [`ControlBlock`](@ref) with number of active qubits `n` and control loc
 julia> control(4, (1, 2), 3=>X)
 nqubits: 4
 control(1, 2)
-└─ (3,) X gate
+└─ (3,) X
 
 julia> control(4, 1, 3=>X)
 nqubits: 4
 control(1)
-└─ (3,) X gate
+└─ (3,) X
 ```
 """
 control(total::Int, ctrl_locs, target::Pair) = ControlBlock{total}(Tuple(ctrl_locs), target)
@@ -94,10 +94,10 @@ Return a lambda that takes the number of total active qubits as input. See also
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> control((2, 3), 1=>X)
-(n -> control(n, (2, 3), 1 => X gate))
+(n -> control(n, (2, 3), 1 => X))
 
 julia> control(2, 1=>X)
-(n -> control(n, 2, 1 => X gate))
+(n -> control(n, 2, 1 => X))
 ```
 """
 control(ctrl_locs, target::Pair) = @λ(n -> control(n, ctrl_locs, target))
@@ -113,10 +113,10 @@ Return a lambda that takes a `Tuple` of control qubits locs as input. See also
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> control(1=>X)
-(ctrl_locs -> control(ctrl_locs, 1 => X gate))
+(ctrl_locs -> control(ctrl_locs, 1 => X))
 
 julia> control((2, 3) => YaoBlocks.ConstGate.CNOT)
-(ctrl_locs -> control(ctrl_locs, (2, 3) => CNOT gate))
+(ctrl_locs -> control(ctrl_locs, (2, 3) => CNOT))
 ```
 """
 control(target::Pair) = @λ(ctrl_locs -> control(ctrl_locs, target))
@@ -148,7 +148,7 @@ Return a speical [`ControlBlock`](@ref), aka CNOT gate with number of active qub
 julia> cnot(3, (2, 3), 1)
 nqubits: 3
 control(2, 3)
-└─ (1,) X gate
+└─ (1,) X
 
 julia> cnot(2, 1)
 (n -> cnot(n, 2, 1))

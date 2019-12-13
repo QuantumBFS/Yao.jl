@@ -29,7 +29,7 @@ location and block to put on.
 julia> put(4, 1=>X)
 nqubits: 4
 put on (1)
-└─ X gate
+└─ X
 ```
 
 If you want to put a multi-qubit gate on specific locations, you need to write down all possible locations.
@@ -39,8 +39,8 @@ julia> put(4, (1, 3)=>kron(X, Y))
 nqubits: 4
 put on (1, 3)
 └─ kron
-   ├─ 1=>X gate
-   └─ 2=>Y gate
+   ├─ 1=>X
+   └─ 2=>Y
 ```
 
 The outter locations creates a scope which make it seems to be a contiguous two qubits for the block inside `PutBlock`.
@@ -63,7 +63,7 @@ Lazy curried version of [`put`](@ref).
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> put(1=>X)
-(n -> put(n, 1 => X gate))
+(n -> put(n, 1 => X))
 ```
 """
 put(pa::Pair) = @λ(n -> put(n, pa))
@@ -124,7 +124,7 @@ Create a `n`-qubit [`Swap`](@ref) gate which swap `loc1` and `loc2`.
 julia> swap(4, 1, 2)
 nqubits: 4
 put on (1, 2)
-└─ SWAP gate
+└─ SWAP
 ```
 """
 swap(n::Int, loc1::Int, loc2::Int) = Swap{n}((loc1, loc2))

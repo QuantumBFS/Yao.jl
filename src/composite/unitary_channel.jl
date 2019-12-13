@@ -43,9 +43,9 @@ The unitary channel is defined as below in Kraus representation
 julia> UnitaryChannel([X, Y, Z])
 nqubits: 1
 unitary_channel
-├─ [1.0] X gate
-├─ [1.0] Y gate
-└─ [1.0] Z gate
+├─ [1.0] X
+├─ [1.0] Y
+└─ [1.0] Z
 ```
 
 Or with weights
@@ -54,9 +54,9 @@ Or with weights
 julia> UnitaryChannel([X, Y, Z], [0.1, 0.2, 0.7])
 nqubits: 1
 unitary_channel
-├─ [0.1] X gate
-├─ [0.2] Y gate
-└─ [0.7] Z gate
+├─ [0.1] X
+├─ [0.2] Y
+└─ [0.7] Z
 ```
 """
 struct UnitaryChannel{N,W<:AbstractWeights} <: CompositeBlock{N}
