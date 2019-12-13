@@ -194,7 +194,7 @@ color(::Type{<:GeneralMatrixBlock}) = :red
 
 print_block(io::IO, g::PhaseGate) = print(io, "phase(", g.theta, ")")
 print_block(io::IO, S::ShiftGate) = print(io, "shift(", S.theta, ")")
-print_block(io::IO, R::RotationGate) = print(io, "rot(", summary(content(R)), ", ", R.theta, ")")
+print_block(io::IO, R::RotationGate) = print(io, "rot(", content(R), ", ", R.theta, ")")
 print_block(io::IO, x::KronBlock) = printstyled(io, "kron"; bold = true, color = color(KronBlock))
 print_block(io::IO, x::ChainBlock) = printstyled(io, "chain"; bold = true, color = color(ChainBlock))
 print_block(io::IO, x::UnitaryChannel) = printstyled(io, "unitary_channel"; bold = true)
