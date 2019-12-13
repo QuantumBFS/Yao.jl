@@ -15,7 +15,7 @@ BitBasis = "0.6"
 Reexport = "0.2"
 YaoArrayRegister = "0.6"
 YaoBase = "0.13"
-YaoBlocks = "0.8"
+YaoBlocks = "0.8, 0.9"
 YaoSym = "0.3"
 julia = "1"
 
