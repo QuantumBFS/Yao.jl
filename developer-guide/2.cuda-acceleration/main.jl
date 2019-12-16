@@ -34,4 +34,3 @@
 # Only if two qubits at `locs` are $0$ and $1$ respectively, they are exchanged, otherwise do nothing.
 # Although $3/4$ of threads are idle and plenty room for optimization, from this example, we see how easy CUDA programming is with
 # [CUDAnative](https://github.com/JuliaGPU/CUDAnative.jl).
-# In appendix \App{app-reg}, we show another example of creating a register that echos received instructions.
