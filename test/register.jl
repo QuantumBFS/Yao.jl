@@ -187,7 +187,7 @@ end
 @testset "overlap between two focused reg" begin
     rega = rand_state(5)
     regb = rand_state(5)
-    reg1 = focus!(copy(rega), (3,2,4))
-    reg2 = focus!(copy(regb), (3,2,4))
-    @test reg1'*reg2 ≈ rega'*regb
+    reg1 = focus!(copy(rega), (3, 2, 4))
+    reg2 = focus!(copy(regb), (3, 2, 4))
+    @test reg1' * reg2 ≈ rega' * regb
 end
