@@ -207,16 +207,25 @@ end
 Calcuate the fidelity between `r1` and `r2`, if `r1` or `r2` is not pure state
 (`nactive(r) != nqubits(r)`), the fidelity is calcuated by purification. See also
 [`pure_state_fidelity`](@ref), [`purification_fidelity`](@ref).
+
+
+    fidelity'(pair_or_reg1, pair_or_reg2) -> (g1, g2)
+
+Obtain the gradient with respect to registers and circuit parameters.
+For pair input `ψ=>circuit`, the returned gradient is a pair of `gψ=>gparams`,
+with `gψ` the gradient of input state and `gparams` the gradients of circuit parameters.
+For register input, the return value is a register.
 """
 function YaoBase.fidelity(r1::ArrayReg{B}, r2::ArrayReg{B}) where {B}
     state1 = rank3(r1)
     state2 = rank3(r2)
     size(state1) == size(state2) || throw(DimensionMismatch("Register size not match!"))
     if size(state1, 2) == 1
-        return map(b -> pure_state_fidelity(state1[:, 1, b], state2[:, 1, b]), 1:B)
+        res = map(b -> pure_state_fidelity(state1[:, 1, b], state2[:, 1, b]), 1:B)
     else
-        return map(b -> purification_fidelity(state1[:, :, b], state2[:, :, b]), 1:B)
+        res = map(b -> purification_fidelity(state1[:, :, b], state2[:, :, b]), 1:B)
     end
+    return B == 1 ? res[] : res
 end
 
 YaoBase.tracedist(r1::ArrayReg{B}, r2::ArrayReg{B}) where {B} = tracedist(ρ(r1), ρ(r2))
