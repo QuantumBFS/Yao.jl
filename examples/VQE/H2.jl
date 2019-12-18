@@ -10,13 +10,6 @@ function hydrogen_hamiltonian()
     0.011280*Z1*Z2 + 0.397936*Z1 + 0.397936*Z2 + 0.180931*X1*X2
 end
 
-function get_gradient(circ, hamiltonian)
-    ψ = zero_state(2) |> circ
-    dψ = copy(ψ) |> hamiltonian
-    backward!((copy(ψ), dψ), circ)
-    gradient(circ)
-end
-
 using Flux: Optimise
 function train!(circ, hamiltonian; optimizer, niter::Int=100)
      params = parameters(circ)

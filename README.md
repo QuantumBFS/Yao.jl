@@ -1,23 +1,16 @@
 # QuAlgorithmZoo
 
-[![Build Status](https://travis-ci.org/QuantumBFS/QuAlgorithmZoo.jl.svg?branch=master)](https://travis-ci.org/QuantumBFS/QuAlgorithmZoo.jl)
-[![Build status](https://ci.appveyor.com/api/projects/status/wdbroxclvf1nhsen/branch/master?svg=true)](https://ci.appveyor.com/project/Roger-luo/qualgorithmzoo-jl/branch/master)
-[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://quantumbfs.github.io/QuAlgorithmZoo.jl/stable/)
-[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://quantumbfs.github.io/QuAlgorithmZoo.jl/latest/)
-
-A curated implementation of quantum algorithms with [Yao.jl](https://github.com/QuantumBFS/Yao.jl)
-
-*Note*: part of functionalities has been moved to [YaoExtensions](https://github.com/QuantumBFS/YaoExtensions.jl).
+A curated implementation of quantum algorithms with [Yao.jl](https://github.com/QuantumBFS/Yao.jl) @0.6
 
 ## Installation
 
 QuAlgorithmZoo.jl is not registered yet, please use the following command:
 
 ```julia
-pkg> add https://github.com/QuantumBFS/QuAlgorithmZoo.jl.git
+pkg> dev https://github.com/QuantumBFS/QuAlgorithmZoo.jl.git
 ```
 
-Disclaimer: **this package is still under development and needs further polish.**
+Then open directory '~/.julia/dev/QuAlgorithmZoo/examples' to find algorithms.
 
 ## Contents
 
