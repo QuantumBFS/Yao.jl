@@ -4,6 +4,7 @@ abstract type TrivialGate{N} <: PrimitiveBlock{N} end
 
 mat(::Type{T}, d::TrivialGate{N}) where {T,N} = IMatrix{1 << N,T}()
 Base.adjoint(g::TrivialGate) = g
+occupied_locs(g::TrivialGate) = ()
 
 """
     IdentityGate{N} <: TrivialGate{N}

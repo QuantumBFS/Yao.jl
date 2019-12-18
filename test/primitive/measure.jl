@@ -14,6 +14,9 @@ using StatsBase: mean
     @test g.results[1] == 0 ? st.state[end] == 0 : st.state[1] == 0
     g = Measure(4; locs = (1, 2), resetto = 2)
     @test g.postprocess isa ResetTo{BitStr64{2}}
+
+    m = Measure(4)
+    @test m.postprocess isa NoPostProcess
 end
 
 @testset "resetto" begin

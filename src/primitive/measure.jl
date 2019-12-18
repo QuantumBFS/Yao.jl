@@ -77,14 +77,14 @@ You can create a `Measure` block on given basis (default is the computational ba
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> Measure(4)
-Measure(4;postprocess=RemoveMeasured())
+Measure(4;postprocess=NoPostProcess())
 ```
 
 Or you could specify which qubits you are going to measure
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> Measure(4; locs=1:3)
-Measure(4;locs=(1, 2, 3), postprocess=RemoveMeasured())
+Measure(4;locs=(1, 2, 3), postprocess=NoPostProcess())
 ```
 
 by default this will collapse the current register to measure results.
@@ -106,7 +106,7 @@ julia> state(r)
  0.7071067811865475 + 0.0im
 
 julia> r |> Measure(3)
-Measure(3;postprocess=RemoveMeasured())
+Measure(3;postprocess=NoPostProcess())
 
 julia> state(r)
 1×1 Array{Complex{Float64},2}:
@@ -130,13 +130,17 @@ function Measure(
     resetto = nothing,
     remove = false,
 ) where {OT,LT,RNG}
-    if resetto !== nothing && remove == true
-        error("invalid keyword combination, expect resetto or remove, got (resetto=$resetto, remove=true)")
-    else
-        if resetto !== nothing
-            postprocess = ResetTo(BitStr64{locs isa AllLocs ? n : length(locs)}(resetto))
+    if resetto !== nothing
+        if remove
+            error("invalid keyword combination, expect resetto or remove, got (resetto=$resetto, remove=true)")
         else
+            postprocess = ResetTo(BitStr64{locs isa AllLocs ? n : length(locs)}(resetto))
+        end
+    else
+        if remove
             postprocess = RemoveMeasured()
+        else
+            postprocess = NoPostProcess()
         end
     end
     if locs isa AllLocs

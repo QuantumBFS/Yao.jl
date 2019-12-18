@@ -9,5 +9,6 @@ using Random, Test
     @test ishermitian(block)
     @test isreflexive(block)
     @test isunitary(block)
+    @test occupied_locs(block) == ()
     @test getiparams(block) == ()
 end
