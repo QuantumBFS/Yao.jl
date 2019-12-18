@@ -24,9 +24,9 @@ using YaoBlocks: ConstGate
     N = 4
     h = heisenberg(N)
     E = eigen(h |> mat |> Matrix).values[1]
-    c = YaoExtensions.variational_circuit(N, 5, [i=>mod(i,N)+1 for i=1:N], mode=:Merged) |> autodiff(:QC)
+    c = YaoExtensions.variational_circuit(N, 5)
     dispatch!(c, :random)
     vqe_solve!(c, h)
     E2 = expect(h, zero_state(N) |> c)
-    @test isapprox(E, E2, atol=1e-1)
+    @test isapprox(E, E2, rtol=1e-1)
 end

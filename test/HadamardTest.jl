@@ -20,11 +20,11 @@ single_swap_test(reg::AbstractRegister, ϕ::Real) = hadamard_test(SWAP, reg, ϕ)
     @test desired ≈ res
     desired = tr(Matrix(rho1)*Matrix(rho2)*Matrix(rho3)) |> real
     c = swap_test_circuit(2, 3, 0)
-    res = expect(put(7, 1=>Z), reduce(⊗, [reg3, reg2, reg1, zero_state(1)]) |> c) |> tr |> real
+    res = expect(put(7, 1=>Z), reduce(join, [reg3, reg2, reg1, zero_state(1)]) |> c) |> tr |> real
     @test desired ≈ res
     desired = tr(Matrix(rho1)*Matrix(rho2)*Matrix(rho3)) |> imag
     c = swap_test_circuit(2, 3, -π/2)
-    res = expect(put(7, 1=>Z), reduce(⊗, [reg3, reg2, reg1, zero_state(1)]) |> c) |> tr |> real
+    res = expect(put(7, 1=>Z), reduce(join, [reg3, reg2, reg1, zero_state(1)]) |> c) |> tr |> real
     @test desired ≈ res
 end
 
@@ -36,7 +36,7 @@ end
     @test hadamard_test(U, reg, 0.0) ≈ real(expect(U, reg))
     @test hadamard_test(U, reg, -π/2) ≈ imag(expect(U, reg))
 
-    reg = zero_state(2) |> singlet_block()
+    reg = zero_state(2) |> YaoExtensions.singlet_block()
     @test single_swap_test(reg, 0) ≈ -1
 
     reg = zero_state(2)

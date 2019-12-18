@@ -39,10 +39,9 @@ variational quantum eigensolver, faithful simulation with optimizer Adam(lr=0.01
 """
 function vqe_solve!(circuit::AbstractBlock{N}, hamiltonian::AbstractBlock; niter::Int=100) where N
     optimizer = Adam(lr=0.01)
-    dbs = collect_blocks(Diff, circuit)
     params = parameters(circuit)
     for i = 1:niter
-        grad = opdiff.(()->zero_state(N) |> circuit, dbs, Ref(hamiltonian))
+        grad = expect'(hamiltonian, zero_state(N) => circuit).second
         dispatch!(circuit, update!(params, grad, optimizer))
         println("Step $i, Energy = $(expect(hamiltonian, zero_state(N) |> circuit))")
     end

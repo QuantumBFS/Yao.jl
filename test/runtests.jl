@@ -14,7 +14,3 @@ end
 @testset "hadamard test" begin
     include("HadamardTest.jl")
 end
-
-@testset "QSVD" begin
-    include("QSVD.jl")
-end
