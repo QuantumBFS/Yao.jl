@@ -215,7 +215,7 @@ function measure!(
     postprocess::PostProcess,
     op,
     reg::AbstractRegister,
-    locs::Union{Tuple,Vector,Integer,UnitRange};
+    locs,
     kwargs...,
 ) where {MODE}
     nbit = nactive(reg)
@@ -232,7 +232,7 @@ end
 function measure(
     op,
     reg::AbstractRegister,
-    locs::Union{Tuple,Vector,Integer,UnitRange};
+    locs,
     kwargs...,
 ) where {MODE}
     nbit = nactive(reg)
