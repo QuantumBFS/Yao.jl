@@ -211,13 +211,7 @@ measure(reg::AbstractRegister, locs; kwargs...) = measure(ComputationalBasis(), 
 measure(reg::AbstractRegister; kwargs...) = measure(ComputationalBasis(), reg, AllLocs(); kwargs...)
 
 # focus! to specify locations, we that we only need to consider full-space measure in the future.
-function measure!(
-    postprocess::PostProcess,
-    op,
-    reg::AbstractRegister,
-    locs;
-    kwargs...,
-) where {MODE}
+function measure!(postprocess::PostProcess, op, reg::AbstractRegister, locs; kwargs...) where {MODE}
     nbit = nactive(reg)
     focus!(reg, locs)
     res = measure!(postprocess, op, reg, AllLocs(); kwargs...)
@@ -229,12 +223,7 @@ function measure!(
     res
 end
 
-function measure(
-    op,
-    reg::AbstractRegister,
-    locs;
-    kwargs...,
-) where {MODE}
+function measure(op, reg::AbstractRegister, locs; kwargs...) where {MODE}
     nbit = nactive(reg)
     focus!(reg, locs)
     res = measure(op, reg, AllLocs(); kwargs...)
