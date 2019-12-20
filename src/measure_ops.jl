@@ -19,6 +19,50 @@ function eigenbasis(op::AbstractBlock{N}) where {N}
     end
 end
 
+for BT in []
+    @eval function eigenbasis(op::$BT)
+        @warn "eigenbasis on blocktype `$($BT)` calls into the fallback implementation, which might be slow. Try using `kron`, `repeat` if items commute to each oher."
+        invoke(eigenbasis, Tuple{AbstractBlock}, op)
+    end
+end
+
+"""
+Return true if operators commute to each other.
+"""
+function simple_commute_eachother(ops::Vector{<:AbstractBlock{N}}) where N
+    occ = zeros(Bool, N)
+    for op in ops
+        for i in occupied_locs(op)
+            if occ[i]
+                return false
+            else
+                occ[i] = true
+            end
+        end
+    end
+    return true
+end
+
+function eigenbasis(op::ChainBlock{N}) where N
+    # detect commute operators
+    if simple_commute_eachother(subblocks(op))
+        E = chain(N)
+        blks = chain(N)
+        for b in subblocks(op)
+            Ei, Vi = eigenbasis(b)
+            push!(E, Ei)
+            push!(blks, Vi)
+        end
+        return E, blks
+    else
+        if N > 5
+            @warn "eigenbasis on blocktype `ChainBlock` (size $N) calls into the fallback implementation, which might be slow. Try using `kron`, `repeat` if items commute to each oher. If this behavior is not what you expected, please file an issue here: https://github.com/QuantumBFS/Yao.jl/issues."
+        end
+        invoke(eigenbasis, Tuple{AbstractBlock}, op)
+    end
+end
+
+
 for GT in [:PutBlock, :RepeatedBlock, :ControlBlock, :Daggered]
     @eval function eigenbasis(op::$GT)
         E, V = eigenbasis(content(op))

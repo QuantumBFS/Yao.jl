@@ -111,16 +111,3 @@ end
         )
     end
 end
-
-AA(i, j) = control(i, j => shift(2π / (1 << (i - j + 1))))
-B(n, i) = chain(n, i == j ? put(i => H) : AA(j, i) for j in i:n)
-qft(n) = chain(B(n, i) for i in 1:n)
-
-@testset "system test" begin
-    nbit = 4
-    c = qft(nbit)
-    H = repeat(nbit, X, 1:nbit)
-    adjin, adjparams = expect'(H, zero_state(nbit) => c)
-    numgrad = YaoBlocks.AD.ng(x -> expect(H, zero_state(nbit) |> dispatch!(c, x)), parameters(c))
-    @test adjparams ≈ vec(numgrad)
-end

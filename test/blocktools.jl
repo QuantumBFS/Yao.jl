@@ -71,3 +71,10 @@ end
     @test reg.state[:, 1] == [0, 1]
     @test reg.state[:, 2] == [1, 0]
 end
+
+@testset "operator fidelity" begin
+    @test operator_fidelity(H, H) ≈ 1
+    @test operator_fidelity(im*H, X) ≈ sqrt(0.5)
+    @test operator_fidelity(im*H, Z) ≈ sqrt(0.5)
+    @test operator_fidelity(H, Y) ≈ 0
+end

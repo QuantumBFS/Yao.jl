@@ -79,10 +79,13 @@ expect(op::AbstractBlock, dm::DensityMatrix{1}) = sum(mat(op) .* dropdims(dm.sta
 
 Get the expectation value of an operator, the second parameter can be a register `reg` or a pair of input register and circuit `reg => circuit`.
 
-    expect'(op::AbstractBlock, reg=>circuit) -> Vector
+expect'(op::AbstractBlock, reg=>circuit) -> Pair
+expect'(op::AbstractBlock, reg) -> AbstracRegister
 
-Obtain the gradient with respect to circuit parameters.
-The return value is a pair of `gψ=>gparams`, with `gψ` the gradient of input state and `gparams` the gradients of circuit parameters.
+Obtain the gradient with respect to registers and circuit parameters.
+For pair input, the second return value is a pair of `gψ=>gparams`,
+with `gψ` the gradient of input state and `gparams` the gradients of circuit parameters.
+For register input, the return value is a register.
 
 !!! note
 
@@ -135,3 +138,25 @@ expect(op::Scale, reg::AbstractRegister{1}) = invoke(expect, Tuple{Scale,Abstrac
 
 # obtaining Dense Matrix of a block
 LinearAlgebra.Matrix(blk::AbstractBlock) = Matrix(mat(blk))
+
+"""
+    operator_fidelity(b1::AbstractBlock, b2::AbstractBlock) -> Number
+
+Operator fidelity defined as
+
+```math
+F^2 = \\frac{1}{d^2}\\left[{\\rm Tr}(b1^\\dagger b2)\\right]
+```
+
+Here, `d` is the size of the Hilbert space. Note this quantity is independant to global phase.
+See arXiv: 0803.2940v2, Equation (2) for reference.
+"""
+@interface function operator_fidelity(b1::AbstractBlock, b2::AbstractBlock)
+    U1 = mat(b1)
+    U2 = mat(b2)
+    @static if isdefined(LuxurySparse, :hadamard_product)
+        abs(sum(LuxurySparse.hadamard_product(conj(U1), U2)))/size(U1,1)
+    else
+        abs(sum(conj(U1) .* U2))/size(U1,1)
+    end
+end

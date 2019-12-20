@@ -22,6 +22,7 @@ include("outerproduct_and_projection.jl")
 include("adjroutines.jl")
 include("mat_back.jl")
 include("apply_back.jl")
+include("specializes.jl")
 include("gradcheck.jl")
 
 end

@@ -20,3 +20,7 @@ end
 @testset "mat_back" begin
     include("mat_back.jl")
 end
+
+@testset "specializes" begin
+    include("specializes.jl")
+end

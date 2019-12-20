@@ -22,6 +22,8 @@ end
         rot(SWAP, 0.5),
         time_evolve(kron(X, X), 0.5),
         3 * put(3, 2 => X),
+        chain(10, put(2=>X), chain(4=>Y)),
+        chain(10, put(2=>X), chain(2=>Y)),
     ]
         @show op
         @test check_eigenbasis(op)
@@ -103,6 +105,7 @@ end
         +(put(nbit, 2 => X), put(nbit, 1 => im * Rx(π))),
         2.8 * put(nbit, 1 => X),
         chain(nbit, put(nbit, 3 => X), put(nbit, 1 => Z)),
+        chain(nbit, put(nbit, 3 => X), put(nbit, 3 => Z)),
         cache(put(nbit, 2 => X)),
         Daggered(put(nbit, 2 => im * Rx(π))),
     ]
@@ -115,4 +118,9 @@ end
         res = measure!(op, reg)
         @test isapprox(res, vec(sum(measure(op, reg; nshots = 100); dims = 1)) / 100, rtol = 0.1)
     end
+end
+
+@testset "commute to eachother" begin
+    @test YaoBlocks.simple_commute_eachother([put(5, 2=>X), put(5, 3=>Y)])
+    @test !YaoBlocks.simple_commute_eachother([put(5, 2=>X), put(5, 2=>Y)])
 end
