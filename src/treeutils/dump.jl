@@ -20,11 +20,11 @@ function dump_gate(blk::ChainBlock)
 end
 
 function dump_gate(blk::RotationGate)
-    :(rot($(dump_gate(blk.block)), $(blk.theta)))
+    :(rot($(dump_gate(blk.block)), $(tokenize_param(blk.theta))))
 end
 
 function dump_gate(blk::TimeEvolution)
-    :(time($(blk.dt)) => $(dump_gate(blk.H)))
+    :(time($(tokenize_param(blk.dt))) => $(dump_gate(blk.H)))
 end
 
 function dump_gate(blk::PutBlock)
@@ -82,6 +82,8 @@ function dump_gate(blk::Subroutine)
     :(focus($(blk.locs...)) => $(dump_gate(blk.content)))
 end
 
+tokenize_param(param::Number) = param
+
 yaotoscript(block::AbstractBlock{N}) where {N} =
     Expr(:block, :(nqubits = $N), dump_gate(block)) |> rmlines
 function yaotoscript(block::ChainBlock{N}) where {N}
@@ -89,17 +91,6 @@ function yaotoscript(block::ChainBlock{N}) where {N}
     Expr(:let, Expr(:block, :(nqubits = $N), :(version = "0.6")), ex)
 end
 yaotofile(filename::String, block) = write(filename, string(yaotoscript(block)))
-
-for (G, F) in [(:ShiftGate, :shift), (:PhaseGate, :phase)]
-    fname = QuoteNode(F)
-    @eval function dump_gate(blk::$G)
-        vars = [getproperty(blk, x) for x in fieldnames(ShiftGate)]
-        Expr(:call, $fname, vars...)
-    end
-    @eval function gate_expr(::Val{$(QuoteNode(F))}, args, info)
-        Expr(:call, $fname, render_arg.(args, Ref(info))...)
-    end
-end
 
 macro dumpload_fallback(blocktype, fname)
     quote

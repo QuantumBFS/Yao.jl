@@ -49,6 +49,14 @@ mutable struct ParseInfo
     version::String
 end
 
+function parse_param(x)
+    @match x begin
+        ::Number => x
+        :(:π) => x
+        _ => error("can not parse parameter $x.")
+    end
+end
+
 function parse_ex(ex, info::ParseInfo)
     @match ex begin
         :(version = $vnumber) => (info.version = String(vnumber); nothing)
@@ -62,8 +70,8 @@ function parse_ex(ex, info::ParseInfo)
             :(repeat($(info.nbit), $(parse_ex(g, ParseInfo(1, info.version))), $loc))
         end
         :(cache($g)) => :(cache($(parse_ex(g, info))))
-        :(rot($g, $theta)) => :(rot($(parse_ex(g, info)), $(Number(theta))))
-        :(time($dt) => $h) => :(time_evolve($(parse_ex(h, info)), $(Number(dt))))
+        :(rot($g, $theta)) => :(rot($(parse_ex(g, info)), $(parse_param(theta))))
+        :(time($dt) => $h) => :(time_evolve($(parse_ex(h, info)), $(parse_param(dt))))
         :($exloc => Measure) => parse_ex(:($exloc => Measure(nothing) => nothing), info)
         :($exloc => Measure($op)) => parse_ex(:($exloc => Measure($op) => nothing), info)
         :($exloc => Measure => $post) => parse_ex(:($exloc => Measure(nothing) => $post), info)
@@ -189,4 +197,14 @@ render_arg(ex, info) = @match ex begin
 
     # try parse a gate
     _ => parse_ex(ex, info)
+end
+
+for (G, F) in [(:ShiftGate, :shift), (:PhaseGate, :phase)]
+    fname = QuoteNode(F)
+    @eval function dump_gate(blk::$G)
+        Expr(:call, $fname, tokenize_param(blk.theta))
+    end
+    @eval function gate_expr(::Val{$(QuoteNode(F))}, args, info)
+        Expr(:call, $fname, parse_param(args[1]))
+    end
 end
