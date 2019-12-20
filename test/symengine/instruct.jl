@@ -39,7 +39,6 @@ end
     @vars θ
     res = ket"01"
     # res  |> rot(SWAP, θ)
-    @test_broken [
-        ComplexF64(subs(si, θ => 0.5)) for si in res.state
-    ] ≈ (product_state(bit"01") |> rot(SWAP, 0.5)).state
+    @test_broken [ComplexF64(subs(si, θ => 0.5)) for si in res.state] ≈
+                 (product_state(bit"01") |> rot(SWAP, 0.5)).state
 end
