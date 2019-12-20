@@ -29,7 +29,7 @@ end
 """
 Return true if operators commute to each other.
 """
-function simple_commute_eachother(ops::Vector{<:AbstractBlock{N}}) where N
+function simple_commute_eachother(ops::Vector{<:AbstractBlock{N}}) where {N}
     occ = zeros(Bool, N)
     for op in ops
         for i in occupied_locs(op)
@@ -43,7 +43,7 @@ function simple_commute_eachother(ops::Vector{<:AbstractBlock{N}}) where N
     return true
 end
 
-function eigenbasis(op::ChainBlock{N}) where N
+function eigenbasis(op::ChainBlock{N}) where {N}
     # detect commute operators
     if simple_commute_eachother(subblocks(op))
         E = chain(N)

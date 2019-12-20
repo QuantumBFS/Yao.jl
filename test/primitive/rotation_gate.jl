@@ -12,10 +12,7 @@ end
 
 @testset "test matrix" begin
     theta = 2.0
-    for (
-        DIRECTION,
-        MAT,
-    ) in [
+    for (DIRECTION, MAT) in [
         (X, [cos(theta / 2) -im * sin(theta / 2); -im * sin(theta / 2) cos(theta / 2)]),
         (Y, [cos(theta / 2) -sin(theta / 2); sin(theta / 2) cos(theta / 2)]),
         (Z, [exp(-im * theta / 2) 0; 0 exp(im * theta / 2)]),

@@ -18,11 +18,8 @@ end
 @test parameters(MockedTag(cache(phase(0.1)))) == [0.1]
 @test parameters(MockedTag(Rx(0.1))) == [0.1]
 
-@test occupied_locs(MockedTag(chain(
-    3,
-    put(1 => X),
-    put(3 => X),
-))) == occupied_locs(chain(3, put(1 => X), put(3 => X)))
+@test occupied_locs(MockedTag(chain(3, put(1 => X), put(3 => X)))) ==
+      occupied_locs(chain(3, put(1 => X), put(3 => X)))
 
 @testset "scale apply" begin
     # factor

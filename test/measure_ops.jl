@@ -22,8 +22,8 @@ end
         rot(SWAP, 0.5),
         time_evolve(kron(X, X), 0.5),
         3 * put(3, 2 => X),
-        chain(10, put(2=>X), chain(4=>Y)),
-        chain(10, put(2=>X), chain(2=>Y)),
+        chain(10, put(2 => X), chain(4 => Y)),
+        chain(10, put(2 => X), chain(2 => Y)),
     ]
         @show op
         @test check_eigenbasis(op)
@@ -121,6 +121,6 @@ end
 end
 
 @testset "commute to eachother" begin
-    @test YaoBlocks.simple_commute_eachother([put(5, 2=>X), put(5, 3=>Y)])
-    @test !YaoBlocks.simple_commute_eachother([put(5, 2=>X), put(5, 2=>Y)])
+    @test YaoBlocks.simple_commute_eachother([put(5, 2 => X), put(5, 3 => Y)])
+    @test !YaoBlocks.simple_commute_eachother([put(5, 2 => X), put(5, 2 => Y)])
 end

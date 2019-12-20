@@ -16,13 +16,14 @@ function (::Adjoint{Any,typeof(expect)})(op::AbstractBlock, reg::ArrayReg)
     copy(reg) |> op
 end
 
-_eval(p::Pair{<:AbstractRegister, <:AbstractBlock}) = copy(p.first) |> p.second
+_eval(p::Pair{<:AbstractRegister,<:AbstractBlock}) = copy(p.first) |> p.second
 _eval(reg::AbstractRegister) = reg
 YaoBase.fidelity(p1, p2) = fidelity(_eval(p1), _eval(p2))
 
 function (::Adjoint{Any,typeof(fidelity)})(
-                reg1::Union{ArrayReg, Pair{<:ArrayReg, <:AbstractBlock}},
-                reg2::Union{ArrayReg, Pair{<:ArrayReg, <:AbstractBlock}})
+    reg1::Union{ArrayReg,Pair{<:ArrayReg,<:AbstractBlock}},
+    reg2::Union{ArrayReg,Pair{<:ArrayReg,<:AbstractBlock}},
+)
     if reg1 isa Pair
         in1, c1 = reg1
         out1 = copy(in1) |> c1
@@ -65,8 +66,7 @@ function (::Adjoint{Any,typeof(fidelity)})(
     return res1, res2
 end
 
-function (::Adjoint{Any,typeof(operator_fidelity)})(
-            b1::AbstractBlock, b2::AbstractBlock)
+function (::Adjoint{Any,typeof(operator_fidelity)})(b1::AbstractBlock, b2::AbstractBlock)
     U1 = mat(b1)
     U2 = mat(b2)
     @static if isdefined(LuxurySparse, :hadamard_product)
@@ -74,8 +74,8 @@ function (::Adjoint{Any,typeof(operator_fidelity)})(
     else
         s = sum(conj(U1) .* U2)
     end
-    adjs = conj(s)/abs(s)/size(U1,1)
-    adjm1 = U2*adjs
-    adjm2 = U1*conj(adjs)
+    adjs = conj(s) / abs(s) / size(U1, 1)
+    adjm1 = U2 * adjs
+    adjm2 = U1 * conj(adjs)
     mat_back(b1, adjm1), mat_back(b2, adjm2)
 end

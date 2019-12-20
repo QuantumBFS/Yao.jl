@@ -8,14 +8,8 @@ export Measure, MeasureAndReset, AllLocs, ComputationalBasis, chmeasureoperator
 
 Measure operator.
 """
-mutable struct Measure{
-    N,
-    K,
-    OT,
-    LT<:Union{NTuple{K,Int},AllLocs},
-    PT<:PostProcess,
-    RNG,
-} <: PrimitiveBlock{N}
+mutable struct Measure{N,K,OT,LT<:Union{NTuple{K,Int},AllLocs},PT<:PostProcess,RNG} <:
+               PrimitiveBlock{N}
     rng::RNG
     operator::OT
     locations::LT
