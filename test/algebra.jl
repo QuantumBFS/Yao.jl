@@ -66,5 +66,5 @@ end
 
 @testset "empty add" begin
     c = Add{4}()
-    @test mat(Float64, c) == zeros(16,16)
+    @test mat(Float64, c) == zeros(16, 16)
 end
