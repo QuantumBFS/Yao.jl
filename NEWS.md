@@ -80,3 +80,5 @@
 - add randn! and rand! and zero (#23) ([GiggleLiu](https://github.com/GiggleLiu))
 - fix-nightly-ambiguity-error (#22) ([GiggleLiu](https://github.com/GiggleLiu))
 - fix-diag to sparse conversion (#21) ([GiggleLiu](https://github.com/GiggleLiu))
+- Specialize Broadcast (#33) ([Roger-luo](https://github.com/Roger-luo))
+- polish sparse interface, new hadamard product (#29) ([GiggleLiu](https://github.com/GiggleLiu))
