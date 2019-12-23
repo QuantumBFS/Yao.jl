@@ -2,4 +2,4 @@
 
 ## Overview of the Architecture
 
-![stack](assets/images/stack.png)
+![stack](../assets/images/stack.png)
