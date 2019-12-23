@@ -154,9 +154,5 @@ See arXiv: 0803.2940v2, Equation (2) for reference.
 @interface function operator_fidelity(b1::AbstractBlock, b2::AbstractBlock)
     U1 = mat(b1)
     U2 = mat(b2)
-    @static if isdefined(LuxurySparse, :hadamard_product)
-        abs(sum(LuxurySparse.hadamard_product(conj(U1), U2))) / size(U1, 1)
-    else
-        abs(sum(conj(U1) .* U2)) / size(U1, 1)
-    end
+    return abs(sum(conj(U1) .* U2)) / size(U1, 1)
 end

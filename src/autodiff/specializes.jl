@@ -69,11 +69,7 @@ end
 function (::Adjoint{Any,typeof(operator_fidelity)})(b1::AbstractBlock, b2::AbstractBlock)
     U1 = mat(b1)
     U2 = mat(b2)
-    @static if isdefined(LuxurySparse, :hadamard_product)
-        s = sum(LuxurySparse.hadamard_product(conj(U1), U2))
-    else
-        s = sum(conj(U1) .* U2)
-    end
+    s = sum(conj(U1) .* U2)
     adjs = conj(s) / abs(s) / size(U1, 1)
     adjm1 = U2 * adjs
     adjm2 = U1 * conj(adjs)
