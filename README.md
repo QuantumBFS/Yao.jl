@@ -86,19 +86,8 @@ Please read our [contribution guide](https://github.com/QuantumBFS/Yao.jl/blob/m
 
 This project is an effort of QuantumBFS, an open source organization for quantum science. Yao is currently maintained by [Xiu-Zhe (Roger) Luo](https://github.com/Roger-luo) and [Jin-Guo Liu](https://github.com/GiggleLiu) with contributions from open source community. All the contributors are listed in the [contributors](https://github.com/QuantumBFS/Yao.jl/graphs/contributors).
 
-## Papers Citing Yao
-
-> Variational Quantum Eigensolver with Fewer Qubits,
-> Jin-Guo Liu, Yi-Hong Zhang, Yuan Wan, Lei Wang,
-> https://arxiv.org/abs/1902.02663
-
-> Learning and inference on generative adversarial quantum circuits,
-> Jinfeng Zeng, Yufeng Wu, Jin-Guo Liu, Lei Wang, and Jiangping Hu,
-> Phys. Rev. A 99, 052306 – Published 6 May 2019
-
-> Parameterized quantum circuits as machine learning models,
-> Marcello Benedetti, Erika Lloyd, and Stefan Sack
-> https://arxiv.org/pdf/1906.07682.pdf
+## Cite Yao
+If you use Yao in teaching and research, please [cite our work](CITATION.bib).
 
 ## License
 
