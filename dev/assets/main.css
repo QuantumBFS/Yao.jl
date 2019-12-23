@@ -34,3 +34,7 @@
 html.theme--documenter-dark body {
     background-color: inherit!important;
 }
+
+#documenter .docs-sidebar ul.docs-menu {
+    flex-grow: 0!important;
+}
