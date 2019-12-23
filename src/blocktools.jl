@@ -119,7 +119,7 @@ function expect(op::AbstractBlock, reg::AbstractRegister{B}) where {B}
 end
 
 #function expect(op::Add, reg::AbstractRegister{B}) where B
-    #sum(opi -> expect(opi, reg), op)
+#sum(opi -> expect(opi, reg), op)
 #end
 
 function expect(op::Add, reg::AbstractRegister{1})
