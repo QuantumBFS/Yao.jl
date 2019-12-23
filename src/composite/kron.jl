@@ -72,6 +72,7 @@ kron
 ```
 """
 Base.kron(total::Int, blocks::Pair{<:Any,<:AbstractBlock}...) = KronBlock{total}(blocks...)
+Base.kron(total::Int) = KronBlock{total}()
 
 """
     kron(blocks::AbstractBlock...)
@@ -149,6 +150,7 @@ cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
 color(::Type{T}) where {T<:KronBlock} = :cyan
 
 function mat(::Type{T}, k::KronBlock{N,M}) where {T,N,M}
+    M == 0 && return IMatrix{1<<N, T}()
     ntrail = N - last(last(k.locs))  # number of trailing bits
     num_bit_list = map(i -> first(k.locs[i]) - (i > 1 ? last(k.locs[i-1]) : 0) - 1, 1:M)
     return reduce(

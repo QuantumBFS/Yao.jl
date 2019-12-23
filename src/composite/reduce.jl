@@ -18,7 +18,10 @@ end
 Add{N}(blocks) where {N} = Add{N}(collect(AbstractBlock{N}, blocks))
 Add(blocks::AbstractBlock{N}...) where {N} = Add{N}(blocks)
 
-mat(::Type{T}, x::Add) where {T} = mapreduce(x -> mat(T, x), +, x.list)
+function mat(::Type{T}, x::Add{N}) where {N,T}
+    length(x.list) == 0 && return Diagonal(zeros(T, 1<<N))
+    mapreduce(x -> mat(T, x), +, x.list)
+end
 
 chsubblocks(x::Add{N}, it) where {N} = Add{N}(it)
 
