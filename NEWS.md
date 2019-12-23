@@ -8,6 +8,7 @@
 - unitary channel support in [YaoBlocks#101](https://github.com/QuantumBFS/YaoBlocks.jl/pull/101)
 - better `measure` with operators in [YaoBlocks#100](https://github.com/QuantumBFS/YaoBlocks.jl/pull/100)
 - **yao script** a mark up language for quantum circuit in [YaoBlocks#92](https://github.com/QuantumBFS/YaoBlocks.jl/pull/92)
+- new fidelity grad and operator fidelity grad. [YaoBlocks#109](https://github.com/QuantumBFS/YaoBlocks.jl/pull/109) ([GiggleLiu](https://github.com/GiggleLiu))
 
 ## Documentation Improvements
 - new website! [yaoquantum.org](http://yaoquantum.org/)
