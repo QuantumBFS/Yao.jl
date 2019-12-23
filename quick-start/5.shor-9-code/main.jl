@@ -21,7 +21,7 @@ shor(E) = chain(9,
 )
 
 # Now we can check whether it can correct a given error by doing symbolic computation
-# on a 1-qubit quantum state ``α|0⟩ + β|1⟩`` and an arbitrary weight-9 error.
+# on an arbitrary 1-qubit pure quantum state ``α|0⟩ + β|1⟩`` and a specific weight-9 error.
 
 @vars α β
 s = α * ket"0" + β * ket"1" |> addbits!(8)
