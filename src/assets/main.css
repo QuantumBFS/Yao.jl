@@ -36,5 +36,5 @@ html.theme--documenter-dark body {
 }
 
 #documenter .docs-sidebar ul.docs-menu {
-    flex-grow: 0;
+    flex-grow: 0 !important;
 }
