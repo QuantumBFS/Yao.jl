@@ -52,7 +52,7 @@ pkg> add Yao
 For current master
 
 ```julia
-pkg> add Yao#master YaoBlocks#master YaoSym#master
+pkg> add Yao#master
 ```
 
 If you have problem to install the package, please [file us an issue](https://github.com/QuantumBFS/Yao.jl/issues/new).
