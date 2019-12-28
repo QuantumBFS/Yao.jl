@@ -87,7 +87,16 @@ Please read our [contribution guide](https://github.com/QuantumBFS/Yao.jl/blob/m
 This project is an effort of QuantumBFS, an open source organization for quantum science. Yao is currently maintained by [Xiu-Zhe (Roger) Luo](https://github.com/Roger-luo) and [Jin-Guo Liu](https://github.com/GiggleLiu) with contributions from open source community. All the contributors are listed in the [contributors](https://github.com/QuantumBFS/Yao.jl/graphs/contributors).
 
 ## Cite Yao
-If you use Yao in teaching and research, please [cite our work](CITATION.bib).
+If you use Yao in teaching and research, please cite our work:
+
+```bib
+@article{YaoFramework2019,
+  title={Yao.jl: Extensible, Efficient Framework for Quantum Algorithm Design},
+  author={Xiu-Zhe Luo and Jin-Guo Liu and Pan Zhang and Lei Wang},
+  journal={arXiv preprint arXiv:1912.10877},
+  year={2019}
+}
+```
 
 ## License
 
