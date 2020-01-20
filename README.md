@@ -22,7 +22,7 @@ Yao is an open source framework that aims to empower quantum information researc
 
 ## Try your first Yao program
 
-A 3 line [Quantum Fourier Transformation](https://quantumbfs.github.io/Yao.jl/latest/examples/QFT/) with [Quantum Blocks](https://quantumbfs.github.io/Yao.jl/latest/man/blocks/):
+A 3 line [Quantum Fourier Transformation](http://tutorials.yaoquantum.org/dev/generated/quick-start/2.qft-phase-estimation/#example-qft-1) with [Quantum Blocks](http://docs.yaoquantum.org/dev/man/blocks.html):
 
 ```julia
 A(i, j) = control(i, j=>shift(2π/(1<<(i-j+1))))
