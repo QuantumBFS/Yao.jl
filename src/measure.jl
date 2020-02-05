@@ -9,7 +9,7 @@ end
 function _measure(rng::AbstractRNG, pl::AbstractMatrix, nshots::Int)
     B = size(pl, 2)
     res = Matrix{BitStr64{log2i(size(pl, 1))}}(undef, nshots, B)
-    for ib in 1:B
+    for ib = 1:B
         @inbounds res[:, ib] = _measure(rng, view(pl, :, ib), nshots)
     end
     return res
@@ -45,7 +45,7 @@ function YaoBase.measure!(
     nstate = similar(reg.state, 1 << nremain(reg), B)
     pl = dropdims(sum(state .|> abs2, dims = 2), dims = 2)
     res = Vector{BitStr64{nactive(reg)}}(undef, B)
-    @inbounds for ib in 1:B
+    @inbounds for ib = 1:B
         ires = _measure(rng, view(pl, :, ib), 1)[]
         # notice ires is `BitStr` type, can be use as indices directly.
         nstate[:, ib] = view(state, Int64(ires) + 1, :, ib) ./ sqrt(pl[Int64(ires)+1, ib])
@@ -67,7 +67,7 @@ function YaoBase.measure!(
     res = measure!(RemoveMeasured(), reg; rng = rng)
     _nstate = reshape(reg.state, :, B)
     indices = Int64.(res) .+ 1
-    for ib in 1:B
+    for ib = 1:B
         @inbounds nstate[indices[ib], :, ib] .= view(_nstate, :, ib)
     end
     reg.state = reshape(nstate, size(state, 1), :)

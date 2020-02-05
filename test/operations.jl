@@ -19,12 +19,10 @@ end
     reg4 = (reg1 + reg2)'
 
     @test statevec(reg3) == onehot(ComplexF64, nbit, 4) + onehot(ComplexF64, nbit, 0)
-    @test statevec(
-        reg3 |> normalize!,
-    ) == (onehot(ComplexF64, nbit, 4) + onehot(ComplexF64, nbit, 0)) / sqrt(2)
-    @test statevec(
-        reg4 |> normalize!,
-    ) == (onehot(ComplexF64, nbit, 4) + onehot(ComplexF64, nbit, 0))' / sqrt(2)
+    @test statevec(reg3 |> normalize!) ==
+          (onehot(ComplexF64, nbit, 4) + onehot(ComplexF64, nbit, 0)) / sqrt(2)
+    @test statevec(reg4 |> normalize!) ==
+          (onehot(ComplexF64, nbit, 4) + onehot(ComplexF64, nbit, 0))' / sqrt(2)
     @test (reg1 + reg2 - reg1) == reg2
     @test reg1' + reg2' - reg1' == reg2'
     @test isnormalized(reg4)

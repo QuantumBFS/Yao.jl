@@ -5,7 +5,7 @@ export ArrayReg,
     AdjointArrayReg,
     ArrayRegOrAdjointArrayReg,
     transpose_storage,
-    # YaoBase
+# YaoBase
     nqubits,
     nactive,
     nremain,
@@ -20,18 +20,18 @@ export ArrayReg,
     collapseto!,
     fidelity,
     tracedist,
-    # YaoBase deprecated
+# YaoBase deprecated
     addbit!,
     reset!,
-    # additional
+# additional
     state,
     statevec,
     relaxedvec,
     rank3,
-    # BitBasis
+# BitBasis
     @bit_str,
     hypercubic,
-    # initialization
+# initialization
     product_state,
     zero_state,
     rand_state,
@@ -50,7 +50,8 @@ mutable struct ArrayReg{B,T,MT<:AbstractMatrix{T}} <: AbstractRegister{B}
 end
 
 const AdjointArrayReg{B,T,MT} = AdjointRegister{B,ArrayReg{B,T,MT}}
-const ArrayRegOrAdjointArrayReg{B,T,MT} = Union{ArrayReg{B,T,MT},AdjointRegister{B,ArrayReg{B,T,MT}}}
+const ArrayRegOrAdjointArrayReg{B,T,MT} =
+    Union{ArrayReg{B,T,MT},AdjointRegister{B,ArrayReg{B,T,MT}}}
 
 """
     ArrayReg{B}(raw)
@@ -66,7 +67,8 @@ explicitly. The batch size will be `size(raw, 2)` by default.
     normalize the input raw array with `normalize` or [`batched_normalize!`](@ref).
 """
 function ArrayReg{B}(raw::MT) where {B,T,MT<:AbstractMatrix{T}}
-    ispow2(size(raw, 1)) || throw(DimensionMismatch("Expect first dimension size to be power of 2"))
+    ispow2(size(raw, 1)) ||
+    throw(DimensionMismatch("Expect first dimension size to be power of 2"))
     if !(ispow2(size(raw, 2) ÷ B) && size(raw, 2) % B == 0)
         throw(DimensionMismatch("Expect second dimension size to be an integral multiple of batch size $B"))
     end
@@ -129,10 +131,12 @@ Initialize a new `ArrayReg` by an existing `ArrayReg`. This is equivalent
 to `copy`.
 """
 ArrayReg(r::ArrayReg{B}) where {B} = ArrayReg{B}(copy(r.state))
-ArrayReg(r::ArrayReg{B,T,<:Transpose}) where {B,T} = ArrayReg{B}(Transpose(copy(r.state.parent)))
+ArrayReg(r::ArrayReg{B,T,<:Transpose}) where {B,T} =
+    ArrayReg{B}(Transpose(copy(r.state.parent)))
 
 transpose_storage(reg::ArrayReg{B,T,<:Transpose}) where {B,T} = ArrayReg{B}(copy(reg.state))
-transpose_storage(reg::ArrayReg{B,T}) where {B,T} = ArrayReg{B}(transpose(copy(transpose(reg.state))))
+transpose_storage(reg::ArrayReg{B,T}) where {B,T} =
+    ArrayReg{B}(transpose(copy(transpose(reg.state))))
 
 Base.copy(r::ArrayReg) = ArrayReg(r)
 Base.similar(r::ArrayRegOrAdjointArrayReg{B}) where {B} = ArrayReg{B}(similar(state(r)))
@@ -188,7 +192,7 @@ function YaoBase.probs(r::ArrayReg{B}) where {B}
 end
 
 function YaoBase.reorder!(r::ArrayReg, orders)
-    @inbounds for i in 1:size(r.state, 2)
+    @inbounds for i = 1:size(r.state, 2)
         r.state[:, i] = reorder(r.state[:, i], orders)
     end
     return r
@@ -275,7 +279,8 @@ Return the rank 3 tensor representation of state,
 the 3 dimensions are (activated space, remaining space, batch dimension).
 See also [`rank3`](@ref).
 """
-rank3(r::ArrayRegOrAdjointArrayReg{B}) where {B} = reshape(state(r), size(state(r), 1), :, B)
+rank3(r::ArrayRegOrAdjointArrayReg{B}) where {B} =
+    reshape(state(r), size(state(r), 1), :, B)
 
 """
     join(regs...)
@@ -317,7 +322,8 @@ ArrayReg{2, Complex{Float32}, Array...}
     active qubits: 3/3
 ```
 """
-product_state(bit_str::BitStr; nbatch::Int = 1) = product_state(ComplexF64, bit_str; nbatch = nbatch)
+product_state(bit_str::BitStr; nbatch::Int = 1) =
+    product_state(ComplexF64, bit_str; nbatch = nbatch)
 
 """
     product_state([T=ComplexF64], total::Int, bit_config::Integer; nbatch=1, no_transpose_storage=false)
@@ -418,7 +424,12 @@ ArrayReg{2, Complex{Float64}, Array...}
 """
 rand_state(n::Int; kwargs...) = rand_state(ComplexF64, n; kwargs...)
 
-function rand_state(::Type{T}, n::Int; nbatch::Int = 1, no_transpose_storage::Bool = false) where {T}
+function rand_state(
+    ::Type{T},
+    n::Int;
+    nbatch::Int = 1,
+    no_transpose_storage::Bool = false,
+) where {T}
     raw = nbatch == 1 || no_transpose_storage ? randn(T, 1 << n, nbatch) :
         transpose(randn(T, nbatch, 1 << n))
     return normalize!(ArrayReg{nbatch}(raw))
@@ -459,7 +470,8 @@ end
 
 Returns an `ArrayReg` with `1:n` qubits activated.
 """
-oneto(r::ArrayReg{B}, n::Int = nqubits(r)) where {B} = ArrayReg{B}(reshape(copy(r.state), 1 << n, :))
+oneto(r::ArrayReg{B}, n::Int = nqubits(r)) where {B} =
+    ArrayReg{B}(reshape(copy(r.state), 1 << n, :))
 oneto(r::ArrayReg{B,T,<:Transpose}, n::Int = nqubits(r)) where {B,T} =
     transpose_storage(ArrayReg{B}(reshape(r.state, 1 << n, :)))
 
@@ -484,7 +496,8 @@ ArrayReg{12, Complex{Float64}, Array...}
     active qubits: 3/3
 ```
 """
-Base.repeat(r::ArrayReg{B}, n::Int) where {B} = ArrayReg{B * n}(hcat((state(r) for k in 1:n)...))
+Base.repeat(r::ArrayReg{B}, n::Int) where {B} =
+    ArrayReg{B * n}(hcat((state(r) for k = 1:n)...))
 
 # NOTE: overload this to make printing more compact
 #       but do not alter the way how type parameters print

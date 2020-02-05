@@ -19,7 +19,8 @@ end
 
 Create a `DensityMatrix` with a state represented by array.
 """
-DensityMatrix(state::MT) where {T,MT<:AbstractArray{T,3}} = DensityMatrix{size(state, 3),T,MT}(state)
+DensityMatrix(state::MT) where {T,MT<:AbstractArray{T,3}} =
+    DensityMatrix{size(state, 3),T,MT}(state)
 DensityMatrix(state::AbstractMatrix) = DensityMatrix(reshape(state, size(state)..., 1))
 
 """
@@ -37,7 +38,7 @@ function YaoBase.density_matrix(reg::ArrayReg{B}) where {B}
     M = size(reg.state, 1)
     s = reshape(reg |> state, M, :, B)
     out = similar(s, M, M, B)
-    for b in 1:B
+    for b = 1:B
         @inbounds @views out[:, :, b] = s[:, :, b] * s[:, :, b]'
     end
     return DensityMatrix(out)
@@ -54,7 +55,7 @@ Returns the probability distribution from a density matrix `ρ`.
 """
 function YaoBase.probs(m::DensityMatrix{B,T}) where {B,T}
     res = zeros(T, size(m.state, 1), B)
-    for i in 1:B
+    for i = 1:B
         @inbounds res[:, B] = diag(view(m.state, :, :, i))
     end
     return res
@@ -71,7 +72,7 @@ function purify(r::DensityMatrix{B}; nbit_env::Int = nactive(r)) where {B}
     Ne = 1 << nbit_env
     Ns = size(r.state, 1)
     state = similar(r.state, Ns, Ne, B)
-    for ib in 1:B
+    for ib = 1:B
         R, U = eigen!(r.state[:, :, ib])
         state[:, :, ib] .= view(U, :, Ns-Ne+1:Ns) .* sqrt.(abs.(view(R, Ns-Ne+1:Ns)'))
     end

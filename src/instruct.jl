@@ -16,7 +16,8 @@ end
 
 A list of symbol for specialized gates/operators.
 """
-const SPECIALIZATION_LIST = Symbol[:X, :Y, :Z, :S, :T, :Sdag, :Tdag, :H, :SWAP, :PSWAP, :CPHASE]
+const SPECIALIZATION_LIST =
+    Symbol[:X, :Y, :Z, :S, :T, :Sdag, :Tdag, :H, :SWAP, :PSWAP, :CPHASE]
 
 function _prepare_instruct(
     state,
@@ -28,7 +29,7 @@ function _prepare_instruct(
     N, MM = log2dim1(state), size(U, 1)
 
     locked_bits = MVector(control_locs..., locs...)
-    locked_vals = MVector(control_bits..., (0 for k in 1:M)...)
+    locked_vals = MVector(control_bits..., (0 for k = 1:M)...)
     locs_raw_it = (b + 1 for b in itercontrol(N, setdiff(1:N, locs), zeros(Int, N - M)))
     locs_raw = SVector(locs_raw_it...)
     ic = itercontrol(N, locked_bits, locked_vals)
@@ -88,7 +89,8 @@ function _instruct!(
     return state
 end
 
-YaoBase.instruct!(state::AbstractVecOrMat, U::IMatrix, locs::NTuple{N,Int}) where {N} = state
+YaoBase.instruct!(state::AbstractVecOrMat, U::IMatrix, locs::NTuple{N,Int}) where {N} =
+    state
 YaoBase.instruct!(state::AbstractVecOrMat, U::IMatrix, locs::Int) = state
 YaoBase.instruct!(state::AbstractVecOrMat, U::IMatrix, locs::Tuple{Int}) = state
 
@@ -107,41 +109,55 @@ function YaoBase.instruct!(
 end
 
 @inline function instruct_kernel(state::AbstractVecOrMat, loc, step1, step2, a, b, c, d)
-    for j in 0:step2:size(state, 1)-step1
-        @inbounds for i in j+1:j+step1
+    for j = 0:step2:size(state, 1)-step1
+        @inbounds for i = j+1:j+step1
             u1rows!(state, i, i + step1, a, b, c, d)
         end
     end
     return state
 end
 
-YaoBase.instruct!(state::AbstractVecOrMat{T}, g::SDPermMatrix{T}, locs::Tuple{Int}) where {T} =
-    instruct!(state, g, locs...)
+YaoBase.instruct!(
+    state::AbstractVecOrMat{T},
+    g::SDPermMatrix{T},
+    locs::Tuple{Int},
+) where {T} = instruct!(state, g, locs...)
 
-function YaoBase.instruct!(state::AbstractVecOrMat{T1}, U1::SDPermMatrix{T2}, loc::Int) where {T1,T2}
+function YaoBase.instruct!(
+    state::AbstractVecOrMat{T1},
+    U1::SDPermMatrix{T2},
+    loc::Int,
+) where {T1,T2}
     U1.perm[1] == 1 && return instruct!(state, Diagonal(U1), loc)
     mask = bmask(loc)
     b, c = T1.(U1.vals)
     step = 1 << (loc - 1)
     step_2 = 1 << loc
-    for j in 0:step_2:size(state, 1)-step
-        @inbounds for i in j+1:j+step
+    for j = 0:step_2:size(state, 1)-step
+        @inbounds for i = j+1:j+step
             swaprows!(state, i, i + step, c, b)
         end
     end
     return state
 end
 
-YaoBase.instruct!(state::AbstractVecOrMat{T}, g::SDDiagonal{T}, locs::Tuple{Int}) where {T} =
-    instruct!(state, g, locs...)
+YaoBase.instruct!(
+    state::AbstractVecOrMat{T},
+    g::SDDiagonal{T},
+    locs::Tuple{Int},
+) where {T} = instruct!(state, g, locs...)
 
-function YaoBase.instruct!(state::AbstractVecOrMat{T1}, U1::SDDiagonal{T2}, loc::Int) where {T1,T2}
+function YaoBase.instruct!(
+    state::AbstractVecOrMat{T1},
+    U1::SDDiagonal{T2},
+    loc::Int,
+) where {T1,T2}
     mask = bmask(loc)
     a, d = T1.(U1.diag)
     step = 1 << (loc - 1)
     step_2 = 1 << loc
-    for j in 0:step_2:size(state, 1)-step
-        @inbounds for i in j+1:j+step
+    for j = 0:step_2:size(state, 1)-step
+        @inbounds for i = j+1:j+step
             mulrow!(state, i, a)
             mulrow!(state, i + step, d)
         end
@@ -151,7 +167,11 @@ end
 
 # specialization
 # paulis
-function YaoBase.instruct!(state::AbstractVecOrMat, ::Val{:X}, locs::NTuple{N,Int}) where {N}
+function YaoBase.instruct!(
+    state::AbstractVecOrMat,
+    ::Val{:X},
+    locs::NTuple{N,Int},
+) where {N}
     mask = bmask(locs)
     do_mask = bmask(first(locs))
     for b in basis(state)
@@ -164,12 +184,20 @@ function YaoBase.instruct!(state::AbstractVecOrMat, ::Val{:X}, locs::NTuple{N,In
     return state
 end
 
-function YaoBase.instruct!(state::AbstractVecOrMat, ::Val{:H}, locs::NTuple{N,Int}) where {N}
+function YaoBase.instruct!(
+    state::AbstractVecOrMat,
+    ::Val{:H},
+    locs::NTuple{N,Int},
+) where {N}
     instruct!(state, YaoBase.Const.H, locs)
 end
 
 
-function YaoBase.instruct!(state::AbstractVecOrMat{T}, ::Val{:Y}, locs::NTuple{N,Int}) where {T,N}
+function YaoBase.instruct!(
+    state::AbstractVecOrMat{T},
+    ::Val{:Y},
+    locs::NTuple{N,Int},
+) where {T,N}
     mask = bmask(Int, locs)
     do_mask = bmask(Int, first(locs))
     bit_parity = iseven(length(locs)) ? 1 : -1
@@ -187,7 +215,11 @@ function YaoBase.instruct!(state::AbstractVecOrMat{T}, ::Val{:Y}, locs::NTuple{N
     return state
 end
 
-function YaoBase.instruct!(state::AbstractVecOrMat{T}, ::Val{:Z}, locs::NTuple{N,Int}) where {T,N}
+function YaoBase.instruct!(
+    state::AbstractVecOrMat{T},
+    ::Val{:Z},
+    locs::NTuple{N,Int},
+) where {T,N}
     mask = bmask(Int, locs)
     @inbounds for b in basis(Int, state)
         if isodd(count_ones(b & mask))
@@ -197,10 +229,10 @@ function YaoBase.instruct!(state::AbstractVecOrMat{T}, ::Val{:Z}, locs::NTuple{N
     return state
 end
 
-for (
-    G,
-    FACTOR,
-) in zip([:S, :T, :Sdag, :Tdag], [:(im), :($(exp(im * π / 4))), :(-im), :($(exp(-im * π / 4)))])
+for (G, FACTOR) in zip(
+    [:S, :T, :Sdag, :Tdag],
+    [:(im), :($(exp(im * π / 4))), :(-im), :($(exp(-im * π / 4)))],
+)
     @eval function YaoBase.instruct!(
         state::AbstractVecOrMat{T},
         ::Val{$(QuoteNode(G))},
@@ -214,16 +246,16 @@ for (
     end
 end
 
-for (
-    G,
-    FACTOR,
-) in zip(
+for (G, FACTOR) in zip(
     [:Z, :S, :T, :Sdag, :Tdag],
     [:(-1), :(im), :($(exp(im * π / 4))), :(-im), :($(exp(-im * π / 4)))],
 )
     # forward single gate
-    @eval YaoBase.instruct!(state::AbstractVecOrMat, g::Val{$(QuoteNode(G))}, locs::Tuple{Int}) =
-        instruct!(state, g, locs...)
+    @eval YaoBase.instruct!(
+        state::AbstractVecOrMat,
+        g::Val{$(QuoteNode(G))},
+        locs::Tuple{Int},
+    ) = instruct!(state, g, locs...)
 
     # no effect (to fix ambiguity)
     @eval YaoBase.instruct!(st::AbstractVecOrMat, ::Val{$(QuoteNode(G))}, ::Tuple{}) = st
@@ -236,8 +268,8 @@ for (
         mask = bmask(locs)
         step = 1 << (locs - 1)
         step_2 = 1 << locs
-        @inbounds for j in 0:step_2:size(state, 1)-step
-            for i in j+step+1:j+step_2
+        @inbounds for j = 0:step_2:size(state, 1)-step
+            for i = j+step+1:j+step_2
                 mulrow!(state, i, $FACTOR)
             end
         end
@@ -268,7 +300,8 @@ rot_mat(::Type{T}, ::Val{:Ry}, theta::Number) where {T} =
     T[cos(theta / 2) -sin(theta / 2); sin(theta / 2) cos(theta / 2)]
 rot_mat(::Type{T}, ::Val{:Rz}, theta::Number) where {T} =
     Diagonal(T[exp(-im * theta / 2), exp(im * theta / 2)])
-rot_mat(::Type{T}, ::Val{:CPHASE}, theta::Number) where {T} = Diagonal(T[1, 1, 1, exp(im * theta)])
+rot_mat(::Type{T}, ::Val{:CPHASE}, theta::Number) where {T} =
+    Diagonal(T[1, 1, 1, exp(im * theta)])
 rot_mat(::Type{T}, ::Val{:PSWAP}, theta::Number) where {T} = rot_mat(T, Const.SWAP, theta)
 
 for G in [:Rx, :Ry, :Rz, :CPHASE]
@@ -337,10 +370,7 @@ function YaoBase.instruct!(
     return state
 end
 
-for (
-    G,
-    FACTOR,
-) in zip(
+for (G, FACTOR) in zip(
     [:Z, :S, :T, :Sdag, :Tdag],
     [:(-1), :(im), :($(exp(im * π / 4))), :(-im), :($(exp(-im * π / 4)))],
 )
@@ -397,8 +427,8 @@ function YaoBase.instruct!(
     step = 1 << (control_locs - 1)
     step_2 = 1 << control_locs
     start = control_bits == 1 ? step : 0
-    for j in start:step_2:size(state, 1)-step+start
-        for b in j:j+step-1
+    for j = start:step_2:size(state, 1)-step+start
+        for b = j:j+step-1
             @inbounds if allone(b, mask2)
                 i = b + 1
                 i_ = flip(b, mask2) + 1
@@ -422,8 +452,8 @@ function YaoBase.instruct!(
     step = 1 << (control_locs - 1)
     step_2 = 1 << control_locs
     start = control_bits == 1 ? step : 0
-    for j in start:step_2:size(state, 1)-step+start
-        for b in j:j+step-1
+    for j = start:step_2:size(state, 1)-step+start
+        for b = j:j+step-1
             @inbounds if allone(b, mask2)
                 i = b + 1
                 i_ = flip(b, mask2) + 1
@@ -440,10 +470,7 @@ function YaoBase.instruct!(
 end
 
 
-for (
-    G,
-    FACTOR,
-) in zip(
+for (G, FACTOR) in zip(
     [:Z, :S, :T, :Sdag, :Tdag],
     [:(-1), :(im), :($(exp(im * π / 4))), :(-im), :($(exp(-im * π / 4)))],
 )
@@ -459,8 +486,8 @@ for (
         step = 1 << (control_locs - 1)
         step_2 = 1 << control_locs
         start = control_bits == 1 ? step : 0
-        @inbounds for j in start:step_2:size(state, 1)-step+start
-            for i in j+1:j+step
+        @inbounds for j = start:step_2:size(state, 1)-step+start
+            for i = j+1:j+step
                 if allone(i - 1, mask2)
                     mulrow!(state, i, $FACTOR)
                 end
@@ -471,7 +498,11 @@ for (
 end
 
 # 2-qubit gates
-function YaoBase.instruct!(state::AbstractVecOrMat{T}, ::Val{:SWAP}, locs::Tuple{Int,Int}) where {T}
+function YaoBase.instruct!(
+    state::AbstractVecOrMat{T},
+    ::Val{:SWAP},
+    locs::Tuple{Int,Int},
+) where {T}
 
     mask1 = bmask(locs[1])
     mask2 = bmask(locs[2])

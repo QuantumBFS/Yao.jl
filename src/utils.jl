@@ -28,8 +28,14 @@ swap row i and row j of v inplace, with f1, f2 factors applied on i and j (befor
 """
 function swaprows! end
 
-Base.@propagate_inbounds function swaprows!(v::AbstractMatrix{T}, i::Int, j::Int, f1, f2) where {T}
-    for c in 1:size(v, 2)
+Base.@propagate_inbounds function swaprows!(
+    v::AbstractMatrix{T},
+    i::Int,
+    j::Int,
+    f1,
+    f2,
+) where {T}
+    for c = 1:size(v, 2)
         temp = v[i, c]
         v[i, c] = v[j, c] * f2
         v[j, c] = temp * f1
@@ -38,7 +44,7 @@ Base.@propagate_inbounds function swaprows!(v::AbstractMatrix{T}, i::Int, j::Int
 end
 
 Base.@propagate_inbounds function swaprows!(v::AbstractMatrix{T}, i::Int, j::Int) where {T}
-    for c in 1:size(v, 2)
+    for c = 1:size(v, 2)
         temp = v[i, c]
         v[i, c] = v[j, c]
         v[j, c] = temp
@@ -53,8 +59,14 @@ swap col i and col j of v inplace, with f1, f2 factors applied on i and j (befor
 """
 function swapcols! end
 
-Base.@propagate_inbounds function swapcols!(v::AbstractMatrix{T}, i::Int, j::Int, f1, f2) where {T}
-    for c in 1:size(v, 1)
+Base.@propagate_inbounds function swapcols!(
+    v::AbstractMatrix{T},
+    i::Int,
+    j::Int,
+    f1,
+    f2,
+) where {T}
+    for c = 1:size(v, 1)
         temp = v[c, i]
         v[c, i] = v[c, j] * f2
         v[c, j] = temp * f1
@@ -63,7 +75,7 @@ Base.@propagate_inbounds function swapcols!(v::AbstractMatrix{T}, i::Int, j::Int
 end
 
 Base.@propagate_inbounds function swapcols!(v::AbstractMatrix{T}, i::Int, j::Int) where {T}
-    for c in 1:size(v, 1)
+    for c = 1:size(v, 1)
         temp = v[c, i]
         v[c, i] = v[c, j]
         v[c, j] = temp
@@ -103,7 +115,7 @@ Base.@propagate_inbounds function u1rows!(state::AbstractVector, i::Int, j::Int,
 end
 
 Base.@propagate_inbounds function u1rows!(state::AbstractMatrix, i::Int, j::Int, a, b, c, d)
-    for col in 1:size(state, 2)
+    for col = 1:size(state, 2)
         w = state[i, col]
         v = state[j, col]
         state[i, col] = a * w + b * v
@@ -125,7 +137,7 @@ Base.@propagate_inbounds function mulrow!(v::AbstractVector, i::Int, f)
 end
 
 Base.@propagate_inbounds function mulrow!(v::AbstractMatrix, i::Int, f)
-    for j in 1:size(v, 2)
+    for j = 1:size(v, 2)
         v[i, j] *= f
     end
     return v
@@ -144,7 +156,7 @@ Base.@propagate_inbounds function mulcol!(v::AbstractVector, i::Int, f)
 end
 
 Base.@propagate_inbounds function mulcol!(v::AbstractMatrix, j::Int, f)
-    for i in 1:size(v, 1)
+    for i = 1:size(v, 1)
         v[i, j] *= f
     end
     return v
@@ -174,7 +186,7 @@ Base.@propagate_inbounds function unrows!(
     inds::AbstractVector,
     U::AbstractMatrix,
 )
-    for k in 1:size(state, 2)
+    for k = 1:size(state, 2)
         state[inds, k] = U * state[inds, k]
     end
     return state
@@ -183,16 +195,24 @@ end
 ############# boost unrows! for sparse matrices ################
 @inline unrows!(state::AbstractVector, inds::AbstractVector, U::IMatrix) = state
 
-Base.@propagate_inbounds function unrows!(state::AbstractVector, inds::AbstractVector, U::SDDiagonal)
-    for i in 1:length(U.diag)
+Base.@propagate_inbounds function unrows!(
+    state::AbstractVector,
+    inds::AbstractVector,
+    U::SDDiagonal,
+)
+    for i = 1:length(U.diag)
         state[inds[i]] *= U.diag[i]
     end
     return state
 end
 
-Base.@propagate_inbounds function unrows!(state::AbstractMatrix, inds::AbstractVector, U::SDDiagonal)
-    for j in 1:size(state, 2)
-        for i in 1:length(U.diag)
+Base.@propagate_inbounds function unrows!(
+    state::AbstractMatrix,
+    inds::AbstractVector,
+    U::SDDiagonal,
+)
+    for j = 1:size(state, 2)
+        for i = 1:length(U.diag)
             state[inds[i], j] *= U.diag[i]
         end
     end
@@ -213,7 +233,7 @@ Base.@propagate_inbounds function unrows!(
     inds::AbstractVector,
     U::SDPermMatrix,
 )
-    for k in 1:size(state, 2)
+    for k = 1:size(state, 2)
         state[inds, k] = state[inds[U.perm], k] .* U.vals
     end
     state
@@ -226,9 +246,9 @@ Base.@propagate_inbounds function unrows!(
     work::AbstractVector,
 )
     work .= 0
-    for col in 1:length(inds)
+    for col = 1:length(inds)
         xj = state[inds[col]]
-        for j in A.colptr[col]:(A.colptr[col+1]-1)
+        for j = A.colptr[col]:(A.colptr[col+1]-1)
             work[A.rowval[j]] += A.nzval[j] * xj
         end
     end
@@ -243,10 +263,10 @@ Base.@propagate_inbounds function unrows!(
     work::Matrix,
 )
     work .= 0
-    for k in 1:size(state, 2)
-        for col in 1:length(inds)
+    for k = 1:size(state, 2)
+        for col = 1:length(inds)
             xj = state[inds[col], k]
-            for j in A.colptr[col]:(A.colptr[col+1]-1)
+            for j = A.colptr[col]:(A.colptr[col+1]-1)
                 work[A.rowval[j], k] += A.nzval[j] * xj
             end
         end

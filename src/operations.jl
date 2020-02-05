@@ -60,12 +60,18 @@ function regsub!(lhs::ArrayReg{B}, rhs::ArrayReg{B}) where {B}
     lhs
 end
 
-function regadd!(lhs::ArrayReg{B,T1,<:Transpose}, rhs::ArrayReg{B,T2,<:Transpose}) where {B,T1,T2}
+function regadd!(
+    lhs::ArrayReg{B,T1,<:Transpose},
+    rhs::ArrayReg{B,T2,<:Transpose},
+) where {B,T1,T2}
     lhs.state.parent .+= rhs.state.parent
     lhs
 end
 
-function regsub!(lhs::ArrayReg{B,T1,<:Transpose}, rhs::ArrayReg{B,T2,<:Transpose}) where {B,T1,T2}
+function regsub!(
+    lhs::ArrayReg{B,T1,<:Transpose},
+    rhs::ArrayReg{B,T2,<:Transpose},
+) where {B,T1,T2}
     lhs.state.parent .-= rhs.state.parent
     lhs
 end
@@ -130,8 +136,8 @@ function Base.:*(
         A, C = parent(state(parent(bra))), parent(state(ket))
         res = zeros(eltype(promote_type(T1, T2)), B)
         #return mapreduce((x, y) -> conj(x) * y, +, ; dims=2)
-        for j in 1:size(A, 2)
-            for i in 1:size(A, 1)
+        for j = 1:size(A, 2)
+            for i = 1:size(A, 1)
                 @inbounds res[i] += conj(A[i, j]) * C[i, j]
             end
         end

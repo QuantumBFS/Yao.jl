@@ -5,7 +5,10 @@ using YaoBase
     @test ArrayReg{3}(rand(4, 6)) isa ArrayReg{3}
     @test_throws DimensionMismatch ArrayReg{2}(rand(4, 3))
     @test_throws DimensionMismatch ArrayReg{2}(rand(5, 2))
-    @test_logs (:warn, "Input type of `ArrayReg` is not Complex, got Float64") ArrayReg(rand(4, 3))
+    @test_logs (:warn, "Input type of `ArrayReg` is not Complex, got Float64") ArrayReg(rand(
+        4,
+        3,
+    ))
 
     @test ArrayReg(rand(ComplexF64, 4, 3)) isa ArrayReg{3}
     @test ArrayReg(rand(ComplexF64, 4)) isa ArrayReg{1}
@@ -33,12 +36,12 @@ end
         @test !(st isa Transpose)
         st = state(product_state(T, bit"100"; nbatch = 2))
         @test st isa Transpose
-        for k in 1:2
+        for k = 1:2
             @test st[:, k] ≈ onehot(T, bit"100")
         end
 
         st = state(product_state(T, 4, 0; nbatch = 3))
-        for k in 1:3
+        for k = 1:3
             @test st[:, k] ≈ onehot(T, 4, 0)
         end
         @test eltype(product_state(Float64, 4, 0).state) == Float64
@@ -50,7 +53,7 @@ end
         @test !(st isa Transpose)
         st = state(zero_state(T, 4; nbatch = 4))
         @test st isa Transpose
-        for k in 1:4
+        for k = 1:4
             @test st[:, k] ≈ onehot(T, 4, 0)
         end
         @test eltype(zero_state(Float64, 4).state) == Float64
@@ -63,7 +66,7 @@ end
         # NOTE: we only check if the state is normalized
         st = state(rand_state(T, 4, nbatch = 2))
         @test st isa Transpose
-        for k in 1:2
+        for k = 1:2
             @test norm(st[:, k]) ≈ 1.0
         end
         @test eltype(rand_state(Float64, 4).state) == Float64
@@ -75,7 +78,7 @@ end
         @test !(st isa Transpose)
         st = state(uniform_state(T, 4; nbatch = 2))
         @test st isa Transpose
-        for k in 1:2
+        for k = 1:2
             for each in st[:, k]
                 @test each ≈ 1 / sqrt(16)
             end
@@ -104,7 +107,7 @@ end
     end
     @testset "test batch iteration" begin
         r = ArrayReg{3}(bit"101")
-        for k in 1:3
+        for k = 1:3
             @test viewbatch(r, k) == ArrayReg(bit"101")
         end
         # broadcast
@@ -138,7 +141,8 @@ end
     r2 = rand_state(6)
     r3 = join(r2, r1)
     r4 = join(focus!(copy(r2), 1:2), focus!(copy(r1), 1:3))
-    @test r4 |> relaxedvec ≈ focus!(copy(r3), [1, 2, 3, 7, 8, 4, 5, 6, 9, 10, 11, 12]) |> relaxedvec
+    @test r4 |> relaxedvec ≈
+          focus!(copy(r3), [1, 2, 3, 7, 8, 4, 5, 6, 9, 10, 11, 12]) |> relaxedvec
     reg5 = focus!(repeat(r1, 3), 1:3)
     reg6 = focus!(repeat(r2, 3), 1:2)
     @test (join(reg6, reg5)|>relaxedvec)[:, 1] ≈ r4 |> relaxedvec
