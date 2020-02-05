@@ -9,4 +9,8 @@
     args...;
     kwargs...,
 )
-@deprecate measure_remove!(args...; kwargs...) measure!(RemoveMeasured(), args...; kwargs...)
+@deprecate measure_remove!(args...; kwargs...) measure!(
+    RemoveMeasured(),
+    args...;
+    kwargs...,
+)

@@ -31,8 +31,8 @@ check if operators are commute.
 """
 function iscommute(ops...)
     n = length(ops)
-    for i in 1:n
-        for j in i+1:n
+    for i = 1:n
+        for j = i+1:n
             iscommute(ops[i], ops[j]) || return false
         end
     end

@@ -127,7 +127,8 @@ Inverse transformation of [`focus!`](@ref), where `to_nactive` is the number
  of active bits for target register.
 """
 @interface relax!(r::AbstractRegister, locs; to_nactive::Int = nqubits(r))
-relax!(r::AbstractRegister; to_nactive::Int = nqubits(r)) = relax!(r, (); to_nactive = to_nactive)
+relax!(r::AbstractRegister; to_nactive::Int = nqubits(r)) =
+    relax!(r, (); to_nactive = to_nactive)
 
 """
     relax!(locs::Int...; to_nactive=nqubits(register)) -> f(register) -> register
@@ -135,7 +136,8 @@ relax!(r::AbstractRegister; to_nactive::Int = nqubits(r)) = relax!(r, (); to_nac
 Lazy version of [`relax!`](@ref), it will be evaluated once you feed a register
 to its output lambda.
 """
-relax!(locs::Int...; to_nactive::Union{Nothing,Int} = nothing) = relax!(locs; to_nactive = to_nactive)
+relax!(locs::Int...; to_nactive::Union{Nothing,Int} = nothing) =
+    relax!(locs; to_nactive = to_nactive)
 
 function relax!(locs::NTuple{N,Int}; to_nactive::Union{Nothing,Int} = nothing) where {N}
     lambda = function (r::AbstractRegister)
@@ -207,11 +209,19 @@ measure!(reg::AbstractRegister, args...; kwargs...) =
     measure!(NoPostProcess(), reg, args...; kwargs...)
 
 measure(op, reg::AbstractRegister; kwargs...) = measure(op, reg, AllLocs(); kwargs...)
-measure(reg::AbstractRegister, locs; kwargs...) = measure(ComputationalBasis(), reg, locs; kwargs...)
-measure(reg::AbstractRegister; kwargs...) = measure(ComputationalBasis(), reg, AllLocs(); kwargs...)
+measure(reg::AbstractRegister, locs; kwargs...) =
+    measure(ComputationalBasis(), reg, locs; kwargs...)
+measure(reg::AbstractRegister; kwargs...) =
+    measure(ComputationalBasis(), reg, AllLocs(); kwargs...)
 
 # focus! to specify locations, we that we only need to consider full-space measure in the future.
-function measure!(postprocess::PostProcess, op, reg::AbstractRegister, locs; kwargs...) where {MODE}
+function measure!(
+    postprocess::PostProcess,
+    op,
+    reg::AbstractRegister,
+    locs;
+    kwargs...,
+) where {MODE}
     nbit = nactive(reg)
     focus!(reg, locs)
     res = measure!(postprocess, op, reg, AllLocs(); kwargs...)
