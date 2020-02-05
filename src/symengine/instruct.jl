@@ -7,8 +7,10 @@ rot_mat(::Type{T}, ::Val{:Ry}, theta::Basic) where {T} =
     Basic[cos(theta / 2) -sin(theta / 2); sin(theta / 2) cos(theta / 2)]
 rot_mat(::Type{T}, ::Val{:Rz}, theta::Basic) where {T} =
     Diagonal(Basic[exp(-im * theta / 2), exp(im * theta / 2)])
-rot_mat(::Type{T}, ::Val{:CPHASE}, theta::Basic) where {T} = Diagonal(Basic[1, 1, 1, exp(im * theta)])
-rot_mat(::Type{T}, ::Val{:PSWAP}, theta::Basic) where {T} = rot_mat(Basic, Const.SWAP, theta)
+rot_mat(::Type{T}, ::Val{:CPHASE}, theta::Basic) where {T} =
+    Diagonal(Basic[1, 1, 1, exp(im * theta)])
+rot_mat(::Type{T}, ::Val{:PSWAP}, theta::Basic) where {T} =
+    rot_mat(Basic, Const.SWAP, theta)
 
 for G in [:Rx, :Ry, :Rz, :CPHASE]
     # forward single gates

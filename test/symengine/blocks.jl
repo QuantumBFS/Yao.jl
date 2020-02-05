@@ -25,7 +25,8 @@ end
         m = mat(Basic, G)
         m = subs.(m, θ, 0.5)
         @test Matrix(mat(GC(0.5))) ≈ Matrix(m)
-        @test subs.(Matrix(mat(Basic, put(4, 2 => G))), θ, 0.5) ≈ Matrix(put(4, 2 => GC(0.5)))
+        @test subs.(Matrix(mat(Basic, put(4, 2 => G))), θ, 0.5) ≈
+              Matrix(put(4, 2 => GC(0.5)))
     end
 
     G = Rz(θ) * Rx(γ) * Rz(θ)

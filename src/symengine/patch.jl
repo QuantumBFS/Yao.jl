@@ -22,8 +22,10 @@ function _basic_approx(x, y; atol = 1e-8)
     all(isapprox.(nres, 0; atol = atol))
 end
 
-Base.:≈(x::AbstractArray{<:Basic}, y::AbstractArray; atol = 1e-8) = _basic_approx(x, y, atol = atol)
-Base.:≈(x::AbstractArray, y::AbstractArray{<:Basic}; atol = 1e-8) = _basic_approx(x, y, atol = atol)
+Base.:≈(x::AbstractArray{<:Basic}, y::AbstractArray; atol = 1e-8) =
+    _basic_approx(x, y, atol = atol)
+Base.:≈(x::AbstractArray, y::AbstractArray{<:Basic}; atol = 1e-8) =
+    _basic_approx(x, y, atol = atol)
 Base.:≈(x::AbstractArray{<:Basic}, y::AbstractArray{<:Basic}; atol = 1e-8) =
     _basic_approx(x, y, atol = atol)
 function Base.Complex{T}(a::Basic) where {T}
