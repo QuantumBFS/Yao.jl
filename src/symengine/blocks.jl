@@ -4,8 +4,7 @@ using SymEngine: BasicType, BasicOp, BasicTrigFunction
 op_types = [:Mul, :Add, :Pow]
 const BiVarOp = Union{[SymEngine.BasicType{Val{i}} for i in op_types]...}
 
-export smat, @vars
-smat(block::AbstractBlock) = mat(Basic, block)
+export @vars
 
 simag = SymFunction("Im")
 sreal = SymFunction("Re")
@@ -137,3 +136,7 @@ function SymEngine.subs(::Type{T}, c::AbstractBlock, args...; kwargs...) where {
     c = chiparams(c, map(x -> T(subs(x, args...; kwargs...)), getiparams(c))...)
     chsubblocks(c, [subs(T, blk, args..., kwargs...) for blk in subblocks(c)])
 end
+
+# dumpload
+YaoBlocks.tokenize_param(param::Basic) = QuoteNode(Symbol(param))
+YaoBlocks.parse_param(x::QuoteNode) = :(Basic($x))

@@ -31,7 +31,7 @@ end
 
     G = Rz(θ) * Rx(γ) * Rz(θ)
     m = mat(Basic, G)
-    @test smat(G) == m
+    @test mat(G) == m
     @test_throws ArgumentError mat(Float64, G)
     m = subs.(m, Ref(θ => Basic(π) / 2), Ref(γ => Basic(π) / 6))
     @test Matrix(mat(Rz(π / 2) * Rx(π / 6) * Rz(π / 2))) ≈ Matrix(m)
@@ -62,11 +62,11 @@ end
     @vars a b
     @test cos(exp(a + im * b))' == cos(exp(a - im * b))
     @test cos(exp(a + im * b))' == cos(exp(a - im * b))
-    @test smat(Rx(a)) == [
+    @test mat(Rx(a)) == [
         cos(a / 2) -im * sin(a / 2)
         -im * sin(a / 2) cos(a / 2)
     ]
-    @test smat(Rx(a)') == [
+    @test mat(Rx(a)') == [
         cos(a / 2) im * sin(a / 2)
         im * sin(a / 2) cos(a / 2)
     ]
@@ -103,4 +103,18 @@ end
     ex = expect'(op, reg)[2]
     ex = subs(ex[], a => 0.9)
     @test ComplexF64(ex) ≈ expect'(op, reg2)[2][]
+end
+
+function check_dumpload(gate::AbstractBlock{N}) where N
+    gate2 = eval(YaoBlocks.parse_ex(YaoBlocks.dump_gate(gate), N))
+    gate2 == gate || mat(gate2) ≈ mat(gate)
+end
+
+@testset "dumpload" begin
+    # basic types
+    @vars θ
+    @test check_dumpload(phase(θ))
+    @test check_dumpload(shift(θ))
+    @test check_dumpload(time_evolve(X, θ))
+    @test check_dumpload(rot(X, θ))
 end
