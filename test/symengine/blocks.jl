@@ -105,7 +105,7 @@ end
     @test ComplexF64(ex) ≈ expect'(op, reg2)[2][]
 end
 
-function check_dumpload(gate::AbstractBlock{N}) where N
+function check_dumpload(gate::AbstractBlock{N}) where {N}
     gate2 = eval(YaoBlocks.parse_ex(YaoBlocks.dump_gate(gate), N))
     gate2 == gate || mat(gate2) ≈ mat(gate)
 end
