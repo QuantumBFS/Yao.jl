@@ -178,7 +178,7 @@ struct NoPostProcess <: PostProcess end
 export measure, measure!
 
 """
-    measure(register[, operator][, locs]; nshots=1, rng=Random.GLOBAL_RNG) -> Vector{Int}
+    measure([, operator], register[, locs]; nshots=1, rng=Random.GLOBAL_RNG) -> Vector{Int}
 
 Return measurement results of qubits in `locs`.
 If `locs` is not provided, all current active qubits are measured (regarding to active qubits,

@@ -85,8 +85,8 @@ Check if the input locations has conflicts.
 """
 function islocs_conflict(locs::AddressList)
     locs = _sort(locs)
-    for (nxt, cur) in zip(locs[2:end], locs[1:end-1])
-        nonempty_minimum(nxt) > nonempty_maximum(cur) || return true
+    for i=1:length(locs)-1
+        nonempty_minimum(locs[i+1]) > nonempty_maximum(locs[i]) || return true
     end
     return false
 end
