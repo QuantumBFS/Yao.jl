@@ -103,7 +103,7 @@ function print_sym_state(io::IO, r::ArrayReg{1})
         isfirst_nonzero = false
     end
 
-    for j = 1:n, i = 1:m
+    for j in 1:n, i in 1:m
         i == 1 && j == 1 && continue
         amp = st[i, j]
         if iszero(amp)
@@ -128,7 +128,7 @@ function print_sym_state(io::IO, r::AdjointArrayReg{1})
         isfirst_nonzero = false
     end
 
-    for j = 1:n, i = 1:m
+    for j in 1:n, i in 1:m
         i == 1 && j == 1 && continue
         amp = st[i, j]
         if iszero(amp)

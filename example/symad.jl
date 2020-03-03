@@ -7,10 +7,10 @@ function sym_variational_circuit(nbit, nlayer; pairs = pair_ring(nbit), entangle
 
     ent = chain(nbit, entangler(nbit, i, j) for (i, j) in pairs)
     has_param = nparameters(ent) != 0
-    for i = 1:(nlayer+1)
+    for i in 1:(nlayer+1)
         i != 1 && push!(circuit, has_param ? deepcopy(ent) : ent)
         r = chain(nbit)
-        for j = 1:nbit
+        for j in 1:nbit
             ci = i == 1 ? (i == nlayer + 1 ? Rx(genθ()) : chain(Rx(genθ()), Rz(genθ()))) :
                 (
                 i == nlayer + 1 ? chain(Rz(genθ()), Rx(genθ())) :

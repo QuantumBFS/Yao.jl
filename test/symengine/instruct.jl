@@ -24,11 +24,10 @@ using YaoBlocks, LuxurySparse
         @test res ≈ state(copy(reg2) |> g2)
     end
 
-    CRk(::Type{T}, i::Int, j::Int, k::Int) where {T} =
-        control([i], j => shift(2 * T(π) / (1 << k)))
+    CRk(::Type{T}, i::Int, j::Int, k::Int) where {T} = control([i], j => shift(2 * T(π) / (1 << k)))
     CRot(::Type{T}, n::Int, i::Int) where {T} =
-        chain(n, i == j ? put(i => H) : CRk(T, j, i, j - i + 1) for j = i:n)
-    qft(::Type{T}, n::Int) where {T} = chain(n, CRot(T, n, i) for i = 1:n)
+        chain(n, i == j ? put(i => H) : CRk(T, j, i, j - i + 1) for j in i:n)
+    qft(::Type{T}, n::Int) where {T} = chain(n, CRot(T, n, i) for i in 1:n)
     res = ket"11" |> qft(Basic, 2)
     l1 = length(string(res.state.nzval[2]))
     res.state.nzval .= simplify_expi.(res.state.nzval)
