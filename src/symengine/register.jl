@@ -1,4 +1,5 @@
-using YaoBase, SparseArrays, BitBasis, YaoArrayRegister, SymEngine
+using YaoBase, SparseArrays, BitBasis, YaoArrayRegister
+using ..SymEngine
 export @ket_str, @bra_str
 export SymReg, AdjointSymReg, SymRegOrAdjointSymReg, expand
 export szero_state

@@ -1,5 +1,8 @@
-using YaoBlocks, SymEngine, LuxurySparse, LinearAlgebra
-using SymEngine: BasicType, BasicOp, BasicTrigFunction
+using YaoBlocks
+using LuxurySparse
+using LinearAlgebra
+using ..SymEngine
+using ..SymEngine: BasicType, BasicOp, BasicTrigFunction
 
 op_types = [:Mul, :Add, :Pow]
 const BiVarOp = Union{[SymEngine.BasicType{Val{i}} for i in op_types]...}

@@ -1,4 +1,4 @@
-using SymEngine: Basic
+using ..SymEngine: Basic
 export simplify_expi
 
 function Base.iszero(x::Basic)

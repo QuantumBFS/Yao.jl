@@ -1,9 +1,11 @@
 module YaoSym
 
-using SymEngine: @vars, Basic
-export @vars, Basic, subs
+using Requires
 
 include("register.jl")
-include("symengine/backend.jl")
+
+function __init__()
+    @require SymEngine="123dc426-2d89-5057-bbad-38513e3affd8" include("symengine/backend.jl")
+end
 
 end # module

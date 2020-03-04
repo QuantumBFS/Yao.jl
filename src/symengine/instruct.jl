@@ -1,4 +1,4 @@
-using SymEngine
+using ..SymEngine
 import YaoBase: rot_mat
 
 rot_mat(::Type{T}, ::Val{:Rx}, theta::Basic) where {T} =
