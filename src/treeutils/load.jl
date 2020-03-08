@@ -93,9 +93,11 @@ function parse_ex(ex, info::ParseInfo)
             loc = render_loc((exloc...,), info.nbit)
             :(subroutine($(info.nbit), $(parse_ex(g, ParseInfo(length(loc), info.version))), $loc))
         end
-        :(begin
-            $(cargs...)
-        end) => begin
+        :(
+            begin
+                $(cargs...)
+            end
+        ) => begin
             args = filter(x -> x !== nothing, [parse_ex(arg, info) for arg in cargs])
             :(chain($(info.nbit), [$(args...)]))
         end
