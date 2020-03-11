@@ -8,6 +8,12 @@ alt="Yao Logo" width="210"></img>
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://QuantumBFS.github.io/Yao.jl/stable)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://QuantumBFS.github.io/Yao.jl/latest)
 
+| main components | YaoBlocks | YaoArrayRegister | YaoSym |
+| ----------   | --------- | ---------------- | ------ |
+| build status | [![Build Status](https://travis-ci.com/QuantumBFS/YaoBlocks.jl.svg?branch=master)](https://travis-ci.com/QuantumBFS/YaoBlocks.jl) | [![Build Status](https://travis-ci.com/QuantumBFS/YaoArrayRegister.jl.svg?branch=master)](https://travis-ci.com/QuantumBFS/YaoArrayRegister.jl) | [![Build Status](https://travis-ci.com/QuantumBFS/YaoArrayRegister.jl.svg?branch=master)](https://travis-ci.com/QuantumBFS/YaoArrayRegister.jl) |
+| coverage     | [![Codecov](https://codecov.io/gh/QuantumBFS/YaoBlocks.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/QuantumBFS/YaoBlocks.jl) | [![Codecov](https://codecov.io/gh/QuantumBFS/YaoArrayRegister.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/QuantumBFS/YaoArrayRegister.jl) | [![Codecov](https://codecov.io/gh/QuantumBFS/YaoSym.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/QuantumBFS/YaoSym.jl) |
+
+
 **Yao** Extensible, Efficient Quantum Algorithm Design for Humans.
 
 ## Introduction
