@@ -40,7 +40,7 @@ end
     end
 end
 
-@testset "fideliy grad" begin
+@testset "fidelity grad" begin
     nbit = 4
     Random.seed!(2)
     for nbatch in [1, 10]
