@@ -19,7 +19,9 @@ function parse_str(s::String)
     return v, k - 1
 end
 
-function ket_m end
+function ket_m(s)
+    error("Please install SymEngine and type using SymEngine explicitly to use symbolic functionality of Yao")
+end
 
 function bra_m(s)
     adjoint(ket_m(s))
