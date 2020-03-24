@@ -220,7 +220,10 @@ For pair input `ψ=>circuit`, the returned gradient is a pair of `gψ=>gparams`,
 with `gψ` the gradient of input state and `gparams` the gradients of circuit parameters.
 For register input, the return value is a register.
 """
-function YaoBase.fidelity(r1::ArrayReg{B}, r2::ArrayReg{B}) where {B}
+function YaoBase.fidelity(r1::ArrayReg{B1}, r2::ArrayReg{B2}) where {B1, B2}
+    B1 == B2 || throw(DimensionMismatch("Register batch not match!"))
+    B = B1
+    
     state1 = rank3(r1)
     state2 = rank3(r2)
     size(state1) == size(state2) || throw(DimensionMismatch("Register size not match!"))
