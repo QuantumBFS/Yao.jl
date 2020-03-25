@@ -88,11 +88,11 @@ end
     Dv = Diagonal(randn(ComplexF64, 2))
 
     @test instruct!(copy(ST), Pm, 3) ≈
-    kron(I2, Pm, I2, I2) * ST ≈
-    instruct!(reshape(copy(ST), :, 1), Pm, 3)
+          kron(I2, Pm, I2, I2) * ST ≈
+          instruct!(reshape(copy(ST), :, 1), Pm, 3)
     @test instruct!(copy(ST), Dv, 3) ≈
-    kron(I2, Dv, I2, I2) * ST ≈
-    instruct!(reshape(copy(ST), :, 1), Dv, 3)
+          kron(I2, Dv, I2, I2) * ST ≈
+          instruct!(reshape(copy(ST), :, 1), Dv, 3)
 end
 
 @testset "swap instruction" begin
