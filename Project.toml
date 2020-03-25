@@ -17,7 +17,7 @@ TupleTools = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
 [compat]
 BitBasis = "0.6"
 LegibleLambdas = "0.2"
-LuxurySparse = "0.5"
+LuxurySparse = "0.5, 0.6"
 MLStyle = "0.3"
 MacroTools = "0.5"
 TupleTools = "1.1.0"
