@@ -5,6 +5,8 @@ three badges on the top of each tutorial that allows you to open it in [mybinder
 it in [nbviewer](https://nbviewer.jupyter.org/) or download the tutorial as `.zip` file, which includes the notebook
 and the scripts and other related materials.
 
+[![asciicast](https://asciinema.org/a/HaDO421J58cmKhIBbVPhJHIr7.svg)](https://asciinema.org/a/HaDO421J58cmKhIBbVPhJHIr7?speed=2)
+
 ## Contribution
 
 If you are interesting in polishing or contributing our tutorial, you can just open a [PR in our tutorial repo](https://github.com/QuantumBFS/tutorials/compare).
