@@ -23,7 +23,10 @@ end
 @testset "Focus 1" begin
     reg0 = rand_state(5; nbatch = 3)
     @test focus!(copy(reg0), [1, 4, 2]) == naive_focus!(copy(reg0), [1, 4, 2])
-    @test copy(reg0) |> focus!(1, 4, 2) |> focus!(2) |> relax!(2, to_nactive = 3) |>
+    @test copy(reg0) |>
+          focus!(1, 4, 2) |>
+          focus!(2) |>
+          relax!(2, to_nactive = 3) |>
           relax!(1, 4, 2) == reg0
     reg = focus!(copy(reg0), 2:3)
     @test reg |> probs ≈

@@ -8,20 +8,12 @@ using PkgBenchmark, BenchmarkTools
 using YaoArrayRegister, BitBasis, Random, YaoBase, StaticArrays, LuxurySparse
 using LinearAlgebra, SparseArrays
 
-bench(
-    n,
-    U,
-    loc::Tuple,
-) = @benchmarkable instruct!(st, $U, $loc) setup = (st = statevec(rand_state($n)))
+bench(n, U, loc::Tuple) =
+    @benchmarkable instruct!(st, $U, $loc) setup = (st = statevec(rand_state($n)))
 bench(n, U, loc::Tuple, control_locs::Tuple, control_bits::Tuple) =
     @benchmarkable instruct!(st, $U, $loc, $control_locs, $control_bits) setup =
         (st = statevec(rand_state($n)))
-bench(
-    n,
-    B::Int,
-    U,
-    loc::Tuple,
-) = @benchmarkable instruct!(st, $U, $loc) setup =
+bench(n, B::Int, U, loc::Tuple) = @benchmarkable instruct!(st, $U, $loc) setup =
     (st = statevec(rand_state($n, nbatch = $B)))
 bench(n, B::Int, U, loc::Tuple, control_locs::Tuple, control_bits::Tuple) =
     @benchmarkable instruct!(st, $U, $loc, $control_locs, $control_bits) setup =

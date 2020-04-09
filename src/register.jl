@@ -5,7 +5,7 @@ export ArrayReg,
     AdjointArrayReg,
     ArrayRegOrAdjointArrayReg,
     transpose_storage,
-# YaoBase
+    # YaoBase
     nqubits,
     nactive,
     nremain,
@@ -20,18 +20,18 @@ export ArrayReg,
     collapseto!,
     fidelity,
     tracedist,
-# YaoBase deprecated
+    # YaoBase deprecated
     addbit!,
     reset!,
-# additional
+    # additional
     state,
     statevec,
     relaxedvec,
     rank3,
-# BitBasis
+    # BitBasis
     @bit_str,
     hypercubic,
-# initialization
+    # initialization
     product_state,
     zero_state,
     rand_state,
