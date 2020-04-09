@@ -1,10 +1,10 @@
 export print_tree, print_annotation, print_prefix, print_title, print_block
 
 struct BlockTreeCharSet
-    mid
-    terminator
-    skip
-    dash
+    mid::Any
+    terminator::Any
+    skip::Any
+    dash::Any
 end
 
 # Default Charset

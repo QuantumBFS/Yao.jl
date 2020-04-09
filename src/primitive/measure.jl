@@ -14,7 +14,7 @@ mutable struct Measure{N,K,OT,LT<:Union{NTuple{K,Int},AllLocs},PT<:PostProcess,R
     operator::OT
     locations::LT
     postprocess::PT
-    results
+    results::Any
     function Measure{N,K,OT,LT,PT,RNG}(
         rng::RNG,
         operator::OT,
@@ -53,7 +53,9 @@ end
 function Base.:(==)(m1::Measure, m2::Measure)
     res =
         m1.rng == m2.rng &&
-        m1.operator == m2.operator && m1.locations == m2.locations && m1.postprocess == m2.postprocess
+        m1.operator == m2.operator &&
+        m1.locations == m2.locations &&
+        m1.postprocess == m2.postprocess
     res = res && isdefined(m1, :results) == isdefined(m2, :results)
     res && (!isdefined(m1, :results) || m1.results == m2.results)
 end
@@ -153,11 +155,7 @@ Measure(;
     resetto = nothing,
     remove = false,
 ) where {K} = @λ(
-    n -> Measure(n; rng = rng,
-        locs = locs,
-        operator = operator,
-        resetto = resetto,
-        remove = remove)
+    n -> Measure(n; rng = rng, locs = locs, operator = operator, resetto = resetto, remove = remove)
 )
 mat(x::Measure) = error("use BlockMap to get its matrix.")
 

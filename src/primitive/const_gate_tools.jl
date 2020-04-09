@@ -131,7 +131,10 @@ function define_struct(__module__::Module, __source__::LineNumberNode, const_bin
     if isdefined(__module__, gt_name)
         msg = "$(string(gt_name)) is already defined, overwritten by new definition at $__source__"
         push!(ex.args, :(@warn $msg))
-        push!(ex.args, :(@eval $__module__ @assert $N == $log2i(size(mat($name), 1)) "new constant does not have the same size with previous definitions"))
+        push!(
+            ex.args,
+            :(@eval $__module__ @assert $N == $log2i(size(mat($name), 1)) "new constant does not have the same size with previous definitions"),
+        )
     else
         push!(ex.args, :(@eval $__module__ Base.@__doc__ struct $gt_name <:
                                                                 YaoBlocks.ConstGate.ConstantGate{$N} end))
