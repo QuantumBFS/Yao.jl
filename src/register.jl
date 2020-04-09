@@ -235,6 +235,32 @@ function YaoBase.fidelity(r1::ArrayReg{B1}, r2::ArrayReg{B2}) where {B1,B2}
     return B == 1 ? res[] : res
 end
 
+function YaoBase.fidelity(r1::ArrayReg{B}, r2::ArrayReg{1}) where B
+    state1 = rank3(r1)
+    state2 = rank3(r2)
+    nqubits(r1) == nqubits(r2) || throw(DimensionMismatch("Register size not match!"))
+    if size(state1, 2) == 1
+        res = map(b -> pure_state_fidelity(state1[:, 1, b], state2[:, 1, 1]), 1:B)
+    else
+        res = map(b -> purification_fidelity(state1[:, :, b], state2[:, :, 1]), 1:B)
+    end
+    return B == 1 ? res[] : res
+end
+
+YaoBase.fidelity(r1::ArrayReg{1}, r2::ArrayReg{B}) where B = YaoBase.fidelity(r2, r1)
+
+function YaoBase.fidelity(r1::ArrayReg{1}, r2::ArrayReg{1})
+    state1 = state(r1)
+    state2 = state(r2)
+    nqubits(r1) == nqubits(r2) || throw(DimensionMismatch("Register size not match!"))
+
+    if size(state1, 2) == 1
+        return pure_state_fidelity(state1[:, 1], state2[:, 1])
+    else
+        return purification_fidelity(state1, state2)
+    end
+end
+
 YaoBase.tracedist(r1::ArrayReg{B}, r2::ArrayReg{B}) where {B} = tracedist(ρ(r1), ρ(r2))
 
 
