@@ -8,19 +8,19 @@ export batch_normalize,
     general_controlled_gates,
     general_c1_gates,
     linop2dense,
-# kron
+    # kron
     hilbertkron,
     batched_kron!,
     batched_kron,
     kron!,
-# norms
+    # norms
     trnorm,
     nucnorm,
-# fidelity
+    # fidelity
     pure_state_fidelity,
     density_fidelity,
     purification_fidelity,
-# matrix tools
+    # matrix tools
     autostatic,
     rot_mat
 

@@ -64,7 +64,9 @@ function capturing_analysis(expr, out, is_literal)
         # ref pattern
         Expr(:&, _) ||
         # predicate
-        Expr(:function, _...) || Expr(:if, _...) || x => nothing
+        Expr(:function, _...) ||
+        Expr(:if, _...) ||
+        x => nothing
     end
 end
 
