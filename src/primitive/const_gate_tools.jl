@@ -136,8 +136,11 @@ function define_struct(__module__::Module, __source__::LineNumberNode, const_bin
             :(@eval $__module__ @assert $N == $log2i(size(mat($name), 1)) "new constant does not have the same size with previous definitions"),
         )
     else
-        push!(ex.args, :(@eval $__module__ Base.@__doc__ struct $gt_name <:
-                                                                YaoBlocks.ConstGate.ConstantGate{$N} end))
+        push!(
+            ex.args,
+            :(@eval $__module__ Base.@__doc__ struct $gt_name <:
+                                                     YaoBlocks.ConstGate.ConstantGate{$N} end),
+        )
     end
     push!(ex.args, :(@eval $__module__ Base.@__doc__ const $(name) = $(gt_name)()))
     return ex
