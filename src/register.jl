@@ -68,7 +68,7 @@ explicitly. The batch size will be `size(raw, 2)` by default.
 """
 function ArrayReg{B}(raw::MT) where {B,T,MT<:AbstractMatrix{T}}
     ispow2(size(raw, 1)) ||
-    throw(DimensionMismatch("Expect first dimension size to be power of 2"))
+        throw(DimensionMismatch("Expect first dimension size to be power of 2"))
     if !(ispow2(size(raw, 2) ÷ B) && size(raw, 2) % B == 0)
         throw(DimensionMismatch("Expect second dimension size to be an integral multiple of batch size $B"))
     end
@@ -235,7 +235,7 @@ function YaoBase.fidelity(r1::ArrayReg{B1}, r2::ArrayReg{B2}) where {B1,B2}
     return B == 1 ? res[] : res
 end
 
-function YaoBase.fidelity(r1::ArrayReg{B}, r2::ArrayReg{1}) where B
+function YaoBase.fidelity(r1::ArrayReg{B}, r2::ArrayReg{1}) where {B}
     state1 = rank3(r1)
     state2 = rank3(r2)
     nqubits(r1) == nqubits(r2) || throw(DimensionMismatch("Register size not match!"))
@@ -247,7 +247,7 @@ function YaoBase.fidelity(r1::ArrayReg{B}, r2::ArrayReg{1}) where B
     return B == 1 ? res[] : res
 end
 
-YaoBase.fidelity(r1::ArrayReg{1}, r2::ArrayReg{B}) where B = YaoBase.fidelity(r2, r1)
+YaoBase.fidelity(r1::ArrayReg{1}, r2::ArrayReg{B}) where {B} = YaoBase.fidelity(r2, r1)
 
 function YaoBase.fidelity(r1::ArrayReg{1}, r2::ArrayReg{1})
     state1 = state(r1)
