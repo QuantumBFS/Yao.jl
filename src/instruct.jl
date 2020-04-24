@@ -2,6 +2,9 @@
 # in principal we only allow one to input a tuple of address to instruct
 # but most of the instruct function in this file defines a forward method
 # for single qubit version with an int as input.
+#
+#
+# In order to make multi threading work, the state vector MUST be named as state
 
 using YaoBase, BitBasis, LuxurySparse, StaticArrays
 export instruct!
@@ -18,6 +21,64 @@ A list of symbol for specialized gates/operators.
 """
 const SPECIALIZATION_LIST =
     Symbol[:X, :Y, :Z, :S, :T, :Sdag, :Tdag, :H, :SWAP, :PSWAP, :CPHASE]
+
+
+const THREAD_THRESHOLD = 10
+
+# generates the threading expression
+macro threads(ex)
+    if Threads.nthreads() == 1 # do nothing in single threading mode
+        return esc(:(@inbounds $ex))
+    else
+        return esc(quote
+            if log2dim1(state) < THREAD_THRESHOLD
+                @inbounds $ex
+            else
+                @inbounds Threads.@threads $ex
+            end
+        end)
+    end
+end
+
+# to avoid potential ambiguity, we limit them to tuple for now
+# but they only has to be an iterator over integers
+const Locations{T} = NTuple{N, T} where N
+const BitConfigs{T} = NTuple{N, T} where N
+
+function YaoBase.instruct!(
+    state::AbstractVecOrMat{T1},
+    operator::AbstractMatrix{T2},
+    locs::Tuple{},
+    control_locs::NTuple{C, Int}=(),
+    control_bits::NTuple{C, Int}=()) where {T1, T2, M, C}
+    return state
+end
+
+function YaoBase.instruct!(
+    state::AbstractVecOrMat{T1},
+    operator::AbstractMatrix{T2},
+    locs::NTuple{M, Int},
+    control_locs::NTuple{C, Int}=(),
+    control_bits::NTuple{C, Int}=()) where {T1, T2, M, C}
+
+    @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
+    return instruct!(state, copyto!(similar(operator, T1), operator), locs, control_locs, control_bits)
+end
+
+function YaoBase.instruct!(state::AbstractVecOrMat{T1}, U1::AbstractMatrix{T2}, loc::Int) where {T1, T2}
+    @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
+    return instruct!(state, copyto!(similar(U1, T1), U1), loc)
+end
+
+function YaoBase.instruct!(state::AbstractVecOrMat{T1}, U1::SDPermMatrix{T2}, loc::Int) where {T1, T2}
+    @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
+    return instruct!(state, copyto!(similar(U1, T1), U1), loc)
+end
+
+function YaoBase.instruct!(state::AbstractVecOrMat{T1}, U1::SDDiagonal{T2}, loc::Int) where {T1, T2}
+    @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
+    return instruct!(state, copyto!(similar(U1, T1), U1), loc)
+end
 
 function _prepare_instruct(
     state,
@@ -109,9 +170,9 @@ function YaoBase.instruct!(
 end
 
 @inline function instruct_kernel(state::AbstractVecOrMat, loc, step1, step2, a, b, c, d)
-    for j = 0:step2:size(state, 1)-step1
-        @inbounds for i = j+1:j+step1
-            u1rows!(state, i, i + step1, a, b, c, d)
+    @threads for j in 0:step2:size(state, 1)-step1
+        @inbounds for i in j+1:j+step1
+            u1rows!(state, i, i+step1, a, b, c, d)
         end
     end
     return state
@@ -130,12 +191,14 @@ function YaoBase.instruct!(
 ) where {T1,T2}
     U1.perm[1] == 1 && return instruct!(state, Diagonal(U1), loc)
     mask = bmask(loc)
-    b, c = T1.(U1.vals)
-    step = 1 << (loc - 1)
-    step_2 = 1 << loc
-    for j = 0:step_2:size(state, 1)-step
-        @inbounds for i = j+1:j+step
-            swaprows!(state, i, i + step, c, b)
+    b, c = U1.vals
+    step = 1<<(loc-1)
+    step_2 = 1<<loc
+    if log2dim1(state) < THREAD_THRESHOLD
+    end
+    @threads for j in 0:step_2:size(state, 1)-step
+        @inbounds for i in j+1:j+step
+            swaprows!(state, i, i+step, c, b)
         end
     end
     return state
@@ -156,8 +219,8 @@ function YaoBase.instruct!(
     a, d = T1.(U1.diag)
     step = 1 << (loc - 1)
     step_2 = 1 << loc
-    for j = 0:step_2:size(state, 1)-step
-        @inbounds for i = j+1:j+step
+    @threads for j in 0:step_2:size(state, 1)-step
+        @inbounds for i in j+1:j+step
             mulrow!(state, i, a)
             mulrow!(state, i + step, d)
         end
@@ -174,7 +237,7 @@ function YaoBase.instruct!(
 ) where {N}
     mask = bmask(locs)
     do_mask = bmask(first(locs))
-    for b in basis(state)
+    @threads for b in basis(state)
         @inbounds if anyone(b, do_mask)
             i = b + 1
             i_ = flip(b, mask) + 1
@@ -203,7 +266,7 @@ function YaoBase.instruct!(
     bit_parity = iseven(length(locs)) ? 1 : -1
     factor = T(-im)^length(locs)
 
-    @inbounds for b in basis(Int, state)
+    @threads for b in basis(Int, state)
         if anyone(b, do_mask)
             i = b + 1
             i_ = flip(b, mask) + 1
@@ -221,7 +284,7 @@ function YaoBase.instruct!(
     locs::NTuple{N,Int},
 ) where {T,N}
     mask = bmask(Int, locs)
-    @inbounds for b in basis(Int, state)
+    @threads for b in basis(Int, state)
         if isodd(count_ones(b & mask))
             mulrow!(state, b + 1, -1)
         end
@@ -239,8 +302,8 @@ for (G, FACTOR) in zip(
         locs::NTuple{N,Int},
     ) where {T,N}
         mask = bmask(Int, locs)
-        @inbounds for b in basis(Int, state)
-            mulrow!(state, b + 1, $FACTOR^count_ones(b & mask))
+        @threads for b in basis(Int, state)
+            mulrow!(state, b+1, $FACTOR^count_ones(b & mask))
         end
         return state
     end
@@ -266,10 +329,10 @@ for (G, FACTOR) in zip(
         locs::Int,
     ) where {T}
         mask = bmask(locs)
-        step = 1 << (locs - 1)
-        step_2 = 1 << locs
-        @inbounds for j = 0:step_2:size(state, 1)-step
-            for i = j+step+1:j+step_2
+        step = 1<<(locs-1)
+        step_2 = 1<<locs
+        @threads for j in 0:step_2:size(state, 1)-step
+            for i in j+step+1:j+step_2
                 mulrow!(state, i, $FACTOR)
             end
         end
@@ -339,7 +402,7 @@ function YaoBase.instruct!(
 
     ctrl = controller((control_locs..., locs[1]), (control_bits..., 0))
     mask2 = bmask(locs)
-    @inbounds for b in basis(state)
+    @threads for b in basis(state)
         if ctrl(b)
             i = b + 1
             i_ = flip(b, mask2) + 1
@@ -359,8 +422,7 @@ function YaoBase.instruct!(
 
     ctrl = controller((control_locs..., locs[1]), (control_bits..., 0))
     mask2 = bmask(locs)
-    @inbounds for b in basis(state)
-        local i_::Int
+    @threads for b in basis(state)
         if ctrl(b)
             i = b + 1
             i_ = flip(b, mask2) + 1
@@ -383,7 +445,7 @@ for (G, FACTOR) in zip(
     ) where {T,N1,N2,N3}
 
         ctrl = controller([control_locs..., locs[1]], [control_bits..., 1])
-        @inbounds for b in basis(state)
+        @threads for b in basis(state)
             if ctrl(b)
                 mulrow!(state, b + 1, $FACTOR)
             end
@@ -427,8 +489,8 @@ function YaoBase.instruct!(
     step = 1 << (control_locs - 1)
     step_2 = 1 << control_locs
     start = control_bits == 1 ? step : 0
-    for j = start:step_2:size(state, 1)-step+start
-        for b = j:j+step-1
+    @threads for j in start:step_2:size(state, 1)-step+start
+        for b in j:j+step-1
             @inbounds if allone(b, mask2)
                 i = b + 1
                 i_ = flip(b, mask2) + 1
@@ -440,20 +502,16 @@ function YaoBase.instruct!(
 end
 
 function YaoBase.instruct!(
-    state::AbstractVecOrMat{T},
-    ::Val{:Y},
-    loc::Int,
-    control_locs::Int,
-    control_bits::Int,
-) where {T}
+        state::AbstractVecOrMat{T},
+        ::Val{:Y}, loc::Int,
+        control_locs::Int, control_bits::Int) where T
 
-    mask2 = bmask(loc)
-    mask = bmask(control_locs, loc)
-    step = 1 << (control_locs - 1)
-    step_2 = 1 << control_locs
-    start = control_bits == 1 ? step : 0
-    for j = start:step_2:size(state, 1)-step+start
-        for b = j:j+step-1
+    mask2 = bmask(loc); mask = bmask(control_locs, loc)
+    step = 1<<(control_locs-1)
+    step_2 = 1<<control_locs
+    start = control_bits==1 ? step : 0
+    @threads for j in start:step_2:size(state, 1)-step+start
+        for b in j:j+step-1
             @inbounds if allone(b, mask2)
                 i = b + 1
                 i_ = flip(b, mask2) + 1
@@ -486,9 +544,9 @@ for (G, FACTOR) in zip(
         step = 1 << (control_locs - 1)
         step_2 = 1 << control_locs
         start = control_bits == 1 ? step : 0
-        @inbounds for j = start:step_2:size(state, 1)-step+start
-            for i = j+1:j+step
-                if allone(i - 1, mask2)
+        @threads for j in start:step_2:size(state, 1)-step+start
+            for i in j+1:j+step
+                if allone(i-1, mask2)
                     mulrow!(state, i, $FACTOR)
                 end
             end
@@ -506,10 +564,10 @@ function YaoBase.instruct!(
 
     mask1 = bmask(locs[1])
     mask2 = bmask(locs[2])
-    mask12 = mask1 | mask2
-    @inbounds for b in basis(state)
-        if b & mask1 == 0 && b & mask2 == mask2
-            i = b + 1
+    mask12 = mask1|mask2
+    @threads for b in basis(state)
+        if b&mask1==0 && b&mask2==mask2
+            i = b+1
             i_ = b ⊻ mask12 + 1
             swaprows!(state, i, i_)
         end
@@ -529,7 +587,7 @@ function YaoBase.instruct!(
     a = T(cos(theta / 2))
     c = T(-im * sin(theta / 2))
     e = T(exp(-im / 2 * theta))
-    @inbounds for b in basis(state)
+    @threads for b in basis(state)
         if b & mask1 == 0
             i = b + 1
             i_ = b ⊻ mask12 + 1
@@ -558,7 +616,7 @@ function YaoBase.instruct!(
     a = T(cos(theta / 2))
     c = T(-im * sin(theta / 2))
     e = T(exp(-im / 2 * theta))
-    @inbounds for b in itercontrol(
+    @threads for b in itercontrol(
         log2i(size(state, 1)),
         collect(Int, control_locs),
         collect(Int, control_bits),
