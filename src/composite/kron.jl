@@ -24,7 +24,7 @@ struct KronBlock{N,M,MT<:NTuple{M,Any}} <: CompositeBlock{N}
 
         for (each, b) in zip(locs, blocks)
             length(each) != nqubits(b) &&
-            throw(LocationConflictError("locs $locs is inconsistent with target block $b"))
+                throw(LocationConflictError("locs $locs is inconsistent with target block $b"))
         end
         return new{N,M,typeof(blocks)}(locs, blocks)
     end

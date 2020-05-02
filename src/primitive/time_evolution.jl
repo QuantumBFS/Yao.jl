@@ -22,7 +22,7 @@ mutable struct TimeEvolution{N,Tt,HT<:AbstractBlock{N}} <: PrimitiveBlock{N}
         check_hermicity::Bool = true,
     ) where {N,Tt,TH<:AbstractBlock{N}}
         (check_hermicity && !ishermitian(H)) &&
-        error("Time evolution Hamiltonian has to be a Hermitian")
+            error("Time evolution Hamiltonian has to be a Hermitian")
         return new{N,Tt,TH}(H, dt, Float64(tol))
     end
 end

@@ -18,7 +18,7 @@ mutable struct RotationGate{N,T,GT<:AbstractBlock{N}} <: PrimitiveBlock{N}
     theta::T
     function RotationGate{N,T,GT}(block::GT, theta) where {N,T,GT<:AbstractBlock{N}}
         ishermitian(block) && isreflexive(block) ||
-        throw(ArgumentError("Gate type $GT is not hermitian or not isreflexive."))
+            throw(ArgumentError("Gate type $GT is not hermitian or not isreflexive."))
         new{N,T,GT}(block, T(theta))
     end
 end

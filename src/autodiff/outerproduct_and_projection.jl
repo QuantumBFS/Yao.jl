@@ -14,7 +14,7 @@ end
 
 function OuterProduct(left::ATL, right::ATR) where {T,ATL,ATR}
     size(left, 2) != size(right, 2) &&
-    throw(DimensionMismatch("The seconds dimension of left ($(size(left,2))) and right $(size(right,2)) does not match."))
+        throw(DimensionMismatch("The seconds dimension of left ($(size(left,2))) and right $(size(right,2)) does not match."))
     return OuterProduct{T,ATL,ATR}(left, right)
 end
 
@@ -58,7 +58,7 @@ Project `op` to sparse matrix with same sparsity as `y`.
 """
 function projection(y::AbstractMatrix, op::AbstractMatrix)
     size(y) == size(op) ||
-    throw(DimensionMismatch("can not project a matrix of size $(size(op)) to target size $(size(y))"))
+        throw(DimensionMismatch("can not project a matrix of size $(size(op)) to target size $(size(y))"))
     out = zero(y)
     unsafe_projection!(out, op)
 end

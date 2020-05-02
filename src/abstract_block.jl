@@ -342,5 +342,5 @@ use the returns of [`parameters`](@ref) as its key.
 
 function _check_size(r::AbstractRegister, pb::AbstractBlock{N}) where {N}
     N == nactive(r) ||
-    throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
+        throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
 end
