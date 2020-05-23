@@ -63,10 +63,10 @@ function capturing_analysis(expr, out, is_literal)
         Expr(_, args...) => foreach(x -> capturing_analysis(x, out, false), args)
         # ref pattern
         Expr(:&, _) ||
-        # predicate
-        Expr(:function, _...) ||
-        Expr(:if, _...) ||
-        x => nothing
+            # predicate
+            Expr(:function, _...) ||
+            Expr(:if, _...) ||
+            x => nothing
     end
 end
 
