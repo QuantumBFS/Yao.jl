@@ -1,5 +1,7 @@
 module YaoApi
 
-greet() = print("Hello World!")
+include("macros.jl")
+include("yaoregister.jl")
+include("yaoblocks.jl")
 
 end # module
