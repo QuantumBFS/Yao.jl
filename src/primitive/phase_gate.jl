@@ -17,7 +17,7 @@ end
 Returns a global phase gate. Defined with following matrix form:
 
 ```math
-exp(iθ) \\mathbf{I}
+e^{iθ} \\mathbf{I}
 ```
 
 # Example
