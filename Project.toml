@@ -1,0 +1,13 @@
+name = "YaoApi"
+uuid = "dcd2b696-d3ec-4a38-887f-d96715bed043"
+authors = ["QuantumBFS"]
+version = "0.1.0"
+
+[compat]
+julia = "1.4"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
