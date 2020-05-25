@@ -1,6 +1,6 @@
-using YaoApi
+using YaoAPI
 using Test
 
-@testset "YaoApi.jl" begin
+@testset "YaoAPI.jl" begin
     # Write your own tests here.
 end

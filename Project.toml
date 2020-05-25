@@ -1,5 +1,5 @@
-name = "YaoApi"
-uuid = "dcd2b696-d3ec-4a38-887f-d96715bed043"
+name = "YaoAPI"
+uuid = "0843a435-28de-4971-9e8b-a9641b2983a8"
 authors = ["QuantumBFS"]
 version = "0.1.0"
 
