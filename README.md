@@ -2,7 +2,7 @@
 
 This package contains abstract APIs for Yao.
 
-## To Start
+## Usage
 
 Type `?` in a Julia REPL to show the docstring.
 
