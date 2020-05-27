@@ -1,12 +1,5 @@
 export @interface
 
-"""
-    INTERFACES::Vector{Symbol}
-
-constant to store all the interfaces symbol.
-"""
-const INTERFACES = Symbol[]
-
 macro interface(ex)
     return interfacem(__module__, __source__, ex)
 end
