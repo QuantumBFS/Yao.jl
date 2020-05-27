@@ -124,6 +124,14 @@ Returns all the parameters contained in block tree with given root `block`.
 @interface parameters
 
 """
+    nparameters(block) -> Int
+
+Return number of parameters in `block`. See also [`niparams`](@ref).
+"""
+@interface nparameters
+
+
+"""
     niparam(block) -> Int
 
 Return number of intrinsic parameters in `block`. See also [`nparameters`](@ref).
