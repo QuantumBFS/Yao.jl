@@ -13,7 +13,7 @@ help?> YaoAPI.mat
   Returns the matrix form of given block.
 ```
 
-The `mat` can be replace to any of the APIs bellow
+The `mat` interface can be replace with any APIs bellow
 
 #### Yao Register API
 
@@ -25,7 +25,7 @@ invorder!, measure, measure!, nactive, nbatch, nqubits, nremain,
 partial_tr, probs, purify, relax!, reorder!, select, select!, tracedist,
 viewbatch, ρ
 
-##### Yao Blocks API
+#### Yao Blocks API
 AbstractBlock, AbstractContainer, CompositeBlock, LocationConflictError,
 PrimitiveBlock, QubitMismatchError, TagBlock,
 apply!, apply_back!, chcontent, chsubblocks, content, dispatch!, expect,
