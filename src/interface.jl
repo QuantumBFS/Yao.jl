@@ -7,7 +7,6 @@ end
 function interfacem(__module__::Module, __source__::LineNumberNode, ex::Symbol)
     esc(quote
         export $ex
-        push!($INTERFACES, $ex)
         Core.@__doc__ $(Expr(:function, ex))
     end)
 end
