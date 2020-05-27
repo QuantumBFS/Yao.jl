@@ -1,7 +1,12 @@
+"""
+    YaoAPI
+
+API definitions for Yao.
+"""
 module YaoAPI
 
-include("macros.jl")
-include("yaoregister.jl")
-include("yaoblocks.jl")
+include("interface.jl")
+include("registers.jl")
+include("blocks.jl")
 
 end # module

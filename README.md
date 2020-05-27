@@ -1,6 +1,6 @@
 # YaoAPI
 
-This package contains abstract APIs for Yao.
+API definitions for Yao.
 
 ## Usage
 
@@ -33,3 +33,7 @@ getiparams, iparams_eltype, iscommute, isreflexive,
 isunitary, mat, mat_back!, niparams, nqubits, occupied_locs,
 operator_fidelity, parameters, parameters_eltype, print_block,
 render_params, setiparams!, subblocks, ishermitian, nparameters
+
+## License
+
+Apache License 2.0
