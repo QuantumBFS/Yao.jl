@@ -10,6 +10,13 @@ using Yao, Yao.AD
     end
 end
 
+@adjoint function Yao.dispatch!(block::AbstractBlock, params)
+    out = dispatch!(block, params)
+    out, function (outδ)
+        (nothing, outδ)
+    end
+end
+
 @adjoint function Matrix(block::AbstractBlock)
     out = Matrix(block)
     out, function (outδ)
@@ -40,3 +47,8 @@ end
 @adjoint statevec(reg::AdjointArrayReg) = statevec(reg), adjy->(ArrayReg(adjy')',)
 @adjoint parent(reg::AdjointArrayReg) = parent(reg), adjy->(adjy',)
 @adjoint Base.adjoint(reg::ArrayReg) = Base.adjoint(reg), adjy->(parent(adjy),)
+Zygote.@nograd Yao.nparameters
+Zygote.@nograd Yao.zero_state
+Zygote.@nograd Yao.rand_state
+Zygote.@nograd Yao.uniform_state
+Zygote.@nograd Yao.product_state
