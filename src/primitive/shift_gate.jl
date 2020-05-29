@@ -57,3 +57,7 @@ function YaoBase.isunitary(r::ShiftGate)
     @warn "θ in ShiftGate is not real, got θ=$(r.theta), fallback to matrix-based method"
     return isunitary(mat(r))
 end
+
+function parameters_range!(out::Vector{Tuple{T,T}}, gate::ShiftGate{T}) where {T}
+    push!(out, (0.0, 2.0*pi))
+end

@@ -3,7 +3,7 @@ export AbstractBlock
 using YaoBase, YaoArrayRegister, SimpleTraits
 import YaoBase: @interface
 
-export nqubits, isreflexive, isunitary, ishermitian
+export nqubits, isreflexive, isunitary, ishermitian, parameters_range
 
 """
     AbstractBlock
@@ -343,4 +343,33 @@ use the returns of [`parameters`](@ref) as its key.
 function _check_size(r::AbstractRegister, pb::AbstractBlock{N}) where {N}
     N == nactive(r) ||
         throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
+end
+
+"""
+    parameters_range(block)
+
+Return the range of real parameters present in `block`.
+
+!!! note
+    It may not be the case that `length(parameters_range(block)) == nparameters(block)`.
+
+# Example
+
+```jldoctest; setup=:(using YaoBlocks)
+julia> parameters_range(RotationGate(X, 0.1))
+1-element Array{Tuple{Float64,Float64},1}:
+ (0.0, 6.283185307179586)
+```
+"""
+function parameters_range(block::AbstractBlock)
+    T = parameters_eltype(block)
+    out = Tuple{T,T}[]
+    parameters_range!(out, block)
+    out
+end
+
+function parameters_range!(out::Vector{Tuple{T,T}}, block::AbstractBlock) where {T}
+    for subblock in subblocks(block)
+        parameters_range!(out, subblock)
+    end
 end
