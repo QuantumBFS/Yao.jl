@@ -59,5 +59,5 @@ function YaoBase.isunitary(r::ShiftGate)
 end
 
 function parameters_range!(out::Vector{Tuple{T,T}}, gate::ShiftGate{T}) where {T}
-    push!(out, (0.0, 2.0*pi))
+    push!(out, (0.0, 2.0 * pi))
 end

@@ -127,5 +127,5 @@ Base.:(==)(lhs::RotationGate{TA,GT}, rhs::RotationGate{TB,GT}) where {TA,TB,GT} 
 cache_key(R::RotationGate) = R.theta
 
 function parameters_range!(out::Vector{Tuple{T,T}}, gate::RotationGate{N,T,GT}) where {N,T,GT}
-    push!(out, (0.0, 2.0*pi))
+    push!(out, (0.0, 2.0 * pi))
 end
