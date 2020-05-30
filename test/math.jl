@@ -1,4 +1,5 @@
 using Test, YaoBase, LuxurySparse
+using BitBasis: invorder, reorder
 
 @testset "batch normalize" begin
     s = rand(3, 4)
@@ -69,3 +70,14 @@ end
     @test rot_mat(ComplexF64, Const.X, theta) |> eltype == ComplexF64
     @test rot_mat(ComplexF32, Const.X, theta) |> eltype == ComplexF32
 end
+
+using LuxurySparse: pmrand
+@testset "reorder" begin
+    ⊗ = kron
+    PA = pmrand(2)
+    PB = pmrand(2)
+    PC = pmrand(2)
+    @test reorder(PC ⊗ PB ⊗ PA, [3, 1, 2]) ≈ PB ⊗ PA ⊗ PC
+    @test invorder(PC ⊗ PB ⊗ PA) ≈ PA ⊗ PB ⊗ PC
+end
+

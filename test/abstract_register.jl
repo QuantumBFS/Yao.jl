@@ -15,9 +15,9 @@ struct TestInterfaceRegister{B} <: AbstractRegister{B} end
 TestInterfaceRegister() = TestInterfaceRegister{1}()
 
 @testset "Test general interface" begin
-    @test_throws NotImplementedError nactive(TestInterfaceRegister())
-    @test_throws NotImplementedError nqubits(TestInterfaceRegister())
-    @test_throws NotImplementedError nremain(TestInterfaceRegister())
+    @test_throws MethodError nactive(TestInterfaceRegister())
+    @test_throws MethodError nqubits(TestInterfaceRegister())
+    @test_throws MethodError nremain(TestInterfaceRegister())
 end
 
 @testset "Test default fallbacks" begin

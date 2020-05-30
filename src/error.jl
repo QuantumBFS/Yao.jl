@@ -1,14 +1,5 @@
 using TupleTools
 
-export NotImplementedError, LocationConflictError, QubitMismatchError
-
-# NOTE: kwargs do not involve in multiple dispatch
-#       no need to store kwargs
-struct NotImplementedError{ArgsT} <: Exception
-    name::Symbol
-    args::ArgsT
-end
-
 NotImplementedError(name::Symbol) = NotImplementedError(name, ())
 
 function Base.show(io::IO, e::NotImplementedError)
@@ -27,23 +18,9 @@ function Base.show(io::IO, e::NotImplementedError{Tuple{}})
     print(io, "$(e.name) is not implemented.")
 end
 
-struct LocationConflictError <: Exception
-    msg::String
-end
-
 function Base.show(io::IO, e::LocationConflictError)
     print(io, "LocationConflictError: ", e.msg)
     # print(io, "locations of $(e.blk1) and $(e.blk2) is conflict.")
-end
-
-# NOTE: More detailed error msg?
-"""
-    QubitMismatchError <: Exception
-
-Qubit number mismatch error when applying a Block to a Register or concatenating Blocks.
-"""
-struct QubitMismatchError <: Exception
-    msg::String
 end
 
 function show(io::IO, e::QubitMismatchError)

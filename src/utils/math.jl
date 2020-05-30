@@ -320,3 +320,22 @@ function rot_mat(::Type{T}, gen::AbstractMatrix, theta::Real) where {N,T}
         return m
     end
 end
+
+BitBasis.unsafe_reorder(A::IMatrix, orders::NTuple{N,<:Integer}) where {N} = A
+
+function BitBasis.unsafe_reorder(A::PermMatrix, orders::NTuple{N,<:Integer}) where {N}
+    od = Vector{Int}(undef, 1 << length(orders))
+    for (i, b) in enumerate(ReorderedBasis(orders))
+        @inbounds od[i] = 1 + b
+    end
+
+    perm = similar(A.perm)
+    vals = similar(A.vals)
+
+    @simd for i in 1:length(perm)
+        @inbounds perm[od[i]] = od[A.perm[i]]
+        @inbounds vals[od[i]] = A.vals[i]
+    end
+
+    return PermMatrix(perm, vals)
+end
