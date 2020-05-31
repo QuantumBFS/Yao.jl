@@ -13,7 +13,7 @@ YaoSym = "3b27209a-d3d6-11e9-3c0f-41eb92b2cb9d"
 [compat]
 BitBasis = "0.6"
 Reexport = "0.2"
-YaoArrayRegister = "0.6"
+YaoArrayRegister = "0.6, 0.7"
 YaoBase = "0.13"
 YaoBlocks = "0.8, 0.9, 0.10"
 YaoSym = "0.3, 0.4"
