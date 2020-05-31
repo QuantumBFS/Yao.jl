@@ -1,42 +1,4 @@
-using YaoBase, BitBasis
 import BitBasis: BitStr, BitStr64
-
-export ArrayReg,
-    AdjointArrayReg,
-    ArrayRegOrAdjointArrayReg,
-    transpose_storage,
-    # YaoBase
-    nqubits,
-    nactive,
-    nremain,
-    nbatch,
-    viewbatch,
-    addbits!,
-    insert_qubits!,
-    datatype,
-    probs,
-    reorder!,
-    invorder!,
-    collapseto!,
-    fidelity,
-    tracedist,
-    # YaoBase deprecated
-    addbit!,
-    reset!,
-    # additional
-    state,
-    statevec,
-    relaxedvec,
-    rank3,
-    # BitBasis
-    @bit_str,
-    hypercubic,
-    # initialization
-    product_state,
-    zero_state,
-    rand_state,
-    uniform_state,
-    oneto
 
 """
     ArrayReg{B, T, MT <: AbstractMatrix{T}} <: AbstractRegister{B}
@@ -86,7 +48,7 @@ Returns the numerical data type used by register.
     is not exactly the same with `AbstractArray`, it is an iterator of several
     registers.
 """
-YaoBase.@interface datatype(r::ArrayReg{B,T}) where {B,T} = T
+datatype(r::ArrayReg{B,T}) where {B,T} = T
 
 function _warn_type(raw::AbstractArray{T}) where {T}
     T <: Complex || @warn "Input type of `ArrayReg` is not Complex, got $(eltype(raw))"

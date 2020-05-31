@@ -1,27 +1,12 @@
-export DensityMatrix, density_matrix, ρ
-export purify
-
-"""
-    DensityMatrix{B, T, MT}
-
-Density Matrix.
-
-- `B`: batch size
-- `T`: element type
-"""
-struct DensityMatrix{B,T,MT<:AbstractArray{T,3}} <: AbstractRegister{B}
-    state::MT
-end
-
 """
     DensityMatrix(state::AbstractArray{T, 3})
     DensityMatrix(state::AbstractMatrix{T})
 
 Create a `DensityMatrix` with a state represented by array.
 """
-DensityMatrix(state::MT) where {T,MT<:AbstractArray{T,3}} =
+YaoBase.DensityMatrix(state::MT) where {T,MT<:AbstractArray{T,3}} =
     DensityMatrix{size(state, 3),T,MT}(state)
-DensityMatrix(state::AbstractMatrix) = DensityMatrix(reshape(state, size(state)..., 1))
+YaoBase.DensityMatrix(state::AbstractMatrix) = DensityMatrix(reshape(state, size(state)..., 1))
 
 """
     state(ρ::DensityMatrix)
@@ -63,12 +48,7 @@ end
 
 YaoBase.probs(m::DensityMatrix{1}) = diag(view(m.state, :, :, 1))
 
-"""
-    purify(r::DensityMatrix{B}; nbit_env::Int=nactive(r)) -> ArrayReg
-
-Get a purification of target density matrix.
-"""
-function purify(r::DensityMatrix{B}; nbit_env::Int = nactive(r)) where {B}
+function YaoBase.purify(r::DensityMatrix{B}; nbit_env::Int = nactive(r)) where {B}
     Ne = 1 << nbit_env
     Ns = size(r.state, 1)
     state = similar(r.state, Ns, Ne, B)

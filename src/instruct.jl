@@ -98,27 +98,22 @@ function _prepare_instruct(
 end
 
 function YaoBase.instruct!(
-    state::AbstractVecOrMat{T1},
-    operator::AbstractMatrix{T2},
+    state::AbstractVecOrMat{T},
+    operator::AbstractMatrix{T},
     locs::Tuple{},
     control_locs::NTuple{C,Int} = (),
     control_bits::NTuple{C,Int} = (),
-) where {T1,T2,M,C}
+) where {T,M,C}
     return state
 end
 
 function YaoBase.instruct!(
-    state::AbstractVecOrMat{T1},
-    operator::AbstractMatrix{T2},
+    state::AbstractVecOrMat{T},
+    operator::AbstractMatrix{T},
     locs::NTuple{M,Int},
     control_locs::NTuple{C,Int} = (),
     control_bits::NTuple{C,Int} = (),
-) where {T1,T2,M,C}
-
-    if T2 != T1
-        @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
-        operator = copyto!(similar(operator, T1), operator)
-    end
+) where {T,M,C}
     operator = sort_unitary(operator, locs)
     locs_raw, ic = _prepare_instruct(state, operator, locs, control_locs, control_bits)
     return _instruct!(state, autostatic(operator), locs_raw, ic)
@@ -160,12 +155,12 @@ YaoBase.instruct!(state::AbstractVecOrMat, g::AbstractMatrix, locs::Tuple{Int}) 
     instruct!(state, g, locs...)
 
 function YaoBase.instruct!(
-    state::AbstractVecOrMat{T1},
-    U1::AbstractMatrix{T2},
+    state::AbstractVecOrMat{T},
+    U1::AbstractMatrix{T},
     loc::Int,
-) where {T1,T2}
+) where {T}
     a, c, b, d = U1
-    instruct_kernel(state, loc, 1 << (loc - 1), 1 << loc, T1(a), T1(b), T1(c), T1(d))
+    instruct_kernel(state, loc, 1 << (loc - 1), 1 << loc, a, b, c, d)
     return state
 end
 
@@ -185,10 +180,10 @@ YaoBase.instruct!(
 ) where {T} = instruct!(state, g, locs...)
 
 function YaoBase.instruct!(
-    state::AbstractVecOrMat{T1},
-    U1::SDPermMatrix{T2},
+    state::AbstractVecOrMat{T},
+    U1::SDPermMatrix{T},
     loc::Int,
-) where {T1,T2}
+) where {T}
     U1.perm[1] == 1 && return instruct!(state, Diagonal(U1), loc)
     mask = bmask(loc)
     b, c = U1.vals
@@ -211,12 +206,12 @@ YaoBase.instruct!(
 ) where {T} = instruct!(state, g, locs...)
 
 function YaoBase.instruct!(
-    state::AbstractVecOrMat{T1},
-    U1::SDDiagonal{T2},
+    state::AbstractVecOrMat{T},
+    U1::SDDiagonal{T},
     loc::Int,
-) where {T1,T2}
+) where {T}
     mask = bmask(loc)
-    a, d = T1.(U1.diag)
+    a, d = U1.diag
     step = 1 << (loc - 1)
     step_2 = 1 << loc
     @threads for j in 0:step_2:size(state, 1)-step
