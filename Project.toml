@@ -18,7 +18,7 @@ LuxurySparse = "0.6"
 StaticArrays = "0.12"
 StatsBase = "0.32, 0.33"
 TupleTools = "1.1"
-YaoBase = "0.14"
+YaoBase = "~0.14.1"
 julia = "1"
 
 [extras]
