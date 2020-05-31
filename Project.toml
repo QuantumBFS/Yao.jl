@@ -13,8 +13,8 @@ TupleTools = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
 YaoBase = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
 
 [compat]
-BitBasis = "0.6, 0.7"
-LuxurySparse = "0.5, 0.6"
+BitBasis = "0.7"
+LuxurySparse = "0.6"
 StaticArrays = "0.12"
 StatsBase = "0.32, 0.33"
 TupleTools = "1.1"
