@@ -1,30 +1,11 @@
 using YaoBase
 
-export CompositeBlock, AbstractContainer
-
-"""
-    CompositeBlock{N} <: AbstractBlock{N}
-
-Abstract supertype which composite blocks will inherit from. Composite blocks
-are blocks composited from other [`AbstractBlock`](@ref)s, thus it is a `AbstractBlock`
-as well.
-"""
-abstract type CompositeBlock{N} <: AbstractBlock{N} end
-
-"""
-    AbstractContainer{BT, N} <: CompositeBlock{N}
-
-Abstract type for container block. Container blocks are blocks contain a single
-block. Container block should have a
-"""
-abstract type AbstractContainer{BT<:AbstractBlock,N} <: CompositeBlock{N} end
-
 """
     content(x)
 
 Returns the content of `x`.
 """
-@interface content(x::AbstractContainer) = x.content
+content(x::AbstractContainer) = x.content
 
 
 """
@@ -32,7 +13,7 @@ Returns the content of `x`.
 
 Create a similar block of `x` and change its content to blk.
 """
-@interface chcontent(x::AbstractContainer, blk) = chsubblocks(x, blk)
+chcontent(x::AbstractContainer, blk) = chsubblocks(x, blk)
 
 subblocks(x::AbstractContainer) = (content(x),)
 # NOTE: there's only one block inside, so we expand the iterator

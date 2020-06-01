@@ -5,7 +5,24 @@ This is a component package for [Yao.jl](https://github.com/QuantumBFS/Yao.jl). 
 """
 module YaoBlocks
 
+using YaoBase
 using LinearAlgebra
+
+import YaoBase: apply!, apply_back!, chcontent, chsubblocks, content, dispatch!, expect,
+     fidelity, focus!, getiparams, iparams_eltype, iscommute, isreflexive,
+     isunitary, mat, mat_back!, niparams, nqubits, occupied_locs,
+     operator_fidelity, parameters, parameters_eltype, print_block,
+     render_params, setiparams!, subblocks, ishermitian, nparameters
+
+export AbstractBlock, AbstractContainer, CompositeBlock, LocationConflictError,
+    PrimitiveBlock, QubitMismatchError, RemoveMeasured, ResetTo, TagBlock,
+    apply!, apply_back!, chcontent, chsubblocks, content, dispatch!, expect,
+     getiparams, iparams_eltype, iscommute, isreflexive,
+     isunitary, mat, mat_back!, niparams, nqubits, occupied_locs,
+     operator_fidelity, parameters, parameters_eltype, print_block,
+     render_params, setiparams!, subblocks, ishermitian, nparameters
+
+export applymatrix, cache_key
 
 include("utils.jl")
 # include("traits.jl")

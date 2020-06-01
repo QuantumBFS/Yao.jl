@@ -4,7 +4,11 @@ for F in [:expect, :fidelity, :operator_fidelity]
     @eval Base.show(io::IO, ::MIME"text/plain", ::Adjoint{Any,typeof($F)}) = print(io, "$($F)'")
 end
 
-function (::Adjoint{Any,typeof(expect)})(op::AbstractBlock, circuit::Pair{<:ArrayReg,<:AbstractBlock})
+function (::Adjoint{Any,typeof(expect)})(op::AbstractBlock, reg_or_circuit)
+    expect_g(op, reg_or_circuit)
+end
+
+function expect_g(op::AbstractBlock, circuit::Pair{<:ArrayReg,<:AbstractBlock})
     reg, c = circuit
     out = copy(reg) |> c
     outδ = copy(out) |> op
@@ -12,7 +16,7 @@ function (::Adjoint{Any,typeof(expect)})(op::AbstractBlock, circuit::Pair{<:Arra
     return inδ => paramsδ .* 2
 end
 
-function (::Adjoint{Any,typeof(expect)})(op::AbstractBlock, reg::ArrayReg)
+function expect_g(op::AbstractBlock, reg::ArrayReg)
     copy(reg) |> op
 end
 
@@ -23,7 +27,14 @@ YaoBase.fidelity(p1, p2) = fidelity(_eval(p1), _eval(p2))
 function (::Adjoint{Any,typeof(fidelity)})(
     reg1::Union{ArrayReg,Pair{<:ArrayReg,<:AbstractBlock}},
     reg2::Union{ArrayReg,Pair{<:ArrayReg,<:AbstractBlock}},
-)
+    )
+    fidelity_g(reg1, reg2)
+end
+
+function fidelity_g(
+    reg1::Union{ArrayReg,Pair{<:ArrayReg,<:AbstractBlock}},
+    reg2::Union{ArrayReg,Pair{<:ArrayReg,<:AbstractBlock}},
+    )
     if reg1 isa Pair
         in1, c1 = reg1
         out1 = copy(in1) |> c1
@@ -67,6 +78,10 @@ function (::Adjoint{Any,typeof(fidelity)})(
 end
 
 function (::Adjoint{Any,typeof(operator_fidelity)})(b1::AbstractBlock, b2::AbstractBlock)
+    operator_fidelity_g(b1, b2)
+end
+
+function operator_fidelity_g(b1::AbstractBlock, b2::AbstractBlock)
     U1 = mat(b1)
     U2 = mat(b2)
     s = sum(conj(U1) .* U2)

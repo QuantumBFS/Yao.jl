@@ -1,6 +1,7 @@
 using YaoBase, YaoArrayRegister, Random
 using BitBasis
-export Measure, MeasureAndReset, AllLocs, ComputationalBasis, chmeasureoperator
+export Measure, MeasureAndReset, AllLocs, ComputationalBasis, chmeasureoperator,
+    nqubits_measured
 
 """
     Measure{N, K, OT, LT, PT, RNG} <: PrimitiveBlock{N}
@@ -60,7 +61,7 @@ function Base.:(==)(m1::Measure, m2::Measure)
     res && (!isdefined(m1, :results) || m1.results == m2.results)
 end
 
-@interface nqubits_measured(::Measure{N,K}) where {N,K} = K
+nqubits_measured(::Measure{N,K}) where {N,K} = K
 
 """
     Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=AllLocs(), resetto=nothing, remove=false)

@@ -59,9 +59,11 @@ Project `op` to sparse matrix with same sparsity as `y`.
 function projection(y::AbstractMatrix, op::AbstractMatrix)
     size(y) == size(op) ||
         throw(DimensionMismatch("can not project a matrix of size $(size(op)) to target size $(size(y))"))
-    out = zero(y)
+    out = _zero(y)
     unsafe_projection!(out, op)
 end
+_zero(y) = y
+_zero(y::SparseMatrixCSC) = SparseMatrixCSC(y.m, y.n, y.colptr, y.rowval, zero(y.nzval))
 
 unsafe_projection!(y::Diagonal, m::AbstractMatrix) = (y.diag .= diag(m); y)
 unsafe_projection!(y::Diagonal, op::OuterProduct) = (y.diag .+= op.left .* op.right; y)

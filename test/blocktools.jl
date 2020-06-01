@@ -76,3 +76,14 @@ end
     @test operator_fidelity(im * H, Z) ≈ sqrt(0.5)
     @test operator_fidelity(H, Y) ≈ 0
 end
+
+@testset "gate count, time" begin
+    cphase(i, j) = control(i, j=> shift(2π/(2^(i-j+1))));
+    hcphases(n, i) = chain(n, i==j ? put(i=>H) : cphase(j, i) for j in i:n);
+    qft_circuit(n::Int) = chain(n, hcphases(n, i) for i = 1:n)
+    qc = qft_circuit(3)
+    @test qc |> gatecount |> length == 2
+    @test qc |> gatecount |> values |> sum == 6
+    res = gatecount(repeat(5, X, (2,3)))
+    @test res |> values |> sum == 2
+end

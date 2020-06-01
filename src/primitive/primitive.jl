@@ -1,19 +1,3 @@
-export PrimitiveBlock
-
-"""
-    PrimitiveBlock{N} <: AbstractBlock{N}
-
-Abstract type that all primitive block will subtype from. A primitive block
-is a concrete block who can not be decomposed into other blocks. All composite
-block can be decomposed into several primitive blocks.
-
-!!! note
-
-    subtype for primitive block with parameter should implement `hash` and `==`
-    method to enable key value cache.
-"""
-abstract type PrimitiveBlock{N} <: AbstractBlock{N} end
-
 # NOTE: we cannot change subblocks of a primitive block
 #      since they are primitive, therefore we return themselves
 chsubblocks(x::PrimitiveBlock, it) = x

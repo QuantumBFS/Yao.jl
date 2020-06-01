@@ -1,16 +1,4 @@
-export AbstractBlock
-
 using YaoBase, YaoArrayRegister, SimpleTraits
-import YaoBase: @interface
-
-export nqubits, isreflexive, isunitary, ishermitian, parameters_range
-
-"""
-    AbstractBlock
-
-Abstract type for quantum circuit blocks.
-"""
-abstract type AbstractBlock{N} end
 
 """
     apply!(register, block)
@@ -18,7 +6,7 @@ abstract type AbstractBlock{N} end
 Apply a block (of quantum circuit) to a quantum register.
 """
 
-@interface function apply!(r::AbstractRegister, b::AbstractBlock)
+function apply!(r::AbstractRegister, b::AbstractBlock)
     _apply_fallback!(r, b)
 end
 
@@ -62,46 +50,47 @@ end
 
 Return a tuple of occupied locations of `x`.
 """
-@interface occupied_locs(x::AbstractBlock) = (1:nqubits(x)...,)
+occupied_locs(x::AbstractBlock) = (1:nqubits(x)...,)
 
 """
     subblocks(x)
 
 Returns an iterator of the sub-blocks of a composite block. Default is empty.
 """
-@interface subblocks(x::AbstractBlock)
+subblocks(x::AbstractBlock)
 
 """
     chsubblocks(composite_block, itr)
 
 Change the sub-blocks of a [`CompositeBlock`](@ref) with given iterator `itr`.
 """
-@interface chsubblocks(x::AbstractBlock, itr)
+chsubblocks(x::AbstractBlock, itr)
 
 """
     applymatrix(g::AbstractBlock) -> Matrix
 
 Transform the apply! function of specific block to dense matrix.
 """
-@interface applymatrix(T, g::AbstractBlock) =
+applymatrix(T, g::AbstractBlock) =
     linop2dense(T, r -> statevec(apply!(ArrayReg(r), g)), nqubits(g))
 applymatrix(g::AbstractBlock) = applymatrix(ComplexF64, g)
 # just use BlockMap maybe? No!
 
-@interface print_block(io::IO, blk::AbstractBlock) = print_block(io, MIME("text/plain"), blk)
+print_block(io::IO, blk::AbstractBlock) = print_block(io, MIME("text/plain"), blk)
 print_block(blk::AbstractBlock) = print_block(stdout, blk)
 print_block(io::IO, ::MIME"text/plain", blk::AbstractBlock) = summary(io, blk)
 
 # return itself by default
 Base.copy(x::AbstractBlock) = x
 
+function cache_key end
+
 """
     mat([T=ComplexF64], blk)
 
 Returns the matrix form of given block.
 """
-@interface mat(x::AbstractBlock) = mat(promote_type(ComplexF64, parameters_eltype(x)), x)
-@interface mat(::Type{T}, x::AbstractBlock) where {T}
+mat(x::AbstractBlock) = mat(promote_type(ComplexF64, parameters_eltype(x)), x)
 
 mat_matchreg(reg::AbstractRegister, x::AbstractBlock) = mat(x)
 mat_matchreg(reg::ArrayReg{B,T}, x::AbstractBlock) where {B,T} = mat(T, x)
@@ -135,7 +124,7 @@ YaoBase.iscommute(op1::AbstractBlock{N}, op2::AbstractBlock{N}) where {N} =
 
 Returns the intrinsic parameters of node `block`, default is an empty tuple.
 """
-@interface getiparams(x::AbstractBlock) = ()
+getiparams(x::AbstractBlock) = ()
 
 """
     setiparams!(block, itr)
@@ -143,7 +132,7 @@ Returns the intrinsic parameters of node `block`, default is an empty tuple.
 
 Set the parameters of `block`.
 """
-@interface setiparams!(x::AbstractBlock, args...) =
+setiparams!(x::AbstractBlock, args...) =
     niparams(x) == length(args) == 0 ? x : throw(NotImplementedError(:setiparams!, (x, args...)))
 
 setiparams!(x::AbstractBlock, it::Union{Tuple,AbstractArray,Base.Generator}) = setiparams!(x, it...)
@@ -172,7 +161,7 @@ setiparams!(f::Function, x::AbstractBlock, it::Symbol) = setiparams!(f, x, rende
 
 Returns all the parameters contained in block tree with given root `block`.
 """
-@interface parameters(x::AbstractBlock) = parameters!(parameters_eltype(x)[], x)
+parameters(x::AbstractBlock) = parameters!(parameters_eltype(x)[], x)
 
 """
     parameters!(out, block)
@@ -180,7 +169,7 @@ Returns all the parameters contained in block tree with given root `block`.
 Append all the parameters contained in block tree with given root `block` to
 `out`.
 """
-@interface function parameters!(out, x::AbstractBlock)
+function parameters!(out, x::AbstractBlock)
     append!(out, getiparams(x))
     for blk in subblocks(x)
         parameters!(out, blk)
@@ -190,14 +179,9 @@ end
 
 # = prewalk(blk->append!(out, getiparams(blk)), x)
 
-"""
-    nparameters(block) -> Int
+niparams(x::AbstractBlock) = length(getiparams(x))
 
-Return number of parameters in `block`. See also [`nparameters`](@ref).
-"""
-@interface niparams(x::AbstractBlock) = length(getiparams(x))
-
-@interface function nparameters(x::AbstractBlock)
+function nparameters(x::AbstractBlock)
     count = niparams(x)
     for each in subblocks(x)
         count += nparameters(each)
@@ -210,14 +194,14 @@ end
 
 Return the element type of [`getiparams`](@ref).
 """
-@interface iparams_eltype(x::AbstractBlock) = eltype(getiparams(x))
+iparams_eltype(x::AbstractBlock) = eltype(getiparams(x))
 
 """
     parameters_eltype(x)
 
 Return the element type of [`parameters`](@ref).
 """
-@interface function parameters_eltype(x::AbstractBlock)
+function parameters_eltype(x::AbstractBlock)
     T = iparams_eltype(x)
     for each in subblocks(x)
         T = promote_type(T, parameters_eltype(each))
@@ -253,7 +237,7 @@ function consume!(d::Dispatcher{<:Number}, n::Int)
     end
 end
 
-@interface function dispatch!(f::Union{Function,Nothing}, x::AbstractBlock, it::Dispatcher)
+function dispatch!(f::Union{Function,Nothing}, x::AbstractBlock, it::Dispatcher)
     setiparams!(f, x, consume!(it, niparams(x)))
     for each in subblocks(x)
         dispatch!(f, each, it)
@@ -270,7 +254,7 @@ Dispatch parameters in collection to block tree `x`.
 
     it will try to dispatch the parameters in collection first.
 """
-@interface function dispatch!(f::Union{Function,Nothing}, x::AbstractBlock, it)
+function dispatch!(f::Union{Function,Nothing}, x::AbstractBlock, it)
     dp = Dispatcher(it)
     res = dispatch!(f, x, dp)
     @assert (it isa Symbol || length(it) == dp.loc) "expect $(dp.loc) parameters, got $(length(it))"
@@ -285,7 +269,7 @@ dispatch!(x::AbstractBlock, it) = dispatch!(nothing, x, it)
 Pop the first [`nparameters`](@ref) parameters of list, map them with a function
 `f`, then dispatch them to the block tree `block`. See also [`dispatch!`](@ref).
 """
-@interface function popdispatch!(f::Function, x::AbstractBlock, list::Vector)
+function popdispatch!(f::Function, x::AbstractBlock, list::Vector)
     setiparams!(f, x, (popfirst!(list) for k in 1:niparams(x))...)
     for each in subblocks(x)
         popdispatch!(f, each, list)
@@ -299,7 +283,7 @@ end
 Pop the first [`nparameters`](@ref) parameters of list, then dispatch them to
 the block tree `block`. See also [`dispatch!`](@ref).
 """
-@interface function popdispatch!(x::AbstractBlock, list::Vector)
+function popdispatch!(x::AbstractBlock, list::Vector)
     setiparams!(x, (popfirst!(list) for k in 1:niparams(x))...)
     for each in subblocks(x)
         popdispatch!(each, list)
@@ -330,7 +314,7 @@ end
 Return the element type that a [`CacheFragment`](@ref)
 will use.
 """
-@interface cache_type(::Type{<:AbstractBlock}) = Any
+cache_type(::Type{<:AbstractBlock}) = Any
 
 """
     cache_key(block)
@@ -338,7 +322,7 @@ will use.
 Returns the key that identify the matrix cache of this block. By default, we
 use the returns of [`parameters`](@ref) as its key.
 """
-@interface cache_key(x::AbstractBlock)
+cache_key(x::AbstractBlock)
 
 function _check_size(r::AbstractRegister, pb::AbstractBlock{N}) where {N}
     N == nactive(r) ||
