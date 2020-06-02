@@ -38,7 +38,7 @@ function goemansWilliamson(W::Matrix{T}; tol::Real=1e-1, iter::Int=100) where T<
 	expr = dot(W, S)
 	constr = [S[i,i] == 1.0 for i in 1:k]
 	problem = minimize(expr, constr...)
-	solve!(problem, SCSSolver(verbose=0))
+	solve!(problem, SCS.Optimizer(verbose=0))
 
 	### Ensure symmetric positive-definite.
 	A = 0.5 * (S.value + S.value')
