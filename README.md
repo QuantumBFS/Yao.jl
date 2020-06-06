@@ -7,6 +7,7 @@ alt="Yao Logo" width="210"></img>
 
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://QuantumBFS.github.io/Yao.jl/stable)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://QuantumBFS.github.io/Yao.jl/latest)
+[![Unitary Fund](https://img.shields.io/badge/Supported%20By-UNITARY%20FUND-brightgreen.svg?style=flat-the-badge)](http://unitary.fund)
 
 | Yao | YaoBlocks | YaoArrayRegister | YaoSym |
 | ----------   | --------- | ---------------- | ------ |
