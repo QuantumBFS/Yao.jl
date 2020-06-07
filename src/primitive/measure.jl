@@ -1,7 +1,6 @@
 using YaoBase, YaoArrayRegister, Random
 using BitBasis
-export Measure, MeasureAndReset, AllLocs, ComputationalBasis, chmeasureoperator,
-    nqubits_measured
+export Measure, MeasureAndReset, AllLocs, ComputationalBasis, chmeasureoperator, nqubits_measured
 
 """
     Measure{N, K, OT, LT, PT, RNG} <: PrimitiveBlock{N}

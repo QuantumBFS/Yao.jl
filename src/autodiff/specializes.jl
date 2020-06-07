@@ -27,14 +27,14 @@ YaoBase.fidelity(p1, p2) = fidelity(_eval(p1), _eval(p2))
 function (::Adjoint{Any,typeof(fidelity)})(
     reg1::Union{ArrayReg,Pair{<:ArrayReg,<:AbstractBlock}},
     reg2::Union{ArrayReg,Pair{<:ArrayReg,<:AbstractBlock}},
-    )
+)
     fidelity_g(reg1, reg2)
 end
 
 function fidelity_g(
     reg1::Union{ArrayReg,Pair{<:ArrayReg,<:AbstractBlock}},
     reg2::Union{ArrayReg,Pair{<:ArrayReg,<:AbstractBlock}},
-    )
+)
     if reg1 isa Pair
         in1, c1 = reg1
         out1 = copy(in1) |> c1

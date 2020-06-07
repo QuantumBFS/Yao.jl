@@ -71,8 +71,7 @@ chsubblocks(x::AbstractBlock, itr)
 
 Transform the apply! function of specific block to dense matrix.
 """
-applymatrix(T, g::AbstractBlock) =
-    linop2dense(T, r -> statevec(apply!(ArrayReg(r), g)), nqubits(g))
+applymatrix(T, g::AbstractBlock) = linop2dense(T, r -> statevec(apply!(ArrayReg(r), g)), nqubits(g))
 applymatrix(g::AbstractBlock) = applymatrix(ComplexF64, g)
 # just use BlockMap maybe? No!
 

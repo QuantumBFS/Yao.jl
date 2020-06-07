@@ -1,5 +1,4 @@
-export postwalk, prewalk, blockfilter!, blockfilter,
-    collect_blocks, gatecount
+export postwalk, prewalk, blockfilter!, blockfilter, collect_blocks, gatecount
 
 """
     parse_block(n, ex)
@@ -158,8 +157,8 @@ function operator_fidelity(b1::AbstractBlock, b2::AbstractBlock)
     return abs(sum(conj(U1) .* U2)) / size(U1, 1)
 end
 
-gatecount(blk::AbstractBlock) = gatecount!(blk, Dict{Type{<:AbstractBlock}, Int}())
-function gatecount!(c::Union{ChainBlock, KronBlock, PutBlock, Add, CachedBlock}, storage::AbstractDict)
+gatecount(blk::AbstractBlock) = gatecount!(blk, Dict{Type{<:AbstractBlock},Int}())
+function gatecount!(c::Union{ChainBlock,KronBlock,PutBlock,Add,CachedBlock}, storage::AbstractDict)
     (gatecount!.(c |> subblocks, Ref(storage)); storage)
 end
 
@@ -174,7 +173,7 @@ function gatecount!(c::RepeatedBlock, storage::AbstractDict)
     storage
 end
 
-function gatecount!(c::Union{PrimitiveBlock, Daggered, ControlBlock}, storage::AbstractDict)
+function gatecount!(c::Union{PrimitiveBlock,Daggered,ControlBlock}, storage::AbstractDict)
     k = typeof(c)
     if haskey(storage, k)
         storage[k] += 1
