@@ -1,5 +1,5 @@
 <div align="center"> <img
-src="http://yaoquantum.org/assets/images/logo.png"
+src="https://yaoquantum.org/assets/images/logo.png"
 alt="Yao Logo" width="210"></img>
 </div>
 
