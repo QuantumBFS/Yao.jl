@@ -11,6 +11,7 @@ export @vars
 
 simag = SymFunction("Im")
 sreal = SymFunction("Re")
+sabs = SymFunction("abs")
 
 Base.promote_rule(::Type{Bool}, ::Type{Basic}) = Basic
 Base.conj(x::Basic) = Basic(conj(SymEngine.BasicType(x)))
@@ -20,6 +21,9 @@ Base.conj(x::BasicTrigFunction) = juliafunc(x)(conj.(get_args(x.x)...)...)
 # WARNING: symbols and constants are assumed real!
 Base.imag(x::BasicType{Val{:Constant}}) = Basic(0)
 Base.imag(x::BasicType{Val{:Symbol}}) = Basic(0)
+Base.abs(x::Basic) = Basic(abs(SymEngine.BasicType(x)))
+Base.abs(x::BasicType{Val{:Constant}}) = x
+Base.abs(x::BasicType{Val{:Symbol}}) = x
 function Base.imag(x::BasicType{Val{:Add}})
     args = get_args(x.x)
     mapreduce(imag, +, args)
@@ -30,11 +34,14 @@ function Base.real(x::BasicType{Val{:Add}})
     mapreduce(real, +, args)
 end
 
+function Base.abs(x::BasicType{Val{:Add}})
+    args = get_args(x.x)
+    mapreduce(abs, +, args)
+end
+
 function Base.imag(x::BasicType{Val{:Mul}})
     args = (get_args(x.x)...,)
     get_mul_imag(args)
-    #@show a, b, res, "IM"
-    #return res
 end
 
 function Base.real(x::BasicType{Val{:Pow}})
@@ -63,6 +70,11 @@ function Base.imag(x::BasicType{Val{:Pow}})
     end
 end
 
+function Base.abs(x::BasicType{Val{:Pow}})
+    a, b = get_args(x.x)
+    abs(a)^real(b)
+end
+
 function Base.real(x::BasicType{Val{:Mul}})
     args = (get_args(x.x)...,)
     get_mul_real(args)
@@ -84,6 +96,15 @@ function Base.real(x::BasicTrigFunction)
         return x.x
     else
         return sreal(x.x)
+    end
+end
+
+function Base.abs(x::BasicTrigFunction)
+    a, = get_args(x.x)
+    if imag(a) == 0
+        return x.x
+    else
+        return sabs(x.x)
     end
 end
 
