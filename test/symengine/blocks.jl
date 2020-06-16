@@ -11,6 +11,8 @@ using Test
     @test imag(sin(a)) == 0
     @test imag(x^2) == 0
     @test real(x^2) == x^2
+    @test real(exp(im*a)) == cos(a)
+    @test imag(exp(im*a)) == sin(a)
 end
 
 @testset "mat" begin
