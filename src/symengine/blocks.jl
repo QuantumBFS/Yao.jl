@@ -50,7 +50,7 @@ function Base.real(x::BasicType{Val{:Pow}})
         return x.x
     else
         if imag(a) == 0
-            return a^real(b)*cos(log(a)*imag(b))
+            return a^real(b) * cos(log(a) * imag(b))
         else
             return sreal(x.x)
         end
@@ -63,7 +63,7 @@ function Base.imag(x::BasicType{Val{:Pow}})
         return Basic(0)
     else
         if imag(a) == 0
-            return a^real(b)*sin(log(a)*imag(b))
+            return a^real(b) * sin(log(a) * imag(b))
         else
             return simag(x.x)
         end
