@@ -18,9 +18,9 @@ function train!(circ, hamiltonian; optimizer, niter::Int=100)
          _, grad = expect'(hamiltonian, zero_state(nqubits(circ)) => circ)
          Optimise.update!(optimizer, params, grad)
          dispatch!(circ, params)
-         println("Energy = $(expect(hamiltonian, zero_state(nqubits(h)) |> circ) |> real)")
+         println("Energy = $(expect(hamiltonian, zero_state(nqubits(hamiltonian)) |> circ) |> real)")
      end
-     return expect(hamiltonian, zero_state(nqubits(h)) |> circ)
+     return expect(hamiltonian, zero_state(nqubits(hamiltonian)) |> circ)
 end
 
 h = hydrogen_hamiltonian()
