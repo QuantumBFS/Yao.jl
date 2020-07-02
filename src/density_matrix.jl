@@ -6,7 +6,8 @@ Create a `DensityMatrix` with a state represented by array.
 """
 YaoBase.DensityMatrix(state::MT) where {T,MT<:AbstractArray{T,3}} =
     DensityMatrix{size(state, 3),T,MT}(state)
-YaoBase.DensityMatrix(state::AbstractMatrix) = DensityMatrix(reshape(state, size(state)..., 1))
+YaoBase.DensityMatrix(state::AbstractMatrix) =
+    DensityMatrix(reshape(state, size(state)..., 1))
 
 """
     state(ρ::DensityMatrix)
