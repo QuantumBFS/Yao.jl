@@ -27,17 +27,13 @@ const THREAD_THRESHOLD = 10
 
 # generates the threading expression
 macro threads(ex)
-    if Threads.nthreads() == 1 # do nothing in single threading mode
-        return esc(:(@inbounds $ex))
-    else
-        return esc(quote
-            if log2dim1(state) < THREAD_THRESHOLD
-                @inbounds $ex
-            else
-                @inbounds Threads.@threads $ex
-            end
-        end)
-    end
+    esc(quote
+        if (Threads.nthreads() == 1) || log2dim1(state) < $THREAD_THRESHOLD
+            @inbounds $ex
+        else
+            @inbounds Threads.@threads $ex
+        end
+    end)
 end
 
 # to avoid potential ambiguity, we limit them to tuple for now
@@ -209,8 +205,7 @@ function YaoBase.instruct!(
     b, c = U1.vals
     step = 1 << (loc - 1)
     step_2 = 1 << loc
-    if log2dim1(state) < THREAD_THRESHOLD
-    end
+
     @threads for j = 0:step_2:size(state, 1)-step
         @inbounds for i = j+1:j+step
             swaprows!(state, i, i + step, c, b)
