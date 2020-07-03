@@ -5,7 +5,7 @@ using Colors
 using ZXCalculus: qubit_loc
 using Compose
 
-export ZXplot
+export plot
 
 function Multigraph2Graph(mg::Multigraph)
     g = SimpleGraph(nv(mg))
@@ -150,7 +150,7 @@ function layout2locs(zxd::ZXGraph{T,P}) where {T,P}
     return locs_x, locs_y
 end
 
-function ZXplot(zxd::ZXDiagram; linetype = "straight")
+function plot(zxd::ZXDiagram; linetype = "straight")
     g, edgelabel = ZX2Graph(zxd)
     nodelabel = ZX2nodelabel(zxd)
     nodefillc = ZX2nodefillc(zxd)
@@ -176,7 +176,7 @@ function ZXplot(zxd::ZXDiagram; linetype = "straight")
         )
     end
 end
-function ZXplot(zxd::ZXGraph; linetype = "straight")
+function plot(zxd::ZXGraph; linetype = "straight")
     g, edge_types = ZX2Graph(zxd)
 
     nodelabel = ZX2nodelabel(zxd)

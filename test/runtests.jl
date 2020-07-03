@@ -1,9 +1,9 @@
-using YaoPlots, ZXCalculus
+using YaoPlots, ZXCalculus, LightGraphs
 using Test
 
-@testset "YaoPlots.jl" begin
-    # Write your tests here.
-end
+# @testset "YaoPlots.jl" begin
+#     # Write your tests here.
+# end
 
 @testset "zx_plot.jl" begin
     g = Multigraph(6)
@@ -13,7 +13,7 @@ end
     ps = [0, 0, 0//1, 2//1, 0, 0]
     v_t = [SpiderType.In, SpiderType.Out, SpiderType.X, SpiderType.Z, SpiderType.Out, SpiderType.In]
     zxd = ZXDiagram(g, v_t, ps)
-    ZXplot(zxd)
+    plot(zxd)
     replace!(Rule{:b}(), zxd)
-    ZXplot(zxd)
+    plot(zxd)
 end
