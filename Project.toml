@@ -11,6 +11,7 @@ LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
 ZXCalculus = "3525faa3-032d-4235-a8d4-8c2939a218dd"
 
 [compat]
+GraphPlot = "0.4"
 LightGraphs = "1.3"
 Compose = "0.9"
 julia = "1"
