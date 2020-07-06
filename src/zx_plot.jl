@@ -144,7 +144,7 @@ function layout2locs(zxd::ZXGraph{T,P}) where {T,P}
             # locs[v] = ((x1+x2)/2, (y1+y2)/2)
         end
     end
-    println(locs)
+    # println(locs)
     locs_x = [locs[v][1] for v in vs]
     locs_y = [locs[v][2] for v in vs]
     return locs_x, locs_y
