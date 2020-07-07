@@ -37,7 +37,7 @@ function Yao.relax!(reg::EchoReg{B}, locs; to_nactive=nqubits(reg)) where {B}
     return true
 end
 
-function Yao.measure!(rng, ::ComputationalBasis, reg::EchoReg{B}, locs) where {B}
+function Yao.measure!(::NoPostProcess, ::ComputationalBasis, reg::EchoReg{B}, locs) where {B}
     println("measure -> $locs")
     return true
 end
