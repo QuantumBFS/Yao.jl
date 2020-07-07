@@ -134,14 +134,14 @@ ControlU(n, m, U) = chain(n+m, control(k, n+1:n+m=>matblock(U^(2^(k-1)))) for k 
 # each of them is a `U` of power ``2^(k-1)``.
 
 # Since we will only apply the qft and Hadamard on first `n` qubits,
-# we could use `Concentrator`, which creates a context of
+# we could use `Subroutine`, which creates a context of
 # a sub-scope of the qubits.
 
 PE(n, m, U) =
     chain(n+m, # total number of the qubits
-        concentrate(Hadamards(n), 1:n), # apply H in local scope
+        subroutine(Hadamards(n), 1:n), # apply H in local scope
         ControlU(n, m, U),
-        concentrate(QFT(n)', 1:n))
+        subroutine(QFT(n)', 1:n))
 
 # we use the first `n` qubits as the output space to store phase ``ϕ``, and the
 # other `m` qubits as the input state which corresponds to an eigenvector of
