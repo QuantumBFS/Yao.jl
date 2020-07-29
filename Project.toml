@@ -1,6 +1,6 @@
 name = "YaoSym"
 uuid = "3b27209a-d3d6-11e9-3c0f-41eb92b2cb9d"
-version = "0.5.4"
+version = "0.4.5"
 
 [deps]
 YaoArrayRegister = "e600142f-9330-5003-8abb-0ebd767abc51"
