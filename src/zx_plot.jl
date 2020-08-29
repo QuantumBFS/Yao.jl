@@ -161,33 +161,37 @@ function layout2locs(zxd::ZXGraph{T,P}) where {T,P}
     return locs_x, locs_y
 end
 
-function plot(zxd::ZXDiagram; linetype = "straight")
+function plot(zxd::ZXDiagram; size_x=nothing, size_y=nothing, kwargs...)
     g, edgelabel = ZX2Graph(zxd)
     nodelabel = ZX2nodelabel(zxd)
     nodefillc = ZX2nodefillc(zxd)
     edgelabelc = colorant"black"
     if zxd.layout.nbits > 0
         locs_x, locs_y = layout2locs(zxd)
-        size_x = maximum(locs_x) - minimum(locs_x)
-        size_y = maximum(locs_y) - minimum(locs_y)
+        if size_x === nothing
+            size_x = maximum(locs_x) - minimum(locs_x)
+        end
+        if size_y === nothing
+            size_y = maximum(locs_y) - minimum(locs_y)
+        end
         set_default_graphic_size(3size_x*cm, 3size_y*cm)
         composition = gplot(g,
-            locs_x, locs_y,
+            locs_x, locs_y;
             nodelabel = nodelabel, edgelabel = edgelabel, edgelabelc = edgelabelc, nodefillc = nodefillc,
-            linetype = linetype,
             NODESIZE = 1/(2size_x),
+            kwargs...
             # EDGELINEWIDTH = 8.0 / sqrt(nv(g))
         )
         # draw(SVG("test.svg", size_x*cm, size_y*cm), composition)
     else
-        gplot(g,
+        gplot(g;
             nodelabel = nodelabel, edgelabel = edgelabel, edgelabelc = edgelabelc, nodefillc = nodefillc,
-            linetype = linetype,
+            kwargs...
             # NODESIZE = 0.35 / sqrt(nv(g)), EDGELINEWIDTH = 8.0 / sqrt(nv(g))
         )
     end
 end
-function plot(zxd::ZXGraph; linetype = "straight")
+function plot(zxd::ZXGraph; size_x=nothing, size_y=nothing, kwargs...)
     g, edge_types = ZX2Graph(zxd)
 
     nodelabel = ZX2nodelabel(zxd)
@@ -195,24 +199,28 @@ function plot(zxd::ZXGraph; linetype = "straight")
     edgestrokec = et2color.(edge_types)
     if zxd.layout.nbits > 0
         locs_x, locs_y = layout2locs(zxd)
-        size_x = maximum(locs_x) - minimum(locs_x)
-        size_y = maximum(locs_y) - minimum(locs_y)
+        if size_x === nothing
+            size_x = maximum(locs_x) - minimum(locs_x)
+        end
+        if size_y === nothing
+            size_y = maximum(locs_y) - minimum(locs_y)
+        end
         set_default_graphic_size(3size_x*cm, 3size_y*cm)
         gplot(g,
-            locs_x, locs_y,
+            locs_x, locs_y;
             nodelabel = nodelabel,
             edgestrokec = edgestrokec,
             nodefillc = nodefillc,
-            linetype = linetype,
             NODESIZE = 1/(2size_x),
+            kwargs...
             # NODESIZE = 0.35 / sqrt(nv(g)), EDGELINEWIDTH = 8.0 / sqrt(nv(g))
             )
     else
-        gplot(g,
+        gplot(g;
             nodelabel = nodelabel,
             edgestrokec = edgestrokec,
             nodefillc = nodefillc,
-            linetype = linetype,
+            kwargs...
             # NODESIZE = 0.35 / sqrt(nv(g)), EDGELINEWIDTH = 8.0 / sqrt(nv(g))
             )
     end
