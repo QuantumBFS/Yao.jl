@@ -3,7 +3,6 @@ using LightGraphs
 using GraphPlot: gplot
 using Colors
 using ZXCalculus: qubit_loc
-using Compose
 
 export plot
 

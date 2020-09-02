@@ -7,6 +7,8 @@ Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
 Compose = "a81c6b42-2e10-5240-aca2-a61377ecd94b"
 GraphPlot = "a2cc645c-3eea-5389-862e-a155d0052231"
 LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
+Viznet = "52a3aca4-6234-47fd-b74a-806bdf78ede9"
+YaoBlocks = "418bc28f-b43b-5e0b-a6e7-61bbc1a2c1df"
 ZXCalculus = "3525faa3-032d-4235-a8d4-8c2939a218dd"
 
 [compat]
