@@ -1,6 +1,5 @@
 name = "YaoPlots"
 uuid = "32cfe2d9-419e-45f2-8191-2267705d8dbc"
-authors = ["Roger-luo <rogerluo.rl18@gmail.com> and contributors"]
 version = "0.2.0"
 
 [deps]
@@ -11,11 +10,11 @@ LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
 ZXCalculus = "3525faa3-032d-4235-a8d4-8c2939a218dd"
 
 [compat]
-Colors = "0.11, 0.12"
-Compose = "0.8, 0.9"
+Colors = "0.12"
+Compose = "0.9"
 GraphPlot = "0.4"
 LightGraphs = "1.3"
-ZXCalculus = "0.1, 0.2"
+ZXCalculus = "0.2"
 julia = "1"
 
 [extras]
