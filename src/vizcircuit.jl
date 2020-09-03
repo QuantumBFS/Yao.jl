@@ -93,59 +93,50 @@ function finalize!(c::CircuitGrid)
 	c.frontier .= i
 end
 
-function draw!(c::CircuitGrid, b::AbstractBlock, address)
+# elementary
+function draw!(c::CircuitGrid, b::AbstractBlock, address, controls)
     error("block type $(typeof(b)) does not support visualization.")
 end
 
-function draw!(c::CircuitGrid, p::ChainBlock{N}, address) where N
-	draw!.(Ref(c), subblocks(p), Ref(address))
+function draw!(c::CircuitGrid, p::PrimitiveBlock{M}, address, controls) where M
+	bts = length(controls)>=1 ? get_cbrush_texts(p) : get_brush_texts(p)
+	_draw!(c, [controls..., [(address[i], bts[i]...) for i=1:M]...])
 end
 
-function draw!(c::CircuitGrid, p::PutBlock{N,1,<:PrimitiveBlock}, address) where N
-	locs = [address[p.locs[1]]]
-	draw!(c, p.content, [address[p.locs[1]]])
+# composite
+function draw!(c::CircuitGrid, p::ChainBlock{N}, address, controls) where N
+	draw!.(Ref(c), subblocks(p), Ref(address), Ref(controls))
 end
 
-function draw!(c::CircuitGrid, p::PutBlock{N,M,<:PrimitiveBlock}, address) where {N,M}
+function draw!(c::CircuitGrid, p::PutBlock{N,M}, address, controls) where {N,M}
 	locs = [address[i] for i in p.locs]
-    _draw!(c, [(loc, CircuitStyles.G(), "") for loc in locs])
+	draw!(c, p.content, locs, controls)
 end
 
-function draw!(c::CircuitGrid, p::PrimitiveBlock{1}, address)
-    _draw!(c, [(address[], get_brush_text(p)...)])
-end
-
-function draw!(c::CircuitGrid, p::PutBlock{N,M,<:ChainBlock}, address) where {N,M}
-	locs = [address[i] for i in p.locs]
-	draw!.(Ref(c), subblocks(p.content), Ref(locs))
-end
-
-function draw!(c::CircuitGrid, p::PutBlock{N,2,<:SWAPGate}, address) where N
-	locs = [address[i] for i in p.locs]
-    _draw!(c, [(locs[1], CircuitStyles.X(), ""), (locs[2], CircuitStyles.X(), "")])
-end
-
-function draw!(c::CircuitGrid, cb::ControlBlock{N,GT,C,1}, address) where {N,GT,C}
+function draw!(c::CircuitGrid, cb::ControlBlock{N,GT,C}, address, controls) where {N,GT,C}
     ctrl_locs = [address[i] for i in cb.ctrl_locs]
     locs = [address[i] for i in cb.locs]
-	_draw!(c, [[(loc, (bit == 1 ? CircuitStyles.C() : CircuitStyles.NC()), "") for (loc, bit)=zip(ctrl_locs, cb.ctrl_config)]..., (locs..., get_cbrush_text(cb.content)...)])
+	mycontrols = [(loc, (bit == 1 ? CircuitStyles.C() : CircuitStyles.NC()), "") for (loc, bit)=zip(ctrl_locs, cb.ctrl_config)]
+	draw!(c, cb.content, locs, [controls..., mycontrols...])
 end
 
 for (GATE, SYM) in [(:XGate, :Rx), (:YGate, :Ry), (:ZGate, :Rz)]
-	@eval get_brush_text(b::RotationGate{1,T,<:$GATE}) where T = (CircuitStyles.WG(), "$($(SYM))($(pretty_angle(b.theta)))")
+	@eval get_brush_texts(b::RotationGate{1,T,<:$GATE}) where T = [(CircuitStyles.WG(), "$($(SYM))($(pretty_angle(b.theta)))")]
 end
 
 pretty_angle(theta) = theta
-pretty_angle(theta::Float64) = round(theta; digits=2)
+pretty_angle(theta::AbstractFloat) = round(theta; digits=2)
 
-get_brush_text(b::PrimitiveBlock{1}) = (CircuitStyles.G(), "")
-get_brush_text(b::ShiftGate) = (CircuitStyles.WG(), "ϕ($(pretty_angle(b.theta)))")
-get_brush_text(b::PhaseGate) = (CircuitStyles.WG(), "$(pretty_angle(b.theta))im")
-get_brush_text(b::T) where T<:ConstantGate = (CircuitStyles.G(), string(T.name.name)[1:end-4])
+get_brush_texts(b::SWAPGate) = [(CircuitStyles.X(), ""), (CircuitStyles.X(), "")]
+get_brush_texts(b::PrimitiveBlock{M}) where M = fill((CircuitStyles.G(), ""), M)
+get_brush_texts(b::PrimitiveBlock{1}) = [(CircuitStyles.G(), "")]
+get_brush_texts(b::ShiftGate) = [(CircuitStyles.WG(), "ϕ($(pretty_angle(b.theta)))")]
+get_brush_texts(b::PhaseGate) = [(CircuitStyles.WG(), "$(pretty_angle(b.theta))im")]
+get_brush_texts(b::T) where T<:ConstantGate = [(CircuitStyles.G(), string(T.name.name)[1:end-4])]
 
-get_cbrush_text(b::AbstractBlock) = get_brush_text(b)
-get_cbrush_text(b::XGate) = (CircuitStyles.NOT(), "")
-get_cbrush_text(b::ZGate) = (CircuitStyles.C(), "")
+get_cbrush_texts(b::PrimitiveBlock) = get_brush_texts(b)
+get_cbrush_texts(b::XGate) = [(CircuitStyles.NOT(), "")]
+get_cbrush_texts(b::ZGate) = [(CircuitStyles.C(), "")]
 
 # front end
 plot(blk::AbstractBlock; kwargs...) = vizcircuit(blk; kwargs...)
@@ -166,7 +157,7 @@ function circuit_canvas(f, nline::Int; w_depth=0.85, w_line=0.75)
 	compose(context(0.5/a, -0.5/b, 1/a, 1/b), g)
 end
 
-Base.:>>(blk::AbstractBlock{N}, c::CircuitGrid) where N = draw!(c, blk, collect(1:N))
+Base.:>>(blk::AbstractBlock{N}, c::CircuitGrid) where N = draw!(c, blk, collect(1:N), [])
 Base.:>>(blk::Function, c::CircuitGrid) = blk(nline(c)) >> c
 
 function rescale(factor)
