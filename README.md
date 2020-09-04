@@ -20,3 +20,48 @@ If you are using a Pluto/Jupyter notebook, Atom/VSCode editor, you should see th
 Otherwise, you might be interested to learn [how to save it as an image](https://giovineitalia.github.io/Compose.jl/latest/tutorial/).
 
 See more [examples](examples/circuits.jl).
+
+## Example 2: Visualize ZX-diagrams in ZXCalculus
+```julia
+using ZXCalculus, YaoPlots
+using Compose
+
+function generate_example()
+    zxd = ZXDiagram(4)
+    push_gate!(zxd, Val{:Z}(), 1, 3//2)
+    push_gate!(zxd, Val{:H}(), 1)
+    push_gate!(zxd, Val{:Z}(), 1, 1//2)
+    push_gate!(zxd, Val{:H}(), 4)
+    push_gate!(zxd, Val{:CZ}(), 4, 1)
+    push_gate!(zxd, Val{:CNOT}(), 1, 4)
+    push_gate!(zxd, Val{:H}(), 1)
+    push_gate!(zxd, Val{:H}(), 4)
+    push_gate!(zxd, Val{:Z}(), 1, 1//4)
+    push_gate!(zxd, Val{:Z}(), 4, 3//2)
+    push_gate!(zxd, Val{:X}(), 4, 1//1)
+    push_gate!(zxd, Val{:H}(), 1)
+    push_gate!(zxd, Val{:Z}(), 4, 1//2)
+    push_gate!(zxd, Val{:X}(), 4, 1//1)
+    push_gate!(zxd, Val{:Z}(), 2, 1//2)
+    push_gate!(zxd, Val{:CNOT}(), 3, 2)
+    push_gate!(zxd, Val{:H}(), 2)
+    push_gate!(zxd, Val{:CNOT}(), 3, 2)
+    push_gate!(zxd, Val{:Z}(), 2, 1//4)
+    push_gate!(zxd, Val{:Z}(), 3, 1//2)
+    push_gate!(zxd, Val{:H}(), 2)
+    push_gate!(zxd, Val{:H}(), 3)
+    push_gate!(zxd, Val{:Z}(), 3, 1//2)
+    push_gate!(zxd, Val{:CNOT}(), 3, 2)
+
+    return zxd
+end
+
+zxd = generate_example() # define a example
+plot(zxd) # draw a ZX-diagram
+plot(ZXGraph(zxd)) # draw a graph-like ZX-diagram
+```
+
+If you are using a Pluto/Jupyter notebook, Atom/VSCode editor, you should see the following images in your plotting panel.
+
+![zxd](examples/demo_zxd.png)
+![zxg](examples/demo_zxg.png)
