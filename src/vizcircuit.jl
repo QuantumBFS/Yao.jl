@@ -167,6 +167,7 @@ function rescale(factor)
 end
 
 vizcircuit(; kwargs...) = c->vizcircuit(c; kwargs...)
+plot(c::AbstractBlock; kwargs...) = vizcircuit(c; kwargs...)
 
 function basicstyle(blk::AbstractBlock)
 	YaoBlocks.Optimise.simplify(blk, rules=[YaoBlocks.Optimise.to_basictypes])
