@@ -4,8 +4,6 @@ using GraphPlot: gplot
 using Colors
 using ZXCalculus: qubit_loc
 
-export plot
-
 function Multigraph2Graph(mg::Multigraph)
     g = SimpleGraph(nv(mg))
     vs = sort!(vertices(mg))
