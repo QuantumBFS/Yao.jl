@@ -63,5 +63,5 @@ plot(ZXGraph(zxd)) # draw a graph-like ZX-diagram
 
 If you are using a Pluto/Jupyter notebook, Atom/VSCode editor, you should see the following images in your plotting panel.
 
-![zxd](examples/demo_zxd.png)
-![zxg](examples/demo_zxg.png)
+![zxd](examples/demo_zxd.svg)
+![zxg](examples/demo_zxg.svg)
