@@ -10,6 +10,19 @@ const SymReg{B,MT} = ArrayReg{B,Basic,MT} where {MT<:AbstractMatrix{Basic}}
 const AdjointSymReg{B,MT} = AdjointArrayReg{B,Basic,MT}
 const SymRegOrAdjointSymReg{B,MT} = Union{SymReg{B,MT},AdjointSymReg{B,MT}}
 
+function SymReg{B, MT}(r::ArrayReg{B, <:Number}) where {B, MT <: AbstractMatrix{Basic}}
+    return ArrayReg{B, Basic, MT}(MT(Basic.(r.state)))
+end
+
+function SymReg(r::ArrayReg{B, <:Number}) where B
+    smat = SparseMatrixCSC(Basic.(_pretty_basic.(r.state)))
+    return ArrayReg{B, Basic, SparseMatrixCSC{Basic, Int}}(SparseMatrixCSC(smat))
+end
+
+_pretty_basic(x) = x
+_pretty_basic(x::Real) = isinteger(x) ? Int(x) : x
+_pretty_basic(x::Complex) = isreal(x) ? _pretty_basic(real(x)) : x
+
 function ket_m(s)
     v, N = parse_str(s)
     st = spzeros(Basic, 1 << N, 1)
