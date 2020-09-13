@@ -58,3 +58,8 @@ end
         "θ in RotationGate is not real, got θ=$(g.theta), fallback to matrix-based method",
     ) isunitary(g) == false
 end
+
+@testset "occupied locs" begin
+    g = rot(put(5, 2=>X), 0.5)
+    @test occupied_locs(g) == (2,)
+end
