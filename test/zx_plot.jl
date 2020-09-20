@@ -1,5 +1,5 @@
 using Test, YaoPlots
-using ZXCalculus
+using ZXCalculus, Multigraphs
 
 @testset "zx plot" begin
     g = Multigraph(6)
