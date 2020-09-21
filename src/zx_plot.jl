@@ -10,7 +10,6 @@ function Multigraph2Graph(mg::Multigraph)
     for me in edges(mg)
         add_edge!(g, searchsortedfirst(vs, src(me)), searchsortedfirst(vs, dst(me)))
     end
-    # multiplicities = ["$(mul(mg, src(e), dst(e)))" for e in edges(g)]
     multiplicities = ["×$(mul(mg, vs[src(e)], vs[dst(e)]))" for e in edges(g)]
     for i = 1:length(multiplicities)
         if multiplicities[i] == "×1"
@@ -117,10 +116,10 @@ function layout2locs(zxd::ZXDiagram{T,P}) where {T,P}
     return locs_x, locs_y
 end
 
-function layout2locs(zxd::ZXGraph{T,P}) where {T,P}
-    lo = zxd.layout
-    spider_seq = ZXCalculus.spider_sequence(zxd)
-    vs = sort!(spiders(zxd))
+function layout2locs(zxg::ZXGraph{T,P}) where {T,P}
+    lo = zxg.layout
+    spider_seq = ZXCalculus.spider_sequence(zxg)
+    vs = sort!(spiders(zxg))
     locs = Dict()
     nqubit = lo.nbits
     frontier_v = ones(T, nqubit)
@@ -128,8 +127,8 @@ function layout2locs(zxd::ZXGraph{T,P}) where {T,P}
     phase_gadget_loc = 1.0
 
     for v in vs
-        if qubit_loc(zxd, v) != nothing
-            y = qubit_loc(zxd, v)
+        if qubit_loc(zxg, v) !== nothing
+            y = qubit_loc(zxg, v)
             x = findfirst(isequal(v), spider_seq[y])
             locs[v] = (Float64(x), Float64(y))
         else
@@ -137,22 +136,32 @@ function layout2locs(zxd::ZXGraph{T,P}) where {T,P}
         end
     end
     for v in vs
-        if locs[v] == nothing
-            nb = neighbors(zxd, v)
+        if locs[v] === nothing
+            nb = neighbors(zxg, v)
             if length(nb) == 1
-                u = nb[1]
-                locs[v] = (phase_gadget_loc, Float64(nqubit + 2))
-                locs[u] = (phase_gadget_loc, Float64(nqubit + 1))
+                gads = [v]
+                u = v
+                w = setdiff(neighbors(zxg, u), gads)[1]
+                while locs[w] === nothing
+                    push!(gads, w)
+                    u = w
+                    w = setdiff(neighbors(zxg, u), gads)[1]
+                end
+                push!(gads, w)
+                for j = 1:(length(gads) - 1)
+                    locs[gads[length(gads)-j]] = (phase_gadget_loc, Float64(nqubit + j))
+                end
                 phase_gadget_loc += 1
             end
-
-            # v1, v2 = neighbors(zxd, v)
-            # x1, y1 = locs[v1]
-            # x2, y2 = locs[v2]
-            # locs[v] = ((x1+x2)/2, (y1+y2)/2)
         end
     end
-    # println(locs)
+    for v in vs
+        if locs[v] === nothing
+            # println(v)
+            locs[v] = (phase_gadget_loc, Float64(nqubit + 1))
+            phase_gadget_loc += 1
+        end
+    end
     locs_x = [locs[v][1] for v in vs]
     locs_y = [locs[v][2] for v in vs]
     return locs_x, locs_y
@@ -210,7 +219,6 @@ function plot(zxd::ZXGraph; size_x=nothing, size_y=nothing, kwargs...)
             nodefillc = nodefillc,
             NODESIZE = 1/(2size_x),
             kwargs...
-            # NODESIZE = 0.35 / sqrt(nv(g)), EDGELINEWIDTH = 8.0 / sqrt(nv(g))
             )
     else
         gplot(g;
@@ -218,7 +226,6 @@ function plot(zxd::ZXGraph; size_x=nothing, size_y=nothing, kwargs...)
             edgestrokec = edgestrokec,
             nodefillc = nodefillc,
             kwargs...
-            # NODESIZE = 0.35 / sqrt(nv(g)), EDGELINEWIDTH = 8.0 / sqrt(nv(g))
             )
     end
 end
