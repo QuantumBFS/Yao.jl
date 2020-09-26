@@ -146,3 +146,11 @@ end
         @test instruct!(copy(st), Val(G), ()) == st
     end
 end
+
+@testset "register insterface" begin
+      r = rand_state(5)
+      @test instruct!(copy(r), Val(:X), (2, )) ≈ instruct!(copy(r.state), Val(:X), (2, ))
+      @test instruct!(copy(r), Val(:X), (2, ), (3, ), (1, )) ≈ instruct!(copy(r.state), Val(:X), (2, ), (3, ), (1, ))
+      @test instruct!(copy(r), Val(:Rx), (2, ), 0.5) ≈ instruct!(copy(r.state), Val(:Rx), (2, ), 0.5)
+      @test instruct!(copy(r), Val(:Rx), (2, ), (3, ), (1, ), 0.5) ≈ instruct!(copy(r.state), Val(:Rx), (2, ), (3, ), (1, ), 0.5)
+end

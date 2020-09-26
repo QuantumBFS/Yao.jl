@@ -9,9 +9,20 @@
 using YaoBase, BitBasis, LuxurySparse, StaticArrays
 export instruct!
 
-function YaoBase.instruct!(reg::ArrayReg, operator, args...; kwargs...)
-    instruct!(matvec(reg.state), operator, args...; kwargs...)
-    return reg
+function YaoBase.instruct!(r::ArrayReg, op, locs::Tuple, control_locs::Tuple, control_bits::Tuple)
+    instruct!(r.state, op, locs, control_locs, control_bits)
+end
+
+function YaoBase.instruct!(r::ArrayReg, op, locs::Tuple)
+    instruct!(r.state, op, locs)
+end
+
+function YaoBase.instruct!(r::ArrayReg, op, locs::Tuple, control_locs::Tuple, control_bits::Tuple, theta::Number)
+    instruct!(r.state, op, locs, control_locs, control_bits, theta)
+end
+
+function YaoBase.instruct!(r::ArrayReg, op, locs::Tuple, theta::Number)
+    instruct!(r.state, op, locs, theta)
 end
 
 """
@@ -326,18 +337,52 @@ for G in [:Rx, :Ry, :Rz, :CPHASE]
         instruct!(state, m, locs, control_locs, control_bits)
         return state
     end
-
-    @eval function YaoBase.instruct!(
-            state::AbstractVecOrMat{T},
-            g::Val{$(QuoteNode(G))},
-            locs::NTuple{N, Int},
-            theta::Number
-        ) where {T, N}
-        m = rot_mat(T, g, theta)
-        instruct!(state, m, locs)
-        return state
-    end
 end # for
+
+@inline function YaoBase.instruct!(
+        state::AbstractVecOrMat{T},
+        ::Val{:Rx},
+        (loc, )::Tuple{Int},
+        theta::Number
+    ) where {T, N}
+    b, a = sincos(theta / 2)
+    instruct_kernel(state, loc, 1 << (loc - 1), 1 << loc, a, -im*b, -im*b, a)
+    return state
+end
+
+function YaoBase.instruct!(
+        state::AbstractVecOrMat{T},
+        ::Val{:Ry},
+        (loc, )::Tuple{Int},
+        theta::Number
+    ) where {T, N}
+    b, a = sincos(theta / 2)
+    instruct_kernel(state, loc, 1 << (loc - 1), 1 << loc, a, -b, b, a)
+    return state
+end
+
+function YaoBase.instruct!(
+        state::AbstractVecOrMat{T},
+        ::Val{:Rz},
+        (loc, )::Tuple{Int},
+        theta::Number
+    ) where {T, N}
+    a = exp(-im * theta / 2)
+    instruct_kernel(state, loc, 1 << (loc - 1), 1 << loc, a, zero(T), zero(T), a')
+    return state
+end
+
+function YaoBase.instruct!(
+    state::AbstractVecOrMat{T},
+    ::Val{:CPHASE},
+    locs::NTuple{N, Int},
+    theta::Number
+) where {T, N}
+    m = rot_mat(T, Val(:CPHASE), theta)
+    instruct!(state, m, locs)
+    return state
+end
+
 
 # forward single gates
 function YaoBase.instruct!(
