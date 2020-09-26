@@ -126,7 +126,8 @@ function _instruct!(
     locs_raw::SVector,
     ic::IterControl,
 ) where {T}
-    work = ndims(state) == 1 ? similar(state, length(locs_raw)) :
+    work =
+        ndims(state) == 1 ? similar(state, length(locs_raw)) :
         similar(state, length(locs_raw), size(state, 2))
     controldo(ic) do i
         @inbounds unrows!(state, locs_raw .+ i, U, work)
@@ -302,7 +303,7 @@ end
 import YaoBase: rot_mat
 
 rot_mat(::Type{T}, ::Val{:Rx}, theta::Number) where {T} =
-    T[cos(theta / 2) -im * sin(theta / 2); -im * sin(theta / 2) cos(theta / 2)]
+    T[cos(theta / 2) -im*sin(theta / 2); -im*sin(theta / 2) cos(theta / 2)]
 rot_mat(::Type{T}, ::Val{:Ry}, theta::Number) where {T} =
     T[cos(theta / 2) -sin(theta / 2); sin(theta / 2) cos(theta / 2)]
 rot_mat(::Type{T}, ::Val{:Rz}, theta::Number) where {T} =

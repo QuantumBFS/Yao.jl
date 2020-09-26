@@ -421,7 +421,8 @@ function rand_state(
     nbatch::Int = 1,
     no_transpose_storage::Bool = false,
 ) where {T}
-    raw = nbatch == 1 || no_transpose_storage ? randn(T, 1 << n, nbatch) :
+    raw =
+        nbatch == 1 || no_transpose_storage ? randn(T, 1 << n, nbatch) :
         transpose(randn(T, nbatch, 1 << n))
     return normalize!(ArrayReg{nbatch}(raw))
 end
@@ -451,7 +452,8 @@ function uniform_state(
     nbatch::Int = 1,
     no_transpose_storage::Bool = false,
 ) where {T}
-    raw = nbatch == 1 || no_transpose_storage ? ones(T, 1 << n, nbatch) :
+    raw =
+        nbatch == 1 || no_transpose_storage ? ones(T, 1 << n, nbatch) :
         transpose(ones(T, nbatch, 1 << n))
     normalize!(ArrayReg{nbatch}(raw))
 end
