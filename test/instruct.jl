@@ -11,23 +11,23 @@ using YaoBase.Const
     I2 = IMatrix(2)
     M = kron(I2, U1, I2, I2) * ST
 
-    @test instruct!(copy(ST), U1, 3) ≈ M ≈ instruct!(reshape(copy(ST), :, 1), U1, 3)
+    @test instruct!(copy(ST), U1, (3, )) ≈ M ≈ instruct!(reshape(copy(ST), :, 1), U1, (3, ))
 
     U2 = rand(ComplexF64, 4, 4)
     M = kron(I2, U2, I2) * ST
     @test instruct!(copy(ST), U2, (2, 3)) ≈ M
 
     @test instruct!(copy(ST), kron(U1, U1), (3, 1)) ≈
-          instruct!(instruct!(copy(ST), U1, 3), U1, 1)
+          instruct!(instruct!(copy(ST), U1, (3, )), U1, (1, ))
     @test instruct!(copy(REG), kron(U1, U1), (3, 1)) ≈
-          instruct!(instruct!(copy(REG), U1, 3), U1, 1)
+          instruct!(instruct!(copy(REG), U1, (3, )), U1, (1, ))
     @test instruct!(transpose_storage(REG), kron(U1, U1), (3, 1)) ≈
-          instruct!(instruct!(copy(REG), U1, 3), U1, 1)
+          instruct!(instruct!(copy(REG), U1, (3, )), U1, (1, ))
     @test instruct!(transpose_storage(REG), kron(U1, U1), (3, 1)) ≈
-          instruct!(instruct!(transpose_storage(REG), U1, 3), U1, 1)
+          instruct!(instruct!(transpose_storage(REG), U1, (3, )), U1, (1, ))
 
     @test instruct!(reshape(copy(ST), :, 1), kron(U1, U1), (3, 1)) ≈
-          instruct!(instruct!(reshape(copy(ST), :, 1), U1, 3), U1, 1)
+          instruct!(instruct!(reshape(copy(ST), :, 1), U1, (3, )), U1, (1, ))
 
     U2 = sprand(ComplexF64, 8, 8, 0.1)
     ST = randn(ComplexF64, 1 << 5)
@@ -74,10 +74,10 @@ end
     end
 
     @testset "test controlled $G instructions" for (G, M) in zip((:X, :Y, :Z), (X, Y, Z))
-        @test linop2dense(s -> instruct!(s, Val(G), 4, (2, 1), (0, 1)), 4) ≈
+        @test linop2dense(s -> instruct!(s, Val(G), (4, ), (2, 1), (0, 1)), 4) ≈
               general_controlled_gates(4, [P0, P1], [2, 1], [M], [4])
 
-        @test linop2dense(s -> instruct!(s, Val(G), 1, 2, 0), 2) ≈
+        @test linop2dense(s -> instruct!(s, Val(G), (1, ), (2, ), (0, )), 2) ≈
               general_controlled_gates(2, [P0], [2], [M], [1])
     end
 end
@@ -87,12 +87,12 @@ end
     Pm = pmrand(ComplexF64, 2)
     Dv = Diagonal(randn(ComplexF64, 2))
 
-    @test instruct!(copy(ST), Pm, 3) ≈
+    @test instruct!(copy(ST), Pm, (3, )) ≈
           kron(I2, Pm, I2, I2) * ST ≈
-          instruct!(reshape(copy(ST), :, 1), Pm, 3)
-    @test instruct!(copy(ST), Dv, 3) ≈
+          instruct!(reshape(copy(ST), :, 1), Pm, (3, ))
+    @test instruct!(copy(ST), Dv, (3, )) ≈
           kron(I2, Dv, I2, I2) * ST ≈
-          instruct!(reshape(copy(ST), :, 1), Dv, 3)
+          instruct!(reshape(copy(ST), :, 1), Dv, (3, ))
 end
 
 @testset "swap instruction" begin
@@ -134,7 +134,7 @@ end
 
 @testset "Yao.jl/#189" begin
     st = rand(1 << 4)
-    @test instruct!(st, IMatrix{2,Float64}(), 1) == st
+    @test instruct!(st, IMatrix{2,Float64}(), (1, )) == st
 end
 
 @testset "test empty locs" begin

@@ -1,4 +1,5 @@
 using LinearAlgebra, StaticArrays, LuxurySparse, SparseArrays
+using Test
 import YaoArrayRegister: swaprows!, swapcols!, mulrow!, mulcol!, u1rows!, unrows!
 
 @testset "swaprows! & mulrow!" begin
@@ -25,9 +26,9 @@ end
         su1 = SMatrix{2,2}(u1)
         inds1 = [1, 3]
         sinds1 = SVector{2}(inds1)
+        @test 0 == @allocated unrows!(v, sinds1, su1)
 
         unrows!(v, sinds1, su1)
-        @test 0 == @allocated unrows!(v, sinds1, su1)
         @test u1rows!(copy(v), inds1..., u1[1], u1[3], u1[2], u1[4]) ≈
               unrows!(copy(v), inds1, u1)
         @test unrows!(copy(v), inds1, u1) ≈ unrows!(copy(v), sinds1, su1)
@@ -52,7 +53,8 @@ end
     dg = ComplexF64[1 0; 0 -1] |> staticize
     inds = SVector{2}([1, 3])
     unrows!(v, inds, dg)
-    @test 0 == @allocated unrows!(v, inds, dg)
+    # NOTE: some machines have a small allocation
+    @test 32 >= @allocated unrows!(v, inds, dg)
     @test unrows!(copy(v), inds, dg) ≈ unrows!(copy(v), [1, 3], dg)
     @test unrows!(copy(v), inds, IMatrix{1 << 2}()) == v
 end
