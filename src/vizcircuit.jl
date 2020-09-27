@@ -100,7 +100,7 @@ end
 
 function draw!(c::CircuitGrid, p::PrimitiveBlock{M}, address, controls) where M
 	bts = length(controls)>=1 ? get_cbrush_texts(p) : get_brush_texts(p)
-	_draw!(c, [controls..., [(address[i], bts[i]...) for i=1:M]...])
+	_draw!(c, [controls..., [(address[i], bts[i]...) for i=occupied_locs(p)]...])
 end
 
 # composite
