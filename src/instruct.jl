@@ -9,7 +9,13 @@
 using YaoBase, BitBasis, LuxurySparse, StaticArrays
 export instruct!
 
-function YaoBase.instruct!(r::ArrayReg, op, locs::Tuple, control_locs::Tuple, control_bits::Tuple)
+function YaoBase.instruct!(
+    r::ArrayReg,
+    op,
+    locs::Tuple,
+    control_locs::Tuple,
+    control_bits::Tuple,
+)
     instruct!(r.state, op, locs, control_locs, control_bits)
 end
 
@@ -17,7 +23,14 @@ function YaoBase.instruct!(r::ArrayReg, op, locs::Tuple)
     instruct!(r.state, op, locs)
 end
 
-function YaoBase.instruct!(r::ArrayReg, op, locs::Tuple, control_locs::Tuple, control_bits::Tuple, theta::Number)
+function YaoBase.instruct!(
+    r::ArrayReg,
+    op,
+    locs::Tuple,
+    control_locs::Tuple,
+    control_bits::Tuple,
+    theta::Number,
+)
     instruct!(r.state, op, locs, control_locs, control_bits, theta)
 end
 
@@ -146,13 +159,14 @@ function _instruct!(
     return state
 end
 
-YaoBase.instruct!(state::AbstractVecOrMat, U::IMatrix, locs::NTuple{N,Int}) where {N} = state
+YaoBase.instruct!(state::AbstractVecOrMat, U::IMatrix, locs::NTuple{N,Int}) where {N} =
+    state
 YaoBase.instruct!(state::AbstractVecOrMat, U::IMatrix, locs::Tuple{Int}) = state
 
 function YaoBase.instruct!(
     state::AbstractVecOrMat{T},
     U1::AbstractMatrix{T},
-    (loc, )::Tuple{Int},
+    (loc,)::Tuple{Int},
 ) where {T}
     a, c, b, d = U1
     instruct_kernel(state, loc, 1 << (loc - 1), 1 << loc, a, b, c, d)
@@ -171,9 +185,9 @@ end
 function YaoBase.instruct!(
     state::AbstractVecOrMat{T},
     U1::SDPermMatrix{T},
-    (loc, )::Tuple{Int},
+    (loc,)::Tuple{Int},
 ) where {T}
-    U1.perm[1] == 1 && return instruct!(state, Diagonal(U1), (loc, ))
+    U1.perm[1] == 1 && return instruct!(state, Diagonal(U1), (loc,))
     mask = bmask(loc)
     b, c = U1.vals
     step = 1 << (loc - 1)
@@ -190,7 +204,7 @@ end
 function YaoBase.instruct!(
     state::AbstractVecOrMat{T},
     U1::SDDiagonal{T},
-    (loc, )::Tuple{Int},
+    (loc,)::Tuple{Int},
 ) where {T}
     mask = bmask(loc)
     a, d = U1.diag
@@ -296,7 +310,7 @@ for (G, FACTOR) in zip(
     @eval function YaoBase.instruct!(
         state::AbstractVecOrMat{T},
         ::Val{$(QuoteNode(G))},
-        (loc, )::Tuple{Int},
+        (loc,)::Tuple{Int},
     ) where {T}
         mask = bmask(loc)
         step = 1 << (loc - 1)
@@ -340,33 +354,33 @@ for G in [:Rx, :Ry, :Rz, :CPHASE]
 end # for
 
 @inline function YaoBase.instruct!(
-        state::AbstractVecOrMat{T},
-        ::Val{:Rx},
-        (loc, )::Tuple{Int},
-        theta::Number
-    ) where {T, N}
+    state::AbstractVecOrMat{T},
+    ::Val{:Rx},
+    (loc,)::Tuple{Int},
+    theta::Number,
+) where {T,N}
     b, a = sincos(theta / 2)
-    instruct_kernel(state, loc, 1 << (loc - 1), 1 << loc, a, -im*b, -im*b, a)
+    instruct_kernel(state, loc, 1 << (loc - 1), 1 << loc, a, -im * b, -im * b, a)
     return state
 end
 
 function YaoBase.instruct!(
-        state::AbstractVecOrMat{T},
-        ::Val{:Ry},
-        (loc, )::Tuple{Int},
-        theta::Number
-    ) where {T, N}
+    state::AbstractVecOrMat{T},
+    ::Val{:Ry},
+    (loc,)::Tuple{Int},
+    theta::Number,
+) where {T,N}
     b, a = sincos(theta / 2)
     instruct_kernel(state, loc, 1 << (loc - 1), 1 << loc, a, -b, b, a)
     return state
 end
 
 function YaoBase.instruct!(
-        state::AbstractVecOrMat{T},
-        ::Val{:Rz},
-        (loc, )::Tuple{Int},
-        theta::Number
-    ) where {T, N}
+    state::AbstractVecOrMat{T},
+    ::Val{:Rz},
+    (loc,)::Tuple{Int},
+    theta::Number,
+) where {T,N}
     a = exp(-im * theta / 2)
     instruct_kernel(state, loc, 1 << (loc - 1), 1 << loc, a, zero(T), zero(T), a')
     return state
@@ -375,9 +389,9 @@ end
 function YaoBase.instruct!(
     state::AbstractVecOrMat{T},
     ::Val{:CPHASE},
-    locs::NTuple{N, Int},
-    theta::Number
-) where {T, N}
+    locs::NTuple{N,Int},
+    theta::Number,
+) where {T,N}
     m = rot_mat(T, Val(:CPHASE), theta)
     instruct!(state, m, locs)
     return state
