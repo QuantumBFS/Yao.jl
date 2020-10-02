@@ -85,11 +85,11 @@ nshot = 3
 
 for nstep = 0:maxtry
     println("number of iter = $nstep")
-    res, reg = single_try(oracle, gen, nstep; nbatch=3)
+    res, regi = single_try(oracle, gen, nstep; nbatch=3)
 
     ## success!
     if any(==(1), res)
-        overlap_final = viewbatch(reg, findfirst(==(1), res))'*target_state
+        overlap_final = viewbatch(regi, findfirst(==(1), res))'*target_state
         println("success, overlap = $(overlap_final)")
         break
     end

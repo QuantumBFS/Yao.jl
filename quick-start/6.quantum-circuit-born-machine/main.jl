@@ -199,20 +199,20 @@ end
 
 # Now let's setup the training
 
-using Flux: Optimise
+import QuAlgorithmZoo
 qcbm = build_circuit(6, 10, [1=>2, 3=>4, 5=>6, 2=>3, 4=>5, 6=>1])
 dispatch!(qcbm, :random) # initialize the parameters
 
 κ = RBFKernel(0.25, 0:2^6-1)
 pg = gaussian_pdf(1:1<<6, 1<<5-0.5, 1<<4);
-opt = Optimise.ADAM()
+opt = QuAlgorithmZoo.Adam(lr=0.01)
 
 function train(qcbm, κ, opt, target)
     history = Float64[]
     for _ in 1:100
         push!(history, loss(κ, qcbm, target))
         ps = parameters(qcbm)
-        Optimise.update!(opt, ps, gradient(qcbm, κ, target))
+        QuAlgorithmZoo.update!(ps, gradient(qcbm, κ, target), opt)
         popdispatch!(qcbm, ps)
     end
     return history

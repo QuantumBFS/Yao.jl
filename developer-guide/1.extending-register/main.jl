@@ -48,6 +48,8 @@ r |> put(3, 2=>X) |> control(3, 3, 2=>X) |> concentrate(3, put(1, 1=>X), 2:2) |>
 
 # But when we still require some more information from you
 
-r |> cache(X)
+# ```julia
+# r |> cache(X)
+# ```
 
 # An `NotImplementedError` will be thrown, no worries!
