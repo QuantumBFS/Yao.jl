@@ -17,19 +17,19 @@ md"At the current moment, we don't have have quantum computers. How do we make q
 md"We can make a cicuit in Yao using *chain* function. For parameters we define the number of qubits and the operations we've to perform on them. Lets say we want to pass two qubits through two X gates. We do this by chain(number of qubits, operations). To use the X gate, we use the put() parameter. Run the cell below to see what happens."
 
 # ╔═╡ ee15c64e-025a-11eb-2158-bd9cbea5f262
-md" **_Remove the '##' signs from the next cell to begin writing and running your code. Don't remove any single '#' sign, only remove the '##' sign, to make the code runnable. Run your code by clicking on the play button on lower right corner of this cell_**"
+md" **\#\#** or single **#** sign mean comments in julia. It means that anything written after # or ## won't be read as a part of the program, in the line you used them."
 
 # ╔═╡ dcf63604-0258-11eb-1466-fb21170c2e1a
 let
-	##circuit = chain(2, put(1=>X), put(2=>X)); #define a variable "circuit" and "put" an X gate on the first qubit, and then put an X gate on the second qubit
-	##plot(circuit) #plot function, which takes a circuit for a parameter and prints the circuit diagram.
+	circuit = chain(2, put(1=>X), put(2=>X)); #define a variable "circuit" and "put" an X gate on the first qubit, and then put an X gate on the second qubit
+	plot(circuit) #plot function, which takes a circuit for a parameter and prints the circuit diagram.
 end
 
 # ╔═╡ 841aa488-0259-11eb-351a-c1f1770b3a51
 md"Assume we have 5 qubits and we have to pass each through an X gate. We can use the *repeat\(\)* parameter to pass the given number of qubits through the same gate."
 
 # ╔═╡ af1aa2b4-0259-11eb-29fe-19ba9462deb9
-##plot(chain(5, repeat(X,1:5))) #plot function takes a circuit, which repeats the X gate on the qubits 1:10 or from 1st qubit to 10th qubit
+plot(chain(5, repeat(X,1:5))) #plot function takes a circuit, which repeats the X gate on the qubits 1:5 or from 1st qubit to 5th qubit
 
 # ╔═╡ 1efc3566-025a-11eb-2aae-fd953f22edfb
 md"What about the Y, Z and H gate? Figure that out yourself. The next cell is left for you to play around."
@@ -44,7 +44,7 @@ end
 md"What about multiqubit gates? We can use the control gate in Yao using the control\( \) parameter." 
 
 # ╔═╡ 22f24af0-025c-11eb-23d3-b9945bc05a36
-##plot(chain(2, control(1, 2=>X))) #Which translates to if the state of the 1st qubit is |1>, perform X gate to the 2nd qubit or "put" the 2nd qubit through the X gate.
+plot(chain(2, control(1, 2=>X))) #Which translates to if the state of the 1st qubit is |1>, perform X gate to the 2nd qubit or "put" the 2nd qubit through the X gate.
 
 # ╔═╡ Cell order:
 # ╟─3c9cf124-0257-11eb-16ce-0d857dce310f

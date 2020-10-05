@@ -18,7 +18,22 @@ Also, this course is in Julia, so knowing basic syntax of Julia might 			  help.
 ##### The required software :-
 - [Julia] (https://julialang.org/downloads/)
 - [Yao.jl] (https://yaoquantum.org/)
-Install Julia, if you don't already have it. Installation instructions are there in the link."
+Install Julia on your system if you haven't already. This tutorial assumes you already have Julia and you opened this notebook in your system."
+
+# ╔═╡ 51da098a-071f-11eb-368f-9171f0d5a43e
+md"As you've opened this tutorial, all the required packages including Yao are being installed currently. It requires an active internet connection. Don't close Julia or this notebook before all the required packages are installed. You can check whether the required packages have been installed or not. If it displays \"Installed\" before the next heading, which is Quantum, it means the required packages have been installed. If it's blank, then wait until you see it."
+
+# ╔═╡ e5004b1c-071e-11eb-1846-5991805d5c2c
+begin
+	import Pkg
+	Pkg.add("Yao")
+	Pkg.add("YaoExtensions")
+	Pkg.add("YaoPlots")
+	Pkg.add("StatsBase")
+	Pkg.add("Makie")
+	Pkg.add("SymEngine")
+	md"Installed"
+end
 
 # ╔═╡ b0a72718-f78e-11ea-1ef3-01bd13cfcd17
 md"## _*Quantum*_
@@ -43,5 +58,7 @@ Then just divide your computer screen into a matrix of 1000s of cells, and every
 
 # ╔═╡ Cell order:
 # ╟─37dc27ba-f78a-11ea-1d7d-2569658183fa
+# ╟─51da098a-071f-11eb-368f-9171f0d5a43e
+# ╟─e5004b1c-071e-11eb-1846-5991805d5c2c
 # ╟─b0a72718-f78e-11ea-1ef3-01bd13cfcd17
 # ╟─8c5d75be-f794-11ea-2b14-d108a10dc9d9

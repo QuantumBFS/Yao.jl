@@ -91,7 +91,7 @@ md"**_Note_**: *The state $ \frac{1}{\sqrt2}\(|\;0> +\; |\;1>\) $ is often calle
 
 # ╔═╡ 46c5e0d2-0233-11eb-387b-ad52dbad8553
 md"### Multiqubit Gates
-As the title suggests, these gates takes in and operates on more than one qubits."
+As the title suggests, these gates takes in and operate on more than one qubits."
 
 # ╔═╡ 7edff156-0233-11eb-024b-090b7ae6481a
 md"##### The CNOT gate

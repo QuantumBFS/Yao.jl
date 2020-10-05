@@ -22,19 +22,13 @@ $ \frac{|00> \;-\; |11>}{\sqrt2} \;$ and $ \frac{|01> \;-\; |10>}{\sqrt2} \;\;$
 are known as the bell states. They are made by the bell circuit. The bell circuit looks like this."
 
 # ╔═╡ 24727e9e-0276-11eb-344c-25a2ba5f138c
-plot(chain(2, put(1=>H), control(1, 2=>X)))
+begin
+	bellcircuit = chain(2, put(1=>H), control(1, 2=>X))
+	plot(bellcircuit)
+end
 
 # ╔═╡ 6a117428-0276-11eb-156f-cf8597070a34
 md"As you can see, the circuit takes in two qubits as input, and operates on them to give the bell states."
-
-# ╔═╡ d432fd4a-0276-11eb-0b7d-8dd2773cd6ae
-md" **_Assignment:_** Make the bell circuit in Yao in the cell below."
-
-# ╔═╡ 2c5d2ae0-0277-11eb-143a-17f032027f9e
-begin
-	##bellcircuit = 
-	##plot(bellcircuit)
-end
 
 # ╔═╡ 932449a0-0277-11eb-0805-c533ef1ceebb
 md"#### Feeding qubits to a circuit in Yao
@@ -59,58 +53,50 @@ ArrayReg(bit"00") + ArrayReg(bit"11") |> normalize! #Equivalent to (1/√2)*(|00
 zero_state(2) #2 qubits, both with the state |0> and |0>
 
 # ╔═╡ 033aa410-0279-11eb-3742-c7b3084f847b
-md" There! We have a system of two qubits! Let's try feeding the qubits to the Bell circuit you made!"
+md" There! We have a system of two qubits! Let's try feeding the qubits to the Bell circuit we made!"
 
 # ╔═╡ 4a6f0f16-027b-11eb-0d9e-77a3d5c6f1ee
-##a = (q1 |> bellcircuit) #Passing the qubit q1 through the bell circuit
+a = (q1 |> bellcircuit) #Passing the qubit q1 through the bell circuit
 
 # ╔═╡ f6d9ad26-0285-11eb-115c-db22262790db
-##state(a)
+state(a)
 
 # ╔═╡ 7f471eb2-0286-11eb-3fa4-45952f77d4eb
 md"### Reverse Bell Circuit
 A circuit which reverses the effects of the bell circuit on a qubit. It's represented in a circuit as follows"
 
 # ╔═╡ a6ab9b2e-0286-11eb-382e-07d449a188c6
-plot(chain(2, control(1,2=>X), put(1=>H)))
+begin
+	reversebellcircuit = chain(2, control(1,2=>X), put(1=>H))
+	plot(reversebellcircuit)
+end
 
 # ╔═╡ cfa3d672-0286-11eb-3ce5-47a7afe1d336
 md"You can input the output state you got from the bell circuit, into the reverse bell circuit, and you'll get back your original state. Why not give it a try?" 
 
 # ╔═╡ 43241144-031c-11eb-01f4-d91cefa66359
-md" **_Assignment:_** _Make the_ **Reverse Bell Circuit** _in Yao. Pass the qubits you got through the passing two qubits in the Bell circuit, into the Reverse Bell Circuit. Implement it in the next two cells below._"
-
-# ╔═╡ ca341ff8-031c-11eb-25de-53b3797aebc8
-begin
-	##reversebellcircuit = 
-	##plot(reversebellcircuit)
-end
+md"Let's pass the qubits we got by passing two qubits in the Bell circuit, into the Reverse Bell Circuit."
 
 # ╔═╡ 0f1b1ea0-031d-11eb-326c-65cd5aa41630
 let
-		##res = (a |> reversebellcircuit)
-		##state(res)
+		res = (a |> reversebellcircuit)
+		state(res)
 end
 
 # ╔═╡ f7b24140-0320-11eb-010d-db85da69ed7c
-md"What do you think is the effect of single qubit gates on a qubit, which is entangled with another qubit? Why not check it out yourself?
-
-**_Assignment:_** 
-1. Make a circuit which takes 2 qubits and passes the first qubit through X\(or any other single qubit\) gate. 
-2. Then make one of the four bell states, using ArrayReg(). 
-3. Then pass the qubits made in step 1, into the circuit made in step 2_
-**Utilize the next two cells for this assignment**." 
+md"What do you think is the effect of single qubit gates on a qubit, which is entangled with another qubit? Lets check it out!"
 
 # ╔═╡ 30a26136-0321-11eb-3375-af7b708a196d
 begin
-	##singlequbitcircuit = #The circuit from step 1
-	##plot(bellstate)
+	singlequbitcircuit = chain(2, put(1=>X))
+	plot(singlequbitcircuit)
 end
 
 # ╔═╡ 57be66c2-0326-11eb-0090-39e6b4f26b19
 begin
-	##bellstate = #The bell state from step 2.
-	##re = 			#step 3.
+	bellstate = ArrayReg(bit"00") + ArrayReg(bit"11") |> normalize!
+	re = bellstate |> singlequbitcircuit
+	state(re)
 end
 
 # ╔═╡ 68a743ea-0322-11eb-0039-d9a5ab8ad3f9
@@ -148,7 +134,21 @@ If you don't get that, just know the syntax and keep nshots=1000.
 Now, lets try measuring the result of the previous assignment!"
 
 # ╔═╡ 0e2e6f62-0325-11eb-1637-116783c77ea8
-##measuredqubits = re |> r->measure(r, nshots=1000)
+measuredqubits = re |> r->measure(r, nshots=1000)
+
+# ╔═╡ 89e76d2e-04b4-11eb-0704-17b457103932
+let
+	using StatsBase
+	hist = fit(Histogram, Int.(measuredqubits), 1:3)
+	h = hist.weights
+	"The number of times the measurement result was 01 is $(h[1]/10)% and the number of times the measurement result was 10 is $(h[2]/10)"
+end
+
+# ╔═╡ d623229e-04b3-11eb-37e4-65be46f8a1c2
+md"Sometimes the measurement gives 01 and sometimes 10. The probability of getting a 01 is same as getting the probability of 10, which is $ (1/\sqrt2)^2 $ that is 0.5 ."
+
+# ╔═╡ 42eda908-04b4-11eb-1d71-2b2df3ab0b82
+md"Wanna see how we can test that?"
 
 # ╔═╡ ef6e1276-03d8-11eb-08b6-1fc082d158f6
 md"Implementing the superdense coding."
@@ -177,7 +177,7 @@ begin
 end
 
 # ╔═╡ adf60706-03db-11eb-2206-c7f5ac69ab41
-##Bobs_part = ((Alice_and_Bobs_entangled_qubits |> Alices_circuit) |> reversebellcircuit) |> r->measure(r, nshots=1000)
+Bobs_part = ((Alice_and_Bobs_entangled_qubits |> Alices_circuit) |> reversebellcircuit) |> r->measure(r, nshots=1000)
 #The content in the first roung bracket, outputs qubits, which are then fed to reversebellcircuit you made before, which is then fed to the measure function.
 
 # ╔═╡ 8570a5d0-03b7-11eb-0f75-09aad5a4b811
@@ -196,12 +196,13 @@ How does Alice do it? Well, she first passes both her qubits through the Reverse
 
 # ╔═╡ 37d4357e-03be-11eb-3e1f-dda5a699af33
 begin
+	Alices_and_Bobs_entangled_qubits = ArrayReg(bit"00") + ArrayReg(bit"11") |> normalize!
 	Alicequbit = rand_state(1) |> normalize!; #This function creates a qubit with a random state.
 	state(Alicequbit)
 end
 
 # ╔═╡ 6ca5a9cc-03be-11eb-2afa-295c81c21e35
-state(Alice_and_Bobs_entangled_qubits)
+state(Alices_and_Bobs_entangled_qubits)
 
 # ╔═╡ af31a570-03be-11eb-1af1-03950ee1c51f
 begin
@@ -211,32 +212,29 @@ end
 
 # ╔═╡ 6498549a-03bf-11eb-0348-a9072154b85e
 begin
-	feeding = join(Alice_and_Bobs_entangled_qubits, Alicequbit) |> teleportationcircuit
+	feeding = join(Alices_and_Bobs_entangled_qubits, Alicequbit) |> teleportationcircuit
 	state(feeding)
 end
 
 # ╔═╡ 14abac76-03c1-11eb-0634-afc86a739215
-md"The join( ) function is used to join multiple qubits."
-
-# ╔═╡ 58c55192-03e0-11eb-031a-19d9f78b74ee
-## feeding |> Measure(3; locs=1:2) #A function to measure the qubit, while collapsing the state of the measured qubits
+md"The join( ) function is used to join multiple qubits. It takes input from left to right."
 
 # ╔═╡ b2e2fea0-03e4-11eb-1a20-157447a12ce5
 Alices_measuredqubits = measure_remove!(feeding, 1:2)
 
 # ╔═╡ 5331ad20-03e5-11eb-1244-1b494c4afa02
-if(Alices_measuredqubits == 00)
+if(Alices_measuredqubits == bit"00")
 	Bobs_qubit = feeding
-elseif(Alices_measuredqubits == 01)
+elseif(Alices_measuredqubits == bit"01")
 	Bobs_qubit = feeding |> chain(1, put(1=>Z))
-elseif(Alices_measuredqubits == 10)
+elseif(Alices_measuredqubits == bit"10")
 	Bobs_qubit = feeding |> chain(1, put(1=>X))
 else
 	Bobs_qubit = feeding |> chain(1, put(1=>Y))
 end
 
 # ╔═╡ 8e222eee-03e2-11eb-3419-edfe12b7c61a
-md"The difference between **_r->measure(r, location of qubits(optional, measures all qubits if absent), nshots=number of runs)_** and *measure_remove!(qubit, the location of qubits(optional, measures all qubits if absent))* is that the latter collapses the state of the qubit, while the former does not."
+md"The difference between **_r->measure(r, location of qubits(optional, measures all qubits if absent), nshots=number of runs)_** and *measure_remove!(qubit, the location of qubits(optional, measures all qubits if absent))* is that the latter collapses the state of the qubit, and removes the 0 + 0im rows of the state vector, while the former only collapses the state of the qubit."
 
 # ╔═╡ 49604160-03c4-11eb-2480-ff7abbe90508
 state(Bobs_qubit)
@@ -248,14 +246,15 @@ You can see that your for your self!"
 # ╔═╡ 14a7320c-03e8-11eb-0909-1354fd574659
 [state(Alicequbit) state(Bobs_qubit)]
 
+# ╔═╡ 340a69fe-068c-11eb-3b37-ed2694843113
+md"Left side : State of Alice's qubit. Right side : State of Bob's qubit. Almost equivalent!"
+
 # ╔═╡ Cell order:
 # ╠═3636e5d4-0276-11eb-2346-b77b042e1240
 # ╟─1aba2418-0273-11eb-2fb6-a12d0afc33c6
 # ╟─84abe9cc-0273-11eb-0e38-c3a2b42c0848
-# ╟─24727e9e-0276-11eb-344c-25a2ba5f138c
+# ╠═24727e9e-0276-11eb-344c-25a2ba5f138c
 # ╟─6a117428-0276-11eb-156f-cf8597070a34
-# ╟─d432fd4a-0276-11eb-0b7d-8dd2773cd6ae
-# ╠═2c5d2ae0-0277-11eb-143a-17f032027f9e
 # ╟─932449a0-0277-11eb-0805-c533ef1ceebb
 # ╠═1a64822e-0278-11eb-1ed7-8f7f03623cee
 # ╠═6af54232-027d-11eb-087e-3b2516a14eb8
@@ -267,10 +266,9 @@ You can see that your for your self!"
 # ╠═4a6f0f16-027b-11eb-0d9e-77a3d5c6f1ee
 # ╠═f6d9ad26-0285-11eb-115c-db22262790db
 # ╟─7f471eb2-0286-11eb-3fa4-45952f77d4eb
-# ╟─a6ab9b2e-0286-11eb-382e-07d449a188c6
+# ╠═a6ab9b2e-0286-11eb-382e-07d449a188c6
 # ╟─cfa3d672-0286-11eb-3ce5-47a7afe1d336
 # ╟─43241144-031c-11eb-01f4-d91cefa66359
-# ╠═ca341ff8-031c-11eb-25de-53b3797aebc8
 # ╠═0f1b1ea0-031d-11eb-326c-65cd5aa41630
 # ╟─f7b24140-0320-11eb-010d-db85da69ed7c
 # ╠═30a26136-0321-11eb-3375-af7b708a196d
@@ -281,6 +279,9 @@ You can see that your for your self!"
 # ╟─669e0b32-031e-11eb-231f-956bf10c9850
 # ╟─65c3b24c-0324-11eb-11bb-8dfba3e35770
 # ╠═0e2e6f62-0325-11eb-1637-116783c77ea8
+# ╟─d623229e-04b3-11eb-37e4-65be46f8a1c2
+# ╟─42eda908-04b4-11eb-1d71-2b2df3ab0b82
+# ╠═89e76d2e-04b4-11eb-0704-17b457103932
 # ╟─ef6e1276-03d8-11eb-08b6-1fc082d158f6
 # ╠═124eca24-03d9-11eb-3bca-c188b5d09404
 # ╠═3e4d90dc-03df-11eb-371e-130d4339b472
@@ -292,10 +293,10 @@ You can see that your for your self!"
 # ╠═af31a570-03be-11eb-1af1-03950ee1c51f
 # ╠═6498549a-03bf-11eb-0348-a9072154b85e
 # ╟─14abac76-03c1-11eb-0634-afc86a739215
-# ╠═58c55192-03e0-11eb-031a-19d9f78b74ee
 # ╠═b2e2fea0-03e4-11eb-1a20-157447a12ce5
 # ╠═5331ad20-03e5-11eb-1244-1b494c4afa02
 # ╟─8e222eee-03e2-11eb-3419-edfe12b7c61a
 # ╠═49604160-03c4-11eb-2480-ff7abbe90508
 # ╟─bec22f54-03e7-11eb-34fd-0fce9ea7da8f
 # ╠═14a7320c-03e8-11eb-0909-1354fd574659
+# ╟─340a69fe-068c-11eb-3b37-ed2694843113
