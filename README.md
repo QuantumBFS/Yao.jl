@@ -31,6 +31,11 @@ instanitiate the project using `Pkg.instantiate()`, type the following command
 julia --project make.jl serve
 ```
 
+## Using Notebooks
+
+You can use the Pluto Notebooks to learn the basics of Quantum Computing and Yao too. The prefered way to open the notebooks is by Opening them in Pluto in your system. Furthur information in [Notebook](https://github.com/QuantumBFS/tutorials/tree/master/Notebooks) folder.
+For any question or discussion, or if you spot an error, consider writing in the [Julia slack](https://slackinvite.julialang.org/) quantum-computing channel.
+
 ## License
 
 Apache License 2.0
