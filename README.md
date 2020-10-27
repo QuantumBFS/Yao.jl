@@ -82,7 +82,7 @@ Some quantum algorithms are implemented with Yao in [QuAlgorithmZoo](https://git
 ## Communication
 
 - Github issues: Please feel free to ask questions and report bugs, feature request in issues
-- Slack: you can [join julia's slack channel](https://slackinvite.julialang.org/) and ask Yao related questions in `#yao-dev` channel.
+- Slack: you can [join julia's slack channel](https://julialang.org/slack/) and ask Yao related questions in `#yao-dev` channel.
 - Julia discourse: You can also ask questions on [julia discourse](https://discourse.julialang.org/) or the [Chinese discourse](https://discourse.juliacn.com/)
 
 ## Contribution
