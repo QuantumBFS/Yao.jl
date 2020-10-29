@@ -103,6 +103,17 @@ function draw!(c::CircuitGrid, p::PrimitiveBlock{M}, address, controls) where M
 	_draw!(c, [controls..., [(address[i], bts[i]...) for i=occupied_locs(p)]...])
 end
 
+function draw!(c::CircuitGrid, p::Scale, address, controls)
+	fp = YaoBlocks.factor(p)
+	if !(abs(fp) ≈ 1)
+		error("can not visualize non-phase factor.")
+	end
+	if length(controls) > 0
+		_draw!(c, [controls[1:end-1]..., (controls[end][1], CircuitStyles.WG(), "ϕ($(pretty_angle(angle(fp))))")])
+	end
+	draw!(c, p.content, address, controls)
+end
+
 # composite
 function draw!(c::CircuitGrid, p::ChainBlock{N}, address, controls) where N
 	draw!.(Ref(c), subblocks(p), Ref(address), Ref(controls))
