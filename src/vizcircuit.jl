@@ -133,7 +133,7 @@ for (GATE, SYM) in [(:XGate, :Rx), (:YGate, :Ry), (:ZGate, :Rz)]
 	@eval get_brush_texts(b::RotationGate{1,T,<:$GATE}) where T = [(CircuitStyles.WG(), "$($(SYM))($(pretty_angle(b.theta)))")]
 end
 
-pretty_angle(theta) = theta
+pretty_angle(theta) = string(theta)
 function pretty_angle(theta::AbstractFloat)
 	c = ZXCalculus.continued_fraction(theta/π, 10)
 	if c.den < 100

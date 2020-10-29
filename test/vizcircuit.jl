@@ -7,7 +7,7 @@ using YaoBlocks
 	@test YaoPlots.get_brush_texts(X)[][2] == "X"
 	@test YaoPlots.get_brush_texts(Rx(0.5))[][2] == "Rx(0.5)"
 	@test YaoPlots.get_brush_texts(shift(0.5))[][2] == "ϕ(0.5)"
-	@test YaoPlots.get_brush_texts(YaoBlocks.phase(0.5))[][2] == "0.5im"
+	@test YaoPlots.get_brush_texts(YaoBlocks.phase(0.5))[][2] == "^0.5"
 end
 
 @testset "circuit canvas" begin
@@ -42,4 +42,13 @@ end
 
 @testset "fix #3" begin
 	@test (control(4, 2, (1,3)=>kron(X, X)) |> vizcircuit) isa Context
+end
+
+@testset "pretty_angle" begin
+	@test YaoPlots.pretty_angle(π) == "π"
+	@test YaoPlots.pretty_angle(π*1.0) == "π"
+	@test YaoPlots.pretty_angle(-π*1.0) == "-π"
+	@test YaoPlots.pretty_angle(-π*0.0) == "0"
+	@test YaoPlots.pretty_angle(-π*0.5) == "-π/2"
+	@test YaoPlots.pretty_angle(1.411110) == "1.41"
 end
