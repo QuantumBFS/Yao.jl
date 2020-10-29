@@ -103,6 +103,15 @@ function draw!(c::CircuitGrid, p::PrimitiveBlock{M}, address, controls) where M
 	_draw!(c, [controls..., [(address[i], bts[i]...) for i=occupied_locs(p)]...])
 end
 
+function draw!(c::CircuitGrid, p::Scale, address, controls)
+	fp = YaoBlocks.factor(p)
+	if !(abs(fp) ≈ 1)
+		error("can not visualize non-phase factor.")
+	end
+	draw!(c, YaoBlocks.phase(angle(fp)), [first(address)], controls)
+	draw!(c, p.content, address, controls)
+end
+
 # composite
 function draw!(c::CircuitGrid, p::ChainBlock{N}, address, controls) where N
 	draw!.(Ref(c), subblocks(p), Ref(address), Ref(controls))
@@ -124,14 +133,33 @@ for (GATE, SYM) in [(:XGate, :Rx), (:YGate, :Ry), (:ZGate, :Rz)]
 	@eval get_brush_texts(b::RotationGate{1,T,<:$GATE}) where T = [(CircuitStyles.WG(), "$($(SYM))($(pretty_angle(b.theta)))")]
 end
 
-pretty_angle(theta) = theta
-pretty_angle(theta::AbstractFloat) = round(theta; digits=2)
+pretty_angle(theta) = string(theta)
+function pretty_angle(theta::AbstractFloat)
+	c = ZXCalculus.continued_fraction(theta/π, 10)
+	if c.den < 100
+		res = if c.num == 1
+			"π"
+		elseif c.num==0
+			"0"
+		elseif c.num==-1
+			"-π"
+		else
+			"$(c.num)π"
+		end
+		if c.den != 1
+			res *= "/$(c.den)"
+		end
+		res
+	else
+		"$(round(theta; digits=2))"
+	end
+end
 
 get_brush_texts(b::SWAPGate) = [(CircuitStyles.X(), ""), (CircuitStyles.X(), "")]
 get_brush_texts(b::PrimitiveBlock{M}) where M = fill((CircuitStyles.G(), ""), M)
 get_brush_texts(b::PrimitiveBlock{1}) = [(CircuitStyles.G(), "")]
 get_brush_texts(b::ShiftGate) = [(CircuitStyles.WG(), "ϕ($(pretty_angle(b.theta)))")]
-get_brush_texts(b::PhaseGate) = [(CircuitStyles.WG(), "$(pretty_angle(b.theta))im")]
+get_brush_texts(b::PhaseGate) = [(CircuitStyles.WG(), "^$(pretty_angle(b.theta))")]
 get_brush_texts(b::T) where T<:ConstantGate = [(CircuitStyles.G(), string(T.name.name)[1:end-4])]
 
 get_cbrush_texts(b::PrimitiveBlock) = get_brush_texts(b)
