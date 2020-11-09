@@ -25,4 +25,4 @@ vizcircuit(chain(control(5, (2,-3), 4=>X), control(5, (-4, -2), 1=>Z))) |> _save
 # controlled kron
 control(4, 2, (1, 3)=>kron(X, X)) |> vizcircuit |> _save("cxx.png")
 
-control(N, -collect(1:4-1), 4=>-Z) |> vizcircuit |> _save("reflect.png")
+control(4, -collect(1:4-1), 4=>-Z) |> vizcircuit |> _save("reflect.png")
