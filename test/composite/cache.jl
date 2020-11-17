@@ -73,3 +73,12 @@ end
     @test cgg isa CachedBlock
     @test content(cgg)[1] == g
 end
+
+@testset "matrix-chain cache" begin
+    A = matblock(rand(ComplexF64, 2, 2))
+    B = matblock(rand(ComplexF64, 2, 2))
+    C = cache(chain(A, B))
+
+    update_cache(ComplexF64, C)
+    @test pull(C) ≈ mat(C)
+end

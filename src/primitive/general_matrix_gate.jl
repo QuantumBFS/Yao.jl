@@ -48,6 +48,8 @@ Create a [`GeneralMatrixBlock`](@ref) with a matrix `m`.
 """
 matblock(m::AbstractBlock) = GeneralMatrixBlock(mat(m))
 
+cache_key(m::GeneralMatrixBlock) = hash(m.mat)
+
 """
     mat(A::GeneralMatrixBlock)
 
