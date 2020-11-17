@@ -6,7 +6,7 @@ using InteractiveUtils
 
 Return projector on `0` or projector on `1`.
 """
-projector(x) = code == 0 ? mat(P0) : mat(P1)
+projector(x) = x == 0 ? mat(ConstGate.P0) : mat(ConstGate.P1)
 
 """
     print_subtypetree(::Type[, level=1, indent=4])

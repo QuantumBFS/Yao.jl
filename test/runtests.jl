@@ -1,5 +1,10 @@
 using Test, YaoBlocks
 
+@testset "utils" begin
+    @test projector(0) ≈ [1 0; 0 0]
+    @test projector(1) ≈ [0 0; 0 1]
+end
+
 @testset "test primitive block" begin
     include("primitive/primitive.jl")
 end
