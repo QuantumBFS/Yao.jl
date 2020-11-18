@@ -7,7 +7,6 @@ mg2 = copy(mg)
 @test mat(ComplexF64, mg) ≈ A
 @test_logs (
     :warn,
-    "converting Complex{Float64} to eltype Complex{Float32}, consider create another matblock with eltype Complex{Float32}",
 ) mat(ComplexF32, mg)
 
 mg2.mat[:, 2] .= 10

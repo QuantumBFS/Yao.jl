@@ -6,7 +6,7 @@ import YaoBlocks: u1mat, unmat, cunmat, unij!
     nbit = 4
     mmm = Rx(0.5) |> mat
     m1 = u1mat(nbit, mmm, 2)
-    m2 = linop2dense(v -> instruct!(v, mmm, 2), nbit)
+    m2 = linop2dense(v -> instruct!(v, mmm, (2,)), nbit)
     m3 = unmat(nbit, mmm, (2,))
     @test m1 ≈ m2
     @test m1 ≈ m3
@@ -37,7 +37,7 @@ end
     nbit = 4
     mmm = X |> mat
     m1 = unmat(nbit, mmm, (2,))
-    m2 = linop2dense(v -> instruct!(v, mmm, 2), nbit)
+    m2 = linop2dense(v -> instruct!(v, mmm, (2,)), nbit)
     @test m1 ≈ m2
 end
 
@@ -45,7 +45,7 @@ end
     nbit = 4
     mmm = Z |> mat
     m1 = unmat(nbit, mmm, (2,))
-    m2 = linop2dense(v -> instruct!(v, mmm, 2), nbit)
+    m2 = linop2dense(v -> instruct!(v, mmm, (2,)), nbit)
     @test m1 ≈ m2
 end
 

@@ -70,10 +70,8 @@ end
 @testset "test @const_gate" begin
 
     @testset "bind new type" begin
-        @test @allocated(mat(X)) == 0
-        @test @allocated(mat(ComplexF32, X)) > 0
         @const_gate X::ComplexF32
-        @test @allocated(mat(ComplexF32, XGate())) == 0
+        @test mat(ComplexF32, X) isa PermMatrix{ComplexF32}
     end
 
     @testset "define new" begin
@@ -81,9 +79,6 @@ end
 
         # errors if given matrix is not a square matrix
         @test_throws DimensionMismatch @const_gate TEST::ComplexF32 = rand(2, 3)
-
-        @const_gate TEST::ComplexF32
-        @test @allocated(mat(ComplexF32, TEST)) == 0
     end
 
 end
@@ -96,6 +91,6 @@ end
 end
 
 @testset "test adjoints" begin
-    adjoint(Pu) == Pd
-    adjoint(Pd) == Pu
+    @test adjoint(Pu) == Pd
+    @test adjoint(Pd) == Pu
 end
