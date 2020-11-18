@@ -13,7 +13,7 @@ end
 @testset "test matrix" begin
     theta = 2.0
     for (DIRECTION, MAT) in [
-        (X, [cos(theta / 2) -im * sin(theta / 2); -im * sin(theta / 2) cos(theta / 2)]),
+        (X, [cos(theta / 2) -im*sin(theta / 2); -im*sin(theta / 2) cos(theta / 2)]),
         (Y, [cos(theta / 2) -sin(theta / 2); sin(theta / 2) cos(theta / 2)]),
         (Z, [exp(-im * theta / 2) 0; 0 exp(im * theta / 2)]),
         (CNOT, exp(-mat(CNOT) / 2 * theta * im |> Matrix)),
@@ -60,6 +60,6 @@ end
 end
 
 @testset "occupied locs" begin
-    g = rot(put(5, 2=>X), 0.5)
+    g = rot(put(5, 2 => X), 0.5)
     @test occupied_locs(g) == (2,)
 end

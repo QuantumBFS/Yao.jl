@@ -88,7 +88,7 @@ end
 
 # Specialized
 mat(::Type{T}, R::RotationGate{1,<:Any,<:XGate}) where {T} =
-    T[cos(R.theta / 2) -im * sin(R.theta / 2); -im * sin(R.theta / 2) cos(R.theta / 2)]
+    T[cos(R.theta / 2) -im*sin(R.theta / 2); -im*sin(R.theta / 2) cos(R.theta / 2)]
 mat(::Type{T}, R::RotationGate{1,<:Any,<:YGate}) where {T} =
     T[cos(R.theta / 2) -sin(R.theta / 2); sin(R.theta / 2) cos(R.theta / 2)]
 # mat(R::RotationGate{1, T, ZGate{Complex{T}}}) where T =

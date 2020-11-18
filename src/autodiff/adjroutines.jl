@@ -58,7 +58,8 @@ function adjcunmat(
         adjunij!(adjy, locs_raw .+ i, adjU)
     end
 
-    adjU = all(diff([locs...]) .> 0) ? adjU :
+    adjU =
+        all(diff([locs...]) .> 0) ? adjU :
         YaoBase.reorder(adjU, collect(locs) |> sortperm |> sortperm)
     adjU
 end

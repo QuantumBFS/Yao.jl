@@ -77,8 +77,9 @@ function parse_ex(ex, info::ParseInfo)
         :($exloc => Measure => $post) => parse_ex(:($exloc => Measure(nothing) => $post), info)
         :($exloc => Measure($op) => $post) => begin
             locs = exloc == :ALL ? :(AllLocs()) : render_loc(exloc, info.nbit)
-            op = op isa Nothing || op == :nothing ? :(ComputationalBasis()) :
-                    parse_ex(op, exloc == :ALL ? info : ParseInfo(length(locs), info.version))
+            op =
+                op isa Nothing || op == :nothing ? :(ComputationalBasis()) :
+                parse_ex(op, exloc == :ALL ? info : ParseInfo(length(locs), info.version))
             @match post begin
                 ::Nothing || :nothing => :(Measure($(info.nbit); locs = $locs, operator = $(op)))
                 :(resetto($(rbits...))) => begin
