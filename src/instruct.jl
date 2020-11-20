@@ -138,7 +138,8 @@ function _instruct!(
     locs_raw::SVector,
     ic::IterControl,
 ) where {T}
-    controldo(ic) do i
+    @threads for j=1:length(ic)
+        @inbounds i = ic[j]
         @inbounds unrows!(state, locs_raw .+ i, U)
     end
     return state
@@ -153,7 +154,8 @@ function _instruct!(
     work =
         ndims(state) == 1 ? similar(state, length(locs_raw)) :
         similar(state, length(locs_raw), size(state, 2))
-    controldo(ic) do i
+    @threads for j=1:length(ic)
+        @inbounds i = ic[j]
         @inbounds unrows!(state, locs_raw .+ i, U, work)
     end
     return state
