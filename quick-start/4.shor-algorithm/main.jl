@@ -44,12 +44,12 @@ end
 
 # Except some shortcuts, in each try, the main program can be summarized in several steps
 # 1. randomly pick a number that prime to the input numebr `L`, i.e. `gcd(x, L) = 1`.
-# The complexity of this algorithm is polynoial.
+# The complexity of this algorithm is polynomial.
 # 2. get the order `x`, i.e. finding a number `r` that satisfies `mod(x^r, L) = 1`.
-# If `r` is even and `x^(r÷2)` is non-trivil, go on, otherwise start another try.
-# Here, trivil means equal to `L-1 (mod L)`.
+# If `r` is even and `x^(r÷2)` is non-trivial, go on, otherwise start another try.
+# Here, trivial means equal to `L-1 (mod L)`.
 # 3. According to Theorem 5.2 in Neilsen book,
-# one of `gcd(x^(r÷2)-1, L)` and `gcd(x^(r÷2)+1, L)` must be a non-trivil (`!=1`) factor of `L`.
+# one of `gcd(x^(r÷2)-1, L)` and `gcd(x^(r÷2)+1, L)` must be a non-trivial (`!=1`) factor of `L`.
 # Notice `powermod(x, r÷2, L)` must be `-1` rather than `1`,
 # otherwise the order should be `r/2` according to definition.
 
