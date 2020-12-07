@@ -5,9 +5,7 @@ mg = matblock(A)
 mg2 = copy(mg)
 @test mg2 == mg
 @test mat(ComplexF64, mg) ≈ A
-@test_logs (
-    :warn,
-) mat(ComplexF32, mg)
+@test_logs (:warn,) mat(ComplexF32, mg)
 
 mg2.mat[:, 2] .= 10
 @test mg2 != mg

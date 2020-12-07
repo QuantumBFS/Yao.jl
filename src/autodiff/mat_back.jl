@@ -113,7 +113,7 @@ end
 
 The backward function of `mat`. Returns the gradients of parameters.
 """
-mat_back(block::AbstractBlock, adjm::AbstractMatrix{T}) where T =
+mat_back(block::AbstractBlock, adjm::AbstractMatrix{T}) where {T} =
     mat_back!(T, block, adjm, parameters_eltype(block)[])
 mat_back(::Type{T}, block::AbstractBlock, adjm::AbstractMatrix) where {T} =
     mat_back!(T, block, adjm, parameters_eltype(block)[])
