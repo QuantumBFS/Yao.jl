@@ -1,10 +1,14 @@
 using Viznet: canvas
+import Viznet
+using Compose: CurvePrimitive, Form
 using YaoBlocks
+using BitBasis
 
 export CircuitStyles, CircuitGrid, circuit_canvas, vizcircuit
 
 module CircuitStyles
-	using Compose
+    using Compose
+    import Viznet
     const r = Ref(0.2)
 	const lw = Ref(1pt)
 	const textsize = Ref(16pt)
@@ -22,7 +26,19 @@ module CircuitStyles
     WG() = compose(context(), rectangle(-1.5*r[], -r[], 3*r[], 2*r[]), fill("white"), stroke("black"), linewidth(lw[]))
     LINE() = compose(context(), line(), stroke("black"), linewidth(lw[]))
 	TEXT() = compose(context(), text(0.0, 0.0, "", hcenter, vcenter), fontsize(textsize[]), font(fontfamily[]))
-	PARAMTEXT() = compose(context(), text(0.0, 0.0, "", hcenter, vcenter), fontsize(paramtextsize[]), font(fontfamily[]))
+    PARAMTEXT() = compose(context(), text(0.0, 0.0, "", hcenter, vcenter), fontsize(paramtextsize[]), font(fontfamily[]))
+    MEASURE() = compose(context(),
+        rectangle(-r[], -r[], 2*r[], 2*r[]), fill("white"), stroke("black"), linewidth(lw[]),
+        compose(context(), curve((-0.8*r[], 0.5*r[]), (-0.8*r[], -0.6*r[]), (0.8*r[], -0.6*r[]), (0.8*r[], 0.5*r[])), stroke("black"), linewidth(lw[])),
+        compose(context(), line([(0.0, 0.5*r[]), (0.7*r[], -0.4*r[])]), stroke("black"), linewidth(lw[])),
+        begin
+            ns = Viznet.nodestyle(:triangle, fill("black"); r=0.1*r[], θ=atan(0.7, 0.9))
+            Viznet.inner_most_containers(ns) do c
+                Viznet.update_locs!(c.form_children, [(0.7*r[], -0.4*r[])])
+            end
+            ns
+        end
+        )
 	function setlw(_lw)
 		lw[] = _lw
 	end
@@ -60,6 +76,7 @@ function frontier(c::CircuitGrid, args...)
 end
 
 function _draw!(c::CircuitGrid, loc_brush_texts)
+    isempty(loc_brush_texts) && return
 	locs = getindex.(loc_brush_texts, 1)
     i = frontier(c, locs...) + 1
 	local jpre
@@ -122,6 +139,23 @@ function draw!(c::CircuitGrid, p::PutBlock{N,M}, address, controls) where {N,M}
 	draw!(c, p.content, locs, controls)
 end
 
+function draw!(c::CircuitGrid, m::YaoBlocks.Measure{N}, address, controls) where {N,M}
+    if m.postprocess isa RemoveMeasured
+        error("can not visualize post-processing: `RemoveMeasured`.")
+    end
+    if !(m.operator isa ComputationalBasis)
+        error("can not visualize measure blocks for operators")
+    end
+    locs = m.locations isa AllLocs ? collect(1:N) : [address[i] for i in m.locations]
+    for (i, loc) in enumerate(locs)
+        _draw!(c, [(loc, CircuitStyles.MEASURE(), "")])
+        if m.postprocess isa ResetTo
+            val = readbit(m.postprocess.x, i)
+            _draw!(c, [(loc, CircuitStyles.G(), val == 1 ? "P₁" : "P₀")])
+        end
+    end
+end
+
 function draw!(c::CircuitGrid, cb::ControlBlock{N,GT,C}, address, controls) where {N,GT,C}
     ctrl_locs = [address[i] for i in cb.ctrl_locs]
     locs = [address[i] for i in cb.locs]
@@ -155,12 +189,28 @@ function pretty_angle(theta::AbstractFloat)
 	end
 end
 
+get_brush_texts(b::ConstGate.CNOTGate) = [(CircuitStyles.C(), ""), (CircuitStyles.X(), "")]
+get_brush_texts(b::ConstGate.CZGate) = [(CircuitStyles.C(), ""), (CircuitStyles.C(), "")]
+get_brush_texts(b::ConstGate.ToffoliGate) = [(CircuitStyles.C(), ""), (CircuitStyles.C(), ""), (CircuitStyles.X(), "")]
+get_brush_texts(b::ConstGate.SdagGate) = [(CircuitStyles.G(), "S†")]
+get_brush_texts(b::ConstGate.TdagGate) = [(CircuitStyles.G(), "T†")]
+get_brush_texts(b::ConstGate.PuGate) = [(CircuitStyles.G(), "P+")]
+get_brush_texts(b::ConstGate.PdGate) = [(CircuitStyles.G(), "P-")]
+get_brush_texts(b::ConstGate.P0Gate) = [(CircuitStyles.G(), "P₀")]
+get_brush_texts(b::ConstGate.P1Gate) = [(CircuitStyles.G(), "P₁")]
+get_brush_texts(b::ConstGate.I2Gate) = []
 get_brush_texts(b::SWAPGate) = [(CircuitStyles.X(), ""), (CircuitStyles.X(), "")]
 get_brush_texts(b::PrimitiveBlock{M}) where M = fill((CircuitStyles.G(), ""), M)
 get_brush_texts(b::PrimitiveBlock{1}) = [(CircuitStyles.G(), "")]
 get_brush_texts(b::ShiftGate) = [(CircuitStyles.WG(), "ϕ($(pretty_angle(b.theta)))")]
 get_brush_texts(b::PhaseGate) = [(CircuitStyles.WG(), "^$(pretty_angle(b.theta))")]
-get_brush_texts(b::T) where T<:ConstantGate = [(CircuitStyles.G(), string(T.name.name)[1:end-4])]
+function get_brush_texts(b::T) where T<:ConstantGate{1}
+    namestr = string(T.name.name)
+    if endswith(namestr, "Gate")
+        namestr = namestr[1:end-4]
+    end
+    [(CircuitStyles.G(), namestr)]
+end
 
 get_cbrush_texts(b::PrimitiveBlock) = get_brush_texts(b)
 get_cbrush_texts(b::XGate) = [(CircuitStyles.NOT(), "")]

@@ -26,3 +26,13 @@ vizcircuit(chain(control(5, (2,-3), 4=>X), control(5, (-4, -2), 1=>Z))) |> _save
 control(4, 2, (1, 3)=>kron(X, X)) |> vizcircuit |> _save("cxx.png")
 
 control(4, -collect(1:4-1), 4=>-Z) |> vizcircuit |> _save("reflect.png")
+
+chain(5, [put(5, 2=>X), Yao.Measure(5; locs=(2,3)), Yao.Measure(5;locs=(2,)), Yao.Measure(5; resetto=bit"00110")]) |> vizcircuit |> _save("measure.png")
+
+chain(5, [put(5, 2=>ConstGate.Sdag), put(5, 3=>ConstGate.Tdag),
+    put(5, (2,3)=>ConstGate.CNOT), put(5, (1,4)=>ConstGate.CZ), put(5, (1,2,5)=>ConstGate.Toffoli),
+    put(5, (2,3)=>ConstGate.SWAP), put(5, (1,)=>ConstGate.P0), put(5, (1,)=>ConstGate.I2),
+    put(5, (2,)=>ConstGate.P1), put(5, (1,)=>ConstGate.Pu), put(5, (1,)=>ConstGate.Pd),
+    put(5, (2,)=>ConstGate.T),
+    ]) |> vizcircuit |> _save("constgates.png")
+
