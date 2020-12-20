@@ -24,6 +24,7 @@ module CircuitStyles
                (context(), polygon([(0.0, -r[]), (0.0, r[])]), stroke("black"), linewidth(lw[]))
                )
     WG() = compose(context(), rectangle(-1.5*r[], -r[], 3*r[], 2*r[]), fill("white"), stroke("black"), linewidth(lw[]))
+    MULTIGATE(h) = compose(context(), rectangle(-1.5*r[], -(h/2+r[]), 3*r[], (h+2*r[])), fill("white"), stroke("black"), linewidth(lw[]))
     LINE() = compose(context(), line(), stroke("black"), linewidth(lw[]))
 	TEXT() = compose(context(), text(0.0, 0.0, "", hcenter, vcenter), fontsize(textsize[]), font(fontfamily[]))
     PARAMTEXT() = compose(context(), text(0.0, 0.0, "", hcenter, vcenter), fontsize(paramtextsize[]), font(fontfamily[]))
@@ -77,25 +78,47 @@ end
 
 function _draw!(c::CircuitGrid, loc_brush_texts)
     isempty(loc_brush_texts) && return
-	locs = getindex.(loc_brush_texts, 1)
+    # a loc can be a integer, or a range
+    locs = Iterators.flatten(getindex.(loc_brush_texts, 1)) |> collect
     i = frontier(c, locs...) + 1
 	local jpre
-	loc_brush_texts = sort(loc_brush_texts, by=x->x[1])
+	loc_brush_texts = sort(loc_brush_texts, by=x->first(x[1]))
     for (k, (j, b, txt)) in enumerate(loc_brush_texts)
-		b >> c[i, j]
+        length(j) == 0 && continue
+        jmid = (minimum(j)+maximum(j))/2
+		b >> c[i, jmid]
 		if length(txt) >= 3
-			CircuitStyles.PARAMTEXT() >> (c[i, j], txt)
+			CircuitStyles.PARAMTEXT() >> (c[i, jmid], txt)
 		elseif length(txt) >= 1
-			CircuitStyles.TEXT() >> (c[i, j], txt)
+			CircuitStyles.TEXT() >> (c[i, jmid], txt)
 		end
 		if k!=1
-			CircuitStyles.LINE() >> c[(i, j); (i, jpre)]
+			CircuitStyles.LINE() >> c[(i, jmid); (i, jpre)]
 		end
-		jpre = j
+		jpre = jmid
     end
 
 	jmin, jmax = min(locs..., nline(c)), max(locs..., 1)
 	for j = jmin:jmax
+		CircuitStyles.LINE() >> c[(i, j); (c.frontier[j], j)]
+		c.frontier[j] = i
+	end
+end
+
+function _draw_continuous_multiqubit!(c::CircuitGrid, loc_text)
+    (start, stop), txt = loc_text
+    stop-start<0 && return
+    b = CircuitStyles.MULTIGATE((stop-start) * c.w_line)
+    i = frontier(c, start:stop...) + 1
+    j = (stop+start)/2
+
+    b >> c[i, j]
+    if length(txt) >= 3
+        CircuitStyles.PARAMTEXT() >> (c[i, j], txt)
+    elseif length(txt) >= 1
+        CircuitStyles.TEXT() >> (c[i, j], txt)
+    end
+	for j = start:stop
 		CircuitStyles.LINE() >> c[(i, j); (c.frontier[j], j)]
 		c.frontier[j] = i
 	end
@@ -161,6 +184,12 @@ function draw!(c::CircuitGrid, cb::ControlBlock{N,GT,C}, address, controls) wher
     locs = [address[i] for i in cb.locs]
 	mycontrols = [(loc, (bit == 1 ? CircuitStyles.C() : CircuitStyles.NC()), "") for (loc, bit)=zip(ctrl_locs, cb.ctrl_config)]
 	draw!(c, cb.content, locs, [controls..., mycontrols...])
+end
+
+function draw!(c::CircuitGrid, cb::LabelBlock{GT,N}, address, controls) where {N,GT}
+    length(address) == 0 && return
+    is_continuous_chunk(address) || error("address not continuous in a block marked as continous.")
+	_draw!(c, [controls..., (minimum(address):maximum(address), CircuitStyles.MULTIGATE((length(address)-1)*c.w_line), cb.name)])
 end
 
 for (GATE, SYM) in [(:XGate, :Rx), (:YGate, :Ry), (:ZGate, :Rz)]
