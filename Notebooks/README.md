@@ -19,7 +19,7 @@ Also, note that for plots to show up, you need Gaston, which is a front-end of [
 Mac Users -` brew install gnuplot `
 
 Windows users -
-Downnload and install it from [here](https://sourceforge.net/projects/gnuplot/files/gnuplot/5.2.8/gp528-win64-mingw.exe/download)
+Download and install it from [here](https://sourceforge.net/projects/gnuplot/files/gnuplot/5.2.8/gp528-win64-mingw.exe/download)
 
 Linux users:-
 
