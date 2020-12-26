@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.11.14
+# v0.12.17
 
 using Markdown
 using InteractiveUtils
@@ -20,21 +20,6 @@ Also, this course is in Julia, so knowing basic syntax of Julia might 			  help.
 - [Yao.jl] (https://yaoquantum.org/)
 Install Julia on your system if you haven't already. This tutorial assumes you already have Julia and you opened this notebook in your system."
 
-# ╔═╡ 51da098a-071f-11eb-368f-9171f0d5a43e
-md"As you've opened this tutorial, all the required packages including Yao are being installed currently. It requires an active internet connection. Don't close Julia or this notebook before all the required packages are installed. You can check whether the required packages have been installed or not. If it displays \"Installed\" before the next heading, which is Quantum, it means the required packages have been installed. If it's blank, then wait until you see it."
-
-# ╔═╡ e5004b1c-071e-11eb-1846-5991805d5c2c
-begin
-	import Pkg
-	Pkg.add("Yao")
-	Pkg.add("YaoExtensions")
-	Pkg.add("YaoPlots")
-	Pkg.add("StatsBase")
-	Pkg.add("Makie")
-	Pkg.add("SymEngine")
-	md"Installed"
-end
-
 # ╔═╡ b0a72718-f78e-11ea-1ef3-01bd13cfcd17
 md"## _*Quantum*_
 
@@ -52,13 +37,11 @@ To understand that, we must understand a few things about classical computers.
 
 \"*A bit (short for binary digit) is the smallest unit of data in a computer*\". You must have read this in a book or article about computers. Computers use bits, represented by the digits 0 and 1, to store data. We organize these bits to store information and manipulate these bits and perform operations on them to get a variety of things done. 
 Like storing numbers, or images or videos. Adding numbers, subtracting numbers.
-How? Well... Consider storing a number. In this case, the collection of bits 1 0 1 1 can be considered as, $ 2^3 + 0 + 2^1 + 2^0 = 11 $. The genereal idea being, the summation of $ 2^{position of 1s(starting from 0) from right} $.  
+How? Well... Consider storing a number. In this case, the collection of bits 1 0 1 1 can be considered as, $ 2^3 + 0 + 2^1 + 2^0 = 11 $. The genereal idea being, the summation of $ 2^{(position\; of\; 1s(starting\; from\; 0)\; from\; right)} $.  
 
 Then just divide your computer screen into a matrix of 1000s of cells, and every cell containing a number, corresponding to the colour in that cell. Yeah, images are stored that way, those numbers are called pixels. Addition looks a bit more complicated than this. It's done using something called 'gates'. Gates take one or more bits and perform a logical operation on them to give a certain output. There's an \"AND gate\" which, takes in 2 bits and multiplies them to give an output. There're more gates like the OR gate, XOR gate etc. These gates are arranged in a certain manner to perform feats like addition, subtraction, etc."
 
 # ╔═╡ Cell order:
 # ╟─37dc27ba-f78a-11ea-1d7d-2569658183fa
-# ╟─51da098a-071f-11eb-368f-9171f0d5a43e
-# ╟─e5004b1c-071e-11eb-1846-5991805d5c2c
 # ╟─b0a72718-f78e-11ea-1ef3-01bd13cfcd17
 # ╟─8c5d75be-f794-11ea-2b14-d108a10dc9d9

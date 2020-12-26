@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.11.14
+# v0.12.17
 
 using Markdown
 using InteractiveUtils
@@ -13,7 +13,7 @@ md"# Assignment Sheet 1"
 # ╔═╡ 1002aa7c-05ac-11eb-3b42-87809ac716c4
 md" **_Assignment 1_:** 
 1. _Make the following circuit in Yao_.
-2. _Make the qubits with state \"0000\", and feed it to the circuit._ Hint: You can use either of zero_state(number of qubits) function or ArrayReg(bit\" \") function
+2. _Make the qubits with state $ “0000” $, and feed it to the circuit._ Hint: You can use either of ` zero_state(number of qubits) ` function or ` ArrayReg(bit\" \") ` function
 3. _Measure the state of all the 4 qubits 1024 times._"
 
 # ╔═╡ 98ceb0e4-05ac-11eb-3058-e59aaaf58e82
@@ -29,7 +29,7 @@ begin
 end
 
 # ╔═╡ 6db30ade-05ae-11eb-2343-e1a2986b6b54
-a1circuit == a1_1 ? md"✅" : md"❌"
+Matrix(a1circuit) == Matrix(a1_1) ? md"✅" : md"❌"
 
 # ╔═╡ 7995ad56-05af-11eb-118a-c3ee4c34d824
 fourzerostate = 0              #Remove that 0 and make the state "0000"
@@ -74,7 +74,7 @@ begin
 end
 
 # ╔═╡ 766552de-067d-11eb-34fb-bbc0fc471071
-bellcircuit == chain(2, put(1=>H), control(1,2=>X)) ? md"✅" : md"❌"
+Matrix(bellcircuit) == Matrix(chain(2, put(1=>H), control(1,2=>X))) ? md"✅" : md"❌"
 
 # ╔═╡ a59c3f42-0667-11eb-34e2-c9ab7e9080f2
 begin
@@ -83,7 +83,7 @@ begin
 end
 
 # ╔═╡ c2a9bb30-067d-11eb-0594-5d416dc1e763
-reversebellcircuit == chain(2, control(1,2=>X), put(1=>H)) ? md"✅" : md"❌"
+Matrix(reversebellcircuit) == Matrix(chain(2, control(1,2=>X), put(1=>H))) ? md"✅" : md"❌"
 
 # ╔═╡ b0bfd050-0667-11eb-2ed7-1b6d4ea15816
 begin
@@ -92,7 +92,7 @@ begin
 end
 
 # ╔═╡ 5d52aca4-067f-11eb-3174-a966da065d76
-bell_and_reverse_bell_circuit == chain(2, put(1=>H), control(1, 2=>H), control(1, 2=>H), put(1=>H)) ? md"✅" : md"❌"
+Matrix(bell_and_reverse_bell_circuit) == Matrix(chain(2, put(1=>H), control(1, 2=>H), control(1, 2=>H), put(1=>H))) ? md"✅" : md"❌"
 
 # ╔═╡ d87106c6-067d-11eb-3beb-8bfea8d168a3
 begin
@@ -120,7 +120,7 @@ end
 (sum(measurement00 .== bit"00") + sum(measurement01 .== bit"10") + sum(measurement10 .== bit"01")  +  sum(measurement11 .== bit"11")) == 4000 ? md"✅" : md"❌"
 
 # ╔═╡ c6efaa82-067e-11eb-0ad1-2518b517ea4e
-md"_**Note:**_ If you're using ArrayReg(bit\" \") to create the qubits, the qubits are entered from right to left. For example, if you enter ArrayReg(\"1101\"), the computer will take it as 1011. Also, the value of measurement is read from right to left."
+md"_**Note:**_ If you're using ` ArrayReg(bit\" \") ` to create the qubits, the qubits are read by the circuit in reverse order. For example, if you enter ` ArrayReg(\"1101\") `, the computer will take it as ` 1011 `. Also, the value of measurement is read from right to left."
 
 # ╔═╡ ff7b74ba-0680-11eb-2688-3fb96fc978c5
 md"_**Assignment 3:**_"
@@ -151,7 +151,7 @@ begin
 end
 
 # ╔═╡ 458cf840-06e3-11eb-19fb-a5a4b0c70f0b
-quantumteleportationcircuit == chain(3, put(1=>H), control(1, 2=>X)) ? md"✅" : md"❌"
+Matrix(quantumteleportationcircuit) == Matrix(chain(3, put(1=>H), control(1, 2=>X))) ? md"✅" : md"❌"
 
 # ╔═╡ fc6e0da0-068c-11eb-1c31-e92bc7455530
 begin
@@ -188,13 +188,13 @@ end
 # ╔═╡ dc0b86be-06e4-11eb-24db-4f56cb821e0f
 begin
 	if(input==bit"00")
-		superdense_coding_circuit == chain(2)
+		Matrix(superdense_coding_circuit) == Matrix(chain(2))
 	elseif(input==bit"01")
-		superdense_coding_circuit == chain(2, put(1=>Z))
+		Matrix(superdense_coding_circuit) == Matrix(chain(2, put(1=>Z)))
 	elseif(input==bit"10")
-		superdense_coding_circuit == chain(2, put(1=>X))
+		Matrix(superdense_coding_circuit) == Matrix(chain(2, put(1=>X)))
 	elseif(input==bit"11")
-		superdense_coding_circuit == chain(2, put(1=>Y))
+		Matrix(superdense_coding_circuit) == Matrix(chain(2, put(1=>Y)))
 	end && typeof(input) != Int64 ? md"✅" : md"❌"
 end
 
@@ -205,28 +205,27 @@ Bobs_part = ((Alice_and_Bobs_second_entangled_qubit |> superdense_coding_circuit
 #Bobs_part now contains the information Alice wanted to convey to Bob regarding his qubits. Use this information to make Bob's qubit's state jump to Alice's random qubit's state
 begin
 	if(Bobs_part[1]==bit"00")
-		Bobs_qubit = input_to_teleportation_circuit |> chain(2)
+		Bobs_qubit = input_to_teleportation_circuit |> chain(1)
 	elseif(Bobs_part[1]==bit"01")
-		Bobs_qubit = input_to_teleportation_circuit |> chain(2) #Complete the circuit
+		Bobs_qubit = input_to_teleportation_circuit |> chain(1) #Complete the circuit
 	elseif(Bobs_part[1]==bit"10")
-		Bobs_qubit = input_to_teleportation_circuit |> chain(2) #Complete the circuit
+		Bobs_qubit = input_to_teleportation_circuit |> chain(1) #Complete the circuit
 	elseif(Bobs_part[1]==bit"11")
-		Bobs_qubit = input_to_teleportation_circuit |> chain(2) #Complete the circuit
+		Bobs_qubit = input_to_teleportation_circuit |> chain(1) #Complete the circuit
 	end
 	state(Bobs_qubit)
 end
 
 # ╔═╡ b1392da2-06e5-11eb-3632-7d96a1b81a24
 begin
-	if(Bobs_part[1]==bit"00")
-		Bobs_qubit == input_to_teleportation_circuit |> chain(2)
-	elseif(Bobs_part[1]==bit"01")
-		Bobs_qubit == input_to_teleportation_circuit |> chain(2, put(1=>Z))
-	elseif(Bobs_part[1]==bit"10")
-		Bobs_qubit == input_to_teleportation_circuit |> chain(2, put(1=>X))
-	elseif(Bobs_part[1]==bit"11")
-		Bobs_qubit == input_to_teleportation_circuit |> chain(2, put(1=>Y)) 
-	end && (sum(Bobs_part .== Bobs_part[1]) == 1000) ? md"✅" : md"❌"
+	log(2,length(state(input_to_teleportation_circuit))) == 2 && ((Bobs_part[1]==bit"00" && Bobs_qubit == (input_to_teleportation_circuit |> chain(1))) || (Bobs_part[1]==bit"01" && Bobs_qubit == (input_to_teleportation_circuit |> chain(1, put(1=>Z)))) || ( Bobs_part[1]==bit"10" && Bobs_qubit == (input_to_teleportation_circuit |> chain(1, put(1=>X))) ) || ( Bobs_part[1]==bit"11" && Bobs_qubit == (input_to_teleportation_circuit |> chain(1, put(1=>Y)))))  &&  (sum(Bobs_part .== Bobs_part[1]) == 1000) ? md"✅" : md"❌"
+	#=elseif()
+		Bobs_qubit == 
+	elseif()
+		Bobs_qubit == 
+	elseif()
+		Bobs_qubit == =#
+	
 end
 
 # ╔═╡ 83df1840-06e7-11eb-2502-173dac5d4963

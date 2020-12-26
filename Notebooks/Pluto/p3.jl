@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.11.14
+# v0.12.17
 
 using Markdown
 using InteractiveUtils
@@ -32,12 +32,12 @@ md"Assume we have 5 qubits and we have to pass each through an X gate. We can us
 plot(chain(5, repeat(X,1:5))) #plot function takes a circuit, which repeats the X gate on the qubits 1:5 or from 1st qubit to 5th qubit
 
 # ╔═╡ 1efc3566-025a-11eb-2aae-fd953f22edfb
-md"What about the Y, Z and H gate? Figure that out yourself. The next cell is left for you to play around."
+md"What about the Y, Z and H gate? "
 
 # ╔═╡ 443afbfa-025a-11eb-03c6-e74bb5344e36
 let
-	##circuit = 
-	##plot(circuit)
+	circuit = chain(3, put(1=>Y), put(2=>Z), put(3=>H), repeat(Y, 1:2), repeat(Z, 1:2), repeat(H, [1 3]))
+	plot(circuit)
 end
 
 # ╔═╡ 686ec0a0-025b-11eb-339e-1158d9b25529
