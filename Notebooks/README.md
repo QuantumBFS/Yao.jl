@@ -60,8 +60,7 @@ Now you can either clone or download the repository and open the notebooks from 
 
 #### Intermediate
 
-[5 - More Quantum Gates]
-(https://raw.githubusercontent.com/QuantumBFS/tutorials/master/Notebooks/Pluto/p5.jl)
+[5 - More Quantum Gates](https://raw.githubusercontent.com/QuantumBFS/tutorials/master/Notebooks/Pluto/p5.jl)
 - More Single Qubit gates
 - More Multi Qubit gates
 - Some Blocks
