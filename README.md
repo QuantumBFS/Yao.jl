@@ -33,7 +33,7 @@ julia --project make.jl serve
 
 ## Using Notebooks
 
-You can use the Pluto Notebooks to learn the basics of Quantum Computing and Yao too. The prefered way to open the notebooks is by opening them in Pluto in your system. Furthur information in [Notebook](https://github.com/QuantumBFS/tutorials/tree/master/Notebooks) folder.
+You can use the Pluto Notebooks to learn the basics of Quantum Computing and Yao too. The prefered way to open the notebooks is by opening them in Pluto in your system. Furthur information in [Notebooks](https://github.com/QuantumBFS/tutorials/tree/master/Notebooks) folder.
 For any question or discussion, or if you spot an error, consider writing in the [Julia slack](https://julialang.org/slack/) quantum-computing channel. There's also a [pdf](https://github.com/QuantumBFS/tutorials/raw/master/Notebooks/pdf/QCTutorial.pdf) available.
 
 ## License
