@@ -130,7 +130,7 @@ md"Suppose that Alice and Bob have 2 pairs of entangled qubits. Both the pairs a
 
 # ╔═╡ c89d84b4-0681-11eb-3c22-4def72fc3477
 md"1. _Make the circuit for quantum teleportation_
-2. _Pass the first pair of Alice and Bob's entangled qubit, with Alice's extra qubit, into the quantum teleportation circuit. Then collapse the first two qubit's states by measuring them._ Hint: Use the ` measure_remove!(qubit, location of qubits) ` function for this.
+2. _Pass the first pair of Alice and Bob's entangled qubit, with Alice's extra qubit, into the quantum teleportation circuit. Then collapse the first two qubit's states by measuring them._ Hint: Use the ` measure!(RemoveMeasured(), input_qubits, [location_of_qubits]) ` function for this.
 3. _Make the circuit for Superdense coding_
 4. _Use the other pair of entangled qubits and superdense coding to convey the information Alice got from measuring her qubits from quantum teleportation circuit, to Bob._
 5. _Use the above information to make Bob's qubit from first pair's state, to jump to Alice's extra qubit state._"
@@ -260,7 +260,7 @@ md"Seems to work... Although, wouldn't using the information from superdense cod
 # ╟─c6efaa82-067e-11eb-0ad1-2518b517ea4e
 # ╟─ff7b74ba-0680-11eb-2688-3fb96fc978c5
 # ╟─131c831a-0681-11eb-2bab-3d4cf5b23006
-# ╠═c89d84b4-0681-11eb-3c22-4def72fc3477
+# ╟─c89d84b4-0681-11eb-3c22-4def72fc3477
 # ╠═e59122aa-0687-11eb-02b0-a7f72525c5e7
 # ╠═b6670002-0688-11eb-3ecc-03476ce15431
 # ╟─458cf840-06e3-11eb-19fb-a5a4b0c70f0b

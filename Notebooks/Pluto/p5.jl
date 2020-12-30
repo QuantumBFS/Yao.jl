@@ -21,11 +21,11 @@ md"#### The `` R_𝜑^Z `` gate"
 
 # ╔═╡ 9d8d835c-1dca-11eb-0ab7-01a80ca23e30
 md"Passing a qubit through the `` R_𝜑^Z `` is equivalent to multiplying its state vector by `` \begin{bmatrix}1 & 0\\0 & e^{𝜑i}\end{bmatrix} ``.  
-Remember, `` e^{iθ} = cos(𝜃) + i sin(𝜃) ``.
+Remember, `` e^{iθ} = \cos(𝜃) + i\sin(𝜃) ``.
 
-The `` R_𝜑^Z `` gate can be alternatively denoted by, `` \begin{bmatrix}e^{-𝜑i/2} & 0\\0 & e^{𝜑i/2}\end{bmatrix} ``. Its just the original matrix, multiplied by `` e^{-𝜑i/2} ``. We can do this since multiplication by `` e^{-𝜑i/2} `` is not *observable* during measurement as its a complex unit and `` | e^{iθ} | = |cos(𝜃) + i sin(𝜃)| = 1 . `` Remember that the abstract value of a complex number `` a + ib ``, i.e.,  `` |a + ib| = \sqrt{a^2 + b^2} `` and `` sin^2θ + cos^2θ = 1. ``
+The `` R_𝜑^Z `` gate can be alternatively denoted by, `` \begin{bmatrix}e^{-𝜑i/2} & 0\\0 & e^{𝜑i/2}\end{bmatrix} ``. Its just the original matrix, multiplied by `` e^{-𝜑i/2} ``. We can do this since multiplication by `` e^{-𝜑i/2} `` is not *observable* during measurement as its a complex unit and `` | e^{iθ} | = |\cos(𝜃) + i\sin(𝜃)| = 1 . `` Remember that the abstract value of a complex number `` a + ib ``, i.e.,  `` |a + ib| = \sqrt{a^2 + b^2} `` and `` \sin^2θ + \cos^2θ = 1. ``
 
-Considering a qubit, `` a|0〉 + b|0〉 , `` passing it through the `` R_\frac{𝞹}{2}^Z `` gate is equivalent to `` \begin{bmatrix}1 & 0\\0 & e^{𝜋i/2}\end{bmatrix} `` . And since `` cos (\frac{𝞹}{2}) = 0`` and `` sin (\frac{𝞹}{2}) = 1 , `` we can rewrite the above as, ``\begin{bmatrix}1 & 0\\0 & i\end{bmatrix}`` `` \begin{bmatrix}a\\b\end{bmatrix} ``."
+Considering a qubit, `` a|0〉 + b|0〉 , `` passing it through the `` R_\frac{𝞹}{2}^Z `` gate is equivalent to `` \begin{bmatrix}1 & 0\\0 & e^{𝜋i/2}\end{bmatrix} `` . And since `` \cos(\frac{𝞹}{2}) = 0`` and `` \sin(\frac{𝞹}{2}) = 1 , `` we can rewrite the above as, ``\begin{bmatrix}1 & 0\\0 & i\end{bmatrix}`` `` \begin{bmatrix}a\\b\end{bmatrix} ``."
 
 # ╔═╡ 8cca417e-1dd4-11eb-2a18-bf9b80da3fd2
 md"Lets try the above in Yao! The `` R_𝜑^Z `` gate can be used in Yao with the shift *block*. "
@@ -79,13 +79,13 @@ plot(chain(1, put(1=>T)))
 md"#### The `` R_𝜑^X `` gate"
 
 # ╔═╡ 09a069f0-1df6-11eb-19de-5da4bb572510
-md"Similar to the `` R_𝜑^Z `` gate, the `` R_𝜑^X `` gate can be represented by `` \begin{bmatrix}cos(\frac{𝜑}{2}) & -sin(\frac{𝜑}{2})i\\-sin(\frac{𝜑}{2})i & cos(\frac{𝜑}{2})\end{bmatrix} ``."
+md"Similar to the `` R_𝜑^Z `` gate, the `` R_𝜑^X `` gate can be represented by `` \begin{bmatrix}\cos(\frac{𝜑}{2}) & -\sin(\frac{𝜑}{2})i\\-\sin(\frac{𝜑}{2})i & \cos(\frac{𝜑}{2})\end{bmatrix} ``."
 
 # ╔═╡ 5a6f6786-1df7-11eb-0f06-5b229b0935bb
 md"#### The `` R_𝜑^Y `` gate"
 
 # ╔═╡ 6a775062-1df7-11eb-1ea2-7d5517774328
-md"Similar to the `` R_𝜑^Z `` gate, the `` R_𝜑^X `` gate can be represented by `` \begin{bmatrix}cos(\frac{𝜑}{2}) & -sin(\frac{𝜑}{2})\\sin(\frac{𝜑}{2}) & cos(\frac{𝜑}{2})\end{bmatrix} ``."
+md"Similar to the `` R_𝜑^Z `` gate, the `` R_𝜑^X `` gate can be represented by `` \begin{bmatrix}\cos(\frac{𝜑}{2}) & -\sin(\frac{𝜑}{2})\\\sin(\frac{𝜑}{2}) & \cos(\frac{𝜑}{2})\end{bmatrix} ``."
 
 # ╔═╡ 8d65504c-1df7-11eb-0f3a-93796bf5b7f9
 md"They can be represented in Yao using the **Rx** and **Ry** *blocks* respectively" 

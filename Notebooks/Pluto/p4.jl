@@ -233,7 +233,7 @@ end
 md"The ``` join(qubit1, qubit2.....,qubitn) ``` function is used to join multiple qubits. Remember, the circuit takes the qubits as inputs, in reverse order."
 
 # ╔═╡ b2e2fea0-03e4-11eb-1a20-157447a12ce5
-Alices_measuredqubits = measure_remove!(feeding, 1:2)
+Alices_measuredqubits = measure!(RemoveMeasured(), feeding, 1:2)
 
 # ╔═╡ 5331ad20-03e5-11eb-1244-1b494c4afa02
 if(Alices_measuredqubits == bit"00")
@@ -247,7 +247,7 @@ else
 end
 
 # ╔═╡ 8e222eee-03e2-11eb-3419-edfe12b7c61a
-md"The difference between ``` measure(input, location of qubits(optional, measures all qubits if absent), nshots=number of runs) ``` and ``` measure_remove!(input, the location of qubits(optional, measures all qubits if absent)) ``` is that the latter measures and removes the qubits the other qubits from the system of qubits, while the former only measures the state of the qubit."
+md"The ` RemoveMeasured() ` parameter in ` measure!() `, first measures the qubits, then removes the measured qubits from the system of qubits."
 
 # ╔═╡ 49604160-03c4-11eb-2480-ff7abbe90508
 state(Bobs_qubit)

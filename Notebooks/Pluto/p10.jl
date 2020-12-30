@@ -11,7 +11,9 @@ using Yao, YaoPlots
 md"# qRAM and Uncomputation"
 
 # ╔═╡ 259b2164-46db-11eb-1969-19fbb8a1d18c
-md"Consider encoding data in qubits. Assume the following array."
+md"
+*A random access memory (RAM) uses n bits to randomly address  N = `` 2^n `` distinct memory cells. A quantum random access memory (qRAM) uses n qubits to address any quantum superposition of N memory cells.*
+Consider encoding data in qubits. Assume the following array."
 
 # ╔═╡ 99efc04a-46dd-11eb-1084-23f01b24d6e0
 a = [0, 0, 1, 0, 0]
