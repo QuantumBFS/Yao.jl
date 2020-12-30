@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.17
+# v0.12.18
 
 using Markdown
 using InteractiveUtils
@@ -14,7 +14,7 @@ md"# Using Yao - The basics of quantum computing in Julia using Yao.jl"
 md"At the current moment, we don't have have quantum computers. How do we make quantum circuits then? Well, two things we can do right now are, simulate a few qubits or use the qubits created by corporates like IBM and D'Wave. Using Yao, we can simulate the qubits, without having a quantum computer\(based on the known mathematical and physics rules\), although the support to run your circuits on Yao using real qubits is coming to Yao soon."
 
 # ╔═╡ 0f7d5bdc-0258-11eb-05bb-074d1b38c551
-md"We can make a cicuit in Yao using *chain* function. For parameters we define the number of qubits and the operations we've to perform on them. Lets say we want to pass two qubits through two X gates. We do this by chain(number of qubits, operations). To use the X gate, we use the put() parameter. Run the cell below to see what happens."
+md"We can make a cicuit in Yao using *chain* function. For parameters we define the number of qubits and the operations we've to perform on them. Lets say we want to pass two qubits through two X gates. We do this by ` chain(number of qubits, blocks) `. To use the X gate, we use the ` put ` block. Run the cell below to see what happens."
 
 # ╔═╡ ee15c64e-025a-11eb-2158-bd9cbea5f262
 md" **\#\#** or single **#** sign mean comments in julia. It means that anything written after # or ## won't be read as a part of the program, in the line you used them."
@@ -26,7 +26,7 @@ let
 end
 
 # ╔═╡ 841aa488-0259-11eb-351a-c1f1770b3a51
-md"Assume we have 5 qubits and we have to pass each through an X gate. We can use the *repeat\(\)* parameter to pass the given number of qubits through the same gate."
+md"Assume we have 5 qubits and we have to pass each through an X gate. We can use the ` repeat ` block to pass the given number of qubits through the same gate."
 
 # ╔═╡ af1aa2b4-0259-11eb-29fe-19ba9462deb9
 plot(chain(5, repeat(X,1:5))) #plot function takes a circuit, which repeats the X gate on the qubits 1:5 or from 1st qubit to 5th qubit
@@ -41,7 +41,7 @@ let
 end
 
 # ╔═╡ 686ec0a0-025b-11eb-339e-1158d9b25529
-md"What about multiqubit gates? We can use the control gate in Yao using the control\( \) parameter." 
+md"What about multiqubit gates? We can use the control gate in Yao using the ` control ` block." 
 
 # ╔═╡ 22f24af0-025c-11eb-23d3-b9945bc05a36
 plot(chain(2, control(1, 2=>X))) #Which translates to if the state of the 1st qubit is |1>, perform X gate to the 2nd qubit or "put" the 2nd qubit through the X gate.

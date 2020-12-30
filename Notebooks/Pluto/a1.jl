@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.17
+# v0.12.18
 
 using Markdown
 using InteractiveUtils
@@ -13,7 +13,7 @@ md"# Assignment Sheet 1"
 # ╔═╡ 1002aa7c-05ac-11eb-3b42-87809ac716c4
 md" **_Assignment 1_:** 
 1. _Make the following circuit in Yao_.
-2. _Make the qubits with state $ “0000” $, and feed it to the circuit._ Hint: You can use either of ` zero_state(number of qubits) ` function or ` ArrayReg(bit\" \") ` function
+2. _Make the qubits with state `` |0000〉 ``, and feed it to the circuit._ Hint: You can use either of ` zero_state(number of qubits) ` function or ` ArrayReg(bit\" \") ` function
 3. _Measure the state of all the 4 qubits 1024 times._"
 
 # ╔═╡ 98ceb0e4-05ac-11eb-3058-e59aaaf58e82
@@ -65,7 +65,7 @@ end
 md"1. _Make the Bell Circuit_
 2. _Make the Reverse Bell Circuit_
 3. _Make a circuit which takes two qubits and passes it through, first the Bell Circuit, and then the Reverse Bell Circuit. Use the two circuits you created above._
-4. _Create the qubits_ \"00\", \"01\", \"10\" and \"11\", _and pass them through the circuit you created in step 3. Measure each time you pass them through the circuit, 1000 times_."
+4. _Create the qubits_ `` |00〉, |01〉, |10〉 `` and `` |11〉 ``, _and pass them through the circuit you created in step 3. Measure each time you pass them through the circuit, 1024 times_."
 
 # ╔═╡ 7ed55e02-0667-11eb-1570-212652d5fe18
 begin
@@ -120,7 +120,7 @@ end
 (sum(measurement00 .== bit"00") + sum(measurement01 .== bit"10") + sum(measurement10 .== bit"01")  +  sum(measurement11 .== bit"11")) == 4000 ? md"✅" : md"❌"
 
 # ╔═╡ c6efaa82-067e-11eb-0ad1-2518b517ea4e
-md"_**Note:**_ If you're using ` ArrayReg(bit\" \") ` to create the qubits, the qubits are read by the circuit in reverse order. For example, if you enter ` ArrayReg(\"1101\") `, the computer will take it as ` 1011 `. Also, the value of measurement is read from right to left."
+md"_**Note:**_ If you're using ` ArrayReg(bit\" \") ` to create the qubits, the qubits are read by the circuit in reverse order. For example, if you enter ` ArrayReg(\"1101\") `, the circuit will take it as ` 1011 `. Also, the value of measurement is read in reverse order."
 
 # ╔═╡ ff7b74ba-0680-11eb-2688-3fb96fc978c5
 md"_**Assignment 3:**_"
@@ -130,7 +130,7 @@ md"Suppose that Alice and Bob have 2 pairs of entangled qubits. Both the pairs a
 
 # ╔═╡ c89d84b4-0681-11eb-3c22-4def72fc3477
 md"1. _Make the circuit for quantum teleportation_
-2. _Pass the first pair of Alice and Bob's entangled qubit, with Alice's extra qubit, into the quantum teleportation circuit. Then collapse the first two qubit's states by measuring them._ Hint: Use the measure_remove!(qubit, location of qubits) function for this.
+2. _Pass the first pair of Alice and Bob's entangled qubit, with Alice's extra qubit, into the quantum teleportation circuit. Then collapse the first two qubit's states by measuring them._ Hint: Use the ` measure_remove!(qubit, location of qubits) ` function for this.
 3. _Make the circuit for Superdense coding_
 4. _Use the other pair of entangled qubits and superdense coding to convey the information Alice got from measuring her qubits from quantum teleportation circuit, to Bob._
 5. _Use the above information to make Bob's qubit from first pair's state, to jump to Alice's extra qubit state._"
@@ -260,7 +260,7 @@ md"Seems to work... Although, wouldn't using the information from superdense cod
 # ╟─c6efaa82-067e-11eb-0ad1-2518b517ea4e
 # ╟─ff7b74ba-0680-11eb-2688-3fb96fc978c5
 # ╟─131c831a-0681-11eb-2bab-3d4cf5b23006
-# ╟─c89d84b4-0681-11eb-3c22-4def72fc3477
+# ╠═c89d84b4-0681-11eb-3c22-4def72fc3477
 # ╠═e59122aa-0687-11eb-02b0-a7f72525c5e7
 # ╠═b6670002-0688-11eb-3ecc-03476ce15431
 # ╟─458cf840-06e3-11eb-19fb-a5a4b0c70f0b

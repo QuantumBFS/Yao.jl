@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.17
+# v0.12.18
 
 using Markdown
 using InteractiveUtils
@@ -35,14 +35,14 @@ The problem is : --
 
 # ╔═╡ b2550450-3ea0-11eb-20ea-dd5194029a53
 md"### Kronecker Product of Hadamard Gate
-We know that the Hadamard Gate can be represented by the matrix, $ \frac{1}{\sqrt2} \begin{bmatrix} 1 & 1 \\\ 1 &-1 \end{bmatrix} $.
+We know that the Hadamard Gate can be represented by the matrix, `` \frac{1}{\sqrt2} \begin{bmatrix} 1 & 1 \\\ 1 &-1 \end{bmatrix} ``.
 
-- Applying H gate on 2 qubits, in the state $ |00〉 $, we get, $ |00〉 + |01〉 + |10〉 + |11〉 $
-- Applying H gate on 2 qubits, in the state $ |01〉 $, we get, $ |00〉 - |01〉 + |10〉 - |11〉 $
-- Applying H gate on 2 qubits, in the state $ |10〉 $, we get, $ |00〉 + |01〉 - |10〉 - |11〉 $
-- Applying H gate on 2 qubits, in the state $ |11〉 $, we get, $ |00〉 - |01〉 - |10〉 + |11〉 $
+- Applying H gate on 2 qubits, in the state `` |00〉 ``, we get, `` \frac{1}{2} (|00〉 + |01〉 + |10〉 + |11〉) ``
+- Applying H gate on 2 qubits, in the state `` |01〉 ``, we get, `` \frac{1}{2} (|00〉 - |01〉 + |10〉 - |11〉) ``
+- Applying H gate on 2 qubits, in the state `` |10〉 ``, we get, `` \frac{1}{2} (|00〉 + |01〉 - |10〉 - |11〉) ``
+- Applying H gate on 2 qubits, in the state `` |11〉 ``, we get, `` \frac{1}{2} (|00〉 - |01〉 - |10〉 + |11〉) ``
 
-The Matrix representation for $ H^{⊗2} $ can be given as, $ \frac{1}{2} \begin{bmatrix} 1 & 1 & 1 & 1 \\\ 1 & -1 & 1 & -1 \\\ 1 & 1 & -1 & -1 \\\ 1 & -1 & -1 & 1 \end{bmatrix} $"
+The Matrix representation for `` H^{⊗2} `` can be given as, `` \frac{1}{2} \begin{bmatrix} 1 & 1 & 1 & 1 \\\ 1 & -1 & 1 & -1 \\\ 1 & 1 & -1 & -1 \\\ 1 & -1 & -1 & 1 \end{bmatrix} ``"
 
 # ╔═╡ a6fc0830-3ea3-11eb-1421-4ff353057988
 md"Which we can verify below"
@@ -53,21 +53,21 @@ Matrix(repeat(2, H, 1:2))
 # ╔═╡ b176596e-3ea3-11eb-3d0a-fff2f58159bf
 md"We can rewrite the above as
 
-$ \frac{1}{\sqrt2} \begin{bmatrix} \begin{matrix} \frac{1}{\sqrt2} & \frac{1}{\sqrt2} \\\ \frac{1}{\sqrt2} &-\frac{1}{\sqrt2} \end{matrix} & \begin{matrix} \frac{1}{\sqrt2} & \frac{1}{\sqrt2} \\\ \frac{1}{\sqrt2} &-\frac{1}{\sqrt2} \end{matrix} \\\ \\\ \begin{matrix} \frac{1}{\sqrt2} & \frac{1}{\sqrt2} \\\ \frac{1}{\sqrt2} &-\frac{1}{\sqrt2} \end{matrix}  & \begin{matrix} -\frac{1}{\sqrt2} & -\frac{1}{\sqrt2} \\\ -\frac{1}{\sqrt2} &\frac{1}{\sqrt2} \end{matrix} \end{bmatrix}$
+`` \frac{1}{\sqrt2} \begin{bmatrix} \begin{matrix} \frac{1}{\sqrt2} & \frac{1}{\sqrt2} \\\ \frac{1}{\sqrt2} &-\frac{1}{\sqrt2} \end{matrix} & \begin{matrix} \frac{1}{\sqrt2} & \frac{1}{\sqrt2} \\\ \frac{1}{\sqrt2} &-\frac{1}{\sqrt2} \end{matrix} \\\ \\\ \begin{matrix} \frac{1}{\sqrt2} & \frac{1}{\sqrt2} \\\ \frac{1}{\sqrt2} &-\frac{1}{\sqrt2} \end{matrix}  & \begin{matrix} -\frac{1}{\sqrt2} & -\frac{1}{\sqrt2} \\\ -\frac{1}{\sqrt2} &\frac{1}{\sqrt2} \end{matrix} \end{bmatrix} ``
 
 Which can be again rewritten as 
 
-$ H^{⊗2} = \frac{1}{\sqrt2} \begin{bmatrix} H & H \\\ H & -H \end{bmatrix} $
+`` H^{⊗2} = \frac{1}{\sqrt2} \begin{bmatrix} H & H \\\ H & -H \end{bmatrix} ``
 
 Following this trend,
 
-$ H^{⊗3} = \frac{1}{\sqrt2} \begin{bmatrix} H^{⊗2} & H^{⊗2} \\\ H^{⊗2} & -H^{⊗2} \end{bmatrix} $
+`` H^{⊗3} = \frac{1}{\sqrt2} \begin{bmatrix} H^{⊗2} & H^{⊗2} \\\ H^{⊗2} & -H^{⊗2} \end{bmatrix} ``
 
-$ H^{⊗4} = \frac{1}{\sqrt2} \begin{bmatrix} H^{⊗3} & H^{⊗3} \\\ H^{⊗3} & -H^{⊗3} \end{bmatrix} $ 
+`` H^{⊗4} = \frac{1}{\sqrt2} \begin{bmatrix} H^{⊗3} & H^{⊗3} \\\ H^{⊗3} & -H^{⊗3} \end{bmatrix} `` 
 - 
 - 
 -
-$ H^{⊗n} = \frac{1}{\sqrt2} \begin{bmatrix} H^{⊗n-1} & H^{⊗n-1} \\\ H^{⊗n-1} & -H^{⊗n-1} \end{bmatrix} $ "
+`` H^{⊗n} = \frac{1}{\sqrt2} \begin{bmatrix} H^{⊗n-1} & H^{⊗n-1} \\\ H^{⊗n-1} & -H^{⊗n-1} \end{bmatrix} `` "
 
 # ╔═╡ 1a13150c-4683-11eb-13a8-736ddb1a95f9
 md"This is known as the Kronecker product of Hadamard Gate."
@@ -76,48 +76,48 @@ md"This is known as the Kronecker product of Hadamard Gate."
 md"### Dot Product of binary strings"
 
 # ╔═╡ 81a82610-4683-11eb-04e9-11c2275ce99c
-md"*The dot product of two binary strings, a and b, both of length n, where ${}a = a_0 a_1 a_2 .... a_{n-1}$, and ${}b = b_0 b_1 b_2 .... b_{n-1}$, the  **dot product**  of $ a $ and $ b, a·b, $ is defined as*
+md"*The dot product of two binary strings, a and b, both of length n, where `` a = a_0 a_1 a_2 .... a_{n-1} ``, and `` b = b_0 b_1 b_2 .... b_{n-1} ``, the  **dot product**  of `` a `` and `` b, a·b, `` is defined as*
 
 ` a · b = a₀ × b₀ ⨁ a₁ × b₁ ⨁ a₂ × b₂ .... aₙ₋₁ × bₙ₋₁ `
 
-It's always equal to $ 0 $ or $ 1 $.
-If $ a = 0010 $ and $  b = 0101 $, then 
+It's always equal to `` 0 `` or `` 1 ``.
+If `` a = 0010 `` and ``  b = 0101 ``, then 
 
 ` a · b = 0 × 0 ⨁ 0 × 1 ⨁ 1 × 0 ⨁ 0 × 1 = 0 ⨁ 0 ⨁ 0 ⨁ 0 = 0 ` "
 
 # ╔═╡ 16991654-4687-11eb-2516-3bb25117cc5e
-md"Lets check out the dot products of all possible combinations for binary strings where $ n = 2. $
+md"Lets check out the dot products of all possible combinations for binary strings where `` n = 2. ``
 
-$ \begin{bmatrix} 00·00 & 00·01 & 00·10 & 00·11 \\\ 01·00 & 01·01 & 01·10 & 01·11 \\\ 10·00 & 10·01 & 10·10 & 10·11 \\\ 11·00 & 11·01 & 11·10 & 11·11 \end{bmatrix} $. Which calculates to $ \begin{bmatrix} 0 & 0 & 0 & 0 \\\ 0 & 1 & 0 & 1 \\\ 0 & 0 & 1 & 1 \\\ 0 & 1 & 1 & 0 \end{bmatrix} $. "
+`` \begin{bmatrix} 00·00 & 00·01 & 00·10 & 00·11 \\\ 01·00 & 01·01 & 01·10 & 01·11 \\\ 10·00 & 10·01 & 10·10 & 10·11 \\\ 11·00 & 11·01 & 11·10 & 11·11 \end{bmatrix} ``. Which calculates to `` \begin{bmatrix} 0 & 0 & 0 & 0 \\\ 0 & 1 & 0 & 1 \\\ 0 & 0 & 1 & 1 \\\ 0 & 1 & 1 & 0 \end{bmatrix} ``. "
 
 # ╔═╡ bc0b8262-468e-11eb-0dee-936c2e985baa
-md"Remember $ H^{⊗2} $, which could be represented by, $ \frac{1}{2} \begin{bmatrix} 1 & 1 & 1 & 1 \\\ 1 & -1 & 1 & -1 \\\ 1 & 1 & -1 & -1 \\\ 1 & -1 & -1 & 1 \end{bmatrix} ? $ 
+md"Remember `` H^{⊗2} ``, which could be represented by, `` \frac{1}{2} \begin{bmatrix} 1 & 1 & 1 & 1 \\\ 1 & -1 & 1 & -1 \\\ 1 & 1 & -1 & -1 \\\ 1 & -1 & -1 & 1 \end{bmatrix} ? `` 
 
-It can also be represented by, $ \frac{1}{2} \begin{bmatrix} (-1)^{00·00} & (-1)^{00·01} & (-1)^{00·10} & (-1)^{00·11} \\\ (-1)^{01·00} & (-1)^{01·01} & (-1)^{01·10} & (-1)^{01·11} \\\ (-1)^{10·00} & (-1)^{10·01} & (-1)^{10·10} & (-1)^{10·11} \\\ (-1)^{11·00} & (-1)^{11·01} & (-1)^{11·10} & (-1)^{11·11} \end{bmatrix} $   "
+It can also be represented by, `` \frac{1}{2} \begin{bmatrix} (-1)^{00·00} & (-1)^{00·01} & (-1)^{00·10} & (-1)^{00·11} \\\ (-1)^{01·00} & (-1)^{01·01} & (-1)^{01·10} & (-1)^{01·11} \\\ (-1)^{10·00} & (-1)^{10·01} & (-1)^{10·10} & (-1)^{10·11} \\\ (-1)^{11·00} & (-1)^{11·01} & (-1)^{11·10} & (-1)^{11·11} \end{bmatrix} ``   "
 
 # ╔═╡ f544222a-4691-11eb-2bee-8d4bc225e181
 md"So yeah, we can use dot products to denote Knonecker products of Hadamard Gates"
 
 # ╔═╡ 0e8001f0-4692-11eb-2457-43db7e80877f
-md"Now, assume $ s = 11 $. We're going to add the columns with the pairs ` x ` and ` x ⨁ s `. In other words, in this case, columns $ 1 $ and $ 4 $, and, columns $ 2 $ and $ 3 $.
+md"Now, assume `` s = 11 ``. We're going to add the columns with the pairs ` x ` and ` x ⨁ s `. In other words, in this case, columns `` 1 `` and `` 4 ``, and, columns `` 2 `` and `` 3 ``.
 
-Adding columns $ 1 $ and $ 4 $,
+Adding columns `` 1 `` and `` 4 ``,
 
-$ \frac{1}{2} \begin{bmatrix} 1 \\\ 1 \\\ 1 \\\ 1 \end{bmatrix} + \frac{1}{2} \begin{bmatrix} 1 \\\ -1 \\\ -1 \\\ 1 \end{bmatrix} = \frac{1}{2} \begin{bmatrix} 2 \\\ 0 \\\ 0 \\\ 2 \end{bmatrix} $
+`` \frac{1}{2} \begin{bmatrix} 1 \\\ 1 \\\ 1 \\\ 1 \end{bmatrix} + \frac{1}{2} \begin{bmatrix} 1 \\\ -1 \\\ -1 \\\ 1 \end{bmatrix} = \frac{1}{2} \begin{bmatrix} 2 \\\ 0 \\\ 0 \\\ 2 \end{bmatrix} ``
 
-Similarly adding columns $ 2 $ and $ 3 $,
+Similarly adding columns `` 2 `` and `` 3 ``,
 
-$ \frac{1}{2} \begin{bmatrix} 1 \\\ -1 \\\ 1 \\\ -1 \end{bmatrix} + \frac{1}{2} \begin{bmatrix} 1 \\\ 1 \\\ -1 \\\ -1 \end{bmatrix} = \frac{1}{2} \begin{bmatrix} 2 \\\ 0 \\\ 0 \\\ -2 \end{bmatrix} $"
+`` \frac{1}{2} \begin{bmatrix} 1 \\\ -1 \\\ 1 \\\ -1 \end{bmatrix} + \frac{1}{2} \begin{bmatrix} 1 \\\ 1 \\\ -1 \\\ -1 \end{bmatrix} = \frac{1}{2} \begin{bmatrix} 2 \\\ 0 \\\ 0 \\\ -2 \end{bmatrix} ``"
 
 # ╔═╡ 59cd0f38-4695-11eb-02ab-7b82274020a9
 md"As the above vectors are state vectors, when doing the operation ` x ⨁ s `, we see that some probability amplitudes are getting amplified and some are getting cancelled. If you've studied exponents, you know that 
-$ (−1)^{a⋅(b⊕s)} = (−1)^{a⋅b}(−1)^{a⋅s} $. It means, if $ a⋅s = 0 $, then $ (−1)^{a⋅(b⊕s)} = (−1)^{a⋅b} $, hence they get added, and if, $ a⋅s = 1 $, then  $ (−1)^{a⋅(b⊕s)} = -(−1)^{a⋅b} $, hence they get cancelled out."
+`` (−1)^{a⋅(b⊕s)} = (−1)^{a⋅b}(−1)^{a⋅s} ``. It means, if `` a⋅s = 0 ``, then `` (−1)^{a⋅(b⊕s)} = (−1)^{a⋅b} ``, hence they get added, and if, `` a⋅s = 1 ``, then  `` (−1)^{a⋅(b⊕s)} = -(−1)^{a⋅b} ``, hence they get cancelled out."
 
 # ╔═╡ bf810cae-4699-11eb-3ef9-253fc690043e
 md"### Circuit Implementation"
 
 # ╔═╡ 319a200a-469a-11eb-0e9d-cb0f5d5c1a39
-md"The circuit looks like this, where it takes a string of $ 0^{2n} $ as input, and the first n inputs, i.e. x, return x after passing through the circuit, and the next n inputs, i.e. y, return ` y ⨁ f(x) `, after passing through the circuit. Let's call this circuit $ U_𝑓 $. This is for $ n = 2 $."
+md"The circuit looks like this, where it takes a string of `` 0^{2n} `` as input, and the first n inputs, i.e. x, return x after passing through the circuit, and the next n inputs, i.e. y, return ` y ⨁ f(x) `, after passing through the circuit. Let's call this circuit `` U_𝑓 ``. This is for `` n = 2 ``."
 
 # ╔═╡ 73c78fea-46ad-11eb-04f0-55a7f0b45d6a
 plot(chain(2*2, repeat(H, 1:2), put(1:4 => label(chain(4), "U𝑓")), repeat(H, 1:2), Measure(4, locs=1:2)))
@@ -147,9 +147,9 @@ end
 output = zero_state(4) |> SimonAlgoCircuit_for_n_2 |> r->measure(r, 1:2, nshots=1024)
 
 # ╔═╡ 50527e46-46d8-11eb-258f-d9943ac9187d
-md"The reason it's a hybrid algorithm, is that we got two states, for $ n=2 $, which have equal chances of being the secret string s. From here on, we've to classically deduce which of the measured states can be the output. Since s can't be $ 00 $, s = $ $s $. 
+md"The reason it's a hybrid algorithm, is that we got two states, for `` n=2 ``, which have equal chances of being the secret string s. From here on, we've to classically deduce which of the measured states can be the output. Since s can't be `` 00 ``, s = $ $s $. 
 
-Note that this implementation is specific to $ n=2 $
+Note that this implementation is specific to `` n=2 ``
 
 Deduction gets really complicated as n increases, and while its very very unlikely, on real quantum machines, there's a chance that you'll never get the secret string s for any number of runs, or nshots. This algorithm doesn't have much use/application cases either. Shor was inspired by this algorithm to make a general period finding algorithm."
 

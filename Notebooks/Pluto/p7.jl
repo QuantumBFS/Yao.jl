@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.17
+# v0.12.18
 
 using Markdown
 using InteractiveUtils
@@ -28,7 +28,7 @@ md"Suppose you've got 10 boxes, each with a paper with a random number on it, an
 
 Even if you get a bit clever, sort all the boxes according to the numbers in them, in ascending or descending order, and apply something like [binary search](https://en.wikipedia.org/wiki/Binary_search_algorithm), it'll almost take log₂(n) searches. 
 
-Grover's Algorithm is a search algorithm, which solves the problem in O($ \sqrt{n} $) [time complexity](https://en.wikipedia.org/wiki/Time_complexity)(it takes $ 𝜋\sqrt{N}/4 $ searches, for one possible match)."
+Grover's Algorithm is a search algorithm, which solves the problem in O(`` \sqrt{n} ``) [time complexity](https://en.wikipedia.org/wiki/Time_complexity)(it takes `` 𝜋\sqrt{N}/4 `` searches, for one possible match)."
 
 # ╔═╡ 88c22c5e-2130-11eb-2b73-5fbbbd662df9
 md"## Sign flipping"
@@ -36,7 +36,7 @@ md"## Sign flipping"
 # ╔═╡ 326c3b46-2140-11eb-333e-27744c831983
 md"Consider you've 3 qubits, with the state vector :- 
 
-$ \frac{1}{\sqrt{8}} |000〉 + \frac{1}{\sqrt{8}} |001〉 + \frac{1}{\sqrt{8}} |010〉 + \frac{1}{\sqrt{8}} |011〉 + \frac{1}{\sqrt{8}} |100〉 + \frac{1}{\sqrt{8}} |101〉 + \frac{1}{\sqrt{8}} |110〉 + \frac{1}{\sqrt{8}} |111〉 $"
+`` \frac{1}{\sqrt{8}} |000〉 + \frac{1}{\sqrt{8}} |001〉 + \frac{1}{\sqrt{8}} |010〉 + \frac{1}{\sqrt{8}} |011〉 + \frac{1}{\sqrt{8}} |100〉 + \frac{1}{\sqrt{8}} |101〉 + \frac{1}{\sqrt{8}} |110〉 + \frac{1}{\sqrt{8}} |111〉 ``"
 
 # ╔═╡ c72bdf32-2140-11eb-1aec-55864296f0d3
 begin
@@ -47,12 +47,12 @@ end
 # ╔═╡ 746f121a-2141-11eb-2fab-5333ec478316
 md"Suppose there was a circuit U, and if you passed the three qubits to U, the resultant state vector would look somewhat like this :-
 
-$ \frac{1}{\sqrt{8}} |000〉 + \frac{1}{\sqrt{8}} |001〉 - \frac{1}{\sqrt{8}} |010〉 + \frac{1}{\sqrt{8}} |011〉 + \frac{1}{\sqrt{8}} |100〉 + \frac{1}{\sqrt{8}} |101〉 + \frac{1}{\sqrt{8}} |110〉 + \frac{1}{\sqrt{8}} |111〉 $"
+`` \frac{1}{\sqrt{8}} |000〉 + \frac{1}{\sqrt{8}} |001〉 - \frac{1}{\sqrt{8}} |010〉 + \frac{1}{\sqrt{8}} |011〉 + \frac{1}{\sqrt{8}} |100〉 + \frac{1}{\sqrt{8}} |101〉 + \frac{1}{\sqrt{8}} |110〉 + \frac{1}{\sqrt{8}} |111〉 ``"
 
 # ╔═╡ b8c52404-2141-11eb-0759-6db99f9ffa3a
 md"One thing we know about this *magical* circuit is that its matrix representation looks like this, 
 
-$\begin{bmatrix}1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\0 & 0 & -1 & 0 & 0 & 0 & 0 & 0\\0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\1 & 0 & 0 & 0 & 0 & 0 & 1 & 0\\1 & 0 & 0 & 0 & 0 & 0 & 0 & 1\end{bmatrix}$ 
+`` \begin{bmatrix}1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\0 & 0 & -1 & 0 & 0 & 0 & 0 & 0\\0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\1 & 0 & 0 & 0 & 0 & 0 & 1 & 0\\1 & 0 & 0 & 0 & 0 & 0 & 0 & 1\end{bmatrix} `` 
 
 Try multiplying the above state vector to the new matrix."
 
@@ -67,7 +67,7 @@ end
 md"### Creating the magic circuit"
 
 # ╔═╡ 9971e84e-28df-11eb-25e2-d9c71ae9dc42
-md"You'll have to think about each circuit individually, according to the the element you want to flip. We're flipping $ \; |010〉 $ in this case. The circuit will be denoted by $ U_𝑓 $."
+md"You'll have to think about each circuit individually, according to the the element you want to flip. We're flipping `` \; |010〉 `` in this case. The circuit will be denoted by `` U_𝑓 ``."
 
 # ╔═╡ 656cf846-444f-11eb-369e-f7919462e228
 plot(chain(3, put(1:3 => label(chain(3), "U𝑓"))))
@@ -82,7 +82,7 @@ begin
 end
 
 # ╔═╡ 9f8330b4-28e2-11eb-1a9d-1dce3076770d
-md"The circuit for $ |011〉 $ will be"
+md"The circuit for `` |011〉 `` will be"
 
 # ╔═╡ bbc3dac6-28e2-11eb-0907-b72813ebe035
 begin
@@ -109,16 +109,16 @@ md"Lets consider you want to increase one particular probability amplitude and d
 md"If your qubits were initially in the state :-
 
 
-$ \frac{1}{\sqrt{8}} |000〉 + \frac{1}{\sqrt{8}} |001〉 + \frac{1}{\sqrt{8}} |010〉 + \frac{1}{\sqrt{8}} |011〉 + \frac{1}{\sqrt{8}} |100〉 + \frac{1}{\sqrt{8}} |101〉 + \frac{1}{\sqrt{8}} |110〉 + \frac{1}{\sqrt{8}} |111〉 $"
+`` \frac{1}{\sqrt{8}} |000〉 + \frac{1}{\sqrt{8}} |001〉 + \frac{1}{\sqrt{8}} |010〉 + \frac{1}{\sqrt{8}} |011〉 + \frac{1}{\sqrt{8}} |100〉 + \frac{1}{\sqrt{8}} |101〉 + \frac{1}{\sqrt{8}} |110〉 + \frac{1}{\sqrt{8}} |111〉 ``"
 
 # ╔═╡ fc46d108-28f5-11eb-0a1c-19b2ba4aa3df
 md"Then you want them in the state :-"
 
 # ╔═╡ 2a73a70e-28f6-11eb-1af0-0b5f034c2cf4
-md"$ 1 × |010〉 $"
+md"`` 1 × |010〉 ``"
 
 # ╔═╡ 664e40c2-28f6-11eb-1957-5702b452c054
-md"That means, ideally, the probability amplitude of $ |010〉 $ being close to $ 1 $, while of others being close to $ 0 $."
+md"That means, ideally, the probability amplitude of `` |010〉 `` being close to `` 1 ``, while of others being close to `` 0 ``."
 
 # ╔═╡ b5687650-28f6-11eb-12d3-eb2ddd6a7a2b
 md"Inversion about the mean is a neat trick which helps you achieve that."
@@ -159,7 +159,7 @@ md"What just happened:-
 - In an array, choose the element you want to amplify.
 - Flip the sign of that element.
 - Then the new array with the element amplified, will have the elements :-
-$ Amplified\; array = (2 × mean) - (the\; original\; array\; with\; the\; flipped\; element). $
+`` Amplified\; array = (2 × mean) - (the\; original\; array\; with\; the\; flipped\; element). ``
 "
 
 # ╔═╡ 98810d58-2a4b-11eb-25c2-9991e8613634
@@ -215,7 +215,7 @@ end
 md"The below function plots the measurement function, just pass the measured values to it. You don't need to know its inner mechanisms to use it."
 
 # ╔═╡ d4234cc0-2a89-11eb-0801-4bdffce7f359
-md"Below is the implementation of the **_Grover's Search Algorithm_** to find $ |010〉 $."
+md"Below is the implementation of the **_Grover's Search Algorithm_** to find `` |010〉 ``."
 
 # ╔═╡ d2766870-2a5d-11eb-0484-7dc4c494b160
 begin
@@ -234,7 +234,7 @@ begin
 end
 
 # ╔═╡ 4f8749de-2a8f-11eb-0687-4b44e155f53c
-md"You can keep running the above block of code, and you'll find that it takes a maximum of 4 tries to find the state $ |010〉 $, which would be the worst case. Most of the times, you can find it in the first try!
+md"You can keep running the above block of code, and you'll find that it takes a maximum of 4 tries to find the state `` |010〉 ``, which would be the worst case. Most of the times, you can find it in the first try!
 
 Which sounds about right."
 

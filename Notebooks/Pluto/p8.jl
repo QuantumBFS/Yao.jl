@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.17
+# v0.12.18
 
 using Markdown
 using InteractiveUtils
@@ -29,7 +29,7 @@ Classically, it takes at least two evaluations to confirm whether the given func
 # ╔═╡ 063623ea-3d4a-11eb-3471-ef67e8f31249
 md"Using quantum computers, we can confirm whether the given function is balanced or not using one evaluation.
 
-First we construct gates that correspond to the 4 functions. Here, let's consider a circuit, which takes the qubits $ |x〉 $ and $ |y〉, $ and returns the qubits $ |x〉 $ and $|y⊕𝑓_i(x)〉$ respectively, where $ i $ can be any random number between $ 0 $ to $ 3 $. Let's call this circuit $ F_i $ ."
+First we construct gates that correspond to the 4 functions. Here, let's consider a circuit, which takes the qubits `` |x〉 `` and `` |y〉, `` and returns the qubits `` |x〉 `` and ``|y⊕𝑓_i(x)〉`` respectively, where `` i `` can be any random number between `` 0 `` to `` 3 ``. Let's call this circuit `` F_i `` ."
 
 # ╔═╡ f95221b4-4452-11eb-3cf6-d330a5c5aa11
 YaoPlots.plot(put(2, 1:2 => label(chain(2), "𝐹ᵢ")))
@@ -73,17 +73,17 @@ md" The new question now is :-
 	Given one of the four circuits at random, how many evaluations would it take to find whether the underlying function is balanced or constant?"
 
 # ╔═╡ 559aa08a-3d56-11eb-2103-dd4114a41999
-md"If, in the above circuits we pass $ 0 $ or $ 1 $, it'll be the same as classical computers -  it'll take 2 evaluations. 
-To achieve this, we'll pass a superposition of $ 0 $ and $ 1 $, to the $ F_i $ circuit, and then we'll pass an H gate to the first qubit and measure it."
+md"If, in the above circuits we pass `` |0〉 `` or `` |1〉 ``, it'll be the same as classical computers -  it'll take 2 evaluations. 
+To achieve this, we'll pass a superposition of `` |0〉 `` and `` |1〉 ``, to the `` F_i `` circuit, and then we'll pass an H gate to the first qubit and measure it."
 
 # ╔═╡ c1ca5030-4453-11eb-1814-dd9862cb5aa1
-md"The final circuit for Deutsch Algorithm where the input is $ |01〉 $ looks somewhat like this"
+md"The final circuit for Deutsch Algorithm where the input is `` |01〉 `` looks somewhat like this"
 
 # ╔═╡ f4e5006e-4453-11eb-3a08-a35438601cf1
 plot(chain(2, repeat(H,1:2), put(1:2 => label(chain(2), "𝐹ᵢ")), put(1=>H), Measure(2, locs=1:1)))
 
 # ╔═╡ 5dec54cc-4454-11eb-33fe-1b90858ea78a
-md"Below is the final implementation, using the $ F_i $ we constructed before."
+md"Below is the final implementation, using the `` F_i `` we constructed before."
 
 # ╔═╡ 5d52c8a8-3d50-11eb-1576-cb5f3485262b
 begin
@@ -167,7 +167,7 @@ md"If output of the measured qubits is $ $(\"0\"^n) $, then the function is cons
 output == measure(zero_state(n)) ? "Constant" : "Balanced"
 
 # ╔═╡ 0ed997be-4157-11eb-3f71-a16557d72c97
-md"Please note, you can change the value of n above to get the Deutsch-Josza Algorithm for different inputs. $ n = 1 $ will give the Deutsch Algorithm."
+md"Please note, you can change the value of n above to get the Deutsch-Josza Algorithm for different inputs. `` n = 1 `` will give the Deutsch Algorithm."
 
 # ╔═╡ Cell order:
 # ╟─e0cfd952-3d49-11eb-195b-b34f3836e322

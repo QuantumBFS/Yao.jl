@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.17
+# v0.12.18
 
 using Markdown
 using InteractiveUtils
@@ -14,39 +14,39 @@ md"# Arithmetic using qubits"
 md"## Binary addition"
 
 # ╔═╡ 949416ee-1ed0-11eb-2a86-dd52c9b1d5f9
-md"Suppose we've to add two numbers in binary form! Say... $ 5 $ and $ 7 $."
+md"Suppose we've to add two numbers in binary form! Say... `` 5 `` and `` 7 ``."
 
 # ╔═╡ aad0de2e-1ed0-11eb-3efc-95c0072fff76
-md"In binary form, $ 5 $ can be represented by $ 101 $ and $ 7 $ can be represented by $ 111 $. Remember when adding two numbers in binary form, 
+md"In binary form, `` 5 `` can be represented by `` 101 `` and `` 7 `` can be represented by `` 111 ``. Remember when adding two numbers in binary form, 
 
-- $ 0 + 0 = 0 $
-- $ 0 + 1 = 1 $
-- $ 1 + 0 = 1 $
-- $ 1 + 1 = 0 $ with a carry of $ 1 $
+- `` 0 + 0 = 0 ``
+- `` 0 + 1 = 1 ``
+- `` 1 + 0 = 1 ``
+- `` 1 + 1 = 0 `` with a carry of `` 1 ``
 
-So adding $ 5 $ and $ 7 $ in binary form looks somewhat like this.
-- $ \;\;\;\; ₁ \;₁\;₁\;₀ $  ← **Carry**
-- $  \;\;\;\;\;\;1\; 0\; 1 $
-- $ \;\; $ + $ \; 1\; 1\; 1 $
-- $ \;\; $ _________
-- $ \;\;\;1\;1\;0\;0 $
+So adding `` 5 `` and `` 7 `` in binary form looks somewhat like this.
+- `` \;\;\;\; ₁ \;₁\;\;₁\;₀ ``  ← **Carry**
+- ``  \;\;\;\;\;\;1\; 0\; 1 ``
+- `` \;\; `` + `` \; 1\; 1\; 1 ``
+- `` \;\; `` _________
+- `` \;\;\;1\;1\;0\;0 ``
 
 Starting from right, and moving to left
 
-- $ 1 + 1 = 0 $ with a carry of $ 1 $
-- $ 0 + 1 = 1 $ which is added to the carried value, which is $ 1 $, so $ 1 + 1 = 0 $ with a carry of $ 1 $, again
-- $ 1 + 1 = 0 $ with a carry of $ 1 $. The result is added again to the carried value, which was $ 1 $, so $ 0 + 1 = 1 $
-- The remaining carried value, which is $ 1 $, is put as it is.
+- `` 1 + 1 = 0 `` with a carry of `` 1 ``
+- `` 0 + 1 = 1 `` which is added to the carried value, which is `` 1 ``, so `` 1 + 1 = 0 `` with a carry of `` 1 ``, again
+- `` 1 + 1 = 0 `` with a carry of `` 1 ``. The result is added again to the carried value, which was `` 1 ``, so `` 0 + 1 = 1 ``
+- The remaining carried value, which is `` 1 ``, is put as it is.
 "
 
 # ╔═╡ c731fcb8-1ed7-11eb-2800-4fda7d5ae5e7
-md"The result is $ \; [( 1 × 2^3 ) + ( 1 × 2^2 ) + ( 0 × 2^1 ) + ( 0 × 2^0 )] = 12. $"
+md"The result is `` \; [( 1 × 2^3 ) + ( 1 × 2^2 ) + ( 0 × 2^1 ) + ( 0 × 2^0 )] = 12. ``"
 
 # ╔═╡ b914c0b4-1ed9-11eb-37e9-8f1a60dbfcb2
 md"#### Quantum addition circuit for one pair of qubits"
 
 # ╔═╡ ec622eb0-1eda-11eb-0ca2-1bc4b4f1a730
-md"We'll try making the adder circuit for addition of two numbers  $ (0-7) $. We'll need $ 3 $ qubits to represent each of the two numbers, which means a total of $ 6 $ qubits."
+md"We'll try making the adder circuit for addition of two numbers  `` (0-7) ``. We'll need `` 3 `` qubits to represent each of the two numbers, which means a total of `` 6 `` qubits."
 
 # ╔═╡ 30953b42-1ede-11eb-32ee-af55afa9221f
 begin
@@ -62,7 +62,7 @@ md"For adding each pair of qubits, we'll need two more qubits to hold the carrie
 - 1 qubit for the carry-out of second pair and the carry-in of the third pair
 - 1 qubit for the carry-out of third pair
 
-In total, we require a total of $ 10 $ qubits to add two numbers in the range $ \; 0-7 $."
+In total, we require a total of `` 10 `` qubits to add two numbers in the range `` \; 0-7 ``."
 
 # ╔═╡ 1ac1e8c0-1f2d-11eb-1cc5-5986d94a86c2
 md"So lets try making the quantum circuit for adding two qubits. We need a qubit for carry-in, which will be zero for the rightmost pair, and a qubit for carry-out, which will act as the carry in for the next pair"
@@ -79,7 +79,7 @@ end
 # ╔═╡ 36613c90-1f2e-11eb-1f5e-d3e079a8deda
 md"
 - The top qubit holds the carry-in value. 
-- The bottom qubit has the state $ |0〉 $. 
+- The bottom qubit has the state `` |0〉 ``. 
 - The 2nd and the 3rd qubits hold the pair to be added.
 After passing throught the circuit,
 - The top qubit holds the carry-in value. 
@@ -119,15 +119,15 @@ measure(ArrayReg(bit"11") |> a) #The output is 01, when we passed 11
 
 # ╔═╡ b3823ea8-1f31-11eb-0651-d55953af774a
 md"Lets analyze the output
-- When the top qubit is $ |0〉 $ and the bottom qubit is $ |0〉 $, the bottom qubit is left untouched.
-- When the top qubit is $ |1〉 $ and the bottom qubit is $ |0〉 $, the bottom qubit is flipped to $ |1〉 $.
-- When the top qubit is $ |0〉 $ and the bottom qubit is $ |1〉 $, the bottom qubit is left untouched.
-- When the top qubit is $ |1〉 $ and the bottom qubit is $ |1〉 $, the bottom qubit is flipped to $ |0〉 $.
+- When the top qubit is `` |0〉 `` and the bottom qubit is `` |0〉 ``, the bottom qubit is left untouched.
+- When the top qubit is `` |1〉 `` and the bottom qubit is `` |0〉 ``, the bottom qubit is flipped to `` |1〉 ``.
+- When the top qubit is `` |0〉 `` and the bottom qubit is `` |1〉 ``, the bottom qubit is left untouched.
+- When the top qubit is `` |1〉 `` and the bottom qubit is `` |1〉 ``, the bottom qubit is flipped to `` |0〉 ``.
 Compare this with,
-- $ 0 + 0 = 0 $
-- $ 0 + 1 = 1 $
-- $ 1 + 0 = 1 $
-- $ 1 + 1 = 0 $
+- `` 0 + 0 = 0 ``
+- `` 0 + 1 = 1 ``
+- `` 1 + 0 = 1 ``
+- `` 1 + 1 = 0 ``
 In all the cases, the bottom qubit holds the added value.
 
 How about adding 3 qubits?
@@ -151,19 +151,19 @@ measure.([(ArrayReg(bit"000") |> b)
 #If the output is not visible, click on the output to expand it.
 
 # ╔═╡ 1604f776-1f36-11eb-03fc-c5575a528776
-md"The toffoli gate acts as the carry-out. If both input qubits are $ |1〉 $, the 3rd qubit is flipped."
+md"The toffoli gate acts as the carry-out. If both input qubits are `` |1〉 ``, the 3rd qubit is flipped."
 
 # ╔═╡ ba41d664-1f3a-11eb-2334-83fa55bc3bb6
 md"### The Quantum Adder Circuit"
 
 # ╔═╡ f4db1d44-1f3a-11eb-0b8c-4589d745d435
-md"We already made the circuit for adding two qubits. Remember that the carry-out for the first pair, becomes the carry in for the second pair. With this, here's the circuit for a quantum adder for 2 numbers between $ 0-7 $."
+md"We already made the circuit for adding two qubits. Remember that the carry-out for the first pair, becomes the carry in for the second pair. With this, here's the circuit for a quantum adder for 2 numbers between `` 0-7 ``."
 
 # ╔═╡ 92b2e1b4-4457-11eb-22c0-7b5173d6bd97
 plot(chain(10, put(1:4=>label(chain(4), "Full adder\nfor a pair\n of qubits")), put(4:7=>label(chain(4), "Full adder\nfor a pair\n of qubits")), put(7:10=>label(chain(4), "Full adder\nfor a pair\n of qubits"))))
 
 # ╔═╡ 71d66a6e-4458-11eb-0a56-69919a6dbdca
-md"Below is a complete circuit for quantum adder for 2 numbers between $ 0 - 7 $."
+md"Below is a complete circuit for quantum adder for 2 numbers between `` 0 - 7 ``."
 
 # ╔═╡ 412203a2-1f3b-11eb-3de7-45f7eccd697e
 begin
@@ -194,10 +194,10 @@ md"## Quantum subtractor"
 
 # ╔═╡ 976e00e8-1f50-11eb-0d93-77e2ba841a09
 md"Binary subtraction has a borrow instead of carry. The rules of binary subtraction look somewhat like this.
-- $ 0 - 0 = 0 $
-- $ 0 - 1 = 1 $ with a borrow of $ 1 $
-- $ 1 - 0 = 1 $
-- $ 1 - 1 = 0 $
+- `` 0 - 0 = 0 ``
+- `` 0 - 1 = 1 `` with a borrow of `` 1 ``
+- `` 1 - 0 = 1 ``
+- `` 1 - 1 = 0 ``
 "
 
 # ╔═╡ 346af906-1f50-11eb-3286-dbf3014c8fab
@@ -234,7 +234,7 @@ stringsub = reverse(string(Int(result[1]), base=2, pad=10)) #To convert it to st
 out =  parse(Int64, reverse(stringsub[3] * stringsub[6] * stringsub[9] * stringsub[10]), base=2)
 
 # ╔═╡ ffd40492-1f56-11eb-210d-ef6bf293244e
-md"This circuit only subtracts numbers if the answer is expected to be positive. It can't solve for calculations like $ 5 - 6 = -1 $."
+md"This circuit only subtracts numbers if the answer is expected to be positive. It can't solve for calculations like `` 5 - 6 = -1 ``."
 
 # ╔═╡ Cell order:
 # ╟─76794562-1ed0-11eb-18ec-ad4020344ce6

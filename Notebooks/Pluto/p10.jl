@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.17
+# v0.12.18
 
 using Markdown
 using InteractiveUtils
@@ -44,21 +44,21 @@ d = [1, 0, 1, 1, 1]
 md"To encode these 4 arrays, it'd take 20 qubits, judging by the above approach. But using QRAMS, we can use 7 qubits, to encode all the 4 arrays."
 
 # ╔═╡ f7efa09c-46de-11eb-293a-e18468e3854d
-let
+begin
 	f(x) = chain(7, [control(1:2, (k+2)=>X) for k in findall(isone, x)])
-	global QRAM = chain(7, repeat(H, 1:2), repeat(X, 1:2), f(a), repeat(X, 1:2), put(1=>X), f(b), put(1=>X), put(2=>X), f(c), put(2=>X), f(d))
+	QRAM = chain(7, repeat(H, 1:2), repeat(X, 1:2), f(a), repeat(X, 1:2), put(1=>X), f(b), put(1=>X), put(2=>X), f(c), put(2=>X), f(d))
 	plot(QRAM)
 end
 
 # ╔═╡ 1811259c-46e1-11eb-23f2-31d638eb73b3
 md"The first two qubits, are called the address qubits.
- - When the address qubits give $ 00 $ or $ 0 $ in decimal, for the next 5 qubits, we get $ $a $.
- - When the address qubits give $ 01 $ or $ 1 $ in decimal, for the next 5 qubits, we get $ $b $.
- - When the address qubits give $ 10 $ or $ 2 $ in decimal, for the next 5 qubits, we get $ $c $.
- - When the address qubits give $ 11 $ or $ 3 $ in decimal, for the next 5 qubits, we get $ $d $."
+ - When the address qubits give `` 00 `` or `` 0 `` in decimal, for the next 5 qubits, we get $ $a $.
+ - When the address qubits give `` 01 `` or `` 1 `` in decimal, for the next 5 qubits, we get $ $b $.
+ - When the address qubits give `` 10 `` or `` 2 `` in decimal, for the next 5 qubits, we get $ $c $.
+ - When the address qubits give `` 11 `` or `` 3 `` in decimal, for the next 5 qubits, we get $ $d $."
 
 # ╔═╡ e26bbe6a-46e1-11eb-2fdc-e94b3c7884ee
-md"The input to the QRAM is $ 0000000 $."
+md"The input to the QRAM is `` |0000000〉 ``."
 
 # ╔═╡ 123ffdb8-46e2-11eb-2c4f-031a675cd551
 output = zero_state(7) |> QRAM |> r->measure(r, nshots = 1024)

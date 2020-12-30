@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.17
+# v0.12.18
 
 using Markdown
 using InteractiveUtils
@@ -17,18 +17,18 @@ md"As you might have thought, there do exist gates, other than the previously de
 md"### Single qubit gates"
 
 # ╔═╡ 83f65eb6-1dca-11eb-32cb-c577ad1d0b68
-md"#### The $ R_𝜑^Z $ gate"
+md"#### The `` R_𝜑^Z `` gate"
 
 # ╔═╡ 9d8d835c-1dca-11eb-0ab7-01a80ca23e30
-md"Passing a qubit through the $ R_𝜑^Z $ is equivalent to multiplying its state vector by $\begin{bmatrix}1 & 0\\0 & e^{𝜑i}\end{bmatrix}$.  
-Remember, $ e^{iθ} = cos(𝜃) + i sin(𝜃) $.
+md"Passing a qubit through the `` R_𝜑^Z `` is equivalent to multiplying its state vector by `` \begin{bmatrix}1 & 0\\0 & e^{𝜑i}\end{bmatrix} ``.  
+Remember, `` e^{iθ} = cos(𝜃) + i sin(𝜃) ``.
 
-The $ R_𝜑^Z $ gate can be alternatively denoted by, $\begin{bmatrix}e^{-𝜑i/2} & 0\\0 & e^{𝜑i/2}\end{bmatrix}$. Its just the original matrix, multiplied by $ e^{-𝜑i/2} $. We can do this since multiplication by $ e^{-𝜑i/2} $ is not *observable* during measurement as its a complex unit and $ | e^{iθ} | = |cos(𝜃) + i sin(𝜃)| = 1 . $ Remember that the abstract value of a complex number $ a + ib $, i.e.,  $ |a + ib| = \sqrt{a^2 + b^2} $ and $ sin^2θ + cos^2θ = 1. $
+The `` R_𝜑^Z `` gate can be alternatively denoted by, `` \begin{bmatrix}e^{-𝜑i/2} & 0\\0 & e^{𝜑i/2}\end{bmatrix} ``. Its just the original matrix, multiplied by `` e^{-𝜑i/2} ``. We can do this since multiplication by `` e^{-𝜑i/2} `` is not *observable* during measurement as its a complex unit and `` | e^{iθ} | = |cos(𝜃) + i sin(𝜃)| = 1 . `` Remember that the abstract value of a complex number `` a + ib ``, i.e.,  `` |a + ib| = \sqrt{a^2 + b^2} `` and `` sin^2θ + cos^2θ = 1. ``
 
-Considering a qubit, $ a|0〉 + b|0〉 , $ passing it through the $ R_\frac{𝞹}{2}^Z $ gate is equivalent to $\begin{bmatrix}1 & 0\\0 & e^{𝜋i/2}\end{bmatrix}$ . And since $ cos (\frac{𝞹}{2}) = 0$ and $ sin (\frac{𝞹}{2}) = 1 , $ we can rewrite the above as, $\begin{bmatrix}1 & 0\\0 & i\end{bmatrix}$ $\begin{bmatrix}a\\b\end{bmatrix}$."
+Considering a qubit, `` a|0〉 + b|0〉 , `` passing it through the `` R_\frac{𝞹}{2}^Z `` gate is equivalent to `` \begin{bmatrix}1 & 0\\0 & e^{𝜋i/2}\end{bmatrix} `` . And since `` cos (\frac{𝞹}{2}) = 0`` and `` sin (\frac{𝞹}{2}) = 1 , `` we can rewrite the above as, ``\begin{bmatrix}1 & 0\\0 & i\end{bmatrix}`` `` \begin{bmatrix}a\\b\end{bmatrix} ``."
 
 # ╔═╡ 8cca417e-1dd4-11eb-2a18-bf9b80da3fd2
-md"Lets try the above in Yao! The $ R_𝜑^Z $ gate can be used in Yao with the shift *block*. "
+md"Lets try the above in Yao! The `` R_𝜑^Z `` gate can be used in Yao with the shift *block*. "
 
 # ╔═╡ 1f7c993e-1dd5-11eb-2f13-7711d2426eb1
 begin
@@ -40,10 +40,10 @@ end
 state(qubit |> chain(1, put(1=>shift(π/2))))
 
 # ╔═╡ ac10f6f8-1dd5-11eb-2cf1-29480480572a
-md"As expected the output was $\begin{bmatrix}a\\ib\end{bmatrix}$. Remember, $ i = \sqrt{-1} $ and $ i^2 = -1 $. (Also, note that in Julia, imaginary number 𝑖 is represented by im.)"
+md"As expected the output was `` \begin{bmatrix}a\\ib\end{bmatrix} ``. Remember, `` i = \sqrt{-1} `` and `` i^2 = -1 ``. (Also, note that in Julia, imaginary number 𝑖 is represented by im.)"
 
 # ╔═╡ af22f8a8-1ddc-11eb-2958-bb45cdadf44f
-md"Also, $ R_𝜋^Z $ gate is equivalent to Z gate."
+md"Also, `` R_𝜋^Z `` gate is equivalent to Z gate."
 
 # ╔═╡ df5a774e-1ddc-11eb-2e86-1dc8dd502e26
 round.(Matrix(chain(1, put(1=>shift(π))))) == round.(Matrix(chain(1, put(1=>Z)))) #The round functions "rounds-off" the elements of the matrices
@@ -58,7 +58,7 @@ plot(chain(1, put(1=>shift(π/3))))
 md"#### The T Gate"
 
 # ╔═╡ b1cc417a-1dd9-11eb-0156-67fd10743000
-md"The T gate is equivalent to $ R_\frac{𝞹}{4}^Z . $ In its matrix form, it can be written as $\begin{bmatrix}1 & 0\\0 & \frac{1 + i}{\sqrt{2}}\end{bmatrix}$. Nevertheless, in Yao, it can be used by using the **T** *block* ."
+md"The T gate is equivalent to `` R_\frac{𝞹}{4}^Z . `` In its matrix form, it can be written as `` \begin{bmatrix}1 & 0\\0 & \frac{1 + i}{\sqrt{2}}\end{bmatrix} ``. Nevertheless, in Yao, it can be used by using the **T** *block* ."
 
 # ╔═╡ 67b2bc30-1dda-11eb-2d81-edd411a207b2
 state(qubit |> chain(1, put(1=>T)))
@@ -76,16 +76,16 @@ md"Its circuit diagram representation looks somewhat like - "
 plot(chain(1, put(1=>T)))
 
 # ╔═╡ 408ce964-1de4-11eb-2830-f14bdc87f899
-md"#### The $ R_𝜑^X $ gate"
+md"#### The `` R_𝜑^X `` gate"
 
 # ╔═╡ 09a069f0-1df6-11eb-19de-5da4bb572510
-md"Similar to the $ R\_𝜑^Z $ gate, the $ R\_𝜑^X $ gate can be represented by $\begin{bmatrix}cos(\frac{𝜑}{2}) & -sin(\frac{𝜑}{2})i\\-sin(\frac{𝜑}{2})i & cos(\frac{𝜑}{2})\end{bmatrix}$."
+md"Similar to the `` R_𝜑^Z `` gate, the `` R_𝜑^X `` gate can be represented by `` \begin{bmatrix}cos(\frac{𝜑}{2}) & -sin(\frac{𝜑}{2})i\\-sin(\frac{𝜑}{2})i & cos(\frac{𝜑}{2})\end{bmatrix} ``."
 
 # ╔═╡ 5a6f6786-1df7-11eb-0f06-5b229b0935bb
-md"#### The $ R_𝜑^Y $ gate"
+md"#### The `` R_𝜑^Y `` gate"
 
 # ╔═╡ 6a775062-1df7-11eb-1ea2-7d5517774328
-md"Similar to the $ R\_𝜑^Z $ gate, the $ R\_𝜑^X $ gate can be represented by $\begin{bmatrix}cos(\frac{𝜑}{2}) & -sin(\frac{𝜑}{2})\\sin(\frac{𝜑}{2}) & cos(\frac{𝜑}{2})\end{bmatrix}$."
+md"Similar to the `` R_𝜑^Z `` gate, the `` R_𝜑^X `` gate can be represented by `` \begin{bmatrix}cos(\frac{𝜑}{2}) & -sin(\frac{𝜑}{2})\\sin(\frac{𝜑}{2}) & cos(\frac{𝜑}{2})\end{bmatrix} ``."
 
 # ╔═╡ 8d65504c-1df7-11eb-0f3a-93796bf5b7f9
 md"They can be represented in Yao using the **Rx** and **Ry** *blocks* respectively" 
@@ -97,7 +97,7 @@ state(qubit |> chain(1, put(1=>Rx(π))))
 state(qubit |> chain(1, put(1=>Ry(π))))
 
 # ╔═╡ 451b4c6a-1e1f-11eb-18f0-e301d5d34c93
-md"There's also an **Rz** *block* which which represents the alternative form of $ R_𝜑^Z $ matrix, i.e., $\begin{bmatrix}e^{-𝜑i/2} & 0\\0 & e^{𝜑i/2}\end{bmatrix}$."
+md"There's also an **Rz** *block* which which represents the alternative form of `` R_𝜑^Z `` matrix, i.e., `` \begin{bmatrix}e^{-𝜑i/2} & 0\\0 & e^{𝜑i/2}\end{bmatrix} ``."
 
 # ╔═╡ ea7cda52-1e1f-11eb-2cdc-e9a04181acfb
 state(qubit |> chain(1, put(1=>Rz(π))))
@@ -140,7 +140,7 @@ md"The SWAP gate has the following circuit diagram representation"
 plot(chain(2, swap(1,2)))
 
 # ╔═╡ 5890257c-1e7e-11eb-2880-1d4257468ffc
-md"There's a Toffoli gate, an S gate, a CSWAP gate, a $ \; C R_𝜑^{X,Y,Z} $ gate and probably a lot more. They can all be constructed using the existing blocks in Yao."
+md"There's a Toffoli gate, an S gate, a CSWAP gate, a `` \; C R_𝜑^{X,Y,Z} `` gate and probably a lot more. They can all be constructed using the existing blocks in Yao."
 
 # ╔═╡ c1d38e3e-1e7e-11eb-07ac-5345d88b4781
 let
@@ -179,7 +179,7 @@ begin
 end
 
 # ╔═╡ 1615f882-445a-11eb-3a16-c76bb2305ff5
-md"Note that now, when we measure them using the measure block, the output remains unchanged, even though we should've a 25% chance of getting $ |00〉, |01〉, |10〉 $ or $ |11〉 $."
+md"Note that now, when we measure them using the measure block, the output remains unchanged, even though we should've a 25% chance of getting `` |00〉, |01〉, |10〉 `` or `` |11〉 ``."
 
 # ╔═╡ 9626495a-445a-11eb-0a2d-2168c66ad1e0
 zero_state(2) |> MeasureGate |> r->measure(r, nshots=1024)
@@ -251,7 +251,9 @@ plot(bellcircuit')
 # ╔═╡ 6f5420f8-4488-11eb-3cf9-03675dc3c8db
 md"Whats the difference between the DaggeredBlock and adjoint ` ' ` ?
 
-One is a function of Yao, while another of Base julia. Both perform the same operation on their input, but DaggeredBlock is many times faster."
+One is a function of Yao, while another of Julia `Base`. Both perform the same operation on their input.
+
+**Note:** _Its recommended to always use `'` over DaggeredBlock_."
 
 # ╔═╡ f612e17a-475c-11eb-080a-ab0967411f64
 md"### The Kron Block"
