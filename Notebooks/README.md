@@ -31,6 +31,8 @@ Now you can either clone or download the repository and open the notebooks from 
 
 ## Table of contents
 
+** Note that the pdf and html versions are not available at the current moment **
+
 #### Basics
 [1 - Introduction](https://htmlpreview.github.io/?https://github.com/QuantumBFS/tutorials/blob/master/Notebooks/html/p1.html)
 - Who should read this tutorial
