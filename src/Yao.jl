@@ -26,6 +26,4 @@ using YaoBlocks:
     print_title,
     print_block
 
-include("deprecations.jl")
-
 end # module
