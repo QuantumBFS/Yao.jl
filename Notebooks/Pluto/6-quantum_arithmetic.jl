@@ -50,8 +50,8 @@ md"We'll try making the adder circuit for addition of two numbers  `` (0-7) ``. 
 
 # ╔═╡ 30953b42-1ede-11eb-32ee-af55afa9221f
 begin
-	FirstNumber = [ArrayReg(bit"1") ArrayReg(bit"1") ArrayReg(bit"1")] #The first number is 7
-	SecondNumber = [ArrayReg(bit"1") ArrayReg(bit"0") ArrayReg(bit"1")] #The second number is 5
+	FirstNumber = ArrayReg(bit"111") #The first number is 7
+	SecondNumber = ArrayReg(bit"101") #The second number is 5
 end
 
 # ╔═╡ 2ae7c4ec-1ee0-11eb-1c46-59d4d3084b39
@@ -175,7 +175,16 @@ end
 md"The input to the circuit being - "
 
 # ╔═╡ e4b012f0-1f3b-11eb-1336-af9ba42a98c8
-input = join(zero_state(1), SecondNumber[1], FirstNumber[1], zero_state(1), SecondNumber[2], FirstNumber[2], zero_state(1), SecondNumber[3], FirstNumber[3], zero_state(1))
+begin
+	input = join(zero_state(4), FirstNumber, SecondNumber)
+	# 10 9 8 7 6 5 4  3 2 1
+	# 1  0 1 1 1 1 0  0 0 0
+	# 2  5 8 3 6 9 1  4 7 10
+	reorder!(input, [2 5 8 3 6 9 1 4 7 10]) #Re-ordering the qubits, for being the input to the above circuit
+end
+
+# ╔═╡ 1abc9e96-4b70-11eb-1661-7f37fdea9130
+measure(input)
 
 # ╔═╡ 04c694e4-1f3c-11eb-1faf-0d08d391ce64
 results = input |> nqbQFA |> r->measure(r, nshots=1024)
@@ -213,19 +222,21 @@ begin
 end
 
 # ╔═╡ adeee882-1f55-11eb-27a4-d79963776e20
-measure(join(zero_state(1), ArrayReg(bit"1"), ArrayReg(bit"0"),zero_state(1)) |> OneqbSubtractor)
+measure(join(zero_state(1), ArrayReg(bit"10"), zero_state(1)) |> OneqbSubtractor)
 
-# ╔═╡ b333400c-1f52-11eb-3775-e7e0ea35f93b
-x = [ArrayReg(bit"1") ArrayReg(bit"0") ArrayReg(bit"0")]
+# ╔═╡ 2ff67ae4-4b4c-11eb-17a6-45e64c916c48
+begin 
+	p = ArrayReg(bit"111")
+	q = ArrayReg(bit"101")
+	inp = join(zero_state(4), p, q)
+	reorder!(inp, [3 6 9 2 5 8 1 4 7 10])
+end
 
-# ╔═╡ c31d7fbe-1f52-11eb-098f-efab8ee8dc9f
-y = [ArrayReg(bit"0") ArrayReg(bit"1") ArrayReg(bit"0")]
-
-# ╔═╡ 0b18dec2-1f52-11eb-0dbb-510695c7b68b
-input1 = join(zero_state(1), y[1], x[1], zero_state(1), y[2], x[2], zero_state(1), y[3], x[3], zero_state(1))
+# ╔═╡ 31eb23f6-4b5e-11eb-2aa3-39ef184edb69
+measure(inp)
 
 # ╔═╡ 1f828098-1f52-11eb-1d00-27f10270a814
-result = input1 |> nqbQFS |> r->measure(r, nshots=1024)
+result = inp |> nqbQFS |> r->measure(r, nshots=1024)
 
 # ╔═╡ 3cbd0f52-1f52-11eb-06f4-ffe29cccde57
 stringsub = reverse(string(Int(result[1]), base=2, pad=10)) #To convert it to string
@@ -270,6 +281,7 @@ md"This circuit only subtracts numbers if the answer is expected to be positive.
 # ╠═412203a2-1f3b-11eb-3de7-45f7eccd697e
 # ╟─c2afc0f8-1f3b-11eb-0626-c5120a452e38
 # ╠═e4b012f0-1f3b-11eb-1336-af9ba42a98c8
+# ╠═1abc9e96-4b70-11eb-1661-7f37fdea9130
 # ╠═04c694e4-1f3c-11eb-1faf-0d08d391ce64
 # ╠═1083740a-1f3c-11eb-2950-c56e4f20087c
 # ╟─23e71498-1f3c-11eb-1c3e-2dac1694afeb
@@ -279,9 +291,8 @@ md"This circuit only subtracts numbers if the answer is expected to be positive.
 # ╠═346af906-1f50-11eb-3286-dbf3014c8fab
 # ╠═e2659b46-1f51-11eb-34db-dbc917b977dd
 # ╠═adeee882-1f55-11eb-27a4-d79963776e20
-# ╠═b333400c-1f52-11eb-3775-e7e0ea35f93b
-# ╠═c31d7fbe-1f52-11eb-098f-efab8ee8dc9f
-# ╠═0b18dec2-1f52-11eb-0dbb-510695c7b68b
+# ╠═2ff67ae4-4b4c-11eb-17a6-45e64c916c48
+# ╠═31eb23f6-4b5e-11eb-2aa3-39ef184edb69
 # ╠═1f828098-1f52-11eb-1d00-27f10270a814
 # ╠═3cbd0f52-1f52-11eb-06f4-ffe29cccde57
 # ╠═658eec52-1f52-11eb-39aa-bbf1fcfb3517
