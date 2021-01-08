@@ -67,18 +67,20 @@ function HTMLWriter.render_html(
     scripts::Vector{DOM.Node} = DOM.Node[],
 )
     @tags html body div
-    DOM.HTMLDocument(html[:lang=>"en"](
-        head,
-        body(
-            Tag(Symbol("#RAW#"))(top_nav),
-            div[".documenter-wrapper#documenter"](
-                sidebar,
-                div[".docs-main"](navbar, article, footer),
-                HTMLWriter.render_settings(ctx),
+    DOM.HTMLDocument(
+        html[:lang=>"en"](
+            head,
+            body(
+                Tag(Symbol("#RAW#"))(top_nav),
+                div[".documenter-wrapper#documenter"](
+                    sidebar,
+                    div[".docs-main"](navbar, article, footer),
+                    HTMLWriter.render_settings(ctx),
+                ),
             ),
+            scripts...,
         ),
-        scripts...,
-    ))
+    )
 end
 
 
@@ -108,7 +110,9 @@ makedocs(
             "assets/main.css",
             asset("https://yaoquantum.org/assets/main.css"),
             asset("http://yaoquantum.org/favicon.ico"),
-            asset("https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"),
+            asset(
+                "https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css",
+            ),
         ],
     ),
     doctest = ("doctest=true" in ARGS),
