@@ -5,10 +5,9 @@ using YaoBase
     @test ArrayReg{3}(rand(4, 6)) isa ArrayReg{3}
     @test_throws DimensionMismatch ArrayReg{2}(rand(4, 3))
     @test_throws DimensionMismatch ArrayReg{2}(rand(5, 2))
-    @test_logs (:warn, "Input type of `ArrayReg` is not Complex, got Float64") ArrayReg(rand(
-        4,
-        3,
-    ))
+    @test_logs (:warn, "Input type of `ArrayReg` is not Complex, got Float64") ArrayReg(
+        rand(4, 3),
+    )
 
     @test ArrayReg(rand(ComplexF64, 4, 3)) isa ArrayReg{3}
     @test ArrayReg(rand(ComplexF64, 4)) isa ArrayReg{1}

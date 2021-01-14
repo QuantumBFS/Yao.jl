@@ -32,7 +32,11 @@ function ArrayReg{B}(raw::MT) where {B,T,MT<:AbstractMatrix{T}}
     ispow2(size(raw, 1)) ||
         throw(DimensionMismatch("Expect first dimension size to be power of 2"))
     if !(ispow2(size(raw, 2) ÷ B) && size(raw, 2) % B == 0)
-        throw(DimensionMismatch("Expect second dimension size to be an integral multiple of batch size $B"))
+        throw(
+            DimensionMismatch(
+                "Expect second dimension size to be an integral multiple of batch size $B",
+            ),
+        )
     end
     return ArrayReg{B,T,MT}(raw)
 end

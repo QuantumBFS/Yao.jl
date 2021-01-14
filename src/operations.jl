@@ -123,7 +123,9 @@ function Base.:*(bra::AdjointArrayReg{1}, ket::ArrayReg{1})
     elseif nremain(bra) == 0 # <s|active> |remain>
         return ArrayReg{1}(state(bra) * state(ket))
     else
-        error("partially contract ⟨bra|ket⟩ is not supported, expect ⟨bra| to be fully actived. nactive(bra)/nqubits(bra)=$(nactive(bra))/$(nqubits(bra))")
+        error(
+            "partially contract ⟨bra|ket⟩ is not supported, expect ⟨bra| to be fully actived. nactive(bra)/nqubits(bra)=$(nactive(bra))/$(nqubits(bra))",
+        )
     end
 end
 
@@ -145,7 +147,9 @@ function Base.:*(
     elseif nremain(bra) == 0 # <s|active> |remain>
         bra .* ket
     else
-        error("partially contract ⟨bra|ket⟩ is not supported, expect ⟨bra| to be fully actived. nactive(bra)/nqubits(bra)=$(nactive(bra))/$(nqubits(bra))")
+        error(
+            "partially contract ⟨bra|ket⟩ is not supported, expect ⟨bra| to be fully actived. nactive(bra)/nqubits(bra)=$(nactive(bra))/$(nqubits(bra))",
+        )
     end
 end
 
