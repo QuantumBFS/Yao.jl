@@ -9,14 +9,28 @@ using Yao, YaoPlots
 
 # ╔═╡ d1930710-4466-11eb-3528-8bdcf0543578
 begin
-	using BitBasis: BitStr
-	using StatsBase: fit, Histogram
-	using Gaston: bar, set, Axes
-	set(showable="svg")
+	using StatsBase: Histogram, fit
+	using Plots: bar, scatter!, gr; gr()
+	using BitBasis
 	function plotmeasure(x::Array{BitStr{n,Int},1}) where n
-		set(preamble="set xtics font ',$(n<=3 ? 15 : 15/(2^(n-3)))'")
 		hist = fit(Histogram, Int.(x), 0:2^n)
-		bar(hist.edges[1][1:end-1], hist.weights, fc="'dark-red'", Axes(title = :Histogram, xtics = (0:(2^n-1), "|" .* string.(0:(2^n-1), base=2, pad=n) .* "〉")))
+		x = 0
+		if(n<=3)
+			s=8
+		elseif(n>3 && n<=6)
+			s=5
+		elseif(n>6 && n<=10)
+			s=3.2
+		elseif(n>10 && n<=15)
+			s=2
+		elseif(n>15)
+			s=1
+		end
+		bar(hist.edges[1] .- 0.5, hist.weights, legend=:none, size=(600*(2^n)/s,400), ylims=(0:maximum(hist.weights)), xlims=(0:2^n), grid=:false, ticks=false, border=:none, color=:lightblue, lc=:lightblue)
+		scatter!(0:2^n-1, ones(2^n,1), markersize=0,
+         series_annotations="|" .* string.(hist.edges[1]; base=2, pad=n) .* "⟩")
+		scatter!(0:2^n-1, zeros(2^n,1) .+ maximum(hist.weights), markersize=0,
+         series_annotations=string.(hist.weights))
 	end
 end
 
@@ -161,7 +175,7 @@ md"Wanna see how we can test that? The below function plots the probability as h
 plotmeasure(measuredqubits)
 
 # ╔═╡ b544dd14-446a-11eb-19c1-914694722f0e
-md"The probability of the measurement giving `` |01〉 `` is `` ``(sum(measuredqubits .== bit\"01\")/10.24)\% `` and the number of times the measurement result is `` |10〉 `` is `` ``(sum(measuredqubits .== bit\"10\")/10.24)\%. ``"
+md"The probability of the measurement giving `` |01〉 `` is $ $(sum(measuredqubits .== bit\"01\")/10.24)% $ and the number of times the measurement result is `` |10〉 `` is $ $(sum(measuredqubits .== bit\"10\")/10.24)\%. $"
 
 # ╔═╡ ef6e1276-03d8-11eb-08b6-1fc082d158f6
 md"Implementing the superdense coding."
