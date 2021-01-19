@@ -12,7 +12,7 @@ You also need to install the below packages,
 
 	]add Plots, BitBasis, StatsBase, Yao, YaoPlots, InspectDR
 	
-**Note:** _In case you find the plotting to be inconvenient, try replacing ``` using Plots: bar, scatter!, gr; gr() ``` with ``` using Plots: bar, scatter!, inspectdr; inspectdr() ```. _
+**Note:** *In case you find the plotting to be inconvenient, try replacing ``` using Plots: bar, scatter!, gr; gr() ``` with ``` using Plots: bar, scatter!, inspectdr; inspectdr() ```.*
 Now you can either clone or download the repository and open the notebooks from the Notebooks folder in Pluto, or you can paste the link from the table of contents.
 
 ## Table of contents
