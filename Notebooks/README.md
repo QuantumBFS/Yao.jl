@@ -10,23 +10,9 @@ Pluto.run()
 
 You also need to install the below packages,
 
-	]add Gaston, BitBasis, StatsBase, Yao, YaoPlots 
-
-Also, note that for plots to show up, you need Gaston, which is a front-end of [gnuplot](http://www.gnuplot.info/). So, you've to install gnuplot externally.
-
-###### Instructions to install gnuplot
-
-Mac Users -` brew install gnuplot `
-
-Windows users -
-Download and install it from [here](https://sourceforge.net/projects/gnuplot/files/gnuplot/5.2.8/g5-more_gates28-win64-mingw.exe/download)
-
-Linux users:-
-
-Fedora/Red-hat-based :- ` sudo dnf install gnuplot `
-
-Ubuntu/Debian-based :- ` sudo apt install gnuplot `
-
+	]add Plots, BitBasis, StatsBase, Yao, YaoPlots, InspectDR
+	
+**Note:** _In case you find the plotting to be inconvenient, try replacing ``` using Plots: bar, scatter!, gr; gr() ``` with ``` using Plots: bar, scatter!, inspectdr; inspectdr() ```. _
 Now you can either clone or download the repository and open the notebooks from the Notebooks folder in Pluto, or you can paste the link from the table of contents.
 
 ## Table of contents
