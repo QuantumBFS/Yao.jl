@@ -13,8 +13,11 @@ struct OuterProduct{T,ATL<:AbstractArray{T},ATR<:AbstractArray{T}} <: LowRankMat
 end
 
 function OuterProduct(left::ATL, right::ATR) where {T,ATL,ATR}
-    size(left, 2) != size(right, 2) &&
-        throw(DimensionMismatch("The seconds dimension of left ($(size(left,2))) and right $(size(right,2)) does not match."))
+    size(left, 2) != size(right, 2) && throw(
+        DimensionMismatch(
+            "The seconds dimension of left ($(size(left,2))) and right $(size(right,2)) does not match.",
+        ),
+    )
     return OuterProduct{T,ATL,ATR}(left, right)
 end
 
@@ -57,8 +60,9 @@ outerprod(outδ::ArrayReg{B}, in::ArrayReg{B}) where {B} =
 Project `op` to sparse matrix with same sparsity as `y`.
 """
 function projection(y::AbstractMatrix, op::AbstractMatrix)
-    size(y) == size(op) ||
-        throw(DimensionMismatch("can not project a matrix of size $(size(op)) to target size $(size(y))"))
+    size(y) == size(op) || throw(
+        DimensionMismatch("can not project a matrix of size $(size(op)) to target size $(size(y))"),
+    )
     out = _zero(y)
     unsafe_projection!(out, op)
 end

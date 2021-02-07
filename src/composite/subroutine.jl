@@ -14,7 +14,11 @@ end
 
 function Subroutine{N}(block::BT, locs::NTuple{C,Int}) where {N,M,C,BT<:AbstractBlock{M}}
     if !(length(locs) == M && N >= M)
-        throw(LocationConflictError("length of locs must be equal to the size of block, and smaller than size of itself."))
+        throw(
+            LocationConflictError(
+                "length of locs must be equal to the size of block, and smaller than size of itself.",
+            ),
+        )
     end
     return Subroutine{N,BT,C}(block, locs)
 end

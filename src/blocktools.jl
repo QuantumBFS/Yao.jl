@@ -27,7 +27,9 @@ parse_block(n::Int, x::Pair{Int,<:Function}) = error("got $x, do you mean put($x
 
 # error if it is not single qubit case
 function parse_block(n::Int, x::Pair)
-    error("please specifiy the block type of $x, consider to use concentrate for large block in local scope.")
+    error(
+        "please specifiy the block type of $x, consider to use concentrate for large block in local scope.",
+    )
 end
 
 """

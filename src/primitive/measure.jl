@@ -128,7 +128,9 @@ function Measure(
 ) where {OT,LT,RNG}
     if resetto !== nothing
         if remove
-            error("invalid keyword combination, expect resetto or remove, got (resetto=$resetto, remove=true)")
+            error(
+                "invalid keyword combination, expect resetto or remove, got (resetto=$resetto, remove=true)",
+            )
         else
             postprocess = ResetTo(BitStr64{locs isa AllLocs ? n : length(locs)}(resetto))
         end

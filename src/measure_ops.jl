@@ -129,7 +129,11 @@ render_mlocs(alllocs, locs) = alllocs[locs]
 
 function _check_msize(op, reg, locs)
     if (locs isa AllLocs ? nactive(reg) : length(locs)) != nqubits(op)
-        throw(QubitMismatchError("operator of size $(nqubits(op)) does not match register size $(nactive(reg))"))
+        throw(
+            QubitMismatchError(
+                "operator of size $(nqubits(op)) does not match register size $(nactive(reg))",
+            ),
+        )
     end
 end
 
