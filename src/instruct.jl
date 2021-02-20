@@ -19,8 +19,22 @@ function YaoBase.instruct!(
     instruct!(r.state, op, locs, control_locs, control_bits)
 end
 
+function YaoBase.instruct!(
+    r::ArrayReg{1},
+    op,
+    locs::Tuple,
+    control_locs::Tuple,
+    control_bits::Tuple,
+)
+    instruct!(vec(r.state), op, locs, control_locs, control_bits)
+end
+
 function YaoBase.instruct!(r::ArrayReg, op, locs::Tuple)
     instruct!(r.state, op, locs)
+end
+
+function YaoBase.instruct!(r::ArrayReg{1}, op, locs::Tuple)
+    instruct!(vec(r.state), op, locs)
 end
 
 function YaoBase.instruct!(
