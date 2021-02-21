@@ -41,13 +41,13 @@ end
     v = rand(ComplexF32, 1 << 8)
     if VERSION < v"1.6-"
         @test_logs (
-                :warn,
-                "Element Type Mismatch: register Complex{Float32}, operator Complex{Float64}. Converting operator to match, this may cause performance issue",
+            :warn,
+            "Element Type Mismatch: register Complex{Float32}, operator Complex{Float64}. Converting operator to match, this may cause performance issue",
         ) instruct!(v, Const.CNOT, (1, 2))
     else
         @test_logs (
-                :warn,
-                "Element Type Mismatch: register ComplexF32, operator ComplexF64. Converting operator to match, this may cause performance issue",
+            :warn,
+            "Element Type Mismatch: register ComplexF32, operator ComplexF64. Converting operator to match, this may cause performance issue",
         ) instruct!(v, Const.CNOT, (1, 2))
     end
 end
