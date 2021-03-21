@@ -73,25 +73,25 @@ You can create a `Measure` block on given basis (default is the computational ba
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> Measure(4)
-Measure(4;postprocess=NoPostProcess())
+Measure(4)
 ```
 
 Or you could specify which qubits you are going to measure
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> Measure(4; locs=1:3)
-Measure(4;locs=(1, 2, 3), postprocess=NoPostProcess())
+Measure(4;locs=(1, 2, 3))
 ```
 
 by default this will collapse the current register to measure results.
 
 ```jldoctest; setup=:(using YaoBlocks, YaoArrayRegister)
 julia> r = normalize!(ArrayReg(bit"000") + ArrayReg(bit"111"))
-ArrayReg{1, Complex{Float64}, Array...}
+ArrayReg{1, ComplexF64, Array...}
     active qubits: 3/3
 
 julia> state(r)
-8×1 Array{Complex{Float64},2}:
+8×1 Matrix{ComplexF64}:
  0.7071067811865475 + 0.0im
                 0.0 + 0.0im
                 0.0 + 0.0im
@@ -102,10 +102,18 @@ julia> state(r)
  0.7071067811865475 + 0.0im
 
 julia> r |> Measure(3)
-Measure(3;postprocess=NoPostProcess())
+ArrayReg{1, ComplexF64, Array...}
+    active qubits: 3/3
 
 julia> state(r)
-1×1 Array{Complex{Float64},2}:
+8×1 Matrix{ComplexF64}:
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
  1.0 + 0.0im
 ```
 
@@ -161,10 +169,9 @@ Measure(;
 )
 mat(x::Measure) = error("use BlockMap to get its matrix.")
 
-function apply!(r::AbstractRegister, m::Measure{N}) where {N}
-    _check_size(r, m)
+function _apply!(r::AbstractRegister, m::Measure{N}) where {N}
     m.results = measure!(m.postprocess, m.operator, r, m.locations; rng = m.rng)
-    return m
+    return r
 end
 
 occupied_locs(m::Measure{N}) where N = m.locations isa AllLocs ? (1:N...,) : m.locations

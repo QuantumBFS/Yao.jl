@@ -94,9 +94,9 @@ mat(::Type{T}, R::RotationGate{1,<:Any,<:YGate}) where {T} =
 # mat(R::RotationGate{1, T, ZGate{Complex{T}}}) where T =
 #     SMatrix{2, 2, Complex{T}}(cos(R.theta/2)-im*sin(R.theta/2), 0, 0, cos(R.theta/2)+im*sin(R.theta/2))
 
-function apply!(r::ArrayReg, rb::RotationGate)
+function _apply!(r::ArrayReg, rb::RotationGate)
     v0 = copy(r.state)
-    apply!(r, rb.block)
+    _apply!(r, rb.block)
     # NOTE: we should not change register's memory address,
     # or batch operations may fail
     r.state .= -im * sin(rb.theta / 2) * r.state + cos(rb.theta / 2) * v0

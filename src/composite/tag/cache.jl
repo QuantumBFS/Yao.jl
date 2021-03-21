@@ -85,17 +85,17 @@ function CacheServers.pull(c::CachedBlock)
     return pull(c.server, c.content)
 end
 
-function apply!(r::ArrayReg{B,T}, c::CachedBlock, signal) where {B,T}
+function _apply!(r::ArrayReg{B,T}, c::CachedBlock, signal) where {B,T}
     if signal > c.level
         r.state .= mat(T, c) * r
     else
-        apply!(r, c.content)
+        _apply!(r, c.content)
     end
     return r
 end
 
-apply!(r::AbstractRegister, c::CachedBlock) = apply!(r, c.content)
-apply!(r::ArrayReg{B,T}, c::CachedBlock) where {B,T} = (r.state .= mat(T, c) * r.state; r)
+_apply!(r::AbstractRegister, c::CachedBlock) = _apply!(r, c.content)
+_apply!(r::ArrayReg{B,T}, c::CachedBlock) where {B,T} = (r.state .= mat(T, c) * r.state; r)
 
 Base.similar(c::CachedBlock, level::Int) = CachedBlock(c.server, c.content, level)
 Base.copy(c::CachedBlock) = CachedBlock(c.server, copy(c.content), c.level)

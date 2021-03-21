@@ -25,12 +25,12 @@ end
 
 chsubblocks(x::Add{N}, it) where {N} = Add{N}(it)
 
-function apply!(r::AbstractRegister, x::Add)
+function _apply!(r::AbstractRegister, x::Add)
     isempty(x.list) && return r
-    length(x.list) == 1 && return apply!(r, x.list[])
+    length(x.list) == 1 && return _apply!(r, x.list[])
 
-    res = mapreduce(blk -> apply!(copy(r), blk), regadd!, x.list[1:end-1])
-    apply!(r, x.list[end])
+    res = mapreduce(blk -> _apply!(copy(r), blk), regadd!, x.list[1:end-1])
+    _apply!(r, x.list[end])
     regadd!(r, res)
     r
 end

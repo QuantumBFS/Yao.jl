@@ -56,6 +56,7 @@ end
     @test Add{3}([put(3, 3 => X)]) isa Add
     @test_throws MethodError Add{3}([put(10, 2 => X)])
     @test_throws MethodError Add(put(10, 2 => X), put(4, 3 => X))
+    @test_throws QubitMismatchError apply!(rand_state(2), Add(put(10, 2 => X)))
 end
 
 @testset "block operations" begin

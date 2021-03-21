@@ -99,8 +99,7 @@ mat(::Type{T}, rb::RepeatedBlock{N}) where {T,N} =
     hilbertkron(N, fill(mat(T, rb.content), length(rb.locs)), [rb.locs...])
 mat(::Type{T}, rb::RepeatedBlock{N,0,GT}) where {T,N,GT} = IMatrix{1 << N,T}()
 
-function apply!(r::AbstractRegister, rp::RepeatedBlock)
-    _check_size(r, rp)
+function _apply!(r::AbstractRegister, rp::RepeatedBlock)
     m = mat_matchreg(r, rp.content)
     for addr in rp.locs
         instruct!(r, m, Tuple(addr:addr+nqubits(rp.content)-1))
@@ -111,13 +110,13 @@ end
 # specialization
 for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
-    @eval function apply!(r::AbstractRegister, rp::RepeatedBlock{N,C,$GT}) where {N,C}
+    @eval function _apply!(r::AbstractRegister, rp::RepeatedBlock{N,C,$GT}) where {N,C}
         instruct!(r, Val($(QuoteNode(G))), rp.locs)
         return r
     end
 end
 
-apply!(reg::AbstractRegister, rp::RepeatedBlock{N,0}) where {N} = reg
+_apply!(reg::AbstractRegister, rp::RepeatedBlock{N,0}) where {N} = reg
 
 cache_key(rb::RepeatedBlock) = (rb.locs, cache_key(rb.content))
 

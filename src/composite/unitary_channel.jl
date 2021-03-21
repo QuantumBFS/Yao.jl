@@ -84,8 +84,8 @@ end
 UnitaryChannel(it, weights) = UnitaryChannel(collect(it), weights)
 UnitaryChannel(it) = UnitaryChannel(collect(it))
 
-function apply!(r::AbstractRegister, x::UnitaryChannel)
-    apply!(r, sample(x.operators, x.weights))
+function _apply!(r::AbstractRegister, x::UnitaryChannel)
+    _apply!(r, sample(x.operators, x.weights))
 end
 
 function mat(::Type{T}, x::UnitaryChannel) where {T}

@@ -82,9 +82,9 @@ function mat(::Type{T}, c::ChainBlock) where {T}
     end
 end
 
-function apply!(r::AbstractRegister, c::ChainBlock)
+function _apply!(r::AbstractRegister, c::ChainBlock)
     for each in c.blocks
-        apply!(r, each)
+        _apply!(r, each)
     end
     return r
 end

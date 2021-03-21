@@ -171,8 +171,7 @@ cz(ctrl_locs, loc::Int) = @λ(n -> cz(n, ctrl_locs, loc))
 mat(::Type{T}, c::ControlBlock{N,BT,C}) where {T,N,BT,C} =
     cunmat(N, c.ctrl_locs, c.ctrl_config, mat(T, c.content), c.locs)
 
-function apply!(r::AbstractRegister, c::ControlBlock)
-    _check_size(r, c)
+function _apply!(r::AbstractRegister, c::ControlBlock)
     instruct!(r, mat_matchreg(r, c.content), c.locs, c.ctrl_locs, c.ctrl_config)
     return r
 end
@@ -181,8 +180,7 @@ end
 for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
 
-    @eval function apply!(r::AbstractRegister, c::ControlBlock{N,<:$GT}) where {N}
-        _check_size(r, c)
+    @eval function _apply!(r::AbstractRegister, c::ControlBlock{N,<:$GT}) where {N}
         instruct!(r, Val($(QuoteNode(G))), c.locs, c.ctrl_locs, c.ctrl_config)
         return r
     end

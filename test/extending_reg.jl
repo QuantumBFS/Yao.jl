@@ -39,7 +39,7 @@ end
 
 @testset "test ArrayRegister extension" begin
     reg = EchoReg{10}(3, 5)
-    @test_throws NotImplementedError reg |> cache(X)
+    @test_throws QubitMismatchError reg |> cache(X)
     @test reg |>
           put(3, 2 => X) |>
           control(3, 3, 2 => X) |>

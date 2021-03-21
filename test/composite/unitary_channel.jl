@@ -8,6 +8,7 @@ using Test
 
     r = rand_state(3)
     @test apply!(copy(r), put(3, 1 => channel)) == apply!(copy(r), put(3, 1 => X))
+    @test_throws QubitMismatchError apply!(copy(r), channel)
 end
 
 @testset "check mat" begin

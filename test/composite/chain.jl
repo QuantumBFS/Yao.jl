@@ -45,6 +45,7 @@ end
 
     @test_throws ErrorException chain(1 => chain())
     @test_throws ErrorException chain(4, 2:3 => kron(X, X))
+    @test_throws QubitMismatchError apply!(rand_state(5), chain(X, X))
 end
 
 @testset "#15" begin

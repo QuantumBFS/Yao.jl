@@ -7,7 +7,7 @@ The fallback is `GateTypeName(fields...)`
 function dump_gate end
 
 function dump_gate(blk::ConstantGate)
-    Symbol("$(typeof(blk).name)"[1:end-4])
+    Symbol("$(typeof(blk).name.name)"[1:end-4])
 end
 
 function dump_gate(blk::ControlBlock)

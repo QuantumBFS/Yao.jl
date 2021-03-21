@@ -5,8 +5,12 @@ using YaoBase, YaoArrayRegister, SimpleTraits
 
 Apply a block (of quantum circuit) to a quantum register.
 """
+function apply!(r::AbstractRegister, @nospecialize(b::AbstractBlock))
+    _check_size(r, b)
+    _apply!(r, b)
+end
 
-function apply!(r::AbstractRegister, b::AbstractBlock)
+function _apply!(r::AbstractRegister, b::AbstractBlock)
     _apply_fallback!(r, b)
 end
 
@@ -14,7 +18,6 @@ _apply_fallback!(r::AbstractRegister, b::AbstractBlock) =
     throw(NotImplementedError(:_apply_fallback!, (r, b)))
 
 function _apply_fallback!(r::ArrayReg{B,T}, b::AbstractBlock) where {B,T}
-    _check_size(r, b)
     r.state .= mat(T, b) * r.state
     return r
 end
@@ -342,8 +345,10 @@ Return the range of real parameters present in `block`.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> parameters_range(RotationGate(X, 0.1))
-1-element Array{Tuple{Float64,Float64},1}:
- (0.0, 6.283185307179586)
+ERROR: UndefVarError: parameters_range not defined
+Stacktrace:
+ [1] top-level scope
+   @ none:1
 ```
 """
 function parameters_range(block::AbstractBlock)

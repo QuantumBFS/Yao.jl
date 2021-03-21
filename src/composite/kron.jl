@@ -161,8 +161,7 @@ function mat(::Type{T}, k::KronBlock{N,M}) where {T,N,M}
     end
 end
 
-function apply!(r::AbstractRegister, k::KronBlock)
-    _check_size(r, k)
+function _apply!(r::AbstractRegister, k::KronBlock)
     for (locs, block) in zip(k.locs, k.blocks)
         _instruct!(r, block, Tuple(locs))
     end
