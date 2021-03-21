@@ -1,7 +1,7 @@
 export Daggered
 
 """
-    Daggered{N, BT} <: TagBlock{N}
+    Daggered{BT, N} <: TagBlock{N}
 
 Wrapper block allowing to execute the inverse of a block of quantum circuit.
 """

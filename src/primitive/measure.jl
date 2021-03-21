@@ -166,3 +166,5 @@ function apply!(r::AbstractRegister, m::Measure{N}) where {N}
     m.results = measure!(m.postprocess, m.operator, r, m.locations; rng = m.rng)
     return m
 end
+
+occupied_locs(m::Measure{N}) where N = m.locations isa AllLocs ? (1:N...,) : m.locations

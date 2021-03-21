@@ -9,6 +9,7 @@ using StatsBase: mean
     # measure it at 1, 2
     # should collapse to 0000 or 1111 since entangled
     g = Measure(4; locs = (1, 2))
+    @test occupied_locs(g) == (1,2)
     st |> g
 
     @test g.results[1] == 0 ? st.state[end] == 0 : st.state[1] == 0
@@ -16,6 +17,7 @@ using StatsBase: mean
     @test g.postprocess isa ResetTo{BitStr64{2}}
 
     m = Measure(4)
+    @test occupied_locs(m) == (1,2,3,4)
     @test m.postprocess isa NoPostProcess
 end
 

@@ -4,6 +4,7 @@ circuit optimisation
 module Optimise
 using SimpleTraits
 using YaoBlocks, YaoBlocks.ConstGate
+using YaoBlocks: NotImplementedError
 
 include("to_basictypes.jl")
 
