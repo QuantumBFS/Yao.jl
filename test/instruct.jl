@@ -164,3 +164,25 @@ end
     @test instruct!(copy(r), Val(:Rx), (2,), (3,), (1,), 0.5) ≈
           instruct!(copy(r.state), Val(:Rx), (2,), (3,), (1,), 0.5)
 end
+
+
+@testset "regression test, rot CNOT - please run with multi-threading" begin
+    g =  [0.921061-0.389418im       0.0+0.0im            0.0+0.0im            0.0+0.0im
+        0.0+0.0im       0.921061-0.0im            0.0+0.0im            0.0-0.389418im
+        0.0+0.0im            0.0+0.0im       0.921061-0.389418im       0.0+0.0im
+        0.0+0.0im            0.0-0.389418im       0.0+0.0im       0.921061-0.0im]
+    n = 16
+    gs = sparse(g)
+    reg1 = rand_state(n)
+    reg2 = copy(reg1)
+    for i=1:50
+        x1 = rand(1:n)
+        x2 = rand(1:n-1)
+        x2 = x2 >= x1 ? x2 + 1 : x2
+        instruct!(reg1, g, (x1, x2))
+        instruct!(reg2, gs, (x1, x2))
+    end
+    @test isapprox(norm(statevec(reg1)), 1.0; atol=1e-5)
+    @test isapprox(norm(statevec(reg2)), 1.0; atol=1e-5)
+    @test isapprox(statevec(reg1), statevec(reg2))
+end
