@@ -87,7 +87,13 @@ Now you can either clone or download the repository and open the notebooks from 
 - qRAM
 - Uncomputation
 - References - [Quantum Random Access Memory](https://arxiv.org/abs/0708.1879)
-- [pdf](https://github.com/QuantumBFS/tutorials/raw/master/Notebooks/pdf/1-introduction0.pdf), [Pluto Notebook](https://raw.githubusercontent.com/QuantumBFS/tutorials/master/Notebooks/Pluto/1-introduction0.jl)
+- [pdf](https://github.com/QuantumBFS/tutorials/raw/master/Notebooks/pdf/10-qram.pdf), [Pluto Notebook](https://raw.githubusercontent.com/QuantumBFS/tutorials/master/Notebooks/Pluto/10-qram.jl)
+
+[11 - Identifying good quantum numbers](https://htmlpreview.github.io/?https://github.com/QuantumBFS/tutorials/blob/master/Notebooks/html/11-goodquantumnumbers.html)
+- Good quantum number
+- References - [Wikipedia](https://en.wikipedia.org/wiki/Good_quantum_number)
+- [pdf](https://github.com/QuantumBFS/tutorials/raw/master/Notebooks/pdf/11-goodquantumnumbers.pdf), [Pluto Notebook](https://raw.githubusercontent.com/QuantumBFS/tutorials/master/Notebooks/Pluto/11-goodquantumnumbers.jl)
+
 
 Note: Linear Algebra is a pre-requisite for upcoming tutorials.
 
