@@ -174,4 +174,4 @@ function _apply!(r::AbstractRegister, m::Measure{N}) where {N}
     return r
 end
 
-occupied_locs(m::Measure{N}) where N = m.locations isa AllLocs ? (1:N...,) : m.locations
+occupied_locs(m::Measure{N}) where {N} = m.locations isa AllLocs ? (1:N...,) : m.locations
