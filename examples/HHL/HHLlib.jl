@@ -22,7 +22,7 @@ end
     a, -b, b, a
 end
 
-function Yao.apply!(reg::ArrayReg, hr::HHLCRot{N, NC, T}) where {N, NC, T}
+function YaoBlocks._apply!(reg::ArrayReg, hr::HHLCRot{N, NC, T}) where {N, NC, T}
     mask = bmask(hr.ibit)
     step = 1<<(hr.ibit-1)
     step_2 = step*2
@@ -71,7 +71,7 @@ function hhlsolve(A::Matrix, b::Vector, n_reg::Int, C_value::Real)
     UG = matblock(exp(2π*im.*A))
 
     # Generating input bits
-    all_bit =  ArrayReg(b) ⊗ zero_state(n_reg) ⊗ zero_state(1)
+    all_bit =  join(ArrayReg(b), zero_state(n_reg), zero_state(1))
 
     # Construct HHL circuit.
     circuit = hhlcircuit(UG, n_reg, C_value)

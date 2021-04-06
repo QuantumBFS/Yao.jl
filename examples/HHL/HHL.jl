@@ -1,4 +1,4 @@
-using Yao
+using Yao, YaoBlocks
 using BitBasis
 using YaoArrayRegister
 using Test, LinearAlgebra
