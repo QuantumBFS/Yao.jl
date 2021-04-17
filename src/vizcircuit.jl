@@ -14,26 +14,28 @@ module CircuitStyles
 	const textsize = Ref(16pt)
 	const paramtextsize = Ref(10pt)
 	const fontfamily = Ref("Helvetica Neue")
-    G() = compose(context(), rectangle(-r[], -r[], 2*r[], 2*r[]), fill("white"), stroke("black"), linewidth(lw[]))
-    C() = compose(context(), circle(0.0, 0.0, r[]/3), fill("black"))
-    NC() = compose(context(), circle(0.0, 0.0, r[]/3), fill("white"), stroke("black"), linewidth(lw[]))
-    X() = compose(context(), xgon(0.0, 0.0, r[], 4), fill("black"))
+    const linecolor = Ref("#000000")
+    const gate_bgcolor = Ref("#FFFFFF")
+    G() = compose(context(), rectangle(-r[], -r[], 2*r[], 2*r[]), fill(gate_bgcolor[]), stroke(linecolor[]), linewidth(lw[]))
+    C() = compose(context(), circle(0.0, 0.0, r[]/3), fill(linecolor[]), linewidth(0))
+    NC() = compose(context(), circle(0.0, 0.0, r[]/3), fill(gate_bgcolor[]), stroke(linecolor[]), linewidth(lw[]))
+    X() = compose(context(), xgon(0.0, 0.0, r[], 4), fill(linecolor[]), linewidth(0))
 	NOT() = compose(context(),
-               (context(), circle(0.0, 0.0, r[]), stroke("black"), linewidth(lw[]), fill("transparent")),
-               (context(), polygon([(-r[], 0.0), (r[], 0.0)]), stroke("black"), linewidth(lw[])),
-               (context(), polygon([(0.0, -r[]), (0.0, r[])]), stroke("black"), linewidth(lw[]))
+               (context(), circle(0.0, 0.0, r[]), stroke(linecolor[]), linewidth(lw[]), fill("transparent")),
+               (context(), polygon([(-r[], 0.0), (r[], 0.0)]), stroke(linecolor[]), linewidth(lw[])),
+               (context(), polygon([(0.0, -r[]), (0.0, r[])]), stroke(linecolor[]), linewidth(lw[]))
                )
-    WG() = compose(context(), rectangle(-1.5*r[], -r[], 3*r[], 2*r[]), fill("white"), stroke("black"), linewidth(lw[]))
-    MULTIGATE(h) = compose(context(), rectangle(-1.5*r[], -(h/2+r[]), 3*r[], (h+2*r[])), fill("white"), stroke("black"), linewidth(lw[]))
-    LINE() = compose(context(), line(), stroke("black"), linewidth(lw[]))
+    WG() = compose(context(), rectangle(-1.5*r[], -r[], 3*r[], 2*r[]), fill(gate_bgcolor[]), stroke(linecolor[]), linewidth(lw[]))
+    MULTIGATE(h) = compose(context(), rectangle(-1.5*r[], -(h/2+r[]), 3*r[], (h+2*r[])), fill(gate_bgcolor[]), stroke(linecolor[]), linewidth(lw[]))
+    LINE() = compose(context(), line(), stroke(linecolor[]), linewidth(lw[]))
 	TEXT() = compose(context(), text(0.0, 0.0, "", hcenter, vcenter), fontsize(textsize[]), font(fontfamily[]))
     PARAMTEXT() = compose(context(), text(0.0, 0.0, "", hcenter, vcenter), fontsize(paramtextsize[]), font(fontfamily[]))
     MEASURE() = compose(context(),
-        rectangle(-r[], -r[], 2*r[], 2*r[]), fill("white"), stroke("black"), linewidth(lw[]),
-        compose(context(), curve((-0.8*r[], 0.5*r[]), (-0.8*r[], -0.6*r[]), (0.8*r[], -0.6*r[]), (0.8*r[], 0.5*r[])), stroke("black"), linewidth(lw[])),
-        compose(context(), line([(0.0, 0.5*r[]), (0.7*r[], -0.4*r[])]), stroke("black"), linewidth(lw[])),
+        rectangle(-r[], -r[], 2*r[], 2*r[]), fill(gate_bgcolor[]), stroke(linecolor[]), linewidth(lw[]),
+        compose(context(), curve((-0.8*r[], 0.5*r[]), (-0.8*r[], -0.6*r[]), (0.8*r[], -0.6*r[]), (0.8*r[], 0.5*r[])), stroke(linecolor[]), linewidth(lw[])),
+        compose(context(), line([(0.0, 0.5*r[]), (0.7*r[], -0.4*r[])]), stroke(linecolor[]), linewidth(lw[])),
         begin
-            ns = Viznet.nodestyle(:triangle, fill("black"); r=0.1*r[], θ=atan(0.7, 0.9))
+            ns = Viznet.nodestyle(:triangle, fill(linecolor[]); r=0.1*r[], θ=atan(0.7, 0.9))
             Viznet.inner_most_containers(ns) do c
                 Viznet.update_locs!(c.form_children, [(0.7*r[], -0.4*r[])])
             end
@@ -124,10 +126,10 @@ function _draw_continuous_multiqubit!(c::CircuitGrid, loc_text)
 	end
 end
 
-function finalize!(c::CircuitGrid)
+function finalize!(c::CircuitGrid; show_ending=true)
     i = frontier(c, 1, nline(c)) + 1
 	for j=1:nline(c)
-		CircuitStyles.LINE() >> c[(i, j-0.2); (i, j+0.2)]
+		show_ending && CircuitStyles.LINE() >> c[(i, j-0.2); (i, j+0.2)]
 		CircuitStyles.LINE() >> c[(i, j); (c.frontier[j], j)]
 	end
 	c.frontier .= i
@@ -247,17 +249,17 @@ get_cbrush_texts(b::ZGate) = [(CircuitStyles.C(), "")]
 
 # front end
 plot(blk::AbstractBlock; kwargs...) = vizcircuit(blk; kwargs...)
-function vizcircuit(blk::AbstractBlock; w_depth=0.85, w_line=0.75, scale=1.0)
-	circuit_canvas(nqubits(blk); w_depth=w_depth, w_line=w_line) do c
+function vizcircuit(blk::AbstractBlock; w_depth=0.85, w_line=0.75, scale=1.0, show_ending=true)
+	circuit_canvas(nqubits(blk); w_depth=w_depth, w_line=w_line, show_ending=show_ending) do c
 		basicstyle(blk) >> c
 	end |> rescale(scale)
 end
 
-function circuit_canvas(f, nline::Int; w_depth=0.85, w_line=0.75)
+function circuit_canvas(f, nline::Int; w_depth=0.85, w_line=0.75, show_ending=true)
 	c = CircuitGrid(nline; w_depth=w_depth, w_line=w_line)
 	g = canvas() do
 	   f(c)
-       finalize!(c)
+       finalize!(c; show_ending=show_ending)
 	end
 	a, b = (depth(c)+1)*w_depth, nline*w_line
 	Compose.set_default_graphic_size(a*2.5*cm, b*2.5*cm)

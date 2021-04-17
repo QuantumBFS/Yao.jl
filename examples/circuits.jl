@@ -3,6 +3,7 @@ using Compose, Cairo
 
 _save(str) = PNG(joinpath(@__DIR__, str))
 
+YaoPlots.CircuitStyles.linecolor[] = "#000000"
 # qft circuit
 vizcircuit(qft_circuit(5)) |> _save("qft.png")
 
@@ -37,3 +38,8 @@ chain(5, [put(5, 2=>ConstGate.Sdag), put(5, 3=>ConstGate.Tdag),
     ]) |> vizcircuit |> _save("constgates.png")
 
 chain(5, [put(5, (2,3)=>label(SWAP, "SWAP")'), put(5, 2=>label(I2, "id")), put(5, 2=>label(X, "X")), control(5, (5,3), (2,4,1)=>put(3, (1,3)=>label(SWAP, "SWAP")))]) |> vizcircuit |>  _save("multiqubit.png")
+
+YaoPlots.CircuitStyles.linecolor[] = "#FFFFFF"
+# qft circuit
+vizcircuit(qft_circuit(5)) |> _save("qft-white.png")
+
