@@ -38,7 +38,7 @@ end
     @test pb |> isunitary
     @test pb |> isreflexive
 
-    @test_throws QubitMismatchError apply!(rand_state(4), put(1000, 2=>Rx(0.4)))
+    @test_throws QubitMismatchError apply!(rand_state(4), put(1000, 2 => Rx(0.4)))
 end
 
 @testset "test swap gate" begin
