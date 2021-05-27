@@ -5,14 +5,16 @@ alt="Yao Logo" width="210"></img>
 
 
 
-[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://QuantumBFS.github.io/Yao.jl/stable)
-[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://QuantumBFS.github.io/Yao.jl/latest)
-[![Unitary Fund](https://img.shields.io/badge/Supported%20By-UNITARY%20FUND-brightgreen.svg?style=flat-the-badge)](http://unitary.fund)
+[![][docs-stable-img]][docs-stable-url]
+[![][docs-dev-img]][docs-dev-url]
+[![Unitary Fund][unitary-fund-img]](http://unitary.fund)
 
-| Yao | YaoBlocks | YaoArrayRegister | YaoSym |
-| ----------   | --------- | ---------------- | ------ |
-| [![CI](https://github.com/QuantumBFS/Yao.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/QuantumBFS/Yao.jl/actions/workflows/CI.yml) | [![Build Status](https://travis-ci.com/QuantumBFS/YaoBlocks.jl.svg?branch=master)](https://travis-ci.com/QuantumBFS/YaoBlocks.jl) | [![Build Status](https://travis-ci.com/QuantumBFS/YaoArrayRegister.jl.svg?branch=master)](https://travis-ci.com/QuantumBFS/YaoArrayRegister.jl) | [![Build Status](https://travis-ci.com/QuantumBFS/YaoArrayRegister.jl.svg?branch=master)](https://travis-ci.com/QuantumBFS/YaoArrayRegister.jl) |
-| [![Codecov](https://codecov.io/gh/QuantumBFS/Yao.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/QuantumBFS/Yao.jl)  | [![Codecov](https://codecov.io/gh/QuantumBFS/YaoBlocks.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/QuantumBFS/YaoBlocks.jl) | [![Codecov](https://codecov.io/gh/QuantumBFS/YaoArrayRegister.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/QuantumBFS/YaoArrayRegister.jl) | [![Codecov](https://codecov.io/gh/QuantumBFS/YaoSym.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/QuantumBFS/YaoSym.jl) |
+| components                        | CI                                        | code coverage                                             |
+| --------------------------------- | ----------------------------------------- | --------------------------------------------------------- |
+| [Yao][main-url]                   | [![CI][main-ci-img]][main-ci-url]         | [![codecov][main-codecov-img]][main-codecov-url]          |
+| [YaoBlocks][block-url]            | [![CI][block-ci-img]][block-ci-url]       | [![codecov][block-codecov-img]][block-codecov-url]        |
+| [YaoArrayRegister][arrayreg-url]  | [![CI][arrayreg-ci-img]][arrayreg-ci-url] | [![codecov][arrayreg-codecov-img]][arrayreg-codecov-url]  |
+| [YaoSym][sym-url]                 | [![CI][sym-ci-img]][sym-ci-url]           | [![codecov][sym-codecov-img]][sym-codecov-url]            |
 
 
 **Yao** Extensible, Efficient Quantum Algorithm Design for Humans.
@@ -42,7 +44,7 @@ qft(n) = chain(B(n, k) for k in 1:n)
 <p>
 Yao is a &nbsp;
     <a href="https://julialang.org">
-        <img src="https://julialang.org/favicon.ico" width="16em">
+        <img src="https://raw.githubusercontent.com/JuliaLang/julia-logo-graphics/master/images/julia.ico" width="16em">
         Julia Language
     </a>
     &nbsp; package. To install Yao,
@@ -108,3 +110,34 @@ If you use Yao in teaching and research, please cite our work:
 ## License
 
 **Yao** is released under the Apache 2 license.
+
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-dev-url]: https://QuantumBFS.github.io/Yao.jl/dev
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-stable-url]: https://QuantumBFS.github.io/Yao.jl/stable
+
+[unitary-fund-img]: https://img.shields.io/badge/Supported%20By-UNITARY%20FUND-brightgreen.svg?style=flat-the-badge
+
+[main-url]: https://github.com/QuantumBFS/Yao.jl
+[main-ci-img]: https://github.com/QuantumBFS/Yao.jl/actions/workflows/CI.yml/badge.svg
+[main-ci-url]: https://github.com/QuantumBFS/Yao.jl/actions/workflows/CI.yml
+[main-codecov-img]: https://codecov.io/gh/QuantumBFS/Yao.jl/branch/master/graph/badge.svg
+[main-codecov-url]: https://codecov.io/gh/QuantumBFS/Yao.jl
+
+[block-url]: https://github.com/QuantumBFS/YaoBlocks.jl
+[block-ci-img]: https://github.com/QuantumBFS/YaoBlocks.jl/workflows/CI/badge.svg
+[block-ci-url]: https://github.com/QuantumBFS/YaoBlocks.jl/actions
+[block-codecov-img]: https://codecov.io/gh/QuantumBFS/YaoBlocks.jl/branch/master/graph/badge.svg
+[block-codecov-url]: https://codecov.io/gh/QuantumBFS/YaoBlocks.jl
+
+[arrayreg-url]: https://github.com/QuantumBFS/YaoArrayRegister.jl
+[arrayreg-ci-img]: https://github.com/QuantumBFS/YaoArrayRegister.jl/workflows/CI/badge.svg
+[arrayreg-ci-url]: https://github.com/QuantumBFS/YaoArrayRegister.jl/actions
+[arrayreg-codecov-img]: https://codecov.io/gh/QuantumBFS/YaoArrayRegister.jl/branch/master/graph/badge.svg
+[arrayreg-codecov-url]: https://codecov.io/gh/QuantumBFS/YaoArrayRegister.jl
+
+[sym-url]: https://github.com/QuantumBFS/YaoSym.jl
+[sym-ci-img]: https://github.com/QuantumBFS/YaoSym.jl/workflows/CI/badge.svg
+[sym-ci-url]: https://github.com/QuantumBFS/YaoSym.jl/actions
+[sym-codecov-img]: https://codecov.io/gh/QuantumBFS/YaoSym.jl/branch/master/graph/badge.svg
+[sym-codecov-url]: https://codecov.io/gh/QuantumBFS/YaoSym.jl
