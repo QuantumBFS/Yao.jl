@@ -1,7 +1,7 @@
 # YaoBlocks
 
-[![Build Status](https://travis-ci.com/QuantumBFS/YaoBlocks.jl.svg?branch=master)](https://travis-ci.com/QuantumBFS/YaoBlocks.jl)
-[![Codecov](https://codecov.io/gh/QuantumBFS/YaoBlocks.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/QuantumBFS/YaoBlocks.jl)
+[![CI](https://github.com/QuantumBFS/YaoBlocks.jl/workflows/CI/badge.svg)](https://github.com/QuantumBFS/YaoBlocks.jl/actions)
+[![codecov](https://codecov.io/gh/QuantumBFS/YaoBlocks.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/QuantumBFS/YaoBlocks.jl)
 
 Standard basic quantum circuit simulator building blocks.
 
