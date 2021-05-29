@@ -12,11 +12,11 @@ jobs:
     - name: Pushes test file
       uses: dmnemec/copy_file_to_another_repo_action@main
       env:
-        API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        API_TOKEN_GITHUB: ${{ secrets.TUTORIAL_TOKEN }}
       with:
         source_file: 'notebooks/'
         destination_repo: 'QuantumBFS/QuantumBFS.github.io'
-        user_email: '1805204@kiit.ac.in'
-        user_name: 'varlad'
+        user_email: 'me@rogerluo.dev'
+        user_name: 'Roger-luo'
         commit_message: 'Pushing the notebooks'
         destination_branch: 'master'
