@@ -1,8 +1,17 @@
 ### A Pluto.jl notebook ###
-# v0.12.18
+# v0.12.20
 
 using Markdown
 using InteractiveUtils
+
+# ╔═╡ fa0ed272-bccc-42a1-b8d5-23015f7a71e2
+begin
+	using Pkg
+	Pkg.activate(mktempdir())
+	Pkg.Registry.update()
+	Pkg.add("Yao")
+	Pkg.add("YaoPlots")
+end
 
 # ╔═╡ b978fdae-05ac-11eb-21b9-a584bead4705
 using Yao, YaoPlots
@@ -232,6 +241,7 @@ end
 md"Seems to work... Although, wouldn't using the information from superdense coding make teleportation pointless."
 
 # ╔═╡ Cell order:
+# ╠═fa0ed272-bccc-42a1-b8d5-23015f7a71e2
 # ╟─efa8e4a8-05ab-11eb-2faa-bb86b93de1fb
 # ╠═b978fdae-05ac-11eb-21b9-a584bead4705
 # ╟─1002aa7c-05ac-11eb-3b42-87809ac716c4

@@ -1,8 +1,17 @@
 ### A Pluto.jl notebook ###
-# v0.12.18
+# v0.12.20
 
 using Markdown
 using InteractiveUtils
+
+# ╔═╡ 11c4ccdd-3d86-48ce-b471-3a581902c345
+begin
+	using Pkg
+	Pkg.activate(mktempdir())
+	Pkg.Registry.update()
+	Pkg.add("Yao")
+	Pkg.add("YaoPlots")
+end
 
 # ╔═╡ f6fa5d36-1dd4-11eb-1c33-3344c7697e82
 using Yao, YaoPlots
@@ -282,6 +291,7 @@ md"Its the general version of the Rx, Ry and Rz gates you saw above"
 plot(chain(1, rot(X, 15), rot(Y, 16)))
 
 # ╔═╡ Cell order:
+# ╠═11c4ccdd-3d86-48ce-b471-3a581902c345
 # ╟─3c87d83e-1dca-11eb-2068-6fa8ceb4849a
 # ╟─5545465e-1dca-11eb-0273-6d32f757b4a2
 # ╟─8def8f9e-1dca-11eb-32cf-fdb2038a8feb
@@ -295,7 +305,7 @@ plot(chain(1, rot(X, 15), rot(Y, 16)))
 # ╟─af22f8a8-1ddc-11eb-2958-bb45cdadf44f
 # ╠═df5a774e-1ddc-11eb-2e86-1dc8dd502e26
 # ╟─c1f87994-1e7c-11eb-3da3-21aa52e80520
-# ╟─cda277ce-1e7c-11eb-246c-0b97bb66ab73
+# ╠═cda277ce-1e7c-11eb-246c-0b97bb66ab73
 # ╟─a1173196-1dd9-11eb-394d-271a3871e181
 # ╟─b1cc417a-1dd9-11eb-0156-67fd10743000
 # ╠═67b2bc30-1dda-11eb-2d81-edd411a207b2
@@ -353,7 +363,7 @@ plot(chain(1, rot(X, 15), rot(Y, 16)))
 # ╟─6f5420f8-4488-11eb-3cf9-03675dc3c8db
 # ╟─f612e17a-475c-11eb-080a-ab0967411f64
 # ╟─fc6c126c-475c-11eb-3efa-d5ffc4347358
-# ╟─0c13552c-475d-11eb-23a8-ad67f6bb93bc
+# ╠═0c13552c-475d-11eb-23a8-ad67f6bb93bc
 # ╟─2c87c612-475d-11eb-3af7-9542b157252f
 # ╠═616d3b96-475d-11eb-1500-5bbf4a263df8
 # ╟─d643aa86-475d-11eb-3af7-0195206e2f64

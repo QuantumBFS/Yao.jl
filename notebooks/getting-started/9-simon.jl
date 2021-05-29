@@ -1,8 +1,17 @@
 ### A Pluto.jl notebook ###
-# v0.12.18
+# v0.12.20
 
 using Markdown
 using InteractiveUtils
+
+# ╔═╡ b9c84fff-8579-46fc-94cf-8bf6651ed0c0
+begin
+	using Pkg
+	Pkg.activate(mktempdir())
+	Pkg.Registry.update()
+	Pkg.add("Yao")
+	Pkg.add("YaoPlots")
+end
 
 # ╔═╡ 2d4047c2-3ea3-11eb-1076-3dff1cef4ec9
 using Yao, YaoPlots
@@ -154,6 +163,7 @@ Note that this implementation is specific to `` n=2 ``
 Deduction gets really complicated as n increases, and while its very very unlikely, on real quantum machines, there's a chance that you'll never get the secret string s for any number of runs, or nshots. This algorithm doesn't have much use/application cases either. Shor was inspired by this algorithm to make a general period finding algorithm."
 
 # ╔═╡ Cell order:
+# ╠═b9c84fff-8579-46fc-94cf-8bf6651ed0c0
 # ╟─6184d07e-3dd2-11eb-085f-af802694d25a
 # ╟─8006c71c-3dd2-11eb-13b5-e32876e57d65
 # ╟─b2550450-3ea0-11eb-20ea-dd5194029a53

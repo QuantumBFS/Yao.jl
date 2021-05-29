@@ -1,8 +1,17 @@
 ### A Pluto.jl notebook ###
-# v0.12.18
+# v0.12.20
 
 using Markdown
 using InteractiveUtils
+
+# ╔═╡ 7233fedb-3123-4040-97d9-2cd3cd285a67
+begin
+	using Pkg
+	Pkg.activate(mktempdir())
+	Pkg.Registry.update()
+	Pkg.add("Yao")
+	Pkg.add("YaoPlots")
+end
 
 # ╔═╡ 06657244-3d4d-11eb-3a7c-f79844513992
 using Yao, YaoPlots
@@ -170,6 +179,7 @@ output == measure(zero_state(n)) ? "Constant" : "Balanced"
 md"Please note, you can change the value of n above to get the Deutsch-Josza Algorithm for different inputs. `` n = 1 `` will give the Deutsch Algorithm."
 
 # ╔═╡ Cell order:
+# ╠═7233fedb-3123-4040-97d9-2cd3cd285a67
 # ╟─e0cfd952-3d49-11eb-195b-b34f3836e322
 # ╟─06c7fa22-3d4a-11eb-2f15-b7ef46b75be3
 # ╟─063623ea-3d4a-11eb-3471-ef67e8f31249

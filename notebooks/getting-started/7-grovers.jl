@@ -1,8 +1,20 @@
 ### A Pluto.jl notebook ###
-# v0.12.18
+# v0.12.20
 
 using Markdown
 using InteractiveUtils
+
+# ╔═╡ 2b3d2532-1bac-491a-aeef-d9c29786341c
+begin
+	using Pkg
+	Pkg.activate(mktempdir())
+	Pkg.Registry.update()
+	Pkg.add("Yao")
+	Pkg.add("YaoPlots")
+	Pkg.add("Plots")
+	Pkg.add("BitBasis")
+	Pkg.add("StatsBase")
+end
 
 # ╔═╡ e3cae266-2140-11eb-12f9-31b294a31586
 using Yao, YaoPlots
@@ -252,6 +264,7 @@ md"You can keep running the above block of code, and you'll find that it takes a
 Which sounds about right."
 
 # ╔═╡ Cell order:
+# ╠═2b3d2532-1bac-491a-aeef-d9c29786341c
 # ╟─ecb98520-212d-11eb-02e4-f3c89c254998
 # ╟─0b9fb54a-212e-11eb-1f1d-8912b444cc0c
 # ╟─88c22c5e-2130-11eb-2b73-5fbbbd662df9

@@ -1,8 +1,17 @@
 ### A Pluto.jl notebook ###
-# v0.12.18
+# v0.12.20
 
 using Markdown
 using InteractiveUtils
+
+# ╔═╡ b2937383-dcbe-4863-9267-eca115a7b666
+begin
+	using Pkg
+	Pkg.activate(mktempdir())
+	Pkg.Registry.update()
+	Pkg.add("Yao")
+	Pkg.add("YaoPlots")
+end
 
 # ╔═╡ 57209cca-1ede-11eb-283b-196a50e6f1eb
 using Yao,YaoPlots
@@ -248,6 +257,7 @@ out =  parse(Int64, reverse(stringsub[3] * stringsub[6] * stringsub[9] * strings
 md"This circuit only subtracts numbers if the answer is expected to be positive. It can't solve for calculations like `` 5 - 6 = -1 ``."
 
 # ╔═╡ Cell order:
+# ╠═b2937383-dcbe-4863-9267-eca115a7b666
 # ╟─76794562-1ed0-11eb-18ec-ad4020344ce6
 # ╟─ad61776c-1ed9-11eb-20af-7d41b6e281c3
 # ╟─949416ee-1ed0-11eb-2a86-dd52c9b1d5f9

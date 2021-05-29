@@ -1,8 +1,17 @@
 ### A Pluto.jl notebook ###
-# v0.12.18
+# v0.12.20
 
 using Markdown
 using InteractiveUtils
+
+# ╔═╡ 052b0dc8-bbfe-450c-bc97-9f6f796154a5
+begin
+	# setting up an empty package environment
+	using Pkg
+	Pkg.activate(tempdir())
+	Pkg.add("Yao")
+	Pkg.add("YaoPlots")
+end
 
 # ╔═╡ 57f367d6-025a-11eb-182a-773094da4307
 using Yao, YaoPlots #calling the Yao and YaoPlots package
@@ -17,7 +26,7 @@ md"At the current moment, we don't have have quantum computers. How do we make q
 md"We can make a cicuit in Yao using *chain* function. For parameters we define the number of qubits and the operations we've to perform on them. Lets say we want to pass two qubits through two X gates. We do this by ` chain(number of qubits, blocks) `. To use the X gate, we use the ` put ` block. Run the cell below to see what happens."
 
 # ╔═╡ ee15c64e-025a-11eb-2158-bd9cbea5f262
-md" **\#\#** or single **#** sign mean comments in julia. It means that anything written after # or ## won't be read as a part of the program, in the line you used them."
+md" `#` sign mean comments in julia. It means that anything written after `#` won't be read as a part of the program, in the line you used them."
 
 # ╔═╡ dcf63604-0258-11eb-1466-fb21170c2e1a
 let
@@ -50,7 +59,8 @@ plot(chain(2, control(1, 2=>X))) #Which translates to if the state of the 1st qu
 # ╟─3c9cf124-0257-11eb-16ce-0d857dce310f
 # ╟─5d5644b2-0257-11eb-36e9-7f4803cb3558
 # ╟─0f7d5bdc-0258-11eb-05bb-074d1b38c551
-# ╟─ee15c64e-025a-11eb-2158-bd9cbea5f262
+# ╠═ee15c64e-025a-11eb-2158-bd9cbea5f262
+# ╠═052b0dc8-bbfe-450c-bc97-9f6f796154a5
 # ╠═57f367d6-025a-11eb-182a-773094da4307
 # ╠═dcf63604-0258-11eb-1466-fb21170c2e1a
 # ╟─841aa488-0259-11eb-351a-c1f1770b3a51

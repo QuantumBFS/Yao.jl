@@ -1,8 +1,17 @@
 ### A Pluto.jl notebook ###
-# v0.12.18
+# v0.12.20
 
 using Markdown
 using InteractiveUtils
+
+# ╔═╡ 5fed24f3-0f30-49d9-857a-52546d0b5a7b
+begin
+	using Pkg
+	Pkg.activate(mktempdir())
+	Pkg.Registry.update()
+	Pkg.add("Yao")
+	Pkg.add("YaoPlots")
+end
 
 # ╔═╡ fe142e4e-46dd-11eb-3b8b-79a5e76789a5
 using Yao, YaoPlots
@@ -104,6 +113,7 @@ zero_state(7) |> uncomputation |> r->measure(r, nshots=1024)
 md"As you can see, we first apply the QRAM circuit, and then its dagger, which undoes the effect."
 
 # ╔═╡ Cell order:
+# ╠═5fed24f3-0f30-49d9-857a-52546d0b5a7b
 # ╟─fb8094ea-46da-11eb-3653-4b38fefb019c
 # ╟─259b2164-46db-11eb-1969-19fbb8a1d18c
 # ╠═99efc04a-46dd-11eb-1084-23f01b24d6e0

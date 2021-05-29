@@ -1,8 +1,20 @@
 ### A Pluto.jl notebook ###
-# v0.12.18
+# v0.12.20
 
 using Markdown
 using InteractiveUtils
+
+# ╔═╡ cf890c59-4b23-4cf9-8620-8259911a8b76
+begin
+	using Pkg
+	Pkg.activate(mktempdir())
+	Pkg.Registry.update()
+	Pkg.add("Yao")
+	Pkg.add("YaoPlots")
+	Pkg.add("StatsBase")
+	Pkg.add("Plots")
+	Pkg.add("BitBasis")
+end
 
 # ╔═╡ 3636e5d4-0276-11eb-2346-b77b042e1240
 using Yao, YaoPlots
@@ -277,6 +289,7 @@ You can see that for yourself!"
 md"Left side : State of Alice's qubit. Right side : State of Bob's qubit. Almost equivalent!"
 
 # ╔═╡ Cell order:
+# ╠═cf890c59-4b23-4cf9-8620-8259911a8b76
 # ╠═3636e5d4-0276-11eb-2346-b77b042e1240
 # ╟─1aba2418-0273-11eb-2fb6-a12d0afc33c6
 # ╟─84abe9cc-0273-11eb-0e38-c3a2b42c0848
