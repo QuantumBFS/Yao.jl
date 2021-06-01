@@ -1,4 +1,4 @@
-name: Push Notebooks
+name: Push docs
 
 on: push
 
@@ -18,5 +18,5 @@ jobs:
         destination_repo: 'VarLad/QuantumBFS.github.io'
         user_email: '1805204@kiit.ac.in'
         user_name: 'varlad'
-        commit_message: 'Pushing the docs to the site repo (master branch)'
+        commit_message: 'Pushing the docs to the site repo (master branch) from Yao.jl repo (master branch)'
         destination_branch: 'master'
