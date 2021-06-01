@@ -1,7 +1,12 @@
 # YaoSym
 
-[![Build Status](https://travis-ci.com/QuantumBFS/YaoSym.jl.svg?branch=master)](https://travis-ci.com/QuantumBFS/YaoSym.jl)
-[![Codecov](https://codecov.io/gh/QuantumBFS/YaoSym.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/QuantumBFS/YaoSym.jl)
-[![Coveralls](https://coveralls.io/repos/github/QuantumBFS/YaoSym.jl/badge.svg?branch=master)](https://coveralls.io/github/QuantumBFS/YaoSym.jl?branch=master)
+[![CI][sym-ci-img]][sym-ci-url]
+[![codecov][sym-codecov-img]][sym-codecov-url]
 
 Symbolic computation backend for [Yao.jl](https://github.com/QuantumBFS/Yao.jl).
+
+[sym-url]: https://github.com/QuantumBFS/YaoSym.jl
+[sym-ci-img]: https://github.com/QuantumBFS/YaoSym.jl/workflows/CI/badge.svg
+[sym-ci-url]: https://github.com/QuantumBFS/YaoSym.jl/actions
+[sym-codecov-img]: https://codecov.io/gh/QuantumBFS/YaoSym.jl/branch/master/graph/badge.svg
+[sym-codecov-url]: https://codecov.io/gh/QuantumBFS/YaoSym.jl
