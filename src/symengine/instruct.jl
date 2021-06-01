@@ -15,7 +15,7 @@ for G in [:Rx, :Ry, :Rz, :CPHASE]
     @eval function YaoBase.instruct!(
         state::AbstractVecOrMat{T},
         g::Val{$(QuoteNode(G))},
-        locs::Union{Int,NTuple{N3,Int}},
+        locs::NTuple{N3,Int},
         control_locs::NTuple{N1,Int},
         control_bits::NTuple{N2,Int},
         theta::Basic,
@@ -23,16 +23,25 @@ for G in [:Rx, :Ry, :Rz, :CPHASE]
         m = rot_mat(T, g, theta)
         instruct!(state, m, locs, control_locs, control_bits)
     end
-end
 
-# forward single gates
-@eval function YaoBase.instruct!(
-    state::AbstractVecOrMat{T},
-    g::Val,
-    locs::Union{Int,NTuple{N1,Int}},
-    theta::Basic,
-) where {T,N1}
-    instruct!(state, g, locs, (), (), theta)
+    # forward single gates
+    @eval function YaoBase.instruct!(
+        state::AbstractVecOrMat{T},
+        g::Val{$(QuoteNode(G))},
+        locs::NTuple{N1,Int},
+        theta::Basic,
+    ) where {T,N1}
+        instruct!(state, g, locs, (), (), theta)
+    end
+
+    @eval function YaoBase.instruct!(
+        state::AbstractVecOrMat{T},
+        g::Val{$(QuoteNode(G))},
+        locs::Tuple{Int},
+        theta::Basic,
+    ) where {T,N1}
+        instruct!(state, g, locs, (), (), theta)
+    end
 end
 
 @eval function YaoBase.instruct!(
