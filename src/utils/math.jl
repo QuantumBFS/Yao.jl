@@ -332,7 +332,7 @@ function BitBasis.unsafe_reorder(A::PermMatrix, orders::NTuple{N,<:Integer}) whe
     perm = similar(A.perm)
     vals = similar(A.vals)
 
-    @simd for i in 1:length(perm)
+    @simd for i = 1:length(perm)
         @inbounds perm[od[i]] = od[A.perm[i]]
         @inbounds vals[od[i]] = A.vals[i]
     end

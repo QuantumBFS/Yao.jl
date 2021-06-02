@@ -9,13 +9,35 @@ using Reexport
 @reexport using YaoAPI
 using YaoAPI
 
-import YaoAPI: isunitary, isreflexive, iscommute,
-    AbstractRegister, AdjointRegister, AbstractBlock,
+import YaoAPI:
+    isunitary,
+    isreflexive,
+    iscommute,
+    AbstractRegister,
+    AdjointRegister,
+    AbstractBlock,
     PostProcess,
-    NotImplementedError, LocationConflictError, QubitMismatchError,
-    instruct!, focus!, relax!, nqubits, nremain, nactive, nbatch,
-    viewbatch, addbits!, insert_qubits!, measure, measure!,
-    occupied_locs, invorder!, partial_tr, select!, ρ, reorder!
+    NotImplementedError,
+    LocationConflictError,
+    QubitMismatchError,
+    instruct!,
+    focus!,
+    relax!,
+    nqubits,
+    nremain,
+    nactive,
+    nbatch,
+    viewbatch,
+    addbits!,
+    insert_qubits!,
+    measure,
+    measure!,
+    occupied_locs,
+    invorder!,
+    partial_tr,
+    select!,
+    ρ,
+    reorder!
 export basis, ishermitian
 
 include("utils/ast_tools.jl")
