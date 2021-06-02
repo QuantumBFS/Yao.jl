@@ -70,9 +70,8 @@ function relax!(locs::NTuple{N,Int}; to_nactive::Union{Nothing,Int} = nothing) w
         return LegibleLambda("(register->relax!(register, locs...; to_nactive))", lambda)
     else
         return LegibleLambda(
-            lambda,
             :(register -> relax!(register, locs...; to_nactive)),
-            Dict(:locs => locs, :to_nactive => to_nactive),
+            lambda,
         )
     end
 end
