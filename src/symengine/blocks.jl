@@ -158,7 +158,8 @@ chiparams(blk::RotationGate, param) = rot(blk.block, param)
 chiparams(blk::ShiftGate, param) = shift(param)
 chiparams(blk::PhaseGate, param) = phase(param)
 chiparams(blk::TimeEvolution, param) = time_evolve(blk.H, param, tol = blk.tol)
-chiparams(blk::AbstractBlock, params...) = niparams(blk) == length(params) == 0 ? blk :
+chiparams(blk::AbstractBlock, params...) =
+    niparams(blk) == length(params) == 0 ? blk :
     throw(NotImplementedError(:chiparams, (blk, params...)))
 
 SymEngine.subs(c::AbstractBlock, args...; kwargs...) = subs(Basic, c, args...; kwargs...)

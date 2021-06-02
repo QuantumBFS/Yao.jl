@@ -2,7 +2,7 @@ using ..SymEngine
 import YaoBase: rot_mat
 
 rot_mat(::Type{T}, ::Val{:Rx}, theta::Basic) where {T} =
-    Basic[cos(theta / 2) -im * sin(theta / 2); -im * sin(theta / 2) cos(theta / 2)]
+    Basic[cos(theta / 2) -im*sin(theta / 2); -im*sin(theta / 2) cos(theta / 2)]
 rot_mat(::Type{T}, ::Val{:Ry}, theta::Basic) where {T} =
     Basic[cos(theta / 2) -sin(theta / 2); sin(theta / 2) cos(theta / 2)]
 rot_mat(::Type{T}, ::Val{:Rz}, theta::Basic) where {T} =

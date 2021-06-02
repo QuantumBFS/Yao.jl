@@ -67,12 +67,12 @@ end
     @test cos(exp(a + im * b))' == cos(exp(a - im * b))
     @test cos(exp(a + im * b))' == cos(exp(a - im * b))
     @test mat(Rx(a)) == [
-        cos(a / 2) -im * sin(a / 2)
-        -im * sin(a / 2) cos(a / 2)
+        cos(a / 2) -im*sin(a / 2)
+        -im*sin(a / 2) cos(a / 2)
     ]
     @test mat(Rx(a)') == [
-        cos(a / 2) im * sin(a / 2)
-        im * sin(a / 2) cos(a / 2)
+        cos(a / 2) im*sin(a / 2)
+        im*sin(a / 2) cos(a / 2)
     ]
 end
 

@@ -17,5 +17,5 @@ end
 
     for i in eachindex(r.state)
         @test r.state[i] ≈ N(sr.state[i])
-    end    
+    end
 end

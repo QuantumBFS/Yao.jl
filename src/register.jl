@@ -20,7 +20,9 @@ function parse_str(s::String)
 end
 
 function ket_m(s)
-    error("Please install SymEngine and type using SymEngine explicitly to use symbolic functionality of Yao")
+    error(
+        "Please install SymEngine and type using SymEngine explicitly to use symbolic functionality of Yao",
+    )
 end
 
 function bra_m(s)
@@ -97,7 +99,7 @@ end
 function print_amp(io::IO, x)
     if !isone(x)
         if isempty(free_symbols(x))
-            print(io, round(N(x); digits=2))
+            print(io, round(N(x); digits = 2))
         else
             print(io, x)
         end
