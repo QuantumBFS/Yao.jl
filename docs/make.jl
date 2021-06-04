@@ -7,82 +7,18 @@ using YaoBlocks: Optimise
 using Documenter.Writers.HTMLWriter
 using Documenter.Utilities.DOM
 using Documenter.Utilities.DOM: Tag, @tags
-# Evil Prirate
+using DocumenterTools: Themes
+#Venerable Inventor :)
 
-const base_url = raw"https://yaoquantum.org"
-
-const top_nav = """
-<div id="top" class="navbar-wrapper">
-<nav class="navbar fixed-top navbar-expand-lg navbar-dark">
-    <a class="navbar-brand" href="$base_url">
-        <img src="$base_url/assets/images/logo-light.png">
-    </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-  
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="$base_url/tutorials/dev">Tutorial</a>
-        </li>
-
-        <li class="nav-item active">
-            <a class="nav-link" href="#">Documentation<span class="sr-only">(current)</span></a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="$base_url/benchmark">Benchmark</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" href="http://yaoquantum.org/soc">SoC</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" href="http://yaoquantum.org/research">Research</a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="https://github.com/QuantumBFS/Yao.jl">GitHub</a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="https://github.com/QuantumBFS/Yao.jl/blob/master/CONTRIBUTING.md">Contribute</a>
-        </li>
-      </ul>
-    </div>
-</nav>
-</div>
-"""
-
-function HTMLWriter.render_html(
-    ctx,
-    navnode,
-    head,
-    sidebar,
-    navbar,
-    article,
-    footer,
-    scripts::Vector{DOM.Node} = DOM.Node[],
-)
-    @tags html body div
-    DOM.HTMLDocument(
-        html[:lang=>"en"](
-            head,
-            body(
-                Tag(Symbol("#RAW#"))(top_nav),
-                div[".documenter-wrapper#documenter"](
-                    sidebar,
-                    div[".docs-main"](navbar, article, footer),
-                    HTMLWriter.render_settings(ctx),
-                ),
-            ),
-            scripts...,
-        ),
-    )
+# create the themes
+for w in ("light", "dark")
+    header = read(joinpath(@__DIR__, "src/assets/quantumbfs-style.scss"), String)
+    theme = read(joinpath(@__DIR__, "src/assets/quantumbfs-$(w)defs.scss"), String)
+    write(joinpath(@__DIR__, "src/assets/quantumbfs-$(w).scss"), header*"\n"*theme)
 end
-
+# compile the themes
+Themes.compile(joinpath(@__DIR__, "src/assets/quantumbfs-light.scss"), joinpath(@__DIR__, "src/assets/themes/documenter-light.css"))
+Themes.compile(joinpath(@__DIR__, "src/assets/quantumbfs-dark.scss"), joinpath(@__DIR__, "src/assets/themes/documenter-dark.css"))
 
 const PAGES = [
     "Home" => "index.md",
@@ -107,12 +43,8 @@ makedocs(
         prettyurls = ("deploy" in ARGS),
         canonical = ("deploy" in ARGS) ? "https://docs.yaoquantum.org/" : nothing,
         assets = [
-            "assets/main.css",
-            asset("https://yaoquantum.org/assets/main.css"),
-            asset("http://yaoquantum.org/favicon.ico"),
-            asset(
-                "https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css",
-            ),
+            asset("https://raw.githubusercontent.com/QuantumBFS/QuantumBFS.github.io/master/_assets/favicon-dark.ico", class=:ico),
+            asset("https://fonts.googleapis.com/css?family=Quicksand|Montserrat|Source+Code+Pro|Lora&display=swap", class=:css),
         ],
     ),
     doctest = ("doctest=true" in ARGS),
