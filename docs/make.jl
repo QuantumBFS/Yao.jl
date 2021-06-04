@@ -54,4 +54,4 @@ makedocs(
     pages = PAGES,
 )
 
-deploydocs(repo = "github.com/QuantumBFS/Yao.jl.git", target = "build")
+deploydocs(repo = "github.com/VarLad/Yao.jl.git", target = "build")
