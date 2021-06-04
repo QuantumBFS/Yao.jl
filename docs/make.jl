@@ -7,18 +7,8 @@ using YaoBlocks: Optimise
 using Documenter.Writers.HTMLWriter
 using Documenter.Utilities.DOM
 using Documenter.Utilities.DOM: Tag, @tags
-using DocumenterTools: Themes
-#Venerable Inventor :)
 
-# create the themes
-for w in ("light", "dark")
-    header = read(joinpath(@__DIR__, "src/assets/quantumbfs-style.scss"), String)
-    theme = read(joinpath(@__DIR__, "src/assets/quantumbfs-$(w)defs.scss"), String)
-    write(joinpath(@__DIR__, "src/assets/quantumbfs-$(w).scss"), header*"\n"*theme)
-end
-# compile the themes
-Themes.compile(joinpath(@__DIR__, "src/assets/quantumbfs-light.scss"), joinpath(@__DIR__, "src/assets/themes/documenter-light.css"))
-Themes.compile(joinpath(@__DIR__, "src/assets/quantumbfs-dark.scss"), joinpath(@__DIR__, "src/assets/themes/documenter-dark.css"))
+#Venerable Inventor :)
 
 const PAGES = [
     "Home" => "index.md",
@@ -43,8 +33,8 @@ makedocs(
         prettyurls = ("deploy" in ARGS),
         canonical = ("deploy" in ARGS) ? "https://docs.yaoquantum.org/" : nothing,
         assets = [
+            "assets/themes/indigo.css",
             asset("https://raw.githubusercontent.com/QuantumBFS/QuantumBFS.github.io/master/_assets/favicon-dark.ico", class=:ico),
-            asset("https://fonts.googleapis.com/css?family=Quicksand|Montserrat|Source+Code+Pro|Lora&display=swap", class=:css),
         ],
     ),
     doctest = ("doctest=true" in ARGS),
@@ -54,4 +44,4 @@ makedocs(
     pages = PAGES,
 )
 
-deploydocs(repo = "github.com/VarLad/Yao.jl.git", target = "build")
+deploydocs(repo = "github.com/QuantumBFS/Yao.jl.git", target = "build")
