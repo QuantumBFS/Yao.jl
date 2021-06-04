@@ -1,0 +1,105 @@
+// This template file overrides some of the Documenter theme variables to customize the theme:
+$themename: "documenter-dark"; // CSS file must be called `$(themename).css`
+// Instruct documenter/*.scss files that this is a dark theme
+$documenter-is-dark-theme: true;
+
+$boldcolor: lighten-color($maincolor, 4.5);
+
+$body-background-color: $darkbg; // main page background
+
+// this is the color the links get, and also when they are hovered
+$link: lighten-color($secondcolor, 2);
+$link-hover: lighten-color($link, 3);
+
+// Main text color:
+$text: darken-color($mainwhite, 0.2);
+// Bold text color, also affects headers
+$text-strong: $boldcolor;
+
+// Code text color:
+$code: #fff;
+//$code-background: rgba(0.5,0,0, 0.05);
+$codebg: darken-color($maincolor, 3);
+$code-background: $codebg; // for inline code
+$pre-background: $codebg;  // for code blocks
+$documenter-docstring-header-background: lighten-color($body-background-color, 0.5);
+
+// Sidebar
+$documenter-sidebar-background: darken-color($maincolor, 1.2); //background color for sidebar
+$documenter-sidebar-color: $text; //font color for sidebar
+$documenter-sidebar-menu-hover-color: $documenter-sidebar-color;
+$documenter-sidebar-menu-hover-background: darken-color($documenter-sidebar-background, 1.2);
+
+$documenter-sidebar-menu-active-background: $darkbg;
+$documenter-sidebar-menu-active-color: $mainwhite;
+$documenter-sidebar-menu-active-hover-background: darken-color($documenter-sidebar-background, 1);
+$documenter-sidebar-menu-active-hover-color: $documenter-sidebar-menu-active-color;
+// these two change what happens with input boxes (the search box):
+$input-hover-border-color: $secondcolor;
+$input-focus-border-color: $mainwhite;
+
+$documenter-docstring-shadow: 3px 3px 4px invert($shadow-color);
+
+// Admonition stuff
+$admbg: lighten-color($body-background-color, 0.5);
+$admonition-background: (
+  'default': $admbg, 'info': $admbg, 'success': $admbg, 'warning': $admbg,
+  'danger': $admbg, 'compat': $admbg
+);
+$admonition-header-background: (
+  'default': #ba3f1f, 'warning': #a88b17, 'danger': #c7524c,
+  'success': #42ac68, 'info': #28c);
+
+// All secondary themes have to be nested in a theme--$(themename) class. When Documenter
+// switches themes, it applies this class to <html> and then disables the primary
+// stylesheet.
+@import "documenter/utilities";
+@import "documenter/variables";
+@import "bulma/utilities/all";
+@import "bulma/base/minireset.sass";
+@import "bulma/base/helpers.sass";
+
+html.theme--#{$themename} {
+  @import "bulma/base/generic.sass";
+
+  @import "documenter/overrides";
+
+  @import "bulma/elements/all";
+  @import "bulma/form/all";
+  @import "bulma/components/all";
+  @import "bulma/grid/all";
+  @import "bulma/layout/all";
+
+  // Additional overrides, if need be
+
+  @import "documenter/elements";
+  @import "documenter/components/all";
+  @import "documenter/patches";
+  @import "documenter/layout/all";
+
+  @import "documenter/theme_overrides";
+
+  // $shadow-color: #202224;
+
+  #documenter .docs-sidebar { // This makes sidebar have shadow at all displays
+    border-right: none;
+    box-shadow: 1.2*$shadow-size 0rem 1*$shadow-blur invert($shadow-color);
+
+    form.docs-search > input { // these controls are for the searchbar
+      color: $mainwhite;
+      background-color: darken-color($documenter-sidebar-background, 1);
+      border-color: darken-color($documenter-sidebar-background, 2);
+      margin-top: 1.0rem;
+      margin-bottom: 1.0rem; // adjust the margings between search and other elements
+      &::placeholder {
+        color: $mainwhite; // placeholder text color ("Search here...")
+      }
+    }
+  }
+  // FIXME: Hack to get a proper theme for highlight.js in the dark theme
+  @import "highlightjs/a11y-dark";
+  // Also, a11y-dark does not highlight string interpolation properly.
+  .hljs-subst {
+    color: #f8f8f2;
+  }
+}

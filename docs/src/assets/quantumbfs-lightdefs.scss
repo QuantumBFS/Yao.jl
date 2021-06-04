@@ -1,0 +1,67 @@
+// This template file overrides some of the Documenter theme variables to customize the theme:
+$themename: "documenter-light"; // CSS file must be called `$(themename).css`
+
+$boldcolor: $maincolor; // darken-color($maincolor, 1);
+
+$body-background-color: $mainwhite; // main page background
+
+// Sidebar
+$documenter-sidebar-background: $maincolor; //background color for sidebar
+$documenter-sidebar-color: $mainwhite; //font color all sidebar
+$documenter-sidebar-menu-hover-color: $documenter-sidebar-color; // text color
+$documenter-sidebar-menu-hover-background: darken-color($documenter-sidebar-background, 1.5);
+
+$documenter-sidebar-menu-active-background: $mainwhite;
+$documenter-sidebar-menu-active-color: $mainblack;
+$documenter-sidebar-menu-active-hover-background: lighten-color($documenter-sidebar-background, 5.2);
+$documenter-sidebar-menu-active-hover-color: $documenter-sidebar-menu-active-color;
+
+// this is the color the links get, and also when they are hovered
+$link: $thirdcolor;
+$link-hover: darken-color($link, 1);
+
+// Main text color:
+$text: $mainblack;
+// Bold text color, also affects headers
+$text-strong: $boldcolor;
+
+// Section headers (markdown ###) text color:
+// TODO
+
+// Code text color:
+$code: #000000;
+//$code-background: rgba(0.5,0,0, 0.05);
+$codebg: lighten-color($maincolor, 6.2);
+// $codebg: lighten-color($secondcolor, 8);
+$code-background: $codebg; // for inline code
+$pre-background: $codebg;  // for code blocks
+$documenter-docstring-header-background: darken-color($body-background-color, 0.4);
+
+// main text font size
+$body-font-size: 1.0em; // the default is 1.0
+// Sidebar text font size
+$documenter-sidebar-size: 1.0em; // the default is 1.0 as well
+
+// these two change what happens with input boxes (the search box):
+$input-hover-border-color: $thirdcolor;
+$input-focus-border-color: $mainwhite;
+
+// Include the original theme which will now use the updated variables.
+// This should be the last thing in the SCSS file.
+@import "documenter-light";
+
+#documenter .docs-sidebar { // This makes sidebar have shadow at all displays
+  border-right: none;
+  box-shadow: 1.2*$shadow-size 0rem 1*$shadow-blur $shadow-color;
+
+  form.docs-search > input { // these controls are for the searchbar
+    color: $mainwhite;
+    background-color: darken-color($documenter-sidebar-background, 1);
+    border-color: darken-color($documenter-sidebar-background, 2);
+    margin-top: 1.0rem;
+    margin-bottom: 1.0rem; // adjust the margings between search and other elements
+    &::placeholder {
+      color: $mainwhite; // placeholder text color ("Search here...")
+    }
+  }
+}

@@ -1,0 +1,47 @@
+@charset "UTF-8";
+// The customizable varibles can be found here:
+// https://github.com/JuliaDocs/Documenter.jl/tree/master/assets/html/scss
+// under documenter/_variables or documenter/_overrides. But some stuff are Bulma defaults
+// as well, so you may need to look them up too: https://bulma.io/documentation/customize/variables/
+
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+// Thse define the JuliaDynamics template:
+$maincolor: hsl(216, 56%, 38%);   // main color of the org theme
+$secondcolor: hsl(180, 100%, 50%); // secondary color that serves as accents
+                       // it is used as-is for links in light theme
+$thirdcolor: hsl(195, 100%, 40%);
+$mainwhite: #fff;      // color representing white
+$mainblack: #202020;   // color representing black
+$darkbg: #1e1e20;      // dark theme main page background
+
+// These commands set up the fonts for the main text and code blocks.
+// the fonds must be included into the assets of the `makdocs` command, with e.g.
+// format = Documenter.HTML(
+//     prettyurls = CI,
+//     assets = [
+//         "assets/logo.ico",
+//         asset("https://fonts.googleapis.com/css?family=Montserrat|Source+Code+Pro&display=swap", class=:css),
+//         ],
+//     ),
+$family-sans-serif: 'Montserrat', sans-serif;
+$family-monospace: 'Source Code Pro', monospace;
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+// variables controlling the siderbar's shadow
+$shadow-color: #bbb !default;
+$shadow-size: 0.2rem !default;
+$shadow-blur: 0.4rem !default;
+
+// Two cool helper functions:
+$lightness-unit: 8% !default;
+// Uses adjust-color to create a darker version of $color
+@function darken-color($color, $factor) {
+  @return adjust-color($color, $lightness: -$factor*$lightness-unit);
+}
+// Uses adjust-color to create a lighter version of $color
+@function lighten-color($color, $factor) {
+  @return adjust-color($color, $lightness: $factor*$lightness-unit);
+}
