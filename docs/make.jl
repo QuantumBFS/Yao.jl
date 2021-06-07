@@ -7,8 +7,9 @@ using YaoBlocks: Optimise
 using Documenter.Writers.HTMLWriter
 using Documenter.Utilities.DOM
 using Documenter.Utilities.DOM: Tag, @tags
-
 #Venerable Inventor :)
+
+download("yaoquantum.org/assets/logo-light.png", output="./docs/assets/logo.png")
 
 const PAGES = [
     "Home" => "index.md",
@@ -44,4 +45,4 @@ makedocs(
     pages = PAGES,
 )
 
-deploydocs(repo = "github.com/QuantumBFS/Yao.jl.git", target = "build")
+deploydocs(repo = "github.com/VarLad/Yao.jl.git", target = "build")
