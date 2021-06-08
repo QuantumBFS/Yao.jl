@@ -55,8 +55,7 @@ for i in x
 		y = read(i, String)
 		y = replace(y, """<body><div id="documenter">""" => """<body><div id="documenter"><div class="js-toc" style="margin-left: 100rem;min-width: 25rem;z-index: 10;display: block;position: fixed; top: 0"></div>""")
 		y = replace(y, """</head>""" => """<link href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.11.1/tocbot.css" rel="stylesheet" type="text/css"/><style> .toc-list { padding-left: 20px; } @media only screen and (min-width: 1841px) { .docs-main { margin-left: 40rem !important } } </style></head>""")
-		y = replace(y, """</body>""" => """<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.11.1/tocbot.min.js"></script>
-       <script>
+		y = replace(y, """</body>""" => """<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.11.1/tocbot.min.js"></script><script>
        tocbot.init({
          // Where to render the table of contents.
          tocSelector: '.js-toc',
@@ -67,11 +66,13 @@ for i in x
          // For headings inside relative or absolute positioned containers within content.
          hasInnerContainers: true,
        });
-       </script></body>""")
+       </script></body>""")  
+		
 		y = replace(y, """<div class="docs-main">""" => """<div class="js-toc-content docs-main">""")
 		f = open(i, "w")
 		write(f, y)
 		close(f)
+	end
 end
 
 deploydocs(repo = "github.com/VarLad/Yao.jl.git", target = "build")
