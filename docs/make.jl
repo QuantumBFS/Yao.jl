@@ -53,8 +53,8 @@ end
 for i in x
 	if(endswith(i, ".html"))
 		y = read(i, String)
-		y = replace(y, """<body><div id="documenter">""" => """<body><div id="documenter"><div class="js-toc" style="margin-left: 100rem;min-width: 25rem;z-index: 10;display: block;position: fixed; top: 0"></div>""")
-		y = replace(y, """</head>""" => """<link href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.11.1/tocbot.css" rel="stylesheet" type="text/css"/><style> .toc-list { padding-left: 20px; } @media only screen and (min-width: 1841px) { .docs-main { margin-left: 40rem !important } } </style></head>""")
+		y = replace(y, """<body><div id="documenter">""" => """<body><div id="documenter"><div class="js-toc" style="right: 0;min-width: 25rem;z-index: 10;display: block;position: fixed; top: 0"></div>""")
+		y = replace(y, """</head>""" => """<link href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.11.1/tocbot.css" rel="stylesheet" type="text/css"/><style> .toc-list { padding-left: 20px; } @media only screen and (min-width: 1841px) { .docs-main { margin-left: 40rem !important } } @media only screen and (min-width: 1589px) { .js-toc { display: none !important; } } </style></head>""")
 		y = replace(y, """</body>""" => """<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.11.1/tocbot.min.js"></script><script>
        tocbot.init({
          // Where to render the table of contents.
