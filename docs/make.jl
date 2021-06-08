@@ -47,7 +47,7 @@ makedocs(
 
 x = []
 for (root, dirs, files) in walkdir("docs/build")
-           x = [x; joinpath.(root, files)] # files is a Vector{String}, can be empty
+           global x = [x; joinpath.(root, files)] # files is a Vector{String}, can be empty
 end
 
 for i in x
