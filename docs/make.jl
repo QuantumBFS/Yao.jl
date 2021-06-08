@@ -69,7 +69,7 @@ for i in x
        });
        </script></body>""")
 		y = replace(y, """<div class="docs-main">""" => """<div class="js-toc-content docs-main">""")
-		f = open("/home/varlad/Music/registers.html", "w")
+		f = open(i, "w")
 		write(f, y)
 		close(f)
 end
