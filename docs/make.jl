@@ -9,7 +9,7 @@ using Documenter.Utilities.DOM
 using Documenter.Utilities.DOM: Tag, @tags
 #Venerable Inventor :)
 
-download("yaoquantum.org/assets/logo-light.png", output="./docs/assets/logo.png")
+download("yaoquantum.org/assets/logo-light.png", "docs/assets/logo.png")
 
 const PAGES = [
     "Home" => "index.md",
