@@ -65,6 +65,7 @@ for i in x
          headingSelector: 'h1, h2, h3',
          // For headings inside relative or absolute positioned containers within content.
          hasInnerContainers: false,
+	 ignoreHiddenElements: true,
        });
        </script></body>""")  
 		
