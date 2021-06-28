@@ -8,6 +8,7 @@ docs/build/
 docs/site/
 docs/Manifest.toml
 docs/src/examples/*.md
+docs/src/assets/themes/indigo.css
 
 *.ipynb_checkpoints
 **/*.ipynb_checkpoints
