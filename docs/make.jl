@@ -92,4 +92,4 @@ for i in x
     end
 end
 
-deploydocs(repo = "github.com/VarLad/Yao.jl.git", target = "build")
+deploydocs(repo = "github.com/QuantumBFS/Yao.jl.git", target = "build")
