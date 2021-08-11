@@ -1,4 +1,5 @@
-include("zygote_patch.jl")
+using Zygote
+include("chainrules_patch.jl")
 
 import YaoExtensions, Random
 
