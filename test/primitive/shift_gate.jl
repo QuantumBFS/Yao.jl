@@ -52,4 +52,5 @@ end
     @test nparameters(shift(0.1)) == 1
     @test parameters(shift(0.1)) == [0.1]
     @test parameters(dispatch!(shift(0.1), 0.2)) == [0.2]
+    @test parameters(dispatch(shift(0.1), 2)) == [2]
 end

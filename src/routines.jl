@@ -34,7 +34,7 @@ set specific col of a CSC matrix
 end
 
 """
-    num_nonzero(nbits, nctrls, U)
+    num_nonzero(nbits, nctrls, U, [N])
 
 Return number of nonzero entries of the matrix form of control-U gate. `nbits`
 is the number of qubits, and `nctrls` is the number of control qubits.
@@ -43,8 +43,8 @@ is the number of qubits, and `nctrls` is the number of control qubits.
     return N + (1 << (nbits - nctrls - log2dim1(U))) * (length(U) - size(U, 2))
 end
 
-@inline function num_nonzero(nbits::Int, U, N::Int = 1 << nbits)
-    return N + (1 << (nbits - log2dim1(U))) * (length(U) - size(U, 2))
+@inline function num_nonzero(nbits::Int, nctrls::Int, U::SDSparseMatrixCSC, N::Int = 1 << nbits)
+    return N + (1 << (nbits - nctrls - log2dim1(U))) * (nnz(U) - size(U, 2))
 end
 
 """
@@ -121,7 +121,7 @@ function u1mat(nbits::Int, U1::SDMatrix, ibit::Int)
     a, c, b, d = U1
     step = 1 << (ibit - 1)
     step_2 = 1 << ibit
-    NNZ = num_nonzero(nbits, U1, N)
+    NNZ = num_nonzero(nbits, 0, U1, N)
 
     colptr = Vector{Int}(1:2:2*N+1)
     rowval = Vector{Int}(undef, NNZ)

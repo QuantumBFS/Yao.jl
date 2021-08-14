@@ -28,7 +28,13 @@ end
     dispatch!(pb, π)
     @test copy(reg) |> pb ≈ -im * (copy(reg) |> swap(6, 2, 4))
     @test copy(reg) |> pb |> isnormalized
+    pb = dispatch(pb, π)
+    @test copy(reg) |> pb ≈ -im * (copy(reg) |> swap(6, 2, 4))
+    @test copy(reg) |> pb |> isnormalized
 
+    pb = pswap(6, 2, 4, 0.0)
     dispatch!(pb, :random)
+    @test copy(reg) |> pb ≈ invoke(apply!, Tuple{ArrayReg,PutBlock}, copy(reg), pb)
+    pb = dispatch(pb, :random)
     @test copy(reg) |> pb ≈ invoke(apply!, Tuple{ArrayReg,PutBlock}, copy(reg), pb)
 end

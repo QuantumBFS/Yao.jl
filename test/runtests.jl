@@ -37,6 +37,10 @@ end
     g = dispatch!(chain(Rx(0.1), Rx(0.2)), [0.3, 0])
     @test getiparams(g[1]) == 0.3
     @test getiparams(g[2]) == 0.0
+
+    g = dispatch(chain(Rx(0.1), Rx(0.2)), [0f3, 0f0])
+    @test getiparams(g[1]) === 0f3
+    @test getiparams(g[2]) === 0f0
 end
 
 @testset "abstract blocks" begin

@@ -1,4 +1,5 @@
 using Test, YaoBlocks, YaoArrayRegister
+using YaoBlocks.ConstGate: CNOT
 
 @testset "test constructor" for T in [Float16, Float32, Float64]
     # NOTE: type should follow the axis
@@ -30,6 +31,9 @@ end
 
 @testset "test dispatch" begin
     @test dispatch!(Rx(0.1), 0.3) == Rx(0.3)
+    x = Rx(0.1)
+    @test dispatch(x, 3f0) == Rx(3f0) && eltype(getiparams(dispatch(x, 3f0))) == Float32
+    @test x == Rx(0.1)
     @test nparameters(Rx(0.1)) == 1
 
     @testset "test $op" for op in [+, -, *, /]

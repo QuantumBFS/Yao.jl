@@ -5,7 +5,7 @@ using YaoBase, YaoArrayRegister, SimpleTraits
 
 Apply a block (of quantum circuit) to a quantum register.
 """
-function apply!(r::AbstractRegister, @nospecialize(b::AbstractBlock))
+function apply!(r::AbstractRegister, b::AbstractBlock)
     _check_size(r, b)
     _apply!(r, b)
 end
@@ -131,34 +131,41 @@ Returns the intrinsic parameters of node `block`, default is an empty tuple.
 getiparams(x::AbstractBlock) = ()
 
 """
-    setiparams!(block, itr)
-    setiparams!(block, params...)
+    setiparams!([f], block, itr)
+    setiparams!([f], block, params...)
 
 Set the parameters of `block`.
+When `f` is provided, set parameters of `block` to the value in `collection` mapped by `f`.
+`iter` can be an iterator or a symbol, the symbol can be `:zero`, `:random`.
 """
-setiparams!(x::AbstractBlock, args...) =
-    niparams(x) == length(args) == 0 ? x : throw(NotImplementedError(:setiparams!, (x, args...)))
-
-setiparams!(x::AbstractBlock, it::Union{Tuple,AbstractArray,Base.Generator}) = setiparams!(x, it...)
-setiparams!(x::AbstractBlock, a::Number, xs::Number...) =
-    error("setparams!(x, θ...) is not implemented")
-setiparams!(x::AbstractBlock, it::Symbol) = setiparams!(x, render_params(x, it))
+function setiparams! end
 
 """
-    setiparams(f, block, collection)
+    setiparams([f], block, itr)
+    setiparams([f], block, params...)
 
-Set parameters of `block` to the value in `collection` mapped by `f`.
+Set the parameters of `block`, the non-inplace version.
+When `f` is provided, set parameters of `block` to the value in `collection` mapped by `f`.
+`iter` can be an iterator or a symbol, the symbol can be `:zero`, `:random`.
 """
-setiparams!(f::Function, x::AbstractBlock, it) =
-    setiparams!(x, map(x -> f(x...), zip(getiparams(x), it)))
-setiparams!(f::Nothing, x::AbstractBlock, it) = setiparams!(x, it)
+function setiparams end
 
-"""
-    setiparams(f, block, symbol)
+for F in [:setiparams!, :setiparams]
+    @eval begin
+        $F(x::AbstractBlock, args...) =
+            niparams(x) == length(args) == 0 ? x : throw(NotImplementedError($(QuoteNode(F)), (x, args...)))
 
-Set the parameters to a given symbol, which can be :zero, :random.
-"""
-setiparams!(f::Function, x::AbstractBlock, it::Symbol) = setiparams!(f, x, render_params(x, it))
+        $F(x::AbstractBlock, it::Union{Tuple,AbstractArray,Base.Generator}) = $F(x, it...)
+        $F(x::AbstractBlock, a::Number, xs::Number...) =
+            error("setparams!(x, θ...) is not implemented")
+        $F(x::AbstractBlock, it::Symbol) = $F(x, render_params(x, it))
+
+        $F(f::Function, x::AbstractBlock, it) =
+            $F(x, map(x -> f(x...), zip(getiparams(x), it)))
+        $F(f::Nothing, x::AbstractBlock, it) = $F(x, it)
+        $F(f::Function, x::AbstractBlock, it::Symbol) = $F(f, x, render_params(x, it))
+    end
+end
 
 """
     parameters(block)
@@ -363,3 +370,37 @@ function parameters_range!(out::Vector{Tuple{T,T}}, block::AbstractBlock) where 
         parameters_range!(out, subblock)
     end
 end
+
+# non-inplace versions
+"""
+    apply(register, block)
+
+The non-inplace version of applying a block (of quantum circuit) to a quantum register.
+Check `apply!` for the faster inplace version.
+"""
+apply(r::AbstractRegister, b) = apply!(copy(r), b)
+
+function generic_dispatch!(f::Union{Function,Nothing}, x::AbstractBlock, it::Dispatcher)
+    x = setiparams(f, x, consume!(it, niparams(x)))
+    chsubblocks(x, map(subblocks(x)) do each
+        generic_dispatch!(f, each, it)
+    end)
+end
+
+"""
+    dispatch(x::AbstractBlock, collection)
+
+Dispatch parameters in collection to block tree `x`, the generic non-inplace version.
+
+!!! note
+
+    it will try to dispatch the parameters in collection first.
+"""
+function dispatch(f::Union{Function,Nothing}, x::AbstractBlock, it)
+    dp = Dispatcher(it)
+    res = generic_dispatch!(f, x, dp)
+    @assert (it isa Symbol || length(it) == dp.loc) "expect $(dp.loc) parameters, got $(length(it))"
+    return res
+end
+
+dispatch(x::AbstractBlock, it) = dispatch(nothing, x, it)

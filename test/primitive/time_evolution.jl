@@ -29,6 +29,9 @@ const hm = heisenberg(4)
     @test setiparams!(cte, 0.5).dt == 0.5
     @test setiparams!(cte, :random).dt != 0.5
     @test setiparams!(cte, :zero).dt == 0.0
+    @test setiparams(cte, 0.5).dt == 0.5
+    @test setiparams(cte, :random).dt != 0.5
+    @test setiparams(cte, :zero).dt == 0.0
 end
 
 @testset "test imaginary time evolution" begin
