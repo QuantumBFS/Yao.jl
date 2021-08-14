@@ -20,8 +20,8 @@ Learn a general U4 gate. The optimizer is LBFGS.
 function learn_u4(u::AbstractMatrix; niter=100)
     ansatz = general_U4() * put(2, 1=>phase(0.0))  # initial values are 0, here, we attach a global phase.
     params = parameters(ansatz)
-    g!(G, x) = (dispatch!(ansatz, x); G .= Zygote.gradient(ansatz->loss(u, ansatz), ansatz)[1])
-    optimize(x->(dispatch!(ansatz, x); loss(u, ansatz)), g!, parameters(ansatz),
+    g!(G, x) = (ansatz=dispatch(ansatz, x); G .= Zygote.gradient(ansatz->loss(u, ansatz), ansatz)[1])
+    optimize(x->(ansatz=dispatch(ansatz, x); loss(u, ansatz)), g!, parameters(ansatz),
                     LBFGS(), Optim.Options(iterations=niter))
     println("final loss = $(loss(u,ansatz))")
     return ansatz

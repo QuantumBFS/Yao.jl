@@ -1,16 +1,16 @@
 import ChainRulesCore: rrule, @non_differentiable, NoTangent
 using Yao, Yao.AD
 
-function rrule(::typeof(apply!), reg::ArrayReg, block::AbstractBlock)
-    out = apply!(reg, block)
+function rrule(::typeof(apply), reg::ArrayReg, block::AbstractBlock)
+    out = apply(reg, block)
     out, function (outδ)
-        (in, inδ), paramsδ = apply_back((out, outδ), block)
+        (in, inδ), paramsδ = apply_back((copy(out), outδ), block)
         return (NoTangent(), inδ, paramsδ)
     end
 end
 
-function rrule(::typeof(dispatch!), block::AbstractBlock, params)
-    out = dispatch!(block, params)
+function rrule(::typeof(dispatch), block::AbstractBlock, params)
+    out = dispatch(block, params)
     out, function (outδ)
         (NoTangent(), NoTangent(), outδ)
     end

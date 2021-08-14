@@ -8,8 +8,8 @@ h = YaoExtensions.heisenberg(5)
 
 function loss(h, c, θ) where N
     # the assign is nessesary!
-    c = dispatch!(c, fill(θ, nparameters(c)))
-    reg = apply!(zero_state(nqubits(c)), c)
+    c = dispatch(c, fill(θ, nparameters(c)))
+    reg = apply(zero_state(nqubits(c)), c)
     real(expect(h, reg))
 end
 
@@ -28,9 +28,9 @@ true_grad = sum(gparams)
 # the batched version
 function loss2(h, c, θ) where N
     # the assign is nessesary!
-    c = dispatch!(c, fill(θ, nparameters(c)))
+    c = dispatch(c, fill(θ, nparameters(c)))
     reg = zero_state(nqubits(c),nbatch=2)
-    reg = apply!(reg, c)
+    reg = apply(reg, c)
     sum(real(expect(h, reg)))
 end
 

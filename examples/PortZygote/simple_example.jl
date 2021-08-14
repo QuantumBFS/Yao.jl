@@ -8,7 +8,7 @@ dispatch!(c, :random)
 
 function loss(reg::AbstractRegister, circuit::AbstractBlock{N}) where N
     #copy(reg) |> circuit
-    reg = apply!(copy(reg), circuit)
+    reg = apply(copy(reg), circuit)
     st = state(reg)
     sum(real(st.*st))
 end
