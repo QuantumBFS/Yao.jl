@@ -55,21 +55,7 @@ end
     @test size(res) == (10,)
     @test res2 == res
 
-    # measure_resetto!
-    reg2 = reg |> copy
-    res = measure!(ResetTo(0), op, reg2, 2:4)
-    reg2 |> repeat(6, H, 2:4)
-    res2 = measure!(ResetTo(0), op, reg2, 2:4)
-    @test size(res) == (10,) == size(res2)
-    @test all(res2 .== 1)
-
-    # measure_remove!
-    reg2 = reg |> copy
-    res = measure!(RemoveMeasured(), op, reg2, 2:4)
-    reg2 |> repeat(3, H, 2:3)
-    @test size(res) == (10,)
-    @test nqubits(reg2) == 3
-
+    # measure_resetto! and measure_remove! for operators are no-longer supported due to its ill property.
     reg = repeat(ArrayReg(ComplexF64[1, -1] / sqrt(2.0)), 10)
     @test measure!(X, reg) |> mean ≈ -1
     reg = repeat(ArrayReg(ComplexF64[1.0, 0]), 1000)
@@ -93,19 +79,6 @@ end
     @test size(res) == (100, 32)
     @test reg ≈ reg2
 
-    # measure_resetto!
-    reg2 = reg |> copy
-    res = measure!(ResetTo(0), op, reg2, 2:6)
-    reg2 |> repeat(8, H, 2:6)
-    res2 = measure!(ResetTo(0), op, reg2, 2:6)
-    @test size(res) == (32,) == size(res2)
-    @test all(res2 .== 1)
-
-    # measure_remove!
-    reg2 = reg |> copy
-    res = measure!(RemoveMeasured(), op, reg2, 2:6)
-    @test size(res) == (32,)
-
     reg = repeat(ArrayReg([1, -1 + 0im] / sqrt(2.0)), 10)
     @test measure!(X, reg) |> mean ≈ -1
     reg = repeat(ArrayReg([1.0, 0 + 0im]), 1000)
@@ -113,4 +86,37 @@ end
 
     m = Measure(5)
     @test chmeasureoperator(m, X) == Measure(5, operator = X)
+end
+
+@testset "measure an operator correctly" begin
+    op = kron(Z,Z)
+    reg = ArrayReg(ComplexF64[1/sqrt(2),0,0,1/sqrt(2)])
+    res = measure!(op, reg)
+    @test res == 1
+    @test reg ≈ ArrayReg(ComplexF64[1/sqrt(2),0,0,1/sqrt(2)])
+    reg = uniform_state(2)
+    res = measure!(op, reg)
+    @test count(!iszero, reg.state) == 2
+
+    # batched
+    reg = ArrayReg(reshape(ComplexF64[1/sqrt(2), 0, 0, 1/sqrt(2), 0.5, 0.5, 0.5, 0.5], 4, 2))
+    res = measure!(op, reg)
+    @test length(reg) == 2 && res[1] == 1
+    @test reg.state[:,1] ≈ ComplexF64[1/sqrt(2),0,0,1/sqrt(2)]
+    @test count(!iszero, reg.state) == 4
+    @test isnormalized(reg)
+
+    # with virtual dimension
+    reg = ArrayReg{1}(reshape(ComplexF64[1/sqrt(2), 0, 0, 1/sqrt(2), 0.5, 0.5, 0.5, 0.5], 4, 2)) / sqrt(2)
+    res = measure!(op, reg)
+    @test length(reg) == 1
+    c = count(!iszero, reg.state)
+    @test (c == 4 && res ≈ 1) || (c == 2 && res == -1)
+    @test isnormalized(reg)
+
+    # measure zero space
+    reg = ArrayReg(ComplexF64[1.0])
+    res = measure!(matblock(fill(3.0+0im, 1, 1)), reg)
+    @test res ≈ 3.0
+    @test reg == zero_state(0)
 end
