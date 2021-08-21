@@ -81,7 +81,8 @@ cache_key(te::TimeEvolution) = (te.dt, cache_key(te.H))
 niparams(::Type{<:TimeEvolution}) = 1
 getiparams(x::TimeEvolution) = x.dt
 setiparams!(r::TimeEvolution, param::Number) = (r.dt = param; r)
-setiparams(r::TimeEvolution, param::Number) = TimeEvolution(r.H, param; tol=r.tol, check_hermicity=false)
+setiparams(r::TimeEvolution, param::Number) =
+    TimeEvolution(r.H, param; tol = r.tol, check_hermicity = false)
 
 function Base.:(==)(lhs::TimeEvolution, rhs::TimeEvolution)
     return lhs.H == rhs.H && lhs.dt == rhs.dt
