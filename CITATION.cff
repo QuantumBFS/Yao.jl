@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "Cite this paper whenever you use Yao"
+authors:
+- family-names: "Luo"
+  given-names: "Xiu-Zhe"
+- family-names: "Liu"
+  given-names: "Jin-Guo"
+- family-names: "Pan"
+  given-names: "Zhang"
+- family-names: "Wang"
+  given-names: "Lei"
+title: "Yao.jl: Extensible, Efficient Framework for Quantum Algorithm Design"
+version: "v1"
+license: "MIT"
+doi: "10.22331/q-2020-10-11-341"
+date-released: 2020-10-11
+url: "https://yaoquantum.org"
+preferred-citation:
+  authors:
+    - family-names: "Luo"
+      given-names: "Xiu-Zhe"
+    - family-names: "Liu"
+      given-names: "Jin-Guo"
+    - family-names: "Pan"
+      given-names: "Zhang"
+    - family-names: "Wang"
+      given-names: "Lei"
+  doi: "10.22331/q-2020-10-11-341"
+  journal: "Quantum"
+  month: 10
+  pages: 341
+  title: "Yao.jl: Extensible, Efficient Framework for Quantum Algorithm Design"
+  type: article
+  volume: 4
+  year: 2020
+  publisher:
+    - name: "Verein zur F{\"{o}}rderung des Open Access Publizierens in den Quantenwissenschaften"
