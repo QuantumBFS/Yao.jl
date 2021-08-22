@@ -127,30 +127,30 @@ struct BlockedBasis{VT}
 end
 
 subblock(bb::BlockedBasis, i::Int) = bb.block_ptr[i]:bb.block_ptr[i+1]-1
-nblocks(bb::BlockedBasis) = length(bb.block_ptr)-1
+nblocks(bb::BlockedBasis) = length(bb.block_ptr) - 1
 
-function BlockedBasis(values::AbstractVector{T}) where T
+function BlockedBasis(values::AbstractVector{T}) where {T}
     if length(values) == 1
-        return BlockedBasis([1], values, [1,2])
+        return BlockedBasis([1], values, [1, 2])
     elseif length(values) == 0
         return BlockedBasis([], values, [1])
     end
-    order = sortperm(values; by=real)
+    order = sortperm(values; by = real)
     values = values[order]
     vpre = values[1]
     block_ptr = [1]
     unique_values = [vpre]
     k = 1
-    for i=2:length(values)
+    for i in 2:length(values)
         v = values[i]
         if !isapprox(v, vpre)  # use approx in order to ignore the round off error
-            k+=1
+            k += 1
             push!(block_ptr, i)
             push!(unique_values, v)
         end
         vpre = v
     end
-    push!(block_ptr, length(values)+1)
+    push!(block_ptr, length(values) + 1)
     return BlockedBasis(order, unique_values, block_ptr)
 end
 
@@ -161,32 +161,32 @@ function YaoBase.measure!(
     ::AllLocs;
     rng::AbstractRNG = Random.GLOBAL_RNG,
 ) where {B,T}
-    state = (reg |> rank3)[bb.perm,:,:]  # permute to make eigen values sorted
+    state = (reg|>rank3)[bb.perm, :, :]  # permute to make eigen values sorted
     pl = dropdims(sum(abs2, state, dims = 2), dims = 2)
-    pl_block = zeros(eltype(pl),nblocks(bb),B)
-    for ib=1:B
-        for i=1:nblocks(bb)
+    pl_block = zeros(eltype(pl), nblocks(bb), B)
+    for ib in 1:B
+        for i in 1:nblocks(bb)
             for k in subblock(bb, i)
-                pl_block[i,ib] += pl[k,ib]
+                pl_block[i, ib] += pl[k, ib]
             end
         end
     end
     res = Vector{Int}(undef, B)
-    @inbounds @views for ib = 1:B
-        ires = sample(rng, 1:nblocks(bb), Weights(pl_block[:,ib]))
+    @inbounds @views for ib in 1:B
+        ires = sample(rng, 1:nblocks(bb), Weights(pl_block[:, ib]))
         # notice ires is `BitStr` type, can be use as indices directly.
-        range = subblock(bb,ires)
-        state[range,:,ib] ./= sqrt(pl_block[ires, ib])
-        state[1:range.start-1,:,ib] .= zero(T)
-        state[range.stop+1:size(state,1),:,ib] .= zero(T)
+        range = subblock(bb, ires)
+        state[range, :, ib] ./= sqrt(pl_block[ires, ib])
+        state[1:range.start-1, :, ib] .= zero(T)
+        state[range.stop+1:size(state, 1), :, ib] .= zero(T)
         res[ib] = ires
     end
     # undo permute and assign back
-    _state = reshape(state, 1<<nactive(reg), :)
-    rstate = reshape(reg.state, 1<<nactive(reg), :)
-    for j = 1:size(rstate,2)
-        for i=1:size(rstate,1)
-            rstate[bb.perm[i],j] = _state[i,j]
+    _state = reshape(state, 1 << nactive(reg), :)
+    rstate = reshape(reg.state, 1 << nactive(reg), :)
+    for j in 1:size(rstate, 2)
+        for i in 1:size(rstate, 1)
+            rstate[bb.perm[i], j] = _state[i, j]
         end
     end
     return B == 1 ? bb.values[res[]] : bb.values[res]

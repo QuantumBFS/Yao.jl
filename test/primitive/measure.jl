@@ -89,11 +89,11 @@ end
 end
 
 @testset "measure an operator correctly" begin
-    op = kron(Z,Z)
-    reg = ArrayReg(ComplexF64[1/sqrt(2),0,0,1/sqrt(2)])
+    op = kron(Z, Z)
+    reg = ArrayReg(ComplexF64[1/sqrt(2), 0, 0, 1/sqrt(2)])
     res = measure!(op, reg)
     @test res == 1
-    @test reg ≈ ArrayReg(ComplexF64[1/sqrt(2),0,0,1/sqrt(2)])
+    @test reg ≈ ArrayReg(ComplexF64[1/sqrt(2), 0, 0, 1/sqrt(2)])
     reg = uniform_state(2)
     res = measure!(op, reg)
     @test count(!iszero, reg.state) == 2
@@ -102,12 +102,14 @@ end
     reg = ArrayReg(reshape(ComplexF64[1/sqrt(2), 0, 0, 1/sqrt(2), 0.5, 0.5, 0.5, 0.5], 4, 2))
     res = measure!(op, reg)
     @test length(reg) == 2 && res[1] == 1
-    @test reg.state[:,1] ≈ ComplexF64[1/sqrt(2),0,0,1/sqrt(2)]
+    @test reg.state[:, 1] ≈ ComplexF64[1/sqrt(2), 0, 0, 1/sqrt(2)]
     @test count(!iszero, reg.state) == 4
     @test isnormalized(reg)
 
     # with virtual dimension
-    reg = ArrayReg{1}(reshape(ComplexF64[1/sqrt(2), 0, 0, 1/sqrt(2), 0.5, 0.5, 0.5, 0.5], 4, 2)) / sqrt(2)
+    reg =
+        ArrayReg{1}(reshape(ComplexF64[1/sqrt(2), 0, 0, 1/sqrt(2), 0.5, 0.5, 0.5, 0.5], 4, 2)) /
+        sqrt(2)
     res = measure!(op, reg)
     @test length(reg) == 1
     c = count(!iszero, reg.state)
@@ -116,7 +118,7 @@ end
 
     # measure zero space
     reg = ArrayReg(ComplexF64[1.0])
-    res = measure!(matblock(fill(3.0+0im, 1, 1)), reg)
+    res = measure!(matblock(fill(3.0 + 0im, 1, 1)), reg)
     @test res ≈ 3.0
     @test reg == zero_state(0)
 end
