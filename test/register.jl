@@ -1,5 +1,6 @@
 using Test, YaoArrayRegister, BitBasis, LinearAlgebra
 using YaoBase
+using Adapt
 
 @testset "test constructors" begin
     @test ArrayReg{3}(rand(4, 6)) isa ArrayReg{3}
@@ -193,4 +194,8 @@ end
     reg1 = focus!(copy(rega), (3, 2, 4))
     reg2 = focus!(copy(regb), (3, 2, 4))
     @test reg1' * reg2 ≈ rega' * regb
+end
+
+@testset "adapt" begin
+    @test datatype(adapt(Array{ComplexF32}, zero_state(5))) == ComplexF32
 end

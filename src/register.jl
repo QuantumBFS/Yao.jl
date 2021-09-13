@@ -11,6 +11,8 @@ mutable struct ArrayReg{B,T,MT<:AbstractMatrix{T}} <: AbstractRegister{B}
     state::MT
 end
 
+Adapt.@adapt_structure ArrayReg
+
 const AdjointArrayReg{B,T,MT} = AdjointRegister{B,ArrayReg{B,T,MT}}
 const ArrayRegOrAdjointArrayReg{B,T,MT} =
     Union{ArrayReg{B,T,MT},AdjointRegister{B,ArrayReg{B,T,MT}}}

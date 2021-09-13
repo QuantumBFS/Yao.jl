@@ -6,7 +6,9 @@ able to simulate a quantum circuit alone with this package in principle.
 """
 module YaoArrayRegister
 
-using YaoBase, BitBasis
+using Adapt
+using YaoBase
+using BitBasis
 
 export ArrayReg,
     AdjointArrayReg,
