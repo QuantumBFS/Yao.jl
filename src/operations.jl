@@ -109,11 +109,13 @@ for op in [:*, :/]
     end
 end
 
-for op in [:(==), :≈]
-    for AT in [:ArrayReg, :AdjointArrayReg]
-        @eval function Base.$op(lhs::$AT, rhs::$AT)
-            ($op)(state(lhs), state(rhs))
-        end
+for AT in [:ArrayReg, :AdjointArrayReg]
+    @eval function Base.:(==)(lhs::$AT, rhs::$AT)
+        state(lhs) == state(rhs)
+    end
+    
+    @eval function Base.isapprox(lhs::$AT, rhs::$AT; kw...)
+        isapprox(state(lhs), state(rhs); kw...)
     end
 end
 
