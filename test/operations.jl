@@ -35,12 +35,15 @@ end
     @test all(state(reg * 2 - reg / 0.5) .== 0)
 
     reg = rand_state(3)
+    @test norm(reg) ≈ 1
     @test reg' * reg ≈ 1
 
     @test state(reg1 * 2) == state(reg1) * 2
     @test state(reg1' * 2) == state(reg1') * 2
     @test reg1 * 2 == 2 * reg1
     @test reg1' * 2 == 2 * reg1'
+    reg = rand_state(3; nbatch=2) * 2
+    @test norm(reg) ≈ [2.0, 2.0]
 end
 
 @testset "partial ⟨bra|ket⟩" begin

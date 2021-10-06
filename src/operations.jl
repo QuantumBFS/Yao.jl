@@ -2,7 +2,7 @@
 
 using LinearAlgebra
 
-export isnormalized, normalize!, regadd!, regsub!, regscale!
+export isnormalized, normalize!, regadd!, regsub!, regscale!, norm
 
 """
     isnormalized(r::ArrayReg) -> Bool
@@ -24,6 +24,9 @@ function LinearAlgebra.normalize!(r::ArrayReg{B}) where {B}
 end
 
 LinearAlgebra.normalize!(r::AdjointArrayReg) = (normalize!(parent(r)); r)
+
+LinearAlgebra.norm(r::ArrayReg{1}) = norm(statevec(r))
+LinearAlgebra.norm(r::ArrayReg{B}) where B = [norm(view(reshape(r.state, :, B), :, ib)) for ib=1:B]
 
 # basic arithmatics
 
