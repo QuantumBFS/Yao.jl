@@ -21,8 +21,8 @@ newlabel!(eb::EinBuilder) = (eb.maxlabel[] += 1; eb.maxlabel[])
 
 function add_product_state!(eb::EinBuilder{T}, bitstring) where T
     for i=1:nqubits(eb)
-        push!(eb.tensors, [bitstring[i] == 0 ? T[1, 0] : T[0, 1]])
-        push!(eb.labels, eb.slots[i])
+        push!(eb.tensors, bitstring[i] == 0 ? T[1, 0] : T[0, 1])
+        push!(eb.labels, [eb.slots[i]])
     end
     return eb
 end
@@ -40,8 +40,6 @@ function add_matrix!(eb::EinBuilder{T}, k::Int, m::AbstractMatrix, locs::Vector)
     else
         push!(eb.tensors, reshape(Vector{T}(diag(m)), fill(2, k)...))  # need to check
         push!(eb.labels, eb.slots[locs])
-        @show eb.tensors[end]
-        @show eb.labels[end]
     end
     return eb
 end

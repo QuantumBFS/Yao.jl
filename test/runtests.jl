@@ -1,6 +1,7 @@
 using YaoToEinsum
 using Test, OMEinsum, OMEinsumContractionOrders
 using Yao
+using YaoExtensions: qft_circuit, variational_circuit, rand_google53
 
 @testset "YaoToEinsum.jl" begin
     n = 5
@@ -11,5 +12,14 @@ using Yao
         code, xs = yao2einsum(C)
         optcode = optimize_code(code, uniformsize(code, 2), GreedyMethod())
         @test reshape(optcode(xs...; size_info=uniformsize(code, 2)), 1<<n, 1<<n) ≈ mat(C)
+    end
+end
+
+@testset "Yao Extensions" begin
+    n = 5
+    for c in [qft_circuit(n), variational_circuit(n, 2), rand_google53(5; nbits=n)]
+        code, xs = yao2einsum(c)
+        optcode = optimize_code(code, uniformsize(code, 2), GreedyMethod())
+        @test reshape(optcode(xs...; size_info=uniformsize(code, 2)), 1<<n, 1<<n) ≈ mat(c)
     end
 end
