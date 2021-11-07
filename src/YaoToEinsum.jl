@@ -61,16 +61,15 @@ function add_controlled_matrix!(eb::EinBuilder{T}, k::Int, m::AbstractMatrix, lo
     if length(control_locs) == 0
         return add_matrix!(eb, k, m, locs)
     end
-    sig = control_locs[1]
+    sig = eb.slots[control_locs[1]]
     val = control_vals[1]
     for i=1:length(control_locs)-1
         newsig = newlabel!(eb)
-        push!(eb.labels, [newsig,i+1,sig])
+        push!(eb.labels, [newsig,eb.slots[control_locs[i+1]],sig])
         push!(eb.tensors, and_gate(T, control_vals[i+1], val))
         sig = newsig
         val = 1
     end
-    @show val
     if !isdiag(m)
         t1 = reshape(Matrix{T}(m), fill(2, 2k)...)
         t2 = reshape(Matrix{T}(I, 1<<k, 1<<k), fill(2, 2k)...)
@@ -98,7 +97,6 @@ function and_gate(::Type{T}, a::Int, b::Int) where T
     for v1 in (0, 1)
         for v2 in (0, 1)
             # the first is output
-            @show v1, a, v2, b
             m[(v1==a && v2==b)+1, v1+1,v2+1] = 1
         end
     end
