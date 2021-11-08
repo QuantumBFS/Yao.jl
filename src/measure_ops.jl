@@ -141,7 +141,7 @@ function BlockedBasis(values::AbstractVector{T}) where {T}
     block_ptr = [1]
     unique_values = [vpre]
     k = 1
-    for i in 2:length(values)
+    @inbounds for i in 2:length(values)
         v = values[i]
         if !isapprox(v, vpre)  # use approx in order to ignore the round off error
             k += 1
@@ -161,10 +161,10 @@ function YaoBase.measure!(
     ::AllLocs;
     rng::AbstractRNG = Random.GLOBAL_RNG,
 ) where {B,T}
-    state = (reg|>rank3)[bb.perm, :, :]  # permute to make eigen values sorted
+    state = @inbounds (reg|>rank3)[bb.perm, :, :]  # permute to make eigen values sorted
     pl = dropdims(sum(abs2, state, dims = 2), dims = 2)
     pl_block = zeros(eltype(pl), nblocks(bb), B)
-    for ib in 1:B
+    @inbounds for ib in 1:B
         for i in 1:nblocks(bb)
             for k in subblock(bb, i)
                 pl_block[i, ib] += pl[k, ib]
@@ -184,7 +184,7 @@ function YaoBase.measure!(
     # undo permute and assign back
     _state = reshape(state, 1 << nactive(reg), :)
     rstate = reshape(reg.state, 1 << nactive(reg), :)
-    for j in 1:size(rstate, 2)
+    @inbounds for j in 1:size(rstate, 2)
         for i in 1:size(rstate, 1)
             rstate[bb.perm[i], j] = _state[i, j]
         end

@@ -24,3 +24,7 @@ end
 @testset "specializes" begin
     include("specializes.jl")
 end
+
+@testset "chainrules_patch" begin
+    include("chainrules_patch.jl")
+end

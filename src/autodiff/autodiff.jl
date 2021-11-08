@@ -24,5 +24,6 @@ include("mat_back.jl")
 include("apply_back.jl")
 include("specializes.jl")
 include("gradcheck.jl")
+include("chainrules_patch.jl")
 
 end
