@@ -9,6 +9,7 @@ OMEinsum = "ebe7aa44-baf0-506c-a96f-8464559b3922"
 Yao = "5872b779-8223-5990-8dd0-5abbb0748c8c"
 
 [compat]
+Yao = "0.6"
 julia = "1"
 
 [extras]
