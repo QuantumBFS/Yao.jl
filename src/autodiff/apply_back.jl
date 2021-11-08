@@ -114,7 +114,7 @@ function apply_back!(st, circuit::Add, collector; in)
     for blk in Base.Iterators.reverse(subblocks(circuit))
         mat_back!(datatype(in), blk, adjmat, collector)
     end
-    inδ = apply!(outδ, adjblock)
+    inδ = apply!(outδ, circuit')
     (in, inδ)
 end
 

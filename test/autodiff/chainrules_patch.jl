@@ -41,3 +41,26 @@ end
     @test fregδ ≈ reinterpret(Float64, regδ.state)
     @test fparamsδ ≈ paramsδ
 end
+
+@testset "add block" begin
+    H = sum([chain(5, put(k=>Z)) for k=1:5])
+    c = chain(put(5, 2=>chain(Rx(0.4), Rx(0.5))), cnot(5, 3, 1), put(5, 3=>Rx(-0.5)))
+    dispatch!(c, :random)
+    function loss(reg::AbstractRegister, circuit::AbstractBlock{N}) where N
+            reg = apply(copy(reg), circuit)
+            st = state(reg)
+            reg2 = apply(copy(reg), H)
+            st2 = state(reg2)
+            sum(real(st.*st2))
+    end
+
+    reg0 = zero_state(5)
+    params = rand!(parameters(c))
+    paramsδ = Zygote.gradient(params->loss(reg0, dispatch(c, params)), params)[1]
+    fparamsδ = ForwardDiff.gradient(params->loss(ArrayReg(Matrix{Complex{eltype(params)}}(reg0.state)), dispatch(c, params)), params)
+    @test fparamsδ ≈ paramsδ
+
+    regδ = Zygote.gradient(reg->loss(reg, c), reg0)[1]
+    fregδ = ForwardDiff.gradient(x->loss(ArrayReg([Complex(x[2i-1],x[2i]) for i=1:length(x)÷2]), dispatch(c, Vector{real(eltype(x))}(parameters(c)))), reinterpret(Float64,reg0.state))
+    @test fregδ ≈ reinterpret(Float64, regδ.state)
+end

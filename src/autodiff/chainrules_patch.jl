@@ -8,6 +8,14 @@ function rrule(::typeof(apply), reg::ArrayReg, block::AbstractBlock)
     end
 end
 
+function rrule(::typeof(apply), reg::ArrayReg, block::Add)
+    out = apply(reg, block)
+    out, function (outδ)
+        (in, inδ), paramsδ = apply_back((copy(out), outδ), block; in=reg)
+        return (NoTangent(), inδ, paramsδ)
+    end
+end
+
 function rrule(::typeof(dispatch), block::AbstractBlock, params)
     out = dispatch(block, params)
     out, function (outδ)
