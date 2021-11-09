@@ -12,7 +12,6 @@ export batch_normalize,
     hilbertkron,
     batched_kron!,
     batched_kron,
-    kron!,
     # norms
     trnorm,
     nucnorm,
@@ -135,22 +134,25 @@ function batched_kron!(
     return C
 end
 
-# NOTE: JuliaLang/julia/pull/31069 includes this function
-function kron!(
-    C::AbstractMatrix{T},
-    A::AbstractMatrix{T1},
-    B::AbstractMatrix{T2},
-) where {T,T1,T2}
-    @assert !Base.has_offset_axes(A, B)
-    m = 1
-    @inbounds for j = 1:size(A, 2), l = 1:size(B, 2), i = 1:size(A, 1)
-        aij = A[i, j]
-        for k = 1:size(B, 1)
-            C[m] = aij * B[k, l]
-            m += 1
+@static if !@isdefined(kron!)
+    export kron!
+    # NOTE: JuliaLang/julia/pull/31069 includes this function
+    function kron!(
+        C::AbstractMatrix{T},
+        A::AbstractMatrix{T1},
+        B::AbstractMatrix{T2},
+    ) where {T,T1,T2}
+        @assert !Base.has_offset_axes(A, B)
+        m = 1
+        @inbounds for j = 1:size(A, 2), l = 1:size(B, 2), i = 1:size(A, 1)
+            aij = A[i, j]
+            for k = 1:size(B, 1)
+                C[m] = aij * B[k, l]
+                m += 1
+            end
         end
+        return C
     end
-    return C
 end
 
 
