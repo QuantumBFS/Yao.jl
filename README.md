@@ -9,8 +9,11 @@ julia> import Yao, YaoToEinsum
 help?> YaoToEinsum.yao2einsum
   yao2einsum(circuit; initial_state=nothing, final_state=nothing)
 
-  Transform a Yao circuit to a generalized tensor network (einsum) notation. This function returns a 2-tuple of (einsum code, input tensors). initial_state and final_state specifies the initial state and final state
-  as product states, e.g. a vector [1, 1, 0, 1] specifies a product state |1⟩⊗|1⟩⊗|0⟩⊗|1⟩. If initial state or final state is not specified, the circuit will have open edges.
+  Transform a Yao circuit to a generalized tensor network (einsum) notation. 
+  This function returns a 2-tuple of (einsum code, input tensors). 
+  initial_state and final_state specifies the initial state and final state
+  as product states, e.g. a vector [1, 1, 0, 1] specifies a product state |1⟩⊗|1⟩⊗|0⟩⊗|1⟩. 
+  If initial state or final state is not specified, the circuit will have open edges.
 
 julia> using YaoExtensions: qft_circuit
 
