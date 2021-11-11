@@ -1,5 +1,7 @@
 # YaoToEinsum
 
+[![CI](https://github.com/QuantumBFS/YaoToEinsum.jl/workflows/CI/badge.svg)](https://github.com/QuantumBFS/YaoToEinsum.jl/actions)
+
 Convert Yao circuit to OMEinsum notation for tensor network based simulation.
 
 ## Example
