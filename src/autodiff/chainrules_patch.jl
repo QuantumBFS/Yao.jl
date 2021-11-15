@@ -1,10 +1,10 @@
-import ChainRulesCore: rrule, @non_differentiable, NoTangent
+import ChainRulesCore: rrule, @non_differentiable, NoTangent, Tangent
 
 function rrule(::typeof(apply), reg::ArrayReg, block::AbstractBlock)
     out = apply(reg, block)
     out, function (outδ)
         (in, inδ), paramsδ = apply_back((copy(out), outδ), block)
-        return (NoTangent(), inδ, paramsδ)
+        return (NoTangent(), inδ, dispatch(block, paramsδ))
     end
 end
 
@@ -12,14 +12,14 @@ function rrule(::typeof(apply), reg::ArrayReg, block::Add)
     out = apply(reg, block)
     out, function (outδ)
         (in, inδ), paramsδ = apply_back((copy(out), outδ), block; in = reg)
-        return (NoTangent(), inδ, paramsδ)
+        return (NoTangent(), inδ, dispatch(block, paramsδ))
     end
 end
 
 function rrule(::typeof(dispatch), block::AbstractBlock, params)
     out = dispatch(block, params)
     out, function (outδ)
-        (NoTangent(), NoTangent(), outδ)
+        (NoTangent(), NoTangent(), parameters(outδ))
     end
 end
 
@@ -34,11 +34,30 @@ function rrule(::typeof(expect), op::AbstractBlock, reg::AbstractRegister{B}) wh
     end
 end
 
-function rrule(::Type{Matrix}, block::AbstractBlock)
-    out = Matrix(block)
+function rrule(::typeof(expect), op::AbstractBlock, reg_and_circuit::Pair{<:ArrayReg{B},<:AbstractBlock}) where {B}
+    out = expect(op, reg_and_circuit)
+    out, function (outδ)
+        greg, gcircuit = expect_g(op, reg_and_circuit)
+        for b in 1:B
+            viewbatch(greg, b).state .*= 2 * outδ[b]
+        end
+        return (NoTangent(), NoTangent(), Tangent{typeof(reg_and_circuit)}(; first=greg, second=dispatch(reg_and_circuit.second, gcircuit)))
+    end
+end
+
+function rrule(::Type{T}, block::AbstractBlock) where T<:Matrix
+    out = T(block)
     out, function (outδ)
         paramsδ = mat_back(block, outδ)
-        return (NoTangent(), paramsδ)
+        return (NoTangent(), dispatch(block, paramsδ))
+    end
+end
+
+function rrule(::typeof(mat), ::Type{T}, block::AbstractBlock) where T
+    out = mat(T, block)
+    out, function (outδ)
+        paramsδ = mat_back(block, outδ)
+        return (NoTangent(), NoTangent(), dispatch(block, paramsδ))
     end
 end
 
