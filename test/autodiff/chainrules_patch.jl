@@ -1,9 +1,17 @@
 import Zygote, ForwardDiff
 using Random, Test
 using YaoBlocks, YaoArrayRegister
+using ChainRulesCore: Tangent
 
-function Zygote.accum(a::AbstractBlock, b::AbstractBlock)
-    dispatch(a, parameters(a) + parameters(b))
+@testset "recursive_create_tangent" begin
+    c = chain(put(5, 2 => chain(Rx(1.4), Rx(0.5))), cnot(5, 3, 1), put(5, 3 => Rx(-0.5)))
+    tc = YaoBlocks.AD.recursive_create_tangent(c)
+    @test tc isa Tangent
+end
+
+@testset "construtors" begin
+    @test Zygote.gradient(x->x.list[1].blocks[1].theta, sum([chain(1, Rz(0.3))]))[1] == (list = NamedTuple{(:blocks,), Tuple{Vector{NamedTuple{(:block, :theta), Tuple{Nothing, Float64}}}}}[(blocks = [(block = nothing, theta = 1.0)],)],)
+    @test_broken Zygote.gradient(x->getfield(getfield(x,:content), :theta), Daggered(Rx(0.5)))[1] == (content = (block = nothing, theta = 1.0),)
 end
 
 @testset "rules" begin
@@ -35,7 +43,7 @@ end
     @test Zygote.gradient(x -> real(sum(abs2, statevec(x'))), r)[1].state ≈ g1
     # zygote does not work if `sin` is not here,
     # because it gives an adjoint of different type as the output matrix type.
-    @test parameters(Zygote.gradient(x -> real(sum(sin, Matrix(x))), c)[1]) ≈
+    @test AD.extract_circuit_gradients!(Zygote.gradient(x -> real(sum(sin, Matrix(x))), c)[1].blocks, Float64[]) ≈
           ForwardDiff.gradient(x -> real(sum(sin, Matrix(dispatch(c, x)))), parameters(c))
 end
 
