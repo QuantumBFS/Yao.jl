@@ -10,8 +10,14 @@ using ChainRulesCore: Tangent
 end
 
 @testset "construtors" begin
-    @test Zygote.gradient(x->x.list[1].blocks[1].theta, sum([chain(1, Rz(0.3))]))[1] == (list = NamedTuple{(:blocks,), Tuple{Vector{NamedTuple{(:block, :theta), Tuple{Nothing, Float64}}}}}[(blocks = [(block = nothing, theta = 1.0)],)],)
-    @test_broken Zygote.gradient(x->getfield(getfield(x,:content), :theta), Daggered(Rx(0.5)))[1] == (content = (block = nothing, theta = 1.0),)
+    @test Zygote.gradient(x -> x.list[1].blocks[1].theta, sum([chain(1, Rz(0.3))]))[1] == (
+        list = NamedTuple{
+            (:blocks,),
+            Tuple{Vector{NamedTuple{(:block, :theta),Tuple{Nothing,Float64}}}},
+        }[(blocks = [(block = nothing, theta = 1.0)],)],
+    )
+    @test_broken Zygote.gradient(x -> getfield(getfield(x, :content), :theta), Daggered(Rx(0.5)))[1] ==
+                 (content = (block = nothing, theta = 1.0),)
 end
 
 @testset "rules" begin
@@ -43,8 +49,10 @@ end
     @test Zygote.gradient(x -> real(sum(abs2, statevec(x'))), r)[1].state ≈ g1
     # zygote does not work if `sin` is not here,
     # because it gives an adjoint of different type as the output matrix type.
-    @test AD.extract_circuit_gradients!(Zygote.gradient(x -> real(sum(sin, Matrix(x))), c)[1].blocks, Float64[]) ≈
-          ForwardDiff.gradient(x -> real(sum(sin, Matrix(dispatch(c, x)))), parameters(c))
+    @test AD.extract_circuit_gradients!(
+        Zygote.gradient(x -> real(sum(sin, Matrix(x))), c)[1].blocks,
+        Float64[],
+    ) ≈ ForwardDiff.gradient(x -> real(sum(sin, Matrix(dispatch(c, x)))), parameters(c))
 end
 
 @testset "adwith zygote" begin
@@ -78,11 +86,18 @@ end
     @test fparamsδ ≈ paramsδ
 
     # expect and fidelity
-    c = chain(put(5, 5=>Rx(1.5)), put(5,1=>Rx(0.4)), put(5,4=>Rx(0.2)), put(5, 2 => chain(Rx(0.4), Rx(0.5))), cnot(5, 3, 1), put(5, 3 => Rx(-0.5)))
+    c = chain(
+        put(5, 5 => Rx(1.5)),
+        put(5, 1 => Rx(0.4)),
+        put(5, 4 => Rx(0.2)),
+        put(5, 2 => chain(Rx(0.4), Rx(0.5))),
+        cnot(5, 3, 1),
+        put(5, 3 => Rx(-0.5)),
+    )
     h = chain(repeat(5, X, 1:5))
     reg = rand_state(5)
     function loss2(reg::AbstractRegister, circuit::AbstractBlock{N}) where {N}
-        return 5*real(expect(h, copy(reg) => circuit) + fidelity(reg, apply(reg, circuit)))
+        return 5 * real(expect(h, copy(reg) => circuit) + fidelity(reg, apply(reg, circuit)))
     end
     params = rand!(parameters(c))
     fδc = ForwardDiff.gradient(
@@ -90,7 +105,7 @@ end
             loss2(ArrayReg(Matrix{Complex{eltype(params)}}(reg.state)), dispatch(c, params)),
         params,
     )
-    δr, δc = Zygote.gradient((reg, params)->loss2(reg, dispatch(c, params)),reg, params)
+    δr, δc = Zygote.gradient((reg, params) -> loss2(reg, dispatch(c, params)), reg, params)
     @test δc ≈ fδc
 
     fregδ = ForwardDiff.gradient(
@@ -101,20 +116,23 @@ end
         reinterpret(Float64, reg.state),
     )
     @test fregδ ≈ reinterpret(Float64, δr.state)
- 
+
     # operator fidelity
-    c = chain(put(5, 5=>Rx(1.5)), put(5,1=>Rx(0.4)), put(5,4=>Rx(0.2)), put(5, 2 => chain(Rx(0.4), Rx(0.5))), cnot(5, 3, 1), put(5, 3 => Rx(-0.5)))
+    c = chain(
+        put(5, 5 => Rx(1.5)),
+        put(5, 1 => Rx(0.4)),
+        put(5, 4 => Rx(0.2)),
+        put(5, 2 => chain(Rx(0.4), Rx(0.5))),
+        cnot(5, 3, 1),
+        put(5, 3 => Rx(-0.5)),
+    )
     h = chain(repeat(5, X, 1:5))
     function loss3(circuit::AbstractBlock{N}, h) where {N}
         return operator_fidelity(circuit, h)
     end
     params = rand!(parameters(c))
-    fδc = ForwardDiff.gradient(
-        params ->
-            loss3(dispatch(c, params), h),
-        params,
-    )
-    δc, = Zygote.gradient(p->loss3(dispatch(c, p), h), params)
+    fδc = ForwardDiff.gradient(params -> loss3(dispatch(c, params), h), params)
+    δc, = Zygote.gradient(p -> loss3(dispatch(c, p), h), params)
     @test δc ≈ fδc
 
     # NOTE: operator back propagation in expect is not implemented!

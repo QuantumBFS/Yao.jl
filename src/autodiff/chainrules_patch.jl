@@ -1,4 +1,5 @@
-import ChainRulesCore: rrule, @non_differentiable, NoTangent, Tangent, backing, AbstractTangent, ZeroTangent
+import ChainRulesCore:
+    rrule, @non_differentiable, NoTangent, Tangent, backing, AbstractTangent, ZeroTangent
 
 function create_circuit_tangent(circuit, params)
     gc = dispatch(circuit, params)
@@ -23,20 +24,30 @@ for GT in [:RotationGate, :ShiftGate, :TimeEvolution, :PhaseGate]
             fn => unsafe_primitive_tangent(getfield(c, fn))
         end
         nt = NamedTuple(lst)
-        Tangent{typeof(c), typeof(nt)}(nt)
+        Tangent{typeof(c),typeof(nt)}(nt)
     end
 end
 # composite blocks
 unsafe_composite_tangent(::Any) = NoTangent()
 unsafe_composite_tangent(c::AbstractVector{<:AbstractBlock}) = recursive_create_tangent.(c)
 unsafe_composite_tangent(c::AbstractBlock) = recursive_create_tangent(c)
-for GT in [:ChainBlock, :Add, :KronBlock, :RepeatedBlock, :PutBlock, :Subroutine, :CachedBlock, :Daggered, :Scale]
+for GT in [
+    :ChainBlock,
+    :Add,
+    :KronBlock,
+    :RepeatedBlock,
+    :PutBlock,
+    :Subroutine,
+    :CachedBlock,
+    :Daggered,
+    :Scale,
+]
     @eval function recursive_create_tangent(c::$GT)
         lst = map(fieldnames(typeof(c))) do fn
             fn => unsafe_composite_tangent(getfield(c, fn))
         end
         nt = NamedTuple(lst)
-        Tangent{typeof(c), typeof(nt)}(nt)
+        Tangent{typeof(c),typeof(nt)}(nt)
     end
 end
 
@@ -99,18 +110,30 @@ function rrule(::typeof(expect), op::AbstractBlock, reg::AbstractRegister{B}) wh
     end
 end
 
-function rrule(::typeof(expect), op::AbstractBlock, reg_and_circuit::Pair{<:ArrayReg{B},<:AbstractBlock}) where {B}
+function rrule(
+    ::typeof(expect),
+    op::AbstractBlock,
+    reg_and_circuit::Pair{<:ArrayReg{B},<:AbstractBlock},
+) where {B}
     out = expect(op, reg_and_circuit)
-    out, function (outδ)
+    out,
+    function (outδ)
         greg, gcircuit = expect_g(op, reg_and_circuit)
         for b in 1:B
             viewbatch(greg, b).state .*= 2 * outδ[b]
         end
-        return (NoTangent(), NoTangent(), Tangent{typeof(reg_and_circuit)}(; first=greg, second=create_circuit_tangent(reg_and_circuit.second, gcircuit)))
+        return (
+            NoTangent(),
+            NoTangent(),
+            Tangent{typeof(reg_and_circuit)}(;
+                first = greg,
+                second = create_circuit_tangent(reg_and_circuit.second, gcircuit),
+            ),
+        )
     end
 end
 
-function rrule(::Type{T}, block::AbstractBlock) where T<:Matrix
+function rrule(::Type{T}, block::AbstractBlock) where {T<:Matrix}
     out = T(block)
     out, function (outδ)
         paramsδ = mat_back(block, outδ)
@@ -118,7 +141,7 @@ function rrule(::Type{T}, block::AbstractBlock) where T<:Matrix
     end
 end
 
-function rrule(::typeof(mat), ::Type{T}, block::AbstractBlock) where T
+function rrule(::typeof(mat), ::Type{T}, block::AbstractBlock) where {T}
     out = mat(T, block)
     out, function (outδ)
         paramsδ = mat_back(block, outδ)
@@ -140,14 +163,14 @@ end
 
 for (BT, BLOCKS) in [(:Add, :(outδ.list)) (:ChainBlock, :(outδ.blocks))]
     for ST in [:AbstractVector, :Tuple]
-        @eval function rrule(::Type{BT}, source::$ST) where {N, BT<:$BT}
+        @eval function rrule(::Type{BT}, source::$ST) where {N,BT<:$BT}
             out = BT(source)
             out, function (outδ)
                 return (NoTangent(), $ST($BLOCKS))
             end
         end
     end
-    @eval function rrule(::Type{BT}, args::AbstractBlock...) where {N, BT <: $BT}
+    @eval function rrule(::Type{BT}, args::AbstractBlock...) where {N,BT<:$BT}
         out = BT(args...)
         out, function (outδ)
             return (NoTangent(), $BLOCKS...)
