@@ -38,8 +38,8 @@ end
     @test getiparams(g[1]) == 0.3
     @test getiparams(g[2]) == 0.0
 
-    g = dispatch(chain(Rx(0.1), Rx(0.2)), [0f3, 0.0f0])
-    @test getiparams(g[1]) === 0f3
+    g = dispatch(chain(Rx(0.1), Rx(0.2)), [0.0f3, 0.0f0])
+    @test getiparams(g[1]) === 0.0f3
     @test getiparams(g[2]) === 0.0f0
 end
 
