@@ -4,6 +4,33 @@
 
 Convert Yao circuit to OMEinsum notation for tensor network based simulation.
 
+## Installation
+
+<p>
+YaoToEinsum is a &nbsp;
+    <a href="https://julialang.org">
+        <img src="https://raw.githubusercontent.com/JuliaLang/julia-logo-graphics/master/images/julia.ico" width="16em">
+        Julia Language
+    </a>
+    &nbsp; package. To install YaoToEinsum,
+    please <a href="https://docs.julialang.org/en/v1/manual/getting-started/">open
+    Julia's interactive session (known as REPL)</a> and press <kbd>]</kbd> key in the REPL to use the package mode, then type the following command
+</p>
+
+For stable release
+
+```julia
+pkg> add YaoToEinsum
+```
+
+For current master
+
+```julia
+pkg> add YaoToEinsum#master
+```
+
+If you have problem to install the package, please [file us an issue](https://github.com/QuantumBFS/YaoToEinsum.jl/issues/new).
+
 ## Example
 ```julia
 julia> import Yao, YaoToEinsum
