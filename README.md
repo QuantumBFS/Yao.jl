@@ -68,6 +68,8 @@ If you have problem to install the package, please [file us an issue](https://gi
 
 For CUDA support, see [CuYao.jl](https://github.com/QuantumBFS/CuYao.jl).
 
+For tensor network based simulations, see [YaoToEinsum.jl](https://github.com/QuantumBFS/YaoToEinsum.jl).
+
 ## Documentation
 
 ### [Tutorial](https://yaoquantum.org/tutorials/) | Learn Quantum Computing with Yao
