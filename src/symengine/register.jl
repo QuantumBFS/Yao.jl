@@ -21,7 +21,15 @@ end
 
 _pretty_basic(x) = x
 _pretty_basic(x::Real) = isinteger(x) ? Int(x) : x
-_pretty_basic(x::Complex) = isreal(x) ? _pretty_basic(real(x)) : x
+function _pretty_basic(x::Complex)
+    if isreal(x)
+        return _pretty_basic(real(x))
+    elseif iszero(real(x))
+        return Basic(im)*_pretty_basic(imag(x))
+    else
+        return _pretty_basic(real(x)) + Basic(im) * _pretty_basic(imag(x))
+    end
+end
 
 function ket_m(s)
     v, N = parse_str(s)

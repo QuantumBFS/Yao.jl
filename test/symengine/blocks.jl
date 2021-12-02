@@ -20,7 +20,7 @@ end
 
 @testset "mat" begin
     @vars θ γ η
-    for G in [X, Y, Z, ConstGate.T, H]
+    for G in [X, Y, Z, ConstGate.T, H, ConstGate.Tdag, ConstGate.T]
         @test Matrix(mat(Basic, G)) ≈ Matrix(mat(G))
         @test Matrix(mat(Basic, control(4, 3, 2 => G))) ≈ Matrix(control(4, 3, 2 => G))
     end
