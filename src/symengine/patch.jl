@@ -40,3 +40,15 @@ function simplify_expi(expr::Basic)
         exp(im * Basic(π) * 3 / 2) => -Basic(im),
     )
 end
+
+Broadcast.broadcasted(
+    ::Broadcast.AbstractArrayStyle{2},
+    ::typeof(_pretty_basic),
+    a::PermMatrix,
+) = PermMatrix(a.perm, _pretty_basic.(a.vals))
+
+Broadcast.broadcasted(
+    ::LinearAlgebra.StructuredMatrixStyle{Diagonal},
+    ::typeof(_pretty_basic),
+    a::IMatrix{N,T},
+) where {N, T} = IMatrix{N,Basic}()

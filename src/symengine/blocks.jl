@@ -128,10 +128,10 @@ YaoBlocks.RotationGate(block::GT, theta::T) where {N,T<:SymReal,GT<:AbstractBloc
 YaoBlocks.phase(θ::SymReal) = PhaseGate(θ)
 YaoBlocks.shift(θ::SymReal) = ShiftGate(θ)
 
+YaoBlocks.mat(::Type{Basic}, gate::GT) where GT<:ConstantGate = _pretty_basic.(mat(gate))
+YaoBlocks.mat(::Type{Basic}, gate::ConstGate.TGate) = Diagonal(Basic[1, exp(Basic(im)*Basic(π)/4)])
+YaoBlocks.mat(::Type{Basic}, gate::ConstGate.TdagGate) = Diagonal(Basic[1, exp(-Basic(im)*Basic(π)/4)])
 YaoBlocks.mat(::Type{Basic}, ::HGate) = 1 / sqrt(Basic(2)) * Basic[1 1; 1 -1]
-YaoBlocks.mat(::Type{Basic}, ::XGate) = Basic[0 1; 1 0]
-YaoBlocks.mat(::Type{Basic}, ::YGate) = Basic[0 -1im; 1im 0]
-YaoBlocks.mat(::Type{Basic}, ::ZGate) = Basic[1 0; 0 -1]
 YaoBlocks.mat(::Type{Basic}, gate::ShiftGate) = Diagonal([1, exp(im * gate.theta)])
 YaoBlocks.mat(::Type{Basic}, gate::PhaseGate) = exp(im * gate.theta) * IMatrix{2}()
 function YaoBlocks.mat(::Type{Basic}, R::RotationGate{N}) where {N}

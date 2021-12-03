@@ -20,7 +20,7 @@ end
 
 @testset "mat" begin
     @vars θ γ η
-    for G in [X, Y, Z, ConstGate.T, H]
+    for G in [X, Y, Z, ConstGate.T, H, ConstGate.Tdag, ConstGate.T, I2, (0.5+0.5im)*X]
         @test Matrix(mat(Basic, G)) ≈ Matrix(mat(G))
         @test Matrix(mat(Basic, control(4, 3, 2 => G))) ≈ Matrix(control(4, 3, 2 => G))
     end
@@ -37,7 +37,7 @@ end
     m = mat(Basic, G)
     @test mat(G) == m
     @test_throws ArgumentError mat(Float64, G)
-    m = subs.(m, Ref(θ => Basic(π) / 2), Ref(γ => Basic(π) / 6))
+    m = subs.(m, Ref((θ, Basic(π) / 2)), Ref((γ, Basic(π) / 6)))
     @test Matrix(mat(Rz(π / 2) * Rx(π / 6) * Rz(π / 2))) ≈ Matrix(m)
 
     A = randn(ComplexF64, 4, 4)
