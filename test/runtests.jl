@@ -19,7 +19,7 @@ end
     n = 5
     for c in [qft_circuit(n), variational_circuit(n, 2), rand_google53(5; nbits=n)]
         code, xs = yao2einsum(c)
-        optcode = optimize_code(code, uniformsize(code, 2), GreedyMethod())
+        optcode = optimize_code(code, uniformsize(code, 2), TreeSA(nslices=3))
         @test reshape(optcode(xs...; size_info=uniformsize(code, 2)), 1<<n, 1<<n) ≈ mat(c)
     end
 end
