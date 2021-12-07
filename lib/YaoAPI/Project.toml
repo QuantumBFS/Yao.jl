@@ -1,0 +1,12 @@
+name = "YaoAPI"
+uuid = "0843a435-28de-4971-9e8b-a9641b2983a8"
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
