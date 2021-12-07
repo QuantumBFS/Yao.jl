@@ -21,7 +21,7 @@ function main()
         package_names = ARGS
     end
     dirs = map(package_names) do name
-        return if name == "EaRyd"
+        return if name == "Yao"
             joinpath(root_directory, "src")
         else
             joinpath(root_directory, "lib", name, "src")
