@@ -1,0 +1,13 @@
+# yao script
+let nqubits = 5
+    begin
+        4 => X
+        5 => rot(X, 0.5)
+        (4,2) => SWAP
+        (4,1) => begin
+            2 => rot(X, 0.3)
+            1=>C(0), 2=>X
+            1=>C, 2=>Y
+        end
+    end
+end
