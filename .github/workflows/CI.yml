@@ -10,6 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
+          - '1.6' # LTS
           - '1'
           - 'nightly'
         os:
@@ -17,6 +18,11 @@ jobs:
           - macOS-latest
         arch:
           - x64
+        packages:
+          - YaoAPI
+          - YaoBase
+          - YaoArrayRegister
+          - YaoBlocks
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
@@ -33,9 +39,13 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
+      - name: "develop lib packages"
+        run: julia --project .ci/run.jl dev
       - uses: julia-actions/julia-buildpkg@v1
-      - uses: julia-actions/julia-runtest@v1
-      - uses: julia-actions/julia-processcoverage@v1
+      - name: "run tests"
+        run: julia --project .ci/run.jl test ${{ matrix.package }}
+      - name: "process code coverage"
+        run: julia --project .ci/codecov.jl ${{ matrix.package }}
       - uses: codecov/codecov-action@v1
         with:
           file: lcov.info
