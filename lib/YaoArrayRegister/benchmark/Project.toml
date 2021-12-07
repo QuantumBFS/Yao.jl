@@ -1,0 +1,9 @@
+[deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
+LuxurySparse = "d05aeea4-b7d4-55ac-b691-9e7fabb07ba2"
+PkgBenchmark = "32113eaa-f34f-5b0d-bd6c-c81e245fc73d"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+YaoArrayRegister = "e600142f-9330-5003-8abb-0ebd767abc51"
+YaoBase = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
