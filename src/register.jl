@@ -314,12 +314,22 @@ julia> product_state(bit"100"; nbatch=2)
 ArrayReg{2, Complex{Float64}, Array...}
     active qubits: 3/3
 
-julia> product_state(ComplexF32, bit"101"; nbatch=2)
+julia> r1 = product_state(ComplexF32, bit"100"; nbatch=2)
 ArrayReg{2, Complex{Float32}, Array...}
     active qubits: 3/3
+
+julia> r2 = product_state(ComplexF32, [0, 0, 1]; nbatch=2)
+ArrayReg{2, Complex{Float32}, Array...}
+    active qubits: 3/3
+
+julia> r1 ≈ r2   # because we read bit strings from right to left, vectors from left to right.
+true
 ```
 """
 product_state(bit_str::BitStr; nbatch::Int = 1) =
+    product_state(ComplexF64, bit_str; nbatch = nbatch)
+
+product_state(bit_str::AbstractVector; nbatch::Int = 1) =
     product_state(ComplexF64, bit_str; nbatch = nbatch)
 
 """
@@ -354,6 +364,9 @@ product_state(total::Int, bit_config::Integer; kwargs...) =
 
 product_state(::Type{T}, bit_str::BitStr{N}; kwargs...) where {T,N} =
     product_state(T, N, buffer(bit_str); kwargs...)
+
+product_state(::Type{T}, bit_configs::AbstractVector; kwargs...) where T = 
+    product_state(T, bit_literal(bit_configs...); kwargs...)
 
 function product_state(
     ::Type{T},

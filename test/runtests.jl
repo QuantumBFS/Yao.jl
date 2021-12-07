@@ -18,3 +18,7 @@ end
 @testset "test measure" begin
     include("measure.jl")
 end
+
+@testset "test density matrix" begin
+    include("density_matrix.jl")
+end

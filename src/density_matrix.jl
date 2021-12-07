@@ -19,6 +19,10 @@ state(ρ::DensityMatrix) = ρ.state
 YaoBase.nqubits(ρ::DensityMatrix) = log2dim1(state(ρ))
 YaoBase.nactive(ρ::DensityMatrix) = nqubits(ρ)
 YaoBase.nbatch(dm::DensityMatrix{B}) where {B} = B
+function YaoBase.density_matrix(reg::ArrayReg, qubits)
+    freg = focus!(copy(reg), qubits)
+    return density_matrix(freg)
+end
 YaoBase.density_matrix(reg::ArrayReg{1}) = DensityMatrix(reg.state * reg.state')
 function YaoBase.density_matrix(reg::ArrayReg{B}) where {B}
     M = size(reg.state, 1)

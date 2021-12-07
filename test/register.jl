@@ -32,6 +32,8 @@ end
     @testset "test product state" begin
         st = state(product_state(T, bit"100"; nbatch = 1))
         @test !(st isa Transpose)
+        st2 = state(product_state(T, [0, 0, 1]; nbatch = 1))
+        @test st2 ≈ st
         st = state(product_state(T, bit"100"; nbatch = 2, no_transpose_storage = true))
         @test !(st isa Transpose)
         st = state(product_state(T, bit"100"; nbatch = 2))
