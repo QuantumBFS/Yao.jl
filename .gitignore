@@ -9,6 +9,7 @@ docs/site/
 docs/Manifest.toml
 docs/src/examples/*.md
 docs/src/assets/indigo.css
+docs/src/generated
 
 *.ipynb_checkpoints
 **/*.ipynb_checkpoints
