@@ -26,7 +26,8 @@ end
 LinearAlgebra.normalize!(r::AdjointArrayReg) = (normalize!(parent(r)); r)
 
 LinearAlgebra.norm(r::ArrayReg{1}) = norm(statevec(r))
-LinearAlgebra.norm(r::ArrayReg{B}) where B = [norm(view(reshape(r.state, :, B), :, ib)) for ib=1:B]
+LinearAlgebra.norm(r::ArrayReg{B}) where {B} =
+    [norm(view(reshape(r.state, :, B), :, ib)) for ib = 1:B]
 
 # basic arithmatics
 
@@ -116,7 +117,7 @@ for AT in [:ArrayReg, :AdjointArrayReg]
     @eval function Base.:(==)(lhs::$AT, rhs::$AT)
         state(lhs) == state(rhs)
     end
-    
+
     @eval function Base.isapprox(lhs::$AT, rhs::$AT; kw...)
         isapprox(state(lhs), state(rhs); kw...)
     end

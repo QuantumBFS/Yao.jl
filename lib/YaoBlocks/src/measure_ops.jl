@@ -141,7 +141,7 @@ function BlockedBasis(values::AbstractVector{T}) where {T}
     block_ptr = [1]
     unique_values = [vpre]
     k = 1
-    @inbounds for i in 2:length(values)
+    @inbounds for i = 2:length(values)
         v = values[i]
         if !isapprox(v, vpre)  # use approx in order to ignore the round off error
             k += 1
@@ -164,15 +164,15 @@ function YaoBase.measure!(
     state = @inbounds (reg|>rank3)[bb.perm, :, :]  # permute to make eigen values sorted
     pl = dropdims(sum(abs2, state, dims = 2), dims = 2)
     pl_block = zeros(eltype(pl), nblocks(bb), B)
-    @inbounds for ib in 1:B
-        for i in 1:nblocks(bb)
+    @inbounds for ib = 1:B
+        for i = 1:nblocks(bb)
             for k in subblock(bb, i)
                 pl_block[i, ib] += pl[k, ib]
             end
         end
     end
     res = Vector{Int}(undef, B)
-    @inbounds @views for ib in 1:B
+    @inbounds @views for ib = 1:B
         ires = sample(rng, 1:nblocks(bb), Weights(pl_block[:, ib]))
         # notice ires is `BitStr` type, can be use as indices directly.
         range = subblock(bb, ires)
@@ -184,8 +184,8 @@ function YaoBase.measure!(
     # undo permute and assign back
     _state = reshape(state, 1 << nactive(reg), :)
     rstate = reshape(reg.state, 1 << nactive(reg), :)
-    @inbounds for j in 1:size(rstate, 2)
-        for i in 1:size(rstate, 1)
+    @inbounds for j = 1:size(rstate, 2)
+        for i = 1:size(rstate, 1)
             rstate[bb.perm[i], j] = _state[i, j]
         end
     end

@@ -48,7 +48,11 @@ end
         reg = rand_state(nbit)
         reg2 = copy(reg)
         @show op
-        @test isapprox(sum(measure(op, reg2; nshots = 100000)) / 100000, expect(op, reg), rtol = 0.1)
+        @test isapprox(
+            sum(measure(op, reg2; nshots = 100000)) / 100000,
+            expect(op, reg),
+            rtol = 0.1,
+        )
         @test reg ≈ reg2
 
         reg = rand_state(nbit; nbatch = 10)
@@ -116,7 +120,11 @@ end
 
         reg = rand_state(nbit; nbatch = 10)
         res = measure!(op, reg)
-        @test isapprox(res, vec(sum(measure(op, reg; nshots = 100); dims = 1)) / 100, rtol = 0.1)
+        @test isapprox(
+            res,
+            vec(sum(measure(op, reg; nshots = 100); dims = 1)) / 100,
+            rtol = 0.1,
+        )
     end
 end
 

@@ -4,7 +4,8 @@ export mat_back!, mat_back
 The matrix gradient of a rotation block.
 """
 @inline function rotgrad(::Type{T}, rb::RotationGate{N}) where {N,T}
-    -sin(rb.theta / 2) / 2 * IMatrix{1 << N}() + im / 2 * cos(rb.theta / 2) * conj(mat(T, rb.block))
+    -sin(rb.theta / 2) / 2 * IMatrix{1 << N}() +
+    im / 2 * cos(rb.theta / 2) * conj(mat(T, rb.block))
 end
 
 function mat_back!(::Type{T}, rb::RotationGate{N,RT}, adjy, collector) where {T,N,RT}
@@ -12,7 +13,10 @@ function mat_back!(::Type{T}, rb::RotationGate{N,RT}, adjy, collector) where {T,
 end
 
 function mat_back!(::Type{T}, rb::TimeEvolution{N}, adjy, collector) where {N,T}
-    pushfirst!(collector, projection(rb.dt, sum(im .* adjy .* conj.(mat(T, rb.H) * mat(T, rb)))))
+    pushfirst!(
+        collector,
+        projection(rb.dt, sum(im .* adjy .* conj.(mat(T, rb.H) * mat(T, rb)))),
+    )
 end
 
 #=
@@ -78,7 +82,7 @@ function mat_back!(::Type{T}, rb::ChainBlock{N}, adjy, collector) where {T,N}
         push!(cache, mi)
     end
     adjb = adjy * cache[end]'
-    for ib in length(rb):-1:1
+    for ib = length(rb):-1:1
         b = rb[ib]
         #adjb = ib==1 ? adjy : adjy*cache[ib]'
         mat_back!(T, b, adjb, collector)

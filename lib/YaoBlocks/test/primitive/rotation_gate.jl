@@ -32,7 +32,8 @@ end
 @testset "test dispatch" begin
     @test dispatch!(Rx(0.1), 0.3) == Rx(0.3)
     x = Rx(0.1)
-    @test dispatch(x, 3.0f0) == Rx(3.0f0) && eltype(getiparams(dispatch(x, 3.0f0))) == Float32
+    @test dispatch(x, 3.0f0) == Rx(3.0f0) &&
+          eltype(getiparams(dispatch(x, 3.0f0))) == Float32
     @test x == Rx(0.1)
     @test nparameters(Rx(0.1)) == 1
 

@@ -13,7 +13,7 @@ end
 function rand_kron_test(n; gateset)
     firstn = rand(1:n)
     locs = randperm(n)
-    blocks = [rand(gateset) for i in 1:firstn]
+    blocks = [rand(gateset) for i = 1:firstn]
     seq = [i => each for (i, each) in zip(locs[1:firstn], blocks)]
     mats = Any[i => mat(each) for (i, each) in zip(locs[1:firstn], blocks)]
     append!(mats, [i => IMatrix(2) for i in locs[firstn+1:end]])
@@ -36,7 +36,8 @@ end
 end
 
 @testset "test mat" begin
-    TestGateSet = [X, Y, Z, phase(0.1), phase(0.2), phase(0.3), rot(X, 0.1), rot(Y, 0.4), rot(Z, 0.2)]
+    TestGateSet =
+        [X, Y, Z, phase(0.1), phase(0.2), phase(0.3), rot(X, 0.1), rot(Y, 0.4), rot(Z, 0.2)]
 
     U = Const.X
     U2 = Const.CNOT
@@ -73,11 +74,11 @@ end
         @test m == mat(g)
     end
 
-    @testset "random dense sequence, n=$i" for i in 2:8
+    @testset "random dense sequence, n=$i" for i = 2:8
         @test random_dense_kron(i; gateset = TestGateSet)
     end
 
-    @testset "random mat sequence, n=$i" for i in 4:8
+    @testset "random mat sequence, n=$i" for i = 4:8
         @test rand_kron_test(i; gateset = TestGateSet)
     end
 end

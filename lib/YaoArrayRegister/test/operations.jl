@@ -42,7 +42,7 @@ end
     @test state(reg1' * 2) == state(reg1') * 2
     @test reg1 * 2 == 2 * reg1
     @test reg1' * 2 == 2 * reg1'
-    reg = rand_state(3; nbatch=2) * 2
+    reg = rand_state(3; nbatch = 2) * 2
     @test norm(reg) ≈ [2.0, 2.0]
 end
 

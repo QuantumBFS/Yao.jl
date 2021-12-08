@@ -109,7 +109,8 @@ Base.eltype(x::CachedBlock) = eltype(content(x))
 
 const DefaultCacheServer = get_server(AbstractBlock, CacheFragment)
 
-cache(x::Function, level::Int = 1; recursive = false) = n -> cache(x(n), level; recursive = recursive)
+cache(x::Function, level::Int = 1; recursive = false) =
+    n -> cache(x(n), level; recursive = recursive)
 
 """
     cache(x[, level=1; recursive=false])
@@ -152,11 +153,21 @@ function clearall!(x::CachedBlock{ST,BT}) where {ST,BT<:CompositeBlock}
     return x
 end
 
-function cache(server::AbstractCacheServer, x::AbstractBlock, level::Int; recursive::Bool = false)
+function cache(
+    server::AbstractCacheServer,
+    x::AbstractBlock,
+    level::Int;
+    recursive::Bool = false,
+)
     return CachedBlock(server, x, level)
 end
 
-function cache(server::AbstractCacheServer, x::ChainBlock, level::Int; recursive::Bool = false)
+function cache(
+    server::AbstractCacheServer,
+    x::ChainBlock,
+    level::Int;
+    recursive::Bool = false,
+)
     if recursive
         chain = similar(x)
         for (i, each) in enumerate(block)
@@ -169,7 +180,12 @@ function cache(server::AbstractCacheServer, x::ChainBlock, level::Int; recursive
     return CachedBlock(server, chain, level)
 end
 
-function cache(server::AbstractCacheServer, block::KronBlock, level::Int; recursive::Bool = false)
+function cache(
+    server::AbstractCacheServer,
+    block::KronBlock,
+    level::Int;
+    recursive::Bool = false,
+)
     if recursive
         x = similar(block)
         for (k, v) in block

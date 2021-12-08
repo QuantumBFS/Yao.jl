@@ -12,11 +12,21 @@ using Random
         @test test_apply_back(reg0, control(3, 2, 1 => shift(0.5)), 0.5; δ = 1e-5)
         # dense matrix
         @test test_apply_back(reg0, put(3, 1 => cache(Rx(0.5))), 0.5; δ = 1e-5)
-        @test test_apply_back(reg0, put(3, 1 => chain(Rz(0.5), Rx(0.8))), [0.5, 0.8]; δ = 1e-5)
+        @test test_apply_back(
+            reg0,
+            put(3, 1 => chain(Rz(0.5), Rx(0.8))),
+            [0.5, 0.8];
+            δ = 1e-5,
+        )
         @test test_apply_back(reg0, control(3, (2, 3), 1 => Rx(0.5)), 0.5; δ = 1e-5)
         # sparse matrix csc
         @test test_apply_back(reg0, put(3, (1, 2) => rot(SWAP, 0.5)), 0.5; δ = 1e-5)
-        @test test_apply_back(reg0, control(3, (3,), (1, 2) => rot(SWAP, 0.5)), 0.5; δ = 1e-5)
+        @test test_apply_back(
+            reg0,
+            control(3, (3,), (1, 2) => rot(SWAP, 0.5)),
+            0.5;
+            δ = 1e-5,
+        )
 
         # special cases: DiffBlock
         @test test_apply_back(reg0, put(3, 1 => Rz(0.5)), 0.5; δ = 1e-5)
@@ -53,10 +63,19 @@ end
             δ = 1e-5,
         )
         @test test_apply_back(reg0, Daggered(put(3, 1 => Rx(0.0))), 0.5; δ = 1e-5)
-        @test test_apply_back(reg0, control(3, (2, 3), 1 => Daggered(Rz(0.0))), 0.5; δ = 1e-5)
         @test test_apply_back(
             reg0,
-            chain(3, Daggered(put(3, 1 => Rx(0.0))), control(3, (2, 3), 1 => Daggered(Rz(0.0)))),
+            control(3, (2, 3), 1 => Daggered(Rz(0.0))),
+            0.5;
+            δ = 1e-5,
+        )
+        @test test_apply_back(
+            reg0,
+            chain(
+                3,
+                Daggered(put(3, 1 => Rx(0.0))),
+                control(3, (2, 3), 1 => Daggered(Rz(0.0))),
+            ),
             [0.5, 0.5];
             δ = 1e-5,
         )
@@ -68,7 +87,11 @@ end
     for reg0 in [rand_state(3), rand_state(3, nbatch = 10)]
         @test test_apply_back(
             reg0,
-            chain(3, put(3, 1 => Rx(0.0)), subroutine(3, control(2, 2, 1 => shift(0.0)), (3, 1))),
+            chain(
+                3,
+                put(3, 1 => Rx(0.0)),
+                subroutine(3, control(2, 2, 1 => shift(0.0)), (3, 1)),
+            ),
             [0.5, 0.5];
             δ = 1e-5,
         )

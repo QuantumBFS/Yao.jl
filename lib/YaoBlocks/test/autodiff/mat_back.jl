@@ -114,7 +114,11 @@ end
     )
     @test test_mat_back(
         ComplexF64,
-        chain(3, control(3, 2, 1 => shift(0.0)), chain(put(3, 1 => Rx(0.0)), put(3, 2 => Ry(0.0)))),
+        chain(
+            3,
+            control(3, 2, 1 => shift(0.0)),
+            chain(put(3, 1 => Rx(0.0)), put(3, 2 => Ry(0.0))),
+        ),
         [0.5, 0.5, 0.5];
         δ = 1e-5,
     )
