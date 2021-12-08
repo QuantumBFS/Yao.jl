@@ -27,7 +27,7 @@ function main()
     elseif "test" == ARGS[1]
         length(ARGS) ≤ 3 || return print(help)
 
-        if length(ARGS) == 2 && "--cpu" in ARGS # test all on cpu
+        if length(ARGS) == 1 || length(ARGS) == 2 && "--cpu" in ARGS # test all on cpu
             package_names = filter(!startswith("Cu"), package_names)
         elseif length(ARGS) == 2 && "--cuda" in ARGS # test all on cuda
             push!(package_names, "Yao")
