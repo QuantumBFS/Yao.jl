@@ -1,0 +1,22 @@
+name: Push Notebooks
+
+on: push
+
+jobs:
+  copy-file:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Pushes test file
+      uses: dmnemec/copy_file_to_another_repo_action@main
+      env:
+        API_TOKEN_GITHUB: ${{ secrets.TUTORIAL_TOKEN }}
+      with:
+        source_file: 'notebooks/'
+        destination_repo: 'QuantumBFS/QuantumBFS.github.io'
+        user_email: 'me@rogerluo.dev'
+        user_name: 'Roger-luo'
+        commit_message: 'Pushing the notebooks'
+        destination_branch: 'master'
