@@ -19,7 +19,7 @@ jobs:
           using Pkg
           Pkg.develop(PackageSpec(path=pwd()))
           Pkg.add(PackageSpec(url="https://github.com/QuantumBFS/QuAlgorithmZoo.jl.git"))
-        shell: julia --color=yes {0}
+        shell: julia --project=docs --color=yes {0}
       - name: Install dependencies
         run: julia --project=docs/ .ci/run.jl doc
       - name: Build and deploy
