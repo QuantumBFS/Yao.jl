@@ -17,6 +17,7 @@ function main()
 
     if length(ARGS) == 0
         package_names = readdir(joinpath(root_directory, "lib"))
+        push!(package_names, "Yao")
     else
         package_names = ARGS
     end
