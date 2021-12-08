@@ -1,16 +1,43 @@
-using Test, YaoPlots
-using ZXCalculus, Multigraphs
+using Test
+using ZXCalculus, YaoPlots
+using YaoHIR, YaoLocations
+using CompilerPluginTools
 
-@testset "zx plot" begin
-    g = Multigraph(6)
-    for e in [[1,3],[2,3],[3,4],[4,5],[4,6]]
-        add_edge!(g, e)
-    end
-    ps = [0, 0, 0//1, 2//1, 0, 0]
-    v_t = [SpiderType.In, SpiderType.Out, SpiderType.X, SpiderType.Z, SpiderType.Out, SpiderType.In]
-    zxd = ZXDiagram(g, v_t, ps)
-    plot(zxd)
-    replace!(Rule{:b}(), zxd)
-    plt = plot(zxd)
-    @test plt !== nothing
+c = YaoHIR.Chain()
+push_gate!(c, Val{:Sdag}(), 1)
+push_gate!(c, Val{:H}(), 1)
+push_gate!(c, Val{:S}(), 1)
+push_gate!(c, Val{:S}(), 2)
+push_gate!(c, Val{:H}(), 4)
+push_gate!(c, Val{:CNOT}(), 3, 2)
+push_gate!(c, Val{:CZ}(), 4, 1)
+push_gate!(c, Val{:H}(), 2)
+push_gate!(c, Val{:T}(), 2)
+push_gate!(c, Val{:CNOT}(), 3, 2)
+push_gate!(c, Val{:Tdag}(), 2)
+push_gate!(c, Val{:CNOT}(), 1, 4)
+push_gate!(c, Val{:H}(), 1)
+push_gate!(c, Val{:T}(), 2)
+push_gate!(c, Val{:S}(), 3)
+push_gate!(c, Val{:H}(), 4)
+push_gate!(c, Val{:T}(), 1)
+push_gate!(c, Val{:H}(), 2)
+push_gate!(c, Val{:H}(), 3)
+push_gate!(c, Val{:Sdag}(), 4)
+push_gate!(c, Val{:S}(), 3)
+push_gate!(c, Val{:X}(), 4)
+push_gate!(c, Val{:CNOT}(), 3, 2)
+push_gate!(c, Val{:H}(), 1)
+push_gate!(c, Val{:S}(), 4)
+push_gate!(c, Val{:X}(), 4)
+
+ir = @make_ircode begin
 end
+bir = BlockIR(ir, 4, c)
+zxd = convert_to_zxd(bir)
+zxg = ZXGraph(zxd)
+
+@test plot(zxd) !== nothing
+@test plot(zxg) !== nothing
+@test plot(zxd; backend = :compose) !== nothing
+@test plot(zxg; backend = :compose) !== nothing
