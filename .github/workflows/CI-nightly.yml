@@ -1,4 +1,4 @@
-name: CI
+name: CI-nightly
 on:
   - push
   - pull_request
@@ -10,8 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.6' # LTS
-          - '1'
+          - 'nightly'
         os:
           - ubuntu-latest
           - macOS-latest
