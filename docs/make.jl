@@ -28,21 +28,21 @@ const PAGES = [
     "Developer Notes" => "dev/index.md",
 ]
 
-makedocs(
-    modules = [Yao, YaoBase, YaoArrayRegister, YaoBlocks, BitBasis, YaoSym, AD, Optimise],
-    format = Documenter.HTML(
-        prettyurls = ("deploy" in ARGS),
-        canonical = ("deploy" in ARGS) ? "https://docs.yaoquantum.org/" : nothing,
-        assets = [
+makedocs(;
+    modules=[Yao, YaoBase, YaoArrayRegister, YaoBlocks, BitBasis, YaoSym, AD, Optimise],
+    format=Documenter.HTML(;
+        prettyurls=("deploy" in ARGS),
+        canonical=("deploy" in ARGS) ? "https://docs.yaoquantum.org/" : nothing,
+        assets=[
             "assets/themes/indigo.css",
-            asset("https://yaoquantum.org/assets/favicon-light.ico", class = :ico),
+            asset("https://yaoquantum.org/assets/favicon-light.ico"; class=:ico),
         ],
     ),
-    doctest = ("doctest=true" in ARGS),
-    clean = false,
-    sitename = "Documentation | Yao",
-    linkcheck = !("skiplinks" in ARGS),
-    pages = PAGES,
+    doctest=("doctest=true" in ARGS),
+    clean=false,
+    sitename="Documentation | Yao",
+    linkcheck=!("skiplinks" in ARGS),
+    pages=PAGES,
 )
 
 x = []
@@ -79,8 +79,7 @@ for i in x
         )
 
         y = replace(
-            y,
-            """<div class="docs-main">""" => """<div class="js-toc-content docs-main">""",
+            y, """<div class="docs-main">""" => """<div class="js-toc-content docs-main">"""
         )
         f = open(i, "w")
         write(f, y)
@@ -88,4 +87,4 @@ for i in x
     end
 end
 
-deploydocs(repo = "github.com/QuantumBFS/Yao.jl.git", target = "build")
+deploydocs(; repo="github.com/QuantumBFS/Yao.jl.git", target="build")

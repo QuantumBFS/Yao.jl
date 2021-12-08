@@ -4,20 +4,20 @@ using BitBasis: invorder, reorder
 @testset "batch normalize" begin
     s = rand(3, 4)
     batch_normalize!(s, 1)
-    for i = 1:4
+    for i in 1:4
         @test sum(s[:, i]) ≈ 1
     end
 
     s = rand(3, 4)
     ss = batch_normalize(s, 1)
-    for i = 1:4
+    for i in 1:4
         @test sum(s[:, i]) != 1
         @test sum(ss[:, i]) ≈ 1
     end
 end
 
 @testset "hilbertkron" begin
-    A, B, C, D = [randn(2, 2) for i = 1:4]
+    A, B, C, D = [randn(2, 2) for i in 1:4]
     II = IMatrix(2)
     ⊗ = kron
     @test hilbertkron(4, [A, B], [3, 1]) ≈ II ⊗ A ⊗ II ⊗ B
@@ -32,12 +32,13 @@ end
 end
 
 @testset "batched kron" begin
-    A, B, C =
-        rand(ComplexF64, 4, 4, 3), rand(ComplexF64, 4, 4, 3), rand(ComplexF64, 4, 4, 3)
+    A, B, C = rand(ComplexF64, 4, 4, 3),
+    rand(ComplexF64, 4, 4, 3),
+    rand(ComplexF64, 4, 4, 3)
     D = batched_kron(A, B, C)
 
     tD = zeros(ComplexF64, 64, 64, 3)
-    for k = 1:3
+    for k in 1:3
         tD[:, :, k] = kron(A[:, :, k], B[:, :, k], C[:, :, k])
     end
 
@@ -49,7 +50,6 @@ end
     D2 = batched_kron(A, B2, C)
     @test tD ≈ D2
 end
-
 
 @testset "random matrices" begin
     mat = rand_unitary(8)
@@ -67,8 +67,8 @@ end
         cos(theta / 2) -im*sin(theta / 2)
         -im*sin(theta / 2) cos(theta / 2)
     ]
-    @test rot_mat(ComplexF64, Const.X, theta) |> eltype == ComplexF64
-    @test rot_mat(ComplexF32, Const.X, theta) |> eltype == ComplexF32
+    @test eltype(rot_mat(ComplexF64, Const.X, theta)) == ComplexF64
+    @test eltype(rot_mat(ComplexF32, Const.X, theta)) == ComplexF32
 end
 
 using LuxurySparse: pmrand

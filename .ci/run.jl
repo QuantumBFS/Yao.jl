@@ -21,7 +21,7 @@ function main()
     length(ARGS) > 0 || return print(help)
     if "dev" == ARGS[1]
         packages = map(package_names) do pkg
-            Pkg.PackageSpec(path = joinpath(root_directory, "lib", pkg))
+            Pkg.PackageSpec(; path=joinpath(root_directory, "lib", pkg))
         end
         Pkg.develop(packages)
     elseif "test" == ARGS[1]
@@ -37,12 +37,12 @@ function main()
         else
             return print(help)
         end
-        Pkg.test(package_names; coverage = true)
+        Pkg.test(package_names; coverage=true)
     elseif "doc" == ARGS[1]
         packages = map(package_names) do pkg
-            Pkg.PackageSpec(path = joinpath(root_directory, "lib", pkg))
+            Pkg.PackageSpec(; path=joinpath(root_directory, "lib", pkg))
         end
-        push!(packages, Pkg.PackageSpec(path = root_directory))
+        push!(packages, Pkg.PackageSpec(; path=root_directory))
         Pkg.develop(packages)
         Pkg.instantiate()
     end

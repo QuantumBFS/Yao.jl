@@ -13,7 +13,6 @@ export @capture
 
 # capture
 function capturing_analysis(expr, out, is_literal)
-
     @match expr begin
         ::QuoteNode => capturing_analysis(expr.value, out, true)
 
@@ -23,10 +22,8 @@ function capturing_analysis(expr, out, is_literal)
         if is_literal
         end && Expr(_, args...) => foreach(x -> capturing_analysis(x, out, true), args)
 
-
         if is_literal
         end && _ => nothing
-
 
         # not literal
         ::Symbol => (push!(out, expr); nothing)
@@ -73,8 +70,9 @@ end
 function capture(template)
     syms = Set(Symbol[])
     capturing_analysis(template, syms, true)
-    out_expr =
-        Expr(:call, Dict, (Expr(:call, =>, QuoteNode(each), each) for each in syms)...)
+    out_expr = Expr(
+        :call, Dict, (Expr(:call, =>, QuoteNode(each), each) for each in syms)...
+    )
     arg_sym = gensym()
     let template = Expr(:quote, template)
         quote
@@ -100,11 +98,11 @@ Dict{Symbol,Int64} with 1 entry:
 :(@capture)
 
 macro capture(template)
-    capture(template) |> esc
+    return esc(capture(template))
 end
 
 macro capture(template, ex)
-    Expr(:call, capture(template), ex) |> esc
+    return esc(Expr(:call, capture(template), ex))
 end
 
 end
