@@ -213,7 +213,7 @@ function train(qcbm, κ, opt, target)
         push!(history, loss(κ, qcbm, target))
         ps = parameters(qcbm)
         QuAlgorithmZoo.update!(ps, gradient(qcbm, κ, target), opt)
-        popdispatch!(qcbm, ps)
+        dispatch!(qcbm, ps)
     end
     return history
 end

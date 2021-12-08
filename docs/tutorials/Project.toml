@@ -1,6 +1,6 @@
 name = "YaoTutorials"
 uuid = "4dcc6239-e9fa-4a8f-8c05-0fe966d2abbe"
-authors = ["QuantumBFS"]
+authors = ["QuantumBFS team and contributors"]
 version = "0.1.0"
 
 [deps]
