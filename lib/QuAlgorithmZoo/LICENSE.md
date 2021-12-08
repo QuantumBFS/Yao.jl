@@ -1,6 +1,6 @@
 The QuAlgorithmZoo.jl package is licensed under the Apache License, Version 2.0:
 
-> Copyright (c) 2018: Roger-luo.
+> Copyright (c) 2018: QuantumBFS.
 >
 >                                  Apache License
 >                            Version 2.0, January 2004
