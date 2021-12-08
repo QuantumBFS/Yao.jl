@@ -1,7 +1,8 @@
 for F in [:expect, :fidelity, :operator_fidelity]
     @eval Base.adjoint(::typeof($F)) = Adjoint($F)
     @eval Base.show(io::IO, ::Adjoint{Any,typeof($F)}) = print(io, "$($F)'")
-    @eval Base.show(io::IO, ::MIME"text/plain", ::Adjoint{Any,typeof($F)}) = print(io, "$($F)'")
+    @eval Base.show(io::IO, ::MIME"text/plain", ::Adjoint{Any,typeof($F)}) =
+        print(io, "$($F)'")
 end
 
 function (::Adjoint{Any,typeof(expect)})(op::AbstractBlock, reg_or_circuit)
@@ -49,9 +50,13 @@ function fidelity_g(
         out2 = reg2
     end
     if nremain(out1) != 0
-        throw(ArgumentError("The gradient of registers with environment is not implemented yet.
-        However, back propagating over a focused register is possible,
-        please file an issue if you really need this feature."))
+        throw(
+            ArgumentError(
+                "The gradient of registers with environment is not implemented yet.
+However, back propagating over a focused register is possible,
+please file an issue if you really need this feature.",
+            ),
+        )
     end
     overlap = out1' * out2
 

@@ -75,7 +75,8 @@ function subroutine(n::Int, block::AbstractBlock, locs)
 end
 
 # support lazy qubits
-subroutine(n::Int, block::Function, locs) = subroutine(n, parse_block(length(locs), block), locs)
+subroutine(n::Int, block::Function, locs) =
+    subroutine(n, parse_block(length(locs), block), locs)
 
 """
     subroutine(block, locs) -> f(n)

@@ -4,8 +4,8 @@ using YaoBase: NotImplementedError
 using Random, Test
 
 AA(i, j) = control(i, j => shift(2π / (1 << (i - j + 1))))
-B(n, i) = chain(n, i == j ? put(i => H) : AA(j, i) for j in i:n)
-qftcirc(n) = chain(B(n, i) for i in 1:n)
+B(n, i) = chain(n, i == j ? put(i => H) : AA(j, i) for j = i:n)
+qftcirc(n) = chain(B(n, i) for i = 1:n)
 
 function state_numgrad(f, reg)
     map(1:length(reg.state)) do i
@@ -29,7 +29,8 @@ end
     H = repeat(nbit, X, 1:nbit)
     for reg in [rand_state(nbit), rand_state(nbit; nbatch = 10)]
         adjin, adjparams = expect'(H, reg => c)
-        numgrad = YaoBlocks.AD.ng(x -> sum(expect(H, reg => dispatch!(c, x))), parameters(c))
+        numgrad =
+            YaoBlocks.AD.ng(x -> sum(expect(H, reg => dispatch!(c, x))), parameters(c))
         @test adjparams ≈ vec(numgrad)
         numgrad2 = state_numgrad(reg -> sum(expect(H, reg => c)), reg)
         @test isapprox(vec(adjin.state), numgrad2, atol = 1e-4)
@@ -62,10 +63,14 @@ end
         )
 
         (g1, pg1), (g2, pg2) = fidelity'(reg1 => c1, reg2 => c2)
-        npg1 =
-            YaoBlocks.AD.ng(x -> sum(fidelity(reg1 => dispatch!(c1, x), reg2 => c2)), parameters(c1))
-        npg2 =
-            YaoBlocks.AD.ng(x -> sum(fidelity(reg1 => c1, reg2 => dispatch!(c2, x))), parameters(c2))
+        npg1 = YaoBlocks.AD.ng(
+            x -> sum(fidelity(reg1 => dispatch!(c1, x), reg2 => c2)),
+            parameters(c1),
+        )
+        npg2 = YaoBlocks.AD.ng(
+            x -> sum(fidelity(reg1 => c1, reg2 => dispatch!(c2, x))),
+            parameters(c2),
+        )
         @test isapprox(pg1, vec(npg1), atol = 1e-5)
         @test isapprox(pg2, vec(npg2), atol = 1e-5)
         @test isapprox(

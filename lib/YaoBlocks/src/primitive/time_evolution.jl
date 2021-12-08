@@ -67,7 +67,7 @@ function _apply!(reg::ArrayReg{B,T}, te::TimeEvolution) where {B,T}
     st = state(reg)
     dt = real(te.dt) == 0 ? imag(te.dt) : -im * te.dt
     A = BlockMap(T, te.H)
-    @inbounds for j in 1:size(st, 2)
+    @inbounds for j = 1:size(st, 2)
         v = view(st, :, j)
         Ks = arnoldi(A, v; tol = te.tol, ishermitian = true, opnorm = 1.0)
         expv!(v, dt, Ks)

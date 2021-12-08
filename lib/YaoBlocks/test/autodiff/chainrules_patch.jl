@@ -16,8 +16,10 @@ end
             Tuple{Vector{NamedTuple{(:block, :theta),Tuple{Nothing,Float64}}}},
         }[(blocks = [(block = nothing, theta = 1.0)],)],
     )
-    @test_broken Zygote.gradient(x -> getfield(getfield(x, :content), :theta), Daggered(Rx(0.5)))[1] ==
-                 (content = (block = nothing, theta = 1.0),)
+    @test_broken Zygote.gradient(
+        x -> getfield(getfield(x, :content), :theta),
+        Daggered(Rx(0.5)),
+    )[1] == (content = (block = nothing, theta = 1.0),)
 end
 
 @testset "rules" begin
@@ -27,21 +29,28 @@ end
     g0 = reinterpret(
         ComplexF64,
         ForwardDiff.gradient(
-            x -> real(expect(h, ArrayReg([Complex(x[2i-1], x[2i]) for i in 1:length(x)÷2]))),
+            x -> real(
+                expect(h, ArrayReg([Complex(x[2i-1], x[2i]) for i = 1:length(x)÷2])),
+            ),
             reinterpret(Float64, r.state),
         ),
     )
     @test Zygote.gradient(x -> real(expect(h, ArrayReg(x))), r.state)[1] ≈ g0
-    @test Zygote.gradient(x -> real(expect(h, ArrayReg{1}(reshape(statevec(x), :, 1)))), r)[1].state ≈
-          g0
-    @test Zygote.gradient(x -> real(expect(h, ArrayReg(reshape(state(x), :, 1)))), r)[1].state ≈ g0
+    @test Zygote.gradient(
+        x -> real(expect(h, ArrayReg{1}(reshape(statevec(x), :, 1)))),
+        r,
+    )[1].state ≈ g0
+    @test Zygote.gradient(
+        x -> real(expect(h, ArrayReg(reshape(state(x), :, 1)))),
+        r,
+    )[1].state ≈ g0
     @test Zygote.gradient(x -> real(expect(h, copy(x))), r)[1].state ≈ g0
     @test Zygote.gradient(x -> real(expect(h, parent(x'))), r)[1].state ≈ g0
 
     g1 = reinterpret(
         ComplexF64,
         ForwardDiff.gradient(
-            x -> real(sum(abs2, [Complex(x[2i-1], x[2i]) for i in 1:length(x)÷2])),
+            x -> real(sum(abs2, [Complex(x[2i-1], x[2i]) for i = 1:length(x)÷2])),
             reinterpret(Float64, r.state),
         ),
     )
@@ -71,13 +80,15 @@ end
     paramsδ = Zygote.gradient(params -> loss(reg0, dispatch(c, params)), params)[1]
     regδ = Zygote.gradient(reg -> loss(reg, c), reg0)[1]
     fparamsδ = ForwardDiff.gradient(
-        params ->
-            loss(ArrayReg(Matrix{Complex{eltype(params)}}(reg0.state)), dispatch(c, params)),
+        params -> loss(
+            ArrayReg(Matrix{Complex{eltype(params)}}(reg0.state)),
+            dispatch(c, params),
+        ),
         params,
     )
     fregδ = ForwardDiff.gradient(
         x -> loss(
-            ArrayReg([Complex(x[2i-1], x[2i]) for i in 1:length(x)÷2]),
+            ArrayReg([Complex(x[2i-1], x[2i]) for i = 1:length(x)÷2]),
             dispatch(c, Vector{real(eltype(x))}(parameters(c))),
         ),
         reinterpret(Float64, reg0.state),
@@ -97,12 +108,15 @@ end
     h = chain(repeat(5, X, 1:5))
     reg = rand_state(5)
     function loss2(reg::AbstractRegister, circuit::AbstractBlock{N}) where {N}
-        return 5 * real(expect(h, copy(reg) => circuit) + fidelity(reg, apply(reg, circuit)))
+        return 5 *
+               real(expect(h, copy(reg) => circuit) + fidelity(reg, apply(reg, circuit)))
     end
     params = rand!(parameters(c))
     fδc = ForwardDiff.gradient(
-        params ->
-            loss2(ArrayReg(Matrix{Complex{eltype(params)}}(reg.state)), dispatch(c, params)),
+        params -> loss2(
+            ArrayReg(Matrix{Complex{eltype(params)}}(reg.state)),
+            dispatch(c, params),
+        ),
         params,
     )
     δr, δc = Zygote.gradient((reg, params) -> loss2(reg, dispatch(c, params)), reg, params)
@@ -110,7 +124,7 @@ end
 
     fregδ = ForwardDiff.gradient(
         x -> loss2(
-            ArrayReg([Complex(x[2i-1], x[2i]) for i in 1:length(x)÷2]),
+            ArrayReg([Complex(x[2i-1], x[2i]) for i = 1:length(x)÷2]),
             dispatch(c, Vector{real(eltype(x))}(params)),
         ),
         reinterpret(Float64, reg.state),
@@ -140,7 +154,7 @@ end
 end
 
 @testset "add block" begin
-    H = sum([chain(5, put(k => Z)) for k in 1:5])
+    H = sum([chain(5, put(k => Z)) for k = 1:5])
     c = chain(put(5, 2 => chain(Rx(0.4), Rx(0.5))), cnot(5, 3, 1), put(5, 3 => Rx(-0.5)))
     dispatch!(c, :random)
     function loss(reg::AbstractRegister, circuit::AbstractBlock{N}) where {N}
@@ -155,8 +169,10 @@ end
     params = rand!(parameters(c))
     paramsδ = Zygote.gradient(params -> loss(reg0, dispatch(c, params)), params)[1]
     fparamsδ = ForwardDiff.gradient(
-        params ->
-            loss(ArrayReg(Matrix{Complex{eltype(params)}}(reg0.state)), dispatch(c, params)),
+        params -> loss(
+            ArrayReg(Matrix{Complex{eltype(params)}}(reg0.state)),
+            dispatch(c, params),
+        ),
         params,
     )
     @test fparamsδ ≈ paramsδ
@@ -164,7 +180,7 @@ end
     regδ = Zygote.gradient(reg -> loss(reg, c), reg0)[1]
     fregδ = ForwardDiff.gradient(
         x -> loss(
-            ArrayReg([Complex(x[2i-1], x[2i]) for i in 1:length(x)÷2]),
+            ArrayReg([Complex(x[2i-1], x[2i]) for i = 1:length(x)÷2]),
             dispatch(c, Vector{real(eltype(x))}(parameters(c))),
         ),
         reinterpret(Float64, reg0.state),

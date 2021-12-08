@@ -15,5 +15,6 @@ using YaoArrayRegister
     @test mat(c) ≈ mat(np)
     @test apply!(copy(reg), c) ≈ apply!(copy(reg), np)
     @test np' == chain(put(3, 1 => Rx(-0.5)), NoParams(put(3, 2 => Ry(-0.2))))
-    @test dispatch!(np, [0.3]) == chain(NoParams(put(3, 2 => Ry(0.2))), put(3, 1 => Rx(0.3)))
+    @test dispatch!(np, [0.3]) ==
+          chain(NoParams(put(3, 2 => Ry(0.2))), put(3, 1 => Rx(0.3)))
 end

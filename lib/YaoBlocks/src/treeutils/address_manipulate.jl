@@ -51,7 +51,12 @@ function map_address(block::AbstractBlock, info::AddressInfo)
 end
 
 function map_address(blk::Measure, info::AddressInfo)
-    m = Measure{info.nbits}(blk.rng, blk.operator, (blk.locations / info...,), blk.postprocess)
+    m = Measure{info.nbits}(
+        blk.rng,
+        blk.operator,
+        (blk.locations / info...,),
+        blk.postprocess,
+    )
     if isdefined(blk, :results)
         m.results = blk.results
     end
@@ -59,10 +64,16 @@ function map_address(blk::Measure, info::AddressInfo)
 end
 
 map_address(blk::PrimitiveBlock, info::AddressInfo) = blk
-map_address(blk::PutBlock, info::AddressInfo) = put(info.nbits, blk.locs / info => content(blk))
+map_address(blk::PutBlock, info::AddressInfo) =
+    put(info.nbits, blk.locs / info => content(blk))
 
 function map_address(blk::ControlBlock, info::AddressInfo)
-    ControlBlock{info.nbits}(blk.ctrl_locs / info, blk.ctrl_config, content(blk), blk.locs / info)
+    ControlBlock{info.nbits}(
+        blk.ctrl_locs / info,
+        blk.ctrl_config,
+        content(blk),
+        blk.locs / info,
+    )
 end
 
 function map_address(blk::KronBlock, info::AddressInfo)

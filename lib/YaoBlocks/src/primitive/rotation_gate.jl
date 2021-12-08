@@ -121,13 +121,17 @@ end
 
 Base.adjoint(blk::RotationGate) = RotationGate(blk.block, -blk.theta)
 Base.copy(R::RotationGate) = RotationGate(R.block, R.theta)
-Base.:(==)(lhs::RotationGate{TA,GTA}, rhs::RotationGate{TB,GTB}) where {TA,TB,GTA,GTB} = false
+Base.:(==)(lhs::RotationGate{TA,GTA}, rhs::RotationGate{TB,GTB}) where {TA,TB,GTA,GTB} =
+    false
 Base.:(==)(lhs::RotationGate{TA,GT}, rhs::RotationGate{TB,GT}) where {TA,TB,GT} =
     lhs.theta == rhs.theta
 
 cache_key(R::RotationGate) = R.theta
 
-function parameters_range!(out::Vector{Tuple{T,T}}, gate::RotationGate{N,T,GT}) where {N,T,GT}
+function parameters_range!(
+    out::Vector{Tuple{T,T}},
+    gate::RotationGate{N,T,GT},
+) where {N,T,GT}
     push!(out, (0.0, 2.0 * pi))
 end
 

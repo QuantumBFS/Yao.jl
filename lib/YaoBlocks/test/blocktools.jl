@@ -50,7 +50,10 @@ end
 end
 
 @testset "expect" begin
-    for reg in [rand_state(3, nbatch = 10), rand_state(3, nbatch = 10, no_transpose_storage = true)]
+    for reg in [
+        rand_state(3, nbatch = 10),
+        rand_state(3, nbatch = 10, no_transpose_storage = true),
+    ]
         e1 = expect(put(2, 2 => X), reg |> copy |> focus!(1, 2) |> ρ)
         e2 = expect(put(2, 2 => X), reg |> copy |> focus!(1, 2))
         e3 = expect(put(3, 2 => X), reg |> ρ)
@@ -79,8 +82,8 @@ end
 
 @testset "gate count, time" begin
     cphase(i, j) = control(i, j => shift(2π / (2^(i - j + 1))))
-    hcphases(n, i) = chain(n, i == j ? put(i => H) : cphase(j, i) for j in i:n)
-    qft_circuit(n::Int) = chain(n, hcphases(n, i) for i in 1:n)
+    hcphases(n, i) = chain(n, i == j ? put(i => H) : cphase(j, i) for j = i:n)
+    qft_circuit(n::Int) = chain(n, hcphases(n, i) for i = 1:n)
     qc = qft_circuit(3)
     @test qc |> gatecount |> length == 2
     @test qc |> gatecount |> values |> sum == 6

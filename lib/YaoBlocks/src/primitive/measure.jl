@@ -1,6 +1,7 @@
 using YaoBase, YaoArrayRegister, Random
 using BitBasis
-export Measure, MeasureAndReset, AllLocs, ComputationalBasis, chmeasureoperator, nqubits_measured
+export Measure,
+    MeasureAndReset, AllLocs, ComputationalBasis, chmeasureoperator, nqubits_measured
 
 """
     Measure{N, K, OT, LT, PT, RNG} <: PrimitiveBlock{N}
@@ -37,7 +38,12 @@ function Measure{N}(
 end
 
 const MeasureAndReset{N,K,OT,LT,RNG} = Measure{N,K,OT,LT,ResetTo{BitStr64{K}},RNG}
-function MeasureAndReset(N, resetto = 0; operator = ComputationalBasis, rng = Random.GLOBAL_RNG)
+function MeasureAndReset(
+    N,
+    resetto = 0;
+    operator = ComputationalBasis,
+    rng = Random.GLOBAL_RNG,
+)
     Measure(N; postprocess = ResetTo(resetto), operator = operator, rng = rng, locs = locs)
 end
 
@@ -165,7 +171,14 @@ Measure(;
     resetto = nothing,
     remove = false,
 ) where {K} = @λ(
-    n -> Measure(n; rng = rng, locs = locs, operator = operator, resetto = resetto, remove = remove)
+    n -> Measure(
+        n;
+        rng = rng,
+        locs = locs,
+        operator = operator,
+        resetto = resetto,
+        remove = remove,
+    )
 )
 mat(x::Measure) = error("use BlockMap to get its matrix.")
 

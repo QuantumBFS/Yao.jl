@@ -76,7 +76,8 @@ chsubblocks(x::AbstractBlock, itr)
 
 Transform the apply! function of specific block to dense matrix.
 """
-applymatrix(T, g::AbstractBlock) = linop2dense(T, r -> statevec(apply!(ArrayReg(r), g)), nqubits(g))
+applymatrix(T, g::AbstractBlock) =
+    linop2dense(T, r -> statevec(apply!(ArrayReg(r), g)), nqubits(g))
 applymatrix(g::AbstractBlock) = applymatrix(ComplexF64, g)
 # just use BlockMap maybe? No!
 
@@ -108,7 +109,8 @@ YaoBase.nqubits(x::AbstractBlock{N}) where {N} = nqubits(typeof(x))
 # properties
 for each_property in [:isunitary, :isreflexive, :ishermitian]
     @eval YaoBase.$each_property(x::AbstractBlock) = $each_property(mat(x))
-    @eval YaoBase.$each_property(::Type{T}) where {T<:AbstractBlock} = $each_property(mat(T))
+    @eval YaoBase.$each_property(::Type{T}) where {T<:AbstractBlock} =
+        $each_property(mat(T))
 end
 
 function iscommute_fallback(op1::AbstractBlock{N}, op2::AbstractBlock{N}) where {N}
@@ -161,7 +163,8 @@ for F in [:setiparams!, :setiparams]
             error("setparams!(x, θ...) is not implemented")
         $F(x::AbstractBlock, it::Symbol) = $F(x, render_params(x, it))
 
-        $F(f::Function, x::AbstractBlock, it) = $F(x, map(x -> f(x...), zip(getiparams(x), it)))
+        $F(f::Function, x::AbstractBlock, it) =
+            $F(x, map(x -> f(x...), zip(getiparams(x), it)))
         $F(f::Nothing, x::AbstractBlock, it) = $F(x, it)
         $F(f::Function, x::AbstractBlock, it::Symbol) = $F(f, x, render_params(x, it))
     end
@@ -281,7 +284,7 @@ Pop the first [`nparameters`](@ref) parameters of list, map them with a function
 `f`, then dispatch them to the block tree `block`. See also [`dispatch!`](@ref).
 """
 function popdispatch!(f::Function, x::AbstractBlock, list::Vector)
-    setiparams!(f, x, (popfirst!(list) for k in 1:niparams(x))...)
+    setiparams!(f, x, (popfirst!(list) for k = 1:niparams(x))...)
     for each in subblocks(x)
         popdispatch!(f, each, list)
     end
@@ -295,7 +298,7 @@ Pop the first [`nparameters`](@ref) parameters of list, then dispatch them to
 the block tree `block`. See also [`dispatch!`](@ref).
 """
 function popdispatch!(x::AbstractBlock, list::Vector)
-    setiparams!(x, (popfirst!(list) for k in 1:niparams(x))...)
+    setiparams!(x, (popfirst!(list) for k = 1:niparams(x))...)
     for each in subblocks(x)
         popdispatch!(each, list)
     end
@@ -304,8 +307,9 @@ end
 
 render_params(r::AbstractBlock, params) = params
 render_params(r::AbstractBlock, params::Symbol) = render_params(r, Val(params))
-render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i in 1:niparams(r))
-render_params(r::AbstractBlock, ::Val{:zero}) = (zero(iparams_eltype(r)) for i in 1:niparams(r))
+render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i = 1:niparams(r))
+render_params(r::AbstractBlock, ::Val{:zero}) =
+    (zero(iparams_eltype(r)) for i = 1:niparams(r))
 
 """
     HasParameters{X} <: SimpleTraits.Trait

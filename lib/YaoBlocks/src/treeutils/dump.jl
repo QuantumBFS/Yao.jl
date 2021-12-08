@@ -36,7 +36,7 @@ function dump_gate(blk::KronBlock{N}) where {N}
         error("unsupported multi-qubit in kron while dumping to Yao script.")
     end
     if length(occupied_locs(blk)) == N
-        :(kron($([dump_gate(blk[i]) for i in 1:N]...)))
+        :(kron($([dump_gate(blk[i]) for i = 1:N]...)))
     else
         :(($([:($i => $(dump_gate(g))) for (i, g) in blk]...),))
     end

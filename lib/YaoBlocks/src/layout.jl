@@ -19,7 +19,7 @@ _charwidth(s) = sum(map(textwidth, collect(s)))
 print prefix of a tree node in a single line.
 """
 function print_prefix(io::IO, depth, charset, active_levels)
-    for current_depth in 2:depth
+    for current_depth = 2:depth
         if current_depth in active_levels
             print(io, charset.skip, " "^(_charwidth(charset.dash) + 1))
         else
@@ -195,8 +195,10 @@ color(::Type{<:GeneralMatrixBlock}) = :red
 print_block(io::IO, g::PhaseGate) = print(io, "phase(", g.theta, ")")
 print_block(io::IO, S::ShiftGate) = print(io, "shift(", S.theta, ")")
 print_block(io::IO, R::RotationGate) = print(io, "rot(", content(R), ", ", R.theta, ")")
-print_block(io::IO, x::KronBlock) = printstyled(io, "kron"; bold = true, color = color(KronBlock))
-print_block(io::IO, x::ChainBlock) = printstyled(io, "chain"; bold = true, color = color(ChainBlock))
+print_block(io::IO, x::KronBlock) =
+    printstyled(io, "kron"; bold = true, color = color(KronBlock))
+print_block(io::IO, x::ChainBlock) =
+    printstyled(io, "chain"; bold = true, color = color(ChainBlock))
 print_block(io::IO, x::UnitaryChannel) = printstyled(io, "unitary_channel"; bold = true)
 print_block(io::IO, c::Subroutine) = print(io, "Subroutine: ", occupied_locs(c))
 print_block(io::IO, c::CachedBlock) = print_block(io, content(c))
@@ -239,7 +241,8 @@ function print_block(io::IO, x::ControlBlock)
     printstyled(io, "control("; bold = true, color = color(ControlBlock))
 
     for i in eachindex(x.ctrl_locs)
-        x.ctrl_config[i] == 0 && printstyled(io, '¬'; bold = true, color = color(ControlBlock))
+        x.ctrl_config[i] == 0 &&
+            printstyled(io, '¬'; bold = true, color = color(ControlBlock))
         printstyled(io, x.ctrl_locs[i]; bold = true, color = color(ControlBlock))
 
         if i != lastindex(x.ctrl_locs)
@@ -283,8 +286,10 @@ function print_annotation(
 end
 
 print_annotation(io::IO, node::AbstractBlock) = nothing # skip
-print_annotation(io::IO, c::Daggered) = printstyled(io, " [†]"; bold = true, color = :yellow)
-print_annotation(io::IO, c::CachedBlock) = printstyled(io, "[cached] "; bold = true, color = :yellow)
+print_annotation(io::IO, c::Daggered) =
+    printstyled(io, " [†]"; bold = true, color = :yellow)
+print_annotation(io::IO, c::CachedBlock) =
+    printstyled(io, "[cached] "; bold = true, color = :yellow)
 
 function print_annotation(io::IO, x::Scale)
     if x.alpha == im
@@ -306,7 +311,13 @@ function print_annotation(io::IO, x::Scale{Val{S}}) where {S}
     print_annotation(io, Scale(S, x))
 end
 
-function print_annotation(io::IO, root::AbstractBlock, node::KronBlock, child::AbstractBlock, k::Int)
+function print_annotation(
+    io::IO,
+    root::AbstractBlock,
+    node::KronBlock,
+    child::AbstractBlock,
+    k::Int,
+)
     if length(node.locs[k]) == 1
         printstyled(io, node.locs[k].start; bold = true, color = :white)
     else
