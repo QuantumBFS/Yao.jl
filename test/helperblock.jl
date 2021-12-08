@@ -1,4 +1,4 @@
-using YaoPlots, Yao, Compose
+using YaoPlots, Yao
 using Test
 
 @testset "LabelBlock" begin
@@ -12,7 +12,7 @@ using Test
     reg = rand_state(5)
     @test apply!(copy(reg), cb) ≈ apply!(copy(reg), x)
     @test cb' isa LabelBlock && mat(cb') ≈ mat(cb)'
-    @test (cb').name == "x†" && ((cb')').name == "x"
+    @test (cb').name == "x†" && (cb'').name == "x"
 
     y = put(5, (3,4)=>matblock(rand_unitary(4)))
     cc = chsubblocks(cb, y)
@@ -23,6 +23,6 @@ using Test
     c1 = chain(5, [put(5, (2,3)=>label(SWAP, "SWAP")), put(5, 2=>label(I2, "id")), put(5, 2=>label(X, "X")), control(5, (5,3), (2,4,1)=>put(3, (1,3)=>label(SWAP, "SWAP")))])
     c2 = chain(5, [put(5, (2,3)=>label(SWAP, "SWAP")), put(5, 2=>label(I2, "id")), put(5, 2=>label(X, "X")), control(5, (5,3), (2,4,1)=>put(3, (1,2)=>label(SWAP, "SWAP")))])
 
-    @test vizcircuit(c1) isa Compose.Context
+    @test vizcircuit(c1) isa Context
     @test_throws ErrorException vizcircuit(c2)
 end
