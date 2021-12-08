@@ -37,7 +37,7 @@ function main()
         else
             return print(help)
         end
-        Pkg.test(package_names; coverage=true)
+        Pkg.test(package_names; coverage = true)
     elseif "doc" == ARGS[1]
         packages = map(package_names) do pkg
             Pkg.PackageSpec(path = joinpath(root_directory, "lib", pkg))

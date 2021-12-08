@@ -37,7 +37,9 @@ function parse_yaoscript(ex)
             end
             parse_ex(body |> rmlines, info)
         end
-        _ => error("wrong format, expect expression like `let nqubits=5 GATEDEF end`, got $ex")
+        _ => error(
+            "wrong format, expect expression like `let nqubits=5 GATEDEF end`, got $ex",
+        )
     end
 end
 
@@ -64,7 +66,8 @@ function parse_ex(ex, info::ParseInfo)
         ::Nothing => nothing
         :($g') => :($(parse_ex(g, info))')
         :($a * $b) => :($(Number(a)) * $(parse_ex(b, info)))
-        :(kron($(args...))) => :(kron($(parse_ex.(args, Ref(ParseInfo(1, info.version)))...)))
+        :(kron($(args...))) =>
+            :(kron($(parse_ex.(args, Ref(ParseInfo(1, info.version)))...)))
         :(repeat($(exloc...)) => $g) => begin
             loc = render_loc((exloc...,), info.nbit)
             :(repeat($(info.nbit), $(parse_ex(g, ParseInfo(1, info.version))), $loc))
@@ -74,25 +77,36 @@ function parse_ex(ex, info::ParseInfo)
         :(time($dt) => $h) => :(time_evolve($(parse_ex(h, info)), $(parse_param(dt))))
         :($exloc => Measure) => parse_ex(:($exloc => Measure(nothing) => nothing), info)
         :($exloc => Measure($op)) => parse_ex(:($exloc => Measure($op) => nothing), info)
-        :($exloc => Measure => $post) => parse_ex(:($exloc => Measure(nothing) => $post), info)
+        :($exloc => Measure => $post) =>
+            parse_ex(:($exloc => Measure(nothing) => $post), info)
         :($exloc => Measure($op) => $post) => begin
             locs = exloc == :ALL ? :(AllLocs()) : render_loc(exloc, info.nbit)
             op =
                 op isa Nothing || op == :nothing ? :(ComputationalBasis()) :
                 parse_ex(op, exloc == :ALL ? info : ParseInfo(length(locs), info.version))
             @match post begin
-                ::Nothing || :nothing => :(Measure($(info.nbit); locs = $locs, operator = $(op)))
+                ::Nothing || :nothing =>
+                    :(Measure($(info.nbit); locs = $locs, operator = $(op)))
                 :(resetto($(rbits...))) => begin
                     cb = bit_literal(render_bitstring.(rbits)...)
                     :(Measure($(info.nbit); locs = $locs, operator = $(op), resetto = $cb))
                 end
-                :remove => :(Measure($(info.nbit); locs = $locs, operator = $(op), remove = true))
+                :remove => :(Measure(
+                    $(info.nbit);
+                    locs = $locs,
+                    operator = $(op),
+                    remove = true,
+                ))
             end
         end
         :(+($(args...))) => :(+($(parse_ex.(args, Ref(info))...)))
         :(focus($(exloc...)) => $g) => begin
             loc = render_loc((exloc...,), info.nbit)
-            :(subroutine($(info.nbit), $(parse_ex(g, ParseInfo(length(loc), info.version))), $loc))
+            :(subroutine(
+                $(info.nbit),
+                $(parse_ex(g, ParseInfo(length(loc), info.version))),
+                $loc,
+            ))
         end
         :(
             begin
@@ -104,7 +118,10 @@ function parse_ex(ex, info::ParseInfo)
         end
         :($exloc => $gate) => begin
             loc = render_loc(exloc, info.nbit)
-            :(put($(info.nbit), $loc => $(parse_ex(gate, ParseInfo(length(loc), info.version)))))
+            :(put(
+                $(info.nbit),
+                $loc => $(parse_ex(gate, ParseInfo(length(loc), info.version))),
+            ))
         end
         :($(cargs...), $exloc => $gate) => begin
             loc = render_loc(exloc, info.nbit)
@@ -116,7 +133,11 @@ function parse_ex(ex, info::ParseInfo)
                     $loc => $(parse_ex(gate, ParseInfo(length(loc), info.version))),
                 ))
             else
-                :(kron($(info.nbit), $(cbits...), $loc => $(parse_ex(gate, ParseInfo(1, info.version)))))
+                :(kron(
+                    $(info.nbit),
+                    $(cbits...),
+                    $loc => $(parse_ex(gate, ParseInfo(1, info.version))),
+                ))
             end
         end
         :($f($(args...))) => gate_expr(Val(Symbol(f)), args, info)
@@ -164,7 +185,8 @@ render_cloc(ex, info) = @match ex begin
         Int(a) * (2 * Int(b) - 1)
     end
     :($a => C) => render_cloc(:($a => C(1)), info)
-    :($a => $g) => :($(render_loc(a, info.nbit)) => $(parse_ex(g, ParseInfo(1, info.version))))
+    :($a => $g) =>
+        :($(render_loc(a, info.nbit)) => $(parse_ex(g, ParseInfo(1, info.version))))
     _ => error("expect a control location specification like `2=>0` or `3=>1`, got $ex")
 end
 

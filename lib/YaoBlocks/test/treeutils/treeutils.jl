@@ -4,8 +4,8 @@ using YaoArrayRegister
 using YaoBlocks: check_dumpload
 
 block_A(i, j) = control(i, j => shift(2π / (1 << (i - j + 1))))
-block_B(n, i) = chain(n, i == j ? put(i => H) : block_A(j, i) for j in i:n)
-qft(n) = chain(block_B(n, i) for i in 1:n)
+block_B(n, i) = chain(n, i == j ? put(i => H) : block_A(j, i) for j = i:n)
+qft(n) = chain(block_B(n, i) for i = 1:n)
 
 @testset "map address" begin
     # chain, put, concentrator
@@ -43,7 +43,8 @@ qft(n) = chain(block_B(n, i) for i in 1:n)
 
     # qft
     c = qft(4)
-    @test mat(subroutine(10, c, (6, 2, 3, 7))) ≈ mat(map_address(c, AddressInfo(10, [6, 2, 3, 7])))
+    @test mat(subroutine(10, c, (6, 2, 3, 7))) ≈
+          mat(map_address(c, AddressInfo(10, [6, 2, 3, 7])))
 end
 
 
@@ -87,7 +88,8 @@ end
     # chain, put, concentrator
     @test to_basictypes(chain(5, put(5, 3 => X))) == chain(5, put(5, 3 => X))
     @test to_basictypes(subroutine(5, put(2, 2 => X), (4, 1))) == put(5, 1 => X)
-    @test to_basictypes(subroutine(5, Measure(2, locs = (2,)), (4, 1))) == Measure(5; locs = (1,))
+    @test to_basictypes(subroutine(5, Measure(2, locs = (2,)), (4, 1))) ==
+          Measure(5; locs = (1,))
     @test to_basictypes(subroutine(5, Measure(2), (4, 1))) == Measure(5; locs = (4, 1))
     @test to_basictypes(subroutine(5, X, (1,))) == put(5, 1 => X)
     @test to_basictypes(put(5, 3 => X)) == put(5, 3 => X)
@@ -127,7 +129,7 @@ end
         chain(put(10, 8 => X), put(10, 7 => Z)),
         Measure(10, operator = X, locs = 6),
     )
-    c2 = chain(10, chain(10, [put(10, i => H) for i in 1:10]), sub2)
+    c2 = chain(10, chain(10, [put(10, i => H) for i = 1:10]), sub2)
     @test simplify(c, rules = [to_basictypes]) == c2
 
     # subroutine, chain, put, kron and control

@@ -38,7 +38,8 @@ Base.adjoint(x::Scale{Val{X}}) where {X} = Scale(Val(adjoint(X)), adjoint(conten
 
 YaoBase.ishermitian(s::Scale) =
     (ishermitian(s |> content) && ishermitian(s |> factor)) || ishermitian(mat(s))
-YaoBase.isunitary(s::Scale) = (isunitary(s |> content) && isunitary(s |> factor)) || isunitary(mat(s))
+YaoBase.isunitary(s::Scale) =
+    (isunitary(s |> content) && isunitary(s |> factor)) || isunitary(mat(s))
 YaoBase.isreflexive(s::Scale) =
     (isreflexive(s |> content) && isreflexive(s |> factor)) || isreflexive(mat(s))
 YaoBase.iscommute(x::Scale, y::Scale) = iscommute(x |> content, y |> content)

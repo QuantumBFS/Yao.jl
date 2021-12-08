@@ -82,7 +82,8 @@ control(1)
 ```
 """
 control(total::Int, ctrl_locs, target::Pair) = ControlBlock{total}(Tuple(ctrl_locs), target)
-control(total::Int, control_location::Int, target::Pair) = control(total, (control_location,), target)
+control(total::Int, control_location::Int, target::Pair) =
+    control(total, (control_location,), target)
 
 """
     control(ctrl_locs, target) -> f(n)
@@ -188,15 +189,21 @@ end
 
 PropertyTrait(::ControlBlock) = PreserveAll()
 
-occupied_locs(c::ControlBlock) = (c.ctrl_locs..., map(x -> c.locs[x], occupied_locs(c.content))...)
+occupied_locs(c::ControlBlock) =
+    (c.ctrl_locs..., map(x -> c.locs[x], occupied_locs(c.content))...)
 chsubblocks(pb::ControlBlock{N}, blk::AbstractBlock) where {N} =
     ControlBlock{N}(pb.ctrl_locs, pb.ctrl_config, blk, pb.locs)
 
 # NOTE: ControlBlock will forward parameters directly without loop
 cache_key(ctrl::ControlBlock) = cache_key(ctrl.content)
 
-function Base.:(==)(lhs::ControlBlock{N,BT,C,M}, rhs::ControlBlock{N,BT,C,M}) where {BT,N,C,M}
-    return (lhs.ctrl_locs == rhs.ctrl_locs) && (lhs.content == rhs.content) && (lhs.locs == rhs.locs)
+function Base.:(==)(
+    lhs::ControlBlock{N,BT,C,M},
+    rhs::ControlBlock{N,BT,C,M},
+) where {BT,N,C,M}
+    return (lhs.ctrl_locs == rhs.ctrl_locs) &&
+           (lhs.content == rhs.content) &&
+           (lhs.locs == rhs.locs)
 end
 
 Base.adjoint(blk::ControlBlock{N}) where {N} =

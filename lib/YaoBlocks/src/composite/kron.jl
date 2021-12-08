@@ -23,15 +23,18 @@ struct KronBlock{N,M,MT<:NTuple{M,Any}} <: CompositeBlock{N}
         @assert_locs_safe N locs
 
         for (each, b) in zip(locs, blocks)
-            length(each) != nqubits(b) &&
-                throw(LocationConflictError("locs $locs is inconsistent with target block $b"))
+            length(each) != nqubits(b) && throw(
+                LocationConflictError("locs $locs is inconsistent with target block $b"),
+            )
         end
         return new{N,M,typeof(blocks)}(locs, blocks)
     end
 end
 
-KronBlock{N}(locs::NTuple{M,UnitRange{Int}}, blocks::MT) where {N,M,MT<:NTuple{M,AbstractBlock}} =
-    KronBlock{N,M,MT}(locs, blocks)
+KronBlock{N}(
+    locs::NTuple{M,UnitRange{Int}},
+    blocks::MT,
+) where {N,M,MT<:NTuple{M,AbstractBlock}} = KronBlock{N,M,MT}(locs, blocks)
 
 function KronBlock{N}(itr::Pair{<:Any,<:AbstractBlock}...) where {N}
     locs = map(itr) do p
@@ -105,7 +108,7 @@ function Base.kron(total::Int, blocks::AbstractBlock...)
 end
 
 function _render_kronloc(l)
-    for i in 1:length(l)-1
+    for i = 1:length(l)-1
         l[i+1] == l[i] + 1 || error("Non-Contiguous location in Kron!")
     end
     l[1]:l[end]

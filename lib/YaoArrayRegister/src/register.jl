@@ -365,7 +365,7 @@ product_state(total::Int, bit_config::Integer; kwargs...) =
 product_state(::Type{T}, bit_str::BitStr{N}; kwargs...) where {T,N} =
     product_state(T, N, buffer(bit_str); kwargs...)
 
-product_state(::Type{T}, bit_configs::AbstractVector; kwargs...) where T = 
+product_state(::Type{T}, bit_configs::AbstractVector; kwargs...) where {T} =
     product_state(T, bit_literal(bit_configs...); kwargs...)
 
 function product_state(

@@ -30,7 +30,8 @@ end
     @test nparameters(phase(0.1)) == 1
     @test adjoint(phase(0.1)) == phase(-0.1)
     @test dispatch!(phase(0.1), 0.3) == phase(0.3)
-    @test dispatch(phase(0.1), 3) == phase(3) && eltype(getiparams(dispatch(phase(0.1), 3))) == Int
+    @test dispatch(phase(0.1), 3) == phase(3) &&
+          eltype(getiparams(dispatch(phase(0.1), 3))) == Int
 
     @testset "test $op" for op in [+, -, *, /]
         @test dispatch!(op, phase(0.1), π) == phase(op(0.1, π))

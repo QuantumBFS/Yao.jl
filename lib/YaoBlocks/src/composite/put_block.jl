@@ -52,7 +52,8 @@ The outter locations creates a scope which make it seems to be a contiguous two 
 put(total::Int, pa::Pair{NTuple{M,Int},<:AbstractBlock}) where {M} =
     PutBlock{total}(pa.second, pa.first)
 put(total::Int, pa::Pair{Int,<:AbstractBlock}) = PutBlock{total}(pa.second, (pa.first,))
-put(total::Int, pa::Pair{<:Any,<:AbstractBlock}) = PutBlock{total}(pa.second, Tuple(pa.first))
+put(total::Int, pa::Pair{<:Any,<:AbstractBlock}) =
+    PutBlock{total}(pa.second, Tuple(pa.first))
 
 """
     put(pair) -> f(n)
@@ -109,7 +110,8 @@ end
 const Swap{N} = PutBlock{N,2,G} where {G<:ConstGate.SWAPGate}
 const PSwap{N,T} = PutBlock{N,2,RotationGate{2,T,G}} where {G<:ConstGate.SWAPGate}
 Swap{N}(locs::Tuple{Int,Int}) where {N} = PutBlock{N}(ConstGate.SWAPGate(), locs)
-PSwap{N}(locs::Tuple{Int,Int}, θ::Real) where {N} = PutBlock{N}(rot(ConstGate.SWAPGate(), θ), locs)
+PSwap{N}(locs::Tuple{Int,Int}, θ::Real) where {N} =
+    PutBlock{N}(rot(ConstGate.SWAPGate(), θ), locs)
 
 """
     swap(n, loc1, loc2)

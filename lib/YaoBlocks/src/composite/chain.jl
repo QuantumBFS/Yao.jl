@@ -14,7 +14,8 @@ struct ChainBlock{N} <: CompositeBlock{N}
 end
 
 ChainBlock(blocks::Vector{<:AbstractBlock{N}}) where {N} = ChainBlock{N}(blocks)
-ChainBlock(blocks::AbstractBlock{N}...) where {N} = ChainBlock(collect(AbstractBlock{N}, blocks))
+ChainBlock(blocks::AbstractBlock{N}...) where {N} =
+    ChainBlock(collect(AbstractBlock{N}, blocks))
 
 """
     chain(blocks...)
@@ -98,12 +99,14 @@ end
 Base.copy(c::ChainBlock{N}) where {N} = ChainBlock{N}(copy(c.blocks))
 Base.similar(c::ChainBlock{N}) where {N} = ChainBlock{N}(empty!(similar(c.blocks)))
 Base.getindex(c::ChainBlock, index) = getindex(c.blocks, index)
-Base.getindex(c::ChainBlock, index::Union{UnitRange,Vector}) = ChainBlock(getindex(c.blocks, index))
+Base.getindex(c::ChainBlock, index::Union{UnitRange,Vector}) =
+    ChainBlock(getindex(c.blocks, index))
 Base.setindex!(c::ChainBlock{N}, val::AbstractBlock{N}, index::Integer) where {N} =
     (setindex!(c.blocks, val, index); c)
 Base.insert!(c::ChainBlock{N}, index::Integer, val::AbstractBlock{N}) where {N} =
     (insert!(c.blocks, index, val); c)
-Base.adjoint(blk::ChainBlock{N}) where {N} = ChainBlock{N}(map(adjoint, reverse(subblocks(blk))))
+Base.adjoint(blk::ChainBlock{N}) where {N} =
+    ChainBlock{N}(map(adjoint, reverse(subblocks(blk))))
 Base.lastindex(c::ChainBlock) = lastindex(c.blocks)
 ## Iterate contained blocks
 Base.iterate(c::ChainBlock, st = 1) = iterate(c.blocks, st)
@@ -114,14 +117,17 @@ Base.popfirst!(c::ChainBlock) = popfirst!(c.blocks)
 Base.pop!(c::ChainBlock) = pop!(c.blocks)
 Base.push!(c::ChainBlock{N}, m::AbstractBlock{N}) where {N} = (push!(c.blocks, m); c)
 Base.push!(c::ChainBlock{N}, f::Function) where {N} = (push!(c.blocks, f(N)); c)
-Base.pushfirst!(c::ChainBlock{N}, m::AbstractBlock{N}) where {N} = (pushfirst!(c.blocks, m); c)
+Base.pushfirst!(c::ChainBlock{N}, m::AbstractBlock{N}) where {N} =
+    (pushfirst!(c.blocks, m); c)
 Base.pushfirst!(c::ChainBlock{N}, f::Function) where {N} = (pushfirst!(c.blocks, f(N)); c)
 Base.append!(c::ChainBlock{N}, list::Vector{<:AbstractBlock{N}}) where {N} =
     (append!(c.blocks, list); c)
-Base.append!(c1::ChainBlock{N}, c2::ChainBlock{N}) where {N} = (append!(c1.blocks, c2.blocks); c1)
+Base.append!(c1::ChainBlock{N}, c2::ChainBlock{N}) where {N} =
+    (append!(c1.blocks, c2.blocks); c1)
 Base.prepend!(c1::ChainBlock{N}, list::Vector{<:AbstractBlock{N}}) where {N} =
     (prepend!(c1.blocks, list); c1)
-Base.prepend!(c1::ChainBlock{N}, c2::ChainBlock{N}) where {N} = (prepend!(c1.blocks, c2.blocks); c1)
+Base.prepend!(c1::ChainBlock{N}, c2::ChainBlock{N}) where {N} =
+    (prepend!(c1.blocks, c2.blocks); c1)
 
 YaoBase.isunitary(c::ChainBlock) = all(isunitary, c.blocks) || isunitary(mat(c))
 YaoBase.isreflexive(c::ChainBlock) =

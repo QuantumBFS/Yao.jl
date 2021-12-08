@@ -32,5 +32,6 @@ function to_basictypes(block::Subroutine{N,<:Measure}) where {N}
 end
 to_basictypes(block::Daggered) where {N} = Daggered(block.content)
 to_basictypes(block::Scale) where {N} = Scale(block.alpha, block.content)
-to_basictypes(block::KronBlock{N}) where {N} = chain(N, [put(N, i => block[i]) for i in block.locs])
+to_basictypes(block::KronBlock{N}) where {N} =
+    chain(N, [put(N, i => block[i]) for i in block.locs])
 to_basictypes(block::Union{Add,PutBlock,ChainBlock,ControlBlock}) where {N} = block

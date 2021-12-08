@@ -8,7 +8,7 @@ using LuxurySparse
     @test g.blocks == [kron(2, X, Y), kron(2, 1 => phase(0.1))]
     blks = [X, Y, Rx(0.3)]
     @test chsubblocks(g, blks) |> subblocks |> collect == blks
-    @test chsubblocks(chain(X, Y, Z), X for _ in 1:3) |> subblocks |> collect == [X, X, X]
+    @test chsubblocks(chain(X, Y, Z), X for _ = 1:3) |> subblocks |> collect == [X, X, X]
 
     c1 = ChainBlock(put(5, 1 => X), put(5, 3 => Y))
     c2 = ChainBlock(put(5, 4 => X), put(5, 5 => Y))
@@ -35,7 +35,7 @@ end
     @test chain(list) == chain(X)
 
     @test chain(4, []) == chain(4)
-    @test chain(X for _ in 1:3) == chain(X, X, X)
+    @test chain(X for _ = 1:3) == chain(X, X, X)
     @test chain(put(1 => X))(4) == chain(put(4, 1 => X))
     @test chain(put(1 => X), put(2 => X))(4) == chain(put(4, 1 => X), put(4, 2 => X))
     @test chain()(4) == chain(4)

@@ -50,7 +50,8 @@ for FUNC in [:length, :iterate, :getindex, :eltype, :eachindex, :popfirst!, :las
     @eval Base.$FUNC(x::Add, args...) = $FUNC(subblocks(x), args...)
 end
 
-Base.getindex(c::Add{N}, index::Union{UnitRange,Vector}) where {N} = Add{N}(getindex(c.list, index))
+Base.getindex(c::Add{N}, index::Union{UnitRange,Vector}) where {N} =
+    Add{N}(getindex(c.list, index))
 Base.setindex!(c::Add{N}, val::AbstractBlock{N}, index::Integer) where {N} =
     (setindex!(c.list, val, index); c)
 Base.insert!(c::Add{N}, index::Integer, val::AbstractBlock{N}) where {N} =
@@ -58,7 +59,8 @@ Base.insert!(c::Add{N}, index::Integer, val::AbstractBlock{N}) where {N} =
 Base.adjoint(blk::Add{N}) where {N} = Add{N}(map(adjoint, subblocks(blk)))
 
 ## Iterate contained blocks
-occupied_locs(c::Add) = (unique(Iterators.flatten(occupied_locs(b) for b in subblocks(c)))...,)
+occupied_locs(c::Add) =
+    (unique(Iterators.flatten(occupied_locs(b) for b in subblocks(c)))...,)
 
 # Additional Methods for Add
 Base.push!(c::Add{N}, val::AbstractBlock{N}) where {N} = (push!(c.list, val); c)

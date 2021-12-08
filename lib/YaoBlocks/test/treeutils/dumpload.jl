@@ -20,7 +20,9 @@ using YaoBlocks: check_dumpload
     @test check_dumpload(Measure(5))
     @test check_dumpload(Measure(5, operator = put(5, 2 => X)))
     @test check_dumpload(Measure(5, locs = (3, 1), resetto = bit"01"))
-    @test check_dumpload(Measure(5, locs = (3, 2), operator = put(2, 2 => X), resetto = bit"11"))
+    @test check_dumpload(
+        Measure(5, locs = (3, 2), operator = put(2, 2 => X), resetto = bit"11"),
+    )
     @test check_dumpload(Daggered(X))
     @test check_dumpload(2 * X)
     @test check_dumpload(cache(2 * X))

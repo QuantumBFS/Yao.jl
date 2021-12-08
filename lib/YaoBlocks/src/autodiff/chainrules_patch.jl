@@ -103,7 +103,7 @@ function rrule(::typeof(expect), op::AbstractBlock, reg::AbstractRegister{B}) wh
     out = expect(op, reg)
     out, function (outδ)
         greg = expect_g(op, reg)
-        for b in 1:B
+        for b = 1:B
             viewbatch(greg, b).state .*= 2 * outδ[b]
         end
         return (NoTangent(), NoTangent(), greg)
@@ -119,7 +119,7 @@ function rrule(
     out,
     function (outδ)
         greg, gcircuit = expect_g(op, reg_and_circuit)
-        for b in 1:B
+        for b = 1:B
             viewbatch(greg, b).state .*= 2 * outδ[b]
         end
         return (
@@ -189,7 +189,8 @@ rrule(::typeof(state), reg::AdjointArrayReg{B,T}) where {B,T} =
 rrule(::typeof(statevec), reg::AdjointArrayReg{B,T}) where {B,T} =
     statevec(reg), adjy -> (NoTangent(), ArrayReg(_totype(T, adjy)')')
 rrule(::typeof(parent), reg::AdjointArrayReg) = parent(reg), adjy -> (NoTangent(), adjy')
-rrule(::typeof(Base.adjoint), reg::ArrayReg) = Base.adjoint(reg), adjy -> (NoTangent(), parent(adjy))
+rrule(::typeof(Base.adjoint), reg::ArrayReg) =
+    Base.adjoint(reg), adjy -> (NoTangent(), parent(adjy))
 @non_differentiable nparameters(::Any)
 @non_differentiable zero_state(args...)
 @non_differentiable rand_state(args...)

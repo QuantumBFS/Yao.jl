@@ -43,7 +43,12 @@ is the number of qubits, and `nctrls` is the number of control qubits.
     return N + (1 << (nbits - nctrls - log2dim1(U))) * (length(U) - size(U, 2))
 end
 
-@inline function num_nonzero(nbits::Int, nctrls::Int, U::SDSparseMatrixCSC, N::Int = 1 << nbits)
+@inline function num_nonzero(
+    nbits::Int,
+    nctrls::Int,
+    U::SDSparseMatrixCSC,
+    N::Int = 1 << nbits,
+)
     return N + (1 << (nbits - nctrls - log2dim1(U))) * (nnz(U) - size(U, 2))
 end
 
@@ -71,7 +76,8 @@ end
     U = all(diff(locs) .> 0) ? U0 : reorder(U0, collect(locs) |> sortperm)
     locked_bits = [cbits..., locs...]
     locked_vals = [cvals..., zeros(Int, M)...]
-    locs_raw = [i + 1 for i in itercontrol(nbit, setdiff(1:nbit, locs), zeros(Int, nbit - M))]
+    locs_raw =
+        [i + 1 for i in itercontrol(nbit, setdiff(1:nbit, locs), zeros(Int, nbit - M))]
     ic = itercontrol(nbit, locked_bits, locked_vals)
     return U |> autostatic, ic, locs_raw |> staticize
 end
@@ -86,7 +92,9 @@ const LARGE_MATRIX_WARN = 62
 
 function large_mat_check(n::Int)
     if n > LARGE_MATRIX_WARN
-        error("matrix is too large, expect n <= $LARGE_MATRIX_WARN, got $n, integer overflows")
+        error(
+            "matrix is too large, expect n <= $LARGE_MATRIX_WARN, got $n, integer overflows",
+        )
     end
     return nothing
 end
@@ -128,8 +136,8 @@ function u1mat(nbits::Int, U1::SDMatrix, ibit::Int)
     nzval = Vector{eltype(U1)}(undef, NNZ)
 
     mat = SparseMatrixCSC(N, N, colptr, rowval, nzval)
-    for j in 0:step_2:N-step
-        @inbounds @simd for i in j+1:j+step
+    for j = 0:step_2:N-step
+        @inbounds @simd for i = j+1:j+step
             u1ij!(mat, i, i + step, a, b, c, d)
         end
     end
@@ -152,7 +160,7 @@ end
 end
 
 @inline function unij!(mat::SparseMatrixCSC, locs, U::SDMatrix)
-    @simd for j in 1:size(U, 2)
+    @simd for j = 1:size(U, 2)
         @inbounds setcol!(mat, locs[j], locs, view(U, :, j))
     end
     csc
@@ -226,7 +234,7 @@ function cunmat(
     controldo(ic) do i
         @inbounds Ns[locs_raw.+i] = ns
     end
-    @inbounds @simd for j in 1:N
+    @inbounds @simd for j = 1:N
         colptr[j+1] = colptr[j] + Ns[j]
         if Ns[j] == 1
             rowval[colptr[j]] = j
@@ -241,7 +249,7 @@ function cunmat(
 end
 
 @inline function unij!(mat::SparseMatrixCSC, locs, U::SDSparseMatrixCSC)
-    @simd for j in 1:size(U, 2)
+    @simd for j = 1:size(U, 2)
         rows, vals = getcol(U, j)
         @inbounds setcol!(mat, locs[j], view(locs, rows), vals)
     end
