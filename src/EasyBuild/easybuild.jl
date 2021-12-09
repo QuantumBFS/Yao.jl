@@ -8,4 +8,5 @@ include("hamiltonians.jl")
 include("variational_circuit.jl")
 include("supremacy_circuit.jl")
 include("google53.jl")
+include("hadamardtest.jl")
 end
