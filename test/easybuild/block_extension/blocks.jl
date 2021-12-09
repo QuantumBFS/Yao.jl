@@ -4,16 +4,12 @@ using Test, Yao.EasyBuild
     include("RotBasis.jl")
 end
 
-@testset "Sequence" begin
-    include("Sequence.jl")
-end
-
 @testset "Bag" begin
     include("Bag.jl")
 end
 
-@testset "TrivialGate" begin
-    include("TrivialGate.jl")
+@testset "EchoBlock" begin
+    include("EchoBlock.jl")
 end
 
 @testset "ConditionBlock" begin

@@ -1,17 +1,3 @@
-export Wait
-
-"""
-    Wait{N, T} <: TrivialGate{N}
-    Wait{N}(t)
-
-Wait the experimental signals for time `t` (empty run).
-"""
-struct Wait{N, T} <: TrivialGate{N}
-    t::T
-    Wait{N}(t::T) where {N,T} = new{N, T}(t)
-end
-YaoAPI.print_block(io::IO, d::Wait) = print(io, "Wait → $(d.t)")
-
 export EchoBlock
 struct EchoBlock{N,OT<:IO} <: PrimitiveBlock{N}
     sym::Symbol

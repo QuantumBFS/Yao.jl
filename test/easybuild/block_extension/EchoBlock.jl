@@ -5,7 +5,7 @@ using Random, Test
     block = EchoBlock(4, :Test)
     reg = rand_state(4)
     @test reg |> block == reg
-    @test mat(block) != nothing
+    @test mat(block) !== nothing
     @test ishermitian(block)
     @test isreflexive(block)
     @test isunitary(block)

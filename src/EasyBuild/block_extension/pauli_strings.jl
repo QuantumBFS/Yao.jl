@@ -10,9 +10,6 @@ struct PauliString{N, BT <: ConstantGate{1}, VT <: SizedVector{N, BT}} <: Compos
         new{N, BT, typeof(blocks)}(blocks)
 end
 
-# NOTE: PauliString has a fixed size `N`, thus by default, it should use
-#      SizedVector, or this block could be actually not correct.
-
 """
     PauliString(xs::PauliGate...)
 

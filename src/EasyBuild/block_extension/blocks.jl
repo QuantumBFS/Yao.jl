@@ -1,7 +1,6 @@
 import .YaoBlocks: _apply!
 include("shortcuts.jl")
-include("sequence.jl")
-include("TrivialGate.jl")
+include("EchoBlock.jl")
 include("Bag.jl")
 include("Mod.jl")
 include("ConditionBlock.jl")
