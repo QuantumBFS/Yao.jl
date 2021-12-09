@@ -3,6 +3,7 @@ using YaoBlocks, YaoBlocks.LuxurySparse, YaoBlocks.YaoAPI, YaoBlocks.YaoArrayReg
 using YaoBlocks.LinearAlgebra
 include("block_extension/blocks.jl")
 include("general_U4.jl")
+include("phaseestimation.jl")
 include("qft_circuit.jl")
 include("hamiltonians.jl")
 include("variational_circuit.jl")

@@ -19,6 +19,7 @@ include("EasyBuild/easybuild.jl")
 using Reexport
 @reexport using YaoBase, YaoArrayRegister, YaoBlocks, YaoSym
 export EasyBuild
+using YaoBase.BitBasis
 
 using YaoBlocks:
     color,
