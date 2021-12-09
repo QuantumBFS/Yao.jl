@@ -1,0 +1,12 @@
+import .YaoBlocks: _apply!
+include("shortcuts.jl")
+include("sequence.jl")
+include("TrivialGate.jl")
+include("Bag.jl")
+include("Mod.jl")
+include("ConditionBlock.jl")
+include("RotBasis.jl")
+include("reflect_gate.jl")
+include("math_gate.jl")
+include("pauli_strings.jl")
+include("FSimGate.jl")
