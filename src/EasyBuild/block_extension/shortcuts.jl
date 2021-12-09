@@ -21,3 +21,16 @@ singlet_block() = singlet_block(2,1,2)
 
 """Identity block"""
 eyeblock(nbits::Int) = put(nbits, 1=>I2)
+
+"""
+    fsim_circuit(θ::Real, ϕ::Real)
+
+The circuit representation of FSim gate.
+"""
+function fsim_circuit(θ::Real, ϕ::Real)
+    if θ ≈ π/2
+        return cphase(2,2,1,-ϕ)*SWAP*rot(kron(Z,Z), -π/2)*put(2,1=>phase(-π/4))
+    else
+        return cphase(2,2,1,-ϕ)*rot(SWAP,2*θ)*rot(kron(Z,Z), -θ)*put(2,1=>phase(θ/2))
+    end
+end

@@ -28,3 +28,4 @@ function YaoAPI.setiparams!(fs::FSimGate{T}, θ, ϕ) where T
 end
 
 YaoBlocks.@dumpload_fallback FSimGate FSimGate
+YaoBlocks.Optimise.to_basictypes(fs::FSimGate) = fsim_circuit(fs.theta, fs.phi)
