@@ -1,4 +1,4 @@
-using Test, Yao
+using Test, Yao.EasyBuild
 
 @testset "block_extension" begin
     include("block_extension/blocks.jl")

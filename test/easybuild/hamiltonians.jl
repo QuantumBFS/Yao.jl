@@ -1,4 +1,4 @@
-using Yao
+using Yao.EasyBuild
 using Test
 using Yao.ConstGate
 

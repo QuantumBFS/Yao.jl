@@ -1,6 +1,6 @@
 using Test
 
-using Yao
+using Yao.EasyBuild
 
 @testset "constructor" begin
 

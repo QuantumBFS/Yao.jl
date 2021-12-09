@@ -1,8 +1,8 @@
 using Test
 using BitBasis
-using Yao
+using Yao.EasyBuild
 using Yao.EasyBuild: pattern53, upperright, lowerleft, upperleft, lowerright
-using Yao.Optimise: to_basictypes, simplify, replace_block
+using YaoBlocks.Optimise: to_basictypes, simplify, replace_block
 
 lattice = Lattice53()
 @test upperright(lattice,1,1) == 0

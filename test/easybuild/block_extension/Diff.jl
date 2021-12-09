@@ -1,7 +1,7 @@
-using Yao
-using Yao.ConstGate
+using Yao.EasyBuild
+using YaoBlocks.ConstGate
 using LinearAlgebra, Test, Random
-using Yao.AD: Rotor, generator
+using YaoBlocks.AD: Rotor, generator
 
 @testset "Diff Block" begin
     reg = rand_state(4)

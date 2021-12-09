@@ -1,9 +1,9 @@
-using Yao
+using Yao.EasyBuild
 using Test
 
-@test_throws ErrorException Yao.PauliString([X, Y, H])
+@test_throws ErrorException EasyBuild.PauliString([X, Y, H])
 
-g = Yao.PauliString(X, Y, Z)
+g = EasyBuild.PauliString(X, Y, Z)
 @test collect(subblocks(g)) == [X, Y, Z]
 @test g[1] == X
 @test g[end] == Z
@@ -14,10 +14,10 @@ g = Yao.PauliString(X, Y, Z)
 r = rand_state(3)
 @test apply!(copy(r), g) ≈ apply!(copy(r), kron(X, Y, Z))
 
-g = Yao.PauliString([X, Y, Z])
+g = EasyBuild.PauliString([X, Y, Z])
 
 @test mat(g) ≈ mat(kron(3, X, Y, Z))
-@test chsubblocks(g, [X, X, X]) == Yao.PauliString(X, X, X)
+@test chsubblocks(g, [X, X, X]) == EasyBuild.PauliString(X, X, X)
 
 g[3] = I2
 @test occupied_locs(g) == (1, 2)

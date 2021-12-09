@@ -76,12 +76,11 @@ function print_lattice53(lattice, pattern)
 end
 
 """
-    rand_google53(depth::Int; seed=1, nbits=53) -> AbstactBlock
+    rand_google53(depth::Int; nbits=53) -> AbstactBlock
 
 random google supremacy circuit with 53 qubits.
 """
-function rand_google53(depth::Int; seed=1, nbits::Int=53)
-    Random.seed!(seed)
+function rand_google53(depth::Int; nbits::Int=53)
     c = chain(nbits)
     lattice = Lattice53(nbits=nbits)
     k = 0

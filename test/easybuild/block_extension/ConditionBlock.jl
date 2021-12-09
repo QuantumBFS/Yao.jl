@@ -1,4 +1,4 @@
-using Yao
+using Yao.EasyBuild
 using Test
 
 @testset "condition, t1, t2" begin

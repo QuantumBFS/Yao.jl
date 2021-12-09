@@ -1,6 +1,6 @@
-using Test, Yao
-using Yao.Optimise: replace_block, to_basictypes, simplify
-using Yao.YaoBlocks: parse_ex
+using Test, Yao.EasyBuild
+using YaoBlocks.Optimise: replace_block, to_basictypes, simplify
+using YaoBlocks: parse_ex
 
 @testset "gates" begin
     @test isunitary(FSimGate(0.5, 0.6))

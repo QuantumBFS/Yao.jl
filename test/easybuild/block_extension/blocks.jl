@@ -1,4 +1,4 @@
-using Test
+using Test, Yao.EasyBuild
 
 @testset "RotBasis" begin
     include("RotBasis.jl")

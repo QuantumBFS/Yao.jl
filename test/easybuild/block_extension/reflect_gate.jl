@@ -1,10 +1,10 @@
-using Yao
+using Yao.EasyBuild
 using Test, LinearAlgebra
 
 @testset "test reflect gate" begin
     reg0 = rand_state(3)
     mirror = randn(1<<3)*im; mirror[:] /= norm(mirror)
-    rf = Yao.reflect(mirror)
+    rf = EasyBuild.reflect(mirror)
     reg = copy(reg0)
     apply!(reg, rf)
 
@@ -16,7 +16,7 @@ using Test, LinearAlgebra
 
     @test mat(ComplexF32, rf) == ComplexF32.(mat(rf))
 
-    @test rf == Yao.reflect(rf.psi)
+    @test rf == EasyBuild.reflect(rf.psi)
     # copy do not occur on register
     @test copy(rf).psi === rf.psi
 

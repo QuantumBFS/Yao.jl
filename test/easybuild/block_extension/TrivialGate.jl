@@ -1,4 +1,4 @@
-using Yao
+using Yao.EasyBuild
 using Random, Test
 
 @testset "EchoBlock" begin

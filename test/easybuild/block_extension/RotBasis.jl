@@ -1,7 +1,7 @@
 using Test, Random, LinearAlgebra
 
-using Yao
-using Yao.YaoBlocks: parse_ex
+using Yao.EasyBuild
+using YaoBlocks: parse_ex
 
 @testset "RotBasis" begin
     rt = RotBasis(0.5, 0.4)

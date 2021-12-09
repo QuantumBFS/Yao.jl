@@ -1,4 +1,4 @@
-using Yao
+using Yao.EasyBuild
 using Test
 
 @testset "SqrtX" begin

@@ -1,5 +1,5 @@
 using Test
-using Yao
+using Yao.EasyBuild
 
 @testset "pairs geometries" begin
     @test pair_ring(3) == [1=>2,2=>3,3=>1]

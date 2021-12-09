@@ -1,4 +1,4 @@
-using Yao, Test
+using Yao.EasyBuild, Test
 @testset "general U2 U4" begin
     c = general_U2(0.5, 0.7, 0.9; ϕ=0.8)
     @test length(c) == 4

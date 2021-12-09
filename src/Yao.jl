@@ -17,7 +17,8 @@ const 幺 = Yao
 include("EasyBuild/easybuild.jl")
 
 using Reexport
-@reexport using YaoBase, YaoArrayRegister, YaoBlocks, YaoSym, .EasyBuild
+@reexport using YaoBase, YaoArrayRegister, YaoBlocks, YaoSym
+export EasyBuild
 
 using YaoBlocks:
     color,

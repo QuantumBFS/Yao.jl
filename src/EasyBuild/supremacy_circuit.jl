@@ -1,4 +1,3 @@
-using Random
 export rand_supremacy2d
 export pair_supremacy, print_square_bond, cz_entangler
 """
@@ -7,14 +6,13 @@ control-Z entangler.
 cz_entangler(n::Int, pairs) = chain(n, control(n, [ctrl], target=>Z) for (ctrl, target) in pairs)
 
 """
-    rand_supremacy2d(nx::Int, ny::Int, depth::Int; seed=1) -> AbstactBlock
+    rand_supremacy2d(nx::Int, ny::Int, depth::Int) -> AbstactBlock
 
 random supremacy circuit.
 
 NOTE: the restriction to `T` gate is removed.
 """
-function rand_supremacy2d(nx::Int, ny::Int, depth::Int; seed=1)
-    Random.seed!(seed)
+function rand_supremacy2d(nx::Int, ny::Int, depth::Int)
     nbits = nx*ny
     entanglers = map(pair->cz_entangler(nbits, pair), pair_supremacy(nx, ny))
     gateset = [ConstGate.T, SqrtX, SqrtY]

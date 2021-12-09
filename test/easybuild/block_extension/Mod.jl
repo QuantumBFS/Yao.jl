@@ -1,4 +1,4 @@
-using Yao, Test
+using Yao.EasyBuild, Test
 
 @testset "Mod" begin
     @test_throws AssertionError Mod{4}(4,10)
