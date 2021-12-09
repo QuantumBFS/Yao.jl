@@ -27,7 +27,7 @@ eyeblock(nbits::Int) = put(nbits, 1=>I2)
 
 The circuit representation of FSim gate.
 """
-function fsim_circuit(θ::Real, ϕ::Real)
+function fsim_gate(θ::Real, ϕ::Real)
     if θ ≈ π/2
         return cphase(2,2,1,-ϕ)*SWAP*rot(kron(Z,Z), -π/2)*put(2,1=>phase(-π/4))
     else
