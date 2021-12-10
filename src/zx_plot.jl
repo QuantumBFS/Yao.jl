@@ -1,5 +1,5 @@
 using ZXCalculus
-using LightGraphs, Multigraphs
+using Graphs, Multigraphs
 using GraphPlot: gplot
 using Colors
 using ZXCalculus: qubit_loc

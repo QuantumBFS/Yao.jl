@@ -1,4 +1,4 @@
-using YaoPlots, ZXCalculus, LightGraphs
+using YaoPlots, ZXCalculus, Graphs
 using Test
 
 @testset "helperblock" begin
