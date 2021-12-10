@@ -1,6 +1,6 @@
 # YaoPlots
 
-[![Build Status](https://travis-ci.com/QuantumBFS/YaoPlots.jl.svg?branch=master)](https://travis-ci.com/QuantumBFS/YaoPlots.jl)
+[![CI](https://github.com/QuantumBFS/YaoPlots.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/QuantumBFS/YaoPlots.jl/actions/workflows/CI.yml)
 [![Coverage](https://codecov.io/gh/QuantumBFS/YaoPlots.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/QuantumBFS/YaoPlots.jl)
 
 ## Example 1: Visualize a QBIR define in Yao
