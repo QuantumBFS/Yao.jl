@@ -1,5 +1,4 @@
 using Yao.EasyBuild
-using Yao.EasyBuild: projection_analysis
 using BitBasis
 using Test, LinearAlgebra
 
@@ -63,6 +62,6 @@ end
     apply!(reg, pe)
 
     # measure
-    bs, proj, amp_relative = projection_analysis(evec, focus!(reg, M+1:M+N))
+    bs, proj, amp_relative = phase_estimation_analysis(evec, focus!(reg, M+1:M+N))
     @test isapprox(ϕs, bfloat.(bs, nbits=M), atol=0.05)
 end

@@ -4,6 +4,12 @@ Impliments PRA 69.062321.
 
 export general_U2, general_U4
 
+"""
+    general_U2(θ1, θ2, θ3; ϕ=nothing)
+
+A general single qubits gate: ``e^(iϕ)R_z(θ_3)R_y(θ_2)R_z(θ_1)``.
+Leave `ϕ` as `nothing` to fix the global phase.
+"""
 function general_U2(θ1, θ2, θ3; ϕ=nothing)
     gate = Rz(θ3) * Ry(θ2) * Rz(θ1)
     if ϕ !== nothing

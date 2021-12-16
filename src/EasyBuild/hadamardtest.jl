@@ -1,7 +1,13 @@
 export hadamard_test, hadamard_test_circuit, swap_test_circuit
 
 """
-see WiKi.
+    hadamard_test_circuit(U::AbstractBlock, ϕ::Real)
+
+The Hadamard test circuit.
+
+References
+-----------------------
+* [Wiki](https://en.wikipedia.org/wiki/Hadamard_test_(quantum_computation))
 """
 function hadamard_test_circuit(U::AbstractBlock{N}, ϕ::Real) where N
     chain(N+1, put(N+1, 1=>H),
@@ -18,8 +24,14 @@ function hadamard_test(U::AbstractBlock{N}, reg::AbstractRegister, ϕ::Real) whe
 end
 
 """
-Estimation of overlap between multiple density matrices.
-PRL 88.217901
+    swap_test_circuit(nbit::Int, nstate::Int, ϕ::Real)
+
+The swap test circuit for computing the overlap between multiple density matrices.
+The `nbit` and `nstate` specifies the number of qubit in each state and how many state we want to compare.
+
+References
+-----------------------
+* Ekert, Artur K., et al. "Direct estimations of linear and nonlinear functionals of a quantum state." Physical review letters 88.21 (2002): 217901.
 """
 function swap_test_circuit(nbit::Int, nstate::Int, ϕ::Real)
     N = nstate*nbit + 1

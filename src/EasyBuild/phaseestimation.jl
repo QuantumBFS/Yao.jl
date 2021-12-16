@@ -1,12 +1,19 @@
-export phase_estimation_circuit, projection_analysis
+export phase_estimation_circuit, phase_estimation_analysis
+
 """
-    phase_estimation_circuit(UG, n_reg, n_b) -> ChainBlock
-phase estimation circuit.
-    * `UG`: the input unitary matrix.
-    * `n_reg`: the number of bits to store phases,
-    * `n_b`: the number of bits to store vector.
+    phase_estimation_circuit(unitarygate::GeneralMatrixBlock, n_reg, n_b) -> ChainBlock
+
+Phase estimation circuit. Input arguments are
+
+* `unitarygate`: the input unitary matrix.
+* `n_reg`: the number of bits to store phases,
+* `n_b`: the number of bits to store vector.
+
+References
+----------------------
+[Wiki](https://en.wikipedia.org/wiki/Quantum_phase_estimation_algorithm)
 """
-function phase_estimation_circuit(UG::GeneralMatrixBlock, n_reg::Int, n_b::Int)
+function phase_estimation_circuit(unitarygate::GeneralMatrixBlock, n_reg::Int, n_b::Int)
     nbit = n_b + n_reg
     # Apply Hadamard Gate.
     hs = repeat(nbit, H, 1:n_reg)
@@ -14,9 +21,9 @@ function phase_estimation_circuit(UG::GeneralMatrixBlock, n_reg::Int, n_b::Int)
     # Construct a control circuit.
     control_circuit = chain(nbit)
     for i = 1:n_reg
-        push!(control_circuit, control(nbit, (i,), (n_reg+1:nbit...,)=>UG))
+        push!(control_circuit, control(nbit, (i,), (n_reg+1:nbit...,)=>unitarygate))
         if i != n_reg
-            UG = matblock(mat(UG) * mat(UG))
+            unitarygate = matblock(mat(unitarygate) * mat(unitarygate))
         end
     end
 
@@ -26,12 +33,14 @@ function phase_estimation_circuit(UG::GeneralMatrixBlock, n_reg::Int, n_b::Int)
 end
 
 """
-    projection_analysis(evec::Matrix, reg::ArrayReg) -> Tuple
-Analyse using state projection.
+    phase_estimation_analysis(eigenvectors::Matrix, reg::ArrayReg) -> Tuple
+
+Analyse phase estimation result using state projection.
 It returns a tuple of (most probable configuration, the overlap matrix, the relative probability for this configuration)
+`eigenvectors` is the eigen vectors of the unitary gate matrix, while `reg` is the result of phase estimation.
 """
-function projection_analysis(evec::Matrix, reg::ArrayReg)
-    overlap = evec'*state(reg)
+function phase_estimation_analysis(eigenvectors::AbstractMatrix, reg::ArrayReg)
+    overlap = eigenvectors'*state(reg)
     amp_relative = Float64[]
     bs = Int[]
 

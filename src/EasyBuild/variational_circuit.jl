@@ -1,22 +1,19 @@
 using YaoArrayRegister.StatsBase: sample
 
-export pair_ring, pair_square
-export rotor, merged_rotor, rotorset
 export variational_circuit
-export rand_single_gate, rand_gate, rand_circuit
 
 ################## Entangler ###################
 """
     pair_ring(n::Int) -> Vector
 
-Pair ring.
+Pair ring entanglement layout.
 """
 pair_ring(n::Int) = [i=>mod(i, n)+1 for i=1:n]
 
 """
     pair_square(m::Int, n::Int) -> Vector
 
-Pair square.
+Pair square entanglement layout.
 """
 function pair_square(m::Int, n::Int; periodic=false)
     res = Vector{Pair{Int, Int}}(undef, (m-!periodic)*n+m*(n-!periodic))
@@ -83,17 +80,19 @@ rotorset(mode::Symbol, nbit::Int, noleading::Bool=false, notrailing::Bool=false)
     variational_circuit(nbit[, nlayer][, pairs]; mode=:Split, do_cache=false, entangler=cnot)
 
 A kind of widely used differentiable quantum circuit, angles in the circuit is randomely initialized.
+Input arguments are
 
-    * pairs: list of `Pair`s for entanglers in a layer, default to `pair_ring` structure,
-    * mode: :Split or :Merged,
-    * do_cache: cache the entangler matrix,
-    * entangler: a constructor returns a two qubit gate, `f(n,i,j) -> gate`.
-        The default value is `cnot(n,i,j)`.
+* `pairs` is list of `Pair`s for entanglers in a layer, default to `pair_ring` structure,
+* `mode` can be :Split or :Merged,
+* `do_cache` decides whether cache the entangler matrix or not,
+* `entangler` is a constructor returns a two qubit gate, `f(n,i,j) -> gate`.
+    The default value is `cnot(n,i,j)`.
 
-ref:
-    1. Kandala, A., Mezzacapo, A., Temme, K., Takita, M., Chow, J. M., & Gambetta, J. M. (2017).
-       Hardware-efficient Quantum Optimizer for Small Molecules and Quantum Magnets. Nature Publishing Group, 549(7671), 242–246.
-       https://doi.org/10.1038/nature23879.
+References
+-------------------------
+1. Kandala, A., Mezzacapo, A., Temme, K., Takita, M., Chow, J. M., & Gambetta, J. M. (2017).
+    Hardware-efficient Quantum Optimizer for Small Molecules and Quantum Magnets. Nature Publishing Group, 549(7671), 242–246.
+    https://doi.org/10.1038/nature23879.
 """
 function variational_circuit(nbit, nlayer, pairs; mode=:Split, do_cache=false, entangler=cnot)
     circuit = chain(nbit)
@@ -113,38 +112,3 @@ end
 variational_circuit(n::Int; kwargs...) = variational_circuit(n, 3, pair_ring(n); kwargs...)
 
 variational_circuit(nbit::Int, nlayer::Int; kwargs...) = variational_circuit(nbit, nlayer, pair_ring(nbit), kwargs...)
-
-############### Completely random circuits (for testing and demo) ################
-randlocs(nbit::Int, mbit::Int) = sample(1:nbit, mbit, replace=false)
-const SINGLE_GATES = [X, Y, Z, H, Rx, Ry, Rz, shift, phase]
-
-rand_single_gate(ngate::Int) = [rand_single_gates() for i=1:ngate]
-function rand_single_gate()
-    gate = rand(SINGLE_GATES)
-    gate isa AbstractBlock ? gate : gate(rand()*2π)
-end
-
-"""
-    rand_gate(nbit::Int, mbit::Int, [ngate::Int]) -> AbstractBlock
-
-random nbit gate.
-"""
-rand_gate(nbit::Int, mbit::Int) = rand_gate(nbit, Val(mbit))
-rand_gate(nbit::Int, mbit::Int, ngate::Int) = [rand_gate(nbit, mbit) for i=1:ngate]
-rand_gate(nbit::Int, ::Val{1}) = put(nbit, rand(1:nbit)=>rand_single_gate())
-function rand_gate(nbit::Int, ::Val{M}) where M
-    locs = randlocs(nbit, M)
-    control(nbit, locs[1:M-1], last(locs)=>rand_single_gate())
-end
-
-function rand_circuit(nbit::Int; p1 = (nbit==1 ? 1.0 : 0.66), ngate=5*nbit)
-    c = chain(nbit)
-    for i=1:ngate
-        if rand() < p1
-            push!(c, rand_gate(nbit, 1))
-        else
-            push!(c, rand_gate(nbit, 2))
-        end
-    end
-    c
-end

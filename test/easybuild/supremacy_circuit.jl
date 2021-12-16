@@ -1,4 +1,5 @@
 using Yao.EasyBuild
+using Yao.EasyBuild: pair_supremacy, cz_entangler
 using Test
 
 @testset "SqrtX" begin

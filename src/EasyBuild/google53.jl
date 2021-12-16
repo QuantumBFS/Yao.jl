@@ -78,7 +78,11 @@ end
 """
     rand_google53(depth::Int; nbits=53) -> AbstactBlock
 
-random google supremacy circuit with 53 qubits.
+Google supremacy circuit with 53 qubits, also know as the Sycamore quantum supremacy circuits.
+
+References
+-------------------------
+* Arute, Frank, et al. "Quantum supremacy using a programmable superconducting processor." Nature 574.7779 (2019): 505-510.
 """
 function rand_google53(depth::Int; nbits::Int=53)
     c = chain(nbits)

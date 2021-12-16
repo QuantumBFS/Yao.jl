@@ -1,5 +1,6 @@
 using Test
 using Yao.EasyBuild
+using Yao.EasyBuild: pair_ring, pair_square, merged_rotor, rotor, rotorset
 
 @testset "pairs geometries" begin
     @test pair_ring(3) == [1=>2,2=>3,3=>1]
@@ -14,15 +15,6 @@ using Yao.EasyBuild
     for item in [1=>2, 3=>4, 2=>1, 4=>3, 1=>3, 2=>4, 3=>1, 4=>2]
         @test item in ps
     end
-end
-
-@testset "random circuit" begin
-    c = rand_circuit(1)
-    @test c isa ChainBlock
-    @test length(c) == 5
-    c = rand_circuit(9)
-    @test c isa ChainBlock
-    @test length(c) == 45
 end
 
 @testset "rotter, collect_blocks, num_gradient, opgrad" begin
