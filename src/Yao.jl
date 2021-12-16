@@ -14,8 +14,12 @@ Extensible Framework for Quantum Algorithm Design for Humans.
 """
 const 幺 = Yao
 
+include("EasyBuild/easybuild.jl")
+
 using Reexport
 @reexport using YaoBase, YaoArrayRegister, YaoBlocks, YaoSym
+export EasyBuild
+using YaoBase.BitBasis
 
 using YaoBlocks:
     color,
