@@ -17,6 +17,7 @@ julia = "1"
 OMEinsumContractionOrders = "6f22d1fd-8eed-4bb7-9776-e7d684900715"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 YaoExtensions = "7a06699c-c960-11e9-3c98-9f78548b5f0f"
+SymEngine = "123dc426-2d89-5057-bbad-38513e3affd8"
 
 [targets]
-test = ["Test", "OMEinsumContractionOrders", "YaoExtensions"]
+test = ["Test", "OMEinsumContractionOrders", "YaoExtensions", "SymEngine"]
