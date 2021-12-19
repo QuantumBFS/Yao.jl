@@ -1,0 +1,41 @@
+name: CI-LTS
+on:
+  - push
+  - pull_request
+jobs:
+  test:
+    name: ${{ matrix.package }} - Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - '1.6' # LTS
+        os:
+          - ubuntu-latest
+        arch:
+          - x64
+        package: # only test Yao and YaoBlocks on LTS
+          - Yao
+          - YaoBlocks
+    steps:
+      - uses: actions/checkout@v2
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: ${{ matrix.version }}
+          arch: ${{ matrix.arch }}
+      - uses: actions/cache@v1
+        env:
+          cache-name: cache-artifacts
+        with:
+          path: ~/.julia/artifacts
+          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-test-${{ env.cache-name }}-
+            ${{ runner.os }}-test-
+            ${{ runner.os }}-
+      - name: "develop lib packages"
+        run: julia --project .ci/run.jl dev
+      - uses: julia-actions/julia-buildpkg@v1
+      - name: "run tests"
+        run: julia --project .ci/run.jl test ${{ matrix.package }}
