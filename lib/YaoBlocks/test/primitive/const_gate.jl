@@ -94,3 +94,8 @@ end
     @test adjoint(Pu) == Pd
     @test adjoint(Pd) == Pu
 end
+
+@testset "N, NGate" begin
+    @test N === P1
+    @test ConstGate.NGate === P1Gate
+end

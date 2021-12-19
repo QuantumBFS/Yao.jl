@@ -68,3 +68,6 @@ Y, YGate
 Pauli Z gate. `Z` is the instance of `YGate`.
 """
 Z, ZGate
+
+const N = P1
+const NGate = P1Gate
