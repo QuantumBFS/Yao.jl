@@ -1,4 +1,4 @@
-name: CI-nightly
+name: CI-MISC
 on:
   - push
   - pull_request
@@ -10,18 +10,15 @@ jobs:
       fail-fast: false
       matrix:
         version:
+          - '1.6' # LTS
           - 'nightly'
         os:
           - ubuntu-latest
-          - macOS-latest
         arch:
           - x64
-        package:
-          - YaoAPI
-          - YaoBase
-          - YaoArrayRegister
+        package: # only test Yao and YaoBlocks on LTS
+          - Yao
           - YaoBlocks
-          - YaoSym
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
@@ -43,8 +40,3 @@ jobs:
       - uses: julia-actions/julia-buildpkg@v1
       - name: "run tests"
         run: julia --project .ci/run.jl test ${{ matrix.package }}
-      - name: "process code coverage"
-        run: julia --project .ci/codecov.jl ${{ matrix.package }}
-      - uses: codecov/codecov-action@v1
-        with:
-          file: lcov.info
