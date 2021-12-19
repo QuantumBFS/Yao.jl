@@ -10,11 +10,9 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.6' # LTS
-          - '1'
+          - '1' # latest stable
         os:
           - ubuntu-latest
-          - macOS-latest
         arch:
           - x64
         package:
