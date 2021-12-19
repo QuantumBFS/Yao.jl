@@ -224,12 +224,6 @@ function measure(op::Daggered, reg::AbstractRegister, locs::AllLocs; kwargs...)
     conj(measure(content(op), reg, locs; kwargs...))
 end
 
-function measure(ab::Add, reg::AbstractRegister, locs::AllLocs; kwargs...)
-    sum(subblocks(ab)) do op
-        measure(op, reg, locs; kwargs...)
-    end
-end
-
 function measure(op::PutBlock{N}, reg::AbstractRegister, locs; kwargs...) where {N}
     _check_msize(op, reg, locs)
 
