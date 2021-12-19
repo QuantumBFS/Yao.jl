@@ -1,4 +1,4 @@
-name: CI-LTS
+name: CI-MISC
 on:
   - push
   - pull_request
@@ -11,6 +11,7 @@ jobs:
       matrix:
         version:
           - '1.6' # LTS
+          - 'nightly'
         os:
           - ubuntu-latest
         arch:
