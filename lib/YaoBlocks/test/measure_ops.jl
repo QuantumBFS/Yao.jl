@@ -132,3 +132,10 @@ end
     @test YaoBlocks.simple_commute_eachother([put(5, 2 => X), put(5, 3 => Y)])
     @test !YaoBlocks.simple_commute_eachother([put(5, 2 => X), put(5, 2 => Y)])
 end
+
+@testset "fix measuring add" begin
+    circ_wfn = zero_state(2) |> put(2, 1=>H)
+    sp = put(2, 1=>(X + 1im*Y)/2)
+    X_diff = sp + sp'
+    @test measure(X_diff, circ_wfn, nshots=100) |> sum ≈ 100.0
+end
