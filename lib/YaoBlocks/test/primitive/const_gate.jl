@@ -96,6 +96,6 @@ end
 end
 
 @testset "N, NGate" begin
-    @test N === P1
-    @test ConstGate.NGate === P1Gate
+    @test ConstGate.N === ConstGate.P1
+    @test ConstGate.NGate === ConstGate.P1Gate
 end
