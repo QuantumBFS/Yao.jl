@@ -13,11 +13,13 @@ using Test, YaoArrayRegister
     reg5 = join(reg_, reg_)
     focus!(reg4, 1:3)
     focus!(reg5, 1:3)
-    @test isapprox(fidelity(reg, reg_), fidelity(reg4, reg5), atol=1e-5)
+    @test isapprox(fidelity(reg, reg_), fidelity(reg4, reg5), atol = 1e-5)
 
-    @test all(isapprox.(
-        fidelity(reg, reg_), fidelity(repeat(reg4, 3), repeat(reg5, 3)), atol=1e-5
-    ))
+    @test isapprox.(
+        fidelity(reg, reg_),
+        fidelity(repeat(reg4, 3), repeat(reg5, 3)),
+        atol = 1e-5,
+    ) |> all
 
     # batch
     st = rand(ComplexF64, 8, 2)
@@ -25,11 +27,13 @@ using Test, YaoArrayRegister
     reg2 = rand_state(3)
 
     @test fidelity(reg1, reg2) ≈
-        [fidelity(ArrayReg(st[:, 1]), reg2), fidelity(ArrayReg(st[:, 2]), reg2)]
+          [fidelity(ArrayReg(st[:, 1]), reg2), fidelity(ArrayReg(st[:, 2]), reg2)]
 
-    @test all(isapprox.(
-        fidelity(reg, reg_), fidelity(repeat(reg4, 3), repeat(reg5, 3)), atol=1e-5
-    ))
+    @test isapprox.(
+        fidelity(reg, reg_),
+        fidelity(repeat(reg4, 3), repeat(reg5, 3)),
+        atol = 1e-5,
+    ) |> all
 end
 
 @testset "test trace distance" begin
@@ -39,42 +43,42 @@ end
     dm = ρ(reg)
     dm_ = ρ(reg_)
     dm2 = ρ(reg2)
-    @test probs(reg) ≈ probs(dm)
-    @test isapprox(tracedist(dm, dm), tracedist(reg, reg), atol=1e-5)
-    @test isapprox(tracedist(dm, dm_), tracedist(reg, reg_), atol=1e-5)
-    @test isapprox(tracedist(dm2, dm2), tracedist(reg2, reg2), atol=1e-5)
+    @test reg |> probs ≈ dm |> probs
+    @test isapprox(tracedist(dm, dm), tracedist(reg, reg), atol = 1e-5)
+    @test isapprox(tracedist(dm, dm_), tracedist(reg, reg_), atol = 1e-5)
+    @test isapprox(tracedist(dm2, dm2), tracedist(reg2, reg2), atol = 1e-5)
 
     # mix
     reg4 = join(reg, reg)
     reg5 = join(reg_, reg_)
     focus!(reg4, 1:3)
     focus!(reg5, 1:3)
-    dm4 = density_matrix(reg4)
-    dm5 = density_matrix(reg5)
-    @test isapprox(tracedist(dm, dm_)[], tracedist(dm4, dm5)[], atol=1e-5)
-    @test all(isapprox.(
+    dm4 = reg4 |> density_matrix
+    dm5 = reg5 |> density_matrix
+    @test isapprox(tracedist(dm, dm_)[], tracedist(dm4, dm5)[], atol = 1e-5)
+    @test isapprox.(
         tracedist(dm, dm_)[],
-        tracedist(density_matrix(repeat(reg4, 3)), density_matrix(repeat(reg5, 3))),
-        atol=1e-5,
-    ))
+        tracedist(repeat(reg4, 3) |> density_matrix, repeat(reg5, 3) |> density_matrix),
+        atol = 1e-5,
+    ) |> all
 end
 
 @testset "purify" begin
     reg = rand_state(6)
-    reg_p = purify(ρ(reg))
-    @test isnormalized(reg_p)
-    @test maximum(probs(exchange_sysenv(reg_p))) ≈ 1
-    reg_p = purify(ρ(reg); nbit_env=0)
+    reg_p = purify(reg |> ρ)
+    @test reg_p |> isnormalized
+    @test reg_p |> exchange_sysenv |> probs |> maximum ≈ 1
+    reg_p = purify(reg |> ρ; nbit_env = 0)
     @test fidelity(reg, reg_p) ≈ 1
 
-    reg = rand_state(6; nbatch=10)
-    reg_p = purify(ρ(reg))
-    @test isnormalized(reg_p)
-    @test maximum(probs(exchange_sysenv(reg_p))) ≈ 1
-    reg_p = purify(ρ(reg); nbit_env=0)
+    reg = rand_state(6; nbatch = 10)
+    reg_p = purify(reg |> ρ)
+    @test reg_p |> isnormalized
+    @test reg_p |> exchange_sysenv |> probs |> maximum ≈ 1
+    reg_p = purify(reg |> ρ; nbit_env = 0)
     @test fidelity(reg, reg_p) ≈ ones(10)
-    reg_p = purify(ρ(reg); nbit_env=2)
-    @test nqubits(reg_p) == 8
+    reg_p = purify(reg |> ρ; nbit_env = 2)
+    @test reg_p |> nqubits == 8
 end
 
 @testset "reduce density matrix" begin

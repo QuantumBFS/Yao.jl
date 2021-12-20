@@ -1,11 +1,12 @@
 using Test
 using YaoArrayRegister, Random, LinearAlgebra, SparseArrays, BitBasis
 
+
 @testset "broadcast register" begin
-    reg = rand_state(5; nbatch=3)
+    reg = rand_state(5; nbatch = 3)
     @test typeof.(reg)[1] <: ArrayReg{<:Any,<:Any,<:SubArray}
-    @test length([reg...]) == 3
-    @test length([rand_state(3)...]) == 1
+    @test [reg...] |> length == 3
+    @test [rand_state(3)...] |> length == 1
 end
 
 @testset "arithmetics" begin
@@ -18,10 +19,10 @@ end
     reg4 = (reg1 + reg2)'
 
     @test statevec(reg3) == onehot(ComplexF64, nbit, 4) + onehot(ComplexF64, nbit, 0)
-    @test statevec(normalize!(reg3)) ==
-        (onehot(ComplexF64, nbit, 4) + onehot(ComplexF64, nbit, 0)) / sqrt(2)
-    @test statevec(normalize!(reg4)) ==
-        (onehot(ComplexF64, nbit, 4) + onehot(ComplexF64, nbit, 0))' / sqrt(2)
+    @test statevec(reg3 |> normalize!) ==
+          (onehot(ComplexF64, nbit, 4) + onehot(ComplexF64, nbit, 0)) / sqrt(2)
+    @test statevec(reg4 |> normalize!) ==
+          (onehot(ComplexF64, nbit, 4) + onehot(ComplexF64, nbit, 0))' / sqrt(2)
     @test (reg1 + reg2 - reg1) == reg2
     @test reg1' + reg2' - reg1' == reg2'
     @test isnormalized(reg4)
@@ -41,7 +42,7 @@ end
     @test state(reg1' * 2) == state(reg1') * 2
     @test reg1 * 2 == 2 * reg1
     @test reg1' * 2 == 2 * reg1'
-    reg = rand_state(3; nbatch=2) * 2
+    reg = rand_state(3; nbatch = 2) * 2
     @test norm(reg) ≈ [2.0, 2.0]
 end
 
@@ -59,28 +60,28 @@ end
     focus!(bra, 2)
     @test_throws ErrorException bra' * ket
 
-    reg1 = rand_state(5; nbatch=10)
-    reg2 = rand_state(5; nbatch=10)
+    reg1 = rand_state(5; nbatch = 10)
+    reg2 = rand_state(5; nbatch = 10)
     @test reg1' * reg2 ≈ reg1' .* reg2
-    reg1 = rand_state(2; nbatch=10)
-    reg2 = rand_state(5; nbatch=10)
+    reg1 = rand_state(2; nbatch = 10)
+    reg2 = rand_state(5; nbatch = 10)
     focus!(reg2, 2:3)
     @test all(reg1' * reg2 .≈ reg1' .* reg2)
 end
 
 @testset "inplace funcs" begin
     for nbatch in [1, 10]
-        reg = rand_state(5; nbatch=nbatch)
+        reg = rand_state(5; nbatch = nbatch)
         reg0 = copy(reg)
         @test regscale!(reg, 0.3) ≈ 0.3 * reg0
-        reg1 = rand_state(5; nbatch=nbatch)
-        reg2 = rand_state(5; nbatch=nbatch)
+        reg1 = rand_state(5; nbatch = nbatch)
+        reg2 = rand_state(5; nbatch = nbatch)
         reg10 = copy(reg1)
         regsub!(reg1, reg2)
         @test reg1 ≈ reg10 - reg2
 
-        reg1 = rand_state(5; nbatch=nbatch)
-        reg2 = rand_state(5; nbatch=nbatch)
+        reg1 = rand_state(5; nbatch = nbatch)
+        reg2 = rand_state(5; nbatch = nbatch)
         reg10 = copy(reg1)
         regadd!(reg1, reg2)
         @test reg1 ≈ reg10 + reg2

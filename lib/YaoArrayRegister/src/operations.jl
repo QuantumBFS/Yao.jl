@@ -9,9 +9,8 @@ export isnormalized, normalize!, regadd!, regsub!, regscale!, norm
 
 Check if the register is normalized.
 """
-function isnormalized(r::ArrayReg)
-    return all(sum(probs(relax!(; to_nactive=nqubits(r))(copy(r))); dims=1) .≈ 1)
-end
+isnormalized(r::ArrayReg) =
+    all(sum(copy(r) |> relax!(to_nactive = nqubits(r)) |> probs, dims = 1) .≈ 1)
 isnormalized(r::AdjointArrayReg) = isnormalized(parent(r))
 
 """
@@ -27,9 +26,8 @@ end
 LinearAlgebra.normalize!(r::AdjointArrayReg) = (normalize!(parent(r)); r)
 
 LinearAlgebra.norm(r::ArrayReg{1}) = norm(statevec(r))
-function LinearAlgebra.norm(r::ArrayReg{B}) where {B}
-    return [norm(view(reshape(r.state, :, B), :, ib)) for ib in 1:B]
-end
+LinearAlgebra.norm(r::ArrayReg{B}) where {B} =
+    [norm(view(reshape(r.state, :, B), :, ib)) for ib = 1:B]
 
 # basic arithmatics
 
@@ -44,7 +42,8 @@ for op in [:+, :-]
     end
 
     @eval function Base.$op(
-        lhs::ArrayReg{B,T1,<:Transpose}, rhs::ArrayReg{B,T2,<:Transpose}
+        lhs::ArrayReg{B,T1,<:Transpose},
+        rhs::ArrayReg{B,T2,<:Transpose},
     ) where {B,T1,T2}
         return ArrayReg(transpose(($op)(state(lhs).parent, state(rhs).parent)))
     end
@@ -57,42 +56,44 @@ end
 
 function regadd!(lhs::ArrayReg{B}, rhs::ArrayReg{B}) where {B}
     lhs.state .+= rhs.state
-    return lhs
+    lhs
 end
 
 function regsub!(lhs::ArrayReg{B}, rhs::ArrayReg{B}) where {B}
     lhs.state .-= rhs.state
-    return lhs
+    lhs
 end
 
 function regadd!(
-    lhs::ArrayReg{B,T1,<:Transpose}, rhs::ArrayReg{B,T2,<:Transpose}
+    lhs::ArrayReg{B,T1,<:Transpose},
+    rhs::ArrayReg{B,T2,<:Transpose},
 ) where {B,T1,T2}
     lhs.state.parent .+= rhs.state.parent
-    return lhs
+    lhs
 end
 
 function regsub!(
-    lhs::ArrayReg{B,T1,<:Transpose}, rhs::ArrayReg{B,T2,<:Transpose}
+    lhs::ArrayReg{B,T1,<:Transpose},
+    rhs::ArrayReg{B,T2,<:Transpose},
 ) where {B,T1,T2}
     lhs.state.parent .-= rhs.state.parent
-    return lhs
+    lhs
 end
 
 function regscale!(reg::ArrayReg{B,T1,<:Transpose}, x) where {B,T1}
     reg.state.parent .*= x
-    return reg
+    reg
 end
 
 function regscale!(reg::ArrayReg{B}, x) where {B,T1}
     reg.state .*= x
-    return reg
+    reg
 end
 
 # *, /
 for op in [:*, :/]
     @eval function Base.$op(lhs::RT, rhs::Number) where {B,RT<:ArrayReg{B}}
-        return ArrayReg{B}($op(state(lhs), rhs))
+        ArrayReg{B}($op(state(lhs), rhs))
     end
 
     @eval function Base.$op(lhs::RT, rhs::Number) where {B,RT<:AdjointArrayReg{B}}
@@ -102,7 +103,7 @@ for op in [:*, :/]
 
     if op == :*
         @eval function Base.$op(lhs::Number, rhs::RT) where {B,RT<:ArrayReg{B}}
-            return ArrayReg{B}(lhs * state(rhs))
+            ArrayReg{B}(lhs * state(rhs))
         end
 
         @eval function Base.$op(lhs::Number, rhs::RT) where {B,RT<:AdjointArrayReg{B}}
@@ -114,11 +115,11 @@ end
 
 for AT in [:ArrayReg, :AdjointArrayReg]
     @eval function Base.:(==)(lhs::$AT, rhs::$AT)
-        return state(lhs) == state(rhs)
+        state(lhs) == state(rhs)
     end
 
     @eval function Base.isapprox(lhs::$AT, rhs::$AT; kw...)
-        return isapprox(state(lhs), state(rhs); kw...)
+        isapprox(state(lhs), state(rhs); kw...)
     end
 end
 
@@ -136,14 +137,15 @@ end
 
 Base.:*(bra::AdjointArrayReg{B}, ket::ArrayReg{B}) where {B} = bra .* ket
 function Base.:*(
-    bra::AdjointArrayReg{B,T1,<:Transpose}, ket::ArrayReg{B,T2,<:Transpose}
+    bra::AdjointArrayReg{B,T1,<:Transpose},
+    ket::ArrayReg{B,T2,<:Transpose},
 ) where {B,T1,T2}
     if nremain(bra) == nremain(ket) == 0 # all active
         A, C = parent(state(parent(bra))), parent(state(ket))
         res = zeros(eltype(promote_type(T1, T2)), B)
         #return mapreduce((x, y) -> conj(x) * y, +, ; dims=2)
-        for j in 1:size(A, 2)
-            for i in 1:size(A, 1)
+        for j = 1:size(A, 2)
+            for i = 1:size(A, 1)
                 @inbounds res[i] += conj(A[i, j]) * C[i, j]
             end
         end

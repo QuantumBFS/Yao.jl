@@ -7,7 +7,7 @@ using Adapt
     @test_throws DimensionMismatch ArrayReg{2}(rand(4, 3))
     @test_throws DimensionMismatch ArrayReg{2}(rand(5, 2))
     @test_logs (:warn, "Input type of `ArrayReg` is not Complex, got Float64") ArrayReg(
-        rand(4, 3)
+        rand(4, 3),
     )
 
     @test ArrayReg(rand(ComplexF64, 4, 3)) isa ArrayReg{3}
@@ -30,57 +30,57 @@ end
 
 @testset "test $T initialization methods" for T in [ComplexF64, ComplexF32, ComplexF16]
     @testset "test product state" begin
-        st = state(product_state(T, bit"100"; nbatch=1))
+        st = state(product_state(T, bit"100"; nbatch = 1))
         @test !(st isa Transpose)
-        st2 = state(product_state(T, [0, 0, 1]; nbatch=1))
+        st2 = state(product_state(T, [0, 0, 1]; nbatch = 1))
         @test st2 ≈ st
-        st = state(product_state(T, bit"100"; nbatch=2, no_transpose_storage=true))
+        st = state(product_state(T, bit"100"; nbatch = 2, no_transpose_storage = true))
         @test !(st isa Transpose)
-        st = state(product_state(T, bit"100"; nbatch=2))
+        st = state(product_state(T, bit"100"; nbatch = 2))
         @test st isa Transpose
-        for k in 1:2
+        for k = 1:2
             @test st[:, k] ≈ onehot(T, bit"100")
         end
 
-        st = state(product_state(T, 4, 0; nbatch=3))
-        for k in 1:3
+        st = state(product_state(T, 4, 0; nbatch = 3))
+        for k = 1:3
             @test st[:, k] ≈ onehot(T, 4, 0)
         end
         @test eltype(product_state(Float64, 4, 0).state) == Float64
     end
     @testset "test zero state" begin
-        st = state(zero_state(T, 3; nbatch=1))
+        st = state(zero_state(T, 3; nbatch = 1))
         @test !(st isa Transpose)
-        st = state(zero_state(T, 3; nbatch=2, no_transpose_storage=true))
+        st = state(zero_state(T, 3; nbatch = 2, no_transpose_storage = true))
         @test !(st isa Transpose)
-        st = state(zero_state(T, 4; nbatch=4))
+        st = state(zero_state(T, 4; nbatch = 4))
         @test st isa Transpose
-        for k in 1:4
+        for k = 1:4
             @test st[:, k] ≈ onehot(T, 4, 0)
         end
         @test eltype(zero_state(Float64, 4).state) == Float64
     end
     @testset "test rand state" begin
-        st = state(rand_state(T, 3; nbatch=1))
+        st = state(rand_state(T, 3; nbatch = 1))
         @test !(st isa Transpose)
-        st = state(rand_state(T, 3; nbatch=2, no_transpose_storage=true))
+        st = state(rand_state(T, 3; nbatch = 2, no_transpose_storage = true))
         @test !(st isa Transpose)
         # NOTE: we only check if the state is normalized
-        st = state(rand_state(T, 4; nbatch=2))
+        st = state(rand_state(T, 4, nbatch = 2))
         @test st isa Transpose
-        for k in 1:2
+        for k = 1:2
             @test norm(st[:, k]) ≈ 1.0
         end
         @test eltype(rand_state(Float64, 4).state) == Float64
     end
     @testset "test uniform state" begin
-        st = state(uniform_state(T, 3; nbatch=1))
+        st = state(uniform_state(T, 3; nbatch = 1))
         @test !(st isa Transpose)
-        st = state(uniform_state(T, 3; nbatch=2, no_transpose_storage=true))
+        st = state(uniform_state(T, 3; nbatch = 2, no_transpose_storage = true))
         @test !(st isa Transpose)
-        st = state(uniform_state(T, 4; nbatch=2))
+        st = state(uniform_state(T, 4; nbatch = 2))
         @test st isa Transpose
-        for k in 1:2
+        for k = 1:2
             for each in st[:, k]
                 @test each ≈ 1 / sqrt(16)
             end
@@ -91,7 +91,7 @@ end
         r1 = uniform_state(ComplexF64, 4)
         r2 = oneto(r1, 2)
         @test nactive(r2) == 2
-        @test nactive(oneto(2)(r1)) == 2
+        @test r1 |> oneto(2) |> nactive == 2
     end
     @testset "test repeat" begin
         r = repeat(ArrayReg{3}(T, bit"101"), 4)
@@ -102,14 +102,14 @@ end
 
 @testset "test YaoBase interface" begin
     @testset "test probs" begin
-        r = rand_state(5; nbatch=3)
+        r = rand_state(5; nbatch = 3)
         @test probs(r) ≈ abs2.(state(r))
         r = rand_state(5)
         @test probs(r) ≈ abs2.(state(r))
     end
     @testset "test batch iteration" begin
         r = ArrayReg{3}(bit"101")
-        for k in 1:3
+        for k = 1:3
             @test viewbatch(r, k) == ArrayReg(bit"101")
         end
         # broadcast
@@ -119,10 +119,10 @@ end
     end
     @testset "test addbits!" begin
         @test addbits!(zero_state(3), 3) == zero_state(6)
-        r = rand_state(3; nbatch=2)
-        @test addbits!(copy(r), 2) ≈ join(zero_state(2; nbatch=2), r)
-        r = rand_state(3; nbatch=1)
-        @test addbits!(copy(r), 2) ≈ join(zero_state(2; nbatch=1), r)
+        r = rand_state(3; nbatch = 2)
+        @test addbits!(copy(r), 2) ≈ join(zero_state(2; nbatch = 2), r)
+        r = rand_state(3; nbatch = 1)
+        @test addbits!(copy(r), 2) ≈ join(zero_state(2; nbatch = 1), r)
     end
 end
 
@@ -134,7 +134,7 @@ end
 end
 
 @testset "test hypercubic" begin
-    @test size(hypercubic(rand_state(3))) == (2, 2, 2, 1)
+    @test hypercubic(rand_state(3)) |> size == (2, 2, 2, 1)
 end
 
 # TODO: test concat multiple registers
@@ -143,16 +143,16 @@ end
     r2 = rand_state(6)
     r3 = join(r2, r1)
     r4 = join(focus!(copy(r2), 1:2), focus!(copy(r1), 1:3))
-    @test relaxedvec(r4) ≈
-        relaxedvec(focus!(copy(r3), [1, 2, 3, 7, 8, 4, 5, 6, 9, 10, 11, 12]))
+    @test r4 |> relaxedvec ≈
+          focus!(copy(r3), [1, 2, 3, 7, 8, 4, 5, 6, 9, 10, 11, 12]) |> relaxedvec
     reg5 = focus!(repeat(r1, 3), 1:3)
     reg6 = focus!(repeat(r2, 3), 1:2)
-    @test (relaxedvec(join(reg6, reg5)))[:, 1] ≈ relaxedvec(r4)
+    @test (join(reg6, reg5)|>relaxedvec)[:, 1] ≈ r4 |> relaxedvec
 
     # manual trace
     r = join(ArrayReg(bit"011"), zero_state(1))
     focus!(r, 2:4)
-    @test sum(r.state; dims=2) ≈ ArrayReg(bit"011").state
+    @test sum(r.state, dims = 2) ≈ ArrayReg(bit"011").state
 end
 
 @testset "YaoBlocks.jl/issues/21" begin
@@ -164,7 +164,7 @@ end
 end
 
 @testset "transpose copy" begin
-    reg = rand_state(5; nbatch=10)
+    reg = rand_state(5; nbatch = 10)
     reg1 = copy(reg)
     reg2 = focus!(copy(reg), (3, 5))
     reg3 = relax!(copy(reg2), (3, 5))
@@ -183,7 +183,7 @@ end
     reg2 = copy(reg)
     focus!(reg, (4, 2))
     collapseto!(reg, bit"01")
-    relax!(reg, (4, 2); to_nactive=4)
+    relax!(reg, (4, 2), to_nactive = 4)
     instruct!(reg2, Const.P0, (2,))
     instruct!(reg2, Const.P1, (4,))
     normalize!(reg2)

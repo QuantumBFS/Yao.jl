@@ -53,12 +53,14 @@ Returns the content of `x`.
 """
 @interface content
 
+
 """
     chcontent(x, blk)
 
 Create a similar block of `x` and change its content to blk.
 """
 @interface chcontent
+
 
 """
     apply!(register, block)
@@ -127,6 +129,7 @@ Returns all the parameters contained in block tree with given root `block`.
 Return number of parameters in `block`. See also [`niparams`](@ref).
 """
 @interface nparameters
+
 
 """
     niparam(block) -> Int

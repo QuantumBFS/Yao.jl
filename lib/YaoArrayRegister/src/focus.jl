@@ -2,6 +2,7 @@ using YaoBase, TupleTools
 
 export focus!, relax!, partial_tr, exchange_sysenv
 
+
 """
     contiguous_shape_orders(shape, orders)
 
@@ -106,7 +107,7 @@ function YaoBase.focus!(r::ArrayReg{B}, locs) where {B}
     return r
 end
 
-function YaoBase.relax!(r::ArrayReg{B}, locs; to_nactive::Int=nqubits(r)) where {B}
+function YaoBase.relax!(r::ArrayReg{B}, locs; to_nactive::Int = nqubits(r)) where {B}
     r.state = reshape(state(r), 1 << to_nactive, :)
     if !is_order_same(locs)
         new_orders = TupleTools.invperm(move_ahead(to_nactive + 1, locs))
@@ -118,7 +119,7 @@ end
 function YaoBase.partial_tr(r::ArrayReg{B}, locs) where {B}
     orders = setdiff(1:nqubits(r), locs)
     focus!(r, orders)
-    state = sum(rank3(r); dims=2)
+    state = sum(rank3(r); dims = 2)
     relax!(r, orders)
     return normalize!(ArrayReg(state))
 end
@@ -129,7 +130,5 @@ end
 Exchange system (focused qubits) and environment (remaining qubits).
 """
 function exchange_sysenv(reg::ArrayReg{B}) where {B}
-    return ArrayReg{B}(
-        reshape(permutedims(rank3(reg), (2, 1, 3)), :, size(reg.state, 1) * B)
-    )
+    ArrayReg{B}(reshape(permutedims(rank3(reg), (2, 1, 3)), :, size(reg.state, 1) * B))
 end

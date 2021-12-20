@@ -69,6 +69,7 @@ export AbstractRegister,
     ρ,
     basis
 
+
 include("utils.jl")
 include("register.jl")
 include("operations.jl")

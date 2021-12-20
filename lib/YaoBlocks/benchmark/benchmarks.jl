@@ -17,21 +17,20 @@ for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GN = Expr(:(.), :ConstGate, QuoteNode(G))
 
     SUITE["primitive"][string(G)] = BenchmarkGroup()
-    for n in 1:4:25
+    for n = 1:4:25
         SUITE["primitive"][string(G)][n] = @eval bench(repeat($n, $GN))
     end
 end
 
-for n in 5:5:25
-    SUITE["composite"]["kron(rand_const)"] = bench(kron(rand([X, Y, Z, H]) for _ in 1:n))
-    SUITE["composite"]["kron(sparse_const)"] = bench(
-        kron(n, k => rand([X, Y, Z, H]) for k in randperm(n)[1:(n ÷ 5)])
-    )
+for n = 5:5:25
+    SUITE["composite"]["kron(rand_const)"] = bench(kron(rand([X, Y, Z, H]) for _ = 1:n))
+    SUITE["composite"]["kron(sparse_const)"] =
+        bench(kron(n, k => rand([X, Y, Z, H]) for k in randperm(n)[1:n÷5]))
     SUITE["composite"]["swap"] = bench(swap(n, 2, 4))
     SUITE["composite"]["swap"] = bench(pswap(n, 2, 4, 0.5))
 end
 
-function heisenberg(n::Int; periodic::Bool=true)
+function heisenberg(n::Int; periodic::Bool = true)
     Sx(i) = put(n, i => X)
     Sy(i) = put(n, i => Y)
     Sz(i) = put(n, i => Z)
@@ -42,8 +41,7 @@ function heisenberg(n::Int; periodic::Bool=true)
     end
 end
 
-for n in 5:5:25
-    SUITE["primitive"]["TimeEvolution(heisenberg(n), 0.2)"] = bench(
-        TimeEvolution(heisenberg(n), 0.2)
-    )
+for n = 5:5:25
+    SUITE["primitive"]["TimeEvolution(heisenberg(n), 0.2)"] =
+        bench(TimeEvolution(heisenberg(n), 0.2))
 end

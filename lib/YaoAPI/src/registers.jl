@@ -7,6 +7,7 @@ Abstract type for quantum registers. `B` is the batch size.
 """
 abstract type AbstractRegister{B} end
 
+
 """
     AdjointRegister{B, T, RT} <: AbstractRegister{B, T}
 
@@ -15,6 +16,7 @@ Lazy adjoint for a quantum register.
 struct AdjointRegister{B,RT<:AbstractRegister{B}} <: AbstractRegister{B}
     parent::RT
 end
+
 
 """
     instruct!(state, operator[, locs, control_locs, control_configs, theta])
@@ -78,6 +80,7 @@ i.e. |psi> -> |000> ⊗ |psi>, increased bits have higher indices.
 If only an integer is provided, then returns a lambda function.
 """
 @interface addbits!
+
 
 """
     insert_qubits!(register, loc::Int; nqubits::Int=1) -> register
