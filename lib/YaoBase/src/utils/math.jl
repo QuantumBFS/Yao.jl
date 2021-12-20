@@ -32,7 +32,7 @@ nucnorm(m)
 Computes the nuclear norm of a matrix `m`.
 """
 function nucnorm(m::AbstractMatrix)
-    norm(svdvals(m), 1)
+    return norm(svdvals(m), 1)
 end
 
 """
@@ -42,18 +42,17 @@ Computes the trace norm of a matrix `m`.
 """
 trnorm(m::AbstractMatrix) = nucnorm(m)
 
-
 """
     batch_normalize!(matrix)
 
 normalize a batch of vector.
 """
-function batch_normalize!(s::AbstractMatrix, p::Real = 2)
+function batch_normalize!(s::AbstractMatrix, p::Real=2)
     B = size(s, 2)
-    for i = 1:B
+    for i in 1:B
         normalize!(view(s, :, i), p)
     end
-    s
+    return s
 end
 
 """
@@ -61,9 +60,9 @@ end
 
 normalize a batch of vector.
 """
-function batch_normalize(s::AbstractMatrix, p::Real = 2)
+function batch_normalize(s::AbstractMatrix, p::Real=2)
     ts = copy(s)
-    batch_normalize!(ts, p)
+    return batch_normalize!(ts, p)
 end
 
 """
@@ -86,49 +85,41 @@ function hilbertkron(num_bit::Int, ops::Vector{<:AbstractMatrix}, start_locs::Ve
         diff(push!(sorted_start_locs, num_bit + 1)) .- sizes[order],
     )
 
-    _wrap_identity(sorted_ops, num_ids)
+    return _wrap_identity(sorted_ops, num_ids)
 end
 
 # kron, and wrap matrices with identities.
 function _wrap_identity(
-    data_list::Vector{T},
-    num_bit_list::Vector{Int},
+    data_list::Vector{T}, num_bit_list::Vector{Int}
 ) where {T<:AbstractMatrix}
     length(num_bit_list) == length(data_list) + 1 || throw(ArgumentError())
     ⊗ = kron
-    reduce(
-        zip(data_list, num_bit_list[2:end]);
-        init = IMatrix(1 << num_bit_list[1]),
-    ) do x, y
+    reduce(zip(data_list, num_bit_list[2:end]); init=IMatrix(1 << num_bit_list[1])) do x, y
         x ⊗ y[1] ⊗ IMatrix(1 << y[2])
     end
 end
 
-batched_kron(a, b, c, xs...) =
-    Base.afoldl(batched_kron, (batched_kron)((batched_kron)(a, b), c), xs...)
+function batched_kron(a, b, c, xs...)
+    return Base.afoldl(batched_kron, (batched_kron)((batched_kron)(a, b), c), xs...)
+end
 
 function batched_kron(A::AbstractArray{T,3}, B::AbstractArray{S,3}) where {T,S}
     @assert size(A, 3) == size(B, 3) "batch size mismatch"
     C = Array{Base.promote_op(*, T, S),3}(
-        undef,
-        size(A, 1) * size(B, 1),
-        size(A, 2) * size(B, 2),
-        size(A, 3),
+        undef, size(A, 1) * size(B, 1), size(A, 2) * size(B, 2), size(A, 3)
     )
     return batched_kron!(C, A, B)
 end
 
 function batched_kron!(
-    C::Array{T,3},
-    A::AbstractArray{T1,3},
-    B::AbstractArray{T2,3},
+    C::Array{T,3}, A::AbstractArray{T1,3}, B::AbstractArray{T2,3}
 ) where {T,T1,T2}
     @assert !Base.has_offset_axes(A, B)
     m, n = size(A)
     p, q = size(B)
-    @inbounds for k = 1:size(C, 3)
-        for s = 1:n, r = 1:m, w = 1:q, v = 1:p
-            C[p*(r-1)+v, q*(s-1)+w, k] = A[r, s, k] * B[v, w, k]
+    @inbounds for k in 1:size(C, 3)
+        for s in 1:n, r in 1:m, w in 1:q, v in 1:p
+            C[p * (r - 1) + v, q * (s - 1) + w, k] = A[r, s, k] * B[v, w, k]
         end
     end
     return C
@@ -138,15 +129,13 @@ end
     export kron!
     # NOTE: JuliaLang/julia/pull/31069 includes this function
     function kron!(
-        C::AbstractMatrix{T},
-        A::AbstractMatrix{T1},
-        B::AbstractMatrix{T2},
+        C::AbstractMatrix{T}, A::AbstractMatrix{T1}, B::AbstractMatrix{T2}
     ) where {T,T1,T2}
         @assert !Base.has_offset_axes(A, B)
         m = 1
-        @inbounds for j = 1:size(A, 2), l = 1:size(B, 2), i = 1:size(A, 1)
+        @inbounds for j in 1:size(A, 2), l in 1:size(B, 2), i in 1:size(A, 1)
             aij = A[i, j]
-            for k = 1:size(B, 1)
+            for k in 1:size(B, 1)
                 C[m] = aij * B[k, l]
                 m += 1
             end
@@ -154,7 +143,6 @@ end
         return C
     end
 end
-
 
 """
     general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix
@@ -173,8 +161,8 @@ function general_controlled_gates(
     gates::Vector{<:AbstractMatrix},
     locs::Vector{Int},
 )
-    IMatrix(1 << n) - hilbertkron(n, projectors, cbits) +
-    hilbertkron(n, vcat(projectors, gates), vcat(cbits, locs))
+    return IMatrix(1 << n) - hilbertkron(n, projectors, cbits) +
+           hilbertkron(n, vcat(projectors, gates), vcat(cbits, locs))
 end
 
 """
@@ -182,15 +170,12 @@ end
 
 general (low performance) construction method for control gate on different lines.
 """
-general_c1_gates(
-    num_bit::Int,
-    projector::Tp,
-    cbit::Int,
-    gates::Vector{Tg},
-    locs::Vector{Int},
-) where {Tg<:AbstractMatrix,Tp<:AbstractMatrix} =
-    hilbertkron(num_bit, [IMatrix(2) - projector], [cbit]) +
-    hilbertkron(num_bit, vcat([projector], gates), vcat([cbit], locs))
+function general_c1_gates(
+    num_bit::Int, projector::Tp, cbit::Int, gates::Vector{Tg}, locs::Vector{Int}
+) where {Tg<:AbstractMatrix,Tp<:AbstractMatrix}
+    return hilbertkron(num_bit, [IMatrix(2) - projector], [cbit]) +
+           hilbertkron(num_bit, vcat([projector], gates), vcat([cbit], locs))
+end
 
 """
     rotmat(M::AbstractMatrix, θ::Real)
@@ -199,15 +184,15 @@ Returns rotated `M`: ``exp(-\\frac{imθ}{2} M)``.
 """
 rotmat(M::AbstractMatrix, θ::Real) = exp(-im * θ / 2 * M)
 
-
 """
     linop2dense([T=ComplexF64], linear_map!::Function, n::Int) -> Matrix
 
 Returns the dense matrix representation given linear map function.
 """
 linop2dense(linear_map!::Function, n::Int) = linop2dense(ComplexF64, linear_map!, n)
-linop2dense(::Type{T}, linear_map!::Function, n::Int) where {T} =
-    linear_map!(Matrix{T}(I, 1 << n, 1 << n))
+function linop2dense(::Type{T}, linear_map!::Function, n::Int) where {T}
+    return linear_map!(Matrix{T}(I, 1 << n, 1 << n))
+end
 
 ################### Fidelity ###################
 
@@ -252,7 +237,7 @@ end
 Create a random unitary matrix.
 """
 rand_unitary(N::Int) = rand_unitary(ComplexF64, N)
-rand_unitary(::Type{T}, N::Int) where {T} = qr(randn(T, N, N)).Q |> Matrix
+rand_unitary(::Type{T}, N::Int) where {T} = Matrix(qr(randn(T, N, N)).Q)
 
 """
     sprand_unitary([T=ComplexF64], N::Int, density) -> SparseMatrixCSC
@@ -260,8 +245,9 @@ rand_unitary(::Type{T}, N::Int) where {T} = qr(randn(T, N, N)).Q |> Matrix
 Create a random sparse unitary matrix.
 """
 sprand_unitary(N::Int, density::Real) = sprand_unitary(ComplexF64, N, density)
-sprand_unitary(::Type{T}, N::Int, density::Real) where {T} =
-    SparseMatrixCSC(qr(sprandn(T, N, N, density)).Q)
+function sprand_unitary(::Type{T}, N::Int, density::Real) where {T}
+    return SparseMatrixCSC(qr(sprandn(T, N, N, density)).Q)
+end
 
 """
     rand_hermitian([T=ComplexF64], N::Int) -> Matrix
@@ -272,7 +258,7 @@ rand_hermitian(N::Int) = rand_hermitian(ComplexF64, N)
 
 function rand_hermitian(::Type{T}, N::Int) where {T}
     A = randn(T, N, N)
-    A + A'
+    return A + A'
 end
 
 """
@@ -293,10 +279,7 @@ end
     end
 
     function SparseArrays.sprandn(
-        ::Type{Complex{T}},
-        n::Int,
-        m::Int,
-        density::Real,
+        ::Type{Complex{T}}, n::Int, m::Int, density::Real
     ) where {T<:Real}
         return T.(sprandn(n, m, density)) + im * T.(sprandn(n, m, density))
     end
@@ -307,8 +290,9 @@ end
 
 Staticize dynamic array `A` by a `threshold`.
 """
-autostatic(A::AbstractVecOrMat; threshold::Int = 8) =
-    length(A) > (1 << threshold) ? A : staticize(A)
+function autostatic(A::AbstractVecOrMat; threshold::Int=8)
+    return length(A) > (1 << threshold) ? A : staticize(A)
+end
 
 # General definition
 function rot_mat(::Type{T}, gen::AbstractMatrix, theta::Real) where {N,T}
@@ -334,7 +318,7 @@ function BitBasis.unsafe_reorder(A::PermMatrix, orders::NTuple{N,<:Integer}) whe
     perm = similar(A.perm)
     vals = similar(A.vals)
 
-    @simd for i = 1:length(perm)
+    @simd for i in 1:length(perm)
         @inbounds perm[od[i]] = od[A.perm[i]]
         @inbounds vals[od[i]] = A.vals[i]
     end

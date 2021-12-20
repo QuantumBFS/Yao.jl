@@ -30,11 +30,10 @@ end
 
         unrows!(v, sinds1, su1)
         @test u1rows!(copy(v), inds1..., u1[1], u1[3], u1[2], u1[4]) ≈
-              unrows!(copy(v), inds1, u1)
+            unrows!(copy(v), inds1, u1)
         @test unrows!(copy(v), inds1, u1) ≈ unrows!(copy(v), sinds1, su1)
     end
 end
-
 
 @testset "dense unrows!" begin
     v = randn(ComplexF64, 1 << 6, 2)
@@ -50,7 +49,7 @@ end
 
 @testset "diagonal unrows!" begin
     v = randn(ComplexF64, 1 << 6)
-    dg = ComplexF64[1 0; 0 -1] |> staticize
+    dg = staticize(ComplexF64[1 0; 0 -1])
     inds = SVector{2}([1, 3])
     unrows!(v, inds, dg)
     # NOTE: some machines have a small allocation
@@ -65,9 +64,9 @@ end
     pm = pmrand(ComplexF64, 1 << M)
     inds = [1, 3, 8, 2]
     sinds = SVector{1 << M}(inds)
-    spm = pm |> staticize
+    spm = staticize(pm)
     unrows!(v, inds, spm)
-    @test unrows!(copy(v), sinds, spm) ≈ unrows!(copy(v), inds, pm |> Matrix)
+    @test unrows!(copy(v), sinds, spm) ≈ unrows!(copy(v), inds, Matrix(pm))
 end
 
 @testset "csc unrows!" begin
@@ -76,9 +75,9 @@ end
     A = sprand(ComplexF64, 4, 4, 0.5)
     work = zeros(ComplexF64, 4)
     sinds = SVector{4}(inds)
-    sA = A |> staticize
+    sA = staticize(A)
     unrows!(v, sinds, sA, work)
     # TODO: this use views?
     # @test 0 == @allocated unrows!(v, sinds, sA, work)
-    @test unrows!(copy(v), sinds, sA, work) ≈ unrows!(copy(v), inds, A |> Matrix)
+    @test unrows!(copy(v), sinds, sA, work) ≈ unrows!(copy(v), inds, Matrix(A))
 end

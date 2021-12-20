@@ -13,12 +13,12 @@ LinearAlgebra.ishermitian(op) = op' ≈ op
 
 function iscommute(ops...)
     n = length(ops)
-    for i = 1:n
-        for j = i+1:n
+    for i in 1:n
+        for j in (i + 1):n
             iscommute(ops[i], ops[j]) || return false
         end
     end
-    true
+    return true
 end
 
 iscommute(op1, op2) = op1 * op2 ≈ op2 * op1

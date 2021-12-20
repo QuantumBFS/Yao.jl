@@ -6,8 +6,9 @@ export @λ, @lambda
 Base.length(r::AbstractRegister{B}) where {B} = B
 
 addbits!(n::Int) = @λ(register -> addbits!(register, n))
-insert_qubits!(loc::Int; nqubits::Int = 1) =
-    @λ(register -> insert_qubits!(register, loc; nqubits = n))
+function insert_qubits!(loc::Int; nqubits::Int=1)
+    @λ(register -> insert_qubits!(register, loc; nqubits=n))
+end
 
 nremain(r::AbstractRegister) = nqubits(r) - nactive(r)
 nbatch(r::AbstractRegister{B}) where {B} = B
@@ -42,11 +43,13 @@ focus!(locs::Int...) = focus!(locs)
 focus!(locs::NTuple{N,Int}) where {N} = @λ(register -> focus!(register, locs))
 focus!(locs::UnitRange) = @λ(register -> focus!(register, locs))
 focus!(f::Base.Callable, r::AbstractRegister, loc::Int) = focus(f, r, (loc,))
-focus!(f::Base.Callable, r::AbstractRegister, locs) =
-    relax!(f(focus!(r, locs)), locs; to_nactive = nqubits(r))
+function focus!(f::Base.Callable, r::AbstractRegister, locs)
+    return relax!(f(focus!(r, locs)), locs; to_nactive=nqubits(r))
+end
 
-relax!(r::AbstractRegister; to_nactive::Int = nqubits(r)) =
-    relax!(r, (); to_nactive = to_nactive)
+function relax!(r::AbstractRegister; to_nactive::Int=nqubits(r))
+    return relax!(r, (); to_nactive=to_nactive)
+end
 
 """
     relax!(locs::Int...; to_nactive=nqubits(register)) -> f(register) -> register
@@ -54,15 +57,16 @@ relax!(r::AbstractRegister; to_nactive::Int = nqubits(r)) =
 Lazy version of [`relax!`](@ref), it will be evaluated once you feed a register
 to its output lambda.
 """
-relax!(locs::Int...; to_nactive::Union{Nothing,Int} = nothing) =
-    relax!(locs; to_nactive = to_nactive)
+function relax!(locs::Int...; to_nactive::Union{Nothing,Int}=nothing)
+    return relax!(locs; to_nactive=to_nactive)
+end
 
-function relax!(locs::NTuple{N,Int}; to_nactive::Union{Nothing,Int} = nothing) where {N}
+function relax!(locs::NTuple{N,Int}; to_nactive::Union{Nothing,Int}=nothing) where {N}
     lambda = function (r::AbstractRegister)
         if to_nactive === nothing
-            return relax!(r, locs; to_nactive = nqubits(r))
+            return relax!(r, locs; to_nactive=nqubits(r))
         else
-            return relax!(r, locs; to_nactive = to_nactive)
+            return relax!(r, locs; to_nactive=to_nactive)
         end
     end
 
@@ -74,50 +78,52 @@ function relax!(locs::NTuple{N,Int}; to_nactive::Union{Nothing,Int} = nothing) w
 end
 
 ## Measurement
-measure!(postprocess::PostProcess, op, reg::AbstractRegister; kwargs...) =
-    measure!(postprocess, op, reg, AllLocs(); kwargs...)
-measure!(postprocess::PostProcess, reg::AbstractRegister, locs; kwargs...) =
-    measure!(postprocess, ComputationalBasis(), reg, locs; kwargs...)
-measure!(postprocess::PostProcess, reg::AbstractRegister; kwargs...) =
-    measure!(postprocess, ComputationalBasis(), reg, AllLocs(); kwargs...)
-measure!(op, reg::AbstractRegister, args...; kwargs...) =
-    measure!(NoPostProcess(), op, reg, args...; kwargs...)
-measure!(reg::AbstractRegister, args...; kwargs...) =
-    measure!(NoPostProcess(), reg, args...; kwargs...)
+function measure!(postprocess::PostProcess, op, reg::AbstractRegister; kwargs...)
+    return measure!(postprocess, op, reg, AllLocs(); kwargs...)
+end
+function measure!(postprocess::PostProcess, reg::AbstractRegister, locs; kwargs...)
+    return measure!(postprocess, ComputationalBasis(), reg, locs; kwargs...)
+end
+function measure!(postprocess::PostProcess, reg::AbstractRegister; kwargs...)
+    return measure!(postprocess, ComputationalBasis(), reg, AllLocs(); kwargs...)
+end
+function measure!(op, reg::AbstractRegister, args...; kwargs...)
+    return measure!(NoPostProcess(), op, reg, args...; kwargs...)
+end
+function measure!(reg::AbstractRegister, args...; kwargs...)
+    return measure!(NoPostProcess(), reg, args...; kwargs...)
+end
 
 measure(op, reg::AbstractRegister; kwargs...) = measure(op, reg, AllLocs(); kwargs...)
-measure(reg::AbstractRegister, locs; kwargs...) =
-    measure(ComputationalBasis(), reg, locs; kwargs...)
-measure(reg::AbstractRegister; kwargs...) =
-    measure(ComputationalBasis(), reg, AllLocs(); kwargs...)
+function measure(reg::AbstractRegister, locs; kwargs...)
+    return measure(ComputationalBasis(), reg, locs; kwargs...)
+end
+function measure(reg::AbstractRegister; kwargs...)
+    return measure(ComputationalBasis(), reg, AllLocs(); kwargs...)
+end
 
 # focus! to specify locations, we that we only need to consider full-space measure in the future.
 function measure!(
-    postprocess::PostProcess,
-    op,
-    reg::AbstractRegister,
-    locs;
-    kwargs...,
+    postprocess::PostProcess, op, reg::AbstractRegister, locs; kwargs...
 ) where {MODE}
     nbit = nactive(reg)
     focus!(reg, locs)
     res = measure!(postprocess, op, reg, AllLocs(); kwargs...)
     if postprocess isa RemoveMeasured
-        relax!(reg; to_nactive = nbit - length(locs))
+        relax!(reg; to_nactive=nbit - length(locs))
     else
-        relax!(reg, locs; to_nactive = nbit)
+        relax!(reg, locs; to_nactive=nbit)
     end
-    res
+    return res
 end
 
 function measure(op, reg::AbstractRegister, locs; kwargs...) where {MODE}
     nbit = nactive(reg)
     focus!(reg, locs)
     res = measure(op, reg, AllLocs(); kwargs...)
-    relax!(reg, locs; to_nactive = nbit)
-    res
+    relax!(reg, locs; to_nactive=nbit)
+    return res
 end
-
 
 """
     basis(register) -> UnitRange
@@ -142,7 +148,7 @@ Lazy version of [`select!`](@ref). See also [`select`](@ref).
 """
 select!(bits...) = @λ(register -> select!(register, bits...))
 
-function Base.iterate(it::AbstractRegister{B}, state = 1) where {B}
+function Base.iterate(it::AbstractRegister{B}, state=1) where {B}
     if state > B
         return nothing
     else
@@ -153,7 +159,7 @@ end
 # fallback printing
 function Base.show(io::IO, reg::AbstractRegister)
     summary(io, reg)
-    print(io, "\n    active qubits: ", nactive(reg), "/", nqubits(reg))
+    return print(io, "\n    active qubits: ", nactive(reg), "/", nqubits(reg))
 end
 
 ρ(x) = density_matrix(x)

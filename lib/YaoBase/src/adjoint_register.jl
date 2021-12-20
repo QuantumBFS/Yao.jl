@@ -1,7 +1,7 @@
 Base.parent(reg::AdjointRegister) = reg.parent
 
 function Base.summary(io::IO, reg::AdjointRegister{B,RT}) where {B,RT}
-    print(io, "adjoint(", summary(reg.parent), ")")
+    return print(io, "adjoint(", summary(reg.parent), ")")
 end
 
 """
