@@ -110,6 +110,8 @@ number of iter = 1
 number of iter = 2
 number of iter = 3
 number of iter = 4
+number of iter = 5
+number of iter = 6
 success, overlap = 1.0 + 0.0im
 </code></pre><p>The final state has an overlap of <code>1</code> with the target state.</p><h2 id="Amplitude-Amplification"><a class="docs-heading-anchor" href="#Amplitude-Amplification">Amplitude Amplification</a><a id="Amplitude-Amplification-1"></a><a class="docs-heading-anchor-permalink" href="#Amplitude-Amplification" title="Permalink"></a></h2><p>Given a circuit to generate a state, now we want to project out the subspace with [1,3,5,8,9,11,12] fixed to 1 and [4,6] fixed to 0. We can construct an oracle</p><pre><code class="language-julia hljs">evidense = [1, 3, -4, 5, -6, 8, 9, 11, 12]
 function inference_oracle(nbit::Int, locs::Vector{Int})
@@ -123,47 +125,25 @@ reg = zero_state(num_bit) |&gt; gen</code></pre><pre><code class="nohighlight hl
 for i = 1:num_grover_step(oracle, gen)
     grover_step!(reg, oracle, gen)
     println(&quot;step $(i-1), overlap = $(abs(reg&#39;*solution))&quot;)
-end</code></pre><pre><code class="nohighlight hljs">step 0, overlap = 0.05341028172202552
-step 1, overlap = 0.08894182919008517
-step 2, overlap = 0.12436051647663512
-step 3, overlap = 0.15962140005496372
-step 4, overlap = 0.19467973663884577
-step 5, overlap = 0.22949103995825157
-step 6, overlap = 0.26401113720892255
-step 7, overlap = 0.29819622510418337
-step 8, overlap = 0.33200292545786536
-step 9, overlap = 0.365388340227811
-step 10, overlap = 0.3983101059501136
-step 11, overlap = 0.4307264474950182
-step 12, overlap = 0.46259623107627434
-step 13, overlap = 0.493879016446673
-step 14, overlap = 0.5245351082135383
-step 15, overlap = 0.5545256062090563
-step 16, overlap = 0.5838124548515262
-step 17, overlap = 0.6123584914348992
-step 18, overlap = 0.640127493285327
-step 19, overlap = 0.6670842237248864
-step 20, overlap = 0.6931944767841465
-step 21, overlap = 0.7184251206068554
-step 22, overlap = 0.7427441394916565
-step 23, overlap = 0.7661206745174953
-step 24, overlap = 0.7885250627011597
-step 25, overlap = 0.8099288746372726
-step 26, overlap = 0.8303049505729694
-step 27, overlap = 0.8496274348714881
-step 28, overlap = 0.8678718088209347
-step 29, overlap = 0.8850149217466023
-step 30, overlap = 0.9010350203873531
-step 31, overlap = 0.9159117764987961
-step 32, overlap = 0.9296263126482279
-step 33, overlap = 0.9421612261686103
-step 34, overlap = 0.9535006112411852
-step 35, overlap = 0.9636300790787065
-step 36, overlap = 0.9725367761836794
-step 37, overlap = 0.9802094006584354
-step 38, overlap = 0.9866382165463525
-step 39, overlap = 0.991815066186017
-step 40, overlap = 0.9957333805626554
-step 41, overlap = 0.9983881876436952
-step 42, overlap = 0.9997761186878846
-</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../2.qft-phase-estimation/index.html">« Quantum Fourier Transformation and Phase Estimation</a><a class="docs-footer-nextpage" href="../4.shor-algorithm/index.html">Shor&#39;s Algorithm »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.10 on <span class="colophon-date" title="Monday 20 December 2021 01:12">Monday 20 December 2021</span>. Using Julia version 1.7.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+end</code></pre><pre><code class="nohighlight hljs">step 0, overlap = 0.10863384955350316
+step 1, overlap = 0.18042097953990324
+step 2, overlap = 0.25125846705484733
+step 3, overlap = 0.3207734602997977
+step 4, overlap = 0.38860006840021866
+step 5, overlap = 0.4543812872653932
+step 6, overlap = 0.5177708786728161
+step 7, overlap = 0.5784351926866417
+step 8, overlap = 0.6360549238179174
+step 9, overlap = 0.6903267916830889
+step 10, overlap = 0.7409651373146597
+step 11, overlap = 0.7877034267218568
+step 12, overlap = 0.8302956537873345
+step 13, overlap = 0.8685176351158
+step 14, overlap = 0.9021681900191469
+step 15, overlap = 0.9310701994272663
+step 16, overlap = 0.9550715381509793
+step 17, overlap = 0.9740458755901413
+step 18, overlap = 0.987893340672409
+step 19, overlap = 0.9965410475227712
+step 20, overlap = 0.9999434790969974
+</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../2.qft-phase-estimation/index.html">« Quantum Fourier Transformation and Phase Estimation</a><a class="docs-footer-nextpage" href="../4.shor-algorithm/index.html">Shor&#39;s Algorithm »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.10 on <span class="colophon-date" title="Tuesday 21 December 2021 17:27">Tuesday 21 December 2021</span>. Using Julia version 1.7.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
