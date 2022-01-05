@@ -19,6 +19,12 @@ state(ρ::DensityMatrix) = ρ.state
 YaoBase.nqubits(ρ::DensityMatrix) = log2dim1(state(ρ))
 YaoBase.nactive(ρ::DensityMatrix) = nqubits(ρ)
 YaoBase.nbatch(dm::DensityMatrix{B}) where {B} = B
+
+"""
+    density_matrix(reg, qubits)
+
+Get the reduced density matrix on given `locs`. See also [`focus!`](@ref).
+"""
 function YaoBase.density_matrix(reg::ArrayReg, qubits)
     freg = focus!(copy(reg), qubits)
     return density_matrix(freg)
@@ -66,3 +72,10 @@ end
 
 # obtaining matrix from Yao.DensityMatrix{1}, `1` is the batch size.
 LinearAlgebra.Matrix(d::DensityMatrix{1}) = dropdims(d.state, dims = 3)
+
+von_neumann_entropy(r::AbstractRegister) = von_neumann_entropy(ρ(r))
+von_neumann_entropy(dm::DensityMatrix{1}) = von_neumann_entropy(Matrix(dm))
+function von_neumann_entropy(dm::AbstractMatrix)
+    p = max.(eigvals(dm), eps(real(eltype(dm))))
+    return -sum(p .* log.(p))
+end
