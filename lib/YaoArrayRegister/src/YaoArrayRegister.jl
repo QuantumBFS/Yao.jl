@@ -9,6 +9,7 @@ module YaoArrayRegister
 using Adapt
 using YaoBase
 using BitBasis
+using LinearAlgebra
 
 export ArrayReg,
     AdjointArrayReg,
@@ -46,6 +47,7 @@ export AbstractRegister,
     addbits!,
     collapseto!,
     density_matrix,
+    von_neumann_entropy,
     fidelity,
     focus!,
     insert_qubits!,

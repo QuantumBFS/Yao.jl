@@ -61,14 +61,26 @@ end
     @test hypercubic(reg) == reshape(reg0.state, fill(2, 8)..., 4)
     @test nactive(reg) == 8
     @test reg0 == relax!(reg, 1:8)
+end
 
-    reg1 = focus!(copy(reg0), (5, 3, 2)) do reg
+@testset "focus do ... end" begin
+    reg = rand_state(5)
+    focus(reg, (1, 2, 3)) do reg
         @test nactive(reg) == 3
-        reg
     end
+    @test nactive(reg) == 5
 
-    @test reg1 == reg0
-    @test reg0 == copy(reg0) |> focus!(7, 3, 2) |> relax!(7, 3, 2)
+    reg = rand_state(5)
+    focus(reg, 1, 2, 3) do reg
+        @test nactive(reg) == 3
+    end
+    @test nactive(reg) == 5
+
+    reg = rand_state(5)
+    focus(reg, 1) do reg
+        @test nactive(reg) == 1
+    end
+    @test nactive(reg) == 5
 end
 
 @testset "partial trace" begin

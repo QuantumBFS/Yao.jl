@@ -108,6 +108,37 @@ julia> focus!(r, (1, 2, 4))
 @interface focus!
 
 """
+    focus(f, register, locs...)
+
+Call a callable `f` under the context of `focus`. See also [`focus!`](@ref).
+
+# Example
+
+print the focused register
+
+```julia
+julia> r = ArrayReg(bit"101100")
+ArrayReg{1,Complex{Float64},Array...}
+    active qubits: 6/6
+
+julia> focus(x->(println(x);x), r, 1, 2);
+ArrayReg{1,Complex{Float64},Array...}
+    active qubits: 2/6
+```
+"""
+@interface focus
+
+function focus(f, r::AbstractRegister, locs::NTuple{N, Int}) where N
+    focus!(r, locs)
+    ret = f(r)
+    relax!(r, locs)
+    return ret
+end
+
+focus(f, r::AbstractRegister, locs::Int...) = focus(f, r, locs)
+
+
+"""
     relax!(register[, locs]; to_nactive=nqubits(register)) -> register
 
 Inverse transformation of [`focus!`](@ref), where `to_nactive` is the number
