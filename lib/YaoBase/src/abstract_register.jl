@@ -13,27 +13,6 @@ nremain(r::AbstractRegister) = nqubits(r) - nactive(r)
 nbatch(r::AbstractRegister{B}) where {B} = B
 
 """
-    focus(f, register, locs...)
-
-Call a callable `f` under the context of `focus`. See also [`focus!`](@ref).
-
-# Example
-
-print the focused register
-
-```julia
-julia> r = ArrayReg(bit"101100")
-ArrayReg{1,Complex{Float64},Array...}
-    active qubits: 6/6
-
-julia> focus(x->(println(x);x), r, 1, 2);
-ArrayReg{1,Complex{Float64},Array...}
-    active qubits: 2/6
-```
-"""
-focus!(f::Base.Callable, r::AbstractRegister, locs::Int...) = focus(f, r, locs)
-
-"""
     focus!(locs...) -> f(register) -> register
 
 Lazy version of [`focus!`](@ref), this returns a lambda which requires a register.
@@ -41,9 +20,6 @@ Lazy version of [`focus!`](@ref), this returns a lambda which requires a registe
 focus!(locs::Int...) = focus!(locs)
 focus!(locs::NTuple{N,Int}) where {N} = @λ(register -> focus!(register, locs))
 focus!(locs::UnitRange) = @λ(register -> focus!(register, locs))
-focus!(f::Base.Callable, r::AbstractRegister, loc::Int) = focus(f, r, (loc,))
-focus!(f::Base.Callable, r::AbstractRegister, locs) =
-    relax!(f(focus!(r, locs)), locs; to_nactive = nqubits(r))
 
 relax!(r::AbstractRegister; to_nactive::Int = nqubits(r)) =
     relax!(r, (); to_nactive = to_nactive)
