@@ -93,8 +93,8 @@ end
 
 @testset "von_neumann_entropy" begin
     reg = (product_state(bit"00000") + product_state(bit"11111")) / sqrt(2)
-
+    rho = density_matrix(reg)
     p = eigvals(statevec(reg) * statevec(reg)')
     p = max.(p, eps(Float64))
-    @test von_neumann_entropy(reg) ≈ -sum(p .* log.(p)) rtol=1e-12
+    @test von_neumann_entropy(rho) ≈ -sum(p .* log.(p)) rtol=1e-12
 end
