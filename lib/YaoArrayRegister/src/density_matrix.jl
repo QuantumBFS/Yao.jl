@@ -73,7 +73,6 @@ end
 # obtaining matrix from Yao.DensityMatrix{1}, `1` is the batch size.
 LinearAlgebra.Matrix(d::DensityMatrix{1}) = dropdims(d.state, dims = 3)
 
-von_neumann_entropy(r::AbstractRegister) = von_neumann_entropy(ρ(r))
 von_neumann_entropy(dm::DensityMatrix{1}) = von_neumann_entropy(Matrix(dm))
 function von_neumann_entropy(dm::AbstractMatrix)
     p = max.(eigvals(dm), eps(real(eltype(dm))))
