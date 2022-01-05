@@ -55,7 +55,7 @@ using Random; Random.seed!(2)  #src
 # In a single try, we `apply` the grover algorithm for `nstep` times.
 function single_try(oracle, gen::AbstractBlock{N}, nstep::Int; nbatch::Int) where N
     reg = zero_state(N+1; nbatch=nshot)
-    focus!(reg, 1:N) do r
+    focus(reg, 1:N) do r
         r |> gen
         for i = 1:nstep
             grover_step!(r, oracle, gen)
