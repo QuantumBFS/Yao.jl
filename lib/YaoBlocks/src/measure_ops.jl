@@ -192,6 +192,26 @@ function YaoBase.measure!(
     return B == 1 ? bb.values[res[]] : bb.values[res]
 end
 
+function YaoBase.measure!(
+    p::ResetTo,
+    op::AbstractBlock,
+    reg::AbstractRegister,
+    locs::AllLocs;
+    kwargs...,
+)
+    throw(ArgumentError("post processing `$p` is not allowed when measuring an operator."))
+end
+ 
+function YaoBase.measure!(
+    p::RemoveMeasured,
+    op::AbstractBlock,
+    reg::AbstractRegister,
+    locs::AllLocs;
+    kwargs...,
+)
+    throw(ArgumentError("post processing `$p` is not allowed when measuring an operator."))
+end
+ 
 function measure(op::AbstractBlock, reg::AbstractRegister, locs::AllLocs; kwargs...)
     _check_msize(op, reg, locs)
     E, V = eigenbasis(op)

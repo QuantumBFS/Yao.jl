@@ -22,8 +22,8 @@ end
         rot(SWAP, 0.5),
         time_evolve(kron(X, X), 0.5),
         3 * put(3, 2 => X),
-        chain(10, put(2 => X), chain(4 => Y)),
-        chain(10, put(2 => X), chain(2 => Y)),
+        chain(10, put(2 => X), chain(put(4 => Y))),
+        chain(10, put(2 => X), chain(put(2 => Y))),
     ]
         @show op
         @test check_eigenbasis(op)
@@ -138,4 +138,12 @@ end
     sp = put(2, 1=>(X + 1im*Y)/2)
     X_diff = sp + sp'
     @test measure(X_diff, circ_wfn, nshots=100) |> sum ≈ 100.0
+end
+
+@testset "measure operator with post processing" begin
+    # measure! and reset
+    reg = rand_state(8; nbatch=32)
+    op = repeat(5, X, 1:5)
+    @test_throws ArgumentError measure!(ResetTo(0), op, reg, 2:6)
+    @test_throws ArgumentError measure!(RemoveMeasured(), op, reg, 2:6)
 end
