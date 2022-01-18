@@ -24,7 +24,7 @@ See more [examples](examples/circuits.jl).
 ### Adjusting the plot attributes
 
 Various attributes of the visualizations can be altered. 
-The plot can be modifiend, if we change the following attributes
+The plot can be modified, if we change the following attributes
 
 - `YaoPlots.CircuitStyles.linecolor[]` for line color, default value being `"#000000"` (black color)
 - `YaoPlots.CircuitStyles.gate_bgcolor[]` for background color of square blocks, the default value being `"#FFFFFF"` (white color)
