@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.2"
+     width="106.25mm" height="56.25mm" viewBox="0 0 106.25 56.25"
+     stroke="none"
+     fill="#000000"
+     stroke-width="0.3"
+     font-size="3.88"
+>
+<defs>
+  <marker id="arrow" markerWidth="15" markerHeight="7" refX="5" refY="3.5" orient="auto" markerUnits="strokeWidth">
+    <path d="M0,0 L15,3.5 L0,7 z" stroke="context-stroke" fill="context-stroke"/>
+  </marker>
+</defs>
+<g stroke-width="0.88" stroke="#FFC0CB" id="img-b25f38b2-1">
+  <g transform="translate(76.25,43.75)">
+    <path fill="none" d="M21.25,0 L-21.25,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" id="img-b25f38b2-2">
+  <g transform="translate(86.88,25)">
+    <path fill="none" d="M10.62,0 L-10.62,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" id="img-b25f38b2-3">
+  <g transform="translate(86.88,6.25)">
+    <path fill="none" d="M10.62,0 L-10.62,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" id="img-b25f38b2-4">
+  <g transform="translate(44.38,43.75)">
+    <path fill="none" d="M10.62,0 L-10.62,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" id="img-b25f38b2-5">
+  <g transform="translate(65.62,25)">
+    <path fill="none" d="M10.62,0 L-10.62,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" id="img-b25f38b2-6">
+  <g transform="translate(65.62,6.25)">
+    <path fill="none" d="M10.62,0 L-10.62,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" id="img-b25f38b2-7">
+  <g transform="translate(44.38,25)">
+    <path fill="none" d="M10.62,0 L-10.62,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" id="img-b25f38b2-8">
+  <g transform="translate(23.12,43.75)">
+    <path fill="none" d="M10.62,0 L-10.62,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" id="img-b25f38b2-9">
+  <g transform="translate(23.12,25)">
+    <path fill="none" d="M10.62,0 L-10.62,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" id="img-b25f38b2-10">
+  <g transform="translate(44.38,6.25)">
+    <path fill="none" d="M10.62,0 L-10.62,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" id="img-b25f38b2-11">
+  <g transform="translate(23.12,6.25)">
+    <path fill="none" d="M10.62,0 L-10.62,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" fill="#FFFF00" id="img-b25f38b2-12">
+  <g transform="translate(55,43.75)">
+    <path d="M-7.5,-5 L7.5,-5 7.5,5 -7.5,5  z" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" fill="#FFFF00" id="img-b25f38b2-13">
+  <g transform="translate(76.25,25)">
+    <path d="M-7.5,-5 L7.5,-5 7.5,5 -7.5,5  z" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" fill="#FFFF00" id="img-b25f38b2-14">
+  <g transform="translate(76.25,6.25)">
+    <path d="M-7.5,-5 L7.5,-5 7.5,5 -7.5,5  z" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" fill="#FFFF00" id="img-b25f38b2-15">
+  <g transform="translate(55,25)">
+    <path d="M-5,-5 L5,-5 5,5 -5,5  z" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" fill="#FFFF00" id="img-b25f38b2-16">
+  <g transform="translate(33.75,43.75)">
+    <path d="M-5,-5 L5,-5 5,5 -5,5  z" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" fill="#FFFF00" id="img-b25f38b2-17">
+  <g transform="translate(33.75,25)">
+    <path d="M-5,-5 L5,-5 5,5 -5,5  z" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" fill="#FFFF00" id="img-b25f38b2-18">
+  <g transform="translate(55,6.25)">
+    <path d="M-5,-5 L5,-5 5,5 -5,5  z" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.88" stroke="#FFC0CB" fill="#FFFF00" id="img-b25f38b2-19">
+  <g transform="translate(33.75,6.25)">
+    <path d="M-5,-5 L5,-5 5,5 -5,5  z" class="primitive"/>
+  </g>
+</g>
+<g font-family="JuliaMono" fill="#000080" font-size="2.82" id="img-b25f38b2-20">
+  <g transform="translate(55,43.75)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.35em">Rx(π/2)</text>
+    </g>
+  </g>
+</g>
+<g font-family="JuliaMono" fill="#000080" font-size="2.82" id="img-b25f38b2-21">
+  <g transform="translate(76.25,25)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.35em">Rx(π/2)</text>
+    </g>
+  </g>
+</g>
+<g font-family="JuliaMono" fill="#000080" font-size="2.82" id="img-b25f38b2-22">
+  <g transform="translate(76.25,6.25)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.35em">Rx(π/2)</text>
+    </g>
+  </g>
+</g>
+<g font-family="JuliaMono" fill="#000080" font-size="4.59" id="img-b25f38b2-23">
+  <g transform="translate(55,25)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.35em">Y</text>
+    </g>
+  </g>
+</g>
+<g font-family="JuliaMono" fill="#000080" font-size="4.59" id="img-b25f38b2-24">
+  <g transform="translate(33.75,43.75)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.35em">H</text>
+    </g>
+  </g>
+</g>
+<g font-family="JuliaMono" fill="#000080" font-size="4.59" id="img-b25f38b2-25">
+  <g transform="translate(33.75,25)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.35em">H</text>
+    </g>
+  </g>
+</g>
+<g font-family="JuliaMono" fill="#000080" font-size="4.59" id="img-b25f38b2-26">
+  <g transform="translate(55,6.25)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.35em">H</text>
+    </g>
+  </g>
+</g>
+<g font-family="JuliaMono" fill="#000080" font-size="4.59" id="img-b25f38b2-27">
+  <g transform="translate(33.75,6.25)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.35em">X</text>
+    </g>
+  </g>
+</g>
+</svg>
