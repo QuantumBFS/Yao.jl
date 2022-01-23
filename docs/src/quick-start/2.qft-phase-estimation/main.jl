@@ -121,8 +121,6 @@ QFT(5)'
 
 # ![phase estimation](assets/phaseest.png)
 
-using Yao
-
 # First we call Hadamard gates repeatly on first `n` qubits.
 
 Hadamards(n) = repeat(H, 1:n)
@@ -131,7 +129,7 @@ Hadamards(n) = repeat(H, 1:n)
 
 ControlU(n, m, U) = chain(n+m, control(k, n+1:n+m=>matblock(U^(2^(k-1)))) for k in 1:n)
 
-# each of them is a `U` of power ``2^(k-1)``.
+# each of them is a `U` of power ``2^{(k-1)}``.
 
 # Since we will only apply the qft and Hadamard on first `n` qubits,
 # we could use `Subroutine`, which creates a context of
@@ -147,37 +145,14 @@ PE(n, m, U) =
 # other `m` qubits as the input state which corresponds to an eigenvector of
 # oracle matrix `U`.
 
-# The concentrator here uses `focus!` and `relax!` to manage
-# a local scope of quantum circuit, and only active the first `n` qubits while applying
-# the block inside the concentrator context, and the scope will be `relax!`ed
-# back, after the context. This is equivalent to manually `focus!`
-# then `relax!`
-
-# fullly activated
-
-r = rand_state(5)
-
-# first 3 qubits activated
-
-focus!(r, 1:3)
-
-# relax back to the original
-
-relax!(r, 1:3)
-
-# In this way, we will be able to apply small operator directly
-# on the subset of the qubits.
-
 # Details about the algorithm can be found here:
-# [Quantum Phase Estimation Algorithm](ttps://en.wikipedia.org/wiki/Quantum_phase_estimation_algorithm)
+# [Quantum Phase Estimation Algorithm](https://en.wikipedia.org/wiki/Quantum_phase_estimation_algorithm)
 
 # Now let's check the results of our phase estimation.
 
 
 # First we need to set up a unitary with known phase, we set the phase to be
 # 0.75, which is `0.75 * 2^3 == 6 == 0b110` .
-
-# # using LinearAlgebra
 
 N, M = 3, 5
 P = eigen(rand_unitary(1<<M)).vectors
