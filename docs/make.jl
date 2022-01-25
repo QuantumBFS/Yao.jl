@@ -7,6 +7,11 @@ using YaoBase: BitBasis
 using YaoBlocks: AD
 using YaoBlocks: Optimise
 
+function notebook_filter(str)
+  re = r"(?<!`)``(?!`)"  # Two backquotes not preceded by nor followed by another
+  replace(str, re => "\$")
+end
+
 attach_notebook_badge(root, name) = str->attach_notebook_badge(root, name, str)
 
 function attach_notebook_badge(root, name, str)
@@ -27,7 +32,7 @@ function build_tutorial(root, name)
     source_dir = joinpath(@__DIR__, "src", root, name)
     source_path = joinpath(source_dir, "main.jl")
     Literate.markdown(source_path, generated_abspath; execute=true, name="index", preprocess = attach_notebook_badge(root, name))
-    Literate.notebook(source_path, generated_abspath; execute=false, name="main")
+    Literate.notebook(source_path, generated_abspath; execute=false, name="main", preprocess = notebook_filter)
     Literate.script(source_path, generated_abspath; execute=false, name="main")
     # copy other things
     for each in readdir(source_dir)
