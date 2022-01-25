@@ -145,6 +145,27 @@ PE(n, m, U) =
 # other `m` qubits as the input state which corresponds to an eigenvector of
 # oracle matrix `U`.
 
+# The subroutine here uses `focus!` and `relax!` to manage
+# a local scope of quantum circuit, and only activate the first `n` qubits while applying
+# the block inside the subroutine context, and the scope will be `relax!`ed
+# back, after the context. This is equivalent to manually `focus!`
+# then `relax!`
+
+# fullly activated
+
+r = rand_state(5)
+
+# first 3 qubits activated
+
+focus!(r, 1:3)
+
+# relax back to the original
+
+relax!(r, 1:3)
+
+# In this way, we will be able to apply small operator directly
+# on the subset of the qubits.
+
 # Details about the algorithm can be found here:
 # [Quantum Phase Estimation Algorithm](https://en.wikipedia.org/wiki/Quantum_phase_estimation_algorithm)
 
