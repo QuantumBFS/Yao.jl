@@ -16,7 +16,7 @@ jobs:
           # All of these options are optional, so you can remove them if you are happy with the defaults
           concurrent_skipping: 'never'
           skip_after_successful_duplicate: 'true'
-          paths_ignore: '["**/README.md", "**/docs/**", "**/examples/**"]'
+          paths_ignore: '["**/README.md", "**/docs/**", "**/notebooks/**"]'
           do_not_skip: '["workflow_dispatch", "schedule"]'
 
   test:
