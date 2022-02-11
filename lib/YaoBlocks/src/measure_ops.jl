@@ -9,10 +9,10 @@ By applying `eigenvector`' to target state,
 one can swith the basis to the eigenbasis of this operator.
 However, `eigenvalues` does not have a specific form.
 """
-function eigenbasis(op::AbstractBlock{N}) where {N}
+function eigenbasis(op::AbstractBlock{N,D}) where {N,D}
     m = mat(op)
     if m isa Diagonal || m isa IMatrix
-        op, IdentityGate{N}()
+        op, IdentityGate{N,D}()
     else
         E, V = eigen!(Matrix(m))
         matblock(Diagonal(E)), matblock(V)

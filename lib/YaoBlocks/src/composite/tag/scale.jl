@@ -3,7 +3,7 @@ using LinearAlgebra
 export Scale, factor
 
 """
-    Scale{S <: Union{Number, Val}, N, BT <: AbstractBlock{N}} <: TagBlock{BT, N}
+    Scale{S <: Union{Number, Val}, N, D, BT <: AbstractBlock{N}} <: TagBlock{BT, N,D}
 
 `Scale` a block with scalar. it can be either a `Number` or a compile time `Val`.
 
@@ -23,7 +23,7 @@ julia> -Z
 [-] Z
 ```
 """
-struct Scale{S<:Union{Number,Val},N,BT<:AbstractBlock{N}} <: TagBlock{BT,N}
+struct Scale{S<:Union{Number,Val},N,D,BT<:AbstractBlock{N,D}} <: TagBlock{BT,N,D}
     alpha::S
     content::BT
 end

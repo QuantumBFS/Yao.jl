@@ -3,7 +3,7 @@ import StaticArrays: SMatrix
 export RotationGate, Rx, Ry, Rz, rot
 
 """
-    RotationGate{N, T, GT <: AbstractBlock{N, Complex{T}}} <: PrimitiveBlock{N, Complex{T}}
+    RotationGate{N, D, T, GT <: AbstractBlock{N, Complex{T}}} <: PrimitiveBlock{N, D, Complex{T}}
 
 RotationGate, with GT both hermitian and isreflexive.
 
@@ -13,20 +13,20 @@ RotationGate, with GT both hermitian and isreflexive.
 \\mathbf{I} cos(θ / 2) - im sin(θ / 2) * mat(U)
 ```
 """
-mutable struct RotationGate{N,T,GT<:AbstractBlock{N}} <: PrimitiveBlock{N}
+mutable struct RotationGate{N,D,T,GT<:AbstractBlock{N}} <: PrimitiveBlock{N,D}
     block::GT
     theta::T
-    function RotationGate{N,T,GT}(block::GT, theta) where {N,T,GT<:AbstractBlock{N}}
+    function RotationGate{N,D,T,GT}(block::GT, theta) where {N,D,T,GT<:AbstractBlock{N,D}}
         ishermitian(block) && isreflexive(block) ||
             throw(ArgumentError("Gate type $GT is not hermitian or not isreflexive."))
-        new{N,T,GT}(block, T(theta))
+        new{N,D,T,GT}(block, T(theta))
     end
 end
 
-RotationGate(block::GT, theta::T) where {N,T,GT<:AbstractBlock{N}} =
-    RotationGate{N,T,GT}(block, theta)
-RotationGate(block::GT, theta::Integer) where {N,GT<:AbstractBlock{N}} =
-    RotationGate{N,Float64,GT}(block, Float64(theta))
+RotationGate(block::GT, theta::T) where {N,D,T,GT<:AbstractBlock{N,D}} =
+    RotationGate{N,D,T,GT}(block, theta)
+RotationGate(block::GT, theta::Integer) where {N,D,GT<:AbstractBlock{N,D}} =
+    RotationGate{N,D,Float64,GT}(block, Float64(theta))
 
 # bindings
 """
@@ -81,8 +81,8 @@ rot(axis::AbstractBlock, theta) = RotationGate(axis, theta)
 content(x::RotationGate) = x.block
 chcontent(x::RotationGate, gen::AbstractBlock) = RotationGate(gen, x.theta)
 # General definition
-function mat(::Type{T}, R::RotationGate{N}) where {N,T}
-    I = IMatrix{1 << N,T}()
+function mat(::Type{T}, R::RotationGate{N,D}) where {N,D,T}
+    I = IMatrix{D^N,T}()
     return I * cos(T(R.theta) / 2) - im * sin(T(R.theta) / 2) * mat(T, R.block)
 end
 
@@ -107,11 +107,11 @@ end
 niparams(::Type{<:RotationGate}) = 1
 getiparams(x::RotationGate) = x.theta
 # no need to specify the type of param, Julia will try to do the conversion
-setiparams!(r::RotationGate, param::Number) where {N,T} = (r.theta = param; r)
-setiparams(r::RotationGate, param::Number) where {N,T} = RotationGate(r.block, param)
+setiparams!(r::RotationGate, param::Number) = (r.theta = param; r)
+setiparams(r::RotationGate, param::Number) = RotationGate(r.block, param)
 
 # fallback to matrix methods if it is not real
-YaoBase.isunitary(r::RotationGate{N,<:Real}) where {N} = true
+YaoBase.isunitary(r::RotationGate{N,D,<:Real}) where {N,D} = true
 
 function YaoBase.isunitary(r::RotationGate)
     isreal(r.theta) && return true
@@ -130,8 +130,8 @@ cache_key(R::RotationGate) = R.theta
 
 function parameters_range!(
     out::Vector{Tuple{T,T}},
-    gate::RotationGate{N,T,GT},
-) where {N,T,GT}
+    ::RotationGate{N,D,T,GT},
+) where {N,D,T,GT}
     push!(out, (0.0, 2.0 * pi))
 end
 

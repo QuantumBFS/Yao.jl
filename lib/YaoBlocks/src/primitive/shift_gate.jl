@@ -16,7 +16,7 @@ Phase shift gate.
 \\end{pmatrix}
 ```
 """
-mutable struct ShiftGate{T} <: PrimitiveBlock{1}
+mutable struct ShiftGate{T} <: PrimitiveBlock{1,2}
     theta::T
 end
 

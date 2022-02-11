@@ -3,19 +3,20 @@ using YaoBase
 export ChainBlock, chain
 
 """
-    ChainBlock{N} <: CompositeBlock{N}
+    ChainBlock{N,D} <: CompositeBlock{N,D}
 
 `ChainBlock` is a basic construct tool to create
 user defined blocks horizontically. It is a `Vector`
 like composite type.
 """
-struct ChainBlock{N} <: CompositeBlock{N}
-    blocks::Vector{AbstractBlock{N}}
+struct ChainBlock{N,D} <: CompositeBlock{N,D}
+    blocks::Vector{AbstractBlock{N,D}}
 end
 
-ChainBlock(blocks::Vector{<:AbstractBlock{N}}) where {N} = ChainBlock{N}(blocks)
-ChainBlock(blocks::AbstractBlock{N}...) where {N} =
-    ChainBlock(collect(AbstractBlock{N}, blocks))
+ChainBlock{N}(blocks; nlevel=2) where N = ChainBlock{N,nlevel}(blocks)
+ChainBlock(blocks::Vector{<:AbstractBlock{N,D}}) where {N,D} = ChainBlock{N,D}(blocks)
+ChainBlock(blocks::AbstractBlock{N,D}...) where {N,D} =
+    ChainBlock(collect(AbstractBlock{N,D}, blocks))
 
 """
     chain(blocks...)
@@ -25,8 +26,8 @@ Return a [`ChainBlock`](@ref) which chains a list of blocks with same
 block in `blocks`, chain can infer the number of qubits and create an
 instance itself.
 """
-chain(blocks::AbstractBlock{N}...) where {N} = ChainBlock(blocks...)
-chain(blocks::Union{AbstractBlock{N},Function}...) where {N} =
+chain(blocks::AbstractBlock{N,D}...) where {N,D} = ChainBlock(blocks...)
+chain(blocks::Union{AbstractBlock{N,D},Function}...) where {N,D} =
     chain(map(x -> parse_block(N, x), blocks)...)
 
 function chain(list::Vector)
@@ -34,7 +35,8 @@ function chain(list::Vector)
         each isa AbstractBlock || error("expect a block, got $(typeof(each))")
     end
     N = nqubits(first(list))
-    return ChainBlock(Vector{AbstractBlock{N}}(list))
+    D = nlevel(first(list))
+    return ChainBlock(Vector{AbstractBlock{N,D}}(list))
 end
 
 # if not all matrix block, try to put the number of qubits.
@@ -71,8 +73,8 @@ subblocks(c::ChainBlock) = c.blocks
 occupied_locs(c::ChainBlock) =
     Tuple(unique(Iterators.flatten(occupied_locs(b) for b in subblocks(c))))
 
-chsubblocks(pb::ChainBlock{N}, blocks::Vector{<:AbstractBlock}) where {N} =
-    length(blocks) == 0 ? ChainBlock{N}([]) : ChainBlock(blocks)
+chsubblocks(pb::ChainBlock{N,D}, blocks::Vector{<:AbstractBlock}) where {N,D} =
+    length(blocks) == 0 ? ChainBlock{N,D}([]) : ChainBlock(blocks)
 chsubblocks(pb::ChainBlock, it) = chain(it...)
 
 function mat(::Type{T}, c::ChainBlock) where {T}
@@ -92,21 +94,21 @@ end
 
 cache_key(c::ChainBlock) = Tuple(cache_key(each) for each in c.blocks)
 
-function Base.:(==)(lhs::ChainBlock{N}, rhs::ChainBlock{N}) where {N}
+function Base.:(==)(lhs::ChainBlock{N,D}, rhs::ChainBlock{N,D}) where {N,D}
     (length(lhs.blocks) == length(rhs.blocks)) && all(lhs.blocks .== rhs.blocks)
 end
 
-Base.copy(c::ChainBlock{N}) where {N} = ChainBlock{N}(copy(c.blocks))
-Base.similar(c::ChainBlock{N}) where {N} = ChainBlock{N}(empty!(similar(c.blocks)))
+Base.copy(c::ChainBlock{N,D}) where {N,D} = ChainBlock{N,D}(copy(c.blocks))
+Base.similar(c::ChainBlock{N,D}) where {N,D} = ChainBlock{N,D}(empty!(similar(c.blocks)))
 Base.getindex(c::ChainBlock, index) = getindex(c.blocks, index)
 Base.getindex(c::ChainBlock, index::Union{UnitRange,Vector}) =
     ChainBlock(getindex(c.blocks, index))
-Base.setindex!(c::ChainBlock{N}, val::AbstractBlock{N}, index::Integer) where {N} =
+Base.setindex!(c::ChainBlock{N,D}, val::AbstractBlock{N,D}, index::Integer) where {N,D} =
     (setindex!(c.blocks, val, index); c)
-Base.insert!(c::ChainBlock{N}, index::Integer, val::AbstractBlock{N}) where {N} =
+Base.insert!(c::ChainBlock{N,D}, index::Integer, val::AbstractBlock{N,D}) where {N,D} =
     (insert!(c.blocks, index, val); c)
-Base.adjoint(blk::ChainBlock{N}) where {N} =
-    ChainBlock{N}(map(adjoint, reverse(subblocks(blk))))
+Base.adjoint(blk::ChainBlock{N,D}) where {N,D} =
+    ChainBlock{N,D}(map(adjoint, reverse(subblocks(blk))))
 Base.lastindex(c::ChainBlock) = lastindex(c.blocks)
 ## Iterate contained blocks
 Base.iterate(c::ChainBlock, st = 1) = iterate(c.blocks, st)
@@ -115,18 +117,18 @@ Base.eltype(c::ChainBlock) = eltype(c.blocks)
 Base.eachindex(c::ChainBlock) = eachindex(c.blocks)
 Base.popfirst!(c::ChainBlock) = popfirst!(c.blocks)
 Base.pop!(c::ChainBlock) = pop!(c.blocks)
-Base.push!(c::ChainBlock{N}, m::AbstractBlock{N}) where {N} = (push!(c.blocks, m); c)
-Base.push!(c::ChainBlock{N}, f::Function) where {N} = (push!(c.blocks, f(N)); c)
-Base.pushfirst!(c::ChainBlock{N}, m::AbstractBlock{N}) where {N} =
+Base.push!(c::ChainBlock{N,D}, m::AbstractBlock{N,D}) where {N,D} = (push!(c.blocks, m); c)
+Base.push!(c::ChainBlock{N,D}, f::Function) where {N,D} = (push!(c.blocks, f(N)); c)
+Base.pushfirst!(c::ChainBlock{N,D}, m::AbstractBlock{N,D}) where {N,D} =
     (pushfirst!(c.blocks, m); c)
-Base.pushfirst!(c::ChainBlock{N}, f::Function) where {N} = (pushfirst!(c.blocks, f(N)); c)
-Base.append!(c::ChainBlock{N}, list::Vector{<:AbstractBlock{N}}) where {N} =
+Base.pushfirst!(c::ChainBlock{N,D}, f::Function) where {N,D} = (pushfirst!(c.blocks, f(N)); c)
+Base.append!(c::ChainBlock{N,D}, list::Vector{<:AbstractBlock{N,D}}) where {N,D} =
     (append!(c.blocks, list); c)
-Base.append!(c1::ChainBlock{N}, c2::ChainBlock{N}) where {N} =
+Base.append!(c1::ChainBlock{N,D}, c2::ChainBlock{N,D}) where {N,D} =
     (append!(c1.blocks, c2.blocks); c1)
-Base.prepend!(c1::ChainBlock{N}, list::Vector{<:AbstractBlock{N}}) where {N} =
+Base.prepend!(c1::ChainBlock{N,D}, list::Vector{<:AbstractBlock{N,D}}) where {N,D} =
     (prepend!(c1.blocks, list); c1)
-Base.prepend!(c1::ChainBlock{N}, c2::ChainBlock{N}) where {N} =
+Base.prepend!(c1::ChainBlock{N,D}, c2::ChainBlock{N,D}) where {N,D} =
     (prepend!(c1.blocks, c2.blocks); c1)
 
 YaoBase.isunitary(c::ChainBlock) = all(isunitary, c.blocks) || isunitary(mat(c))

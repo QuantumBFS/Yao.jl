@@ -105,6 +105,8 @@ Base.Matrix{T}(x::AbstractBlock) where {T} = Matrix(mat(T, x))
 # YaoBase interface
 YaoBase.nqubits(::Type{<:AbstractBlock{N}}) where {N} = N
 YaoBase.nqubits(x::AbstractBlock{N}) where {N} = nqubits(typeof(x))
+YaoBase.nlevel(::Type{<:AbstractBlock{N,D}}) where {N,D} = D
+YaoBase.nlevel(x::AbstractBlock{N,D}) where {N,D} = nlevel(typeof(x))
 
 # properties
 for each_property in [:isunitary, :isreflexive, :ishermitian]

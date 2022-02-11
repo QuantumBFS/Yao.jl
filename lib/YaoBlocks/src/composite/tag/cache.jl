@@ -37,21 +37,21 @@ CacheServers.pull(frag::CacheFragment) = frag.storage[cache_key(frag.ref)]
 CacheServers.clear!(frag::CacheFragment) = (empty!(frag.storage); frag)
 
 """
-    CachedBlock{ST, BT, N} <: TagBlock{BT, N}
+    CachedBlock{ST, BT, N, D} <: TagBlock{BT, N, D}
 
 A label type that tags an instance of type `BT`. It forwards
 every methods of the block it contains, except [`mat`](@ref)
 and [`apply!`](@ref), it will cache the matrix form whenever
 the program has.
 """
-struct CachedBlock{ST,BT,N} <: TagBlock{BT,N}
+struct CachedBlock{ST,BT,N, D} <: TagBlock{BT,N,D}
     server::ST
     content::BT
     level::Int
 
-    function CachedBlock(server::ST, x::BT, level::Int) where {ST,N,BT<:AbstractBlock{N}}
+    function CachedBlock(server::ST, x::BT, level::Int) where {ST,N,D,BT<:AbstractBlock{N,D}}
         alloc!(server, x, CacheFragment(x))
-        new{ST,BT,N}(server, x, level)
+        new{ST,BT,N,D}(server, x, level)
     end
 end
 

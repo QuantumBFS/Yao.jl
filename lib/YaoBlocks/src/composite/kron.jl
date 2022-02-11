@@ -5,18 +5,18 @@ export KronBlock, kron
 const KronLocT = Union{Int,UnitRange{Int}}
 
 """
-    KronBlock{N, T, MT<:AbstractBlock} <: CompositeBlock{N, T}
+    KronBlock{N,D,M,MT<:NTuple{M,Any}} <: CompositeBlock{N,D}
 
 composite block that combine blocks by kronecker product.
 """
-struct KronBlock{N,M,MT<:NTuple{M,Any}} <: CompositeBlock{N}
+struct KronBlock{N,D,M,MT<:NTuple{M,Any}} <: CompositeBlock{N,D}
     locs::NTuple{M,UnitRange{Int}}
     blocks::MT
 
-    function KronBlock{N,M,MT}(
+    function KronBlock{N,D,M,MT}(
         locs::NTuple{M,UnitRange{Int}},
         blocks::MT,
-    ) where {N,M,MT<:NTuple{M,AbstractBlock}}
+    ) where {N,D,M,MT<:NTuple{M,AbstractBlock{N0,D} where N0}}
         perm = TupleTools.sortperm(locs, by = first)
         locs = TupleTools.permute(locs, perm)
         blocks = TupleTools.permute(blocks, perm)
@@ -27,16 +27,17 @@ struct KronBlock{N,M,MT<:NTuple{M,Any}} <: CompositeBlock{N}
                 LocationConflictError("locs $locs is inconsistent with target block $b"),
             )
         end
-        return new{N,M,typeof(blocks)}(locs, blocks)
+        return new{N,D,M,typeof(blocks)}(locs, blocks)
     end
 end
 
+KronBlock{N}(::Tuple{}, ::Tuple{}; nlevel=2) where N = KronBlock{N,nlevel,0,Tuple{}}((), ())
 KronBlock{N}(
     locs::NTuple{M,UnitRange{Int}},
     blocks::MT,
-) where {N,M,MT<:NTuple{M,AbstractBlock}} = KronBlock{N,M,MT}(locs, blocks)
+) where {N,D,M,MT<:NTuple{M,AbstractBlock{N0,D} where N0}} = KronBlock{N,D,M,MT}(locs, blocks)
 
-function KronBlock{N}(itr::Pair{<:Any,<:AbstractBlock}...) where {N}
+function KronBlock{N}(itr::Pair{<:Any,<:AbstractBlock{M,D} where M}...) where {N,D}
     locs = map(itr) do p
         _render_kronloc(first(p))
     end
@@ -152,15 +153,15 @@ chsubblocks(pb::KronBlock{N}, it) where {N} = KronBlock{N}(pb.locs, (it...,))
 cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
 color(::Type{T}) where {T<:KronBlock} = :cyan
 
-function mat(::Type{T}, k::KronBlock{N,M}) where {T,N,M}
+function mat(::Type{T}, k::KronBlock{N,D,M}) where {T,N,D,M}
     M == 0 && return IMatrix{1 << N,T}()
     ntrail = N - last(last(k.locs))  # number of trailing bits
     num_bit_list = map(i -> first(k.locs[i]) - (i > 1 ? last(k.locs[i-1]) : 0) - 1, 1:M)
     return reduce(
         Iterators.reverse(zip(subblocks(k), num_bit_list)),
-        init = IMatrix{1 << ntrail,T}(),
+        init = IMatrix{D^ntrail,T}(),
     ) do x, y
-        kron(x, mat(T, y[1]), IMatrix(1 << y[2]))
+        kron(x, mat(T, y[1]), IMatrix(D^y[2]))
     end
 end
 

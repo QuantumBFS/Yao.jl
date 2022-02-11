@@ -3,7 +3,7 @@ using YaoArrayRegister: matvec
 
 export ControlBlock, control, cnot, cz
 
-struct ControlBlock{N,BT<:AbstractBlock,C,M} <: AbstractContainer{BT,N}
+struct ControlBlock{N,BT<:AbstractBlock,C,M} <: AbstractContainer{BT,N,2}
     ctrl_locs::NTuple{C,Int}
     ctrl_config::NTuple{C,Int}
     content::BT

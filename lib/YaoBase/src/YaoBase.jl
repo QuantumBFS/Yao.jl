@@ -37,7 +37,8 @@ import YaoAPI:
     partial_tr,
     select!,
     ρ,
-    reorder!
+    reorder!,
+    nlevel
 export basis, ishermitian
 
 include("utils/ast_tools.jl")

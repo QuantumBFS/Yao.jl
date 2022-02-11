@@ -4,7 +4,7 @@ A(i, j) = control(i, j => shift(2π / (1 << (i - j + 1))))
 B(n, i) = chain(n, i == j ? put(i => H) : A(j, i) for j = i:n)
 qft(n) = chain(B(n, i) for i = 1:n)
 
-struct QFT{N,T} <: PrimitiveBlock{N,T} end
+struct QFT{N,T} <: PrimitiveBlock{N,2,T} end
 
 QFT(::Type{T}, n::Int) where {T} = QFT{n,T}()
 QFT(n::Int) = QFT(ComplexF64, n)

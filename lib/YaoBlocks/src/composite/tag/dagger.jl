@@ -1,11 +1,11 @@
 export Daggered
 
 """
-    Daggered{BT, N} <: TagBlock{N}
+    Daggered{BT, N, D} <: TagBlock{BT,N, D}
 
 Wrapper block allowing to execute the inverse of a block of quantum circuit.
 """
-struct Daggered{BT<:AbstractBlock,N} <: TagBlock{BT,N}
+struct Daggered{BT<:AbstractBlock,N,D} <: TagBlock{BT,N,D}
     content::BT
 end
 
@@ -37,7 +37,7 @@ julia> QFT(2)'
  [†]QFT{2}
 ```
 """
-Daggered(x::BT) where {N,BT<:AbstractBlock{N}} = Daggered{BT,N}(x)
+Daggered(x::BT) where {N,D,BT<:AbstractBlock{N,D}} = Daggered{BT,N,D}(x)
 
 PropertyTrait(::Daggered) = PreserveAll()
 mat(::Type{T}, blk::Daggered) where {T} = adjoint(mat(T, content(blk)))

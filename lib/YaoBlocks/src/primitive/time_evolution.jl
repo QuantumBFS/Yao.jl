@@ -3,14 +3,14 @@ using ExponentialUtilities, YaoArrayRegister
 export TimeEvolution, time_evolve
 
 """
-    TimeEvolution{N, TT, GT} <: PrimitiveBlock{N}
+    TimeEvolution{N, D, TT, GT} <: PrimitiveBlock{N}
 
 TimeEvolution, where GT is block type. input matrix should be hermitian.
 
 !!!note:
     `TimeEvolution` contructor check hermicity of the input block by default, but sometimes it can be slow. Turn off the check manually by specifying optional parameter `check_hermicity = false`.
 """
-mutable struct TimeEvolution{N,Tt,HT<:AbstractBlock{N}} <: PrimitiveBlock{N}
+mutable struct TimeEvolution{N,D,Tt,HT<:AbstractBlock{N,D}} <: PrimitiveBlock{N,D}
     H::HT
     dt::Tt
     tol::Float64
@@ -20,10 +20,10 @@ mutable struct TimeEvolution{N,Tt,HT<:AbstractBlock{N}} <: PrimitiveBlock{N}
         dt::Tt;
         tol::Real = 1e-7,
         check_hermicity::Bool = true,
-    ) where {N,Tt,TH<:AbstractBlock{N}}
+    ) where {N,D,Tt,TH<:AbstractBlock{N,D}}
         (check_hermicity && !ishermitian(H)) &&
             error("Time evolution Hamiltonian has to be a Hermitian")
-        return new{N,Tt,TH}(H, dt, Float64(tol))
+        return new{N,D,Tt,TH}(H, dt, Float64(tol))
     end
 end
 
@@ -52,9 +52,9 @@ struct BlockMap{T,GT<:AbstractBlock} <: AbstractArray{T,2}
     BlockMap(::Type{T}, block::GT) where {T,GT<:AbstractBlock} = new{T,GT}(block)
 end
 
-Base.size(bm::BlockMap{T,GT}, i::Int) where {T,N,GT<:AbstractBlock{N}} =
-    0 < i <= 2 ? 1 << N : DimensionMismatch("")
-Base.size(bm::BlockMap{T,GT}) where {T,N,GT<:AbstractBlock{N}} = (L = 1 << N; (L, L))
+Base.size(bm::BlockMap{T,GT}, i::Int) where {T,N,D,GT<:AbstractBlock{N,D}} =
+    0 < i <= 2 ? D^N : DimensionMismatch("")
+Base.size(bm::BlockMap{T,GT}) where {T,N,D,GT<:AbstractBlock{N,D}} = (L = D^N; (L, L))
 LinearAlgebra.ishermitian(bm::BlockMap) = ishermitian(bm.block)
 
 function LinearAlgebra.mul!(y::AbstractVector, A::BlockMap, x::AbstractVector)

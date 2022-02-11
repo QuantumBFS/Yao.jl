@@ -2,35 +2,35 @@ using YaoBase
 export RepeatedBlock, repeat
 
 """
-    RepeatedBlock <: AbstractContainer
+    RepeatedBlock{N,D,C,GT<:AbstractBlock} <: AbstractContainer{GT,N,D}
 
 Repeat the same block on given locations.
 """
-struct RepeatedBlock{N,C,GT<:AbstractBlock} <: AbstractContainer{GT,N}
+struct RepeatedBlock{N,D,C,GT<:AbstractBlock} <: AbstractContainer{GT,N,D}
     content::GT
     locs::NTuple{C,Int}
 end
 
-function RepeatedBlock{N}(block::AbstractBlock{M}, locs::NTuple{C,Int}) where {N,M,C}
+function RepeatedBlock{N}(block::AbstractBlock{M,D}, locs::NTuple{C,Int}) where {N,M,D,C}
     @assert_locs_safe N Tuple(i:i+M-1 for i in locs)
     M > 1 && throw(
         ArgumentError("RepeatedBlock does not support multi-qubit content for the moment."),
     )
-    return RepeatedBlock{N,C,typeof(block)}(block, locs)
+    return RepeatedBlock{N,D,C,typeof(block)}(block, locs)
 end
 
-function RepeatedBlock{N}(block::AbstractBlock{M}, locs::UnitRange{Int}) where {N,M}
+function RepeatedBlock{N}(block::AbstractBlock{M,D}, locs::UnitRange{Int}) where {N,M,D}
     (0 < locs.start) && (locs.stop <= N) ||
         throw(LocationConflictError("locations conflict."))
     M > 1 && throw(
         ArgumentError("RepeatedBlock does not support multi-qubit content for the moment."),
     )
-    return RepeatedBlock{N,length(locs),typeof(block)}(block, Tuple(locs))
+    return RepeatedBlock{N,D,length(locs),typeof(block)}(block, Tuple(locs))
 end
 
 
-function RepeatedBlock{N}(block::GT) where {N,M,GT<:AbstractBlock{M}}
-    return RepeatedBlock{N,N,GT}(block, Tuple(1:M:N-M+1))
+function RepeatedBlock{N}(block::GT) where {N,M,D,GT<:AbstractBlock{M,D}}
+    return RepeatedBlock{N,D,N,GT}(block, Tuple(1:M:N-M+1))
 end
 
 """

@@ -4,13 +4,13 @@ export Measure,
     MeasureAndReset, AllLocs, ComputationalBasis, chmeasureoperator, nqubits_measured
 
 """
-    Measure{N, K, OT, LT, PT, RNG} <: PrimitiveBlock{N}
+    Measure{N, K, OT, LT, PT, RNG} <: PrimitiveBlock{N,2}
     Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=1:n, resetto=nothing, remove=false)
 
-Measure operator.
+Measure operator, currently only qubits are supported.
 """
 mutable struct Measure{N,K,OT,LT<:Union{NTuple{K,Int},AllLocs},PT<:PostProcess,RNG} <:
-               PrimitiveBlock{N}
+               PrimitiveBlock{N,2}
     rng::RNG
     operator::OT
     locations::LT

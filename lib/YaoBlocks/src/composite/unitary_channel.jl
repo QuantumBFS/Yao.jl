@@ -59,7 +59,7 @@ unitary_channel
 └─ [0.7] Z
 ```
 """
-struct UnitaryChannel{N,W<:AbstractWeights} <: CompositeBlock{N}
+struct UnitaryChannel{N,W<:AbstractWeights} <: CompositeBlock{N,2}
     operators::Vector{AbstractBlock{N}}
     weights::W
 
