@@ -122,8 +122,8 @@ end
 end
 
 const SymReal = Union{Basic,SymEngine.BasicRealNumber}
-YaoBlocks.RotationGate(block::GT, theta::T) where {N,T<:SymReal,GT<:AbstractBlock{N}} =
-    RotationGate{N,T,GT}(block, theta)
+YaoBlocks.RotationGate(block::GT, theta::T) where {N,D,T<:SymReal,GT<:AbstractBlock{N,D}} =
+    RotationGate{N,D,T,GT}(block, theta)
 
 YaoBlocks.phase(θ::SymReal) = PhaseGate(θ)
 YaoBlocks.shift(θ::SymReal) = ShiftGate(θ)
@@ -139,7 +139,7 @@ function YaoBlocks.mat(::Type{Basic}, R::RotationGate{N}) where {N}
     return I * cos(R.theta / 2) - im * sin(R.theta / 2) * mat(Basic, R.block)
 end
 for GT in [:XGate, :YGate, :ZGate]
-    @eval YaoBlocks.mat(::Type{Basic}, R::RotationGate{1,T,<:$GT}) where {T} =
+    @eval YaoBlocks.mat(::Type{Basic}, R::RotationGate{1,D,T,<:$GT}) where {D,T} =
         invoke(mat, Tuple{Type{Basic},RotationGate}, Basic, R)
 end
 
