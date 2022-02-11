@@ -27,6 +27,7 @@ import YaoBase:
     mat_back!,
     niparams,
     nqubits,
+    nlevel,
     occupied_locs,
     operator_fidelity,
     parameters,
