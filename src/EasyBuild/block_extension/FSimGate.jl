@@ -1,7 +1,7 @@
 export FSimGate, fsim_block
 
 """
-    FSimGate{T<:Number} <: PrimitiveBlock{2}
+    FSimGate{T<:Number} <: PrimitiveBlock{2, 2}
 
 The two parameter `FSim` gate.
 
@@ -9,7 +9,7 @@ References
 -------------------------
 * Arute, Frank, et al. "Quantum supremacy using a programmable superconducting processor." Nature 574.7779 (2019): 505-510.
 """
-mutable struct FSimGate{T<:Number} <: PrimitiveBlock{2}
+mutable struct FSimGate{T<:Number} <: PrimitiveBlock{2, 2}
     theta::T
     phi::T
 end

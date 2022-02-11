@@ -21,7 +21,8 @@ export batch_normalize,
     purification_fidelity,
     # matrix tools
     autostatic,
-    rot_mat
+    rot_mat,
+    logdi
 
 using LuxurySparse, LinearAlgebra, BitBasis, SparseArrays
 import LinearAlgebra: svdvals
@@ -340,4 +341,14 @@ function BitBasis.unsafe_reorder(A::PermMatrix, orders::NTuple{N,<:Integer}) whe
     end
 
     return PermMatrix(perm, vals)
+end
+
+function logdi(x::Integer, d::Integer)
+    @assert x > 0 && d > 0
+    res = log(x) / log(d)
+    r = round(Int, res)
+    if !(res ≈ r)
+        throw(ArgumentError("`$x` is not an integer power of `$d`."))
+    end
+    return r
 end
