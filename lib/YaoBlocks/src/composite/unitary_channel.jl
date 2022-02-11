@@ -6,10 +6,10 @@ export UnitaryChannel
 # when StatsBase 0.33 is out
 _uweights(n) = weights(ones(n))
 
-function check_nqubits(operators)
-    N = nqubits(first(operators))
+function check_nqudits(operators)
+    N = nqudits(first(operators))
     for each in operators
-        N == nqubits(each) || throw(AssertionError("number of qubits mismatch"))
+        N == nqudits(each) || throw(AssertionError("number of qubits mismatch"))
     end
     return N
 end
@@ -41,7 +41,7 @@ The unitary channel is defined as below in Kraus representation
 
 ```jldoctest; setup=:(using YaoBlocks, YaoArrayRegister)
 julia> UnitaryChannel([X, Y, Z])
-nqubits: 1
+nqudits: 1
 unitary_channel
 ├─ [1.0] X
 ├─ [1.0] Y
@@ -52,7 +52,7 @@ Or with weights
 
 ```jldoctest; setup=:(using YaoBlocks, YaoArrayRegister)
 julia> UnitaryChannel([X, Y, Z], [0.1, 0.2, 0.7])
-nqubits: 1
+nqudits: 1
 unitary_channel
 ├─ [0.1] X
 ├─ [0.2] Y
@@ -65,18 +65,18 @@ struct UnitaryChannel{N,W<:AbstractWeights} <: CompositeBlock{N,2}
 
     function UnitaryChannel(operators::Vector)
         w = _uweights(length(operators))
-        N = check_nqubits(operators)
+        N = check_nqudits(operators)
         new{N,typeof(w)}(operators, w)
     end
 
     function UnitaryChannel(operators::Vector, w::AbstractWeights)
-        N = check_nqubits(operators)
+        N = check_nqudits(operators)
         new{N,typeof(w)}(operators, w)
     end
 
     function UnitaryChannel(operators::Vector, w::AbstractVector)
         w = weights(w)
-        N = check_nqubits(operators)
+        N = check_nqudits(operators)
         new{N,typeof(w)}(operators, w)
     end
 end

@@ -6,12 +6,13 @@ export @λ, @lambda
 Base.length(r::AbstractRegister{B}) where {B} = B
 
 addbits!(n::Int) = @λ(register -> addbits!(register, n))
-insert_qubits!(loc::Int; nqubits::Int = 1) =
-    @λ(register -> insert_qubits!(register, loc; nqubits = n))
+insert_qudits!(loc::Int; nqudits::Int = 1) =
+    @λ(register -> insert_qudits!(register, loc; nqudits = n))
 
-nremain(r::AbstractRegister) = nqubits(r) - nactive(r)
+nremain(r::AbstractRegister) = nqudits(r) - nactive(r)
 nbatch(r::AbstractRegister{B}) where {B} = B
 nlevel(r::AbstractRegister{B,D}) where {B,D} = D
+nqudits(r::AbstractRegister{B,2}) where {B} = nqudits(r)
 
 """
     focus!(locs...) -> f(register) -> register
@@ -22,11 +23,11 @@ focus!(locs::Int...) = focus!(locs)
 focus!(locs::NTuple{N,Int}) where {N} = @λ(register -> focus!(register, locs))
 focus!(locs::UnitRange) = @λ(register -> focus!(register, locs))
 
-relax!(r::AbstractRegister; to_nactive::Int = nqubits(r)) =
+relax!(r::AbstractRegister; to_nactive::Int = nqudits(r)) =
     relax!(r, (); to_nactive = to_nactive)
 
 """
-    relax!(locs::Int...; to_nactive=nqubits(register)) -> f(register) -> register
+    relax!(locs::Int...; to_nactive=nqudits(register)) -> f(register) -> register
 
 Lazy version of [`relax!`](@ref), it will be evaluated once you feed a register
 to its output lambda.
@@ -37,7 +38,7 @@ relax!(locs::Int...; to_nactive::Union{Nothing,Int} = nothing) =
 function relax!(locs::NTuple{N,Int}; to_nactive::Union{Nothing,Int} = nothing) where {N}
     lambda = function (r::AbstractRegister)
         if to_nactive === nothing
-            return relax!(r, locs; to_nactive = nqubits(r))
+            return relax!(r, locs; to_nactive = nqudits(r))
         else
             return relax!(r, locs; to_nactive = to_nactive)
         end
@@ -101,7 +102,7 @@ end
 
 Returns an `UnitRange` of the all the bits in the Hilbert space of given register.
 """
-BitBasis.basis(r::AbstractRegister) = basis(nqubits(r))
+BitBasis.basis(r::AbstractRegister) = basis(nqudits(r))
 
 invorder!(r::AbstractRegister) = reorder!(r, Tuple(nactive(r):-1:1))
 
@@ -130,7 +131,7 @@ end
 # fallback printing
 function Base.show(io::IO, reg::AbstractRegister)
     summary(io, reg)
-    print(io, "\n    active qubits: ", nactive(reg), "/", nqudits(reg))
+    print(io, "\n    active qudits: ", nactive(reg), "/", nqudits(reg))
 end
 
 ρ(x) = density_matrix(x)

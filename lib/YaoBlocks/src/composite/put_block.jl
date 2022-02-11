@@ -12,7 +12,7 @@ struct PutBlock{N,D,C,GT<:AbstractBlock} <: AbstractContainer{GT,N,D}
 
     function PutBlock{N}(block::GT, locs::NTuple{C,Int}) where {N,D,M,C,GT<:AbstractBlock{M,D}}
         @assert_locs_safe N locs
-        @assert nqubits(block) == C "number of locations doesn't match the size of block"
+        @assert nqudits(block) == C "number of locations doesn't match the size of block"
         return new{N,D,C,GT}(block, locs)
     end
 end
@@ -27,7 +27,7 @@ location and block to put on.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> put(4, 1=>X)
-nqubits: 4
+nqudits: 4
 put on (1)
 └─ X
 ```
@@ -36,7 +36,7 @@ If you want to put a multi-qubit gate on specific locations, you need to write d
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> put(4, (1, 3)=>kron(X, Y))
-nqubits: 4
+nqudits: 4
 put on (1, 3)
 └─ kron
    ├─ 1=>X
@@ -87,7 +87,7 @@ end
 # specialization
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag, :H]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
-    @eval function _apply!(r::AbstractRegister, pb::PutBlock{N,D,C,<:$GT}) where {N,D,C}
+    @eval function _apply!(r::AbstractRegister, pb::PutBlock{N,2,C,<:$GT}) where {N,C}
         instruct!(r, Val($(QuoteNode(G))), pb.locs)
         return r
     end
@@ -122,7 +122,7 @@ Create a `n`-qubit [`Swap`](@ref) gate which swap `loc1` and `loc2`.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> swap(4, 1, 2)
-nqubits: 4
+nqudits: 4
 put on (1, 2)
 └─ SWAP
 ```
@@ -147,7 +147,7 @@ swap(loc1::Int, loc2::Int) = @λ(n -> swap(n, loc1, loc2))
 function mat(::Type{T}, g::Swap{N}) where {T,N}
     mask = bmask(g.locs[1], g.locs[2])
     orders = map(b -> swapbits(b, mask) + 1, basis(N))
-    return PermMatrix(orders, ones(T, 1 << N))
+    return PermMatrix(orders, ones(T, nlevel(g)^N))
 end
 
 _apply!(r::AbstractRegister, g::Swap) = (instruct!(r, Val(:SWAP), g.locs); r)

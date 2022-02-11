@@ -70,7 +70,7 @@ end
 """
     hilbertkron(num_bit::Int, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix
 
-Return general kronecher product form of gates in Hilbert space of `num_bit` qubits.
+Return general kronecher product form of gates in Hilbert space of `num_bit` qudits.
 
 * `gates` are a list of matrices.
 * `start_locs` should have the same length as `gates`, specifing the gates starting positions.
@@ -160,7 +160,7 @@ end
 """
     general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix
 
-Return general multi-controlled gates in hilbert space of `num_bit` qubits,
+Return general multi-controlled gates in hilbert space of `num_bit` qudits,
 
 * `projectors` are often chosen as `P0` and `P1` for inverse-Control and Control at specific position.
 * `cbits` should have the same length as `projectors`, specifing the controling positions.
@@ -202,20 +202,20 @@ rotmat(M::AbstractMatrix, θ::Real) = exp(-im * θ / 2 * M)
 
 
 """
-    linop2dense([T=ComplexF64], linear_map!::Function, n::Int) -> Matrix
+    linop2dense([T=ComplexF64], linear_map!::Function, n::Int; nlevel=2) -> Matrix
 
 Returns the dense matrix representation given linear map function.
 """
-linop2dense(linear_map!::Function, n::Int) = linop2dense(ComplexF64, linear_map!, n)
-linop2dense(::Type{T}, linear_map!::Function, n::Int) where {T} =
-    linear_map!(Matrix{T}(I, 1 << n, 1 << n))
+linop2dense(linear_map!::Function, n::Int; nlevel=2) = linop2dense(ComplexF64, linear_map!, n; nlevel=nlevel)
+linop2dense(::Type{T}, linear_map!::Function, n::Int; nlevel=2) where {T} =
+    linear_map!(Matrix{T}(I, nlevel ^ n, nlevel ^ n))
 
 ################### Fidelity ###################
 
 """
     density_fidelity(ρ1, ρ2)
 
-General fidelity (including mixed states) between two density matrix for qubits.
+General fidelity (including mixed states) between two density matrix for qudits.
 
 # Definition
 

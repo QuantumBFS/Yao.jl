@@ -85,7 +85,7 @@ function CacheServers.pull(c::CachedBlock)
     return pull(c.server, c.content)
 end
 
-function _apply!(r::ArrayReg{B,T}, c::CachedBlock, signal) where {B,T}
+function _apply!(r::ArrayReg{B,D,T}, c::CachedBlock, signal) where {B,D,T}
     if signal > c.level
         r.state .= mat(T, c) * r
     else
@@ -95,7 +95,7 @@ function _apply!(r::ArrayReg{B,T}, c::CachedBlock, signal) where {B,T}
 end
 
 _apply!(r::AbstractRegister, c::CachedBlock) = _apply!(r, c.content)
-_apply!(r::ArrayReg{B,T}, c::CachedBlock) where {B,T} = (r.state .= mat(T, c) * r.state; r)
+_apply!(r::ArrayReg{B,D,T}, c::CachedBlock) where {B,D,T} = (r.state .= mat(T, c) * r.state; r)
 
 Base.similar(c::CachedBlock, level::Int) = CachedBlock(c.server, c.content, level)
 Base.copy(c::CachedBlock) = CachedBlock(c.server, copy(c.content), c.level)
@@ -122,13 +122,13 @@ it calls [`mat`](@ref), and use the cached matrix in the following calculations.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> cache(control(3, 1, 2=>X))
-nqubits: 3
+nqudits: 3
 [cached] control(1)
    └─ (2,) X
 
 
 julia> chain(cache(control(3, 1, 2=>X)), repeat(H))
-nqubits: 3
+nqudits: 3
 chain
 ├─ [cached] control(1)
 │     └─ (2,) X

@@ -30,7 +30,7 @@ import YaoAPI:
     nbatch,
     viewbatch,
     addbits!,
-    insert_qubits!,
+    insert_qudits!,
     measure,
     measure!,
     occupied_locs,

@@ -17,7 +17,7 @@ end
 _apply_fallback!(r::AbstractRegister, b::AbstractBlock) =
     throw(NotImplementedError(:_apply_fallback!, (r, b)))
 
-function _apply_fallback!(r::ArrayReg{B,T}, b::AbstractBlock) where {B,T}
+function _apply_fallback!(r::ArrayReg{B,D,T}, b::AbstractBlock) where {B,D,T}
     r.state .= mat(T, b) * r.state
     return r
 end
@@ -55,7 +55,7 @@ end
 
 Return a tuple of occupied locations of `x`.
 """
-occupied_locs(x::AbstractBlock) = (1:nqubits(x)...,)
+occupied_locs(x::AbstractBlock) = (1:nqudits(x)...,)
 
 """
     subblocks(x)
@@ -77,7 +77,7 @@ chsubblocks(x::AbstractBlock, itr)
 Transform the apply! function of specific block to dense matrix.
 """
 applymatrix(T, g::AbstractBlock) =
-    linop2dense(T, r -> statevec(apply!(ArrayReg(r), g)), nqubits(g))
+    linop2dense(T, r -> statevec(apply!(ArrayReg(r), g)), nqudits(g))
 applymatrix(g::AbstractBlock) = applymatrix(ComplexF64, g)
 # just use BlockMap maybe? No!
 
@@ -98,12 +98,13 @@ Returns the matrix form of given block.
 mat(x::AbstractBlock) = mat(promote_type(ComplexF64, parameters_eltype(x)), x)
 
 mat_matchreg(reg::AbstractRegister, x::AbstractBlock) = mat(x)
-mat_matchreg(reg::ArrayReg{B,T}, x::AbstractBlock) where {B,T} = mat(T, x)
+mat_matchreg(reg::ArrayReg{B,D,T}, x::AbstractBlock) where {B,D,T} = mat(T,x)
 
 Base.Matrix{T}(x::AbstractBlock) where {T} = Matrix(mat(T, x))
 
 # YaoBase interface
-YaoBase.nqubits(block::AbstractBlock) = nqudits(block)
+YaoBase.nqubits(block::AbstractBlock{N,2}) where N = nqudits(block)
+YaoBase.nqubits(::Type{<:AbstractBlock{N,2}}) where {N} = N
 YaoBase.nqudits(::Type{<:AbstractBlock{N}}) where {N} = N
 YaoBase.nqudits(x::AbstractBlock{N}) where {N} = nqudits(typeof(x))
 YaoBase.nlevel(::Type{<:AbstractBlock{N,D}}) where {N,D} = D
@@ -345,6 +346,8 @@ cache_key(x::AbstractBlock)
 function _check_size(r::AbstractRegister, pb::AbstractBlock{N}) where {N}
     N == nactive(r) ||
         throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
+    nlevel(r) == nlevel(pb) ||
+        throw(QubitMismatchError("register number of level $(nlevel(r)) mismatch with block number of level $(nlevel(pb))"))
 end
 
 """

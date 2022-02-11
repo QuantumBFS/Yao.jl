@@ -134,8 +134,8 @@ YaoBlocks.mat(::Type{Basic}, gate::ConstGate.TdagGate) = Diagonal(Basic[1, exp(-
 YaoBlocks.mat(::Type{Basic}, ::HGate) = 1 / sqrt(Basic(2)) * Basic[1 1; 1 -1]
 YaoBlocks.mat(::Type{Basic}, gate::ShiftGate) = Diagonal([1, exp(im * gate.theta)])
 YaoBlocks.mat(::Type{Basic}, gate::PhaseGate) = exp(im * gate.theta) * IMatrix{2}()
-function YaoBlocks.mat(::Type{Basic}, R::RotationGate{N}) where {N}
-    I = IMatrix{1 << N}()
+function YaoBlocks.mat(::Type{Basic}, R::RotationGate{N,D}) where {N,D}
+    I = IMatrix{D^N}()
     return I * cos(R.theta / 2) - im * sin(R.theta / 2) * mat(Basic, R.block)
 end
 for GT in [:XGate, :YGate, :ZGate]

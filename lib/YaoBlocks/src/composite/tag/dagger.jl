@@ -25,7 +25,7 @@ julia> B(n, i) = chain(n, i==j ? put(i=>H) : A(j, i) for j in i:n);
 
 julia> qft(n) = chain(B(n, i) for i in 1:n);
 
-julia> struct QFT{N} <: PrimitiveBlock{N} end
+julia> struct QFT{N} <: PrimitiveBlock{N,2} end
 
 julia> QFT(n) = QFT{n}();
 

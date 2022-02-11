@@ -92,7 +92,7 @@ end
 export @assert_locs_safe, @assert_locs_inbounds
 
 """
-    @assert_locs_inbounds <number of total qubits> <locations list> [<msg>]
+    @assert_locs_inbounds <number of total qudits> <locations list> [<msg>]
 
 Assert if all the locations are inbounds.
 """
@@ -106,7 +106,7 @@ macro assert_locs_inbounds(n, locs, msgs...)
 end
 
 """
-    @assert_locs_safe <number of total qubits> <locations list> [<msg>]
+    @assert_locs_safe <number of total qudits> <locations list> [<msg>]
 
 Assert if all the locations are:
     - inbounds.

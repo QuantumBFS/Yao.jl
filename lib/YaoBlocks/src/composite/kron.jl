@@ -23,7 +23,7 @@ struct KronBlock{N,D,M,MT<:NTuple{M,Any}} <: CompositeBlock{N,D}
         @assert_locs_safe N locs
 
         for (each, b) in zip(locs, blocks)
-            length(each) != nqubits(b) && throw(
+            length(each) != nqudits(b) && throw(
                 LocationConflictError("locs $locs is inconsistent with target block $b"),
             )
         end
@@ -48,8 +48,8 @@ function KronBlock(itr::AbstractBlock...)
     locs = UnitRange{Int}[]
     count = 0
     for each in itr
-        count += nqubits(each)
-        push!(locs, count-nqubits(each)+1:count)
+        count += nqudits(each)
+        push!(locs, count-nqudits(each)+1:count)
     end
     return KronBlock{count}((locs...,), itr)
 end
@@ -68,11 +68,10 @@ and a `Y` gate on the `3`rd qubit.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> kron(4, 1=>X, 3=>Y)
-nqubits: 4
+nqudits: 4
 kron
 ├─ 1=>X
 └─ 3=>Y
-
 ```
 """
 Base.kron(total::Int, blocks::Pair{<:Any,<:AbstractBlock}...) = KronBlock{total}(blocks...)
@@ -91,20 +90,19 @@ You can use kronecker product to composite small blocks to a large blocks.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> kron(X, Y, Z, Z)
-nqubits: 4
+nqudits: 4
 kron
 ├─ 1=>X
 ├─ 2=>Y
 ├─ 3=>Z
 └─ 4=>Z
-
 ```
 """
 Base.kron(blocks::AbstractBlock...) = KronBlock(blocks...)
 Base.kron(fs::Union{Function,AbstractBlock}...) = @λ(n -> kron(n, fs...))
 
 function Base.kron(total::Int, blocks::AbstractBlock...)
-    sum(nqubits, blocks) == total || error("total number of qubits mismatch")
+    sum(nqudits, blocks) == total || error("total number of qubits mismatch")
     return kron(blocks...)
 end
 
@@ -132,16 +130,16 @@ If you don't know the number of qubit yet, or you are just too lazy, it is fine.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> kron(put(1=>X) for _ in 1:2)
-(n -> kron(n, (n  ->  put(n, 1 => X)), (n  ->  put(n, 1 => X))))
+(n -> kron(n, ((n  ->  put(n, 1 => X)), (n  ->  put(n, 1 => X)))...))
 
 julia> kron(X for _ in 1:2)
-nqubits: 2
+nqudits: 2
 kron
 ├─ 1=>X
 └─ 2=>X
 
 julia> kron(1=>X, 3=>Y)
-(n -> kron(n, 1 => X, 3 => Y))
+(n -> kron(n, (1 => X, 3 => Y)...))
 ```
 """
 Base.kron(blocks::Pair{<:Any,<:AbstractBlock}...) = @λ(n -> kron(n, blocks...))
@@ -154,7 +152,7 @@ cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
 color(::Type{T}) where {T<:KronBlock} = :cyan
 
 function mat(::Type{T}, k::KronBlock{N,D,M}) where {T,N,D,M}
-    M == 0 && return IMatrix{1 << N,T}()
+    M == 0 && return IMatrix{D^N,T}()
     ntrail = N - last(last(k.locs))  # number of trailing bits
     num_bit_list = map(i -> first(k.locs[i]) - (i > 1 ? last(k.locs[i-1]) : 0) - 1, 1:M)
     return reduce(

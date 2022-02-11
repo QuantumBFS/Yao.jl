@@ -52,14 +52,14 @@ ArrayReg{1, ComplexF64, Array...}
     active qubits: 4/4
 
 julia> cc = subroutine(4, kron(X, Y), (1, 3))
-nqubits: 4
+nqudits: 4
 Subroutine: (1, 3)
 └─ kron
    ├─ 1=>X
    └─ 2=>Y
 
 julia> pp = chain(4, put(1=>X), put(3=>Y))
-nqubits: 4
+nqudits: 4
 chain
 ├─ put on (1)
 │  └─ X
@@ -93,7 +93,7 @@ PreserveTrait(::Subroutine) = PreserveAll()
 function _apply!(r::AbstractRegister, c::Subroutine)
     focus!(r, c.locs)
     _apply!(r, c.content)
-    relax!(r, c.locs, to_nactive = nqubits(c))
+    relax!(r, c.locs, to_nactive = nqudits(c))
     return r
 end
 
@@ -107,7 +107,7 @@ function Base.:(==)(a::Subroutine{N,D,BT}, b::Subroutine{N,D,BT}) where {N,D,BT}
     return a.content == b.content && a.locs == b.locs
 end
 
-YaoBase.nqubits(::Subroutine{N}) where {N} = N
+YaoBase.nqudits(::Subroutine{N}) where {N} = N
 YaoBase.nactive(c::Subroutine) = length(c.locs)
 
 function YaoBase.iscommute(x::Subroutine{N,D}, y::Subroutine{N,D}) where {N,D}

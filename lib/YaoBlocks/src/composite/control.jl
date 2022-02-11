@@ -15,7 +15,7 @@ struct ControlBlock{N,BT<:AbstractBlock,C,M} <: AbstractContainer{BT,N,2}
         locs,
     ) where {N,C,M,BT<:AbstractBlock}
         @assert_locs_safe N (ctrl_locs..., locs...)
-        @assert nqubits(block) == M "number of locations doesn't match the size of block"
+        @assert nqudits(block) == M "number of locations doesn't match the size of block"
         @assert block isa AbstractBlock "expect a block, got $(typeof(block))"
         new{N,BT,C,M}(ctrl_locs, ctrl_config, block, locs)
     end
@@ -71,12 +71,12 @@ Return a [`ControlBlock`](@ref) with number of active qubits `n` and control loc
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> control(4, (1, 2), 3=>X)
-nqubits: 4
+nqudits: 4
 control(1, 2)
 └─ (3,) X
 
 julia> control(4, 1, 3=>X)
-nqubits: 4
+nqudits: 4
 control(1)
 └─ (3,) X
 ```
@@ -147,7 +147,7 @@ Return a speical [`ControlBlock`](@ref), aka CNOT gate with number of active qub
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> cnot(3, (2, 3), 1)
-nqubits: 3
+nqudits: 3
 control(2, 3)
 └─ (1,) X
 

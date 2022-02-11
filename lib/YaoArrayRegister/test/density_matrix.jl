@@ -69,16 +69,16 @@ end
     reg_p = purify(reg |> ρ)
     @test reg_p |> isnormalized
     @test reg_p |> exchange_sysenv |> probs |> maximum ≈ 1
-    reg_p = purify(reg |> ρ; nbit_env = 0)
+    reg_p = purify(reg |> ρ; num_env = 0)
     @test fidelity(reg, reg_p) ≈ 1
 
     reg = rand_state(6; nbatch = 10)
     reg_p = purify(reg |> ρ)
     @test reg_p |> isnormalized
     @test reg_p |> exchange_sysenv |> probs |> maximum ≈ 1
-    reg_p = purify(reg |> ρ; nbit_env = 0)
+    reg_p = purify(reg |> ρ; num_env = 0)
     @test fidelity(reg, reg_p) ≈ ones(10)
-    reg_p = purify(reg |> ρ; nbit_env = 2)
+    reg_p = purify(reg |> ρ; num_env = 2)
     @test reg_p |> nqubits == 8
 end
 

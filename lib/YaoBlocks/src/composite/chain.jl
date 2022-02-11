@@ -22,7 +22,7 @@ ChainBlock(blocks::AbstractBlock{N,D}...) where {N,D} =
     chain(blocks...)
 
 Return a [`ChainBlock`](@ref) which chains a list of blocks with same
-[`nqubits`](@ref). If there is lazy evaluated
+[`nqudits`](@ref). If there is lazy evaluated
 block in `blocks`, chain can infer the number of qubits and create an
 instance itself.
 """
@@ -34,7 +34,7 @@ function chain(list::Vector)
     for each in list # check type
         each isa AbstractBlock || error("expect a block, got $(typeof(each))")
     end
-    N = nqubits(first(list))
+    N = nqudits(first(list))
     D = nlevel(first(list))
     return ChainBlock(Vector{AbstractBlock{N,D}}(list))
 end
@@ -47,7 +47,7 @@ chain(n::Int, itr) = isempty(itr) ? chain(n) : chain(map(x -> parse_block(n, x),
 chain(n::Int, it::Pair) = chain(n, parse_block(n, it))
 chain(n::Int, f::Function) = chain(n, parse_block(n, f))
 function chain(n::Int, block::AbstractBlock)
-    @assert n == nqubits(block) "number of qubits mismatch"
+    @assert n == nqudits(block) "number of qubits mismatch"
     return ChainBlock(block)
 end
 chain(blocks::Function...) = @λ(n -> chain(n, blocks...))
@@ -77,9 +77,9 @@ chsubblocks(pb::ChainBlock{N,D}, blocks::Vector{<:AbstractBlock}) where {N,D} =
     length(blocks) == 0 ? ChainBlock{N,D}([]) : ChainBlock(blocks)
 chsubblocks(pb::ChainBlock, it) = chain(it...)
 
-function mat(::Type{T}, c::ChainBlock) where {T}
+function mat(::Type{T}, c::ChainBlock{N,D}) where {T,N,D}
     if isempty(c.blocks)
-        return IMatrix{1 << nqubits(c),T}()
+        return IMatrix{D^N,T}()
     else
         return prod(x -> mat(T, x), Iterators.reverse(c.blocks))
     end

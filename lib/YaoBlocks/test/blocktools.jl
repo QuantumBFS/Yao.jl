@@ -43,7 +43,7 @@ end
 
 @testset "insert_qubits!" begin
     reg = rand_state(5; nbatch = 10)
-    insert_qubits!(reg, 3; nqubits = 2)
+    insert_qudits!(reg, 3; nqudits = 2)
     @test reg |> nqubits == 7
     @test expect(put(7, 3 => Z), reg) .|> tr |> mean ≈ 1
     @test expect(put(7, 4 => Z), reg) .|> tr |> mean ≈ 1

@@ -14,6 +14,6 @@ Base.adjoint(reg::AdjointRegister) = parent(reg)
 
 viewbatch(reg::AdjointRegister, i::Int) = adjoint(viewbatch(parent(reg), i))
 
-for FUNC in [:nqubits, :nremain, :nactive]
+for FUNC in [:nqudits, :nremain, :nactive]
     @eval $FUNC(r::AdjointRegister) = $FUNC(r.parent)
 end

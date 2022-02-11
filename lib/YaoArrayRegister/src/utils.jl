@@ -280,3 +280,8 @@ Base.convert(::Type{Transpose{T,Matrix{T}}}, arr::AbstractMatrix{T}) where {T} =
     transpose(Matrix(transpose(arr)))
 Base.convert(t::Type{Transpose{T,Matrix{T}}}, arr::Transpose{T}) where {T} =
     invoke(convert, Tuple{Type{Transpose{T,Matrix{T}}},Transpose}, t, arr)
+
+function ispow(x::Integer, d::Integer)
+    r = log(x) / log(d)
+    return round(Int, r) ≈ r
+end
