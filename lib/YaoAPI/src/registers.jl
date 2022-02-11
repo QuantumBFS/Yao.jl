@@ -1,19 +1,19 @@
 export AbstractRegister, AdjointRegister, DensityMatrix
 
 """
-    AbstractRegister{B}
+    AbstractRegister{B, D}
 
-Abstract type for quantum registers. `B` is the batch size.
+Abstract type for quantum registers. `B` is the batch size, `D` is the number of levels in each qudit.
 """
-abstract type AbstractRegister{B} end
+abstract type AbstractRegister{B, D} end
 
 
 """
-    AdjointRegister{B, T, RT} <: AbstractRegister{B, T}
+    AdjointRegister{B, D, RT} <: AbstractRegister{B, D}
 
 Lazy adjoint for a quantum register.
 """
-struct AdjointRegister{B,RT<:AbstractRegister{B}} <: AbstractRegister{B}
+struct AdjointRegister{B,D,RT<:AbstractRegister{B,D}} <: AbstractRegister{B,D}
     parent::RT
 end
 
@@ -47,6 +47,14 @@ Returns the (total) number of qubits. See [`nactive`](@ref), [`nremain`](@ref)
 for more details.
 """
 @interface nqubits
+
+"""
+    nqudits(register) -> Int
+
+Returns the (total) number of qudits. See [`nactive`](@ref), [`nremain`](@ref)
+for more details.
+"""
+@interface nqudits
 
 """
     nremain(register) -> Int
@@ -348,7 +356,7 @@ Density Matrix.
 - `B`: batch size
 - `T`: element type
 """
-struct DensityMatrix{B,T,MT<:AbstractArray{T,3}} <: AbstractRegister{B}
+struct DensityMatrix{B,T,MT<:AbstractArray{T,3}} <: AbstractRegister{B,2}
     state::MT
 end
 

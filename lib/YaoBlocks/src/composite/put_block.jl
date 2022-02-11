@@ -77,7 +77,7 @@ cache_key(pb::PutBlock) = cache_key(pb.content)
 mat(::Type{T}, pb::PutBlock{N,2,1}) where {T,N} = u1mat(N, mat(T, pb.content), pb.locs...)
 mat(::Type{T}, pb::PutBlock{N,2,C}) where {T,N,C} = unmat(N, mat(T, pb.content), pb.locs)
 
-function _apply!(r::AbstractRegister, pb::PutBlock{N}) where {N}
+function _apply!(r::AbstractRegister, pb::PutBlock{N,2}) where {N}
     instruct!(r, mat_matchreg(r, pb.content), pb.locs)
     return r
 end
@@ -99,7 +99,7 @@ function Base.:(==)(lhs::PutBlock{N,D,C,GT}, rhs::PutBlock{N,D,C,GT}) where {N,D
     return (lhs.content == rhs.content) && (lhs.locs == rhs.locs)
 end
 
-function YaoBase.iscommute(x::PutBlock{N}, y::PutBlock{N}) where {N}
+function YaoBase.iscommute(x::PutBlock{N,D}, y::PutBlock{N,D}) where {N,D}
     if x.locs == y.locs
         return iscommute(x.content, y.content)
     else

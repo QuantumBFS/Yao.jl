@@ -1,13 +1,13 @@
 import BitBasis: BitStr, BitStr64
 
 """
-    ArrayReg{B, T, MT <: AbstractMatrix{T}} <: AbstractRegister{B}
+    ArrayReg{B, T, MT <: AbstractMatrix{T}} <: AbstractRegister{B,2}
 
 Simulated full amplitude register type, it uses an array to represent
 corresponding one or a batch of quantum states. `B` is the batch size, `T`
 is the numerical type for each amplitude, it is `ComplexF64` by default.
 """
-mutable struct ArrayReg{B,T,MT<:AbstractMatrix{T}} <: AbstractRegister{B}
+mutable struct ArrayReg{B,T,MT<:AbstractMatrix{T}} <: AbstractRegister{B,2}
     state::MT
 end
 
@@ -122,6 +122,7 @@ end
 
 # register interface
 YaoBase.nqubits(r::ArrayReg{B}) where {B} = log2i(length(r.state) ÷ B)
+YaoBase.nqudits(r::AbstractRegister{B,D}) where {B,D} = logdi(length(r.state) ÷ B, D)
 YaoBase.nactive(r::ArrayReg) = log2dim1(r.state)
 YaoBase.viewbatch(r::ArrayReg, ind::Int) = @inbounds ArrayReg{1}(view(rank3(r), :, :, ind))
 

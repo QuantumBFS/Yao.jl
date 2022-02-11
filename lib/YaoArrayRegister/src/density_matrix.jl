@@ -17,6 +17,7 @@ Return the raw state of density matrix `ρ`.
 state(ρ::DensityMatrix) = ρ.state
 
 YaoBase.nqubits(ρ::DensityMatrix) = log2dim1(state(ρ))
+YaoBase.nqudits(r::DensityMatrix) = nqubits(r)
 YaoBase.nactive(ρ::DensityMatrix) = nqubits(ρ)
 YaoBase.nbatch(dm::DensityMatrix{B}) where {B} = B
 

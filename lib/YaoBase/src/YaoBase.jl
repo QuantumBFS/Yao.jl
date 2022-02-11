@@ -23,6 +23,7 @@ import YaoAPI:
     instruct!,
     focus!,
     relax!,
+    nqudits,
     nqubits,
     nremain,
     nactive,

@@ -11,6 +11,7 @@ insert_qubits!(loc::Int; nqubits::Int = 1) =
 
 nremain(r::AbstractRegister) = nqubits(r) - nactive(r)
 nbatch(r::AbstractRegister{B}) where {B} = B
+nlevel(r::AbstractRegister{B,D}) where {B,D} = D
 
 """
     focus!(locs...) -> f(register) -> register
@@ -129,7 +130,7 @@ end
 # fallback printing
 function Base.show(io::IO, reg::AbstractRegister)
     summary(io, reg)
-    print(io, "\n    active qubits: ", nactive(reg), "/", nqubits(reg))
+    print(io, "\n    active qubits: ", nactive(reg), "/", nqudits(reg))
 end
 
 ρ(x) = density_matrix(x)

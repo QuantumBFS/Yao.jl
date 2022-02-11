@@ -103,8 +103,9 @@ mat_matchreg(reg::ArrayReg{B,T}, x::AbstractBlock) where {B,T} = mat(T, x)
 Base.Matrix{T}(x::AbstractBlock) where {T} = Matrix(mat(T, x))
 
 # YaoBase interface
-YaoBase.nqubits(::Type{<:AbstractBlock{N}}) where {N} = N
-YaoBase.nqubits(x::AbstractBlock{N}) where {N} = nqubits(typeof(x))
+YaoBase.nqubits(block::AbstractBlock) = nqudits(block)
+YaoBase.nqudits(::Type{<:AbstractBlock{N}}) where {N} = N
+YaoBase.nqudits(x::AbstractBlock{N}) where {N} = nqudits(typeof(x))
 YaoBase.nlevel(::Type{<:AbstractBlock{N,D}}) where {N,D} = D
 YaoBase.nlevel(x::AbstractBlock{N,D}) where {N,D} = nlevel(typeof(x))
 

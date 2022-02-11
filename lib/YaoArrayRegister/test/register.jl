@@ -31,6 +31,7 @@ end
 @testset "test $T initialization methods" for T in [ComplexF64, ComplexF32, ComplexF16]
     @testset "test product state" begin
         st = state(product_state(T, bit"100"; nbatch = 1))
+        @test nqudits(st) == 3
         @test !(st isa Transpose)
         st2 = state(product_state(T, [0, 0, 1]; nbatch = 1))
         @test st2 ≈ st
