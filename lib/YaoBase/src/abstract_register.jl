@@ -12,7 +12,7 @@ insert_qudits!(loc::Int; nqudits::Int = 1) =
 nremain(r::AbstractRegister) = nqudits(r) - nactive(r)
 nbatch(r::AbstractRegister{B}) where {B} = B
 nlevel(r::AbstractRegister{B,D}) where {B,D} = D
-nqudits(r::AbstractRegister{B,2}) where {B} = nqudits(r)
+nqubits(r::AbstractRegister{B,2}) where {B} = nqudits(r)
 
 """
     focus!(locs...) -> f(register) -> register

@@ -34,11 +34,11 @@ end
 @testset "Test Printing" begin
     @test repr(TestRegister()) == """
     TestRegister{1}
-        active qubits: 2/8"""
+        active qudits: 2/8"""
 end
 
 @testset "Test adjoint printing" begin
     @test repr(adjoint(TestRegister())) == """
         adjoint(TestRegister{1})
-            active qubits: 2/8"""
+            active qudits: 2/8"""
 end

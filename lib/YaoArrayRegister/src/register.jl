@@ -123,7 +123,7 @@ function Base.copyto!(dst::AdjointArrayReg, src::AdjointArrayReg)
 end
 
 # register interface
-YaoBase.nqubits(r::ArrayReg{B,2}) where {B} = log2i(length(r.state) ÷ B)
+YaoBase.nqudits(r::ArrayReg{B,2}) where {B} = log2i(length(r.state) ÷ B)
 YaoBase.nqudits(r::ArrayReg{B,D}) where {B,D} = logdi(length(r.state) ÷ B, D)
 YaoBase.nactive(r::ArrayReg) = log2dim1(r.state)
 YaoBase.viewbatch(r::ArrayReg, ind::Int) = @inbounds ArrayReg{1}(view(rank3(r), :, :, ind))
