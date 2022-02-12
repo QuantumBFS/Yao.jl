@@ -1,6 +1,6 @@
 name = "YaoSym"
 uuid = "3b27209a-d3d6-11e9-3c0f-41eb92b2cb9d"
-version = "0.4.8"
+version = "0.5.0"
 
 [deps]
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
@@ -17,9 +17,9 @@ BitBasis = "0.7"
 LuxurySparse = "0.6"
 Requires = "1"
 SymEngine = "0.8"
-YaoArrayRegister = "0.6, 0.7"
-YaoBase = "0.13, 0.14"
-YaoBlocks = "0.10, 0.11"
+YaoArrayRegister = "0.8"
+YaoBase = "0.15"
+YaoBlocks = "0.12"
 julia = "1"
 
 [extras]

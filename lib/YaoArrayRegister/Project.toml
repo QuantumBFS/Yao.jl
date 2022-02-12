@@ -1,6 +1,6 @@
 name = "YaoArrayRegister"
 uuid = "e600142f-9330-5003-8abb-0ebd767abc51"
-version = "0.7.12"
+version = "0.8.0"
 
 [deps]
 Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
@@ -20,7 +20,7 @@ LuxurySparse = "0.6"
 StaticArrays = "0.12, 1.0"
 StatsBase = "0.32, 0.33"
 TupleTools = "1.1"
-YaoBase = "~0.14.1"
+YaoBase = "0.15"
 julia = "1"
 
 [extras]
