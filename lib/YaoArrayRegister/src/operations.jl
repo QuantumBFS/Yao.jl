@@ -10,7 +10,7 @@ export isnormalized, normalize!, regadd!, regsub!, regscale!, norm
 Check if the register is normalized.
 """
 isnormalized(r::ArrayReg) =
-    all(sum(copy(r) |> relax!(to_nactive = nqubits(r)) |> probs, dims = 1) .≈ 1)
+    all(sum(copy(r) |> relax!(to_nactive = nqudits(r)) |> probs, dims = 1) .≈ 1)
 isnormalized(r::AdjointArrayReg) = isnormalized(parent(r))
 
 """
@@ -130,7 +130,7 @@ function Base.:*(bra::AdjointArrayReg{1}, ket::ArrayReg{1})
         return ArrayReg{1}(state(bra) * state(ket))
     else
         error(
-            "partially contract ⟨bra|ket⟩ is not supported, expect ⟨bra| to be fully actived. nactive(bra)/nqubits(bra)=$(nactive(bra))/$(nqubits(bra))",
+            "partially contract ⟨bra|ket⟩ is not supported, expect ⟨bra| to be fully actived. nactive(bra)/nqudits(bra)=$(nactive(bra))/$(nqudits(bra))",
         )
     end
 end
@@ -154,7 +154,7 @@ function Base.:*(
         bra .* ket
     else
         error(
-            "partially contract ⟨bra|ket⟩ is not supported, expect ⟨bra| to be fully actived. nactive(bra)/nqubits(bra)=$(nactive(bra))/$(nqubits(bra))",
+            "partially contract ⟨bra|ket⟩ is not supported, expect ⟨bra| to be fully actived. nactive(bra)/nqudits(bra)=$(nactive(bra))/$(nqudits(bra))",
         )
     end
 end

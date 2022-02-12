@@ -96,28 +96,28 @@ is_order_same(locs) = all(a == b for (a, b) in zip(locs, 1:length(locs)))
 # NOTE: locations is not the same with orders
 # locations: some location of the wire
 # orders: includes all the location of the wire in some order
-function YaoBase.focus!(r::ArrayReg{B}, locs) where {B}
+function YaoBase.focus!(r::ArrayReg{B,D}, locs) where {B,D}
     if is_order_same(locs)
         arr = r.state
     else
         new_orders = move_ahead(nactive(r) + 1, locs)
         arr = group_permutedims(hypercubic(r), new_orders)
     end
-    r.state = reshape(arr, 1 << length(locs), :)
+    r.state = reshape(arr, D^length(locs), :)
     return r
 end
 
-function YaoBase.relax!(r::ArrayReg{B}, locs; to_nactive::Int = nqubits(r)) where {B}
-    r.state = reshape(state(r), 1 << to_nactive, :)
+function YaoBase.relax!(r::ArrayReg{B,D}, locs; to_nactive::Int = nqudits(r)) where {B,D}
+    r.state = reshape(state(r), D^to_nactive, :)
     if !is_order_same(locs)
         new_orders = TupleTools.invperm(move_ahead(to_nactive + 1, locs))
-        r.state = reshape(group_permutedims(hypercubic(r), new_orders), 1 << to_nactive, :)
+        r.state = reshape(group_permutedims(hypercubic(r), new_orders), D^to_nactive, :)
     end
     return r
 end
 
 function YaoBase.partial_tr(r::ArrayReg{B}, locs) where {B}
-    orders = setdiff(1:nqubits(r), locs)
+    orders = setdiff(1:nqudits(r), locs)
     focus!(r, orders)
     state = sum(rank3(r); dims = 2)
     relax!(r, orders)

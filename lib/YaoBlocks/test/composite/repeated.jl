@@ -14,3 +14,5 @@ rp = RepeatedBlock{5}(X, (1, 2, 3))
 
 @test_throws QubitMismatchError apply!(rand_state(2), repeat(10, X, (1, 2, 3)))
 @test_throws QubitMismatchError apply!(rand_state(2), repeat(10, put(1, 1 => X), ()))
+
+@test mat(repeat(10, X, ())) == IMatrix{1<<10}()

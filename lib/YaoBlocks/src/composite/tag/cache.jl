@@ -37,21 +37,21 @@ CacheServers.pull(frag::CacheFragment) = frag.storage[cache_key(frag.ref)]
 CacheServers.clear!(frag::CacheFragment) = (empty!(frag.storage); frag)
 
 """
-    CachedBlock{ST, BT, N} <: TagBlock{BT, N}
+    CachedBlock{ST, BT, N, D} <: TagBlock{BT, N, D}
 
 A label type that tags an instance of type `BT`. It forwards
 every methods of the block it contains, except [`mat`](@ref)
 and [`apply!`](@ref), it will cache the matrix form whenever
 the program has.
 """
-struct CachedBlock{ST,BT,N} <: TagBlock{BT,N}
+struct CachedBlock{ST,BT,N, D} <: TagBlock{BT,N,D}
     server::ST
     content::BT
     level::Int
 
-    function CachedBlock(server::ST, x::BT, level::Int) where {ST,N,BT<:AbstractBlock{N}}
+    function CachedBlock(server::ST, x::BT, level::Int) where {ST,N,D,BT<:AbstractBlock{N,D}}
         alloc!(server, x, CacheFragment(x))
-        new{ST,BT,N}(server, x, level)
+        new{ST,BT,N,D}(server, x, level)
     end
 end
 
@@ -85,7 +85,7 @@ function CacheServers.pull(c::CachedBlock)
     return pull(c.server, c.content)
 end
 
-function _apply!(r::ArrayReg{B,T}, c::CachedBlock, signal) where {B,T}
+function _apply!(r::ArrayReg{B,D,T}, c::CachedBlock, signal) where {B,D,T}
     if signal > c.level
         r.state .= mat(T, c) * r
     else
@@ -95,7 +95,7 @@ function _apply!(r::ArrayReg{B,T}, c::CachedBlock, signal) where {B,T}
 end
 
 _apply!(r::AbstractRegister, c::CachedBlock) = _apply!(r, c.content)
-_apply!(r::ArrayReg{B,T}, c::CachedBlock) where {B,T} = (r.state .= mat(T, c) * r.state; r)
+_apply!(r::ArrayReg{B,D,T}, c::CachedBlock) where {B,D,T} = (r.state .= mat(T, c) * r.state; r)
 
 Base.similar(c::CachedBlock, level::Int) = CachedBlock(c.server, c.content, level)
 Base.copy(c::CachedBlock) = CachedBlock(c.server, copy(c.content), c.level)
@@ -122,13 +122,13 @@ it calls [`mat`](@ref), and use the cached matrix in the following calculations.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> cache(control(3, 1, 2=>X))
-nqubits: 3
+nqudits: 3
 [cached] control(1)
    └─ (2,) X
 
 
 julia> chain(cache(control(3, 1, 2=>X)), repeat(H))
-nqubits: 3
+nqudits: 3
 chain
 ├─ [cached] control(1)
 │     └─ (2,) X

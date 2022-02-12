@@ -47,7 +47,7 @@ Base.adjoint(::TdagGate) = T
 # Docs
 """
     X
-    XGate <: ConstantGate{1}
+    XGate <: ConstantGate{1,2}
 
 Pauli X gate. `X` is the instance of `XGate`.
 """
@@ -55,7 +55,7 @@ X, XGate
 
 """
     Y
-    YGate  <: ConstantGate{1}
+    YGate  <: ConstantGate{1,2}
 
 Pauli Y gate. `Y` is the instance of `YGate`.
 """
@@ -63,7 +63,7 @@ Y, YGate
 
 """
     Z
-    ZGate  <: ConstantGate{1}
+    ZGate  <: ConstantGate{1,2}
 
 Pauli Z gate. `Z` is the instance of `YGate`.
 """

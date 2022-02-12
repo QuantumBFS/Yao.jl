@@ -4,13 +4,13 @@ export Measure,
     MeasureAndReset, AllLocs, ComputationalBasis, chmeasureoperator, nqubits_measured
 
 """
-    Measure{N, K, OT, LT, PT, RNG} <: PrimitiveBlock{N}
+    Measure{N, K, OT, LT, PT, RNG} <: PrimitiveBlock{N,2}
     Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=1:n, resetto=nothing, remove=false)
 
-Measure operator.
+Measure operator, currently only qubits are supported.
 """
 mutable struct Measure{N,K,OT,LT<:Union{NTuple{K,Int},AllLocs},PT<:PostProcess,RNG} <:
-               PrimitiveBlock{N}
+               PrimitiveBlock{N,2}
     rng::RNG
     operator::OT
     locations::LT
@@ -91,10 +91,10 @@ Measure(4;locs=(1, 2, 3))
 
 by default this will collapse the current register to measure results.
 
-```jldoctest; setup=:(using YaoBlocks, YaoArrayRegister)
+```jldoctest; setup=:(using YaoBlocks, YaoArrayRegister, Random; Random.seed!(2))
 julia> r = normalize!(ArrayReg(bit"000") + ArrayReg(bit"111"))
-ArrayReg{1, ComplexF64, Array...}
-    active qubits: 3/3
+ArrayReg{1, 2, ComplexF64, Array...}
+    active qudits: 3/3
 
 julia> state(r)
 8×1 Matrix{ComplexF64}:
@@ -108,19 +108,19 @@ julia> state(r)
  0.7071067811865475 + 0.0im
 
 julia> r |> Measure(3)
-ArrayReg{1, ComplexF64, Array...}
-    active qubits: 3/3
+ArrayReg{1, 2, ComplexF64, Array...}
+    active qudits: 3/3
 
 julia> state(r)
 8×1 Matrix{ComplexF64}:
- 0.0 + 0.0im
- 0.0 + 0.0im
- 0.0 + 0.0im
- 0.0 + 0.0im
- 0.0 + 0.0im
- 0.0 + 0.0im
- 0.0 + 0.0im
  1.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
 ```
 
 But you can also specify the target bit configuration you want to collapse to with keyword `resetto`.

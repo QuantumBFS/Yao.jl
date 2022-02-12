@@ -3,27 +3,25 @@ using SimpleTraits.BaseTraits, SimpleTraits
 export Add
 
 """
-    Add{N} <: CompositeBlock{N}
-    Add{N}(iterable) -> Add
-    Add(blocks::AbstractBlock{N}...) -> Add
+    Add{N,D} <: CompositeBlock{N,D}
+    Add(blocks::AbstractBlock...) -> Add
 """
-struct Add{N} <: CompositeBlock{N}
-    list::Vector{AbstractBlock{N}}
-
-    Add{N}(list::Vector{AbstractBlock{N}}) where {N} = new{N}(list)
-    Add{N}() where {N} = new{N}(AbstractBlock{N}[])
+struct Add{N,D} <: CompositeBlock{N,D}
+    list::Vector{AbstractBlock{N,D}}
+    Add{N,D}(blocks::Vector{AbstractBlock{N,D}}) where {N,D} = new{N,D}(blocks)
+    Add(blocks::Vector{<:AbstractBlock{N,D}}) where {N,D} = new{N,D}(collect(AbstractBlock{N,D}, blocks))
+    Add{N}(; nlevel=2) where {N} = new{N,nlevel}(AbstractBlock{N,nlevel}[])
 end
 
-#Add{N}() where N = Add{N}(AbstractBlock{N}[])
-Add{N}(blocks) where {N} = Add{N}(collect(AbstractBlock{N}, blocks))
-Add(blocks::AbstractBlock{N}...) where {N} = Add{N}(blocks)
+Add{N,D}(blocks) where {N,D} = Add{N,D}(collect(AbstractBlock{N,D}, blocks))
+Add(blocks::AbstractBlock{N,D}...) where {N,D} = Add{N,D}(blocks)
 
-function mat(::Type{T}, x::Add{N}) where {N,T}
-    length(x.list) == 0 && return Diagonal(zeros(T, 1 << N))
+function mat(::Type{T}, x::Add{N,D}) where {N,D,T}
+    length(x.list) == 0 && return Diagonal(zeros(T, D^N))
     mapreduce(x -> mat(T, x), +, x.list)
 end
 
-chsubblocks(x::Add{N}, it) where {N} = Add{N}(it)
+chsubblocks(x::Add{N,D}, it) where {N,D} = Add{N,D}(it)
 
 function _apply!(r::AbstractRegister, x::Add)
     isempty(x.list) && return r
@@ -39,10 +37,10 @@ export Add
 
 subblocks(x::Add) = x.list
 cache_key(x::Add) = map(cache_key, x.list)
-Base.copy(x::Add{N}) where {N} = Add{N}(copy(x.list))
-Base.similar(c::Add{N}) where {N} = Add{N}(empty!(similar(c.list)))
+Base.copy(x::Add{N,D}) where {N,D} = Add{N,D}(copy(x.list))
+Base.similar(c::Add{N,D}) where {N,D} = Add{N,D}(empty!(similar(c.list)))
 
-function Base.:(==)(lhs::Add{N}, rhs::Add{N}) where {N}
+function Base.:(==)(lhs::Add{N,D}, rhs::Add{N,D}) where {N,D}
     (length(lhs.list) == length(rhs.list)) && all(lhs.list .== rhs.list)
 end
 
@@ -50,22 +48,22 @@ for FUNC in [:length, :iterate, :getindex, :eltype, :eachindex, :popfirst!, :las
     @eval Base.$FUNC(x::Add, args...) = $FUNC(subblocks(x), args...)
 end
 
-Base.getindex(c::Add{N}, index::Union{UnitRange,Vector}) where {N} =
-    Add{N}(getindex(c.list, index))
-Base.setindex!(c::Add{N}, val::AbstractBlock{N}, index::Integer) where {N} =
+Base.getindex(c::Add{N,D}, index::Union{UnitRange,Vector}) where {N,D} =
+    Add{N,D}(getindex(c.list, index))
+Base.setindex!(c::Add{N,D}, val::AbstractBlock{N,D}, index::Integer) where {N,D} =
     (setindex!(c.list, val, index); c)
-Base.insert!(c::Add{N}, index::Integer, val::AbstractBlock{N}) where {N} =
+Base.insert!(c::Add{N,D}, index::Integer, val::AbstractBlock{N,D}) where {N,D} =
     (insert!(c.list, index, val); c)
-Base.adjoint(blk::Add{N}) where {N} = Add{N}(map(adjoint, subblocks(blk)))
+Base.adjoint(blk::Add{N,D}) where {N,D} = Add{N,D}(map(adjoint, subblocks(blk)))
 
 ## Iterate contained blocks
 occupied_locs(c::Add) =
     (unique(Iterators.flatten(occupied_locs(b) for b in subblocks(c)))...,)
 
 # Additional Methods for Add
-Base.push!(c::Add{N}, val::AbstractBlock{N}) where {N} = (push!(c.list, val); c)
+Base.push!(c::Add{N,D}, val::AbstractBlock{N,D}) where {N,D} = (push!(c.list, val); c)
 
-function Base.push!(c::Add{N}, val::Function) where {N}
+function Base.push!(c::Add{N,D}, val::Function) where {N,D}
     push!(c, val(N))
 end
 

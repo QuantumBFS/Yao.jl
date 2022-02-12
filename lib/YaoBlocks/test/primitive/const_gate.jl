@@ -81,6 +81,10 @@ end
         @test_throws DimensionMismatch @const_gate TEST::ComplexF32 = rand(2, 3)
     end
 
+    @testset "define new 3-level" begin
+        @const_gate TEST2 = rand(ComplexF64, 3, 3) nlevel=3
+        @test nlevel(TEST2) == 3
+    end
 end
 
 @testset "I gate" begin

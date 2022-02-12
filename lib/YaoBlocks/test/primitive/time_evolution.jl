@@ -10,7 +10,7 @@ function heisenberg(n::Int; periodic::Bool = true)
         j = mod1(i, n)
         Sx(i) * Sx(j) + Sy(i) * Sy(j) + Sz(i) * Sz(j)
     end
-    Add{n}(res)
+    Add(res)
 end
 
 const hm = heisenberg(4)

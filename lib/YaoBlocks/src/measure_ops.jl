@@ -9,10 +9,10 @@ By applying `eigenvector`' to target state,
 one can swith the basis to the eigenbasis of this operator.
 However, `eigenvalues` does not have a specific form.
 """
-function eigenbasis(op::AbstractBlock{N}) where {N}
+function eigenbasis(op::AbstractBlock{N,D}) where {N,D}
     m = mat(op)
     if m isa Diagonal || m isa IMatrix
-        op, IdentityGate{N}()
+        op, IdentityGate{N,D}()
     else
         E, V = eigen!(Matrix(m))
         matblock(Diagonal(E)), matblock(V)
@@ -157,10 +157,10 @@ end
 function YaoBase.measure!(
     ::NoPostProcess,
     bb::BlockedBasis,
-    reg::ArrayReg{B,T},
+    reg::ArrayReg{B,D,T},
     ::AllLocs;
     rng::AbstractRNG = Random.GLOBAL_RNG,
-) where {B,T}
+) where {B,D,T}
     state = @inbounds (reg|>rank3)[bb.perm, :, :]  # permute to make eigen values sorted
     pl = dropdims(sum(abs2, state, dims = 2), dims = 2)
     pl_block = zeros(eltype(pl), nblocks(bb), B)

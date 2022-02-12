@@ -2,28 +2,28 @@ using YaoBase, YaoArrayRegister
 export GeneralMatrixBlock, matblock
 
 """
-    GeneralMatrixBlock{M, N, MT} <: PrimitiveBlock{N}
+    GeneralMatrixBlock{M, N, D, MT} <: PrimitiveBlock{N, D}
 
 General matrix gate wraps a matrix operator to quantum gates. This is the most
 general form of a quantum gate. `M` is the hilbert dimension (first dimension),
 `N` is the hilbert dimension (second dimension) of current quantum state. For
 most quantum gates, we have ``M = N``.
 """
-struct GeneralMatrixBlock{M,N,T,MT<:AbstractMatrix{T}} <: PrimitiveBlock{N}
+struct GeneralMatrixBlock{M,N,D,T,MT<:AbstractMatrix{T}} <: PrimitiveBlock{N,D}
     mat::MT
 
-    function GeneralMatrixBlock{M,N}(m::MT) where {M,N,T,MT<:AbstractMatrix{T}}
-        (1 << M, 1 << N) == size(m) ||
-            throw(DimensionMismatch("expect a $(1<<M) x $(1<<N) matrix, got $(size(m))"))
+    function GeneralMatrixBlock{M,N,D}(m::MT) where {M,N,D,T,MT<:AbstractMatrix{T}}
+        (D^M, D^N) == size(m) ||
+            throw(DimensionMismatch("expect a $(D^M) x $(D^N) matrix, got $(size(m))"))
 
-        return new{M,N,T,MT}(m)
+        return new{M,N,D,T,MT}(m)
     end
 end
 
-GeneralMatrixBlock(m::AbstractMatrix) = GeneralMatrixBlock{log2i.(size(m))...}(m)
+GeneralMatrixBlock(m::AbstractMatrix; nlevel=2) = GeneralMatrixBlock{logdi.(size(m), nlevel)..., nlevel}(m)
 
 """
-    matblock(m::AbstractMatrix)
+    matblock(m::AbstractMatrix; nlevel=2)
 
 Create a [`GeneralMatrixBlock`](@ref) with a matrix `m`.
 
@@ -39,14 +39,14 @@ matblock(...)
     Instead of converting it to the default data type `ComplexF64`,
     this will return its contained matrix when calling `mat`.
 """
-matblock(m::AbstractMatrix) = GeneralMatrixBlock(m)
+matblock(m::AbstractMatrix; nlevel=2) = GeneralMatrixBlock(m; nlevel=nlevel)
 
 """
-    matblock(m::AbstractMatrix)
+    matblock(m::AbstractMatrix; nlevel=2)
 
 Create a [`GeneralMatrixBlock`](@ref) with a matrix `m`.
 """
-matblock(m::AbstractBlock) = GeneralMatrixBlock(mat(m))
+matblock(m::AbstractBlock{N,D}) where {N,D} = GeneralMatrixBlock(mat(m); nlevel=D)
 
 cache_key(m::GeneralMatrixBlock) = hash(m.mat)
 

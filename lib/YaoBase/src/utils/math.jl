@@ -21,7 +21,8 @@ export batch_normalize,
     purification_fidelity,
     # matrix tools
     autostatic,
-    rot_mat
+    rot_mat,
+    logdi
 
 using LuxurySparse, LinearAlgebra, BitBasis, SparseArrays
 import LinearAlgebra: svdvals
@@ -67,15 +68,15 @@ function batch_normalize(s::AbstractMatrix, p::Real = 2)
 end
 
 """
-    hilbertkron(num_bit::Int, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix
+    hilbertkron(num_bit::Int, gates::Vector{AbstractMatrix}, locs::Vector{Int}; nlevel=2) -> AbstractMatrix
 
-Return general kronecher product form of gates in Hilbert space of `num_bit` qubits.
+Return general kronecher product form of gates in Hilbert space of `num_bit` qudits.
 
 * `gates` are a list of matrices.
 * `start_locs` should have the same length as `gates`, specifing the gates starting positions.
 """
-function hilbertkron(num_bit::Int, ops::Vector{<:AbstractMatrix}, start_locs::Vector{Int})
-    sizes = [log2dim1(op) for op in ops]
+function hilbertkron(num_bit::Int, ops::Vector{<:AbstractMatrix}, start_locs::Vector{Int}; nlevel=2)
+    sizes = [logdi(size(op, 1), nlevel) for op in ops]
     start_locs = num_bit .- start_locs .- sizes .+ 2
 
     order = sortperm(start_locs)
@@ -86,21 +87,22 @@ function hilbertkron(num_bit::Int, ops::Vector{<:AbstractMatrix}, start_locs::Ve
         diff(push!(sorted_start_locs, num_bit + 1)) .- sizes[order],
     )
 
-    _wrap_identity(sorted_ops, num_ids)
+    _wrap_identity(sorted_ops, num_ids, nlevel)
 end
 
 # kron, and wrap matrices with identities.
 function _wrap_identity(
     data_list::Vector{T},
     num_bit_list::Vector{Int},
+    nlevel
 ) where {T<:AbstractMatrix}
     length(num_bit_list) == length(data_list) + 1 || throw(ArgumentError())
     ⊗ = kron
     reduce(
         zip(data_list, num_bit_list[2:end]);
-        init = IMatrix(1 << num_bit_list[1]),
+        init = IMatrix(nlevel ^ num_bit_list[1]),
     ) do x, y
-        x ⊗ y[1] ⊗ IMatrix(1 << y[2])
+        x ⊗ y[1] ⊗ IMatrix(nlevel ^ y[2])
     end
 end
 
@@ -159,7 +161,7 @@ end
 """
     general_controlled_gates(num_bit::Int, projectors::Vector{Tp}, cbits::Vector{Int}, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix
 
-Return general multi-controlled gates in hilbert space of `num_bit` qubits,
+Return general multi-controlled gates in hilbert space of `num_bit` qudits,
 
 * `projectors` are often chosen as `P0` and `P1` for inverse-Control and Control at specific position.
 * `cbits` should have the same length as `projectors`, specifing the controling positions.
@@ -201,20 +203,20 @@ rotmat(M::AbstractMatrix, θ::Real) = exp(-im * θ / 2 * M)
 
 
 """
-    linop2dense([T=ComplexF64], linear_map!::Function, n::Int) -> Matrix
+    linop2dense([T=ComplexF64], linear_map!::Function, n::Int; nlevel=2) -> Matrix
 
 Returns the dense matrix representation given linear map function.
 """
-linop2dense(linear_map!::Function, n::Int) = linop2dense(ComplexF64, linear_map!, n)
-linop2dense(::Type{T}, linear_map!::Function, n::Int) where {T} =
-    linear_map!(Matrix{T}(I, 1 << n, 1 << n))
+linop2dense(linear_map!::Function, n::Int; nlevel=2) = linop2dense(ComplexF64, linear_map!, n; nlevel=nlevel)
+linop2dense(::Type{T}, linear_map!::Function, n::Int; nlevel=2) where {T} =
+    linear_map!(Matrix{T}(I, nlevel ^ n, nlevel ^ n))
 
 ################### Fidelity ###################
 
 """
     density_fidelity(ρ1, ρ2)
 
-General fidelity (including mixed states) between two density matrix for qubits.
+General fidelity (including mixed states) between two density matrix for qudits.
 
 # Definition
 
@@ -323,10 +325,10 @@ function rot_mat(::Type{T}, gen::AbstractMatrix, theta::Real) where {N,T}
     end
 end
 
-BitBasis.unsafe_reorder(A::IMatrix, orders::NTuple{N,<:Integer}) where {N} = A
+BitBasis.unsafe_reorder(A::IMatrix, orders::NTuple{N,<:Integer}; nlevel=2) where {N} = A
 
-function BitBasis.unsafe_reorder(A::PermMatrix, orders::NTuple{N,<:Integer}) where {N}
-    od = Vector{Int}(undef, 1 << length(orders))
+function BitBasis.unsafe_reorder(A::PermMatrix, orders::NTuple{N,<:Integer}; nlevel=2) where {N}
+    od = Vector{Int}(undef, nlevel ^ length(orders))
     for (i, b) in enumerate(ReorderedBasis(orders))
         @inbounds od[i] = 1 + b
     end
@@ -340,4 +342,14 @@ function BitBasis.unsafe_reorder(A::PermMatrix, orders::NTuple{N,<:Integer}) whe
     end
 
     return PermMatrix(perm, vals)
+end
+
+function logdi(x::Integer, d::Integer)
+    @assert x > 0 && d > 0
+    res = log(x) / log(d)
+    r = round(Int, res)
+    if !(res ≈ r)
+        throw(ArgumentError("`$x` is not an integer power of `$d`."))
+    end
+    return r
 end

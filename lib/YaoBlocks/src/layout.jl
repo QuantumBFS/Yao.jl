@@ -34,7 +34,7 @@ end
 Print the title of given `block` of an [`AbstractBlock`](@ref).
 """
 function print_title(io::IO, x::AbstractBlock)
-    printstyled(io, "nqubits: ", nqubits(x); bold = false, color = :cyan)
+    printstyled(io, "nqudits: ", nqudits(x); bold = false, color = :cyan)
 end
 
 """

@@ -1,19 +1,19 @@
 export AbstractRegister, AdjointRegister, DensityMatrix
 
 """
-    AbstractRegister{B}
+    AbstractRegister{B, D}
 
-Abstract type for quantum registers. `B` is the batch size.
+Abstract type for quantum registers. `B` is the batch size, `D` is the number of levels in each qudit.
 """
-abstract type AbstractRegister{B} end
+abstract type AbstractRegister{B, D} end
 
 
 """
-    AdjointRegister{B, T, RT} <: AbstractRegister{B, T}
+    AdjointRegister{B, D, RT} <: AbstractRegister{B, D}
 
 Lazy adjoint for a quantum register.
 """
-struct AdjointRegister{B,RT<:AbstractRegister{B}} <: AbstractRegister{B}
+struct AdjointRegister{B,D,RT<:AbstractRegister{B,D}} <: AbstractRegister{B,D}
     parent::RT
 end
 
@@ -32,11 +32,11 @@ different types.
 """
     nactive(register) -> Int
 
-Returns the number of active qubits.
+Returns the number of active qudits.
 
 !!! note
 
-    Operators always apply on active qubits.
+    Operators always apply on active qudits.
 """
 @interface nactive
 
@@ -49,9 +49,17 @@ for more details.
 @interface nqubits
 
 """
+    nqudits(register) -> Int
+
+Returns the (total) number of qudits. See [`nactive`](@ref), [`nremain`](@ref)
+for more details.
+"""
+@interface nqudits
+
+"""
     nremain(register) -> Int
 
-Returns the number of non-active qubits.
+Returns the number of non-active qudits.
 """
 @interface nremain
 
@@ -71,10 +79,10 @@ Returns a view of the i-th slice on batch dimension.
 
 ###################### Reg Operations: Location and size #####################
 """
-    addbits!(register, n::Int) -> register
-    addbits!(n::Int) -> λ(register)
+    adddits!(register, n::Int) -> register
+    adddits!(n::Int) -> λ(register)
 
-Add `n` qubits to given register in state |0>.
+Add `n` qudits to given register in state |0>.
 i.e. |psi> -> |000> ⊗ |psi>, increased bits have higher indices.
 
 If only an integer is provided, then returns a lambda function.
@@ -83,15 +91,15 @@ If only an integer is provided, then returns a lambda function.
 
 
 """
-    insert_qubits!(register, loc::Int; nqubits::Int=1) -> register
-    insert_qubits!(loc::Int; nqubits::Int=1) -> λ(register)
+    insert_qudits!(register, loc::Int; nqudits::Int=1) -> register
+    insert_qudits!(loc::Int; nqudits::Int=1) -> λ(register)
 
-Insert `n` qubits to given register in state |0>.
+Insert `n` qudits to given register in state |0>.
 i.e. |psi> -> |psi> ⊗ |000> ⊗ |psi>, increased bits have higher indices.
 
 If only an integer is provided, then returns a lambda function.
 """
-@interface insert_qubits!
+@interface insert_qudits!
 
 """
     focus!(register, locs) -> register
@@ -119,11 +127,11 @@ print the focused register
 ```julia
 julia> r = ArrayReg(bit"101100")
 ArrayReg{1,Complex{Float64},Array...}
-    active qubits: 6/6
+    active qudits: 6/6
 
 julia> focus(x->(println(x);x), r, 1, 2);
 ArrayReg{1,Complex{Float64},Array...}
-    active qubits: 2/6
+    active qudits: 2/6
 ```
 """
 @interface focus
@@ -139,7 +147,7 @@ focus(f, r::AbstractRegister, locs::Int...) = focus(f, r, locs)
 
 
 """
-    relax!(register[, locs]; to_nactive=nqubits(register)) -> register
+    relax!(register[, locs]; to_nactive=nqudits(register)) -> register
 
 Inverse transformation of [`focus!`](@ref), where `to_nactive` is the number
  of active bits for target register.
@@ -192,8 +200,8 @@ struct NoPostProcess <: PostProcess end
 """
     measure([, operator], register[, locs]; nshots=1, rng=Random.GLOBAL_RNG) -> Vector{Int}
 
-Return measurement results of qubits in `locs`.
-If `locs` is not provided, all current active qubits are measured (regarding to active qubits,
+Return measurement results of qudits in `locs`.
+If `locs` is not provided, all current active qudits are measured (regarding to active qudits,
 see [`focus!`](@ref) and [`relax!`](@ref)).
 """
 @interface measure
@@ -201,7 +209,7 @@ see [`focus!`](@ref) and [`relax!`](@ref)).
 """
     measure!([postprocess,] [operator, ]register[, locs]; rng=Random.GLOBAL_RNG)
 
-Measure current active qubits or qubits at `locs`. After measure and collapse,
+Measure current active qudits or qudits at `locs`. After measure and collapse,
 
     * do nothing if postprocess is `NoPostProcess`
     * reset to result state to `postprocess.config` if `postprocess` is `ResetTo`.
@@ -225,7 +233,7 @@ After selection, the focused qubit space is 0, so you may want call `relax!` man
 
     Developers should overload `select!(r::RegisterType, bits::NTuple{N, <:Integer})` and
     do not assume `bits` has specific number of bits (e.g `Int64`), or it will restrict the
-    its maximum available number of qubits.
+    its maximum available number of qudits.
 """
 @interface select!
 
@@ -250,7 +258,7 @@ Returns the probability distribution of computation basis, aka ``|<x|ψ>|^2``.
 Return the fidelity between two states.
 
 # Definition
-The fidelity of two quantum state for qubits is defined as:
+The fidelity of two quantum state for qudits is defined as:
 
 ```math
 F(ρ, σ) = tr(\\sqrt{\\sqrt{ρ}σ\\sqrt{ρ}})
@@ -341,14 +349,14 @@ check if operators are commute.
 ####################### Density Matrix ############
 
 """
-    DensityMatrix{B, T, MT}
+    DensityMatrix{B, D, T, MT}
 
 Density Matrix.
 
 - `B`: batch size
 - `T`: element type
 """
-struct DensityMatrix{B,T,MT<:AbstractArray{T,3}} <: AbstractRegister{B}
+struct DensityMatrix{B,D,T,MT<:AbstractArray{T,3}} <: AbstractRegister{B,D}
     state::MT
 end
 
@@ -362,14 +370,14 @@ Get a purification of target density matrix.
 """
     density_matrix(register)
 
-Returns the density matrix of current active qubits.
+Returns the density matrix of current active qudits.
 """
 @interface density_matrix
 
 """
     ρ(register)
 
-Returns the density matrix of current active qubits. This is the same as
+Returns the density matrix of current active qudits. This is the same as
 [`density_matrix`](@ref).
 """
 @interface ρ
