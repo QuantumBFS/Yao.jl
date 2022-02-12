@@ -4,7 +4,8 @@
 
 Create a `DensityMatrix` with a state represented by array.
 """
-YaoBase.DensityMatrix(state::AbstractMatrix{T}; nlevel=2) where T = DensityMatrix{nlevel,T}(state)
+YaoBase.DensityMatrix{D}(state::AbstractMatrix{T}) where {T,D} = DensityMatrix{D,T,typeof(state)}(state)
+YaoBase.DensityMatrix(state::AbstractMatrix{T}; nlevel=2) where T = DensityMatrix{nlevel}(state)
 
 """
     state(ρ::DensityMatrix)

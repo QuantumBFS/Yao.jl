@@ -118,10 +118,9 @@ end
 
 function YaoBase.partial_tr(r::AbstractArrayReg{D}, locs) where D
     orders = setdiff(1:nqudits(r), locs)
-    focus!(r, orders)
-    state = sum(rank3(r); dims = 2)
-    relax!(r, orders)
-    return normalize!(arrayreg(state; nbatch=nbatch(r), nlevel=D))
+    r2 = focus!(copy(r), orders)
+    state = sum(rank3(r2); dims = 2)
+    return normalize!(arrayreg(reshape(state, :, size(state, 3)); nbatch=nbatch(r), nlevel=D))
 end
 
 """

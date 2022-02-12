@@ -9,7 +9,7 @@ export isnormalized, normalize!, regadd!, regsub!, regscale!, norm
 
 Check if the register is normalized.
 """
-isnormalized(r::ArrayReg) =
+isnormalized(r::AbstractArrayReg) =
     all(sum(copy(r) |> relax!(to_nactive = nqudits(r)) |> probs, dims = 1) .≈ 1)
 isnormalized(r::AdjointArrayReg) = isnormalized(parent(r))
 
@@ -138,7 +138,7 @@ function Base.:*(
 ) where {D,T1,T2}
     if nremain(bra) == nremain(ket) == 0 # all active
         A, C = parent(state(parent(bra))), parent(state(ket))
-        res = zeros(eltype(promote_type(T1, T2)), B)
+        res = zeros(eltype(promote_type(T1, T2)), nbatch(ket))
         #return mapreduce((x, y) -> conj(x) * y, +, ; dims=2)
         for j = 1:size(A, 2)
             for i = 1:size(A, 1)

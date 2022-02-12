@@ -11,7 +11,8 @@ using YaoBase
 using BitBasis
 using LinearAlgebra
 
-export ArrayReg,
+export AbstractArrayReg,
+    ArrayReg,
     BatchedArrayReg,
     AdjointArrayReg,
     ArrayRegOrAdjointArrayReg,

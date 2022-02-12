@@ -116,10 +116,4 @@ Lazy version of [`select!`](@ref). See also [`select`](@ref).
 """
 select!(bits...) = @λ(register -> select!(register, bits...))
 
-# fallback printing
-function Base.show(io::IO, reg::AbstractRegister)
-    summary(io, reg)
-    print(io, "\n    active qudits: ", nactive(reg), "/", nqudits(reg))
-end
-
 ρ(x) = density_matrix(x)

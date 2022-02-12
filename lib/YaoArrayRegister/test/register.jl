@@ -44,11 +44,11 @@ end
 
 @testset "test $T initialization methods" for T in [ComplexF64, ComplexF32, ComplexF16]
     @testset "test product state" begin
-        reg = product_state(T, bit"100"; nbatch = NoBatch())
+        reg = product_state(T, bit"100")
         st = state(reg)
         @test nqudits(reg) == 3
         @test !(st isa Transpose)
-        st2 = state(product_state(T, [0, 0, 1]; nbatch = NoBatch()))
+        st2 = state(product_state(T, [0, 0, 1]))
         @test st2 ≈ st
         st = state(product_state(T, bit"100"; nbatch = 2, no_transpose_storage = true))
         @test !(st isa Transpose)
@@ -65,7 +65,7 @@ end
         @test eltype(product_state(Float64, 4, 0).state) == Float64
     end
     @testset "test zero state" begin
-        st = state(zero_state(T, 3; nbatch = NoBatch()))
+        st = state(zero_state(T, 3))
         @test !(st isa Transpose)
         st = state(zero_state(T, 3; nbatch = 2, no_transpose_storage = true))
         @test !(st isa Transpose)
@@ -77,7 +77,7 @@ end
         @test eltype(zero_state(Float64, 4).state) == Float64
     end
     @testset "test rand state" begin
-        st = state(rand_state(T, 3; nbatch = NoBatch()))
+        st = state(rand_state(T, 3))
         @test !(st isa Transpose)
         st = state(rand_state(T, 3; nbatch = 2, no_transpose_storage = true))
         @test !(st isa Transpose)
@@ -90,7 +90,7 @@ end
         @test eltype(rand_state(Float64, 4).state) == Float64
     end
     @testset "test uniform state" begin
-        st = state(uniform_state(T, 3; nbatch = NoBatch()))
+        st = state(uniform_state(T, 3))
         @test !(st isa Transpose)
         st = state(uniform_state(T, 3; nbatch = 2, no_transpose_storage = true))
         @test !(st isa Transpose)

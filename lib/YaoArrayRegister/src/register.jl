@@ -87,7 +87,7 @@ function ArrayReg(r::BatchedArrayReg{D}) where D
         return ArrayReg{D}(r.state)
     end
 end
-BatchedArrayReg(r::ArrayReg{D}) where D = BatchedArrayReg{D}(r.state, 1)
+BatchedArrayReg(r::ArrayReg{D}...) where D = BatchedArrayReg{D}(hcat(state.(r)...), length(r))
 
 function _check_reg_input(raw::AbstractMatrix{T}, D::Integer, B::Integer) where T
     T <: Complex || @warn "Input matrix element type is not `Complex`, got `$(eltype(raw))`"
@@ -125,10 +125,8 @@ Adapt.@adapt_structure ArrayReg
 Adapt.@adapt_structure BatchedArrayReg
 
 const AdjointArrayReg{D,T,MT} = AdjointRegister{D,<:AbstractArrayReg{D,T,MT}}
-#const AdjointArrayReg{D,T,MT} = AdjointRegister{D,ArrayReg{D,T,MT}}
-#const BatchedAdjointArrayReg{D,T,MT} = AdjointRegister{D,BatchedArrayReg{D,T,MT}}
 const ArrayRegOrAdjointArrayReg{D,T,MT} =
-    Union{AbstractArrayReg{D,T,MT},AdjointRegister{D,AbstractArrayReg{D,T,MT}}}
+    Union{AbstractArrayReg{D,T,MT},AdjointArrayReg{D,T,MT}}
 
 """
     datatype(register) -> Int
@@ -291,7 +289,8 @@ function YaoBase.fidelity(r1::ArrayReg, r2::ArrayReg)
     end
 end
 
-YaoBase.tracedist(r1::AbstractArrayReg, r2::AbstractArrayReg) = tracedist(ρ(r1), ρ(r2))
+YaoBase.tracedist(r1::ArrayReg, r2::ArrayReg) = tracedist(ρ(r1), ρ(r2))
+YaoBase.tracedist(r1::BatchedArrayReg, r2::BatchedArrayReg) = tracedist.(r1, r2)
 
 
 # properties
@@ -364,7 +363,7 @@ join_datatype(::Type{T}) where {T} = T
 
 # initialization methods
 """
-    product_state([T=ComplexF64], bit_str; nbatch=1)
+    product_state([T=ComplexF64], bit_str; nbatch=NoBatch())
 
 Create an [`ArrayReg`](@ref) with bit string literal
 defined with [`@bit_str`](@ref). See also [`zero_state`](@ref),
@@ -389,10 +388,10 @@ julia> r1 ≈ r2   # because we read bit strings from right to left, vectors fro
 true
 ```
 """
-product_state(bit_str::BitStr; nbatch::Int = 1) =
+product_state(bit_str::BitStr; nbatch::Union{NoBatch,Int} = NoBatch()) =
     product_state(ComplexF64, bit_str; nbatch = nbatch)
 
-product_state(bit_str::AbstractVector; nbatch::Int = 1) =
+product_state(bit_str::AbstractVector; nbatch::Union{NoBatch,Int} = NoBatch()) =
     product_state(ComplexF64, bit_str; nbatch = nbatch)
 
 """
@@ -575,12 +574,17 @@ Base.repeat(r::AbstractArrayReg{D}, n::Int) where D =
 
 # NOTE: overload this to make printing more compact
 #       but do not alter the way how type parameters print
-function Base.summary(io::IO, r::ArrayReg{D,T,MT}) where {D,T,MT}
+function Base.show(io::IO, reg::ArrayReg{D,T,MT}) where {D,T,MT}
     print(io, "ArrayReg{$D, $T, $(nameof(MT))...}")
+    print(io, "\n    active qudits: ", nactive(reg), "/", nqudits(reg))
+    print(io, "\n    nlevel: ", nlevel(reg))
 end
 
-function Base.summary(io::IO, r::BatchedArrayReg{D,T,MT}) where {D,T,MT}
-    print(io, "BatchedArrayReg{$D, $T, $(nameof(MT))...} (nbatch = $(r.nbatch))")
+function Base.show(io::IO, reg::BatchedArrayReg{D,T,MT}) where {D,T,MT}
+    print(io, "BatchedArrayReg{$D, $T, $(nameof(MT))...}")
+    print(io, "\n    active qudits: ", nactive(reg), "/", nqudits(reg))
+    print(io, "\n    nlevel: ", nlevel(reg))
+    print(io, "\n    nbatch: ", nbatch(reg))
 end
 
 """
@@ -589,7 +593,7 @@ end
 Compute the mutual information between locations `part1` and locations `part2` in a quantum state `reg`.
 """
 function mutual_information(reg::AbstractArrayReg, part1, part2)
-    von_neumann_entropy(reg, part1) + von_neumann_entropy(reg, part2) - von_neumann_entropy(reg, part1 ∪ part2)
+    von_neumann_entropy(reg, part1) .+ von_neumann_entropy(reg, part2) .- von_neumann_entropy(reg, part1 ∪ part2)
 end
 
 """
@@ -599,10 +603,11 @@ end
 The entanglement entropy between `part` and the rest part in quantum state `reg`.
 If the input is a density matrix, it returns the entropy of a mixed state.
 """
-von_neumann_entropy(reg::BatchedArrayReg, part) = von_neumann_entropy.(density_matrix.(reg, Ref(part)))
+von_neumann_entropy(reg::BatchedArrayReg, part) = von_neumann_entropy.(reg, Ref(part))
+von_neumann_entropy(reg::ArrayReg, part) = von_neumann_entropy(density_matrix(reg, part))
 
-function Base.iterate(it::BatchedArrayReg, state = 1)
-    if state > it.nbatch
+function Base.iterate(it::Union{BatchedArrayReg{D}, AdjointRegister{D, <:BatchedArrayReg{D}}} where D, state = 1)
+    if state > nbatch(it)
         return nothing
     else
         return viewbatch(it, state), state + 1
@@ -610,6 +615,7 @@ function Base.iterate(it::BatchedArrayReg, state = 1)
 end
 
 Base.length(r::BatchedArrayReg) = r.nbatch
+Base.length(r::AdjointRegister{D, <:BatchedArrayReg{D}}) where {D} = length(parent(r))
 
 """
     nbatch(register) -> Int
@@ -618,3 +624,4 @@ Returns the number of batches.
 """
 nbatch(r::BatchedArrayReg) = r.nbatch
 nbatch(r::ArrayReg) = NoBatch()
+nbatch(r::AdjointArrayReg) = nbatch(parent(r))
