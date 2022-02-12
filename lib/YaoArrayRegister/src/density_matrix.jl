@@ -1,13 +1,13 @@
 """
-    DensityMatrix(state::AbstractArray{T, 3})
-    DensityMatrix(state::AbstractMatrix{T})
+    DensityMatrix(state::AbstractArray{T, 3}; nlevel=2)
+    DensityMatrix(state::AbstractMatrix{T}; nlevel=2)
 
 Create a `DensityMatrix` with a state represented by array.
 """
-YaoBase.DensityMatrix(state::MT) where {T,MT<:AbstractArray{T,3}} =
-    DensityMatrix{size(state, 3),T,MT}(state)
-YaoBase.DensityMatrix(state::AbstractMatrix) =
-    DensityMatrix(reshape(state, size(state)..., 1))
+YaoBase.DensityMatrix(state::MT; nlevel=2) where {T,MT<:AbstractArray{T,3}} =
+    DensityMatrix{size(state, 3),nlevel,T,MT}(state)
+YaoBase.DensityMatrix(state::AbstractMatrix; nlevel=2) =
+    DensityMatrix(reshape(state, size(state)..., 1); nlevel=nlevel)
 
 """
     state(ρ::DensityMatrix)
@@ -16,9 +16,9 @@ Return the raw state of density matrix `ρ`.
 """
 state(ρ::DensityMatrix) = ρ.state
 
-YaoBase.nqubits(ρ::DensityMatrix) = log2dim1(state(ρ))
-YaoBase.nactive(ρ::DensityMatrix) = nqubits(ρ)
-YaoBase.nbatch(dm::DensityMatrix{B}) where {B} = B
+YaoBase.nqubits(ρ::DensityMatrix) = nqudits(state(ρ))
+YaoBase.nqudits(ρ::DensityMatrix{B,D}) where {B,D} = logdi(size(state(ρ), 1), D)
+YaoBase.nactive(ρ::DensityMatrix) = nqudits(ρ)
 
 """
     density_matrix(reg, qubits)
@@ -40,7 +40,7 @@ function YaoBase.density_matrix(reg::ArrayReg{B}) where {B}
     return DensityMatrix(out)
 end
 
-YaoBase.tracedist(dm1::DensityMatrix{B}, dm2::DensityMatrix{B}) where {B} =
+YaoBase.tracedist(dm1::DensityMatrix{B,D}, dm2::DensityMatrix{B,D}) where {B,D} =
     map(b -> trnorm(dm1.state[:, :, b] - dm2.state[:, :, b]), 1:B)
 
 # TODO: use batch_broadcast in the future
@@ -49,7 +49,7 @@ YaoBase.tracedist(dm1::DensityMatrix{B}, dm2::DensityMatrix{B}) where {B} =
 
 Returns the probability distribution from a density matrix `ρ`.
 """
-function YaoBase.probs(m::DensityMatrix{B,T}) where {B,T}
+function YaoBase.probs(m::DensityMatrix{B,D,T}) where {B,D,T}
     res = zeros(T, size(m.state, 1), B)
     for i = 1:B
         @inbounds res[:, B] = diag(view(m.state, :, :, i))
@@ -59,8 +59,8 @@ end
 
 YaoBase.probs(m::DensityMatrix{1}) = diag(view(m.state, :, :, 1))
 
-function YaoBase.purify(r::DensityMatrix{B}; nbit_env::Int = nactive(r)) where {B}
-    Ne = 1 << nbit_env
+function YaoBase.purify(r::DensityMatrix{B,D}; num_env::Int = nactive(r)) where {B,D}
+    Ne = D ^ num_env
     Ns = size(r.state, 1)
     state = similar(r.state, Ns, Ne, B)
     for ib = 1:B
@@ -76,5 +76,12 @@ LinearAlgebra.Matrix(d::DensityMatrix{1}) = dropdims(d.state, dims = 3)
 von_neumann_entropy(dm::DensityMatrix{1}) = von_neumann_entropy(Matrix(dm))
 function von_neumann_entropy(dm::AbstractMatrix)
     p = max.(eigvals(dm), eps(real(eltype(dm))))
-    return -sum(p .* log.(p))
+    return von_neumann_entropy(p)
+end
+von_neumann_entropy(v::AbstractVector) = -sum(x->x*log(x), v)
+
+function von_neumann_entropy(d::DensityMatrix{B}) where B
+    map(1:B) do ib
+        von_neumann_entropy(view(d.state,:,:,ib))
+    end
 end

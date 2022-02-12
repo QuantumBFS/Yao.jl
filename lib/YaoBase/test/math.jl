@@ -80,3 +80,8 @@ using LuxurySparse: pmrand
     @test reorder(PC ⊗ PB ⊗ PA, [3, 1, 2]) ≈ PB ⊗ PA ⊗ PC
     @test invorder(PC ⊗ PB ⊗ PA) ≈ PA ⊗ PB ⊗ PC
 end
+
+@testset "logdi" begin
+    @test logdi(9, 3) == 2
+    @test_throws ArgumentError logdi(9, 5)
+end

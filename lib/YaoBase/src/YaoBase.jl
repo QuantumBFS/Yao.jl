@@ -23,13 +23,14 @@ import YaoAPI:
     instruct!,
     focus!,
     relax!,
+    nqudits,
     nqubits,
     nremain,
     nactive,
     nbatch,
     viewbatch,
     addbits!,
-    insert_qubits!,
+    insert_qudits!,
     measure,
     measure!,
     occupied_locs,
@@ -37,7 +38,8 @@ import YaoAPI:
     partial_tr,
     select!,
     ρ,
-    reorder!
+    reorder!,
+    nlevel
 export basis, ishermitian
 
 include("utils/ast_tools.jl")

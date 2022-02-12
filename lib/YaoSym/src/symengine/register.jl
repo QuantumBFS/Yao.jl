@@ -6,17 +6,17 @@ export szero_state
 
 YaoArrayRegister._warn_type(raw::AbstractArray{Basic}) = nothing
 
-const SymReg{B,MT} = ArrayReg{B,Basic,MT} where {MT<:AbstractMatrix{Basic}}
-const AdjointSymReg{B,MT} = AdjointArrayReg{B,Basic,MT}
-const SymRegOrAdjointSymReg{B,MT} = Union{SymReg{B,MT},AdjointSymReg{B,MT}}
+const SymReg{B,D,MT} = ArrayReg{B,D,Basic,MT} where {MT<:AbstractMatrix{Basic}}
+const AdjointSymReg{B,D,MT} = AdjointArrayReg{B,D,Basic,MT}
+const SymRegOrAdjointSymReg{B,D,MT} = Union{SymReg{B,D,MT},AdjointSymReg{B,D,MT}}
 
-function SymReg{B,MT}(r::ArrayReg{B,<:Number}) where {B,MT<:AbstractMatrix{Basic}}
-    return ArrayReg{B,Basic,MT}(MT(Basic.(r.state)))
+function SymReg{B,D,MT}(r::ArrayReg{B,D,<:Number}) where {B,D,MT<:AbstractMatrix{Basic}}
+    return ArrayReg{B,D,Basic,MT}(MT(Basic.(r.state)))
 end
 
-function SymReg(r::ArrayReg{B,<:Number}) where {B}
+function SymReg(r::ArrayReg{B,D,<:Number}) where {B,D}
     smat = SparseMatrixCSC(Basic.(_pretty_basic.(r.state)))
-    return ArrayReg{B,Basic,SparseMatrixCSC{Basic,Int}}(SparseMatrixCSC(smat))
+    return ArrayReg{B,D,Basic,SparseMatrixCSC{Basic,Int}}(SparseMatrixCSC(smat))
 end
 
 _pretty_basic(x) = x
@@ -42,22 +42,22 @@ end
 const MAX_SYM_QUBITS = 10
 
 function Base.show(io::IO, r::SymRegOrAdjointSymReg{1})
-    if nqubits(r) < MAX_SYM_QUBITS
+    if nqudits(r) < MAX_SYM_QUBITS
         print_sym_state(io, r)
     else
         summary(io, r)
-        print(io, "\n    active qubits: ", nactive(r), "/", nqubits(r))
+        print(io, "\n    active qudits: ", nactive(r), "/", nqudits(r))
     end
 end
 
-Base.:(*)(x::SymReg{B,MT}, y::SymReg{B,MT}) where {B,MT} = SymReg{B,MT}(kron(state(x), state(y)))
-Base.:(^)(x::SymReg{B,MT}, n::Int) where {B,MT} = SymReg{B,MT}(kron(state(x) for _ in 1:n))
-
-Base.:(*)(x::AdjointSymReg{B,MT}, y::AdjointSymReg{B,MT}) where {B,MT} =
+Base.:(*)(x::SymReg{B,D,MT}, y::SymReg{B,D,MT}) where {B,D,MT} = SymReg{B,D,MT}(kron(state(x), state(y)))
+Base.:(*)(x::AdjointSymReg{B,D,MT}, y::AdjointSymReg{B,D,MT}) where {B,D,MT} =
     adjoint(parent(x) * parent(y))
-Base.:(^)(x::AdjointSymReg{B,MT}, n::Int) where {B,MT} = adjoint(parent(x)^n)
 
-SymEngine.expand(x::SymReg{B}) where {B} = ArrayReg{B}(expand.(state(x)))
+Base.:(^)(x::SymReg{B,D,MT}, n::Int) where {B,D,MT} = SymReg{B,D,MT}(kron(state(x) for _ in 1:n))
+Base.:(^)(x::AdjointSymReg{B,D,MT}, n::Int) where {B,D,MT} = adjoint(parent(x)^n)
+
+SymEngine.expand(x::SymReg{B,D}) where {B,D} = ArrayReg{B,D}(expand.(state(x)))
 
 """
     szero_state(n; nbatch=1)
@@ -67,7 +67,7 @@ Create a symbolic zero state, same as `ket"000"`, but allows you use an integer.
 szero_state(args...; kwargs...) = zero_state(Basic, args...; kwargs...)
 
 function YaoBase.partial_tr(r::SymReg{B}, locs) where {B}
-    orders = setdiff(1:nqubits(r), locs)
+    orders = setdiff(1:nqudits(r), locs)
     focus!(r, orders)
     state = sum(rank3(r); dims = 2)
     relax!(r, orders)

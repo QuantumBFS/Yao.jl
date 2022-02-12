@@ -2,12 +2,12 @@ using YaoBase
 using YaoBlocks
 using Test
 
-mutable struct EchoReg{B} <: AbstractRegister{B}
+mutable struct EchoReg{B} <: AbstractRegister{B,2}
     nactive::Int
     nqubits::Int
 end
 YaoBase.nactive(reg::EchoReg) = reg.nactive
-YaoBase.nqubits(reg::EchoReg) = reg.nqubits
+YaoBase.nqudits(reg::EchoReg) = reg.nqubits
 
 function YaoBase.instruct!(::EchoReg{B}, ::Val{G}, locs, args...) where {B,G}
     println("apply -> $G on $locs")

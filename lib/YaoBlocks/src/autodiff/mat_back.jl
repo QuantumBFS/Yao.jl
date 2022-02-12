@@ -3,12 +3,12 @@ export mat_back!, mat_back
 """
 The matrix gradient of a rotation block.
 """
-@inline function rotgrad(::Type{T}, rb::RotationGate{N}) where {N,T}
-    -sin(rb.theta / 2) / 2 * IMatrix{1 << N}() +
+@inline function rotgrad(::Type{T}, rb::RotationGate{N,D}) where {N,D,T}
+    -sin(rb.theta / 2) / 2 * IMatrix{2^N}() +
     im / 2 * cos(rb.theta / 2) * conj(mat(T, rb.block))
 end
 
-function mat_back!(::Type{T}, rb::RotationGate{N,RT}, adjy, collector) where {T,N,RT}
+function mat_back!(::Type{T}, rb::RotationGate{N,D,RT}, adjy, collector) where {T,N,D,RT}
     pushfirst!(collector, projection(rb.theta, sum(adjy .* rotgrad(T, rb))))
 end
 
@@ -44,7 +44,7 @@ function mat_back!(::Type{T}, rb::AbstractBlock, adjy, collector) where {T}
     throw(MethodError(mat_back!, (T, rb, adjy, collector)))
 end
 
-function mat_back!(::Type{T}, rb::PutBlock{N,C,RT}, adjy, collector) where {T,N,C,RT}
+function mat_back!(::Type{T}, rb::PutBlock{N,D,C,RT}, adjy, collector) where {T,N,D,C,RT}
     nparameters(rb) == 0 && return collector
     adjm = adjcunmat(adjy, N, (), (), mat(T, content(rb)), rb.locs)
     mat_back!(T, content(rb), adjm, collector)

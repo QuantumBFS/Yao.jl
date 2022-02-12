@@ -30,7 +30,9 @@ end
 
 @testset "test $T initialization methods" for T in [ComplexF64, ComplexF32, ComplexF16]
     @testset "test product state" begin
-        st = state(product_state(T, bit"100"; nbatch = 1))
+        reg = product_state(T, bit"100"; nbatch = 1)
+        st = state(reg)
+        @test nqudits(reg) == 3
         @test !(st isa Transpose)
         st2 = state(product_state(T, [0, 0, 1]; nbatch = 1))
         @test st2 ≈ st
@@ -200,4 +202,18 @@ end
 
 @testset "adapt" begin
     @test datatype(adapt(Array{ComplexF32}, zero_state(5))) == ComplexF32
+end
+
+@testset "von_neumann_entropy" begin
+    reg = (product_state(bit"00000") + product_state(bit"11111")) / sqrt(2)
+    @test von_neumann_entropy(reg, [2,3]) ≈ log(2)
+    @test mutual_information(reg, [2,3], [5]) ≈ log(2)
+end
+
+@testset "qudit" begin
+    reg = ArrayReg{1,3}(reshape(randn(9), :, 1))
+    @test nlevel(reg) == 3
+    @test nactive(reg) == 2
+    @test_throws MethodError nqubits(reg)
+    @test nqudits(reg) == 2
 end

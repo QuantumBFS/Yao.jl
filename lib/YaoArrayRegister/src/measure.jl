@@ -37,12 +37,12 @@ end
 function YaoBase.measure!(
     ::YaoBase.RemoveMeasured,
     ::ComputationalBasis,
-    reg::ArrayReg{B},
+    reg::ArrayReg{B,D},
     ::AllLocs;
     rng::AbstractRNG = Random.GLOBAL_RNG,
-) where {B}
+) where {B,D}
     state = reg |> rank3
-    nstate = similar(reg.state, 1 << nremain(reg), B)
+    nstate = similar(reg.state, D ^ nremain(reg), B)
     pl = dropdims(sum(state .|> abs2, dims = 2), dims = 2)
     res = Vector{BitStr64{nactive(reg)}}(undef, B)
     @inbounds for ib = 1:B

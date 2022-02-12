@@ -2,15 +2,15 @@ using YaoBase
 using Test
 
 # mocked registers
-struct TestRegister{B} <: AbstractRegister{B} end
+struct TestRegister{B} <: AbstractRegister{B,2} end
 
 TestRegister() = TestRegister{1}()
 
-YaoBase.nqubits(::TestRegister) = 8
+YaoBase.nqudits(::TestRegister) = 8
 YaoBase.nactive(::TestRegister) = 2
 
 export TestInterfaceRegister
-struct TestInterfaceRegister{B} <: AbstractRegister{B} end
+struct TestInterfaceRegister{B} <: AbstractRegister{B,2} end
 
 TestInterfaceRegister() = TestInterfaceRegister{1}()
 
@@ -34,11 +34,11 @@ end
 @testset "Test Printing" begin
     @test repr(TestRegister()) == """
     TestRegister{1}
-        active qubits: 2/8"""
+        active qudits: 2/8"""
 end
 
 @testset "Test adjoint printing" begin
     @test repr(adjoint(TestRegister())) == """
         adjoint(TestRegister{1})
-            active qubits: 2/8"""
+            active qudits: 2/8"""
 end

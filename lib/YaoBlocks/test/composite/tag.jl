@@ -1,10 +1,10 @@
 using Test, YaoBlocks, YaoArrayRegister
 using YaoBase, BitBasis
 
-struct MockedTag{BT,N} <: TagBlock{BT,N}
+struct MockedTag{BT,N,D} <: TagBlock{BT,N,D}
     content::BT
 
-    MockedTag(x::BT) where {N,BT<:AbstractBlock{N}} = new{BT,N}(x)
+    MockedTag(x::BT) where {N,D,BT<:AbstractBlock{N,D}} = new{BT,N,D}(x)
 end
 
 @test nqubits(MockedTag(X)) == nqubits(X)

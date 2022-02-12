@@ -2,7 +2,7 @@
 
 # TODO
 # to make a mat block differentiable
-#YaoBlocks.niparams(x::GeneralMatrixBlock{N,N}) where N = 1<<2N
+#YaoBlocks.niparams(x::GeneralMatrixBlock{N,N,D}) where {N,D} = D ^ {2N}
 #YaoBlocks.getiparams(x::GeneralMatrixBlock) where N = (vec(x.mat)...,)
 
 # to make a scale block differentiable

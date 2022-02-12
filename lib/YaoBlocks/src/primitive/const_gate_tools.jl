@@ -29,14 +29,24 @@ You can bind new element types by simply re-declare with a type annotation.
 @const_gate X::ComplexF32
 ```
 """
-macro const_gate(ex)
-    return _const_gate(__module__, __source__, ex)
+macro const_gate(ex, ex2=:(nlevel=2))
+    @match ex2 begin
+        :(nlevel = $nlevel) => begin
+            if !(nlevel isa Integer)
+                error("You should provide an integer as the value of `nlevel`! e.g. `nlevel=3`")
+            end
+            _const_gate(__module__, __source__, ex, nlevel)
+        end
+        _ => begin
+            error("The second argument should be e.g. `nlevel=3`")
+        end
+    end
 end
 
-function _const_gate(__module__::Module, __source__::LineNumberNode, ex)
+function _const_gate(__module__::Module, __source__::LineNumberNode, ex, nlevel)
     @match ex begin
-        :($name::$t = $expr) => define_gate(__module__, __source__, name, t, expr)
-        :($name = $expr) => define_gate(__module__, __source__, name, expr)
+        :($name::$t = $expr) => define_gate(__module__, __source__, name, t, expr, nlevel)
+        :($name = $expr) => define_gate(__module__, __source__, name, expr, nlevel)
         :($name::$t) => define_typed_binding(__module__, __source__, name, t)
         _ => throw(Meta.ParseError("use @const_gate <gate name> = <expr> or
             @const_gate <gate name>::<type> = <expr> to define new gate, or
@@ -64,30 +74,30 @@ constant_name(name) = gensym(Symbol("Const", "_", name))
 Return the expression to define a constant gate with given type (value of `expr`
 will be converted to given `type`).
 """
-function define_gate(__module__::Module, __source__::LineNumberNode, name, type, expr)
+function define_gate(__module__::Module, __source__::LineNumberNode, name, type, expr, nlevel)
     const_binding = constant_name(name)
     gt_name = gatetype_name(name)
 
     return quote
         $(define_binding(__module__, const_binding, type, expr))
-        $(define_struct(__module__, __source__, const_binding, name))
+        $(define_struct(__module__, __source__, const_binding, name, nlevel))
         $(define_methods(__module__, const_binding, name))
         $(define_properties(__module__, const_binding, name))
     end
 end
 
 """
-    define_gate(__module__::Module, __source__::LineNumberNode, name, expr)
+    define_gate(__module__::Module, __source__::LineNumberNode, name, expr, nlevel)
 
 Return the expression to define a constant gate, use the inferred type.
 """
-function define_gate(__module__::Module, __source__::LineNumberNode, name, expr)
+function define_gate(__module__::Module, __source__::LineNumberNode, name, expr, nlevel)
     const_binding = constant_name(name)
     gt_name = gatetype_name(name)
 
     return quote
         $(define_binding(__module__, const_binding, expr))
-        $(define_struct(__module__, __source__, const_binding, name))
+        $(define_struct(__module__, __source__, const_binding, name, nlevel))
         $(define_methods(__module__, const_binding, name))
         $(define_properties(__module__, const_binding, name))
     end
@@ -113,7 +123,7 @@ function define_typed_binding(__module__::Module, __source__::LineNumberNode, na
     end
 end
 
-function define_struct(__module__::Module, __source__::LineNumberNode, const_binding, name)
+function define_struct(__module__::Module, __source__::LineNumberNode, const_binding, name, nlevel)
     gt_name = gatetype_name(name)
     ex = Expr(:block)
 
@@ -123,7 +133,7 @@ function define_struct(__module__::Module, __source__::LineNumberNode, const_bin
     end
     # calculate new shape
     N = gensym(:N)
-    push!(ex.args, :(@eval $__module__ $N = $log2i(size($(const_binding), 1))))
+    push!(ex.args, :(@eval $__module__ $N = $logdi(size($(const_binding), 1), $nlevel)))
 
     # we allow overwrite in order to support the following syntax
     # @const_gate X = BLABLA
@@ -133,13 +143,13 @@ function define_struct(__module__::Module, __source__::LineNumberNode, const_bin
         push!(ex.args, :(@warn $msg))
         push!(
             ex.args,
-            :(@eval $__module__ @assert $N == $log2i(size(mat($name), 1)) "new constant does not have the same size with previous definitions"),
+            :(@eval $__module__ @assert $N == $logdi(size(mat($name), 1), $nlevel) "new constant does not have the same size with previous definitions"),
         )
     else
         push!(
             ex.args,
             :(@eval $__module__ Base.@__doc__ struct $gt_name <:
-                                                     YaoBlocks.ConstGate.ConstantGate{$N} end),
+                                                     YaoBlocks.ConstGate.ConstantGate{$N,$nlevel} end),
         )
     end
     push!(ex.args, :(@eval $__module__ Base.@__doc__ const $(name) = $(gt_name)()))

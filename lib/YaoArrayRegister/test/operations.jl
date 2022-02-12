@@ -4,7 +4,7 @@ using YaoArrayRegister, Random, LinearAlgebra, SparseArrays, BitBasis
 
 @testset "broadcast register" begin
     reg = rand_state(5; nbatch = 3)
-    @test typeof.(reg)[1] <: ArrayReg{<:Any,<:Any,<:SubArray}
+    @test typeof.(reg)[1] <: ArrayReg{1,2,ComplexF64,<:SubArray}
     @test [reg...] |> length == 3
     @test [rand_state(3)...] |> length == 1
 end

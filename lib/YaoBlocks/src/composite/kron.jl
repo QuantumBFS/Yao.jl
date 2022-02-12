@@ -5,38 +5,39 @@ export KronBlock, kron
 const KronLocT = Union{Int,UnitRange{Int}}
 
 """
-    KronBlock{N, T, MT<:AbstractBlock} <: CompositeBlock{N, T}
+    KronBlock{N,D,M,MT<:NTuple{M,Any}} <: CompositeBlock{N,D}
 
 composite block that combine blocks by kronecker product.
 """
-struct KronBlock{N,M,MT<:NTuple{M,Any}} <: CompositeBlock{N}
+struct KronBlock{N,D,M,MT<:NTuple{M,Any}} <: CompositeBlock{N,D}
     locs::NTuple{M,UnitRange{Int}}
     blocks::MT
 
-    function KronBlock{N,M,MT}(
+    function KronBlock{N,D,M,MT}(
         locs::NTuple{M,UnitRange{Int}},
         blocks::MT,
-    ) where {N,M,MT<:NTuple{M,AbstractBlock}}
+    ) where {N,D,M,MT<:NTuple{M,AbstractBlock{N0,D} where N0}}
         perm = TupleTools.sortperm(locs, by = first)
         locs = TupleTools.permute(locs, perm)
         blocks = TupleTools.permute(blocks, perm)
         @assert_locs_safe N locs
 
         for (each, b) in zip(locs, blocks)
-            length(each) != nqubits(b) && throw(
+            length(each) != nqudits(b) && throw(
                 LocationConflictError("locs $locs is inconsistent with target block $b"),
             )
         end
-        return new{N,M,typeof(blocks)}(locs, blocks)
+        return new{N,D,M,typeof(blocks)}(locs, blocks)
     end
 end
 
+KronBlock{N}(::Tuple{}, ::Tuple{}; nlevel=2) where N = KronBlock{N,nlevel,0,Tuple{}}((), ())
 KronBlock{N}(
     locs::NTuple{M,UnitRange{Int}},
     blocks::MT,
-) where {N,M,MT<:NTuple{M,AbstractBlock}} = KronBlock{N,M,MT}(locs, blocks)
+) where {N,D,M,MT<:NTuple{M,AbstractBlock{N0,D} where N0}} = KronBlock{N,D,M,MT}(locs, blocks)
 
-function KronBlock{N}(itr::Pair{<:Any,<:AbstractBlock}...) where {N}
+function KronBlock{N}(itr::Pair{<:Any,<:AbstractBlock{M,D} where M}...) where {N,D}
     locs = map(itr) do p
         _render_kronloc(first(p))
     end
@@ -47,8 +48,8 @@ function KronBlock(itr::AbstractBlock...)
     locs = UnitRange{Int}[]
     count = 0
     for each in itr
-        count += nqubits(each)
-        push!(locs, count-nqubits(each)+1:count)
+        count += nqudits(each)
+        push!(locs, count-nqudits(each)+1:count)
     end
     return KronBlock{count}((locs...,), itr)
 end
@@ -67,11 +68,10 @@ and a `Y` gate on the `3`rd qubit.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> kron(4, 1=>X, 3=>Y)
-nqubits: 4
+nqudits: 4
 kron
 ├─ 1=>X
 └─ 3=>Y
-
 ```
 """
 Base.kron(total::Int, blocks::Pair{<:Any,<:AbstractBlock}...) = KronBlock{total}(blocks...)
@@ -90,20 +90,19 @@ You can use kronecker product to composite small blocks to a large blocks.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> kron(X, Y, Z, Z)
-nqubits: 4
+nqudits: 4
 kron
 ├─ 1=>X
 ├─ 2=>Y
 ├─ 3=>Z
 └─ 4=>Z
-
 ```
 """
 Base.kron(blocks::AbstractBlock...) = KronBlock(blocks...)
 Base.kron(fs::Union{Function,AbstractBlock}...) = @λ(n -> kron(n, fs...))
 
 function Base.kron(total::Int, blocks::AbstractBlock...)
-    sum(nqubits, blocks) == total || error("total number of qubits mismatch")
+    sum(nqudits, blocks) == total || error("total number of qubits mismatch")
     return kron(blocks...)
 end
 
@@ -131,16 +130,16 @@ If you don't know the number of qubit yet, or you are just too lazy, it is fine.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> kron(put(1=>X) for _ in 1:2)
-(n -> kron(n, (n  ->  put(n, 1 => X)), (n  ->  put(n, 1 => X))))
+(n -> kron(n, ((n  ->  put(n, 1 => X)), (n  ->  put(n, 1 => X)))...))
 
 julia> kron(X for _ in 1:2)
-nqubits: 2
+nqudits: 2
 kron
 ├─ 1=>X
 └─ 2=>X
 
 julia> kron(1=>X, 3=>Y)
-(n -> kron(n, 1 => X, 3 => Y))
+(n -> kron(n, (1 => X, 3 => Y)...))
 ```
 """
 Base.kron(blocks::Pair{<:Any,<:AbstractBlock}...) = @λ(n -> kron(n, blocks...))
@@ -152,15 +151,15 @@ chsubblocks(pb::KronBlock{N}, it) where {N} = KronBlock{N}(pb.locs, (it...,))
 cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
 color(::Type{T}) where {T<:KronBlock} = :cyan
 
-function mat(::Type{T}, k::KronBlock{N,M}) where {T,N,M}
-    M == 0 && return IMatrix{1 << N,T}()
+function mat(::Type{T}, k::KronBlock{N,D,M}) where {T,N,D,M}
+    M == 0 && return IMatrix{D^N,T}()
     ntrail = N - last(last(k.locs))  # number of trailing bits
     num_bit_list = map(i -> first(k.locs[i]) - (i > 1 ? last(k.locs[i-1]) : 0) - 1, 1:M)
     return reduce(
         Iterators.reverse(zip(subblocks(k), num_bit_list)),
-        init = IMatrix{1 << ntrail,T}(),
+        init = IMatrix{D^ntrail,T}(),
     ) do x, y
-        kron(x, mat(T, y[1]), IMatrix(1 << y[2]))
+        kron(x, mat(T, y[1]), IMatrix(D^y[2]))
     end
 end
 

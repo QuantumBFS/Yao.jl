@@ -180,13 +180,13 @@ end
 
 _totype(::Type{T}, x::AbstractArray{T}) where {T} = x
 _totype(::Type{T}, x::AbstractArray{T2}) where {T,T2} = convert.(T, x)
-rrule(::typeof(state), reg::ArrayReg{B,T}) where {B,T} =
+rrule(::typeof(state), reg::ArrayReg{B,D,T}) where {B,D,T} =
     state(reg), adjy -> (NoTangent(), ArrayReg(_totype(T, adjy)))
-rrule(::typeof(statevec), reg::ArrayReg{B,T}) where {B,T} =
+rrule(::typeof(statevec), reg::ArrayReg{B,D,T}) where {B,D,T} =
     statevec(reg), adjy -> (NoTangent(), ArrayReg(_totype(T, adjy)))
-rrule(::typeof(state), reg::AdjointArrayReg{B,T}) where {B,T} =
+rrule(::typeof(state), reg::AdjointArrayReg{B,D,T}) where {B,D,T} =
     state(reg), adjy -> (NoTangent(), ArrayReg(_totype(T, adjy)')')
-rrule(::typeof(statevec), reg::AdjointArrayReg{B,T}) where {B,T} =
+rrule(::typeof(statevec), reg::AdjointArrayReg{B,D,T}) where {B,D,T} =
     statevec(reg), adjy -> (NoTangent(), ArrayReg(_totype(T, adjy)')')
 rrule(::typeof(parent), reg::AdjointArrayReg) = parent(reg), adjy -> (NoTangent(), adjy')
 rrule(::typeof(Base.adjoint), reg::ArrayReg) =

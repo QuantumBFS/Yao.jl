@@ -10,46 +10,52 @@ using YaoBase, BitBasis, LuxurySparse, StaticArrays
 export instruct!
 
 function YaoBase.instruct!(
-    r::ArrayReg,
+    r::ArrayReg{B,D},
     op,
     locs::Tuple,
     control_locs::Tuple,
     control_bits::Tuple,
-)
-    instruct!(r.state, op, locs, control_locs, control_bits)
+) where {B,D}
+    instruct!(Val(D), r.state, op, locs, control_locs, control_bits)
+    return r
 end
 
 function YaoBase.instruct!(
-    r::ArrayReg{1},
+    r::ArrayReg{1,D},
     op,
     locs::Tuple,
     control_locs::Tuple,
     control_bits::Tuple,
-)
-    instruct!(vec(r.state), op, locs, control_locs, control_bits)
+) where {D}
+    instruct!(Val(D), vec(r.state), op, locs, control_locs, control_bits)
+    return r
 end
 
-function YaoBase.instruct!(r::ArrayReg, op, locs::Tuple)
-    instruct!(r.state, op, locs)
+function YaoBase.instruct!(r::ArrayReg{B,D}, op, locs::Tuple) where {B,D}
+    instruct!(Val(D), r.state, op, locs)
+    return r
 end
 
-function YaoBase.instruct!(r::ArrayReg{1}, op, locs::Tuple)
-    instruct!(vec(r.state), op, locs)
+function YaoBase.instruct!(r::ArrayReg{1,D}, op, locs::Tuple) where D
+    instruct!(Val(D), vec(r.state), op, locs)
+    return r
 end
 
 function YaoBase.instruct!(
-    r::ArrayReg,
+    r::ArrayReg{B,D},
     op,
     locs::Tuple,
     control_locs::Tuple,
     control_bits::Tuple,
     theta::Number,
-)
-    instruct!(r.state, op, locs, control_locs, control_bits, theta)
+) where {B,D}
+    instruct!(Val(D), r.state, op, locs, control_locs, control_bits, theta)
+    return r
 end
 
-function YaoBase.instruct!(r::ArrayReg, op, locs::Tuple, theta::Number)
-    instruct!(r.state, op, locs, theta)
+function YaoBase.instruct!(r::ArrayReg{B,D}, op, locs::Tuple, theta::Number) where {B,D}
+    instruct!(Val(D), r.state, op, locs, theta)
+    return r
 end
 
 """
@@ -79,17 +85,17 @@ end
 const Locations{T} = NTuple{N,T} where {N}
 const BitConfigs{T} = NTuple{N,T} where {N}
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T1},
     operator::AbstractMatrix{T2},
     locs::Tuple{},
     control_locs::NTuple{C,Int} = (),
     control_bits::NTuple{C,Int} = (),
-) where {T1,T2,M,C}
+) where {T1,T2,C}
     return state
 end
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T1},
     operator::AbstractMatrix{T2},
     locs::NTuple{M,Int},
@@ -98,7 +104,7 @@ function YaoBase.instruct!(
 ) where {T1,T2,M,C}
 
     @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
-    return instruct!(
+    return instruct!(Val(2),
         state,
         copyto!(similar(operator, T1), operator),
         locs,
@@ -124,7 +130,7 @@ function _prepare_instruct(
     return locs_raw, ic
 end
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     operator::AbstractMatrix{T},
     locs::Tuple{},
@@ -134,7 +140,7 @@ function YaoBase.instruct!(
     return state
 end
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     operator::AbstractMatrix{T},
     locs::NTuple{M,Int},
@@ -175,11 +181,11 @@ function _instruct!(
     return state
 end
 
-YaoBase.instruct!(state::AbstractVecOrMat, U::IMatrix, locs::NTuple{N,Int}) where {N} =
+YaoBase.instruct!(::Val{2}, state::AbstractVecOrMat, U::IMatrix, locs::NTuple{N,Int}) where {N} =
     state
-YaoBase.instruct!(state::AbstractVecOrMat, U::IMatrix, locs::Tuple{Int}) = state
+YaoBase.instruct!(::Val{2}, state::AbstractVecOrMat, U::IMatrix, locs::Tuple{Int}) = state
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     U1::AbstractMatrix{T},
     (loc,)::Tuple{Int},
@@ -198,12 +204,12 @@ end
     return state
 end
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     U1::SDPermMatrix{T},
     (loc,)::Tuple{Int},
 ) where {T}
-    U1.perm[1] == 1 && return instruct!(state, Diagonal(U1), (loc,))
+    U1.perm[1] == 1 && return instruct!(Val(2),state, Diagonal(U1), (loc,))
     mask = bmask(loc)
     b, c = U1.vals
     step = 1 << (loc - 1)
@@ -217,7 +223,7 @@ function YaoBase.instruct!(
     return state
 end
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     U1::SDDiagonal{T},
     (loc,)::Tuple{Int},
@@ -237,7 +243,7 @@ end
 
 # specialization
 # paulis
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat,
     ::Val{:X},
     locs::NTuple{N,Int},
@@ -254,16 +260,16 @@ function YaoBase.instruct!(
     return state
 end
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat,
     ::Val{:H},
     locs::NTuple{N,Int},
 ) where {N}
-    instruct!(state, YaoBase.Const.H, locs)
+    instruct!(Val(2), state, YaoBase.Const.H, locs)
 end
 
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     ::Val{:Y},
     locs::NTuple{N,Int},
@@ -285,7 +291,7 @@ function YaoBase.instruct!(
     return state
 end
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     ::Val{:Z},
     locs::NTuple{N,Int},
@@ -303,7 +309,7 @@ for (G, FACTOR) in zip(
     [:S, :T, :Sdag, :Tdag],
     [:(im), :($(exp(im * π / 4))), :(-im), :($(exp(-im * π / 4)))],
 )
-    @eval function YaoBase.instruct!(
+    @eval function YaoBase.instruct!(::Val{2},
         state::AbstractVecOrMat{T},
         ::Val{$(QuoteNode(G))},
         locs::NTuple{N,Int},
@@ -321,9 +327,9 @@ for (G, FACTOR) in zip(
     [:(-1), :(im), :($(exp(im * π / 4))), :(-im), :($(exp(-im * π / 4)))],
 )
     # no effect (to fix ambiguity)
-    @eval YaoBase.instruct!(st::AbstractVecOrMat, ::Val{$(QuoteNode(G))}, ::Tuple{}) = st
+    @eval YaoBase.instruct!(::Val{2}, st::AbstractVecOrMat, ::Val{$(QuoteNode(G))}, ::Tuple{}) = st
 
-    @eval function YaoBase.instruct!(
+    @eval function YaoBase.instruct!(::Val{2},
         state::AbstractVecOrMat{T},
         ::Val{$(QuoteNode(G))},
         (loc,)::Tuple{Int},
@@ -355,7 +361,7 @@ rot_mat(::Type{T}, ::Val{:PSWAP}, theta::Number) where {T} = rot_mat(T, Const.SW
 
 for G in [:Rx, :Ry, :Rz, :CPHASE]
     # forward single gates
-    @eval function YaoBase.instruct!(
+    @eval function YaoBase.instruct!(::Val{2},
         state::AbstractVecOrMat{T},
         g::Val{$(QuoteNode(G))},
         locs::NTuple{N3,Int},
@@ -364,12 +370,12 @@ for G in [:Rx, :Ry, :Rz, :CPHASE]
         theta::Number,
     ) where {T,N1,N2,N3}
         m = rot_mat(T, g, theta)
-        instruct!(state, m, locs, control_locs, control_bits)
+        instruct!(Val(2), state, m, locs, control_locs, control_bits)
         return state
     end
 end # for
 
-@inline function YaoBase.instruct!(
+@inline function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     ::Val{:Rx},
     (loc,)::Tuple{Int},
@@ -380,7 +386,7 @@ end # for
     return state
 end
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     ::Val{:Ry},
     (loc,)::Tuple{Int},
@@ -391,7 +397,7 @@ function YaoBase.instruct!(
     return state
 end
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     ::Val{:Rz},
     (loc,)::Tuple{Int},
@@ -402,29 +408,29 @@ function YaoBase.instruct!(
     return state
 end
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     ::Val{:CPHASE},
     locs::NTuple{N,Int},
     theta::Number,
 ) where {T,N}
     m = rot_mat(T, Val(:CPHASE), theta)
-    instruct!(state, m, locs)
+    instruct!(Val(2), state, m, locs)
     return state
 end
 
 
 # forward single gates
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     g::Val,
     locs::Union{Int,NTuple{N1,Int}},
     theta::Number,
 ) where {T,N1}
-    instruct!(state, g, locs, (), (), theta)
+    instruct!(Val(2), state, g, locs, (), (), theta)
 end
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     ::Val{:X},
     locs::NTuple{N1,Int},
@@ -444,7 +450,7 @@ function YaoBase.instruct!(
     return state
 end
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     ::Val{:Y},
     locs::NTuple{N1,Int},
@@ -468,7 +474,7 @@ for (G, FACTOR) in zip(
     [:Z, :S, :T, :Sdag, :Tdag],
     [:(-1), :(im), :($(exp(im * π / 4))), :(-im), :($(exp(-im * π / 4)))],
 )
-    @eval function YaoBase.instruct!(
+    @eval function YaoBase.instruct!(::Val{2},
         state::AbstractVecOrMat{T},
         ::Val{$(QuoteNode(G))},
         locs::NTuple{N1,Int},
@@ -489,26 +495,26 @@ end
 ## single controlled paulis
 for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     # forward single controlled
-    @eval YaoBase.instruct!(
+    @eval YaoBase.instruct!(::Val{2},
         state::AbstractVecOrMat,
         g::Val{$(QuoteNode(G))},
         locs::NTuple{N,Int},
         control_locs::Tuple{Int},
         control_bits::Tuple{Int},
-    ) where {N} = instruct!(state, g, locs, control_locs..., control_bits...)
+    ) where {N} = instruct!(Val(2), state, g, locs, control_locs..., control_bits...)
 
     # forward single location
-    @eval YaoBase.instruct!(
+    @eval YaoBase.instruct!(::Val{2},
         state::AbstractVecOrMat,
         g::Val{$(QuoteNode(G))},
         locs::Tuple{Int},
         control_locs::Int,
         control_bits::Int,
-    ) where {N} = instruct!(state, g, locs..., control_locs, control_bits)
+    ) where {N} = instruct!(Val(2), state, g, locs..., control_locs, control_bits)
 
 end
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     ::Val{:X},
     loc::Int,
@@ -533,7 +539,7 @@ function YaoBase.instruct!(
     return state
 end
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     ::Val{:Y},
     loc::Int,
@@ -568,7 +574,7 @@ for (G, FACTOR) in zip(
     [:Z, :S, :T, :Sdag, :Tdag],
     [:(-1), :(im), :($(exp(im * π / 4))), :(-im), :($(exp(-im * π / 4)))],
 )
-    @eval function YaoBase.instruct!(
+    @eval function YaoBase.instruct!(::Val{2},
         state::AbstractVecOrMat{T},
         ::Val{$(QuoteNode(G))},
         loc::Int,
@@ -592,7 +598,7 @@ for (G, FACTOR) in zip(
 end
 
 # 2-qubit gates
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     ::Val{:SWAP},
     locs::Tuple{Int,Int},
@@ -611,7 +617,7 @@ function YaoBase.instruct!(
     return state
 end
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     ::Val{:PSWAP},
     locs::Tuple{Int,Int},
@@ -638,7 +644,7 @@ function YaoBase.instruct!(
     return state
 end
 
-function YaoBase.instruct!(
+function YaoBase.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     ::Val{:PSWAP},
     locs::Tuple{Int,Int},
