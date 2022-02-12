@@ -17,7 +17,7 @@ end
 
 YaoBase.measure(
     ::ComputationalBasis,
-    reg::ArrayReg{1},
+    reg::ArrayReg,
     ::AllLocs;
     nshots::Int = 1,
     rng::AbstractRNG = Random.GLOBAL_RNG,
@@ -25,11 +25,11 @@ YaoBase.measure(
 
 function YaoBase.measure(
     ::ComputationalBasis,
-    reg::ArrayReg{B},
+    reg::BatchedArrayReg,
     ::AllLocs;
     nshots::Int = 1,
     rng::AbstractRNG = Random.GLOBAL_RNG,
-) where {B}
+)
     pl = dropdims(sum(reg |> rank3 .|> abs2, dims = 2), dims = 2)
     return _measure(rng, pl, nshots)
 end
@@ -37,11 +37,12 @@ end
 function YaoBase.measure!(
     ::YaoBase.RemoveMeasured,
     ::ComputationalBasis,
-    reg::ArrayReg{B,D},
+    reg::AbstractArrayReg{D},
     ::AllLocs;
     rng::AbstractRNG = Random.GLOBAL_RNG,
-) where {B,D}
+) where {D}
     state = reg |> rank3
+    B = size(state, 3)
     nstate = similar(reg.state, D ^ nremain(reg), B)
     pl = dropdims(sum(state .|> abs2, dims = 2), dims = 2)
     res = Vector{BitStr64{nactive(reg)}}(undef, B)
@@ -52,17 +53,18 @@ function YaoBase.measure!(
         res[ib] = ires
     end
     reg.state = reshape(nstate, 1, :)
-    return B == 1 ? res[] : res
+    return reg isa ArrayReg ? res[] : res
 end
 
 function YaoBase.measure!(
     ::YaoBase.NoPostProcess,
     ::ComputationalBasis,
-    reg::ArrayReg{B},
+    reg::AbstractArrayReg,
     ::AllLocs;
     rng::AbstractRNG = Random.GLOBAL_RNG,
-) where {B}
+)
     state = reg |> rank3
+    M, N, B = size(state)
     nstate = zero(state)
     res = measure!(RemoveMeasured(), reg; rng = rng)
     _nstate = reshape(reg.state, :, B)
@@ -70,19 +72,19 @@ function YaoBase.measure!(
     for ib = 1:B
         @inbounds nstate[indices[ib], :, ib] .= view(_nstate, :, ib)
     end
-    reg.state = reshape(nstate, size(state, 1), :)
+    reg.state = reshape(nstate, M, :)
     return res
 end
 
 function YaoBase.measure!(
     rst::YaoBase.ResetTo,
     ::ComputationalBasis,
-    reg::ArrayReg{B},
+    reg::AbstractArrayReg,
     ::AllLocs;
     rng::AbstractRNG = Random.GLOBAL_RNG,
-) where {B}
+)
     state = rank3(reg)
-    M, N, B1 = size(state)
+    M, N, B = size(state)
     nstate = zero(state)
     res = measure!(YaoBase.RemoveMeasured(), reg; rng = rng)
     nstate[Int(rst.x)+1, :, :] = reshape(reg.state, :, B)
@@ -91,13 +93,13 @@ function YaoBase.measure!(
 end
 
 import YaoBase: select, select!
-select(r::ArrayReg{B}, bits::AbstractVector{T}) where {B,T<:Integer} =
-    ArrayReg{B}(r.state[Int64.(bits).+1, :])
-select(r::ArrayReg{B}, bit::Integer) where {B} = select(r, [bit])
+select(r::AbstractArrayReg, bits::AbstractVector{T}) where {T<:Integer} =
+    arrayreg(r.state[Int64.(bits).+1, :]; nbatch=nbatch(r), nlevel=nlevel(r))
+select(r::AbstractArrayReg, bit::Integer) = select(r, [bit])
 
-function select!(r::ArrayReg, bits::AbstractVector{T}) where {T<:Integer}
+function select!(r::AbstractArrayReg, bits::AbstractVector{T}) where {T<:Integer}
     r.state = r.state[Int64.(bits).+1, :]
     return r
 end
 
-select!(r::ArrayReg, bit::Integer) = select!(r, [bit])
+select!(r::AbstractArrayReg, bit::Integer) = select!(r, [bit])

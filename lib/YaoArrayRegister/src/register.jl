@@ -1,29 +1,21 @@
 import BitBasis: BitStr, BitStr64
 
+abstract type AbstractArrayReg{D,T,AT} <: AbstractRegister{D} end
+
+struct NoBatch end
+_asint(x::Int) = x
+_asint(::NoBatch) = 1
+
+
 """
-    ArrayReg{B, D, T, MT <: AbstractMatrix{T}} <: AbstractRegister{B,D}
+    ArrayReg{D,T,MT<:AbstractMatrix{T}} <: AbstractArrayRegister{D}
+    ArrayReg{D}(raw)
+    ArrayReg(raw::AbstractVecOrMat; nlevel=2)
+    ArrayReg(r::ArrayReg)
 
 Simulated full amplitude register type, it uses an array to represent
-corresponding one or a batch of quantum states. `B` is the batch size, `T`
+corresponding one or a batch of quantum states. `T`
 is the numerical type for each amplitude, it is `ComplexF64` by default.
-"""
-mutable struct ArrayReg{B,D,T,MT<:AbstractMatrix{T}} <: AbstractRegister{B,D}
-    state::MT
-end
-
-Adapt.@adapt_structure ArrayReg
-
-const AdjointArrayReg{B,D,T,MT} = AdjointRegister{B,D,ArrayReg{B,D,T,MT}}
-const ArrayRegOrAdjointArrayReg{B,D,T,MT} =
-    Union{ArrayReg{B,D,T,MT},AdjointRegister{B,D,ArrayReg{B,D,T,MT}}}
-
-"""
-    ArrayReg{B}(raw; nlevel=2)
-    ArrayReg{B,D}(raw)
-    ArrayReg(raw::AbstractVecOrMat)
-
-Construct an array register from a raw array. The size of batch should be declared
-explicitly. The batch size will be `size(raw, 2)` by default.
 
 !!! warning
 
@@ -31,19 +23,112 @@ explicitly. The batch size will be `size(raw, 2)` by default.
     normalized quantum state remember to use `normalize!(register)` on the register or
     normalize the input raw array with `normalize` or [`batched_normalize!`](@ref).
 """
-ArrayReg{B}(raw::AbstractMatrix; nlevel=2) where B = ArrayReg{B,nlevel}(raw)
-function ArrayReg{B,D}(raw::MT) where {B,D,T,MT<:AbstractMatrix{T}}
+mutable struct ArrayReg{D,T,MT<:AbstractMatrix{T}} <: AbstractArrayReg{D,T,MT}
+    state::MT
+    function ArrayReg{D,T,MT}(state::MT) where {D,T, MT<:AbstractMatrix{T}}
+        _check_reg_input(state, D, 1)
+        return new{D,T,MT}(state)
+    end
+end
+
+ArrayReg(raw; nlevel=2) = ArrayReg{nlevel}(raw)
+ArrayReg{D}(raw::AbstractVector) where D = ArrayReg{D}(reshape(raw, :, 1))
+function ArrayReg{D}(raw::MT) where {D,T,MT<:AbstractMatrix{T}}
+    return ArrayReg{D,T,MT}(raw)
+end
+
+ArrayReg(r::ArrayReg{D}) where {D} = ArrayReg{D}(copy(r.state))
+ArrayReg(r::ArrayReg{D,T,<:Transpose}) where {D,T} =
+        ArrayReg{D}(Transpose(copy(r.state.parent)))
+
+Base.copy(r::ArrayReg) = ArrayReg(r)
+Base.similar(r::ArrayReg{D}) where D = ArrayReg{D}(similar(state(r)))
+
+"""
+    BatchedArrayReg{D,T,MT<:AbstractMatrix{T}} <: AbstractArrayReg{D}
+    BatchedArrayReg(raw, nbatch; nlevel=2)
+    BatchedArrayReg{D}(raw, nbatch)
+
+Simulated batched full amplitude register type, it uses an array to represent
+corresponding one or a batch of quantum states. `T`
+is the numerical type for each amplitude, it is `ComplexF64` by default.
+
+!!! warning
+
+    `BatchedArrayReg` constructor will not normalize the quantum state. If you need a
+    normalized quantum state remember to use `normalize!(register)` on the register or
+    normalize the input raw array with `normalize` or [`batched_normalize!`](@ref).
+"""
+mutable struct BatchedArrayReg{D,T,MT<:AbstractMatrix{T}} <: AbstractArrayReg{D,T,MT}
+    state::MT
+    nbatch::Int
+    function BatchedArrayReg{D,T,MT}(state::MT, nbatch::Int) where {D,T, MT<:AbstractMatrix{T}}
+        _check_reg_input(state, D, nbatch)
+        return new{D,T,MT}(state, nbatch)
+    end
+end
+BatchedArrayReg(raw::AbstractMatrix, nbatch::Int=size(raw, 2); nlevel=2) = BatchedArrayReg{nlevel}(raw, nbatch)
+function BatchedArrayReg{D}(raw::MT, nbatch::Int) where {D,T,MT<:AbstractMatrix{T}}
+    return BatchedArrayReg{D,T,MT}(raw, nbatch)
+end
+
+BatchedArrayReg(r::BatchedArrayReg{D}) where {D} = BatchedArrayReg{D}(copy(r.state), r.nbatch)
+BatchedArrayReg(r::BatchedArrayReg{D,T,<:Transpose}) where {D,T} =
+        BatchedArrayReg{D}(Transpose(copy(r.state.parent)), r.nbatch)
+
+Base.copy(r::BatchedArrayReg) = BatchedArrayReg(r)
+Base.similar(r::BatchedArrayReg{D}) where D = BatchedArrayReg{D}(similar(state(r)), r.nbatch)
+
+# convert
+function ArrayReg(r::BatchedArrayReg{D}) where D
+    if nbatch(r) != 1
+        error("can not convert a `BatchedArrayReg` with `nbatch != 1` to a `ArrayReg`")
+    else
+        return ArrayReg{D}(r.state)
+    end
+end
+BatchedArrayReg(r::ArrayReg{D}) where D = BatchedArrayReg{D}(r.state, 1)
+
+function _check_reg_input(raw::AbstractMatrix{T}, D::Integer, B::Integer) where T
+    T <: Complex || @warn "Input matrix element type is not `Complex`, got `$(eltype(raw))`"
+    if D <= 0
+        error("invalid number of level: $D")
+    end
+    if B < 0
+        error("invalid batch size: $B")
+    end
     ispow(size(raw, 1), D) ||
         throw(DimensionMismatch("Expect first dimension size to be power of $D"))
     if !(ispow(size(raw, 2) ÷ B, D) && size(raw, 2) % B == 0)
         throw(
             DimensionMismatch(
-                "Expect second dimension size to be an integral multiple of batch size $B",
+                "Expect second dimension size to be an integer multiple of batch size $B",
             ),
         )
     end
-    return ArrayReg{B,D,T,MT}(raw)
 end
+
+"""
+    arrayreg(state; nbatch::Union{Integer,NoBatch}=NoBatch(), nlevel::Integer=2)
+
+Create an array register, if nbatch is a integer, it will return a `BatchedArrayReg`.
+"""
+function arrayreg(state; nbatch::Union{Integer,NoBatch}=NoBatch(), nlevel::Integer=2)
+    if nbatch isa NoBatch
+        return ArrayReg{nlevel}(state)
+    else
+        return BatchedArrayReg{nlevel}(state, nbatch)
+    end
+end
+
+Adapt.@adapt_structure ArrayReg
+Adapt.@adapt_structure BatchedArrayReg
+
+const AdjointArrayReg{D,T,MT} = AdjointRegister{D,<:AbstractArrayReg{D,T,MT}}
+#const AdjointArrayReg{D,T,MT} = AdjointRegister{D,ArrayReg{D,T,MT}}
+#const BatchedAdjointArrayReg{D,T,MT} = AdjointRegister{D,BatchedArrayReg{D,T,MT}}
+const ArrayRegOrAdjointArrayReg{D,T,MT} =
+    Union{AbstractArrayReg{D,T,MT},AdjointRegister{D,AbstractArrayReg{D,T,MT}}}
 
 """
     datatype(register) -> Int
@@ -56,63 +141,35 @@ Returns the numerical data type used by register.
     is not exactly the same with `AbstractArray`, it is an iterator of several
     registers.
 """
-datatype(r::ArrayReg{B,D,T}) where {B,D,T} = T
+datatype(r::AbstractArrayReg{D,T}) where {D,T} = T
 
-function _warn_type(raw::AbstractArray{T}) where {T}
-    T <: Complex || @warn "Input type of `ArrayReg` is not Complex, got $(eltype(raw))"
-end
-
-ArrayReg(raw::AbstractVector) = (_warn_type(raw); ArrayReg(reshape(raw, :, 1)))
-ArrayReg(raw::AbstractMatrix) = (_warn_type(raw); ArrayReg{size(raw, 2)}(raw))
-ArrayReg(raw::AbstractArray{<:Any,3}) =
-    (_warn_type(raw); ArrayReg{size(raw, 3)}(reshape(raw, size(raw, 1), :)))
-
-# bit literal
-# NOTE: batch size B and element type T are 1 and ComplexF64 by default
 """
-    ArrayReg([T=ComplexF64], bit_str)
-    ArrayReg{B}([T=ComplexF64], bit_str)
+    arrayreg([T=ComplexF64], bit_str; nbatch=NoBatch())
 
-Construct an array register from bit string literal. Batch size `B` is 1 by default.
+Construct an array register from bit string literal.
 For bit string literal please read [`@bit_str`](@ref).
 
 # Examples
 
 ```jldoctest; setup=:(using YaoArrayRegister)
-julia> ArrayReg(bit"1010")
+julia> arrayreg(bit"1010")
 ArrayReg{1, 2, ComplexF64, Array...}
     active qudits: 4/4
 
-julia> ArrayReg(ComplexF32, bit"1010")
+julia> arrayreg(ComplexF32, bit"1010")
 ArrayReg{1, 2, ComplexF32, Array...}
     active qudits: 4/4
 ```
 """
-ArrayReg(bitstr::BitStr) = ArrayReg(ComplexF64, bitstr)
-ArrayReg(::Type{T}, bitstr::BitStr) where {T} = ArrayReg{1}(T, bitstr)
-ArrayReg{B}(bitstr::BitStr) where {B} = ArrayReg{B}(ComplexF64, bitstr)
-ArrayReg{B}(::Type{T}, bitstr::BitStr) where {B,T} = ArrayReg{B}(onehot(T, bitstr, B))
+arrayreg(bitstr::BitStr; nbatch::Union{Int,NoBatch}=NoBatch()) = arrayreg(ComplexF64, bitstr; nbatch=nbatch)
+arrayreg(::Type{T}, bitstr::BitStr; nbatch::Union{Int,NoBatch}=NoBatch()) where {T} = arrayreg(onehot(T, bitstr, _asint(nbatch)); nbatch=nbatch, nlevel=2)
 
-
-"""
-    ArrayReg(r::ArrayReg)
-
-Initialize a new `ArrayReg` by an existing `ArrayReg`. This is equivalent
-to `copy`.
-"""
-ArrayReg(r::ArrayReg{B,D}) where {B,D} = ArrayReg{B,D}(copy(r.state))
-ArrayReg(r::ArrayReg{B,D,T,<:Transpose}) where {B,D,T} =
-    ArrayReg{B,D}(Transpose(copy(r.state.parent)))
-
-transpose_storage(reg::ArrayReg{B,D,T,<:Transpose}) where {B,D,T} = ArrayReg{B,D}(copy(reg.state))
-transpose_storage(reg::ArrayReg{B,D,T}) where {B,D,T} =
-    ArrayReg{B,D}(transpose(copy(transpose(reg.state))))
-
-Base.copy(r::ArrayReg) = ArrayReg(r)
-Base.similar(r::ArrayRegOrAdjointArrayReg{B,D}) where {B,D} = ArrayReg{B,D}(similar(state(r)))
+transpose_storage(reg::AbstractArrayReg{D,T,<:Transpose}) where {D,T} = arrayreg(copy(reg.state); nbatch=nbatch(reg), nlevel=D)
+transpose_storage(reg::AbstractArrayReg) =
+    arrayreg(transpose(copy(transpose(reg.state))); nbatch=nbatch(reg), nlevel=nlevel(reg))
 
 # NOTE: ket bra is not copyable
-function Base.copyto!(dst::ArrayReg, src::ArrayReg)
+function Base.copyto!(dst::AbstractArrayReg, src::AbstractArrayReg)
     copyto!(state(dst), state(src))
     return dst
 end
@@ -123,12 +180,12 @@ function Base.copyto!(dst::AdjointArrayReg, src::AdjointArrayReg)
 end
 
 # register interface
-YaoBase.nqudits(r::ArrayReg{B,2}) where {B} = log2i(length(r.state) ÷ B)
-YaoBase.nqudits(r::ArrayReg{B,D}) where {B,D} = logdi(length(r.state) ÷ B, D)
-YaoBase.nactive(r::ArrayReg{B,D}) where {B,D} = logdi(size(r.state, 1), D)
-YaoBase.viewbatch(r::ArrayReg, ind::Int) = @inbounds ArrayReg{1}(view(rank3(r), :, :, ind))
+YaoBase.nqudits(r::AbstractArrayReg{2}) = log2i(length(r.state) ÷ _asint(nbatch(r)))
+YaoBase.nqudits(r::AbstractArrayReg{D}) where {D} = logdi(length(r.state) ÷ _asint(nbatch(r)), D)
+YaoBase.nactive(r::AbstractArrayReg{D}) where {D} = logdi(size(r.state, 1), D)
+YaoBase.viewbatch(r::BatchedArrayReg{D}, ind::Int) where D = @inbounds ArrayReg{D}(view(rank3(r), :, :, ind))
 
-function YaoBase.addbits!(r::ArrayReg{B,D}, n::Int) where {B,D}
+function YaoBase.addbits!(r::AbstractArrayReg{D}, n::Int) where {D}
     raw = state(r)
     M, N = size(raw)
     r.state = similar(r.state, M * (D ^ n), N)
@@ -137,15 +194,15 @@ function YaoBase.addbits!(r::ArrayReg{B,D}, n::Int) where {B,D}
     return r
 end
 
-function YaoBase.insert_qudits!(reg::ArrayReg{B}, loc::Int; nqudits::Int = 1) where {B}
+function YaoBase.insert_qudits!(reg::AbstractArrayReg{D}, loc::Int; nqudits::Int = 1) where D
     na = nactive(reg)
     focus!(reg, 1:loc-1)
-    reg2 = join(zero_state(nqudits; nbatch = B), reg) |> relax! |> focus!((1:na+nqudits)...)
+    reg2 = join(zero_state(nqudits; nbatch = nbatch(reg), nlevel=D), reg) |> relax! |> focus!((1:na+nqudits)...)
     reg.state = reg2.state
     reg
 end
 
-function YaoBase.probs(r::ArrayReg{1})
+function YaoBase.probs(r::ArrayReg)
     if size(r.state, 2) == 1
         return vec(r.state .|> abs2)
     else
@@ -153,8 +210,8 @@ function YaoBase.probs(r::ArrayReg{1})
     end
 end
 
-function YaoBase.probs(r::ArrayReg{B}) where {B}
-    if size(r.state, 2) == B
+function YaoBase.probs(r::BatchedArrayReg)
+    if size(r.state, 2) == nbatch(r)
         return r.state .|> abs2
     else
         probs = r |> rank3 .|> abs2
@@ -162,14 +219,14 @@ function YaoBase.probs(r::ArrayReg{B}) where {B}
     end
 end
 
-function YaoBase.reorder!(r::ArrayReg, orders)
+function YaoBase.reorder!(r::AbstractArrayReg, orders)
     @inbounds for i = 1:size(r.state, 2)
         r.state[:, i] = reorder(r.state[:, i], orders)
     end
     return r
 end
 
-function YaoBase.collapseto!(r::ArrayReg, bit_config::Integer)
+function YaoBase.collapseto!(r::AbstractArrayReg, bit_config::Integer)
     st = normalize!(r.state[Int(bit_config)+1, :])
     fill!(r.state, 0)
     r.state[Int(bit_config)+1, :] .= st
@@ -177,7 +234,7 @@ function YaoBase.collapseto!(r::ArrayReg, bit_config::Integer)
 end
 
 """
-    fidelity(r1::ArrayReg, r2::ArrayReg)
+    fidelity(r1::AbstractArrayReg, r2::AbstractArrayReg)
 
 Calcuate the fidelity between `r1` and `r2`, if `r1` or `r2` is not pure state
 (`nactive(r) != nqudits(r)`), the fidelity is calcuated by purification. See also
@@ -191,9 +248,10 @@ For pair input `ψ=>circuit`, the returned gradient is a pair of `gψ=>gparams`,
 with `gψ` the gradient of input state and `gparams` the gradients of circuit parameters.
 For register input, the return value is a register.
 """
-function YaoBase.fidelity(r1::ArrayReg{B1}, r2::ArrayReg{B2}) where {B1,B2}
+function YaoBase.fidelity(r1::BatchedArrayReg{D}, r2::BatchedArrayReg{D}) where {D}
+    B1, B2 = nbatch(r1), nbatch(r2)
     B1 == B2 || throw(DimensionMismatch("Register batch not match!"))
-    B = B1
+    B = nbatch(r1)
 
     state1 = rank3(r1)
     state2 = rank3(r2)
@@ -203,10 +261,11 @@ function YaoBase.fidelity(r1::ArrayReg{B1}, r2::ArrayReg{B2}) where {B1,B2}
     else
         res = map(b -> purification_fidelity(state1[:, :, b], state2[:, :, b]), 1:B)
     end
-    return B == 1 ? res[] : res
+    return res
 end
 
-function YaoBase.fidelity(r1::ArrayReg{B}, r2::ArrayReg{1}) where {B}
+function YaoBase.fidelity(r1::BatchedArrayReg, r2::ArrayReg)
+    B = nbatch(r1)
     state1 = rank3(r1)
     state2 = rank3(r2)
     nqudits(r1) == nqudits(r2) || throw(DimensionMismatch("Register size not match!"))
@@ -215,12 +274,12 @@ function YaoBase.fidelity(r1::ArrayReg{B}, r2::ArrayReg{1}) where {B}
     else
         res = map(b -> purification_fidelity(state1[:, :, b], state2[:, :, 1]), 1:B)
     end
-    return B == 1 ? res[] : res
+    return res
 end
 
-YaoBase.fidelity(r1::ArrayReg{1}, r2::ArrayReg{B}) where {B} = YaoBase.fidelity(r2, r1)
+YaoBase.fidelity(r1::ArrayReg, r2::BatchedArrayReg) = YaoBase.fidelity(r2, r1)
 
-function YaoBase.fidelity(r1::ArrayReg{1}, r2::ArrayReg{1})
+function YaoBase.fidelity(r1::ArrayReg, r2::ArrayReg)
     state1 = state(r1)
     state2 = state(r2)
     nqudits(r1) == nqudits(r2) || throw(DimensionMismatch("Register size not match!"))
@@ -232,16 +291,16 @@ function YaoBase.fidelity(r1::ArrayReg{1}, r2::ArrayReg{1})
     end
 end
 
-YaoBase.tracedist(r1::ArrayReg{B}, r2::ArrayReg{B}) where {B} = tracedist(ρ(r1), ρ(r2))
+YaoBase.tracedist(r1::AbstractArrayReg, r2::AbstractArrayReg) = tracedist(ρ(r1), ρ(r2))
 
 
 # properties
 """
-    state(register::ArrayReg) -> raw array
+    state(register::AbstractArrayReg) -> raw array
 
 Returns the raw array storage of `register`. See also [`statevec`](@ref).
 """
-state(r::ArrayReg) = r.state
+state(r::AbstractArrayReg) = r.state
 state(r::AdjointArrayReg) = adjoint(state(parent(r)))
 
 """
@@ -255,13 +314,13 @@ Return a state matrix/vector by droping the last dimension of size 1. See also [
 statevec(r::ArrayRegOrAdjointArrayReg) = matvec(state(r))
 
 """
-    relaxedvec(r::ArrayReg) -> AbstractArray
+    relaxedvec(r::AbstractArrayReg) -> AbstractArray
 
-Return a matrix (vector) for B>1 (B=1) as a vector representation of state, with all qudits activated.
+Return a vector representation of state, with all qudits activated.
 See also [`state`](@ref), [`statevec`](@ref).
 """
-relaxedvec(r::ArrayReg{B}) where {B} = reshape(state(r), :, B)
-relaxedvec(r::ArrayReg{1}) = vec(state(r))
+relaxedvec(r::ArrayReg) = vec(state(r))
+relaxedvec(r::BatchedArrayReg) = reshape(state(r), :, nbatch(r))
 
 """
     hypercubic(r::ArrayReg) -> AbstractArray
@@ -279,8 +338,10 @@ Return the rank 3 tensor representation of state,
 the 3 dimensions are (activated space, remaining space, batch dimension).
 See also [`rank3`](@ref).
 """
-rank3(r::ArrayRegOrAdjointArrayReg{B}) where {B} =
-    reshape(state(r), size(state(r), 1), :, B)
+function rank3(r::ArrayRegOrAdjointArrayReg)
+    s = state(r)
+    reshape(s, size(s, 1), :, _asint(nbatch(r)))
+end
 
 """
     join(regs...)
@@ -288,16 +349,15 @@ rank3(r::ArrayRegOrAdjointArrayReg{B}) where {B} =
 concat a list of registers `regs` to a larger register, each register should
 have the same batch size. See also [`repeat`](@ref).
 """
-Base.join(rs::ArrayReg{B}...) where {B} = _join(join_datatype(rs...), rs...)
-Base.join(r::ArrayReg) = r
-
-function _join(::Type{T}, rs::ArrayReg{B}...) where {T,B}
-    state = batched_kron(rank3.(rs)...)
-    return ArrayReg{B}(reshape(state, size(state, 1), :))
+Base.join(rs::AbstractArrayReg...) = _join(join_datatype(rs...), rs...)
+Base.join(r::AbstractArrayReg) = r
+function _join(::Type{T}, rs0::AbstractArrayReg{D}, rs::AbstractArrayReg{D}...) where {T,D}
+    state = batched_kron(rank3(rs0), rank3.(rs)...)
+    return arrayreg(reshape(state, size(state, 1), :), nbatch=nbatch(rs[1]), nlevel=D)
 end
 
-join_datatype(r::ArrayReg{B,D,T}, rs::ArrayReg{B,D,T}...) where {B,D,T} = join_datatype(T, r, rs...)
-join_datatype(::Type{T}, r::ArrayReg{B,D,T1}, rs::ArrayReg{B}...) where {T,T1,B,D} =
+join_datatype(r::AbstractArrayReg{D,T}, rs::AbstractArrayReg{D,T}...) where {D,T} = join_datatype(T, r, rs...)
+join_datatype(::Type{T}, r::AbstractArrayReg{D,T1}, rs::AbstractArrayReg...) where {T,T1,D} =
     join_datatype(promote_type(T, T1), rs...)
 join_datatype(::Type{T}) where {T} = T
 
@@ -375,23 +435,24 @@ function product_state(
     ::Type{T},
     total::Int,
     bit_config::Integer;
-    nbatch::Int = 1,
+    nbatch::Union{Int,NoBatch} = NoBatch(),
+    nlevel::Int=2,
     no_transpose_storage::Bool = false,
 ) where {T}
-    if nbatch == 1 || no_transpose_storage
-        raw = onehot(T, total, bit_config, nbatch)
+    if nbatch isa NoBatch || no_transpose_storage
+        raw = onehot(T, total, bit_config, _asint(nbatch))
     else
-        raw = zeros(T, nbatch, 1 << total)
+        raw = zeros(T, _asint(nbatch), nlevel ^ total)
         raw[:, Int(bit_config)+1] .= 1
         raw = transpose(raw)
     end
-    return ArrayReg{nbatch}(raw)
+    return arrayreg(raw; nbatch=nbatch, nlevel=nlevel)
 end
 
 """
     zero_state([T=ComplexF64], n::Int; nbatch::Int=1)
 
-Create an [`ArrayReg`](@ref) with total number of bits `n`.
+Create an [`AbstractArrayReg`](@ref) with total number of bits `n`.
 See also [`product_state`](@ref), [`rand_state`](@ref), [`uniform_state`](@ref).
 
 # Examples
@@ -417,7 +478,7 @@ zero_state(::Type{T}, n::Int; kwargs...) where {T} = product_state(T, n, 0; kwar
 """
     rand_state([T=ComplexF64], n::Int; nbatch=1, no_transpose_storage=false)
 
-Create a random [`ArrayReg`](@ref) with total number of qudits `n`.
+Create a random [`AbstractArrayReg`](@ref) with total number of qudits `n`.
 
 # Examples
 
@@ -440,14 +501,14 @@ rand_state(n::Int; kwargs...) = rand_state(ComplexF64, n; kwargs...)
 function rand_state(
     ::Type{T},
     n::Int;
-    nbatch::Int = 1,
+    nbatch::Union{Int,NoBatch} = NoBatch(),
     no_transpose_storage::Bool = false,
     nlevel = 2,
 ) where {T}
     raw =
-        nbatch == 1 || no_transpose_storage ? randn(T, nlevel ^ n, nbatch) :
-        transpose(randn(T, nbatch, nlevel ^ n))
-    return normalize!(ArrayReg{nbatch, nlevel}(raw))
+        nbatch isa NoBatch || no_transpose_storage ? randn(T, nlevel ^ n, _asint(nbatch)) :
+        transpose(randn(T, _asint(nbatch), nlevel ^ n))
+    return normalize!(arrayreg(raw; nbatch=nbatch, nlevel=nlevel))
 end
 
 """
@@ -460,7 +521,7 @@ can also be created by applying [`H`](@ref) (Hadmard gate) on ``|00⋯00⟩`` st
 
 ```jldoctest; setup=:(using YaoArrayRegister)
 julia> uniform_state(4; nbatch=2)
-ArrayReg{2, 2, ComplexF64, Transpose...}
+BatchedArrayReg{2, 2, ComplexF64, Transpose...}
     active qudits: 4/4
 
 julia> uniform_state(ComplexF32, 4; nbatch=2)
@@ -469,35 +530,31 @@ ArrayReg{2, 2, ComplexF32, Transpose...}
 ```
 """
 uniform_state(n::Int; kwargs...) = uniform_state(ComplexF64, n; kwargs...)
-function uniform_state(
-    ::Type{T},
-    n::Int;
-    nbatch::Int = 1,
+
+function uniform_state(::Type{T}, n::Int;
+    nbatch::Union{Int,NoBatch} = NoBatch(),
     nlevel::Int = 2,
     no_transpose_storage::Bool = false,
 ) where {T}
-    raw =
-        nbatch == 1 || no_transpose_storage ? ones(T, nlevel ^ n, nbatch) :
-        transpose(ones(T, nbatch, nlevel ^ n))
-    normalize!(ArrayReg{nbatch, nlevel}(raw))
+    if (nbatch isa NoBatch) || no_transpose_storage
+        raw = ones(T, nlevel ^ n, _asint(nbatch))
+    else
+        raw = transpose(ones(T, _asint(nbatch), nlevel ^ n))
+    end
+    return normalize!(arrayreg(raw; nbatch=nbatch, nlevel=nlevel))
 end
 
 """
-    oneto(r::ArrayReg, n::Int=nqudits(r))
-
-Returns an `ArrayReg` with `1:n` qudits activated.
-"""
-oneto(r::ArrayReg{B,D}, n::Int = nqudits(r)) where {B,D} =
-    ArrayReg{B,D}(reshape(copy(r.state), D ^ n, :))
-oneto(r::ArrayReg{B,D,T,<:Transpose}, n::Int = nqudits(r)) where {B,D,T} =
-    transpose_storage(ArrayReg{B}(reshape(r.state, D ^ n, :)))
-
-"""
     oneto(n::Int) -> f(register)
+    oneto(r::AbstractArrayReg, n::Int=nqudits(r))
 
-Like `oneto(register, n)`, but the input `register` is delayed.
+Returns an register with `1:n` qudits activated.
 """
 oneto(n::Int) = r -> oneto(r, n)
+oneto(r::AbstractArrayReg{D}, n::Int = nqudits(r)) where {D} =
+    arrayreg(reshape(copy(r.state), D ^ n, :), nbatch=nbatch(r), nlevel=D)
+oneto(r::AbstractArrayReg{D,T,<:Transpose}, n::Int = nqudits(r)) where {D,T} =
+    transpose_storage(arrayreg(reshape(r.state, D ^ n, :); nbatch=nbatch(r), nlevel=D))
 
 """
     repeat(register, n)
@@ -508,37 +565,56 @@ batch dimension.
 # Example
 
 ```jldoctest; setup=:(using YaoArrayRegister)
-julia> repeat(ArrayReg{3}(bit"101"), 4)
-ArrayReg{12, 2, ComplexF64, Array...}
+julia> repeat(BatchedArrayReg(bit"101", 3), 4)
+BatchedArrayReg{12, 2, ComplexF64, Array...}
     active qudits: 3/3
 ```
 """
-Base.repeat(r::ArrayReg{B}, n::Int) where {B} =
-    ArrayReg{B * n}(hcat((state(r) for k = 1:n)...))
+Base.repeat(r::AbstractArrayReg{D}, n::Int) where D =
+    BatchedArrayReg{D}(hcat((state(r) for k = 1:n)...), n * _asint(nbatch(r)))
 
 # NOTE: overload this to make printing more compact
 #       but do not alter the way how type parameters print
-function Base.summary(io::IO, r::ArrayReg{B,D,T,MT}) where {B,D,T,MT}
-    print(io, "ArrayReg{$B, $D, $T, $(nameof(MT))...}")
+function Base.summary(io::IO, r::ArrayReg{D,T,MT}) where {D,T,MT}
+    print(io, "ArrayReg{$D, $T, $(nameof(MT))...}")
+end
+
+function Base.summary(io::IO, r::BatchedArrayReg{D,T,MT}) where {D,T,MT}
+    print(io, "BatchedArrayReg{$D, $T, $(nameof(MT))...} (nbatch = $(r.nbatch))")
 end
 
 """
-    mutual_information(reg::ArrayReg, part1, part2)
+    mutual_information(reg::AbstractArrayReg, part1, part2)
 
 Compute the mutual information between locations `part1` and locations `part2` in a quantum state `reg`.
 """
-function mutual_information(reg::ArrayReg, part1, part2)
+function mutual_information(reg::AbstractArrayReg, part1, part2)
     von_neumann_entropy(reg, part1) + von_neumann_entropy(reg, part2) - von_neumann_entropy(reg, part1 ∪ part2)
 end
 
 """
-    von_neumann_entropy(reg::AbstractRegister, part)
+    von_neumann_entropy(reg::AbstractArrayReg, part)
     von_neumann_entropy(ρ::DensityMatrix)
 
 The entanglement entropy between `part` and the rest part in quantum state `reg`.
 If the input is a density matrix, it returns the entropy of a mixed state.
 """
-function von_neumann_entropy(reg::AbstractRegister, part)
-    reg2 = focus!(copy(reg), part)
-    von_neumann_entropy(density_matrix(reg2))
+von_neumann_entropy(reg::BatchedArrayReg, part) = von_neumann_entropy.(density_matrix.(reg, Ref(part)))
+
+function Base.iterate(it::BatchedArrayReg, state = 1)
+    if state > it.nbatch
+        return nothing
+    else
+        return viewbatch(it, state), state + 1
+    end
 end
+
+Base.length(r::BatchedArrayReg) = r.nbatch
+
+"""
+    nbatch(register) -> Int
+
+Returns the number of batches.
+"""
+nbatch(r::BatchedArrayReg) = r.nbatch
+nbatch(r::ArrayReg) = NoBatch()

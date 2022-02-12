@@ -12,8 +12,11 @@ using BitBasis
 using LinearAlgebra
 
 export ArrayReg,
+    BatchedArrayReg,
     AdjointArrayReg,
     ArrayRegOrAdjointArrayReg,
+    NoBatch,
+    arrayreg,
     transpose_storage,
     datatype,
     # initialization

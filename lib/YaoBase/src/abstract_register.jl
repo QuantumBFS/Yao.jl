@@ -2,17 +2,13 @@ using BitBasis, LegibleLambdas
 
 export @λ, @lambda
 
-# same with nbatch
-Base.length(r::AbstractRegister{B}) where {B} = B
-
 addbits!(n::Int) = @λ(register -> addbits!(register, n))
 insert_qudits!(loc::Int; nqudits::Int = 1) =
     @λ(register -> insert_qudits!(register, loc; nqudits = n))
 
 nremain(r::AbstractRegister) = nqudits(r) - nactive(r)
-nbatch(r::AbstractRegister{B}) where {B} = B
-nlevel(r::AbstractRegister{B,D}) where {B,D} = D
-nqubits(r::AbstractRegister{B,2}) where {B} = nqudits(r)
+nlevel(r::AbstractRegister{D}) where {D} = D
+nqubits(r::AbstractRegister{2}) = nqudits(r)
 
 """
     focus!(locs...) -> f(register) -> register
@@ -119,14 +115,6 @@ partial_tr(locs) = @λ(register -> partial_tr(register, locs))
 Lazy version of [`select!`](@ref). See also [`select`](@ref).
 """
 select!(bits...) = @λ(register -> select!(register, bits...))
-
-function Base.iterate(it::AbstractRegister{B}, state = 1) where {B}
-    if state > B
-        return nothing
-    else
-        return viewbatch(it, state), state + 1
-    end
-end
 
 # fallback printing
 function Base.show(io::IO, reg::AbstractRegister)
