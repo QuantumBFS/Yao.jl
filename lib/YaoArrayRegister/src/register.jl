@@ -125,7 +125,7 @@ end
 # register interface
 YaoBase.nqudits(r::ArrayReg{B,2}) where {B} = log2i(length(r.state) ÷ B)
 YaoBase.nqudits(r::ArrayReg{B,D}) where {B,D} = logdi(length(r.state) ÷ B, D)
-YaoBase.nactive(r::ArrayReg) = log2dim1(r.state)
+YaoBase.nactive(r::ArrayReg{B,D}) where {B,D} = logdi(size(r.state, 1), D)
 YaoBase.viewbatch(r::ArrayReg, ind::Int) = @inbounds ArrayReg{1}(view(rank3(r), :, :, ind))
 
 function YaoBase.addbits!(r::ArrayReg{B,D}, n::Int) where {B,D}

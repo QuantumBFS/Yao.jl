@@ -68,15 +68,15 @@ function batch_normalize(s::AbstractMatrix, p::Real = 2)
 end
 
 """
-    hilbertkron(num_bit::Int, gates::Vector{AbstractMatrix}, locs::Vector{Int}) -> AbstractMatrix
+    hilbertkron(num_bit::Int, gates::Vector{AbstractMatrix}, locs::Vector{Int}; nlevel=2) -> AbstractMatrix
 
 Return general kronecher product form of gates in Hilbert space of `num_bit` qudits.
 
 * `gates` are a list of matrices.
 * `start_locs` should have the same length as `gates`, specifing the gates starting positions.
 """
-function hilbertkron(num_bit::Int, ops::Vector{<:AbstractMatrix}, start_locs::Vector{Int})
-    sizes = [log2dim1(op) for op in ops]
+function hilbertkron(num_bit::Int, ops::Vector{<:AbstractMatrix}, start_locs::Vector{Int}; nlevel=2)
+    sizes = [logdi(size(op, 1), nlevel) for op in ops]
     start_locs = num_bit .- start_locs .- sizes .+ 2
 
     order = sortperm(start_locs)
@@ -87,21 +87,22 @@ function hilbertkron(num_bit::Int, ops::Vector{<:AbstractMatrix}, start_locs::Ve
         diff(push!(sorted_start_locs, num_bit + 1)) .- sizes[order],
     )
 
-    _wrap_identity(sorted_ops, num_ids)
+    _wrap_identity(sorted_ops, num_ids, nlevel)
 end
 
 # kron, and wrap matrices with identities.
 function _wrap_identity(
     data_list::Vector{T},
     num_bit_list::Vector{Int},
+    nlevel
 ) where {T<:AbstractMatrix}
     length(num_bit_list) == length(data_list) + 1 || throw(ArgumentError())
     ⊗ = kron
     reduce(
         zip(data_list, num_bit_list[2:end]);
-        init = IMatrix(1 << num_bit_list[1]),
+        init = IMatrix(nlevel ^ num_bit_list[1]),
     ) do x, y
-        x ⊗ y[1] ⊗ IMatrix(1 << y[2])
+        x ⊗ y[1] ⊗ IMatrix(nlevel ^ y[2])
     end
 end
 
@@ -324,10 +325,10 @@ function rot_mat(::Type{T}, gen::AbstractMatrix, theta::Real) where {N,T}
     end
 end
 
-BitBasis.unsafe_reorder(A::IMatrix, orders::NTuple{N,<:Integer}) where {N} = A
+BitBasis.unsafe_reorder(A::IMatrix, orders::NTuple{N,<:Integer}; nlevel=2) where {N} = A
 
-function BitBasis.unsafe_reorder(A::PermMatrix, orders::NTuple{N,<:Integer}) where {N}
-    od = Vector{Int}(undef, 1 << length(orders))
+function BitBasis.unsafe_reorder(A::PermMatrix, orders::NTuple{N,<:Integer}; nlevel=2) where {N}
+    od = Vector{Int}(undef, nlevel ^ length(orders))
     for (i, b) in enumerate(ReorderedBasis(orders))
         @inbounds od[i] = 1 + b
     end

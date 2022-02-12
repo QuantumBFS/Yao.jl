@@ -102,7 +102,7 @@ chsubblocks(x::RepeatedBlock{N}, blk::AbstractBlock) where {N} =
 PropertyTrait(x::RepeatedBlock) = PreserveAll()
 
 mat(::Type{T}, rb::RepeatedBlock{N,D}) where {T,N,D} =
-    hilbertkron(N, fill(mat(T, rb.content), length(rb.locs)), [rb.locs...])
+    hilbertkron(N, fill(mat(T, rb.content), length(rb.locs)), [rb.locs...]; nlevel=D)
 mat(::Type{T}, rb::RepeatedBlock{N,D,0,GT}) where {T,N,D,GT} = IMatrix{D^N,T}()
 
 function _apply!(r::AbstractRegister, rp::RepeatedBlock)
