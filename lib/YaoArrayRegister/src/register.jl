@@ -111,7 +111,7 @@ function _check_reg_input(raw::AbstractMatrix{T}, D::Integer, B::Integer) where 
     end
 end
 
-function _warn_type(raw::T) where T
+function _warn_type(raw::AbstractMatrix{T}) where T
     T <: Complex || @warn "Input matrix element type is not `Complex`, got `$(eltype(raw))`"
 end
 
