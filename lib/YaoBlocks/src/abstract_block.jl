@@ -17,7 +17,7 @@ end
 _apply_fallback!(r::AbstractRegister, b::AbstractBlock) =
     throw(NotImplementedError(:_apply_fallback!, (r, b)))
 
-function _apply_fallback!(r::ArrayReg{B,D,T}, b::AbstractBlock) where {B,D,T}
+function _apply_fallback!(r::AbstractArrayReg{D,T}, b::AbstractBlock) where {D,T}
     r.state .= mat(T, b) * r.state
     return r
 end
@@ -98,7 +98,7 @@ Returns the matrix form of given block.
 mat(x::AbstractBlock) = mat(promote_type(ComplexF64, parameters_eltype(x)), x)
 
 mat_matchreg(reg::AbstractRegister, x::AbstractBlock) = mat(x)
-mat_matchreg(reg::ArrayReg{B,D,T}, x::AbstractBlock) where {B,D,T} = mat(T,x)
+mat_matchreg(reg::AbstractArrayReg{D,T}, x::AbstractBlock) where {D,T} = mat(T,x)
 
 Base.Matrix{T}(x::AbstractBlock) where {T} = Matrix(mat(T, x))
 

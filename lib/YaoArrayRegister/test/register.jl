@@ -15,6 +15,15 @@ using Adapt
 
     @test state(arrayreg(bit"101")) == reshape(onehot(bit"101"), :, 1)
     @test datatype(arrayreg(ComplexF32, bit"101")) == ComplexF32
+
+    st = rand(ComplexF64, 4, 8)
+    reg= ArrayReg{2}(st)
+    @test similar(reg) isa ArrayReg
+    @test nactive(similar(reg)) == 2
+    m = randn(ComplexF64, 8, 8)
+    @test similar(reg, m).state == m
+    @test viewbatch(reg, 1) == reg
+    @test_throws ErrorException viewbatch(reg, 2)
 end
 
 @testset "test BatchedArrayReg constructors" begin
@@ -40,6 +49,14 @@ end
     r2 = ArrayReg(reg)
     @test r2 isa ArrayReg
     @test BatchedArrayReg(r2) == reg
+
+    st = rand(ComplexF64, 4, 8)
+    reg= BatchedArrayReg{2}(st, 4)
+    @test similar(reg) isa BatchedArrayReg
+    @test nactive(similar(reg)) == 2
+    @test nqubits(similar(reg)) == 3
+    m = randn(ComplexF64, 8, 8)
+    @test similar(reg, m).state == m
 end
 
 @testset "test $T initialization methods" for T in [ComplexF64, ComplexF32, ComplexF16]

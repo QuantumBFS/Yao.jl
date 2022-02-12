@@ -39,11 +39,11 @@ end
 
     clear!(g)
 
-    @test state(apply!(ArrayReg(bit"1"), g)) ≈ state(ArrayReg(bit"0"))
+    @test state(apply!(arrayreg(bit"1"), g)) ≈ state(arrayreg(bit"0"))
     @test pull(g) ≈ mat(X)
 
     clear!(g)
-    @test state(YaoBlocks._apply!(ArrayReg(bit"1"), g, 2)) ≈ state(ArrayReg(bit"0"))
+    @test state(YaoBlocks._apply!(arrayreg(bit"1"), g, 2)) ≈ state(arrayreg(bit"0"))
     @test_throws KeyError pull(g)
 end
 

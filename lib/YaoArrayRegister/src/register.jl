@@ -43,6 +43,7 @@ ArrayReg(r::ArrayReg{D,T,<:Transpose}) where {D,T} =
 
 Base.copy(r::ArrayReg) = ArrayReg(r)
 Base.similar(r::ArrayReg{D}) where D = ArrayReg{D}(similar(state(r)))
+Base.similar(r::ArrayReg{D}, state::AbstractMatrix) where D = ArrayReg{D}(state)
 
 """
     BatchedArrayReg{D,T,MT<:AbstractMatrix{T}} <: AbstractArrayReg{D}
@@ -78,6 +79,8 @@ BatchedArrayReg(r::BatchedArrayReg{D,T,<:Transpose}) where {D,T} =
 
 Base.copy(r::BatchedArrayReg) = BatchedArrayReg(r)
 Base.similar(r::BatchedArrayReg{D}) where D = BatchedArrayReg{D}(similar(state(r)), r.nbatch)
+Base.similar(r::BatchedArrayReg{D}, state::AbstractMatrix) where D = BatchedArrayReg{D}(state, r.nbatch)
+YaoBase.viewbatch(r::ArrayReg, ind::Int) = ind == 1 ? r : error("Index `$ind` out of bounds, should be `1`.")
 
 # convert
 function ArrayReg(r::BatchedArrayReg{D}) where D

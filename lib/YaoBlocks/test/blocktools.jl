@@ -4,7 +4,7 @@ using StatsBase: mean
 using LinearAlgebra: tr
 
 @testset "blockfilter expect" begin
-    ghz = (ArrayReg(bit"0000") + ArrayReg(bit"1111")) |> normalize!
+    ghz = (arrayreg(bit"0000") + arrayreg(bit"1111")) |> normalize!
     obs1 = kron(4, 2 => Z)
     obs2 = kron(4, 2 => X)
     obs3 = repeat(4, X)
@@ -36,9 +36,9 @@ end
     @test expect(op, dm) ≈ expect(op, reg)
 
     reg = rand_state(4; nbatch = 3)
-    dm = reg |> density_matrix
+    dms = reg .|> density_matrix
     op = put(4, 3 => X)
-    @test expect(op, dm) ≈ expect(op, reg)
+    @test expect.(Ref(op), dms) ≈ expect(op, reg)
 end
 
 @testset "insert_qubits!" begin
@@ -54,9 +54,9 @@ end
         rand_state(3, nbatch = 10),
         rand_state(3, nbatch = 10, no_transpose_storage = true),
     ]
-        e1 = expect(put(2, 2 => X), reg |> copy |> focus!(1, 2) |> ρ)
+        e1 = expect.(Ref(put(2, 2 => X)), reg |> copy |> focus!(1, 2) .|> ρ)
         e2 = expect(put(2, 2 => X), reg |> copy |> focus!(1, 2))
-        e3 = expect(put(3, 2 => X), reg |> ρ)
+        e3 = expect.(Ref(put(3, 2 => X)), reg .|> ρ)
         e4 = expect(put(3, 2 => X), reg)
         e5 = expect(put(3, 2 => -X), reg)
         @test e1 ≈ e2

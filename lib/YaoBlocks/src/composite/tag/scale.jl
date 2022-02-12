@@ -54,7 +54,7 @@ cache_key(x::Scale) = (factor(x), cache_key(content(x)))
 mat(::Type{T}, x::Scale) where {T} = T(x.alpha) * mat(T, content(x))
 mat(::Type{T}, x::Scale{Val{S}}) where {T,S} = T(S) * mat(T, content(x))
 
-function _apply!(r::ArrayReg{B}, x::Scale{S,N}) where {S,B,N}
+function _apply!(r::AbstractArrayReg, x::Scale{S,N}) where {S,N}
     _apply!(r, content(x))
     regscale!(r, factor(x))
     return r

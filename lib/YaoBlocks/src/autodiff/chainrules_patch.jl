@@ -74,14 +74,14 @@ function extract_circuit_gradients!(c::NamedTuple, output)
     return output
 end
 
-function rrule(::typeof(apply), reg::ArrayReg, block::AbstractBlock)
+function rrule(::typeof(apply), reg::AbstractArrayReg, block::AbstractBlock)
     out = apply(reg, block)
     out, function (outδ)
         (in, inδ), paramsδ = apply_back((copy(out), outδ), block)
         return (NoTangent(), inδ, create_circuit_tangent(block, paramsδ))
     end
 end
-function rrule(::typeof(apply), reg::ArrayReg, block::Add)
+function rrule(::typeof(apply), reg::AbstractArrayReg, block::Add)
     out = apply(reg, block)
     out, function (outδ)
         (in, inδ), paramsδ = apply_back((copy(out), outδ), block; in = reg)
@@ -99,7 +99,8 @@ function rrule(::typeof(dispatch), block::AbstractBlock, params)
     end
 end
 
-function rrule(::typeof(expect), op::AbstractBlock, reg::AbstractRegister{B}) where {B}
+function rrule(::typeof(expect), op::AbstractBlock, reg::AbstractArrayReg)
+    B = YaoArrayRegister._asint(nbatch(reg))
     out = expect(op, reg)
     out, function (outδ)
         greg = expect_g(op, reg)
@@ -113,13 +114,12 @@ end
 function rrule(
     ::typeof(expect),
     op::AbstractBlock,
-    reg_and_circuit::Pair{<:ArrayReg{B},<:AbstractBlock},
-) where {B}
+    reg_and_circuit::Pair{<:AbstractArrayReg,<:AbstractBlock})
     out = expect(op, reg_and_circuit)
     out,
     function (outδ)
         greg, gcircuit = expect_g(op, reg_and_circuit)
-        for b = 1:B
+        for b = 1:YaoArrayRegister._asint(nbatch(greg))
             viewbatch(greg, b).state .*= 2 * outδ[b]
         end
         return (
@@ -149,15 +149,23 @@ function rrule(::typeof(mat), ::Type{T}, block::AbstractBlock) where {T}
     end
 end
 
-function rrule(::Type{ArrayReg{B}}, raw::AbstractArray) where {B}
-    ArrayReg{B}(raw), adjy -> (NoTangent(), reshape(adjy.state, size(raw)))
+function rrule(::Type{ArrayReg{D}}, raw::AbstractArray) where {D}
+    ArrayReg{D}(raw), adjy -> (NoTangent(), reshape(adjy.state, size(raw)))
 end
 
 function rrule(::Type{ArrayReg}, raw::AbstractArray)
     ArrayReg(raw), adjy -> (NoTangent(), reshape(adjy.state, size(raw)))
 end
 
-function rrule(::typeof(copy), reg::ArrayReg) where {B}
+function rrule(::Type{BatchedArrayReg{D}}, raw::AbstractArray, nbatch::Int) where {D}
+    BatchedArrayReg{D}(raw, nbatch), adjy -> (NoTangent(), reshape(adjy.state, size(raw)), NoTangent())
+end
+
+function rrule(::Type{BatchedArrayReg}, raw::AbstractArray, nbatch::Int)
+    BatchedArrayReg(raw, nbatch), adjy -> (NoTangent(), reshape(adjy.state, size(raw)), NoTangent())
+end
+
+function rrule(::typeof(copy), reg::AbstractArrayReg)
     copy(reg), adjy -> (NoTangent(), adjy)
 end
 
@@ -178,19 +186,23 @@ for (BT, BLOCKS) in [(:Add, :(outδ.list)) (:ChainBlock, :(outδ.blocks))]
     end
 end
 
+rrule(::typeof(state), reg::AbstractArrayReg{D,T}) where {D,T} =
+    state(reg), adjy -> (NoTangent(), _match_type(reg, _totype(T, adjy)))
+rrule(::typeof(statevec), reg::AbstractArrayReg{D,T}) where {D,T} =
+    statevec(reg), adjy -> (NoTangent(), _match_type(reg, _totype(T, adjy)))
+rrule(::typeof(state), reg::AdjointArrayReg{D,T}) where {D,T} =
+    state(reg), adjy -> (NoTangent(), _match_type(parent(reg), _totype(T, adjy)')')
+rrule(::typeof(statevec), reg::AdjointArrayReg{D,T}) where {D,T} =
+    statevec(reg), adjy -> (NoTangent(), _match_type(parent(reg), _totype(T, adjy)')')
+rrule(::typeof(parent), reg::AdjointArrayReg) = parent(reg), adjy -> (NoTangent(), adjy')
+rrule(::typeof(Base.adjoint), reg::AbstractArrayReg) =
+    Base.adjoint(reg), adjy -> (NoTangent(), parent(adjy))
+
 _totype(::Type{T}, x::AbstractArray{T}) where {T} = x
 _totype(::Type{T}, x::AbstractArray{T2}) where {T,T2} = convert.(T, x)
-rrule(::typeof(state), reg::ArrayReg{B,D,T}) where {B,D,T} =
-    state(reg), adjy -> (NoTangent(), ArrayReg(_totype(T, adjy)))
-rrule(::typeof(statevec), reg::ArrayReg{B,D,T}) where {B,D,T} =
-    statevec(reg), adjy -> (NoTangent(), ArrayReg(_totype(T, adjy)))
-rrule(::typeof(state), reg::AdjointArrayReg{B,D,T}) where {B,D,T} =
-    state(reg), adjy -> (NoTangent(), ArrayReg(_totype(T, adjy)')')
-rrule(::typeof(statevec), reg::AdjointArrayReg{B,D,T}) where {B,D,T} =
-    statevec(reg), adjy -> (NoTangent(), ArrayReg(_totype(T, adjy)')')
-rrule(::typeof(parent), reg::AdjointArrayReg) = parent(reg), adjy -> (NoTangent(), adjy')
-rrule(::typeof(Base.adjoint), reg::ArrayReg) =
-    Base.adjoint(reg), adjy -> (NoTangent(), parent(adjy))
+_match_type(::ArrayReg{D}, mat) where D = ArrayReg{D}(mat)
+_match_type(r::BatchedArrayReg{D}, mat) where D = BatchedArrayReg{D}(mat, r.nbatch)
+
 @non_differentiable nparameters(::Any)
 @non_differentiable zero_state(args...)
 @non_differentiable rand_state(args...)

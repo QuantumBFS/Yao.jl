@@ -38,7 +38,7 @@ _setval(m::AbstractMatrix, i, j, v) = (m[i, j] = v; m)
 _setval(m::OuterProduct, i, j, v) = (m.left[i] = v == 0 ? 0 : 1; m.right[j] = v; m)
 Base.setindex!(m::PermMatrix, v, i, j) = m.perm[i] == j ? m.vals[i] = v : error()
 
-function apply_back_jacobian(reg0::ArrayReg{B}, block, θ; kwargs...) where {B}
+function apply_back_jacobian(reg0::AbstractArrayReg{D}, block, θ; kwargs...) where D
     dispatch!(block, θ)
     out = apply!(copy(reg0), block)
     m = out.state
@@ -49,11 +49,11 @@ function apply_back_jacobian(reg0::ArrayReg{B}, block, θ; kwargs...) where {B}
             if m[i, j] != 0
                 zm[i, j] = 1
                 (in, inδ), col =
-                    apply_back((copy(out), ArrayReg{B}(copy(zm))), block; kwargs...)
+                    apply_back((copy(out), similar(reg0, copy(zm))), block; kwargs...)
                 @assert in ≈ reg0
                 jac[i, j, :] = col
                 zm[i, j] *= 1im
-                (in, inδ), col = apply_back((copy(out), ArrayReg{B}(copy(zm))), block)
+                (in, inδ), col = apply_back((copy(out), similar(reg0, copy(zm))), block)
                 jac[i, j, :] += 1im * col
                 zm[i, j] = 0
             end

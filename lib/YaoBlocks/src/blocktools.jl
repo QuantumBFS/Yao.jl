@@ -94,20 +94,20 @@ For register input, the return value is a register.
 
     For batched register, `expect(op, reg=>circuit)` returns a vector of size number of batch as output. However, one can not differentiate over a vector loss, so `expect'(op, reg=>circuit)` accumulates the gradient over batch, rather than returning a batched gradient of parameters.
 """
-function expect(op::AbstractBlock, dm::DensityMatrix{B}) where {B}
+function expect(op::AbstractBlock, dm::DensityMatrix)
     mop = mat(op)
-    [tr(view(dm.state, :, :, i) * mop) for i = 1:B]
+    return sum(transpose(dm.state) .* mop)
 end
 
-expect(op::AbstractBlock, reg::AbstractRegister{1}) = reg' * apply!(copy(reg), op)
+expect(op::AbstractBlock, reg::ArrayReg) = reg' * apply!(copy(reg), op)
 
-function expect(op::AbstractBlock, reg::AbstractRegister{B}) where {B}
+function expect(op::AbstractBlock, reg::BatchedArrayReg)
+    B = YaoArrayRegister._asint(nbatch(reg))
     ket = apply!(copy(reg), op)
     if !(reg.state isa Transpose)
         C = conj!(reshape(ket.state, :, B))
         A = reshape(reg.state, :, B)
         dropdims(sum(A .* C, dims = 1), dims = 1) |> conj
-        #mapreduce((x,y) -> conj(x*y), +, A, C, dims=1)
     elseif size(reg.state, 2) == B
         Na = size(reg.state, 1)
         C = conj!(reshape(ket.state.parent, B, Na))
@@ -121,24 +121,18 @@ function expect(op::AbstractBlock, reg::AbstractRegister{B}) where {B}
     end
 end
 
-#function expect(op::Add, reg::AbstractRegister{B}) where B
-#sum(opi -> expect(opi, reg), op)
-#end
-
-function expect(op::Add, reg::AbstractRegister{1})
-    sum(opi -> expect(opi, reg), op)
-end
-
-function expect(op::Scale, reg::AbstractRegister)
-    factor(op) * expect(content(op), reg)
+for REG in [:ArrayReg, :BatchedArrayReg]
+    @eval function expect(op::Add, reg::$REG)
+        sum(opi -> expect(opi, reg), op)
+    end
+    @eval function expect(op::Scale, reg::$REG)
+        factor(op) * expect(content(op), reg)
+    end
 end
 
 function expect(op, plan::Pair{<:AbstractRegister,<:AbstractBlock})
     expect(op, copy(plan.first) |> plan.second)
 end
-
-expect(op::Scale, reg::AbstractRegister{1}) =
-    invoke(expect, Tuple{Scale,AbstractRegister}, op, reg)
 
 # obtaining Dense Matrix of a block
 LinearAlgebra.Matrix(blk::AbstractBlock) = Matrix(mat(blk))

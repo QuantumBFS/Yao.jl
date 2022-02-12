@@ -63,7 +63,7 @@ function LinearAlgebra.mul!(y::AbstractVector, A::BlockMap, x::AbstractVector)
     return y
 end
 
-function _apply!(reg::ArrayReg{B,D,T}, te::TimeEvolution) where {B,D,T}
+function _apply!(reg::AbstractArrayReg{D,T}, te::TimeEvolution) where {D,T}
     st = state(reg)
     dt = real(te.dt) == 0 ? imag(te.dt) : -im * te.dt
     A = BlockMap(T, te.H)
