@@ -1,4 +1,5 @@
 using Test, YaoSym, YaoBase, YaoArrayRegister
+using SymEngine
 
 @testset "constructors" begin
     @test ket"011" isa SymReg

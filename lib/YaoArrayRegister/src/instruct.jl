@@ -10,7 +10,7 @@ using YaoBase, BitBasis, LuxurySparse, StaticArrays
 export instruct!
 
 function YaoBase.instruct!(
-    r::AbstractArrayReg{D},
+    r::BatchedArrayReg{D},
     op,
     locs::Tuple,
     control_locs::Tuple,
@@ -21,7 +21,7 @@ function YaoBase.instruct!(
 end
 
 function YaoBase.instruct!(
-    r::AbstractArrayReg{1,D},
+    r::ArrayReg{D},
     op,
     locs::Tuple,
     control_locs::Tuple,
@@ -31,12 +31,12 @@ function YaoBase.instruct!(
     return r
 end
 
-function YaoBase.instruct!(r::AbstractArrayReg{D}, op, locs::Tuple) where {D}
+function YaoBase.instruct!(r::BatchedArrayReg{D}, op, locs::Tuple) where {D}
     instruct!(Val(D), r.state, op, locs)
     return r
 end
 
-function YaoBase.instruct!(r::AbstractArrayReg{1,D}, op, locs::Tuple) where D
+function YaoBase.instruct!(r::ArrayReg{D}, op, locs::Tuple) where D
     instruct!(Val(D), vec(r.state), op, locs)
     return r
 end

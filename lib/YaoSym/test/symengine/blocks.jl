@@ -80,7 +80,7 @@ end
     @vars a b
     reg = ket"111" |> control(3, 1, 2 => Rx(a))
     op = put(3, 2 => Z)
-    reg2 = ArrayReg(bit"111") |> control(3, 1, 2 => Rx(0.5))
+    reg2 = arrayreg(bit"111") |> control(3, 1, 2 => Rx(0.5))
     ex = expect(op, reg)
     ex = subs(ex, a => 0.5)
     @test ComplexF64(ex) ≈ expect(op, reg2)
@@ -88,9 +88,9 @@ end
 
 @testset "grad" begin
     @vars a b
-    reg = ArrayReg(Basic, bit"111") => control(3, 1, 2 => Rx(a))
+    reg = arrayreg(Basic, bit"111") => control(3, 1, 2 => Rx(a))
     op = put(3, 2 => Z)
-    reg2 = ArrayReg(bit"111") => control(3, 1, 2 => Rx(0.5))
+    reg2 = arrayreg(bit"111") => control(3, 1, 2 => Rx(0.5))
     ex = expect'(op, reg)[2]
     ex = subs(ex[], a => 0.5)
     @test ComplexF64(ex) ≈ expect'(op, reg2)[2][]
@@ -98,9 +98,9 @@ end
 
 @testset "grad" begin
     @vars a b
-    reg = ArrayReg(Basic, bit"000") => put(3, 2 => Rx(a))
+    reg = arrayreg(Basic, bit"000") => put(3, 2 => Rx(a))
     op = put(3, 2 => Z)
-    reg2 = ArrayReg(bit"000") => put(3, 2 => Rx(0.9))
+    reg2 = arrayreg(bit"000") => put(3, 2 => Rx(0.9))
     ex = expect(op, reg)
     ex = subs(ex[], a => 0.9)
     @test ComplexF64(ex) ≈ expect(op, reg2)

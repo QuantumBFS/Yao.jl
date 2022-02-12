@@ -46,7 +46,7 @@ function YaoBase.purify(r::DensityMatrix{D}; num_env::Int = nactive(r)) where {D
     return ArrayReg{D}(state)
 end
 
-# obtaining matrix from Yao.DensityMatrix{1}, `1` is the batch size.
+# obtaining matrix from Yao.DensityMatrix
 LinearAlgebra.Matrix(d::DensityMatrix) = d.state
 
 von_neumann_entropy(dm::DensityMatrix) = von_neumann_entropy(Matrix(dm))

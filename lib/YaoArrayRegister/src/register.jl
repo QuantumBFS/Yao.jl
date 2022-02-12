@@ -93,7 +93,7 @@ end
 BatchedArrayReg(r::ArrayReg{D}...) where D = BatchedArrayReg{D}(hcat(state.(r)...), length(r))
 
 function _check_reg_input(raw::AbstractMatrix{T}, D::Integer, B::Integer) where T
-    T <: Complex || @warn "Input matrix element type is not `Complex`, got `$(eltype(raw))`"
+    _warn_type(raw)
     if D <= 0
         error("invalid number of level: $D")
     end
@@ -109,6 +109,10 @@ function _check_reg_input(raw::AbstractMatrix{T}, D::Integer, B::Integer) where 
             ),
         )
     end
+end
+
+function _warn_type(raw::T) where T
+    T <: Complex || @warn "Input matrix element type is not `Complex`, got `$(eltype(raw))`"
 end
 
 """
