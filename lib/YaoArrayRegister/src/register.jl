@@ -459,13 +459,19 @@ function product_state(
     no_transpose_storage::Bool = false,
 ) where {T}
     if nbatch isa NoBatch || no_transpose_storage
-        raw = onehot(T, total, bit_config, _asint(nbatch))
+        raw = onehot(T, total, bit_config, _asint(nbatch), nlevel)
     else
         raw = zeros(T, _asint(nbatch), nlevel ^ total)
         raw[:, Int(bit_config)+1] .= 1
         raw = transpose(raw)
     end
     return arrayreg(raw; nbatch=nbatch, nlevel=nlevel)
+end
+
+function onehot(::Type{T}, nbits::Int, x::Integer, nbatch::Int, nlevel::Int) where {T}
+    v = zeros(T, nlevel ^ nbits, nbatch)
+    v[x+1, :] .= 1
+    return v
 end
 
 """

@@ -242,9 +242,16 @@ end
 end
 
 @testset "qudit" begin
-    reg = ArrayReg{3}(reshape(randn(9), :, 1))
+    reg = ArrayReg{3}(reshape(randn(ComplexF64, 9), :, 1))
     @test nlevel(reg) == 3
     @test nactive(reg) == 2
     @test_throws MethodError nqubits(reg)
     @test nqudits(reg) == 2
+
+    # constructors
+    reg = zero_state(2; nlevel=3)
+    @test statevec(reg) == [1.0, 0.0im, 0, 0, 0, 0, 0, 0, 0]
+    @test statevec(product_state(2, 1; nlevel=3)) == [0.0, 1.0+0.0im, 0, 0, 0, 0, 0, 0, 0]
+    @test length(statevec(rand_state(2; nlevel=3))) == 9
+    @test size(statevec(zero_state(2; nbatch=5, nlevel=3))) == (9,5)
 end
