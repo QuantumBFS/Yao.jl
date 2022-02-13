@@ -4,7 +4,10 @@ export @λ, @lambda
 
 addbits!(n::Int) = @λ(register -> addbits!(register, n))
 insert_qudits!(loc::Int; nqudits::Int = 1) =
-    @λ(register -> insert_qudits!(register, loc; nqudits = n))
+    @λ(register -> insert_qudits!(register, loc; nqudits = nqudits))
+insert_qubits!(loc::Int; nqubits::Int = 1) =
+    @λ(register -> insert_qubits!(register, loc; nqubits = nqubits))
+insert_qubits!(reg::AbstractRegister{2}, loc::Int; nqubits::Int = 1) = insert_qudits!(reg, loc; nqudits=nqubits)
 
 nremain(r::AbstractRegister) = nqudits(r) - nactive(r)
 nlevel(r::AbstractRegister{D}) where {D} = D

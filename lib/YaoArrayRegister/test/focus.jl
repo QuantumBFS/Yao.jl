@@ -50,6 +50,9 @@ end
           reg
 
     @test insert_qudits!(copy(reg), 2; nqudits = 2) |> nactive == 5
+    @test insert_qubits!(copy(reg), 2; nqubits = 2) |> nactive == 5
+    @test insert_qudits!(2; nqudits = 2)(copy(reg)) |> nactive == 5
+    @test insert_qubits!(2; nqubits = 2)(copy(reg)) |> nactive == 5
 end
 
 @testset "Focus 2" begin

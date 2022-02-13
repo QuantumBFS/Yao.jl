@@ -676,3 +676,12 @@ function YaoBase.instruct!(::Val{2},
     end
     return state
 end
+
+# empty gate
+instruct!(::Val{D},
+    state::AbstractVecOrMat,
+    ::Any,
+    locs::Tuple{},
+    control_locs::NTuple{N1,Int} = (),
+    control_configs::NTuple{N2,Int} = (),
+) where {D,N1,N2} = state
