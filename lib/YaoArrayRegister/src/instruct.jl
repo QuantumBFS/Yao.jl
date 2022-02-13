@@ -678,7 +678,7 @@ function YaoBase.instruct!(::Val{2},
 end
 
 # empty gate
-instruct!(::Val{D},
+YaoBase.instruct!(::Val{D},
     state::AbstractVecOrMat,
     ::Any,
     locs::Tuple{},
