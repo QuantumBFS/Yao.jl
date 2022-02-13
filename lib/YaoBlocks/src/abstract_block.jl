@@ -361,11 +361,9 @@ Return the range of real parameters present in `block`.
 # Example
 
 ```jldoctest; setup=:(using YaoBlocks)
-julia> parameters_range(RotationGate(X, 0.1))
-ERROR: UndefVarError: parameters_range not defined
-Stacktrace:
- [1] top-level scope
-   @ none:1
+julia> YaoBlocks.parameters_range(RotationGate(X, 0.1))
+1-element Vector{Tuple{Float64, Float64}}:
+ (0.0, 6.283185307179586)
 ```
 """
 function parameters_range(block::AbstractBlock)

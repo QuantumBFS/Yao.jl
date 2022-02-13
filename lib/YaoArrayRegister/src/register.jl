@@ -158,12 +158,14 @@ For bit string literal please read [`@bit_str`](@ref).
 
 ```jldoctest; setup=:(using YaoArrayRegister)
 julia> arrayreg(bit"1010")
-ArrayReg{1, 2, ComplexF64, Array...}
+ArrayReg{2, ComplexF64, Array...}
     active qudits: 4/4
+    nlevel: 2
 
 julia> arrayreg(ComplexF32, bit"1010")
-ArrayReg{1, 2, ComplexF32, Array...}
+ArrayReg{2, ComplexF32, Array...}
     active qudits: 4/4
+    nlevel: 2
 ```
 """
 arrayreg(bitstr::BitStr; nbatch::Union{Int,NoBatch}=NoBatch()) = arrayreg(ComplexF64, bitstr; nbatch=nbatch)
@@ -380,16 +382,22 @@ defined with [`@bit_str`](@ref). See also [`zero_state`](@ref),
 
 ```jldoctest; setup=:(using YaoArrayRegister)
 julia> product_state(bit"100"; nbatch=2)
-ArrayReg{2, 2, ComplexF64, Transpose...}
+BatchedArrayReg{2, ComplexF64, Transpose...}
     active qudits: 3/3
+    nlevel: 2
+    nbatch: 2
 
 julia> r1 = product_state(ComplexF32, bit"100"; nbatch=2)
-ArrayReg{2, 2, ComplexF32, Transpose...}
+BatchedArrayReg{2, ComplexF32, Transpose...}
     active qudits: 3/3
+    nlevel: 2
+    nbatch: 2
 
 julia> r2 = product_state(ComplexF32, [0, 0, 1]; nbatch=2)
-ArrayReg{2, 2, ComplexF32, Transpose...}
+BatchedArrayReg{2, ComplexF32, Transpose...}
     active qudits: 3/3
+    nlevel: 2
+    nbatch: 2
 
 julia> r1 ≈ r2   # because we read bit strings from right to left, vectors from left to right.
 true
@@ -411,16 +419,21 @@ See also [`zero_state`](@ref), [`rand_state`](@ref), [`uniform_state`](@ref).
 
 ```jldoctest; setup=:(using YaoArrayRegister)
 julia> product_state(4, 3; nbatch=2)
-ArrayReg{2, 2, ComplexF64, Transpose...}
+BatchedArrayReg{2, ComplexF64, Transpose...}
     active qudits: 4/4
+    nlevel: 2
+    nbatch: 2
 
 julia> product_state(4, 0b1001; nbatch=2)
-ArrayReg{2, 2, ComplexF64, Transpose...}
+BatchedArrayReg{2, ComplexF64, Transpose...}
     active qudits: 4/4
+    nlevel: 2
+    nbatch: 2
 
 julia> product_state(ComplexF32, 4, 0b101)
-ArrayReg{1, 2, ComplexF32, Array...}
+ArrayReg{2, ComplexF32, Array...}
     active qudits: 4/4
+    nlevel: 2
 ```
 
 !!! warning
@@ -465,16 +478,20 @@ See also [`product_state`](@ref), [`rand_state`](@ref), [`uniform_state`](@ref).
 
 ```jldoctest; setup=:(using YaoArrayRegister)
 julia> zero_state(4)
-ArrayReg{1, 2, ComplexF64, Array...}
+ArrayReg{2, ComplexF64, Array...}
     active qudits: 4/4
+    nlevel: 2
 
 julia> zero_state(ComplexF32, 4)
-ArrayReg{1, 2, ComplexF32, Array...}
+ArrayReg{2, ComplexF32, Array...}
     active qudits: 4/4
+    nlevel: 2
 
 julia> zero_state(ComplexF32, 4; nbatch=3)
-ArrayReg{3, 2, ComplexF32, Transpose...}
+BatchedArrayReg{2, ComplexF32, Transpose...}
     active qudits: 4/4
+    nlevel: 2
+    nbatch: 3
 ```
 """
 zero_state(n::Int; kwargs...) = zero_state(ComplexF64, n; kwargs...)
@@ -490,16 +507,20 @@ Create a random [`AbstractArrayReg`](@ref) with total number of qudits `n`.
 
 ```jldoctest; setup=:(using YaoArrayRegister)
 julia> rand_state(4)
-ArrayReg{1, 2, ComplexF64, Array...}
+ArrayReg{2, ComplexF64, Array...}
     active qudits: 4/4
+    nlevel: 2
 
 julia> rand_state(ComplexF64, 4)
-ArrayReg{1, 2, ComplexF64, Array...}
+ArrayReg{2, ComplexF64, Array...}
     active qudits: 4/4
+    nlevel: 2
 
 julia> rand_state(ComplexF64, 4; nbatch=2)
-ArrayReg{2, 2, ComplexF64, Transpose...}
+BatchedArrayReg{2, ComplexF64, Transpose...}
     active qudits: 4/4
+    nlevel: 2
+    nbatch: 2
 ```
 """
 rand_state(n::Int; kwargs...) = rand_state(ComplexF64, n; kwargs...)
@@ -527,12 +548,16 @@ can also be created by applying [`H`](@ref) (Hadmard gate) on ``|00⋯00⟩`` st
 
 ```jldoctest; setup=:(using YaoArrayRegister)
 julia> uniform_state(4; nbatch=2)
-BatchedArrayReg{2, 2, ComplexF64, Transpose...}
+BatchedArrayReg{2, ComplexF64, Transpose...}
     active qudits: 4/4
+    nlevel: 2
+    nbatch: 2
 
 julia> uniform_state(ComplexF32, 4; nbatch=2)
-ArrayReg{2, 2, ComplexF32, Transpose...}
+BatchedArrayReg{2, ComplexF32, Transpose...}
     active qudits: 4/4
+    nlevel: 2
+    nbatch: 2
 ```
 """
 uniform_state(n::Int; kwargs...) = uniform_state(ComplexF64, n; kwargs...)
@@ -571,9 +596,11 @@ batch dimension.
 # Example
 
 ```jldoctest; setup=:(using YaoArrayRegister)
-julia> repeat(BatchedArrayReg(bit"101", 3), 4)
-BatchedArrayReg{12, 2, ComplexF64, Array...}
+julia> repeat(arrayreg(bit"101"; nbatch=3), 4)
+BatchedArrayReg{2, ComplexF64, Array...}
     active qudits: 3/3
+    nlevel: 2
+    nbatch: 12
 ```
 """
 Base.repeat(r::AbstractArrayReg{D}, n::Int) where D =

@@ -22,15 +22,3 @@ end
     @test nqubits(adjoint(TestRegister())) == 8
     @test nactive(adjoint(TestRegister())) == 2
 end
-
-@testset "Test Printing" begin
-    @test repr(TestRegister()) == """
-    TestRegister
-        active qudits: 2/8"""
-end
-
-@testset "Test adjoint printing" begin
-    @test repr(adjoint(TestRegister())) == """
-        adjoint(TestRegister)
-            active qudits: 2/8"""
-end

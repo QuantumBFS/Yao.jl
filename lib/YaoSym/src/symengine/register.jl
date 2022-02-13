@@ -4,7 +4,7 @@ export @ket_str, @bra_str
 export SymReg, AdjointSymReg, SymRegOrAdjointSymReg, expand
 export szero_state
 
-YaoArrayRegister._warn_type(raw::AbstractArray{Basic}) = nothing
+YaoArrayRegister._warn_type(raw::AbstractMatrix{Basic}) = nothing
 
 const SymReg{D,MT} = AbstractArrayReg{D,Basic,MT} where {MT<:AbstractMatrix{Basic}}
 const AdjointSymReg{D,MT} = AdjointArrayReg{D,Basic,MT}
