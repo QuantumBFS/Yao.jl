@@ -1,21 +1,23 @@
 using Test, YaoArrayRegister, BitBasis, YaoBase
 
-function naive_focus!(reg::ArrayReg{B}, bits) where {B}
+function naive_focus!(reg::AbstractArrayReg{D}, bits) where {D}
+    B = YaoArrayRegister._asint(nbatch(reg))
     nbits = nqubits(reg)
     norder = vcat(bits, setdiff(1:nbits, bits), nbits + 1)
     @views reg.state = reshape(
-        permutedims(reshape(reg.state, fill(2, nbits)..., B), norder),
+        permutedims(reshape(reg.state, fill(D, nbits)..., B), norder),
         :,
-        (1 << (nbits - length(bits))) * B,
+        (D ^ (nbits - length(bits))) * B,
     )
     return reg
 end
 
-function naive_relax!(reg::ArrayReg{B}, bits) where {B}
+function naive_relax!(reg::AbstractArrayReg{D}, bits) where {D}
+    B = YaoArrayRegister._asint(nbatch(reg))
     nbit = nqubits(reg)
     norder = vcat(bits, setdiff(1:nbit, bits), nbit + 1) |> invperm
     @views reg.state =
-        reshape(permutedims(reshape(reg.state, fill(2, nbit)..., B), norder), :, B)
+        reshape(permutedims(reshape(reg.state, fill(D, nbit)..., B), norder), :, B)
     return reg
 end
 
@@ -48,6 +50,9 @@ end
           reg
 
     @test insert_qudits!(copy(reg), 2; nqudits = 2) |> nactive == 5
+    @test insert_qubits!(copy(reg), 2; nqubits = 2) |> nactive == 5
+    @test insert_qudits!(2; nqudits = 2)(copy(reg)) |> nactive == 5
+    @test insert_qubits!(2; nqubits = 2)(copy(reg)) |> nactive == 5
 end
 
 @testset "Focus 2" begin
@@ -84,6 +89,6 @@ end
 end
 
 @testset "partial trace" begin
-    r = join(ArrayReg(bit"111"), zero_state(1))
-    @test partial_tr(r, 1) ≈ ArrayReg(bit"111")
+    r = join(arrayreg(bit"111"), zero_state(1))
+    @test partial_tr(r, 1) ≈ arrayreg(bit"111")
 end

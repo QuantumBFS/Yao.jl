@@ -1,19 +1,19 @@
 export AbstractRegister, AdjointRegister, DensityMatrix
 
 """
-    AbstractRegister{B, D}
+    AbstractRegister{D}
 
-Abstract type for quantum registers. `B` is the batch size, `D` is the number of levels in each qudit.
+Abstract type for quantum registers. `D` is the number of levels in each qudit.
 """
-abstract type AbstractRegister{B, D} end
+abstract type AbstractRegister{D} end
 
 
 """
-    AdjointRegister{B, D, RT} <: AbstractRegister{B, D}
+    AdjointRegister{D, RT} <: AbstractRegister{D}
 
-Lazy adjoint for a quantum register.
+Lazy adjoint for a quantum register, `RT` is the parent type.
 """
-struct AdjointRegister{B,D,RT<:AbstractRegister{B,D}} <: AbstractRegister{B,D}
+struct AdjointRegister{D,RT<:AbstractRegister{D}} <: AbstractRegister{D}
     parent::RT
 end
 
@@ -64,13 +64,6 @@ Returns the number of non-active qudits.
 @interface nremain
 
 """
-    nbatch(register) -> Int
-
-Returns the number of batches.
-"""
-@interface nbatch
-
-"""
     viewbatch(register, i::Int) -> AbstractRegister{1}
 
 Returns a view of the i-th slice on batch dimension.
@@ -100,6 +93,17 @@ i.e. |psi> -> |psi> ⊗ |000> ⊗ |psi>, increased bits have higher indices.
 If only an integer is provided, then returns a lambda function.
 """
 @interface insert_qudits!
+
+"""
+    insert_qubits!(register, loc::Int; nqubits::Int=1) -> register
+    insert_qubits!(loc::Int; nqubits::Int=1) -> λ(register)
+
+Insert `n` qubits to given register in state |0>.
+i.e. |psi> -> |psi> ⊗ |000> ⊗ |psi>, increased bits have higher indices.
+
+If only an integer is provided, then returns a lambda function.
+"""
+@interface insert_qubits!
 
 """
     focus!(register, locs) -> register
@@ -349,19 +353,18 @@ check if operators are commute.
 ####################### Density Matrix ############
 
 """
-    DensityMatrix{B, D, T, MT}
+    DensityMatrix{D, T, MT}
 
 Density Matrix.
 
-- `B`: batch size
 - `T`: element type
 """
-struct DensityMatrix{B,D,T,MT<:AbstractArray{T,3}} <: AbstractRegister{B,D}
+struct DensityMatrix{D,T,MT<:AbstractMatrix{T}} <: AbstractRegister{D}
     state::MT
 end
 
 """
-    purify(r::DensityMatrix{B}; nbit_env::Int=nactive(r)) -> ArrayReg
+    purify(r::DensityMatrix; nbit_env::Int=nactive(r)) -> ArrayReg
 
 Get a purification of target density matrix.
 """

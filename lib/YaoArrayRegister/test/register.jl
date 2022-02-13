@@ -2,39 +2,70 @@ using Test, YaoArrayRegister, BitBasis, LinearAlgebra
 using YaoBase
 using Adapt
 
-@testset "test constructors" begin
-    @test ArrayReg{3}(rand(4, 6)) isa ArrayReg{3}
-    @test_throws DimensionMismatch ArrayReg{2}(rand(4, 3))
-    @test_throws DimensionMismatch ArrayReg{2}(rand(5, 2))
-    @test_logs (:warn, "Input type of `ArrayReg` is not Complex, got Float64") ArrayReg(
-        rand(4, 3),
+@testset "test ArrayReg constructors" begin
+    @test ArrayReg(rand(4)) isa ArrayReg{2}
+    @test_logs (:warn, "Input matrix element type is not `Complex`, got `Float64`") ArrayReg(
+        rand(4, 4),
     )
+    @test ArrayReg(rand(ComplexF64, 4)) isa ArrayReg{2}
+    @test ArrayReg(arrayreg(bit"101")) == arrayreg(bit"101")
 
-    @test ArrayReg(rand(ComplexF64, 4, 3)) isa ArrayReg{3}
-    @test ArrayReg(rand(ComplexF64, 4)) isa ArrayReg{1}
-
-    @test state(ArrayReg(bit"101")) == reshape(onehot(bit"101"), :, 1)
-    @test datatype(ArrayReg(ComplexF32, bit"101")) == ComplexF32
-    @test ArrayReg(ArrayReg(bit"101")) == ArrayReg(bit"101")
-
-    st = rand(ComplexF64, 4, 6)
+    st = rand(ComplexF64, 4, 8)
     @test state(adjoint(ArrayReg(st))) == adjoint(st)
 
-    reg = ArrayReg{6}(st)
+    @test state(arrayreg(bit"101")) == reshape(onehot(bit"101"), :, 1)
+    @test datatype(arrayreg(ComplexF32, bit"101")) == ComplexF32
+
+    st = rand(ComplexF64, 4, 8)
+    reg= ArrayReg{2}(st)
+    @test similar(reg) isa ArrayReg
+    @test nactive(similar(reg)) == 2
+    m = randn(ComplexF64, 8, 8)
+    @test similar(reg, m).state == m
+    @test viewbatch(reg, 1) == reg
+    @test_throws ErrorException viewbatch(reg, 2)
+end
+
+@testset "test BatchedArrayReg constructors" begin
+    @test BatchedArrayReg(rand(4, 6), 3) isa BatchedArrayReg{2}
+    @test_throws DimensionMismatch BatchedArrayReg(rand(4, 3), 2)
+    @test_throws DimensionMismatch BatchedArrayReg(rand(5, 2), 2)
+    @test BatchedArrayReg(rand(ComplexF64, 4, 3)) isa BatchedArrayReg{2}
+
+    @test state(arrayreg(bit"101"; nbatch=2)) == repeat(reshape(onehot(bit"101"), :, 1), 1, 2)
+    @test datatype(arrayreg(ComplexF32, bit"101"; nbatch=2)) == ComplexF32
+
+    st = rand(ComplexF64, 4, 6)
+    reg = BatchedArrayReg(st, 6)
     regt = transpose_storage(reg)
     @test regt.state isa Transpose
     @test regt == reg
     @test transpose_storage(regt).state isa Matrix
     @test transpose_storage(regt) == reg
+    @test_throws ErrorException ArrayReg(reg)
+
+    reg = zero_state(5; nbatch=1)
+    @test reg isa BatchedArrayReg
+    r2 = ArrayReg(reg)
+    @test r2 isa ArrayReg
+    @test BatchedArrayReg(r2) == reg
+
+    st = rand(ComplexF64, 4, 8)
+    reg= BatchedArrayReg{2}(st, 4)
+    @test similar(reg) isa BatchedArrayReg
+    @test nactive(similar(reg)) == 2
+    @test nqubits(similar(reg)) == 3
+    m = randn(ComplexF64, 8, 8)
+    @test similar(reg, m).state == m
 end
 
 @testset "test $T initialization methods" for T in [ComplexF64, ComplexF32, ComplexF16]
     @testset "test product state" begin
-        reg = product_state(T, bit"100"; nbatch = 1)
+        reg = product_state(T, bit"100")
         st = state(reg)
         @test nqudits(reg) == 3
         @test !(st isa Transpose)
-        st2 = state(product_state(T, [0, 0, 1]; nbatch = 1))
+        st2 = state(product_state(T, [0, 0, 1]))
         @test st2 ≈ st
         st = state(product_state(T, bit"100"; nbatch = 2, no_transpose_storage = true))
         @test !(st isa Transpose)
@@ -51,7 +82,7 @@ end
         @test eltype(product_state(Float64, 4, 0).state) == Float64
     end
     @testset "test zero state" begin
-        st = state(zero_state(T, 3; nbatch = 1))
+        st = state(zero_state(T, 3))
         @test !(st isa Transpose)
         st = state(zero_state(T, 3; nbatch = 2, no_transpose_storage = true))
         @test !(st isa Transpose)
@@ -63,7 +94,7 @@ end
         @test eltype(zero_state(Float64, 4).state) == Float64
     end
     @testset "test rand state" begin
-        st = state(rand_state(T, 3; nbatch = 1))
+        st = state(rand_state(T, 3))
         @test !(st isa Transpose)
         st = state(rand_state(T, 3; nbatch = 2, no_transpose_storage = true))
         @test !(st isa Transpose)
@@ -76,7 +107,7 @@ end
         @test eltype(rand_state(Float64, 4).state) == Float64
     end
     @testset "test uniform state" begin
-        st = state(uniform_state(T, 3; nbatch = 1))
+        st = state(uniform_state(T, 3))
         @test !(st isa Transpose)
         st = state(uniform_state(T, 3; nbatch = 2, no_transpose_storage = true))
         @test !(st isa Transpose)
@@ -96,7 +127,7 @@ end
         @test r1 |> oneto(2) |> nactive == 2
     end
     @testset "test repeat" begin
-        r = repeat(ArrayReg{3}(T, bit"101"), 4)
+        r = repeat(arrayreg(T, bit"101"; nbatch=3), 4)
         @test nactive(r) == 3
         @test nbatch(r) == 12
     end
@@ -110,13 +141,13 @@ end
         @test probs(r) ≈ abs2.(state(r))
     end
     @testset "test batch iteration" begin
-        r = ArrayReg{3}(bit"101")
+        r = arrayreg(bit"101"; nbatch= 3)
         for k = 1:3
-            @test viewbatch(r, k) == ArrayReg(bit"101")
+            @test viewbatch(r, k) == arrayreg(bit"101")
         end
         # broadcast
         for each in r
-            @test each == ArrayReg(bit"101")
+            @test each == arrayreg(bit"101")
         end
     end
     @testset "test addbits!" begin
@@ -129,7 +160,7 @@ end
 end
 
 @testset "test statevec" begin
-    r = ArrayReg{3}(bit"101")
+    r = arrayreg(bit"101"; nbatch=3)
     @test statevec(r) == r.state
     r = oneto(r, 2)
     @test statevec(r) == reshape(state(r), 4, 6)
@@ -152,9 +183,9 @@ end
     @test (join(reg6, reg5)|>relaxedvec)[:, 1] ≈ r4 |> relaxedvec
 
     # manual trace
-    r = join(ArrayReg(bit"011"), zero_state(1))
+    r = join(arrayreg(bit"011"), zero_state(1))
     focus!(r, 2:4)
-    @test sum(r.state, dims = 2) ≈ ArrayReg(bit"011").state
+    @test sum(r.state, dims = 2) ≈ arrayreg(bit"011").state
 end
 
 @testset "YaoBlocks.jl/issues/21" begin
@@ -211,9 +242,16 @@ end
 end
 
 @testset "qudit" begin
-    reg = ArrayReg{1,3}(reshape(randn(9), :, 1))
+    reg = ArrayReg{3}(reshape(randn(ComplexF64, 9), :, 1))
     @test nlevel(reg) == 3
     @test nactive(reg) == 2
     @test_throws MethodError nqubits(reg)
     @test nqudits(reg) == 2
+
+    # constructors
+    reg = zero_state(2; nlevel=3)
+    @test statevec(reg) == [1.0, 0.0im, 0, 0, 0, 0, 0, 0, 0]
+    @test statevec(product_state(2, 1; nlevel=3)) == [0.0, 1.0+0.0im, 0, 0, 0, 0, 0, 0, 0]
+    @test length(statevec(rand_state(2; nlevel=3))) == 9
+    @test size(statevec(zero_state(2; nbatch=5, nlevel=3))) == (9,5)
 end

@@ -10,18 +10,18 @@ using YaoBase, BitBasis, LuxurySparse, StaticArrays
 export instruct!
 
 function YaoBase.instruct!(
-    r::ArrayReg{B,D},
+    r::BatchedArrayReg{D},
     op,
     locs::Tuple,
     control_locs::Tuple,
     control_bits::Tuple,
-) where {B,D}
+) where {D}
     instruct!(Val(D), r.state, op, locs, control_locs, control_bits)
     return r
 end
 
 function YaoBase.instruct!(
-    r::ArrayReg{1,D},
+    r::ArrayReg{D},
     op,
     locs::Tuple,
     control_locs::Tuple,
@@ -31,29 +31,29 @@ function YaoBase.instruct!(
     return r
 end
 
-function YaoBase.instruct!(r::ArrayReg{B,D}, op, locs::Tuple) where {B,D}
+function YaoBase.instruct!(r::BatchedArrayReg{D}, op, locs::Tuple) where {D}
     instruct!(Val(D), r.state, op, locs)
     return r
 end
 
-function YaoBase.instruct!(r::ArrayReg{1,D}, op, locs::Tuple) where D
+function YaoBase.instruct!(r::ArrayReg{D}, op, locs::Tuple) where D
     instruct!(Val(D), vec(r.state), op, locs)
     return r
 end
 
 function YaoBase.instruct!(
-    r::ArrayReg{B,D},
+    r::AbstractArrayReg{D},
     op,
     locs::Tuple,
     control_locs::Tuple,
     control_bits::Tuple,
     theta::Number,
-) where {B,D}
+) where {D}
     instruct!(Val(D), r.state, op, locs, control_locs, control_bits, theta)
     return r
 end
 
-function YaoBase.instruct!(r::ArrayReg{B,D}, op, locs::Tuple, theta::Number) where {B,D}
+function YaoBase.instruct!(r::AbstractArrayReg{D}, op, locs::Tuple, theta::Number) where {D}
     instruct!(Val(D), r.state, op, locs, theta)
     return r
 end
@@ -676,3 +676,12 @@ function YaoBase.instruct!(::Val{2},
     end
     return state
 end
+
+# empty gate
+YaoBase.instruct!(::Val{D},
+    state::AbstractVecOrMat,
+    ::Any,
+    locs::Tuple{},
+    control_locs::NTuple{N1,Int} = (),
+    control_configs::NTuple{N2,Int} = (),
+) where {D,N1,N2} = state

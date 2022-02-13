@@ -4,15 +4,15 @@ using YaoArrayRegister, Random, LinearAlgebra, SparseArrays, BitBasis
 
 @testset "broadcast register" begin
     reg = rand_state(5; nbatch = 3)
-    @test typeof.(reg)[1] <: ArrayReg{1,2,ComplexF64,<:SubArray}
+    @test typeof.(reg)[1] <: ArrayReg{2,ComplexF64,<:SubArray}
     @test [reg...] |> length == 3
-    @test [rand_state(3)...] |> length == 1
+    @test [rand_state(3; nbatch=2)...] |> length == 2
 end
 
 @testset "arithmetics" begin
     nbit = 5
     reg1 = zero_state(5)
-    reg2 = ArrayReg(bit"00100")
+    reg2 = arrayreg(bit"00100")
     @test reg1 != reg2
     @test statevec(reg2) == onehot(ComplexF64, nbit, 4)
     reg3 = reg1 + reg2
@@ -47,8 +47,8 @@ end
 end
 
 @testset "partial ⟨bra|ket⟩" begin
-    bra = ArrayReg(bit"10")
-    ket = ArrayReg(bit"100") + 2 * ArrayReg(bit"110") + 3 * ArrayReg(bit"111")
+    bra = arrayreg(bit"10")
+    ket = arrayreg(bit"100") + 2 * arrayreg(bit"110") + 3 * arrayreg(bit"111")
 
     focus!(ket, 2:3)
     t = bra' * ket

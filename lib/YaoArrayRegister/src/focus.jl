@@ -96,7 +96,7 @@ is_order_same(locs) = all(a == b for (a, b) in zip(locs, 1:length(locs)))
 # NOTE: locations is not the same with orders
 # locations: some location of the wire
 # orders: includes all the location of the wire in some order
-function YaoBase.focus!(r::ArrayReg{B,D}, locs) where {B,D}
+function YaoBase.focus!(r::AbstractArrayReg{D}, locs) where {D}
     if is_order_same(locs)
         arr = r.state
     else
@@ -107,7 +107,7 @@ function YaoBase.focus!(r::ArrayReg{B,D}, locs) where {B,D}
     return r
 end
 
-function YaoBase.relax!(r::ArrayReg{B,D}, locs; to_nactive::Int = nqudits(r)) where {B,D}
+function YaoBase.relax!(r::AbstractArrayReg{D}, locs; to_nactive::Int = nqudits(r)) where {D}
     r.state = reshape(state(r), D^to_nactive, :)
     if !is_order_same(locs)
         new_orders = TupleTools.invperm(move_ahead(to_nactive + 1, locs))
@@ -116,19 +116,20 @@ function YaoBase.relax!(r::ArrayReg{B,D}, locs; to_nactive::Int = nqudits(r)) wh
     return r
 end
 
-function YaoBase.partial_tr(r::ArrayReg{B}, locs) where {B}
+function YaoBase.partial_tr(r::AbstractArrayReg{D}, locs) where D
     orders = setdiff(1:nqudits(r), locs)
-    focus!(r, orders)
-    state = sum(rank3(r); dims = 2)
-    relax!(r, orders)
-    return normalize!(ArrayReg(state))
+    r2 = focus!(copy(r), orders)
+    state = sum(rank3(r2); dims = 2)
+    return normalize!(arrayreg(reshape(state, :, size(state, 3)); nbatch=nbatch(r), nlevel=D))
 end
 
 """
-    exchange_sysenv(reg::ArrayReg) -> ArrayReg
+    exchange_sysenv(reg::AbstractArrayReg) -> AbstractRegister
 
 Exchange system (focused qubits) and environment (remaining qubits).
 """
-function exchange_sysenv(reg::ArrayReg{B}) where {B}
-    ArrayReg{B}(reshape(permutedims(rank3(reg), (2, 1, 3)), :, size(reg.state, 1) * B))
+function exchange_sysenv(reg::AbstractArrayReg)
+    r3 = rank3(reg)
+    M, N, B = size(r3)
+    arrayreg(reshape(permutedims(r3, (2, 1, 3)), :, M*B); nbatch=nbatch(reg), nlevel=nlevel(reg))
 end

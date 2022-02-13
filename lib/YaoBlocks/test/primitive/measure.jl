@@ -3,7 +3,7 @@ using StatsBase: mean
 
 @testset "measure ghz" begin
     # GHZ state
-    st = normalize!(ArrayReg(bit"0000") + ArrayReg(bit"1111"))
+    st = normalize!(arrayreg(bit"0000") + arrayreg(bit"1111"))
     Random.seed!(1234)
 
     # measure it at 1, 2
@@ -105,7 +105,7 @@ end
 
     # batched
     reg =
-        ArrayReg(reshape(ComplexF64[1/sqrt(2), 0, 0, 1/sqrt(2), 0.5, 0.5, 0.5, 0.5], 4, 2))
+        BatchedArrayReg(reshape(ComplexF64[1/sqrt(2), 0, 0, 1/sqrt(2), 0.5, 0.5, 0.5, 0.5], 4, 2))
     res = measure!(op, reg)
     @test length(reg) == 2 && res[1] == 1
     @test reg.state[:, 1] ≈ ComplexF64[1/sqrt(2), 0, 0, 1/sqrt(2)]
@@ -114,11 +114,11 @@ end
 
     # with virtual dimension
     reg =
-        ArrayReg{1}(
+        ArrayReg(
             reshape(ComplexF64[1/sqrt(2), 0, 0, 1/sqrt(2), 0.5, 0.5, 0.5, 0.5], 4, 2),
         ) / sqrt(2)
     res = measure!(op, reg)
-    @test length(reg) == 1
+    @test reg isa ArrayReg
     c = count(!iszero, reg.state)
     @test (c == 4 && res ≈ 1) || (c == 2 && res == -1)
     @test isnormalized(reg)

@@ -27,10 +27,10 @@ import YaoAPI:
     nqubits,
     nremain,
     nactive,
-    nbatch,
     viewbatch,
     addbits!,
     insert_qudits!,
+    insert_qubits!,
     measure,
     measure!,
     occupied_locs,
@@ -52,7 +52,6 @@ include("abstract_register.jl")
 include("adjoint_register.jl")
 
 include("inspect.jl")
-include("instruct.jl")
 
 # compat with older version of dependencies
 include("compat.jl")

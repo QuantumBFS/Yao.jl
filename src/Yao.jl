@@ -14,9 +14,6 @@ Extensible Framework for Quantum Algorithm Design for Humans.
 """
 const 幺 = Yao
 
-include("EasyBuild/easybuild.jl")
-include("deprecations.jl")
-
 using Reexport
 @reexport using YaoBase, YaoArrayRegister, YaoBlocks, YaoSym
 export EasyBuild
@@ -30,5 +27,9 @@ using YaoBlocks:
     print_prefix,
     print_title,
     print_block
+
+
+include("deprecations.jl")
+include("EasyBuild/easybuild.jl")
 
 end # module

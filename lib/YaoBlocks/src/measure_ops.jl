@@ -157,10 +157,11 @@ end
 function YaoBase.measure!(
     ::NoPostProcess,
     bb::BlockedBasis,
-    reg::ArrayReg{B,D,T},
+    reg::AbstractArrayReg{D,T},
     ::AllLocs;
     rng::AbstractRNG = Random.GLOBAL_RNG,
-) where {B,D,T}
+) where {D,T}
+    B = YaoArrayRegister._asint(nbatch(reg))
     state = @inbounds (reg|>rank3)[bb.perm, :, :]  # permute to make eigen values sorted
     pl = dropdims(sum(abs2, state, dims = 2), dims = 2)
     pl_block = zeros(eltype(pl), nblocks(bb), B)
@@ -189,7 +190,7 @@ function YaoBase.measure!(
             rstate[bb.perm[i], j] = _state[i, j]
         end
     end
-    return B == 1 ? bb.values[res[]] : bb.values[res]
+    return reg isa ArrayReg ? bb.values[res[]] : bb.values[res]
 end
 
 function YaoBase.measure!(

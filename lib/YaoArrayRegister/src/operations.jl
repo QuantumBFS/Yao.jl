@@ -9,25 +9,25 @@ export isnormalized, normalize!, regadd!, regsub!, regscale!, norm
 
 Check if the register is normalized.
 """
-isnormalized(r::ArrayReg) =
+isnormalized(r::AbstractArrayReg) =
     all(sum(copy(r) |> relax!(to_nactive = nqudits(r)) |> probs, dims = 1) .≈ 1)
 isnormalized(r::AdjointArrayReg) = isnormalized(parent(r))
 
 """
-    normalize!(r::ArrayReg)
+    normalize!(r::AbstractArrayReg)
 
 Normalize the register `r` in-place by its `2`-norm.
 """
-function LinearAlgebra.normalize!(r::ArrayReg{B}) where {B}
-    batch_normalize!(reshape(r.state, :, B))
+function LinearAlgebra.normalize!(r::AbstractArrayReg)
+    batch_normalize!(reshape(r.state, :, _asint(nbatch(r))))
     return r
 end
 
 LinearAlgebra.normalize!(r::AdjointArrayReg) = (normalize!(parent(r)); r)
 
-LinearAlgebra.norm(r::ArrayReg{1}) = norm(statevec(r))
-LinearAlgebra.norm(r::ArrayReg{B}) where {B} =
-    [norm(view(reshape(r.state, :, B), :, ib)) for ib = 1:B]
+LinearAlgebra.norm(r::ArrayReg) = norm(statevec(r))
+LinearAlgebra.norm(r::BatchedArrayReg) =
+    [norm(view(reshape(r.state, :, nbatch(r)), :, ib)) for ib = 1:nbatch(r)]
 
 # basic arithmatics
 
@@ -37,97 +37,93 @@ Base.:-(reg::AdjointArrayReg) = adjoint(-parent(reg))
 
 # +, -
 for op in [:+, :-]
-    @eval function Base.$op(lhs::ArrayReg{B}, rhs::ArrayReg{B}) where {B}
-        return ArrayReg(($op)(state(lhs), state(rhs)))
+    @eval function Base.$op(lhs::AbstractArrayReg{D}, rhs::AbstractArrayReg{D}) where D
+        @assert nbatch(lhs) == nbatch(rhs)
+        return arrayreg(($op)(state(lhs), state(rhs)); nbatch=nbatch(lhs), nlevel=D)
     end
 
     @eval function Base.$op(
-        lhs::ArrayReg{B,T1,<:Transpose},
-        rhs::ArrayReg{B,T2,<:Transpose},
-    ) where {B,T1,T2}
-        return ArrayReg(transpose(($op)(state(lhs).parent, state(rhs).parent)))
+        lhs::AbstractArrayReg{D,T1,<:Transpose},
+        rhs::AbstractArrayReg{D,T2,<:Transpose},
+    ) where {D,T1,T2}
+        @assert nbatch(lhs) == nbatch(rhs)
+        return arrayreg(transpose(($op)(state(lhs).parent, state(rhs).parent)); nbatch=nbatch(lhs), nlevel=D)
     end
 
-    @eval function Base.$op(lhs::AdjointArrayReg{B}, rhs::AdjointArrayReg{B}) where {B}
+    @eval function Base.$op(lhs::AdjointArrayReg{D}, rhs::AdjointArrayReg{D}) where {D}
         r = $op(parent(lhs), parent(rhs))
         return adjoint(r)
     end
 end
 
-function regadd!(lhs::ArrayReg{B}, rhs::ArrayReg{B}) where {B}
+function regadd!(lhs::AbstractArrayReg{D}, rhs::AbstractArrayReg{D}) where {D}
+    @assert nbatch(lhs) == nbatch(rhs)
     lhs.state .+= rhs.state
     lhs
 end
 
-function regsub!(lhs::ArrayReg{B}, rhs::ArrayReg{B}) where {B}
+function regsub!(lhs::AbstractArrayReg{D}, rhs::AbstractArrayReg{D}) where {D}
+    @assert nbatch(lhs) == nbatch(rhs)
     lhs.state .-= rhs.state
     lhs
 end
 
 function regadd!(
-    lhs::ArrayReg{B,T1,<:Transpose},
-    rhs::ArrayReg{B,T2,<:Transpose},
-) where {B,T1,T2}
+    lhs::AbstractArrayReg{D,T1,<:Transpose},
+    rhs::AbstractArrayReg{D,T2,<:Transpose},
+) where {D,T1,T2}
+    @assert nbatch(lhs) == nbatch(rhs)
     lhs.state.parent .+= rhs.state.parent
     lhs
 end
 
 function regsub!(
-    lhs::ArrayReg{B,T1,<:Transpose},
-    rhs::ArrayReg{B,T2,<:Transpose},
-) where {B,T1,T2}
+    lhs::AbstractArrayReg{D,T1,<:Transpose},
+    rhs::AbstractArrayReg{D,T2,<:Transpose},
+) where {D,T1,T2}
+    @assert nbatch(lhs) == nbatch(rhs)
     lhs.state.parent .-= rhs.state.parent
     lhs
 end
 
-function regscale!(reg::ArrayReg{B,T1,<:Transpose}, x) where {B,T1}
+function regscale!(reg::AbstractArrayReg{D,T1,<:Transpose}, x) where {D,T1}
     reg.state.parent .*= x
     reg
 end
 
-function regscale!(reg::ArrayReg{B}, x) where {B,T1}
+function regscale!(reg::AbstractArrayReg{D}, x) where {D}
     reg.state .*= x
     reg
 end
 
 # *, /
 for op in [:*, :/]
-    @eval function Base.$op(lhs::RT, rhs::Number) where {B,RT<:ArrayReg{B}}
-        ArrayReg{B}($op(state(lhs), rhs))
+    @eval function Base.$op(lhs::AbstractArrayReg, rhs::Number)
+        arrayreg($op(state(lhs), rhs); nbatch=nbatch(lhs), nlevel=nlevel(lhs))
     end
 
-    @eval function Base.$op(lhs::RT, rhs::Number) where {B,RT<:AdjointArrayReg{B}}
+    @eval function Base.$op(lhs::AdjointArrayReg, rhs::Number)
         r = $op(parent(lhs), rhs')
         return adjoint(r)
     end
 
     if op == :*
-        @eval function Base.$op(lhs::Number, rhs::RT) where {B,RT<:ArrayReg{B}}
-            ArrayReg{B}(lhs * state(rhs))
+        @eval function Base.$op(lhs::Number, rhs::AbstractArrayReg)
+            arrayreg(lhs * state(rhs); nbatch=nbatch(rhs), nlevel=nlevel(rhs))
         end
 
-        @eval function Base.$op(lhs::Number, rhs::RT) where {B,RT<:AdjointArrayReg{B}}
+        @eval function Base.$op(lhs::Number, rhs::AdjointArrayReg)
             r = lhs' * parent(rhs)
             return adjoint(r)
         end
     end
 end
 
-for AT in [:ArrayReg, :AdjointArrayReg]
-    @eval function Base.:(==)(lhs::$AT, rhs::$AT)
-        state(lhs) == state(rhs)
-    end
-
-    @eval function Base.isapprox(lhs::$AT, rhs::$AT; kw...)
-        isapprox(state(lhs), state(rhs); kw...)
-    end
-end
-
-function Base.:*(bra::AdjointArrayReg{1}, ket::ArrayReg{1})
+function Base.:*(bra::AdjointRegister{D,<:ArrayReg}, ket::ArrayReg{D}) where D
     if nremain(bra) == nremain(ket)
         return dot(relaxedvec(parent(bra)), relaxedvec(ket))
     elseif nremain(bra) == 0 # <s|active> |remain>
-        return ArrayReg{1}(state(bra) * state(ket))
+        return ArrayReg{D}(state(bra) * state(ket))
     else
         error(
             "partially contract ⟨bra|ket⟩ is not supported, expect ⟨bra| to be fully actived. nactive(bra)/nqudits(bra)=$(nactive(bra))/$(nqudits(bra))",
@@ -135,14 +131,14 @@ function Base.:*(bra::AdjointArrayReg{1}, ket::ArrayReg{1})
     end
 end
 
-Base.:*(bra::AdjointArrayReg{B}, ket::ArrayReg{B}) where {B} = bra .* ket
+Base.:*(bra::AdjointRegister{D,<:BatchedArrayReg}, ket::BatchedArrayReg{D}) where D = bra .* ket
 function Base.:*(
-    bra::AdjointArrayReg{B,T1,<:Transpose},
-    ket::ArrayReg{B,T2,<:Transpose},
-) where {B,T1,T2}
+    bra::AdjointRegister{D,<:BatchedArrayReg{D, T1, <:Transpose}},
+    ket::BatchedArrayReg{D,T2,<:Transpose},
+) where {D,T1,T2}
     if nremain(bra) == nremain(ket) == 0 # all active
         A, C = parent(state(parent(bra))), parent(state(ket))
-        res = zeros(eltype(promote_type(T1, T2)), B)
+        res = zeros(eltype(promote_type(T1, T2)), nbatch(ket))
         #return mapreduce((x, y) -> conj(x) * y, +, ; dims=2)
         for j = 1:size(A, 2)
             for i = 1:size(A, 1)
@@ -160,5 +156,18 @@ function Base.:*(
 end
 
 # broadcast
-broadcastable(r::ArrayRegOrAdjointArrayReg{1}) = Ref(r)
-broadcastable(r::ArrayRegOrAdjointArrayReg{B}) where {B} = (each for each in r)
+broadcastable(r::AdjointRegister{D, <:BatchedArrayReg{D}}) where {D} = (each for each in r)
+
+for AT in [:AbstractArrayReg, :AdjointArrayReg]
+    @eval function Base.:(==)(lhs::$AT, rhs::$AT)
+        nbatch(lhs) == nbatch(rhs) &&
+        nlevel(lhs) == nlevel(rhs) &&
+        state(lhs) == state(rhs)
+    end
+
+    @eval function Base.isapprox(lhs::$AT, rhs::$AT; kw...)
+        nbatch(lhs) == nbatch(rhs) &&
+        nlevel(lhs) == nlevel(rhs) &&
+        isapprox(state(lhs), state(rhs); kw...)
+    end
+end

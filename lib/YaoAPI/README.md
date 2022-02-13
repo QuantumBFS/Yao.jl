@@ -21,7 +21,7 @@ AbstractRegister, AdjointRegister, AllLocs, ComputationalBasis,
 DensityMatrix, NoPostProcess, NotImplementedError,
 PostProcess, RemoveMeasured, ResetTo, addbits!,
 collapseto!, density_matrix, fidelity, focus!, insert_qubits!, instruct!,
-invorder!, measure, measure!, nactive, nbatch, nqubits, nremain,
+invorder!, measure, measure!, nactive, nqubits, nqudits, nremain,
 partial_tr, probs, purify, relax!, reorder!, select, select!, tracedist,
 viewbatch, ρ
 

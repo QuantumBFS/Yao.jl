@@ -37,7 +37,7 @@ end
     )
     @test Zygote.gradient(x -> real(expect(h, ArrayReg(x))), r.state)[1] ≈ g0
     @test Zygote.gradient(
-        x -> real(expect(h, ArrayReg{1}(reshape(statevec(x), :, 1)))),
+        x -> real(expect(h, ArrayReg(reshape(statevec(x), :, 1)))),
         r,
     )[1].state ≈ g0
     @test Zygote.gradient(

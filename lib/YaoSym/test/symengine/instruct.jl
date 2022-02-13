@@ -12,7 +12,7 @@ using YaoBlocks, LuxurySparse
         # print reg2 errors
     end
 
-    reg2 = ArrayReg(bit"0011")
+    reg2 = arrayreg(bit"0011")
     reg1 = ArrayReg(Basic.(state(reg2)))
     for GC in [Rx, Ry, Rz, shift, phase, θ -> rot(SWAP, θ)]
         G = GC(θ)
@@ -32,7 +32,7 @@ using YaoBlocks, LuxurySparse
     l1 = length(string(res.state.nzval[2]))
     res.state.nzval .= simplify_expi.(res.state.nzval)
     @test length(string(res.state.nzval[2])) < l1
-    @test res ≈ ArrayReg(bit"11") |> qft(Float64, 2)
+    @test res ≈ arrayreg(bit"11") |> qft(Float64, 2)
 end
 
 @testset "apply rot SWAP" begin

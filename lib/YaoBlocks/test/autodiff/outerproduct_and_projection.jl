@@ -24,7 +24,11 @@ using Test
         @test transpose(A) == transpose(a)
         @test conj(A) == conj(a)
         @test conj!(A) == conj!(a)
-        outerprod(ArrayReg(l), ArrayReg(r)) == a
+        if l isa Vector
+            outerprod(ArrayReg(l), ArrayReg(r)) == a
+        else
+            outerprod(BatchedArrayReg(l), BatchedArrayReg(r)) == a
+        end
     end
 end
 

@@ -109,7 +109,7 @@ function print_amp(io::IO, x)
     end
 end
 
-function print_sym_state(io::IO, r::ArrayReg{1})
+function print_sym_state(io::IO, r::ArrayReg)
     st = state(r)
     m, n = size(st)
     isfirst_nonzero = true
@@ -134,7 +134,7 @@ function print_sym_state(io::IO, r::ArrayReg{1})
     end
 end
 
-function print_sym_state(io::IO, r::AdjointArrayReg{1})
+function print_sym_state(io::IO, r::AdjointRegister{D,<:ArrayReg{D}}) where D
     st = state(r)
     m, n = size(st)
     isfirst_nonzero = true

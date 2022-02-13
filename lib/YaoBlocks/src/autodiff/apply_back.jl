@@ -51,7 +51,8 @@ function apply_back!(st, block::TimeEvolution{N}, collector) where {N}
 
     out, outδ = st
     input = apply!(out, adjblock)
-    for o in outδ
+    for i=1:YaoArrayRegister._asint(nbatch(outδ))
+        o = viewbatch(outδ, i)
         !all(x -> x ≈ 0.0im, o.state) && apply!(o, adjblock)
     end
     pushfirst!(collector, -sum(imag(input' * apply!(copy(outδ), block.H))))
@@ -145,11 +146,11 @@ function backward_params!(st, block::Rotor, collector)
 end
 
 """
-    apply_back(st::Tuple{<:ArrayReg, <:ArrayReg}, block::AbstractBlock; kwargs...) -> (out, outδ), paramsδ
+    apply_back(st::Tuple{<:AbstractArrayReg, <:AbstractArrayReg}, block::AbstractBlock; kwargs...) -> (out, outδ), paramsδ
 
 The backward function of `apply!`. Returns a tuple of ((input register, gradient of input register), parameter gradients)
 """
-function apply_back(st::Tuple{<:ArrayReg,<:ArrayReg}, block::AbstractBlock; kwargs...)
+function apply_back(st::Tuple{<:AbstractArrayReg,<:AbstractArrayReg}, block::AbstractBlock; kwargs...)
     col = []
     in, inδ = apply_back!(st, block, col; kwargs...)
     (in, inδ), col
