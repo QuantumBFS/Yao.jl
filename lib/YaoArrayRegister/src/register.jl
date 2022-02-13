@@ -468,7 +468,7 @@ function product_state(
     return arrayreg(raw; nbatch=nbatch, nlevel=nlevel)
 end
 
-function onehot(::Type{T}, nbits::Int, x::Integer, nbatch::Int, nlevel::Int) where {T}
+function BitBasis.onehot(::Type{T}, nbits::Int, x::Integer, nbatch::Int, nlevel::Int) where {T}
     v = zeros(T, nlevel ^ nbits, nbatch)
     v[x+1, :] .= 1
     return v
