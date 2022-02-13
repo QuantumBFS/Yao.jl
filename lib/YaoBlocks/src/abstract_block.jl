@@ -30,7 +30,7 @@ Pipe operator for quantum circuits.
 # Example
 
 ```julia
-julia> ArrayReg(bit"0") |> X |> Y
+julia> arrayreg(bit"0") |> X |> Y
 ```
 
 !!! warning

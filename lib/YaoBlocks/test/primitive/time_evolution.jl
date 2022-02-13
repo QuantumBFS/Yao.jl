@@ -71,3 +71,11 @@ end
     @test ishermitian(BlockMap(ComplexF64, X))
     @test size(BlockMap(ComplexF64, X)) == (2, 2)
 end
+
+@testset "qudits" begin
+    reg = zero_state(1; nlevel=3)
+    H = randn(ComplexF64, 3,3)
+    reg2 = apply(reg, time_evolve(matblock(H + H'; nlevel=3), 0.5))
+    @test nlevel(reg2) == 3
+    @test isnormalized(reg2)
+end

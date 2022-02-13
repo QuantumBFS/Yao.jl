@@ -57,9 +57,9 @@ Base.size(bm::BlockMap{T,GT}, i::Int) where {T,N,D,GT<:AbstractBlock{N,D}} =
 Base.size(bm::BlockMap{T,GT}) where {T,N,D,GT<:AbstractBlock{N,D}} = (L = D^N; (L, L))
 LinearAlgebra.ishermitian(bm::BlockMap) = ishermitian(bm.block)
 
-function LinearAlgebra.mul!(y::AbstractVector, A::BlockMap, x::AbstractVector)
+function LinearAlgebra.mul!(y::AbstractVector, A::BlockMap{T,GT}, x::AbstractVector) where {T,N,D,GT<:AbstractBlock{N,D}}
     copyto!(y, x)
-    apply!(ArrayReg(y), A.block)
+    apply!(ArrayReg{D}(y), A.block)
     return y
 end
 
