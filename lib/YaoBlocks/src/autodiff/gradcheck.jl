@@ -64,11 +64,11 @@ end
 
 function test_mat_back(
     T,
-    block::AbstractBlock{N},
+    block::AbstractBlock{D},
     param;
     δ = 1e-5,
     use_outeradj::Bool = false,
-) where {N}
+) where {D}
     function mfunc(param)
         dispatch!(block, param)
         mat(T, block)
@@ -87,11 +87,11 @@ end
 
 function test_apply_back(
     reg0,
-    block::AbstractBlock{N},
+    block::AbstractBlock{D},
     param;
     δ = 1e-5,
     kwargs...,
-) where {N}
+) where {D}
     function mfunc(param)
         dispatch!(block, param)
         apply!(copy(reg0), block).state

@@ -31,12 +31,12 @@ function dump_gate(blk::PutBlock)
     :($(blk.locs) => $(dump_gate(blk.content)))
 end
 
-function dump_gate(blk::KronBlock{N}) where {N}
+function dump_gate(blk::KronBlock)
     if any(x -> nqubits(x) != 1, subblocks(blk))
         error("unsupported multi-qubit in kron while dumping to Yao script.")
     end
-    if length(occupied_locs(blk)) == N
-        :(kron($([dump_gate(blk[i]) for i = 1:N]...)))
+    if length(occupied_locs(blk)) == nqudits(blk)
+        :(kron($([dump_gate(blk[i]) for i = 1:nqudits(blk)]...)))
     else
         :(($([:($i => $(dump_gate(g))) for (i, g) in blk]...),))
     end
@@ -62,7 +62,7 @@ function dump_gate(blk::Scale)
     :($(factor(blk)) * $(dump_gate(blk.content)))
 end
 
-function dump_gate(blk::Measure{N,M}) where {M,N}
+function dump_gate(blk::Measure)
     if blk.operator == ComputationalBasis()
         MOP = :(Measure)
     else
@@ -84,11 +84,11 @@ end
 
 tokenize_param(param::Number) = param
 
-yaotoscript(block::AbstractBlock{N}) where {N} =
-    Expr(:block, :(nqubits = $N), dump_gate(block)) |> rmlines
-function yaotoscript(block::ChainBlock{N}) where {N}
+yaotoscript(block::AbstractBlock) =
+    Expr(:block, :(nqubits = $(nqudits(block))), dump_gate(block)) |> rmlines
+function yaotoscript(block::ChainBlock)
     ex = dump_gate(block)
-    Expr(:let, Expr(:block, :(nqubits = $N), :(version = "0.6")), ex)
+    Expr(:let, Expr(:block, :(nqubits = $(nqudits(block))), :(version = "0.6")), ex)
 end
 yaotofile(filename::String, block) = write(filename, string(yaotoscript(block)))
 

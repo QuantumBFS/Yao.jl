@@ -2,7 +2,6 @@
 circuit optimisation
 """
 module Optimise
-using SimpleTraits
 using YaoBlocks, YaoBlocks.ConstGate
 using YaoBlocks: NotImplementedError
 
@@ -34,27 +33,23 @@ function replace_block(
 end
 
 
-export is_pauli, IsPauliGroup
-
-"""
-    IsPauliGroup{X}
-
-Trait to check if `X` is an element of Pauli group.
-"""
-@traitdef IsPauliGroup{X}
-IsPauliGroup(x) = IsPauliGroup{typeof(x)}()
+export is_pauli
 
 """
     is_pauli(x)
 
 Check if `x` is an element of pauli group.
-
-!!! note
-    this function is just a binding of `SimpleTraits.istrait`, it will not work
-    if the type is not registered as a trait with `@traitimpl`.
 """
-is_pauli(x::T) where {T} = SimpleTraits.istrait(IsPauliGroup{T})
 is_pauli(xs...) = all(is_pauli, xs)
+is_pauli(::Union{XGate,YGate, ZGate, I2Gate}) = true
+is_pauli(::AbstractBlock) = false
+function is_pauli(s::Scale)
+    if factor(s) == im || factor(s) == -im || factor(s) == 1 || factor(s) == -1
+        return is_pauli(content(s))
+    else
+        return false
+    end
+end
 
 for G in [:I2, :X, :Y, :Z]
     ImG = Symbol(:Im, G)
@@ -64,18 +59,16 @@ for G in [:I2, :X, :Y, :Z]
     @eval const $ImG = im * $G
     @eval const $nImG = -im * $G
     @eval const $nG = -$G
-
-    @eval @traitimpl IsPauliGroup{typeof($G)}
-    @eval @traitimpl IsPauliGroup{typeof($ImG)}
-    @eval @traitimpl IsPauliGroup{typeof($nImG)}
-    @eval @traitimpl IsPauliGroup{typeof($nG)}
 end
 
 export merge_pauli
 merge_pauli(x) = x
 merge_pauli(x::AbstractBlock, y::AbstractBlock) = x * y
 
-function merge_pauli(ex::ChainBlock{1})
+function merge_pauli(ex::ChainBlock)
+    if ex.n != 1
+        return ex
+    end
     L = length(ex)
     new_ex = chain(1)
 
@@ -121,7 +114,7 @@ function eliminate_nested(ex::T) where {T<:Union{ChainBlock,Add}}
     _flatten(x::T) = subblocks(x)
 
     isone(length(ex)) && return first(subblocks(ex))
-    return chsubblocks(ex, Iterators.flatten(map(_flatten, subblocks(ex))))
+    return chsubblocks(ex, collect(AbstractBlock{nlevel(ex)}, Iterators.flatten(map(_flatten, subblocks(ex)))))
 end
 
 # temporary utils
@@ -168,9 +161,9 @@ combine_alpha(alpha, x::AbstractBlock) = alpha + 1
 combine_alpha(alpha, x::Scale) = alpha + x.alpha
 combine_alpha(alpha, x::Scale{Val{S}}) where {S} = alpha + S
 
-function combine_similar(ex::Add{N}) where {N}
+function combine_similar(ex::Add{D}) where D
     table = zeros(Bool, length(ex))
-    list = []
+    list = AbstractBlock{D}[]
     p = 1
     while p <= length(ex)
         if table[p] == true
@@ -205,9 +198,9 @@ function combine_similar(ex::Add{N}) where {N}
     end
 
     if isempty(list)
-        return Add{N}()
+        return Add(ex.n)
     else
-        return Add(list...)
+        return Add(ex.n, list)
     end
 end
 

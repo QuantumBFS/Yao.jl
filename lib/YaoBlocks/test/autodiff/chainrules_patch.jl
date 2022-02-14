@@ -10,11 +10,11 @@ using ChainRulesCore: Tangent
 end
 
 @testset "construtors" begin
-    @test Zygote.gradient(x -> x.list[1].blocks[1].theta, sum([chain(1, Rz(0.3))]))[1] == (
+    @test Zygote.gradient(x -> x.list[1].blocks[1].theta, sum([chain(1, Rz(0.3))]))[1] == (n=nothing,
         list = NamedTuple{
-            (:blocks,),
-            Tuple{Vector{NamedTuple{(:block, :theta),Tuple{Nothing,Float64}}}},
-        }[(blocks = [(block = nothing, theta = 1.0)],)],
+            (:n, :blocks,),
+            Tuple{Nothing, Vector{NamedTuple{(:block, :theta),Tuple{Nothing,Float64}}}},
+        }[(n=nothing, blocks = [(block = nothing, theta = 1.0)],)],
     )
     @test_broken Zygote.gradient(
         x -> getfield(getfield(x, :content), :theta),

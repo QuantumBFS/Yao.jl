@@ -70,20 +70,37 @@ end
 end
 
 @testset "inplace funcs" begin
-    for nbatch in [1, 10]
-        reg = rand_state(5; nbatch = nbatch)
+    for reg in [
+            rand_state(5; nbatch = NoBatch()),
+            rand_state(5; nbatch = 3),
+            transpose_storage(rand_state(5; nbatch = 3)),
+        ]
         reg0 = copy(reg)
         @test regscale!(reg, 0.3) ≈ 0.3 * reg0
-        reg1 = rand_state(5; nbatch = nbatch)
-        reg2 = rand_state(5; nbatch = nbatch)
+        reg1 = rand_state(5; nbatch = nbatch(reg))
+        reg2 = rand_state(5; nbatch = nbatch(reg))
         reg10 = copy(reg1)
         regsub!(reg1, reg2)
         @test reg1 ≈ reg10 - reg2
 
-        reg1 = rand_state(5; nbatch = nbatch)
-        reg2 = rand_state(5; nbatch = nbatch)
+        reg1 = rand_state(5; nbatch = nbatch(reg))
+        reg2 = rand_state(5; nbatch = nbatch(reg))
         reg10 = copy(reg1)
         regadd!(reg1, reg2)
         @test reg1 ≈ reg10 + reg2
     end
+end
+
+
+@testset "more (push test coverage)" begin
+    reg1 = focus!(rand_state(5; nbatch=5), (2, 3))
+    reg2 = focus!(rand_state(5), (2, 3))
+    @test fidelity(reg1, reg2) ≈ fidelity(reg2, reg1)
+    @test join(reg1) == reg1
+    us = uniform_state(3; nlevel=3, nbatch=2)
+    @test nbatch(us) == 2
+    @test nlevel(us) == 3
+    println(reg1)
+    println(reg2)
+    @test von_neumann_entropy(repeat(reg2, 3), [2,1]) ≈ fill(von_neumann_entropy(reg2, [1,2]), 3)
 end

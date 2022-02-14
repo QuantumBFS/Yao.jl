@@ -37,21 +37,21 @@ CacheServers.pull(frag::CacheFragment) = frag.storage[cache_key(frag.ref)]
 CacheServers.clear!(frag::CacheFragment) = (empty!(frag.storage); frag)
 
 """
-    CachedBlock{ST, BT, N, D} <: TagBlock{BT, N, D}
+    CachedBlock{ST, BT, D} <: TagBlock{BT, D}
 
 A label type that tags an instance of type `BT`. It forwards
 every methods of the block it contains, except [`mat`](@ref)
 and [`apply!`](@ref), it will cache the matrix form whenever
 the program has.
 """
-struct CachedBlock{ST,BT,N, D} <: TagBlock{BT,N,D}
+struct CachedBlock{ST,BT,D} <: TagBlock{BT,D}
     server::ST
     content::BT
     level::Int
 
-    function CachedBlock(server::ST, x::BT, level::Int) where {ST,N,D,BT<:AbstractBlock{N,D}}
+    function CachedBlock(server::ST, x::BT, level::Int) where {ST,D,BT<:AbstractBlock{D}}
         alloc!(server, x, CacheFragment(x))
-        new{ST,BT,N,D}(server, x, level)
+        new{ST,BT,D}(server, x, level)
     end
 end
 
@@ -130,10 +130,8 @@ nqudits: 3
 julia> chain(cache(control(3, 1, 2=>X)), repeat(H))
 nqudits: 3
 chain
-├─ [cached] control(1)
-│     └─ (2,) X
-└─ repeat on (1, 2, 3)
-   └─ H
+└─ [cached] control(1)
+      └─ (2,) X
 
 ```
 """

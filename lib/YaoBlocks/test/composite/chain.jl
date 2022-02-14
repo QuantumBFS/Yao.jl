@@ -4,10 +4,10 @@ using LuxurySparse
 @testset "test constructors" begin
     g = ChainBlock(kron(2, 1 => X, 2 => Y), kron(2, 1 => phase(0.1)))
 
-    @test g isa ChainBlock{2} # default type
+    @test g isa ChainBlock && g.n == 2 # default type
     @test g.blocks == [kron(2, X, Y), kron(2, 1 => phase(0.1))]
     blks = [X, Y, Rx(0.3)]
-    @test chsubblocks(g, blks) |> subblocks |> collect == blks
+    @test_throws QubitMismatchError chsubblocks(g, blks) |> subblocks |> collect == blks
     @test chsubblocks(chain(X, Y, Z), X for _ = 1:3) |> subblocks |> collect == [X, X, X]
 
     c1 = ChainBlock(put(5, 1 => X), put(5, 3 => Y))
@@ -16,7 +16,7 @@ using LuxurySparse
     @test iscommute(c1, c2, c2)
     @test ishermitian(ChainBlock(c1, c2))
 
-    c = ChainBlock{1}([X, Y])
+    c = ChainBlock(1, [X, Y])
     c[1] = put(1, 1 => X)
     @test c[1] == put(1, 1 => X)
     c = ChainBlock([X, Y])

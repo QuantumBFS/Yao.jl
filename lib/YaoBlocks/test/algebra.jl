@@ -1,6 +1,7 @@
 using Test, YaoBlocks, YaoArrayRegister
 import YaoBlocks.ConstGate: Toffoli
 using YaoBase: QubitMismatchError
+using LinearAlgebra: I
 
 @testset "construction" begin
     @test X + Y + Z == +(X, Y, Z)
@@ -53,10 +54,10 @@ end
           apply!(copy(reg), ad[1]) + apply!(copy(reg), ad[2]) + apply!(copy(reg), ad[3]) |>
           state
 
-    @test Add{3}() isa Add
-    @test Add{3}([put(3, 3 => X)]) isa Add
-    @test_throws MethodError Add{3}([put(10, 2 => X)])
-    @test_throws MethodError Add(put(10, 2 => X), put(4, 3 => X))
+    @test Add(3) isa Add
+    @test Add(3, [put(3, 3 => X)]) isa Add
+    @test_throws QubitMismatchError Add(3, [put(10, 2 => X)])
+    @test_throws QubitMismatchError Add(put(10, 2 => X), put(4, 3 => X))
     @test_throws QubitMismatchError apply!(rand_state(2), Add(put(10, 2 => X)))
 end
 
@@ -67,6 +68,17 @@ end
 end
 
 @testset "empty add" begin
-    c = Add{4}()
+    c = Add(4)
     @test mat(Float64, c) == zeros(16, 16)
+end
+
+@testset "algebra" begin
+    @test factor(-X) == -1
+    @test -(-X) === X
+    @test factor(-(2X)) === -2
+    @test factor((2X)*(2X)) == 4
+    @test factor((2X)*Y) == 2
+    @test factor(X*(2Y)) == 2
+    @test factor(2(-X)) === -2
+    @test mat(X^2) ≈ Matrix(I, 2, 2)
 end

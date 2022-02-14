@@ -207,7 +207,7 @@ print_block(io::IO, c::TagBlock) = nothing
 print_block(io::IO, c::GeneralMatrixBlock) =
     printstyled(io, "matblock(...)"; color = color(GeneralMatrixBlock))
 
-function print_block(io::IO, c::Measure{N,K,OT}) where {N,K,OT}
+function print_block(io::IO, c::Measure{D,K,OT}) where {D,K,OT}
     strs = String[]
     if c.operator != ComputationalBasis()
         push!(strs, "operator=$(repr(c.operator))")
@@ -223,9 +223,9 @@ function print_block(io::IO, c::Measure{N,K,OT}) where {N,K,OT}
 
     out = join(strs, ", ")
     if !isempty(strs)
-        out = "Measure($N;" * out
+        out = "Measure($(nqudits(c));" * out
     else
-        out = "Measure($N" * out
+        out = "Measure($(nqudits(c))" * out
     end
 
     return print(io, out, ")")
@@ -252,7 +252,7 @@ function print_block(io::IO, x::ControlBlock)
     printstyled(io, ")"; bold = true, color = color(ControlBlock))
 end
 
-function print_block(io::IO, pb::PutBlock{N}) where {N}
+function print_block(io::IO, pb::PutBlock)
     printstyled(io, "put on ("; bold = true, color = color(PutBlock))
     for i in eachindex(pb.locs)
         printstyled(io, pb.locs[i]; bold = true, color = color(PutBlock))
@@ -263,7 +263,7 @@ function print_block(io::IO, pb::PutBlock{N}) where {N}
     printstyled(io, ")"; bold = true, color = color(PutBlock))
 end
 
-function print_block(io::IO, rb::RepeatedBlock{N}) where {N}
+function print_block(io::IO, rb::RepeatedBlock)
     printstyled(io, "repeat on ("; bold = true, color = color(RepeatedBlock))
     for i in eachindex(rb.locs)
         printstyled(io, rb.locs[i]; bold = true, color = color(RepeatedBlock))

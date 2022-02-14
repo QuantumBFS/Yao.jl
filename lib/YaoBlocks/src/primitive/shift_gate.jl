@@ -16,11 +16,12 @@ Phase shift gate.
 \\end{pmatrix}
 ```
 """
-mutable struct ShiftGate{T} <: PrimitiveBlock{1,2}
+mutable struct ShiftGate{T} <: PrimitiveBlock{2}
     theta::T
 end
 
 ShiftGate(theta::Integer) = ShiftGate(Float64(theta))
+nqudits(blk::ShiftGate) = 1
 
 """
     shift(θ)
@@ -59,6 +60,4 @@ function YaoBase.isunitary(r::ShiftGate)
     return isunitary(mat(r))
 end
 
-function parameters_range!(out::Vector{Tuple{T,T}}, gate::ShiftGate{T}) where {T}
-    push!(out, (0.0, 2.0 * pi))
-end
+iparams_range(::ShiftGate{T}) where {T} = ((zero(T), T(2.0 * pi)),)

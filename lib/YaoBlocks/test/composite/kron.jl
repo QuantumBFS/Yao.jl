@@ -4,7 +4,7 @@ using YaoBlocks.ConstGate
 function random_dense_kron(n; gateset)
     locs = randperm(n)
     blocks = [i => rand(gateset) for i in locs]
-    g = KronBlock{n}(blocks...)
+    g = KronBlock(n, blocks...)
     sorted_blocks = sort(blocks, by = x -> x[1])
     t = mapreduce(x -> mat(x[2]), kron, reverse(sorted_blocks), init = IMatrix(1))
     mat(g) ≈ t || @info(g)
@@ -20,14 +20,14 @@ function rand_kron_test(n; gateset)
     sorted = sort(mats, by = x -> x.first)
     mats = map(x -> x.second, reverse(sorted))
 
-    g = KronBlock{n}(seq...)
+    g = KronBlock(n, seq...)
     t = reduce(kron, mats, init = IMatrix(1))
     mat(g) ≈ t || @info(g)
 end
 
 
 @testset "test constructors" begin
-    @test_throws LocationConflictError KronBlock{5}(4 => CNOT, 5 => X)
+    @test_throws LocationConflictError KronBlock(5, 4 => CNOT, 5 => X)
     @test_throws MethodError kron(3, 1 => X, Y)
     @test kron(2 => X)(4) == kron(4, 2 => X)
     @test_throws LocationConflictError kron(10, (2, 3) => CNOT, [3] => Y)
@@ -55,8 +55,8 @@ end
         @test chsubblocks(g, blks) |> subblocks |> collect == blks
 
         m = kron(U2, Const.I2, U, Const.I2)
-        @test_throws LocationConflictError KronBlock{5}(4 => CNOT, 2 => X)
-        g = KronBlock{5}(4:5 => CNOT, 2 => X)
+        @test_throws LocationConflictError KronBlock(5, 4 => CNOT, 2 => X)
+        g = KronBlock(5, 4:5 => CNOT, 2 => X)
         @test m == mat(g)
         @test g.locs == (2:2, 4:5)
         @test occupied_locs(g) == (2, 4, 5)
@@ -64,13 +64,13 @@ end
 
     @testset "case 2" begin
         m = kron(mat(X), mat(Y), mat(Z))
-        g = KronBlock{3}(1 => Z, 2 => Y, 3 => X)
+        g = KronBlock(3, 1 => Z, 2 => Y, 3 => X)
         g1 = KronBlock(Z, Y, X)
         @test m == mat(g)
         @test m == mat(g1)
 
         m = kron(Const.I2, m)
-        g = KronBlock{4}(1 => Z, 2 => Y, 3 => X)
+        g = KronBlock(4, 1 => Z, 2 => Y, 3 => X)
         @test m == mat(g)
     end
 

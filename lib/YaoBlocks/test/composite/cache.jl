@@ -19,7 +19,7 @@ test_server = DefaultServer{AbstractBlock,CacheFragment}()
 
 @testset "constructor" begin
     c = CachedBlock(test_server, X, 2)
-    @test c isa CachedBlock{DefaultServer{AbstractBlock,CacheFragment},XGate,1}
+    @test c isa CachedBlock{DefaultServer{AbstractBlock,CacheFragment},XGate}
 
     blk = kron(4, 2 => Rx(0.3))
     @test first(chsubblocks(c, blk) |> subblocks) == blk

@@ -14,7 +14,7 @@ Return the raw state of density matrix `ρ`.
 """
 state(ρ::DensityMatrix) = ρ.state
 
-YaoBase.nqubits(ρ::DensityMatrix) = nqudits(state(ρ))
+YaoBase.nqubits(ρ::DensityMatrix) = nqudits(ρ)
 YaoBase.nqudits(ρ::DensityMatrix{D}) where {D} = logdi(size(state(ρ), 1), D)
 YaoBase.nactive(ρ::DensityMatrix) = nqudits(ρ)
 
@@ -27,7 +27,7 @@ function YaoBase.density_matrix(reg::ArrayReg, qubits)
     freg = focus!(copy(reg), qubits)
     return density_matrix(freg)
 end
-YaoBase.density_matrix(reg::ArrayReg) = DensityMatrix(reg.state * reg.state')
+YaoBase.density_matrix(reg::ArrayReg{D}) where D = DensityMatrix{D}(reg.state * reg.state')
 YaoBase.tracedist(dm1::DensityMatrix{D}, dm2::DensityMatrix{D}) where {D} = trnorm(dm1.state .- dm2.state)
 
 # TODO: use batch_broadcast in the future

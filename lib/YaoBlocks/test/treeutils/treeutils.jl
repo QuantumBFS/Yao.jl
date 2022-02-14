@@ -7,6 +7,12 @@ block_A(i, j) = control(i, j => shift(2π / (1 << (i - j + 1))))
 block_B(n, i) = chain(n, i == j ? put(i => H) : block_A(j, i) for j = i:n)
 qft(n) = chain(block_B(n, i) for i = 1:n)
 
+@testset "is pauli" begin
+    @test is_pauli(-im*X)
+    @test is_pauli(X, Z, -Z)
+    @test !is_pauli(X, Z, -2Z)
+end
+
 @testset "map address" begin
     # chain, put, concentrator
     c2 = map_address(

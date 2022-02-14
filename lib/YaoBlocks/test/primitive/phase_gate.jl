@@ -2,8 +2,8 @@ using Test, YaoBlocks, YaoArrayRegister, LuxurySparse
 
 
 @testset "test constructor" for T in [Float16, Float32, Float64]
-    @test PhaseGate(0.1) isa PrimitiveBlock{1}
-    @test phase(T(0.1)) isa PrimitiveBlock{1}
+    @test PhaseGate(0.1) isa PrimitiveBlock{2}
+    @test phase(T(0.1)) isa PrimitiveBlock{2}
 end
 
 @testset "test copy" begin

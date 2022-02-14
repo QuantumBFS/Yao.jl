@@ -2,25 +2,26 @@ using YaoBase, YaoArrayRegister
 export GeneralMatrixBlock, matblock
 
 """
-    GeneralMatrixBlock{M, N, D, MT} <: PrimitiveBlock{N, D}
+    GeneralMatrixBlock{D, MT} <: PrimitiveBlock{D}
 
 General matrix gate wraps a matrix operator to quantum gates. This is the most
-general form of a quantum gate. `M` is the hilbert dimension (first dimension),
-`N` is the hilbert dimension (second dimension) of current quantum state. For
-most quantum gates, we have ``M = N``.
+general form of a quantum gate.
 """
-struct GeneralMatrixBlock{M,N,D,T,MT<:AbstractMatrix{T}} <: PrimitiveBlock{N,D}
+struct GeneralMatrixBlock{D,T,MT<:AbstractMatrix{T}} <: PrimitiveBlock{D}
+    m::Int
+    n::Int
     mat::MT
 
-    function GeneralMatrixBlock{M,N,D}(m::MT) where {M,N,D,T,MT<:AbstractMatrix{T}}
-        (D^M, D^N) == size(m) ||
-            throw(DimensionMismatch("expect a $(D^M) x $(D^N) matrix, got $(size(m))"))
+    function GeneralMatrixBlock{D}(m::Int, n::Int, A::MT) where {D,T,MT<:AbstractMatrix{T}}
+        (D^m, D^n) == size(A) ||
+            throw(DimensionMismatch("expect a $(D^m) x $(D^n) matrix, got $(size(A))"))
 
-        return new{M,N,D,T,MT}(m)
+        return new{D,T,MT}(m, n, A)
     end
 end
+YaoBase.nqudits(m::GeneralMatrixBlock) = m.n
 
-GeneralMatrixBlock(m::AbstractMatrix; nlevel=2) = GeneralMatrixBlock{logdi.(size(m), nlevel)..., nlevel}(m)
+GeneralMatrixBlock(m::AbstractMatrix; nlevel=2) = GeneralMatrixBlock{nlevel}(logdi.(size(m), nlevel)..., m)
 
 """
     matblock(m::AbstractMatrix; nlevel=2)
@@ -46,7 +47,7 @@ matblock(m::AbstractMatrix; nlevel=2) = GeneralMatrixBlock(m; nlevel=nlevel)
 
 Create a [`GeneralMatrixBlock`](@ref) with a matrix `m`.
 """
-matblock(m::AbstractBlock{N,D}) where {N,D} = GeneralMatrixBlock(mat(m); nlevel=D)
+matblock(m::AbstractBlock{D}) where {D} = GeneralMatrixBlock(mat(m); nlevel=D)
 
 cache_key(m::GeneralMatrixBlock) = hash(m.mat)
 

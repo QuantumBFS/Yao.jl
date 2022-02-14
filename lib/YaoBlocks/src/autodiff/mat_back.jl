@@ -3,16 +3,16 @@ export mat_back!, mat_back
 """
 The matrix gradient of a rotation block.
 """
-@inline function rotgrad(::Type{T}, rb::RotationGate{N,D}) where {N,D,T}
-    -sin(rb.theta / 2) / 2 * IMatrix{2^N}() +
+@inline function rotgrad(::Type{T}, rb::RotationGate{D}) where {D,T}
+    -sin(rb.theta / 2) / 2 * IMatrix{2^nqudits(rb)}() +
     im / 2 * cos(rb.theta / 2) * conj(mat(T, rb.block))
 end
 
-function mat_back!(::Type{T}, rb::RotationGate{N,D,RT}, adjy, collector) where {T,N,D,RT}
+function mat_back!(::Type{T}, rb::RotationGate{D,RT}, adjy, collector) where {T,D,RT}
     pushfirst!(collector, projection(rb.theta, sum(adjy .* rotgrad(T, rb))))
 end
 
-function mat_back!(::Type{T}, rb::TimeEvolution{N}, adjy, collector) where {N,T}
+function mat_back!(::Type{T}, rb::TimeEvolution, adjy, collector) where {T}
     pushfirst!(
         collector,
         projection(rb.dt, sum(im .* adjy .* conj.(mat(T, rb.H) * mat(T, rb)))),
@@ -44,15 +44,15 @@ function mat_back!(::Type{T}, rb::AbstractBlock, adjy, collector) where {T}
     throw(MethodError(mat_back!, (T, rb, adjy, collector)))
 end
 
-function mat_back!(::Type{T}, rb::PutBlock{N,D,C,RT}, adjy, collector) where {T,N,D,C,RT}
+function mat_back!(::Type{T}, rb::PutBlock{D,C,RT}, adjy, collector) where {T,D,C,RT}
     nparameters(rb) == 0 && return collector
-    adjm = adjcunmat(adjy, N, (), (), mat(T, content(rb)), rb.locs)
+    adjm = adjcunmat(adjy, nqudits(rb), (), (), mat(T, content(rb)), rb.locs)
     mat_back!(T, content(rb), adjm, collector)
 end
 
-function mat_back!(::Type{T}, rb::Subroutine{N}, adjy, collector) where {T,N}
+function mat_back!(::Type{T}, rb::Subroutine, adjy, collector) where {T}
     nparameters(rb) == 0 && return collector
-    adjm = adjcunmat(adjy, N, (), (), mat(T, content(rb)), rb.locs)
+    adjm = adjcunmat(adjy, nqudits(rb), (), (), mat(T, content(rb)), rb.locs)
     mat_back!(T, content(rb), adjm, collector)
 end
 
@@ -64,13 +64,13 @@ function mat_back!(::Type{T}, rb::Daggered, adjy, collector) where {T}
     mat_back!(T, content(rb), adjy', collector)
 end
 
-function mat_back!(::Type{T}, rb::ControlBlock{N,C,RT}, adjy, collector) where {T,N,C,RT}
+function mat_back!(::Type{T}, rb::ControlBlock, adjy, collector) where {T}
     nparameters(rb) == 0 && return collector
-    adjm = adjcunmat(adjy, N, rb.ctrl_locs, rb.ctrl_config, mat(T, content(rb)), rb.locs)
+    adjm = adjcunmat(adjy, nqudits(rb), rb.ctrl_locs, rb.ctrl_config, mat(T, content(rb)), rb.locs)
     mat_back!(T, content(rb), adjm, collector)
 end
 
-function mat_back!(::Type{T}, rb::ChainBlock{N}, adjy, collector) where {T,N}
+function mat_back!(::Type{T}, rb::ChainBlock, adjy, collector) where {T}
     np = nparameters(rb)
     np == 0 && return collector
     length(rb) == 1 && return mat_back!(T, rb[1], adjy, collector)
@@ -91,13 +91,13 @@ function mat_back!(::Type{T}, rb::ChainBlock{N}, adjy, collector) where {T,N}
     return collector
 end
 
-function mat_back!(::Type{T}, rb::KronBlock{N}, adjy, collector) where {T,N}
+function mat_back!(::Type{T}, rb::KronBlock, adjy, collector) where {T}
     nparameters(rb) == 0 && return collector
-    mat_back!(T, chain(N, [put(loc => rb[loc]) for loc in rb.locs]), adjy, collector)
+    mat_back!(T, chain(nqudits(rb), [put(loc => rb[loc]) for loc in rb.locs]), adjy, collector)
     return collector
 end
 
-function mat_back!(::Type{T}, rb::Add{N}, adjy, collector) where {T,N}
+function mat_back!(::Type{T}, rb::Add, adjy, collector) where {T}
     nparameters(rb) == 0 && return collector
     for b in subblocks(rb)[end:-1:1]
         mat_back!(T, b, adjy, collector)
@@ -105,7 +105,7 @@ function mat_back!(::Type{T}, rb::Add{N}, adjy, collector) where {T,N}
     return collector
 end
 
-function mat_back!(::Type{T}, rb::Scale{N}, adjy, collector) where {T,N}
+function mat_back!(::Type{T}, rb::Scale, adjy, collector) where {T}
     np = nparameters(rb)
     np == 0 && return collector
     mat_back!(T, content(rb), factor(rb) * adjy, collector)

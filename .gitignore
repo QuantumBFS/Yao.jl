@@ -3,6 +3,7 @@
 *.jl.cov
 *.jl.*.cov
 *.jl.mem
+_*.yao
 
 docs/build/
 docs/site/

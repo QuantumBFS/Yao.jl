@@ -56,6 +56,7 @@ end
     focus!(reg5, 1:3)
     dm4 = reg4 |> density_matrix
     dm5 = reg5 |> density_matrix
+    @test nqubits(dm4) == 3
     @test isapprox(tracedist(dm, dm_)[], tracedist(dm4, dm5)[], atol = 1e-5)
     @test isapprox.(
         tracedist(dm, dm_)[],
@@ -97,4 +98,8 @@ end
     p = eigvals(statevec(reg) * statevec(reg)')
     p = max.(p, eps(Float64))
     @test von_neumann_entropy(rho) ≈ -sum(p .* log.(p)) rtol=1e-12
+
+    reg = zero_state(4; nlevel=3)
+    r = density_matrix(reg, [1,2])
+    @test nqudits(r) == 2
 end

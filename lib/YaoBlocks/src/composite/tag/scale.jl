@@ -3,7 +3,7 @@ using LinearAlgebra
 export Scale, factor
 
 """
-    Scale{S <: Union{Number, Val}, N, D, BT <: AbstractBlock{N}} <: TagBlock{BT, N,D}
+    Scale{S <: Union{Number, Val}, D, BT <: AbstractBlock{D}} <: TagBlock{BT, D}
 
 `Scale` a block with scalar. it can be either a `Number` or a compile time `Val`.
 
@@ -23,7 +23,7 @@ julia> -Z
 [-] Z
 ```
 """
-struct Scale{S<:Union{Number,Val},N,D,BT<:AbstractBlock{N,D}} <: TagBlock{BT,N,D}
+struct Scale{S<:Union{Number,Val},D,BT<:AbstractBlock{D}} <: TagBlock{BT,D}
     alpha::S
     content::BT
 end
@@ -54,7 +54,7 @@ cache_key(x::Scale) = (factor(x), cache_key(content(x)))
 mat(::Type{T}, x::Scale) where {T} = T(x.alpha) * mat(T, content(x))
 mat(::Type{T}, x::Scale{Val{S}}) where {T,S} = T(S) * mat(T, content(x))
 
-function _apply!(r::AbstractArrayReg, x::Scale{S,N}) where {S,N}
+function _apply!(r::AbstractArrayReg, x::Scale{S}) where {S}
     _apply!(r, content(x))
     regscale!(r, factor(x))
     return r

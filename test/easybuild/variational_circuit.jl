@@ -27,7 +27,7 @@ end
     @test rotor(5, 2, true, true) isa ChainBlock
     @test rotor(5, 2, true, true) |> length == 1
     @test rotor(5, 2, true, true) |> nqubits == 5
-    @test collect_blocks(PutBlock{<:Any, <:Any, <:Any, <:RotationGate}, rotorset(:Split, 5, true, false)) |> length == 10
+    @test collect_blocks(PutBlock{2, <:Any, <:RotationGate}, rotorset(:Split, 5, true, false)) |> length == 10
 end
 
 @testset "entangler" begin

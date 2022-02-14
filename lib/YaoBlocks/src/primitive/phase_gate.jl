@@ -3,13 +3,14 @@ using YaoBase
 export PhaseGate, phase
 
 """
-    PhiGate
+    PhaseGate
 
 Global phase gate.
 """
-mutable struct PhaseGate{T} <: PrimitiveBlock{1,2}
+mutable struct PhaseGate{T} <: PrimitiveBlock{2}
     theta::T
 end
+nqudits(pg::PhaseGate) = 1
 
 """
     phase(theta)
@@ -54,6 +55,6 @@ Base.:(==)(lhs::PhaseGate, rhs::PhaseGate) = lhs.theta == rhs.theta
 
 cache_key(gate::PhaseGate) = gate.theta
 
-function parameters_range!(out::Vector{Tuple{T,T}}, gate::PhaseGate{T}) where {T}
-    push!(out, (0.0, 2.0 * pi))
+function iparams_range(::PhaseGate{T}) where {T}
+    return ((zero(T), T(2.0 * pi)),)
 end

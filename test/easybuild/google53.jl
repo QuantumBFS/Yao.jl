@@ -26,5 +26,5 @@ end
     c = rand_google53(4)
     @test length(collect_blocks(FSimGate, c)) == 86
     @test nparameters(c) == 86*2
-    @test length(collect_blocks(PrimitiveBlock{1}, c)) == 53*4
+    @test length(blockfilter(x->nqudits(x)==1, c)) == 53*4
 end

@@ -255,3 +255,18 @@ end
     @test length(statevec(rand_state(2; nlevel=3))) == 9
     @test size(statevec(zero_state(2; nbatch=5, nlevel=3))) == (9,5)
 end
+
+@testset "more (push test coverage)" begin
+    reg1 = transpose_storage(rand_state(3; nbatch=5))
+    reg2 = transpose_storage(rand_state(3; nbatch=5))
+    res = reg1' * reg2
+    @test res ≈ (reg1') .* reg2
+
+    reg = transpose_storage(focus!(rand_state(6), [2,3]))
+    @test reg.state isa Transpose
+    @test copy(reg).state isa Transpose
+    
+    copyto!(reg1', reg2')
+    @test reg1 ≈ reg2
+    @test reorder!(reg1, [2,3,1]).state ≈ reshape(permutedims(reshape(reg2.state, 2, 2, 2, 5), sortperm([2,3,1,4])), 8, 5)
+end

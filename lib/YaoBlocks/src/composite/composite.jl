@@ -54,10 +54,6 @@ for METHOD in (:ishermitian, :isreflexive, :isunitary)
     end
 end
 
-function Base.:(==)(lhs::AbstractContainer{BT,N}, rhs::AbstractContainer{BT,N}) where {BT,N}
-    return content(lhs) == content(rhs)
-end
-
 include("chain.jl")
 include("kron.jl")
 include("control.jl")

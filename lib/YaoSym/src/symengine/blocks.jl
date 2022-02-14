@@ -122,8 +122,8 @@ end
 end
 
 const SymReal = Union{Basic,SymEngine.BasicRealNumber}
-YaoBlocks.RotationGate(block::GT, theta::T) where {N,D,T<:SymReal,GT<:AbstractBlock{N,D}} =
-    RotationGate{N,D,T,GT}(block, theta)
+YaoBlocks.RotationGate(block::GT, theta::T) where {D,T<:SymReal,GT<:AbstractBlock{D}} =
+    RotationGate{D,T,GT}(block, theta)
 
 YaoBlocks.phase(θ::SymReal) = PhaseGate(θ)
 YaoBlocks.shift(θ::SymReal) = ShiftGate(θ)
@@ -134,23 +134,23 @@ YaoBlocks.mat(::Type{Basic}, gate::ConstGate.TdagGate) = Diagonal(Basic[1, exp(-
 YaoBlocks.mat(::Type{Basic}, ::HGate) = 1 / sqrt(Basic(2)) * Basic[1 1; 1 -1]
 YaoBlocks.mat(::Type{Basic}, gate::ShiftGate) = Diagonal([1, exp(im * gate.theta)])
 YaoBlocks.mat(::Type{Basic}, gate::PhaseGate) = exp(im * gate.theta) * IMatrix{2}()
-function YaoBlocks.mat(::Type{Basic}, R::RotationGate{N,D}) where {N,D}
-    I = IMatrix{D^N}()
+function YaoBlocks.mat(::Type{Basic}, R::RotationGate{D}) where {D}
+    I = IMatrix{D^nqudits(R)}()
     return I * cos(R.theta / 2) - im * sin(R.theta / 2) * mat(Basic, R.block)
 end
 for GT in [:XGate, :YGate, :ZGate]
-    @eval YaoBlocks.mat(::Type{Basic}, R::RotationGate{1,D,T,<:$GT}) where {D,T} =
+    @eval YaoBlocks.mat(::Type{Basic}, R::RotationGate{D,T,<:$GT}) where {D,T} =
         invoke(mat, Tuple{Type{Basic},RotationGate}, Basic, R)
 end
 
-for T in [:(RotationGate{N,<:SymReal}), :(PhaseGate{<:SymReal}), :(ShiftGate{<:SymReal})]
+for T in [:(RotationGate{D,<:SymReal} where D), :(PhaseGate{<:SymReal}), :(ShiftGate{<:SymReal})]
     @eval YaoBlocks.mat(gate::$T) = mat(Basic, gate)
 end
 
-YaoBlocks.PSwap{N}(locs::Tuple{Int,Int}, θ::SymReal) where {N} =
-    YaoBlocks.PutBlock{N}(rot(ConstGate.SWAPGate(), θ), locs)
+YaoBlocks.PSwap(n::Int, locs::Tuple{Int,Int}, θ::SymReal) =
+    YaoBlocks.PutBlock(n, rot(ConstGate.SWAPGate(), θ), locs)
 
-YaoBlocks.pswap(n::Int, i::Int, j::Int, α::SymReal) = PSwap{n}((i, j), α)
+YaoBlocks.pswap(n::Int, i::Int, j::Int, α::SymReal) = PSwap(n, (i, j), α)
 YaoBlocks.pswap(i::Int, j::Int, α::SymReal) = n -> pswap(n, i, j, α)
 
 export subs, chiparams
