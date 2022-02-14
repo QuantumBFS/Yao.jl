@@ -30,4 +30,4 @@ end
 @test copy(X) === X
 
 # block type can be used as traits
-@test nqubits(typeof(X)) == 1
+@test nqubits(X) == 1

@@ -103,12 +103,9 @@ mat_matchreg(reg::AbstractArrayReg{D,T}, x::AbstractBlock) where {D,T} = mat(T,x
 Base.Matrix{T}(x::AbstractBlock) where {T} = Matrix(mat(T, x))
 
 # YaoBase interface
-YaoBase.nqubits(block::AbstractBlock{N,2}) where N = nqudits(block)
-YaoBase.nqubits(::Type{<:AbstractBlock{N,2}}) where {N} = N
-YaoBase.nqudits(::Type{<:AbstractBlock{N}}) where {N} = N
-YaoBase.nqudits(x::AbstractBlock{N}) where {N} = nqudits(typeof(x))
-YaoBase.nlevel(::Type{<:AbstractBlock{N,D}}) where {N,D} = D
-YaoBase.nlevel(x::AbstractBlock{N,D}) where {N,D} = nlevel(typeof(x))
+YaoBase.nqubits(block::AbstractBlock{2}) = nqudits(block)
+YaoBase.nlevel(::Type{<:AbstractBlock{D}}) where {D} = D
+YaoBase.nlevel(x::AbstractBlock{D}) where {D} = nlevel(typeof(x))
 
 # properties
 for each_property in [:isunitary, :isreflexive, :ishermitian]
@@ -117,7 +114,8 @@ for each_property in [:isunitary, :isreflexive, :ishermitian]
         $each_property(mat(T))
 end
 
-function iscommute_fallback(op1::AbstractBlock{N}, op2::AbstractBlock{N}) where {N}
+function iscommute_fallback(op1::AbstractBlock{D}, op2::AbstractBlock{D}) where {D}
+    _check_block_sizes(op1, op2)
     if length(intersect(occupied_locs(op1), occupied_locs(op2))) == 0
         return true
     else
@@ -125,7 +123,7 @@ function iscommute_fallback(op1::AbstractBlock{N}, op2::AbstractBlock{N}) where 
     end
 end
 
-YaoBase.iscommute(op1::AbstractBlock{N}, op2::AbstractBlock{N}) where {N} =
+YaoBase.iscommute(op1::AbstractBlock{D}, op2::AbstractBlock{D}) where {D} =
     iscommute_fallback(op1, op2)
 
 # parameters
@@ -343,11 +341,28 @@ use the returns of [`parameters`](@ref) as its key.
 """
 cache_key(x::AbstractBlock)
 
-function _check_size(r::AbstractRegister, pb::AbstractBlock{N}) where {N}
-    N == nactive(r) ||
-        throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
+function _check_size(r::AbstractRegister{D}, pb::AbstractBlock{D}) where D
+    nqudits(pb) == nactive(r) ||
+        throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $(nqudits(pb))"))
     nlevel(r) == nlevel(pb) ||
         throw(QubitMismatchError("register number of level $(nlevel(r)) mismatch with block number of level $(nlevel(pb))"))
+end
+
+_check_block_sizes(blocks::AbstractBlock{D}...) where D = _check_block_sizes(blocks)
+function _check_block_sizes(blocks::Union{AbstractVector{<:AbstractBlock{D}}, NTuple{N, AbstractBlock{D}} where N}, n=nothing) where D
+    if n === nothing
+        if length(blocks) == 0
+            error("number of blocks can not be 0!")
+        else
+            n = nqudits(first(blocks))
+        end
+    end
+    for b in blocks
+        if nqudits(b) != n
+            throw(QubitMismatchError("number of qudits `$(nqudits(b))` does not match the expected value `$(n)`."))
+        end
+    end
+    return n
 end
 
 """

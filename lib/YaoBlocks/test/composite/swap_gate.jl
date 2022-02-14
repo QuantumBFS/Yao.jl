@@ -1,7 +1,7 @@
 using Test, YaoBlocks, YaoBase, LuxurySparse, YaoArrayRegister
 
 @test_throws LocationConflictError swap(2, 1, 1)
-@test swap(2, 1, 2) isa Swap{2}
+@test swap(2, 1, 2) isa Swap
 @test mat(swap(2, 1, 2)) ≈ PermMatrix([1, 3, 2, 4], ones(1 << 2))
 @test mat(swap(4, 1, 3)) ≈ linop2dense(s -> instruct!(Val(2), s, Val(:SWAP), (1, 3)), 4)
 
@@ -19,7 +19,7 @@ end
 
 @testset "pswap gate" begin
     pb = pswap(6, 2, 4, 0.0)
-    @test pb isa PSwap{6,Float64}
+    @test pb isa PSwap{Float64} && pb.n == 6
     @test pb == pswap(2, 4, 0.0)(6)
     reg = rand_state(6)
     @test copy(reg) |> pb ≈ invoke(apply!, Tuple{ArrayReg,PutBlock}, copy(reg), pb)

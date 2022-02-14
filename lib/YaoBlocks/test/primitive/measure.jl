@@ -27,6 +27,7 @@ end
 
     st = rand_state(5; nbatch = 3)
     g = Measure(5; locs = (1, 2), resetto = bit"00011")
+    @test num_measured(g) == 2
     st |> g
     for k = 1:32
         if !(st.state[k] ≈ 0.0)

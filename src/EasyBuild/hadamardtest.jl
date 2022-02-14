@@ -9,7 +9,8 @@ References
 -----------------------
 * [Wiki](https://en.wikipedia.org/wiki/Hadamard_test_(quantum_computation))
 """
-function hadamard_test_circuit(U::AbstractBlock{N}, ϕ::Real) where N
+function hadamard_test_circuit(U::AbstractBlock, ϕ::Real)
+    N = nqudits(U)
     chain(N+1, put(N+1, 1=>H),
         put(N+1, 1=>Rz(ϕ)),
         control(N+1, 1, 2:N+1=>U),  # get matrix first, very inefficient
@@ -17,7 +18,8 @@ function hadamard_test_circuit(U::AbstractBlock{N}, ϕ::Real) where N
         )
 end
 
-function hadamard_test(U::AbstractBlock{N}, reg::AbstractRegister, ϕ::Real) where N
+function hadamard_test(U::AbstractBlock, reg::AbstractRegister, ϕ::Real)
+    N = nqudits(U)
     c = hadamard_test_circuit(U, ϕ::Real)
     reg = join(reg, zero_state(1))
     expect(put(N+1, 1=>Z), reg |> c)

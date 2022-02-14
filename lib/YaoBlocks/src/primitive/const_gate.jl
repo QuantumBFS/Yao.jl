@@ -30,9 +30,9 @@ export ConstantGate, PauliGate
 
 Abstract type for constant gates. Constant gates are
 quantum gates with constant value, e.g Pauli gates,
-T gate, Hadmard gates, etc.
+T gate, Hadmard gates, etc. Type parameter `N` is the number of qubits.
 """
-abstract type ConstantGate{N,D} <: YaoBlocks.PrimitiveBlock{N,D} end
+abstract type ConstantGate{N,D} <: YaoBlocks.PrimitiveBlock{D} end
 
 include("const_gate_tools.jl")
 include("const_gate_gen.jl")
@@ -67,4 +67,6 @@ import .ConstGate:
     @const_gate,
     ConstantGate,
     PauliGate
+
 occupied_locs(::I2Gate) = ()
+nqudits(::ConstantGate{N}) where N = N

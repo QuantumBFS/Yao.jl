@@ -16,11 +16,12 @@ Phase shift gate.
 \\end{pmatrix}
 ```
 """
-mutable struct ShiftGate{T} <: PrimitiveBlock{1,2}
+mutable struct ShiftGate{T} <: PrimitiveBlock{2}
     theta::T
 end
 
 ShiftGate(theta::Integer) = ShiftGate(Float64(theta))
+nqudits(blk::ShiftGate) = 1
 
 """
     shift(θ)

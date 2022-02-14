@@ -2,17 +2,17 @@ import YaoBase: measure!, measure
 using LinearAlgebra: eigen!
 
 """
-    eigenbasis(op::AbstractBlock{N})
+    eigenbasis(op::AbstractBlock)
 
 Return the `eigenvalue` and `eigenvectors` of target operator.
 By applying `eigenvector`' to target state,
 one can swith the basis to the eigenbasis of this operator.
 However, `eigenvalues` does not have a specific form.
 """
-function eigenbasis(op::AbstractBlock{N,D}) where {N,D}
+function eigenbasis(op::AbstractBlock{D}) where {D}
     m = mat(op)
     if m isa Diagonal || m isa IMatrix
-        op, IdentityGate{N,D}()
+        op, IdentityGate{D}(nqudits(op))
     else
         E, V = eigen!(Matrix(m))
         matblock(Diagonal(E)), matblock(V)
@@ -29,8 +29,9 @@ end
 """
 Return true if operators commute to each other.
 """
-function simple_commute_eachother(ops::Vector{<:AbstractBlock{N}}) where {N}
-    occ = zeros(Bool, N)
+function simple_commute_eachother(ops::Vector{<:AbstractBlock{D}}) where {D}
+    n = _check_block_sizes(ops)
+    occ = zeros(Bool, n)
     for op in ops
         for i in occupied_locs(op)
             if occ[i]
@@ -43,11 +44,11 @@ function simple_commute_eachother(ops::Vector{<:AbstractBlock{N}}) where {N}
     return true
 end
 
-function eigenbasis(op::ChainBlock{N}) where {N}
+function eigenbasis(op::ChainBlock)
     # detect commute operators
     if simple_commute_eachother(subblocks(op))
-        E = chain(N)
-        blks = chain(N)
+        E = chain(op.n)
+        blks = chain(op.n)
         for b in subblocks(op)
             Ei, Vi = eigenbasis(b)
             push!(E, Ei)
@@ -55,8 +56,8 @@ function eigenbasis(op::ChainBlock{N}) where {N}
         end
         return E, blks
     else
-        if N > 5
-            @warn "eigenbasis on blocktype `ChainBlock` (size $N) calls into the fallback implementation, which might be slow. Try using `kron`, `repeat` if items commute to each oher. If this behavior is not what you expected, please file an issue here: https://github.com/QuantumBFS/Yao.jl/issues."
+        if op.n > 5
+            @warn "eigenbasis on blocktype `ChainBlock` (size $(op.n)) calls into the fallback implementation, which might be slow. Try using `kron`, `repeat` if items commute to each oher. If this behavior is not what you expected, please file an issue here: https://github.com/QuantumBFS/Yao.jl/issues."
         end
         invoke(eigenbasis, Tuple{AbstractBlock}, op)
     end
@@ -83,7 +84,7 @@ for GT in [:CachedBlock]
     end
 end
 
-function eigenbasis(op::KronBlock{N}) where {N}
+function eigenbasis(op::KronBlock)
     E = []
     blks = []
     for (k, b) in op
@@ -91,7 +92,7 @@ function eigenbasis(op::KronBlock{N}) where {N}
         push!(E, k => Ei)
         push!(blks, k => Vi)
     end
-    kron(N, E...), kron(N, blks...)
+    kron(op.n, E...), kron(op.n, blks...)
 end
 
 function eigenbasis(op::XGate)
@@ -245,7 +246,7 @@ function measure(op::Daggered, reg::AbstractRegister, locs::AllLocs; kwargs...)
     conj(measure(content(op), reg, locs; kwargs...))
 end
 
-function measure(op::PutBlock{N}, reg::AbstractRegister, locs; kwargs...) where {N}
+function measure(op::PutBlock, reg::AbstractRegister, locs; kwargs...)
     _check_msize(op, reg, locs)
 
     # get eigen basis
@@ -261,6 +262,6 @@ function measure(op::PutBlock{N}, reg::AbstractRegister, locs; kwargs...) where 
     map(ri -> E[Int64(ri)+1], res)
 end
 
-function measure(op::PutBlock{N}, reg::AbstractRegister, locs::AllLocs; kwargs...) where {N}
+function measure(op::PutBlock, reg::AbstractRegister, locs::AllLocs; kwargs...)
     invoke(measure, Tuple{PutBlock,AbstractRegister,Any}, op, reg, locs; kwargs...)
 end

@@ -2,26 +2,28 @@ using YaoBase
 export Subroutine, subroutine
 
 """
-    Subroutine{N, D, BT <: AbstractBlock, C} <: AbstractContainer{BT, N, D}
+    Subroutine{D, BT <: AbstractBlock, C} <: AbstractContainer{BT, D}
 
 Subroutine node on given locations. This allows you to shoehorn a smaller
 circuit to a larger one.
 """
-struct Subroutine{N,D,BT<:AbstractBlock,C} <: AbstractContainer{BT,N,D}
+struct Subroutine{D,BT<:AbstractBlock,C} <: AbstractContainer{BT,D}
+    n::Int
     content::BT
     locs::NTuple{C,Int}
 end
 
-function Subroutine{N}(block::BT, locs::NTuple{C,Int}) where {N,D,M,C,BT<:AbstractBlock{M,D}}
-    if !(length(locs) == M && N >= M)
+function Subroutine(n::Int, block::BT, locs::NTuple{C,Int}) where {N,D,C,BT<:AbstractBlock{D}}
+    if !(length(locs) == nqudits(block) && n>= nqudits(block))
         throw(
             LocationConflictError(
                 "length of locs must be equal to the size of block, and smaller than size of itself.",
             ),
         )
     end
-    return Subroutine{N,D,BT,C}(block, locs)
+    return Subroutine{D,BT,C}(n, block, locs)
 end
+YaoBase.nqudits(b::Subroutine) = b.n
 
 """
     subroutine(n, block, locs)
@@ -73,7 +75,7 @@ true
 ```
 """
 function subroutine(n::Int, block::AbstractBlock, locs)
-    return Subroutine{n}(block, Tuple(locs))
+    return Subroutine(n, block, Tuple(locs))
 end
 
 # support lazy qubits
@@ -89,7 +91,7 @@ subroutine(block::AbstractBlock, locs) = @λ(n -> subroutine(n, block, locs))
 subroutine(block::Function, locs) = @λ(n -> subroutine(n, block, locs))
 
 occupied_locs(c::Subroutine) = map(i -> c.locs[i], c.content |> occupied_locs)
-chsubblocks(pb::Subroutine{N}, blk::AbstractBlock) where {N} = Subroutine{N}(blk, pb.locs)
+chsubblocks(pb::Subroutine{D}, blk::AbstractBlock{D}) where {D} = Subroutine(pb.n, blk, pb.locs)
 PreserveTrait(::Subroutine) = PreserveAll()
 
 function _apply!(r::AbstractRegister, c::Subroutine)
@@ -99,20 +101,20 @@ function _apply!(r::AbstractRegister, c::Subroutine)
     return r
 end
 
-function mat(::Type{T}, c::Subroutine{N,D,<:AbstractBlock}) where {N,D,T}
-    mat(T, PutBlock{N}(c.content, c.locs))
+function mat(::Type{T}, c::Subroutine{D,<:AbstractBlock}) where {D,T}
+    mat(T, PutBlock(c.n, c.content, c.locs))
 end
 
-Base.adjoint(blk::Subroutine{N}) where {N} = Subroutine{N}(adjoint(blk.content), blk.locs)
+Base.adjoint(blk::Subroutine) = Subroutine(blk.n, adjoint(blk.content), blk.locs)
 
-function Base.:(==)(a::Subroutine{N,D,BT}, b::Subroutine{N,D,BT}) where {N,D,BT}
-    return a.content == b.content && a.locs == b.locs
+function Base.:(==)(a::Subroutine{D,BT}, b::Subroutine{D,BT}) where {D,BT}
+    return a.n == b.n && a.content == b.content && a.locs == b.locs
 end
 
-YaoBase.nqudits(::Subroutine{N}) where {N} = N
 YaoBase.nactive(c::Subroutine) = length(c.locs)
 
-function YaoBase.iscommute(x::Subroutine{N,D}, y::Subroutine{N,D}) where {N,D}
+function YaoBase.iscommute(x::Subroutine{D}, y::Subroutine{D}) where {D}
+    _check_block_sizes(x, y)
     isempty(setdiff(occupied_locs(x), occupied_locs(y))) && return true
     if x.locs == y.locs
         return iscommute(x.content, y.content)

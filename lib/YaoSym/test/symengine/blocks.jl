@@ -45,7 +45,7 @@ end
     @test Matrix(mb) ≈ A
 
     @test pswap(4, 2, 1, θ) == pswap(2, 1, θ)(4)
-    @test pswap(4, 2, 1, θ) isa PSwap{4,Basic}
+    @test pswap(4, 2, 1, θ) isa PSwap{Basic}
 end
 
 @testset "sub" begin

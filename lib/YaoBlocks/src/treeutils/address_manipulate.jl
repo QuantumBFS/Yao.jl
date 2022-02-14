@@ -50,8 +50,8 @@ function map_address(block::AbstractBlock, info::AddressInfo)
     throw(NotImplementedError(:map_address, typeof(block)))
 end
 
-function map_address(blk::Measure, info::AddressInfo)
-    m = Measure{info.nbits}(
+function map_address(blk::Measure{D}, info::AddressInfo) where D
+    m = Measure{D}(info.nbits,
         blk.rng,
         blk.operator,
         (blk.locations / info...,),
@@ -68,7 +68,7 @@ map_address(blk::PutBlock, info::AddressInfo) =
     put(info.nbits, blk.locs / info => content(blk))
 
 function map_address(blk::ControlBlock, info::AddressInfo)
-    ControlBlock{info.nbits}(
+    ControlBlock(info.nbits,
         blk.ctrl_locs / info,
         blk.ctrl_config,
         content(blk),
@@ -105,5 +105,5 @@ function map_address(blk::Scale, info::AddressInfo)
 end
 
 function map_address(blk::Add, info::AddressInfo)
-    Add{info.nbits}(map(b -> map_address(b, info), subblocks(blk)))
+    Add(info.nbits, map(b -> map_address(b, info), subblocks(blk)))
 end

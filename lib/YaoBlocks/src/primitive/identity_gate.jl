@@ -1,21 +1,24 @@
 export TrivialGate, IdentityGate, igate
 
-abstract type TrivialGate{N,D} <: PrimitiveBlock{N,D} end
+abstract type TrivialGate{D} <: PrimitiveBlock{D} end
 
-mat(::Type{T}, d::TrivialGate{N,D}) where {T,N,D} = IMatrix{D^N,T}()
+mat(::Type{T}, d::TrivialGate{D}) where {T,D} = IMatrix{D^nqubits(d),T}()
 Base.adjoint(g::TrivialGate) = g
 occupied_locs(g::TrivialGate) = ()
 
 """
-    IdentityGate{N,D} <: TrivialGate{N,D}
+    IdentityGate{D} <: TrivialGate{D}
 
 The identity gate.
 """
-struct IdentityGate{N,D} <: TrivialGate{N,D} end
+struct IdentityGate{D} <: TrivialGate{D}
+    n::Int
+end
+nqudits(ig::IdentityGate) = ig.n
 
 """
     igate(n::Int; nlevel=2)
 
 The constructor for identity gate.
 """
-igate(n::Int; nlevel=2) = IdentityGate{n, nlevel}()
+igate(n::Int; nlevel=2) = IdentityGate{nlevel}(n)

@@ -1,7 +1,7 @@
 # A Simple Computational Algebra System
 
 # scale
-Base.:(-)(x::AbstractBlock{N}) where {N} = Scale(Val(-1), x)
+Base.:(-)(x::AbstractBlock) = Scale(Val(-1), x)
 Base.:(-)(x::Scale{Val{-1}}) = content(x)
 Base.:(-)(x::Scale{Val{S}}) where {S} = Scale(Val(-S), content(x))
 Base.:(-)(x::Scale) = Scale(-x.alpha, content(x))
@@ -36,9 +36,9 @@ Base.:(+)(xs::AbstractBlock...) = Add(xs...)
 Base.:(*)(xs::AbstractBlock...) = chain(Iterators.reverse(xs)...)
 Base.:(/)(A::AbstractBlock, x::Number) = (1 / x) * A
 # reduce
-Base.prod(blocks::AbstractVector{<:AbstractBlock{N}}) where {N} =
+Base.prod(blocks::AbstractVector{<:AbstractBlock{D}}) where D =
     chain(Iterators.reverse(blocks)...)
-Base.sum(blocks::AbstractVector{<:AbstractBlock{N}}) where {N} = +(blocks...)
+Base.sum(blocks::AbstractVector{<:AbstractBlock{D}}) where D = +(blocks...)
 
 Base.:(-)(lhs::AbstractBlock, rhs::AbstractBlock) = Add(lhs, -rhs)
 Base.:(^)(x::AbstractBlock, n::Int) = chain((copy(x) for k = 1:n)...)

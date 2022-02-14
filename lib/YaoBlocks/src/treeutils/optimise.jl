@@ -75,7 +75,10 @@ export merge_pauli
 merge_pauli(x) = x
 merge_pauli(x::AbstractBlock, y::AbstractBlock) = x * y
 
-function merge_pauli(ex::ChainBlock{1})
+function merge_pauli(ex::ChainBlock)
+    if ex.n != 1
+        return ex
+    end
     L = length(ex)
     new_ex = chain(1)
 
@@ -121,7 +124,7 @@ function eliminate_nested(ex::T) where {T<:Union{ChainBlock,Add}}
     _flatten(x::T) = subblocks(x)
 
     isone(length(ex)) && return first(subblocks(ex))
-    return chsubblocks(ex, Iterators.flatten(map(_flatten, subblocks(ex))))
+    return chsubblocks(ex, collect(AbstractBlock{nlevel(ex)}, Iterators.flatten(map(_flatten, subblocks(ex)))))
 end
 
 # temporary utils
@@ -168,9 +171,9 @@ combine_alpha(alpha, x::AbstractBlock) = alpha + 1
 combine_alpha(alpha, x::Scale) = alpha + x.alpha
 combine_alpha(alpha, x::Scale{Val{S}}) where {S} = alpha + S
 
-function combine_similar(ex::Add{N}) where {N}
+function combine_similar(ex::Add{D}) where D
     table = zeros(Bool, length(ex))
-    list = []
+    list = AbstractBlock{D}[]
     p = 1
     while p <= length(ex)
         if table[p] == true
@@ -205,9 +208,9 @@ function combine_similar(ex::Add{N}) where {N}
     end
 
     if isempty(list)
-        return Add{N}()
+        return Add(ex.n)
     else
-        return Add(list...)
+        return Add(ex.n, list)
     end
 end
 

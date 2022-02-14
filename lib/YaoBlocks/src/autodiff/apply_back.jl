@@ -1,6 +1,6 @@
 export apply_back!, apply_back
 
-const Rotor{N,T} = Union{RotationGate{N,T},PutBlock{N,<:Any,<:RotationGate{<:Any,T}}}
+const Rotor{D,T} = Union{RotationGate{D,T},PutBlock{D,<:Any,<:RotationGate{<:Any,T}}}
 
 as_scalar(arr::AbstractArray{T,0}) where {T} = arr[]
 as_scalar(arr) = arr
@@ -11,8 +11,8 @@ as_scalar(arr) = arr
 Return the generator of rotation block.
 """
 generator(rot::RotationGate) = rot.block
-generator(rot::PutBlock{N,C,GT}) where {N,C,GT<:RotationGate} =
-    PutBlock{N}(generator(rot |> content), rot |> occupied_locs)
+generator(rot::PutBlock) =
+    PutBlock(rot.n, generator(rot |> content), rot |> occupied_locs)
 
 function apply_back!(st, block::AbstractBlock, collector) #,AbstractContainer{<:PrimitiveBlock}
     out, outδ = st
@@ -26,17 +26,17 @@ function apply_back!(st, block::AbstractBlock, collector) #,AbstractContainer{<:
     end
 end
 
-function apply_back!(st, block::Subroutine{N}, collector) where {N}
+function apply_back!(st, block::Subroutine{D}, collector) where {D}
     out, outδ = st
     focus!(out, block.locs)
     focus!(outδ, block.locs)
     apply_back!((out, outδ), content(block), collector)
-    relax!(out, block.locs; to_nactive = N)
-    relax!(outδ, block.locs; to_nactive = N)
+    relax!(out, block.locs; to_nactive = nqudits(block))
+    relax!(outδ, block.locs; to_nactive = nqudits(block))
     return (out, outδ)
 end
 
-function apply_back!(st, block::Rotor{N}, collector) where {N}
+function apply_back!(st, block::Rotor{D}, collector) where {D}
     out, outδ = st
     adjblock = block'
     backward_params!((out, outδ), block, collector)
@@ -45,7 +45,7 @@ function apply_back!(st, block::Rotor{N}, collector) where {N}
     return (in, inδ)
 end
 
-function apply_back!(st, block::TimeEvolution{N}, collector) where {N}
+function apply_back!(st, block::TimeEvolution, collector)
     out, outδ = st
     adjblock = block'
 
@@ -59,7 +59,7 @@ function apply_back!(st, block::TimeEvolution{N}, collector) where {N}
     return (input, outδ)
 end
 
-function apply_back!(st, block::PutBlock{N}, collector) where {N}
+function apply_back!(st, block::PutBlock, collector)
     out, outδ = st
     adjblock = block'
     in = apply!(out, adjblock)
@@ -69,15 +69,14 @@ function apply_back!(st, block::PutBlock{N}, collector) where {N}
     return (in, inδ)
 end
 
-function apply_back!(st, block::KronBlock{N}, collector) where {N}
-    apply_back!(st, chain(N, [put(loc => block[loc]) for loc in block.locs]), collector)
+function apply_back!(st, block::KronBlock, collector)
+    apply_back!(st, chain(nqudits(block), [put(loc => block[loc]) for loc in block.locs]), collector)
 end
 
-function apply_back!(st, block::ControlBlock{N}, collector) where {N}
+function apply_back!(st, block::ControlBlock, collector)
     out, outδ = st
     adjblock = block'
     in = apply!(out, adjblock)
-    #adjm = adjcunmat(outerprod(in, outδ), N, block.ctrl_locs, block.ctrl_config, mat(content(block)), block.locs)
     adjmat = outerprod(outδ, in)
     mat_back!(datatype(in), block, adjmat, collector)
     inδ = apply!(outδ, adjblock)
@@ -119,12 +118,12 @@ function apply_back!(st, circuit::Add, collector; in)
     (in, inδ)
 end
 
-function apply_back!(st, block::RepeatedBlock{N,C}, collector) where {N,C}
+function apply_back!(st, block::RepeatedBlock{D,C}, collector) where {D,C}
     if nparameters(content(block)) == 0
         return apply!.(st, Ref(block'))
     end
     res = Any[]
-    st = apply_back!(st, chain(N, [put(loc => content(block)) for loc in block.locs]), res)
+    st = apply_back!(st, chain(nqudits(block), [put(loc => content(block)) for loc in block.locs]), res)
     res = dropdims(sum(reshape(res, :, C), dims = 2), dims = 2) |> as_scalar
     prepend!(collector, res)
     return st

@@ -1,7 +1,7 @@
 export ISWAP, SqrtX, SqrtY, SqrtW, singlet_block
 export ISWAPGate, SqrtXGate, SqrtYGate, SqrtWGate, CPhaseGate
 
-const CPhaseGate{N, T} = ControlBlock{N,<:ShiftGate{T},<:Any}
+const CPhaseGate{T} = ControlBlock{<:ShiftGate{T},<:Any}
 
 @const_gate ISWAP = PermMatrix([1,3,2,4], [1,1.0im,1.0im,1])
 @const_gate SqrtX = [0.5+0.5im 0.5-0.5im; 0.5-0.5im 0.5+0.5im]

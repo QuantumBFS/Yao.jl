@@ -8,4 +8,3 @@
 @deprecate mathgate(f; nbits) mathgate(nbits, f)
 @deprecate Concentrator Subroutine
 @deprecate concentrate subroutine
-@deprecate Add{N}(blocks::Vector{<:AbstractBlock{N,D}}) where {N,D} Add{N,D}(blocks)

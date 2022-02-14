@@ -41,6 +41,6 @@ end
 end
 
 # check extension fallback errors
-struct MockedQFT{N,D} <: CompositeBlock{N,D} end
-@test_throws MethodError ishermitian(MockedQFT{2,2}())
-@test_throws MethodError isunitary(MockedQFT{2,2}())
+struct MockedQFT{D} <: CompositeBlock{D} end
+@test_throws MethodError ishermitian(MockedQFT{2}())
+@test_throws MethodError isunitary(MockedQFT{2}())

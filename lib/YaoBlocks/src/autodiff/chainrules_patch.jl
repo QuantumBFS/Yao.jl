@@ -171,14 +171,14 @@ end
 
 for (BT, BLOCKS) in [(:Add, :(outδ.list)) (:ChainBlock, :(outδ.blocks))]
     for ST in [:AbstractVector, :Tuple]
-        @eval function rrule(::Type{BT}, source::$ST) where {N,BT<:$BT}
+        @eval function rrule(::Type{BT}, source::$ST) where {BT<:$BT}
             out = BT(source)
             out, function (outδ)
                 return (NoTangent(), $ST($BLOCKS))
             end
         end
     end
-    @eval function rrule(::Type{BT}, args::AbstractBlock...) where {N,BT<:$BT}
+    @eval function rrule(::Type{BT}, args::AbstractBlock...) where {BT<:$BT}
         out = BT(args...)
         out, function (outδ)
             return (NoTangent(), $BLOCKS...)

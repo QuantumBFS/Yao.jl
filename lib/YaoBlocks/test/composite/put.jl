@@ -9,37 +9,37 @@ end
     n = 6
     Reg = rand_state(n)
 
-    pb = PutBlock{n}(X, (3,))
+    pb = PutBlock(n, X, (3,))
     rb = repeat(n, X, (3,))
     @test apply!(copy(Reg), pb) ≈ apply!(copy(Reg), rb)
     @test pb |> applymatrix ≈ mat(pb)
-    pb = PutBlock{n}(rot(X, 0.3), (3,))
+    pb = PutBlock(n, rot(X, 0.3), (3,))
     @test pb |> applymatrix ≈ mat(pb)
 
-    pb = PutBlock{n}(rot(CNOT, 0.3), (6, 3))
+    pb = PutBlock(n, rot(CNOT, 0.3), (6, 3))
     @test pb |> applymatrix ≈ mat(pb)
-    pb = PutBlock{n}(matblock(mat(rot(CNOT, 0.3)) |> Matrix), (6, 3))
+    pb = PutBlock(n, matblock(mat(rot(CNOT, 0.3)) |> Matrix), (6, 3))
     @test pb |> applymatrix ≈ mat(pb)
 
-    pb = PutBlock{n}(rot(X, 0.3), (3,))
+    pb = PutBlock(n, rot(X, 0.3), (3,))
     @test pb |> applymatrix ≈ mat(pb)
-    pb = PutBlock{n}(matblock(mat(rot(X, 0.3)) |> Matrix), (3,))
+    pb = PutBlock(n, matblock(mat(rot(X, 0.3)) |> Matrix), (3,))
     @test pb |> applymatrix ≈ mat(pb)
 
     Cb = control(n, (3,), 5 => X)
-    pb = PutBlock{n}(CNOT, (3, 5))
+    pb = PutBlock(n, CNOT, (3, 5))
     @test apply!(copy(Reg), Cb) ≈ apply!(copy(Reg), pb)
 
     blks = [control(2, 1, 2 => Z)]
     @test (chsubblocks(pb, blks) |> subblocks .== blks) |> all
 
-    pb = PutBlock{1000}(X, (3,))
+    pb = PutBlock(1000, X, (3,))
     @test pb |> ishermitian
     @test pb |> isunitary
     @test pb |> isreflexive
 
     @test_throws QubitMismatchError apply!(rand_state(4), put(1000, 2 => Rx(0.4)))
-    @test_throws QubitMismatchError apply!(rand_state(4), put(4, 2 => matblock(randn(3,3); nlevel=3)))
+    @test_throws MethodError apply!(rand_state(4), put(4, 2 => matblock(randn(3,3); nlevel=3)))
 end
 
 @testset "test swap gate" begin

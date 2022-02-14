@@ -1,50 +1,53 @@
 using YaoBase, YaoArrayRegister, Random
 using BitBasis
 export Measure,
-    MeasureAndReset, AllLocs, ComputationalBasis, chmeasureoperator, nqubits_measured
+    MeasureAndReset, AllLocs, ComputationalBasis, chmeasureoperator, num_measured
 
 """
-    Measure{N, K, OT, LT, PT, RNG} <: PrimitiveBlock{N,2}
-    Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=1:n, resetto=nothing, remove=false)
+    Measure{D,K, OT, LT, PT, RNG} <: PrimitiveBlock{D}
+    Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=1:n, resetto=nothing, remove=false, nlevel=2)
 
-Measure operator, currently only qubits are supported.
+Measure operator, currently only qudits are supported.
 """
-mutable struct Measure{N,K,OT,LT<:Union{NTuple{K,Int},AllLocs},PT<:PostProcess,RNG} <:
-               PrimitiveBlock{N,2}
+mutable struct Measure{D,K,OT,LT<:Union{NTuple{K,Int},AllLocs},PT<:PostProcess,RNG} <:
+               PrimitiveBlock{D}
+    n::Int
     rng::RNG
     operator::OT
     locations::LT
     postprocess::PT
     results::Any
-    function Measure{N,K,OT,LT,PT,RNG}(
+    function Measure{D,K,OT,LT,PT,RNG}(n::Int,
         rng::RNG,
         operator::OT,
         locations::LT,
         postprocess::PT,
-    ) where {RNG,N,K,OT,LT<:Union{NTuple{K,Int},AllLocs},PT<:PostProcess}
-        locations isa AllLocs || @assert_locs_safe N locations
-        new{N,K,OT,LT,PT,RNG}(rng, operator, locations, postprocess)
+    ) where {RNG,D,K,OT,LT<:Union{NTuple{K,Int},AllLocs},PT<:PostProcess}
+        locations isa AllLocs || @assert_locs_safe n locations
+        new{D,K,OT,LT,PT,RNG}(n, rng, operator, locations, postprocess)
     end
 end
+nqudits(m::Measure) = m.n
 
-function Measure{N}(
+function Measure{D}(n::Int,
     rng::RNG,
     operator::OT,
     locations::LT,
     postprocess::PT,
-) where {RNG,N,OT,LT<:Union{NTuple{K,Int} where K,AllLocs},PT<:PostProcess}
-    k = locations isa AllLocs ? N : length(locations)
-    Measure{N,k,OT,LT,PT,RNG}(rng, operator, locations, postprocess)
+) where {D,RNG,OT,LT<:Union{NTuple{K,Int} where K,AllLocs},PT<:PostProcess}
+    k = locations isa AllLocs ? n : length(locations)
+    Measure{D,k,OT,LT,PT,RNG}(n, rng, operator, locations, postprocess)
 end
 
-const MeasureAndReset{N,K,OT,LT,RNG} = Measure{N,K,OT,LT,ResetTo{BitStr64{K}},RNG}
+const MeasureAndReset{D,K,OT,LT,RNG} = Measure{D,K,OT,LT,ResetTo{BitStr64{K}},RNG}
 function MeasureAndReset(
-    N,
+    N::Int,
     resetto = 0;
     operator = ComputationalBasis,
     rng = Random.GLOBAL_RNG,
+    nlevel=2,
 )
-    Measure(N; postprocess = ResetTo(resetto), operator = operator, rng = rng, locs = locs)
+    Measure{nlevel}(N; nlevel=nlevel, postprocess = ResetTo(resetto), operator = operator, rng = rng, locs = locs)
 end
 
 """
@@ -52,8 +55,8 @@ end
 
 change the measuring `operator`. It will also discard existing measuring results.
 """
-function chmeasureoperator(m::Measure{N}, op::AbstractBlock) where {N}
-    Measure{N}(m.rng, op, m.locations, m.postprocess)
+function chmeasureoperator(m::Measure{D}, op::AbstractBlock) where D
+    Measure{D}(m.n, m.rng, op, m.locations, m.postprocess)
 end
 
 function Base.:(==)(m1::Measure, m2::Measure)
@@ -66,12 +69,12 @@ function Base.:(==)(m1::Measure, m2::Measure)
     res && (!isdefined(m1, :results) || m1.results == m2.results)
 end
 
-nqubits_measured(::Measure{N,K}) where {N,K} = K
+num_measured(::Measure{D,K}) where {D,K} = K
 
 """
     Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=AllLocs(), resetto=nothing, remove=false)
 
-Create a `Measure` block with number of qubits `n`.
+Create a `Measure` block with number of qudits `n`.
 
 # Example
 
@@ -82,7 +85,7 @@ julia> Measure(4)
 Measure(4)
 ```
 
-Or you could specify which qubits you are going to measure
+Or you could specify which qudits you are going to measure
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> Measure(4; locs=1:3)
@@ -141,7 +144,8 @@ function Measure(
     locs = AllLocs(),
     resetto = nothing,
     remove = false,
-) where {OT,LT,RNG}
+    nlevel = 2,
+) where {OT,RNG}
     if resetto !== nothing
         if remove
             error(
@@ -163,7 +167,7 @@ function Measure(
         locs = (locs...,)
         K = length(locs)
     end
-    Measure{n,K,OT,typeof(locs),typeof(postprocess),RNG}(rng, operator, locs, postprocess)
+    Measure{nlevel,K,OT,typeof(locs),typeof(postprocess),RNG}(n,rng, operator, locs, postprocess)
 end
 
 Measure(;
@@ -172,7 +176,8 @@ Measure(;
     operator = ComputationalBasis(),
     resetto = nothing,
     remove = false,
-) where {K} = @λ(
+    nlevel = 2,
+) = @λ(
     n -> Measure(
         n;
         rng = rng,
@@ -180,13 +185,14 @@ Measure(;
         operator = operator,
         resetto = resetto,
         remove = remove,
+        nlevel = nlevel,
     )
 )
 mat(x::Measure) = error("use BlockMap to get its matrix.")
 
-function _apply!(r::AbstractRegister, m::Measure{N}) where {N}
+function _apply!(r::AbstractRegister{D}, m::Measure{D}) where {D}
     m.results = measure!(m.postprocess, m.operator, r, m.locations; rng = m.rng)
     return r
 end
 
-occupied_locs(m::Measure{N}) where {N} = m.locations isa AllLocs ? (1:N...,) : m.locations
+occupied_locs(m::Measure) = m.locations isa AllLocs ? (1:nqudits(m)...,) : m.locations

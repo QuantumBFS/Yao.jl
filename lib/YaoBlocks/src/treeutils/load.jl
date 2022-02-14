@@ -148,8 +148,8 @@ function parse_ex(ex, info::ParseInfo)
     end
 end
 
-function check_dumpload(gate::AbstractBlock{N}) where {N}
-    gate2 = eval(parse_ex(dump_gate(gate), N))
+function check_dumpload(gate::AbstractBlock)
+    gate2 = eval(parse_ex(dump_gate(gate), nqudits(gate)))
     gate2 == gate || mat(gate2) ≈ mat(gate)
 end
 

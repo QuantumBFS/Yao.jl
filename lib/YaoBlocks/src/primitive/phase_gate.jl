@@ -3,13 +3,14 @@ using YaoBase
 export PhaseGate, phase
 
 """
-    PhiGate
+    PhaseGate
 
 Global phase gate.
 """
-mutable struct PhaseGate{T} <: PrimitiveBlock{1,2}
+mutable struct PhaseGate{T} <: PrimitiveBlock{2}
     theta::T
 end
+nqudits(pg::PhaseGate) = 1
 
 """
     phase(theta)

@@ -3,12 +3,12 @@ using YaoBlocks.ConstGate: CNOT
 
 @testset "test constructor" for T in [Float16, Float32, Float64]
     # NOTE: type should follow the axis
-    @test RotationGate(X, 0.1) isa PrimitiveBlock{1,2}
+    @test RotationGate(X, 0.1) isa PrimitiveBlock{2}
 
-    @test Rx(1) isa RotationGate{1,2,Float64,XGate}
-    @test Rx(T(0.1)) isa RotationGate{1,2,T,XGate}
-    @test Ry(T(0.1)) isa RotationGate{1,2,T,YGate}
-    @test Rz(T(0.1)) isa RotationGate{1,2,T,ZGate}
+    @test Rx(1) isa RotationGate{2,Float64,XGate}
+    @test Rx(T(0.1)) isa RotationGate{2,T,XGate}
+    @test Ry(T(0.1)) isa RotationGate{2,T,YGate}
+    @test Rz(T(0.1)) isa RotationGate{2,T,ZGate}
 end
 
 @testset "test matrix" begin

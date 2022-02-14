@@ -6,14 +6,6 @@ export UnitaryChannel
 # when StatsBase 0.33 is out
 _uweights(n) = weights(ones(n))
 
-function check_nqudits(operators)
-    N = nqudits(first(operators))
-    for each in operators
-        N == nqudits(each) || throw(AssertionError("number of qubits mismatch"))
-    end
-    return N
-end
-
 # NOTE: this can have a better support in YaoIR directly with StatsBase
 # as an compiled instruction, but store the weights is the best solution
 # here
@@ -59,30 +51,32 @@ unitary_channel
 └─ [0.7] Z
 ```
 """
-struct UnitaryChannel{N,W<:AbstractWeights} <: CompositeBlock{N,2}
-    operators::Vector{AbstractBlock{N}}
+struct UnitaryChannel{W<:AbstractWeights} <: CompositeBlock{2}
+    n::Int
+    operators::Vector{AbstractBlock{2}}
     weights::W
 
     function UnitaryChannel(operators::Vector)
         w = _uweights(length(operators))
-        N = check_nqudits(operators)
-        new{N,typeof(w)}(operators, w)
+        n = _check_block_sizes(operators)
+        new{typeof(w)}(n, operators, w)
     end
 
     function UnitaryChannel(operators::Vector, w::AbstractWeights)
-        N = check_nqudits(operators)
-        new{N,typeof(w)}(operators, w)
+        n = _check_block_sizes(operators)
+        new{typeof(w)}(n, operators, w)
     end
 
     function UnitaryChannel(operators::Vector, w::AbstractVector)
         w = weights(w)
-        N = check_nqudits(operators)
-        new{N,typeof(w)}(operators, w)
+        n = _check_block_sizes(operators)
+        new{typeof(w)}(n, operators, w)
     end
 end
 
 UnitaryChannel(it, weights) = UnitaryChannel(collect(it), weights)
 UnitaryChannel(it) = UnitaryChannel(collect(it))
+nqudits(uc::UnitaryChannel) = uc.n
 
 function _apply!(r::AbstractRegister, x::UnitaryChannel)
     _apply!(r, sample(x.operators, x.weights))
@@ -94,7 +88,7 @@ function mat(::Type{T}, x::UnitaryChannel) where {T}
 end
 
 subblocks(x::UnitaryChannel) = x.operators
-chsubblocks(x::UnitaryChannel{N}, it) where {N} = UnitaryChannel{N}(collect(it), x.weights)
+chsubblocks(x::UnitaryChannel, it) = UnitaryChannel(collect(it), x.weights)
 occupied_locs(x::UnitaryChannel) = union(occupied_locs.(x.operators)...)
 
 function cache_key(x::UnitaryChannel)
@@ -105,8 +99,8 @@ function cache_key(x::UnitaryChannel)
     return key
 end
 
-function Base.:(==)(lhs::UnitaryChannel{N}, rhs::UnitaryChannel{N}) where {N}
-    return (lhs.weights == rhs.weights) && (lhs.operators == rhs.operators)
+function Base.:(==)(lhs::UnitaryChannel, rhs::UnitaryChannel)
+    return (lhs.n == rhs.n) && (lhs.weights == rhs.weights) && (lhs.operators == rhs.operators)
 end
 
 Base.adjoint(x::UnitaryChannel) = UnitaryChannel(adjoint.(x.operators), x.weights)

@@ -53,10 +53,10 @@ end
           apply!(copy(reg), ad[1]) + apply!(copy(reg), ad[2]) + apply!(copy(reg), ad[3]) |>
           state
 
-    @test Add{3}() isa Add
-    @test Add{3}([put(3, 3 => X)]) isa Add
-    @test_throws MethodError Add{3}([put(10, 2 => X)])
-    @test_throws MethodError Add(put(10, 2 => X), put(4, 3 => X))
+    @test Add(3) isa Add
+    @test Add(3, [put(3, 3 => X)]) isa Add
+    @test_throws QubitMismatchError Add(3, [put(10, 2 => X)])
+    @test_throws QubitMismatchError Add(put(10, 2 => X), put(4, 3 => X))
     @test_throws QubitMismatchError apply!(rand_state(2), Add(put(10, 2 => X)))
 end
 
@@ -67,6 +67,6 @@ end
 end
 
 @testset "empty add" begin
-    c = Add{4}()
+    c = Add(4)
     @test mat(Float64, c) == zeros(16, 16)
 end

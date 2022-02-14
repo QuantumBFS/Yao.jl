@@ -1,15 +1,15 @@
 export AbstractBlock, PrimitiveBlock, CompositeBlock, AbstractContainer, TagBlock
 
 """
-    AbstractBlock{N, D}
+    AbstractBlock{D}
 
 Abstract type for quantum circuit blocks.
-`N` is the number of qudits, while `D` is the number level in each qudit.
+while `D` is the number level in each qudit.
 """
-abstract type AbstractBlock{N,D} end
+abstract type AbstractBlock{D} end
 
 """
-    PrimitiveBlock{N, D} <: AbstractBlock{N, D}
+    PrimitiveBlock{D} <: AbstractBlock{D}
 
 Abstract type that all primitive block will subtype from. A primitive block
 is a concrete block who can not be decomposed into other blocks. All composite
@@ -20,32 +20,32 @@ block can be decomposed into several primitive blocks.
     subtype for primitive block with parameter should implement `hash` and `==`
     method to enable key value cache.
 """
-abstract type PrimitiveBlock{N,D} <: AbstractBlock{N,D} end
+abstract type PrimitiveBlock{D} <: AbstractBlock{D} end
 
 """
-    CompositeBlock{N, D} <: AbstractBlock{N, D}
+    CompositeBlock{D} <: AbstractBlock{D}
 
 Abstract supertype which composite blocks will inherit from. Composite blocks
 are blocks composited from other [`AbstractBlock`](@ref)s, thus it is a `AbstractBlock`
 as well.
 """
-abstract type CompositeBlock{N,D} <: AbstractBlock{N,D} end
+abstract type CompositeBlock{D} <: AbstractBlock{D} end
 
 """
-    AbstractContainer{BT,N, D} <: CompositeBlock{N, D}
+    AbstractContainer{BT,D} <: CompositeBlock{D}
 
 Abstract type for container block. Container blocks are blocks contain a single
 block. Container block should have a
 """
-abstract type AbstractContainer{BT<:AbstractBlock,N,D} <: CompositeBlock{N,D} end
+abstract type AbstractContainer{BT<:AbstractBlock,D} <: CompositeBlock{D} end
 
 """
-    TagBlock{BT, N, D} <: AbstractContainer{BT, N, D}
+    TagBlock{BT, D} <: AbstractContainer{BT, D}
 
 `TagBlock` is a special kind of Container block, it forwards most of the methods
 but tag the block with some extra information.
 """
-abstract type TagBlock{BT,N,D} <: AbstractContainer{BT,N,D} end
+abstract type TagBlock{BT,D} <: AbstractContainer{BT,D} end
 
 """
     nlevel(x)

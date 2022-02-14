@@ -1,6 +1,6 @@
 export NoParams
 
-struct NoParams{N,D,BT<:AbstractBlock{N,D}} <: TagBlock{BT,N,D}
+struct NoParams{D,BT<:AbstractBlock{D}} <: TagBlock{BT,D}
     content::BT
 end
 
