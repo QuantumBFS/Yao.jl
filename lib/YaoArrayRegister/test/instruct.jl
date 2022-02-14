@@ -35,6 +35,18 @@ using YaoBase.Const
     @test instruct!(Val(2), copy(ST), U2, (2, 3, 4)) ≈ M
 
     @test instruct!(Val(2), copy(ST), I2, (1,)) ≈ ST
+    @test instruct!(Val(2), copy(ST), IMatrix(4), (2,3)) ≈ ST
+
+    STB = randn(ComplexF64, 2 ^ 4, 5)
+    U1 = randn(ComplexF64, 2, 2)
+    REGB = BatchedArrayReg(STB, 5)
+    @test instruct!(copy(REGB), U1, (3,)).state ≈ instruct!(Val(2), copy(STB), U1, (3,)) ≈ instruct!(Val(2), copy(STB), U1, (3,), (), ())
+    @test instruct!(Val(2), copy(STB), rand_unitary(1), ()) ≈ STB
+
+    # PermMatrix
+    U1 = PermMatrix([0.0 -1.0im; 1.0im 0.0im])
+    @test instruct!(copy(REGB), U1, (3,)).state ≈ instruct!(copy(REGB), Val(:Y), (3,)).state
+    @test instruct!(copy(REGB), Diagonal([1.0, im]), (3,)).state ≈ instruct!(copy(REGB), Val(:S), (3,)).state
 end
 
 @testset "test auto conversion" begin

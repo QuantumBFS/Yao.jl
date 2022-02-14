@@ -131,7 +131,7 @@ function Base.:*(bra::AdjointRegister{D,<:ArrayReg}, ket::ArrayReg{D}) where D
     end
 end
 
-Base.:*(bra::AdjointRegister{D,<:BatchedArrayReg}, ket::BatchedArrayReg{D}) where D = bra .* ket
+Base.:*(bra::AdjointRegister{D,<:BatchedArrayReg{D}}, ket::BatchedArrayReg{D}) where D = bra .* ket
 function Base.:*(
     bra::AdjointRegister{D,<:BatchedArrayReg{D, T1, <:Transpose}},
     ket::BatchedArrayReg{D,T2,<:Transpose},
