@@ -134,7 +134,7 @@ Base.copy(x::RepeatedBlock) = RepeatedBlock(nqudits(x), x.content, x.locs)
 Base.:(==)(A::RepeatedBlock, B::RepeatedBlock) = A.locs == B.locs && A.content == B.content
 
 function YaoBase.iscommute(x::RepeatedBlock{D}, y::RepeatedBlock{D}) where {D}
-    if nqubtis(x) != nqudits(y)
+    if nqudits(x) != nqudits(y)
         throw(QubitMismatchError("got nqudits = `$(nqudits(x))` and `$(nqudits(y))`"))
     end
     if x.locs == y.locs

@@ -14,6 +14,7 @@ struct Subroutine{D,BT<:AbstractBlock,C} <: AbstractContainer{BT,D}
 end
 
 function Subroutine(n::Int, block::BT, locs::NTuple{C,Int}) where {N,D,C,BT<:AbstractBlock{D}}
+    @assert_locs_safe n locs
     if !(length(locs) == nqudits(block) && n>= nqudits(block))
         throw(
             LocationConflictError(
@@ -92,7 +93,7 @@ subroutine(block::Function, locs) = @λ(n -> subroutine(n, block, locs))
 
 occupied_locs(c::Subroutine) = map(i -> c.locs[i], c.content |> occupied_locs)
 chsubblocks(pb::Subroutine{D}, blk::AbstractBlock{D}) where {D} = Subroutine(pb.n, blk, pb.locs)
-PreserveTrait(::Subroutine) = PreserveAll()
+PropertyTrait(::Subroutine) = PreserveAll()
 
 function _apply!(r::AbstractRegister, c::Subroutine)
     focus!(r, c.locs)

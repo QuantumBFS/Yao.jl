@@ -15,7 +15,7 @@ U = mat(X)
     @test cz(4, (1, 2), 3) == control(4, (1, 2), 3 => Z)
     @test cz((1, 2), 3)(4) == cz(4, (1, 2), 3)
 
-    @test control(3 => X)((1, 2))(4) == control(4, (1, 2), 3 => X)
+    @test control((1, 2), 3 => X)(4) == control(4, (1, 2), 3 => X)
 end
 
 @testset "single control" begin
@@ -91,4 +91,14 @@ end
     @test applymatrix(g) == applymatrix(g2) == applymatrix(g3)
     @test mat(g) == mat(g2)
     @test mat(g) == mat(g3)
+end
+
+@testset "push tests" begin
+    @test !iscommute(control(5, 1, 2=>X), control(5, 1, 2=>Y))
+    @test iscommute(control(5, 1, 2=>X), control(5, 1, 3=>Y))
+    @test !iscommute(control(5, 1, 2=>X), control(5, 2, 3=>Y))
+
+    c = control((2,3), 1=>X)(5)
+    @test c == control(5, (2,3), 1=>X)
+    @test copy(c) == c
 end

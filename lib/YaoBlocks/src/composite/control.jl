@@ -27,7 +27,6 @@ end
 
 Decode signs into control sequence on control or inversed control.
 """
-decode_sign(ctrls::Int...) = decode_sign(ctrls)
 decode_sign(ctrls::NTuple{N,Int}) where {N} =
     tuple(ctrls .|> abs, ctrls .|> sign .|> (x -> (1 + x) ÷ 2))
 
@@ -41,22 +40,9 @@ function ControlBlock(n::Int,
     return ControlBlock{BT,C,K}(n, ctrl_locs, ctrl_config, block, locs)
 end
 
-function ControlBlock(n::Int,
-    ctrl_locs::NTuple{C},
-    ctrl_config::NTuple{C},
-    block,
-    locs::NTuple{K},
-) where {M,C,K}
-    error("expect a block, got $(typeof(block))")
-end
-
 # control bit configs are 1 by default, it use sign to encode control bit code
 ControlBlock(n::Int, ctrl_locs::NTuple{C}, block::AbstractBlock, locs::NTuple) where {C} =
     ControlBlock(n::Int, decode_sign(ctrl_locs)..., block, locs)
-ControlBlock(n::Int, ctrl_locs::NTuple{C}, block::Function, locs::NTuple) where {C} =
-    ControlBlock(n::Int, decode_sign(ctrl_locs)..., parse_block(length(locs), block), locs)
-ControlBlock(ctrl_locs::NTuple{C}, block, locs::NTuple) where {C} =
-    ControlBlock(n::Int, decode_sign(ctrl_locs)..., block, locs) # trigger error
 
 # use pair to represent block under control in a compact way
 ControlBlock(n::Int, ctrl_locs::NTuple{C}, target::Pair) where {C} =
@@ -106,39 +92,6 @@ julia> control(2, 1=>X)
 """
 control(ctrl_locs, target::Pair) = @λ(n -> control(n, ctrl_locs, target))
 control(control_location::Int, target::Pair) = @λ(n -> control(n, control_location, target))
-
-"""
-    control(target) -> f(ctrl_locs)
-
-Return a lambda that takes a `Tuple` of control qubits locs as input. See also
-[`control`](@ref).
-
-# Example
-
-```jldoctest; setup=:(using YaoBlocks)
-julia> control(1=>X)
-(ctrl_locs -> control(ctrl_locs, 1 => X))
-
-julia> control((2, 3) => YaoBlocks.ConstGate.CNOT)
-(ctrl_locs -> control(ctrl_locs, (2, 3) => CNOT))
-```
-"""
-control(target::Pair) = @λ(ctrl_locs -> control(ctrl_locs, target))
-
-"""
-    control(ctrl_locs::Int...) -> f(target)
-
-Return a lambda that takes a `Pair` of control target as input.
-See also [`control`](@ref).
-
-# Example
-
-```jldoctest; setup=:(using YaoBlocks)
-julia> control(1, 2)
-(target -> control((1, 2), target))
-```
-"""
-control(ctrl_locs::Int...) = @λ(target -> control(ctrl_locs, target))
 
 """
     cnot([n, ]ctrl_locs, location)

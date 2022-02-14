@@ -10,6 +10,7 @@ end
     Reg = rand_state(n)
 
     pb = PutBlock(n, X, (3,))
+    @test copy(pb) == pb
     rb = repeat(n, X, (3,))
     @test apply!(copy(Reg), pb) ≈ apply!(copy(Reg), rb)
     @test pb |> applymatrix ≈ mat(pb)
