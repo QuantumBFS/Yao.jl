@@ -25,9 +25,10 @@ julia> B(n, i) = chain(n, i==j ? put(i=>H) : A(j, i) for j in i:n);
 
 julia> qft(n) = chain(B(n, i) for i in 1:n);
 
-julia> struct QFT <: PrimitiveBlock{2} end
+julia> struct QFT <: PrimitiveBlock{2} n::Int end
 
-julia> QFT(n) = QFT{n}();
+julia> YaoBlocks.nqudits(q::QFT) = q.n
+
 
 julia> circuit(q::QFT) = qft(nqubits(q));
 
