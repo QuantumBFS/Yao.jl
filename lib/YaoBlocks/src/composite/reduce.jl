@@ -1,5 +1,3 @@
-using SimpleTraits.BaseTraits, SimpleTraits
-
 export Add
 
 """

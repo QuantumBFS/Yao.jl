@@ -2,7 +2,6 @@
 circuit optimisation
 """
 module Optimise
-using SimpleTraits
 using YaoBlocks, YaoBlocks.ConstGate
 using YaoBlocks: NotImplementedError
 
@@ -34,27 +33,23 @@ function replace_block(
 end
 
 
-export is_pauli, IsPauliGroup
-
-"""
-    IsPauliGroup{X}
-
-Trait to check if `X` is an element of Pauli group.
-"""
-@traitdef IsPauliGroup{X}
-IsPauliGroup(x) = IsPauliGroup{typeof(x)}()
+export is_pauli
 
 """
     is_pauli(x)
 
 Check if `x` is an element of pauli group.
-
-!!! note
-    this function is just a binding of `SimpleTraits.istrait`, it will not work
-    if the type is not registered as a trait with `@traitimpl`.
 """
-is_pauli(x::T) where {T} = SimpleTraits.istrait(IsPauliGroup{T})
 is_pauli(xs...) = all(is_pauli, xs)
+is_pauli(::Union{XGate,YGate, ZGate, I2Gate}) = true
+is_pauli(::AbstractBlock) = false
+function is_pauli(s::Scale)
+    if factor(s) == im || factor(s) == -im || factor(s) == 1 || factor(s) == -1
+        return is_pauli(content(s))
+    else
+        return false
+    end
+end
 
 for G in [:I2, :X, :Y, :Z]
     ImG = Symbol(:Im, G)
@@ -64,11 +59,6 @@ for G in [:I2, :X, :Y, :Z]
     @eval const $ImG = im * $G
     @eval const $nImG = -im * $G
     @eval const $nG = -$G
-
-    @eval @traitimpl IsPauliGroup{typeof($G)}
-    @eval @traitimpl IsPauliGroup{typeof($ImG)}
-    @eval @traitimpl IsPauliGroup{typeof($nImG)}
-    @eval @traitimpl IsPauliGroup{typeof($nG)}
 end
 
 export merge_pauli

@@ -51,6 +51,10 @@ end
     include("extending_reg.jl")
 end
 
+@testset "measure_ops" begin
+    include("measure_ops.jl")
+end
+
 @testset "test tree utils" begin
     include("treeutils/treeutils.jl")
 end

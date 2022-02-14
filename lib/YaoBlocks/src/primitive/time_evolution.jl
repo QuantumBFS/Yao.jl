@@ -98,3 +98,5 @@ function YaoBase.isunitary(te::TimeEvolution)
     iszero(imag(te.dt)) || return false
     return true
 end
+
+iparams_range(::TimeEvolution{D,T}) where {D,T} = ((typemin(T), typemax(T)),)

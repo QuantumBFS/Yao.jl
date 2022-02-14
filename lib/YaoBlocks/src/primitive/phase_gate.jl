@@ -55,6 +55,6 @@ Base.:(==)(lhs::PhaseGate, rhs::PhaseGate) = lhs.theta == rhs.theta
 
 cache_key(gate::PhaseGate) = gate.theta
 
-function parameters_range!(out::Vector{Tuple{T,T}}, gate::PhaseGate{T}) where {T}
-    push!(out, (0.0, 2.0 * pi))
+function iparams_range(::PhaseGate{T}) where {T}
+    return ((zero(T), T(2.0 * pi)),)
 end

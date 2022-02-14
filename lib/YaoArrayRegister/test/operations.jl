@@ -93,7 +93,6 @@ end
 
 
 @testset "more (push test coverage)" begin
-    @test reorder!(reg1, [2,3,1]).state ≈ reshape(permutedims(reshape(reg2.state, 2, 2, 2, 5), sortperm([2,3,1,4])), 8, 5)
     reg1 = focus!(rand_state(5; nbatch=5), (2, 3))
     reg2 = focus!(rand_state(5), (2, 3))
     @test fidelity(reg1, reg2) ≈ fidelity(reg2, reg1)
@@ -103,5 +102,5 @@ end
     @test nlevel(us) == 3
     println(reg1)
     println(reg2)
-    von_neumann_entropy(repeat(reg2, 3), [2,1]) ≈ fill(von_neumann_entropy(reg2, [1,2]), 3)
+    @test von_neumann_entropy(repeat(reg2, 3), [2,1]) ≈ fill(von_neumann_entropy(reg2, [1,2]), 3)
 end

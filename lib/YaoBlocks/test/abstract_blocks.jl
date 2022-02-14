@@ -31,3 +31,10 @@ end
 
 # block type can be used as traits
 @test nqubits(X) == 1
+
+@test isunitary(XGate)
+@test isreflexive(XGate)
+@test ishermitian(XGate)
+@test setiparams(Rx(0.3), 0.5) == Rx(0.5)
+@test setiparams(+, Rx(0.3), 0.5) == Rx(0.8)
+@test YaoBlocks.parameters_range(chain(Z, shift(0.3), phase(0.2), Rx(0.5), time_evolve(X, 0.5), Ry(0.5))) == [(0.0, 2π), (0.0, 2π), (0.0, 2π), (-Inf, Inf), (0.0, 2π)]

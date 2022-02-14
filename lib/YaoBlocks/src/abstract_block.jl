@@ -1,4 +1,4 @@
-using YaoBase, YaoArrayRegister, SimpleTraits
+using YaoBase, YaoArrayRegister
 
 """
     apply!(register, block)
@@ -314,18 +314,6 @@ render_params(r::AbstractBlock, ::Val{:zero}) =
     (zero(iparams_eltype(r)) for i = 1:niparams(r))
 
 """
-    HasParameters{X} <: SimpleTraits.Trait
-
-Trait that block `X` has parameters.
-"""
-@traitdef HasParameters{X<:AbstractBlock}
-
-@generated function SimpleTraits.trait(::Type{HasParameters{X}}) where {X}
-    hasmethod(parameters, Tuple{X}) ? :(HasParameters{X}) : :(Not{HasParameters{X}})
-end
-
-
-"""
     cache_type(::Type) -> DataType
 
 Return the element type that a [`CacheFragment`](@ref)
@@ -389,6 +377,14 @@ function parameters_range(block::AbstractBlock)
 end
 
 function parameters_range!(out::Vector{Tuple{T,T}}, block::AbstractBlock) where {T}
+    np = niparams(block)
+    if  np!= 0
+        ranges = iparams_range(block)
+        @assert length(ranges) == np
+        for i=1:np
+            push!(out, ranges[i])
+        end
+    end
     for subblock in subblocks(block)
         parameters_range!(out, subblock)
     end

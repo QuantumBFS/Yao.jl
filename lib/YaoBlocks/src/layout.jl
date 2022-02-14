@@ -207,7 +207,7 @@ print_block(io::IO, c::TagBlock) = nothing
 print_block(io::IO, c::GeneralMatrixBlock) =
     printstyled(io, "matblock(...)"; color = color(GeneralMatrixBlock))
 
-function print_block(io::IO, c::Measure{N,K,OT}) where {N,K,OT}
+function print_block(io::IO, c::Measure{D,K,OT}) where {D,K,OT}
     strs = String[]
     if c.operator != ComputationalBasis()
         push!(strs, "operator=$(repr(c.operator))")
@@ -223,9 +223,9 @@ function print_block(io::IO, c::Measure{N,K,OT}) where {N,K,OT}
 
     out = join(strs, ", ")
     if !isempty(strs)
-        out = "Measure($N;" * out
+        out = "Measure($(nqudits(c));" * out
     else
-        out = "Measure($N" * out
+        out = "Measure($(nqudits(c))" * out
     end
 
     return print(io, out, ")")

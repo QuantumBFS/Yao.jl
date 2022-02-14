@@ -129,11 +129,6 @@ Base.:(==)(lhs::RotationGate{TA,GT}, rhs::RotationGate{TB,GT}) where {TA,TB,GT} 
 
 cache_key(R::RotationGate) = R.theta
 
-function parameters_range!(
-    out::Vector{Tuple{T,T}},
-    ::RotationGate{D,T,GT},
-) where {D,T,GT}
-    push!(out, (0.0, 2.0 * pi))
-end
+iparams_range(::RotationGate{D,T,GT}) where {D,T,GT} = ((zero(T), T(2 * pi)),)
 
 occupied_locs(g::RotationGate) = occupied_locs(g.block)
