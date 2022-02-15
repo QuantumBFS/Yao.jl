@@ -21,7 +21,7 @@ LuxurySparse = "0.5, 0.6"
 MLStyle = "0.3, 0.4"
 Reexport = "1"
 TupleTools = "1"
-YaoAPI = "0.2"
+YaoAPI = "0.3"
 julia = "1"
 
 [extras]
