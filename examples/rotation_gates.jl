@@ -1,4 +1,4 @@
-using Yao, YaoPlots, YaoExtensions
+using Yao, YaoPlots, Yao.EasyBuild
 N = 4
 d = 1
 ising(nbit, i, j) = rot(kron(nbit, i=>X, j=>X), 0.0)

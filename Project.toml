@@ -1,6 +1,6 @@
 name = "YaoPlots"
 uuid = "32cfe2d9-419e-45f2-8191-2267705d8dbc"
-version = "0.7.0"
+version = "0.7.1"
 
 [deps]
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
@@ -18,17 +18,16 @@ BitBasis = "0.7"
 Colors = "0.11, 0.12"
 Compose = "0.8, 0.9"
 GraphPlot = "0.5"
-Graphs = "1.4"
+Graphs = "1.6"
 Multigraphs = "0.3"
 Viznet = "0.3.1"
-YaoBlocks = "0.11"
+YaoBlocks = "0.12"
 ZXCalculus = "0.5"
 julia = "1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Yao = "5872b779-8223-5990-8dd0-5abbb0748c8c"
-YaoExtensions = "7a06699c-c960-11e9-3c98-9f78548b5f0f"
 
 [targets]
-test = ["Test", "Yao", "YaoExtensions"]
+test = ["Test", "Yao"]

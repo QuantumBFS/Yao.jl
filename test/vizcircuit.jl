@@ -4,10 +4,11 @@ using Test
 using YaoBlocks
 
 @testset "gate styles" begin
-	@test YaoPlots.get_brush_texts(X)[][2] == "X"
-	@test YaoPlots.get_brush_texts(Rx(0.5))[][2] == "Rx(0.5)"
-	@test YaoPlots.get_brush_texts(shift(0.5))[][2] == "ϕ(0.5)"
-	@test YaoPlots.get_brush_texts(YaoBlocks.phase(0.5))[][2] == "^0.5"
+    c = YaoPlots.CircuitGrid(1)
+	@test YaoPlots.get_brush_texts(c, X)[][2] == "X"
+	@test YaoPlots.get_brush_texts(c, Rx(0.5))[][2] == "Rx(0.5)"
+	@test YaoPlots.get_brush_texts(c, shift(0.5))[][2] == "ϕ(0.5)"
+	@test YaoPlots.get_brush_texts(c, YaoBlocks.phase(0.5))[][2] == "^0.5"
 end
 
 @testset "circuit canvas" begin
@@ -51,4 +52,16 @@ end
 	@test YaoPlots.pretty_angle(-π*0.0) == "0"
 	@test YaoPlots.pretty_angle(-π*0.5) == "-π/2"
 	@test YaoPlots.pretty_angle(1.411110) == "1.41"
+end
+
+@testset "readme" begin
+    YaoPlots.CircuitStyles.linecolor[] = "pink" 
+    YaoPlots.CircuitStyles.gate_bgcolor[] = "yellow" 
+    YaoPlots.CircuitStyles.textcolor[] = "#000080" # the navy blue color
+    YaoPlots.CircuitStyles.fontfamily[] = "JuliaMono"
+    YaoPlots.CircuitStyles.lw[] = 2.5pt
+    YaoPlots.CircuitStyles.textsize[] = 13pt
+    YaoPlots.CircuitStyles.paramtextsize[] = 8pt
+            
+    @test plot(chain(3, put(1=>X), repeat(3, H), put(2=>Y), repeat(3, Rx(π/2)))) isa Compose.Context
 end

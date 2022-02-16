@@ -1,4 +1,4 @@
-using YaoExtensions, YaoPlots, Yao
+using Yao.EasyBuild, YaoPlots, Yao
 using Compose, Cairo
 
 _save(str) = PNG(joinpath(@__DIR__, str))

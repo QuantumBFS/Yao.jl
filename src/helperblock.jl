@@ -2,18 +2,18 @@ using YaoBlocks
 export LabelBlock
 
 """
-    LabelBlock{BT,N} <: TagBlock{N}
+    LabelBlock{BT,D} <: TagBlock{BT,D}
 
 A marker to mark a circuit applying on a continous block for better plotting.
 """
-struct LabelBlock{BT<:AbstractBlock,N} <: TagBlock{BT,N}
+struct LabelBlock{BT<:AbstractBlock,D} <: TagBlock{BT,D}
     content::BT
     name::String
 end
 
 YaoBlocks.content(cb::LabelBlock) = cb.content
-function LabelBlock(x::BT, name::String) where {N,BT<:AbstractBlock{N}}
-    LabelBlock{BT,N}(x, name)
+function LabelBlock(x::BT, name::String) where {D,BT<:AbstractBlock{D}}
+    LabelBlock{BT,D}(x, name)
 end
 
 function is_continuous_chunk(x)

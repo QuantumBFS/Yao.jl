@@ -6,7 +6,7 @@
 ## Example 1: Visualize a QBIR define in Yao
 
 ```julia
-using YaoExtensions, YaoPlots
+using Yao.EasyBuild, YaoPlots
 using Compose
 
 # show a qft circuit
