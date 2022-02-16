@@ -1,7 +1,7 @@
 using YaoToEinsum
 using Test, OMEinsum, OMEinsumContractionOrders
 using Yao
-using YaoExtensions: qft_circuit, variational_circuit, rand_google53
+using Yao.EasyBuild: qft_circuit, variational_circuit, rand_google53
 using SymEngine
 
 @testset "YaoToEinsum.jl" begin
