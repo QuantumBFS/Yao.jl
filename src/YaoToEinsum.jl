@@ -24,7 +24,7 @@ function EinBuilder(::Type{T}, n::Int) where T
 end
 newlabel!(eb::EinBuilder) = (eb.maxlabel[] += 1; eb.maxlabel[])
 
-function add_gate!(eb::EinBuilder{T}, b::PutBlock{N,C}) where {T, N,C}
+function add_gate!(eb::EinBuilder{T}, b::PutBlock{D,C}) where {T,D,C}
     return add_matrix!(eb, C, mat(T, b.content), collect(b.locs))
 end
 # general and diagonal gates
@@ -39,7 +39,7 @@ function add_matrix!(eb::EinBuilder{T}, k::Int, m::AbstractMatrix, locs::Vector)
     return eb
 end
 # swap gate
-function add_gate!(eb::EinBuilder{T}, b::PutBlock{N,2,ConstGate.SWAPGate}) where {T,N}
+function add_gate!(eb::EinBuilder{T}, b::PutBlock{2,2,ConstGate.SWAPGate}) where {T,N}
     lj = eb.slots[b.locs[2]]
     eb.slots[b.locs[2]] = eb.slots[b.locs[1]]
     eb.slots[b.locs[1]] = lj
@@ -47,7 +47,7 @@ function add_gate!(eb::EinBuilder{T}, b::PutBlock{N,2,ConstGate.SWAPGate}) where
 end
 
 # control gates
-function add_gate!(eb::EinBuilder{T}, b::ControlBlock{N,BT,C,M}) where {T, N,BT,C,M}
+function add_gate!(eb::EinBuilder{T}, b::ControlBlock{BT,C,M}) where {T, BT,C,M}
     return add_controlled_matrix!(eb, M, mat(T, b.content), collect(b.locs), collect(b.ctrl_locs), collect(b.ctrl_config))
 end
 function add_controlled_matrix!(eb::EinBuilder{T}, k::Int, m::AbstractMatrix, locs::Vector, control_locs, control_vals) where T
@@ -138,19 +138,19 @@ julia> yao2einsum(c; initial_state=Dict(1=>0, 2=>1), final_state=Dict(1=>ArrayRe
 (1, 2, 4∘2, 5∘1, 6∘3∘5, 5, 4 -> 6∘3, AbstractArray{ComplexF64}[[1.0 + 0.0im, 0.0 + 0.0im], [0.0 + 0.0im, 1.0 + 0.0im], [0.0 + 0.0im 1.0 + 0.0im; 1.0 + 0.0im 0.0 + 0.0im], [0.0 + 0.0im 0.0 - 1.0im; 0.0 + 1.0im 0.0 + 0.0im], [1.0 + 0.0im 0.0 + 0.0im; 0.0 + 0.0im 1.0 + 0.0im;;; 0.0 + 0.0im 0.0 - 1.0im; 0.0 + 1.0im 0.0 + 0.0im], [0.6 + 0.0im, 0.0 + 0.8im], [0.0 + 0.0im, 1.0 + 0.0im]])
 ```
 """
-function yao2einsum(circuit::AbstractBlock; initial_state::Dict=Dict{Int,Int}(), final_state::Dict=Dict{Int,Int}())
+function yao2einsum(circuit::AbstractBlock{D}; initial_state::Dict=Dict{Int,Int}(), final_state::Dict=Dict{Int,Int}()) where {D}
     T = promote_type(ComplexF64, dict_regtype(initial_state), dict_regtype(final_state), Yao.parameters_eltype(circuit))
-    vec_initial_state = Dict{Int,ArrayReg{1,T}}([k=>render_single_qubit_state(T, v) for (k, v) in initial_state])
-    vec_final_state = Dict{Int,ArrayReg{1,T}}([k=>render_single_qubit_state(T, v) for (k, v) in final_state])
+    vec_initial_state = Dict{Int,ArrayReg{D,T}}([k=>render_single_qubit_state(T, v) for (k, v) in initial_state])
+    vec_final_state = Dict{Int,ArrayReg{D,T}}([k=>render_single_qubit_state(T, v) for (k, v) in final_state])
     yao2einsum(circuit, vec_initial_state, vec_final_state)
 end
 dict_regtype(d::Dict) = promote_type(_regtype.(values(d))...)
-_regtype(::ArrayReg{1,VT}) where {VT} = VT
+_regtype(::ArrayReg{D,VT}) where {D,VT} = VT
 _regtype(::Int) = ComplexF64
 render_single_qubit_state(::Type{T}, x::Int) where T = x == 0 ? zero_state(T, 1) : product_state(T, bit"1")
-render_single_qubit_state(::Type{T}, x::ArrayReg{1}) where T = ArrayReg(collect(T, statevec(x)))
+render_single_qubit_state(::Type{T}, x::ArrayReg) where T = ArrayReg(collect(T, statevec(x)))
 
-function yao2einsum(circuit::AbstractBlock, initial_state::Dict{Int,<:ArrayReg{1,T}}, final_state::Dict{Int,<:ArrayReg{1,T}}) where T
+function yao2einsum(circuit::AbstractBlock{D}, initial_state::Dict{Int,<:ArrayReg{D,T}}, final_state::Dict{Int,<:ArrayReg{D,T}}) where {D,T}
     n = nqubits(circuit)
     eb = EinBuilder(T, n)
     openindices = Int[]

@@ -1,7 +1,7 @@
 name = "YaoToEinsum"
 uuid = "9b173c7b-dc24-4dc5-a0e1-adab2f7b6ba9"
 authors = ["GiggleLiu <cacate0129@gmail.com> and contributors"]
-version = "0.1.2"
+version = "0.1.3"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
@@ -10,14 +10,13 @@ Yao = "5872b779-8223-5990-8dd0-5abbb0748c8c"
 
 [compat]
 OMEinsum = "0.6"
-Yao = "0.6"
+Yao = "0.7"
 julia = "1"
 
 [extras]
 OMEinsumContractionOrders = "6f22d1fd-8eed-4bb7-9776-e7d684900715"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-YaoExtensions = "7a06699c-c960-11e9-3c98-9f78548b5f0f"
 SymEngine = "123dc426-2d89-5057-bbad-38513e3affd8"
 
 [targets]
-test = ["Test", "OMEinsumContractionOrders", "YaoExtensions", "SymEngine"]
+test = ["Test", "OMEinsumContractionOrders", "SymEngine"]
