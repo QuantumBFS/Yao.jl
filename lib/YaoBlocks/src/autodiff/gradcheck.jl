@@ -51,10 +51,10 @@ function apply_back_jacobian(reg0::AbstractArrayReg{D}, block, θ; kwargs...) wh
                 (in, inδ), col =
                     apply_back((copy(out), similar(reg0, copy(zm))), block; kwargs...)
                 @assert in ≈ reg0
-                jac[i, j, :] = col
+                jac[i, j, :] .= col
                 zm[i, j] *= 1im
                 (in, inδ), col = apply_back((copy(out), similar(reg0, copy(zm))), block)
-                jac[i, j, :] += 1im * col
+                jac[i, j, :] .+= 1im .* col
                 zm[i, j] = 0
             end
         end
@@ -93,7 +93,7 @@ function test_apply_back(
     kwargs...,
 ) where {D}
     function mfunc(param)
-        dispatch!(block, param)
+        block = dispatch(block, param)
         apply!(copy(reg0), block).state
     end
     # test loss is `real(sum(rand_matrix .* m))`

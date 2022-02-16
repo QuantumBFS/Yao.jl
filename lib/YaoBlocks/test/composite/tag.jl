@@ -28,18 +28,19 @@ end
 
     # type
     @test -X isa Scale{<:Val}
-    @test -im * X isa Scale{<:Val}
+    @test -im * X isa Scale{<:Number}
+    @test Val(-im) * X isa Scale{<:Val}
     @test -2 * X isa Scale{<:Number}
 
     # apply!
     reg = rand_state(1)
     @test apply!(copy(reg), -X) ≈ -apply!(copy(reg), X)
-    @test apply!(copy(reg), (-im * Y)') ≈ apply!(copy(reg), im * Y)
+    @test apply!(copy(reg), (Val(-im) * Y)') ≈ apply!(copy(reg), im * Y)
     @test apply!(copy(reg), (-2im * Y)') ≈ apply!(copy(reg), 2im * Y)
 
     # mat
     @test mat(-X) ≈ -mat(X)
-    @test mat((-im * Y)') ≈ (-im * mat(Y))'
+    @test mat((Val(-im) * Y)') ≈ (-im * mat(Y))'
     @test mat((-2im * Y)') ≈ (-2im * mat(Y))'
 
     # other
@@ -47,6 +48,13 @@ end
     @test cache_key(Scale(Val(-1), X)) == cache_key(Scale(-1, X))
     @test copy(-X) == -X
     @test copy(-X) isa Scale{<:Val}
+
+    # parameters
+    @test getiparams(2X) == (2,)
+    @test setiparams(2X, 4.0) == 4.0X
+    s = 2.0X
+    setiparams!(s, 4.0)
+    @test s == 4.0X
 end
 
 @testset "properties" begin

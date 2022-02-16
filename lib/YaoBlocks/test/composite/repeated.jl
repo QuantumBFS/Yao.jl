@@ -9,9 +9,9 @@ using LuxurySparse
     reg = rand_state(5)
     @test apply(reg, repeat(5, X, ())) == reg
     rp = RepeatedBlock(5, X, (1, 2, 3))
-    @test iscommute(RepeatedBlock(5, X, (1, 2, 3)), repeat(5, im*X, (1, 2, 3)))
-    @test_throws QubitMismatchError iscommute(RepeatedBlock(5, X, (1, 2, 3)), repeat(3, im*X, (1, 2, 3)))
-    @test iscommute(RepeatedBlock(5, X, (1, 2, 3)), repeat(5, im*X, (1, 2)))
+    @test iscommute(RepeatedBlock(5, X, (1, 2, 3)), repeat(5, Val(im)*X, (1, 2, 3)))
+    @test_throws QubitMismatchError iscommute(RepeatedBlock(5, X, (1, 2, 3)), repeat(3, Val(im)*X, (1, 2, 3)))
+    @test iscommute(RepeatedBlock(5, X, (1, 2, 3)), repeat(5, Val(im)*X, (1, 2)))
     @test isreflexive(rp)
     @test ishermitian(rp)
     @test isunitary(rp)

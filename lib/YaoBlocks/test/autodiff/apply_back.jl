@@ -35,6 +35,11 @@ using Random
 
         # TimeEvolution
         @test test_apply_back(reg0, TimeEvolution(put(3, 1 => X), 0.5), 0.5; δ = 1e-5)
+
+        # scale
+        @test test_apply_back(reg0, Scale(3.0, put(3, 1 => X)), 3.5; δ = 1e-5)
+        @test test_apply_back(reg0, Scale(3.0, put(3, 1 => Scale(2.0,Y))), [1.3, 0.6]; δ = 1e-5)
+        @test test_apply_back(reg0, chain(Scale(2.0, repeat(3,X)), Scale(3.0, put(3, 1 => Scale(2.0,Y)))), [-0.4, 2.0, -0.2]; δ = 1e-5)
     end
 end
 
@@ -58,8 +63,8 @@ end
     for reg0 in [rand_state(3), rand_state(3, nbatch = 10)]
         @test test_apply_back(
             reg0,
-            chain(put(3, 1 => Rx(0.0)), (3 + 2im) * control(3, (2, 3), 1 => Rz(0.0))),
-            [0.5, 0.5];
+            chain(put(3, 1 => Rx(0.0)), (3.0 + 2im) * control(3, (2, 3), 1 => Rz(0.0))),
+            [0.5, 0.5, 0.6];
             δ = 1e-5,
         )
         @test test_apply_back(reg0, Daggered(put(3, 1 => Rx(0.0))), 0.5; δ = 1e-5)

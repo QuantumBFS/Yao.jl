@@ -95,10 +95,27 @@ end
 
 function apply_back!(st, block::Scale, collector)
     out, outδ = st
-    apply_back!((out, outδ), content(block), collector)
-    regscale!(outδ, conj(factor(block)))
-    regscale!(out, 1 / factor(block))
-    return (out, outδ)
+    # recoverting inputs
+    if isunitary(block)
+        in = apply!(out, block')
+    elseif isunitary(content(block))
+        in = apply!(regscale!(out, inv(factor(block))), content(block)')
+    else
+        @warn "rescaling a non-unitary block, call into inefficient back-propgation routine."
+        in = apply!(out, matblock(inv(Matrix(block))))
+    end
+    # adjoint of matrix
+    adjmat = outerprod(in, outδ)
+    mat_back!(datatype(in), block, adjmat, collector)
+
+    inδ = apply!(outδ, block')
+
+    # differentiate scaling
+    #if niparams(block) > 0
+    #    g = dropdims(sum(conj.(state(in)) .* state(outδ), dims = (1, 2)), dims = (1, 2)) |> as_scalar
+    #    pushfirst!(collector, g')
+    #end
+    return (in, inδ)
 end
 
 function apply_back!(st, circuit::ChainBlock, collector)

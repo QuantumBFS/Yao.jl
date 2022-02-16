@@ -23,7 +23,7 @@ julia> -Z
 [-] Z
 ```
 """
-struct Scale{S<:Union{Number,Val},D,BT<:AbstractBlock{D}} <: TagBlock{BT,D}
+mutable struct Scale{S<:Union{Number,Val},D,BT<:AbstractBlock{D}} <: TagBlock{BT,D}
     alpha::S
     content::BT
 end
@@ -31,6 +31,11 @@ end
 content(x::Scale) = x.content
 factor(x::Scale{<:Number}) = x.alpha
 factor(x::Scale{Val{X}}) where {X} = X
+
+# parameter interface
+getiparams(s::Scale{<:Number}) = (factor(s),)
+setiparams(s::Scale{<:Number}, alpha::Number) = Scale(alpha, s.content)
+setiparams!(s::Scale{T1}, alpha::T2) where {T1<:Number, T2<:Number} = (s.alpha = T1(alpha); s)
 
 Base.copy(x::Scale) = Scale(x.alpha, copy(x.content))
 Base.adjoint(x::Scale{<:Number}) = Scale(adjoint(x.alpha), adjoint(content(x)))
