@@ -105,7 +105,7 @@ function apply_back!(st, block::Scale, collector)
         in = apply!(out, matblock(inv(Matrix(block))))
     end
     # adjoint of matrix
-    adjmat = outerprod(in, outδ)
+    adjmat = outerprod(outδ, in)
     mat_back!(datatype(in), block, adjmat, collector)
 
     inδ = apply!(outδ, block')

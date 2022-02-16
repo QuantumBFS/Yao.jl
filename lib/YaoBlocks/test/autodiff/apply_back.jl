@@ -63,8 +63,8 @@ end
     for reg0 in [rand_state(3), rand_state(3, nbatch = 10)]
         @test test_apply_back(
             reg0,
-            chain(put(3, 1 => Rx(0.0)), (3.0 + 2im) * control(3, (2, 3), 1 => Rz(0.0))),
-            [0.5, 0.5, 0.6];
+            chain(put(3, 1 => Rx(0.0)), 3.0 * control(3, (2, 3), 1 => Rz(0.0))),
+            [0.5, 1.5, 0.6];
             δ = 1e-5,
         )
         @test test_apply_back(reg0, Daggered(put(3, 1 => Rx(0.0))), 0.5; δ = 1e-5)

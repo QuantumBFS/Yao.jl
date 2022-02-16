@@ -108,7 +108,7 @@ end
 function mat_back!(::Type{T}, rb::Scale, adjy, collector) where {T}
     np = nparameters(rb)
     np == 0 && return collector
-    mat_back!(T, content(rb), factor(rb) .* adjy, collector)
+    mat_back!(T, content(rb), conj(factor(rb)) .* adjy, collector)
     if niparams(rb) > 0
         pushfirst!(collector, projection(rb.alpha, sum(adjy .* conj.(mat(T, content(rb))))))
     end

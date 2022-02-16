@@ -86,6 +86,6 @@ end
     @test factor((2X)*(2X)) == 4
     @test factor((2X)*Y) == 2
     @test factor(X*(2Y)) == 2
-    @test factor(2(-X)) === -2
+    @test 2(-X) isa Scale{Int64, 2, Scale{Val{-1}, 2, XGate}}
     @test mat(X^2) ≈ Matrix(I, 2, 2)
 end

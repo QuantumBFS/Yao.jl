@@ -3,7 +3,7 @@
 _mul(::Val{X}, ::Val{Y}) where {X, Y} = Val(X*Y)
 _mul(x::Number, y::Number) = x * y
 _neg(::Val{X}) where X = Val(-X)
-_neg(x::Number) = x
+_neg(x::Number) = -x
 
 # negate
 Base.:(-)(x::AbstractBlock) = Scale(Val(-1), x)
@@ -12,7 +12,8 @@ Base.:(-)(x::Scale) = Scale(_neg(x.alpha), content(x))
 
 # scaler multiply block
 Base.:(*)(α::T, x::AbstractBlock) where {T<:Union{Val, Number}} = Scale(α, x)
-Base.:(*)(α::T, x::Scale) where {T<:Union{Val, Number}} = Scale(_mul(α, x.alpha), content(x))
+Base.:(*)(α::T, x::Scale{T2}) where {T<:Val,T2<:Val} = Scale(_mul(α, x.alpha), content(x))
+Base.:(*)(α::T, x::Scale{T2}) where {T<:Number,T2<:Number} = Scale(_mul(α, x.alpha), content(x))
 Base.:(*)(x::AbstractBlock, α::Union{Val, Number}) = α * x
 
 # block multiply block
