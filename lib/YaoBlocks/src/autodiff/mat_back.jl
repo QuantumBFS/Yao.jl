@@ -98,8 +98,6 @@ function mat_back!(::Type{T}, rb::ChainBlock{D}, adjy, collector) where {T,D}
     return collector
 end
 
-_
-
 function mat_back!(::Type{T}, rb::KronBlock, adjy, collector) where {T}
     nparameters(rb) == 0 && return collector
     mat_back!(T, chain(nqudits(rb), [put(loc => rb[loc]) for loc in rb.locs]), adjy, collector)
