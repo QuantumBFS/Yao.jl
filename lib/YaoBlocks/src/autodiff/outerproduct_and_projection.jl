@@ -10,15 +10,14 @@ Else if `ATL(R) <: AbstractMatrix`, then it is an outer product `x.left*transpos
 struct OuterProduct{T,ATL<:AbstractArray{T},ATR<:AbstractArray{T}} <: LowRankMatrix{T}
     left::ATL
     right::ATR
-end
-
-function OuterProduct(left::ATL, right::ATR) where {T,ATL,ATR}
-    size(left, 2) != size(right, 2) && throw(
-        DimensionMismatch(
-            "The seconds dimension of left ($(size(left,2))) and right $(size(right,2)) does not match.",
-        ),
-    )
-    return OuterProduct{T,ATL,ATR}(left, right)
+    function OuterProduct(left::ATL, right::ATR) where {T,ATL<:AbstractArray{T},ATR<:AbstractArray{T}}
+        size(left, 2) != size(right, 2) && throw(
+            DimensionMismatch(
+                "The seconds dimension of left ($(size(left,2))) and right $(size(right,2)) does not match.",
+            ),
+        )
+        return new{T,ATL,ATR}(left, right)
+    end
 end
 
 const BatchedOuterProduct{T,MTL,MTR} =
@@ -35,13 +34,14 @@ Base.size(op::OuterProduct) = (size(op.left, 1), size(op.right, 1))
 Base.size(op::OuterProduct, i::Int) =
     i == 1 ? size(op.left, 1) : (i == 2 ? size(op.right, 1) : throw(DimensionMismatch("")))
 
-LinearAlgebra.mul!(a::OuterProduct, b) = a.left * (transpose(a.right) * b)
-LinearAlgebra.mul!(a::OuterProduct, b::AbstractMatrix) =
+Base.:(*)(a::OuterProduct, b::AbstractVector) = a.left * (transpose(a.right) * b)
+Base.:(*)(a::OuterProduct, b::AbstractMatrix) =
     OuterProduct(a.left, transpose(transpose(a.right) * b))
-LinearAlgebra.mul!(a, b::OuterProduct) = (a * b.left) * transpose(b.right)
-LinearAlgebra.mul!(a::AbstractMatrix, b::OuterProduct) = OuterProduct(a * b.left, b.right)
-LinearAlgebra.mul!(a::OuterProduct, b::OuterProduct) =
+Base.:(*)(a::AbstractMatrix, b::OuterProduct) = OuterProduct(a * b.left, b.right)
+Base.:(*)(a::LinearAlgebra.AdjointAbsVec, b::OuterProduct) = (a * b.left) * transpose(b.right)
+Base.:(*)(a::OuterProduct, b::OuterProduct) =
     OuterProduct(a.left * (transpose(a.right) * b.left), b.right)
+LinearAlgebra.rmul!(a::OuterProduct, b::Number) = (rmul!(a.left, b); a)
 
 Base.conj!(op::OuterProduct) = OuterProduct(conj!(op.left), conj!(op.right))
 Base.transpose(op::OuterProduct) = OuterProduct(op.right, op.left)

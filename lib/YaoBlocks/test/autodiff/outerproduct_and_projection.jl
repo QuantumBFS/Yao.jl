@@ -1,6 +1,7 @@
 using YaoBlocks.AD
 using SparseArrays, LuxurySparse
 using YaoArrayRegister
+using LinearAlgebra
 using Test
 
 @testset "outer prod" begin
@@ -28,6 +29,13 @@ using Test
             outerprod(ArrayReg(l), ArrayReg(r)) == a
         else
             outerprod(BatchedArrayReg(l), BatchedArrayReg(r)) == a
+        end
+
+        a = outerprod(l, r)
+        @test rmul!(copy(a), 0.3) ≈ a .* 0.3
+
+        if ndims(a) == 2
+            @test AD._sum_A_Bconj!(copy(a), B) ≈ AD._sum_A_Bconj!(Matrix(a), B)
         end
     end
 end
