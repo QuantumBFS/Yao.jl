@@ -42,6 +42,8 @@ Base.:(*)(a::LinearAlgebra.AdjointAbsVec, b::OuterProduct) = (a * b.left) * tran
 Base.:(*)(a::OuterProduct, b::OuterProduct) =
     OuterProduct(a.left * (transpose(a.right) * b.left), b.right)
 LinearAlgebra.rmul!(a::OuterProduct, b::Number) = (rmul!(a.left, b); a)
+Base.:(*)(a::Number, b::OuterProduct) = OuterProduct(a * b.left, b.right)
+Base.:(*)(b::OuterProduct, a::Number) = a * b
 
 Base.conj!(op::OuterProduct) = OuterProduct(conj!(op.left), conj!(op.right))
 Base.transpose(op::OuterProduct) = OuterProduct(op.right, op.left)

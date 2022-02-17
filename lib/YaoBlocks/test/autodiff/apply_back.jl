@@ -132,8 +132,8 @@ end
     for reg0 in [rand_state(3), rand_state(3, nbatch = 10)]
         @test_broken test_apply_back(
             reg0,
-            (3 * control(3, (2, 3), 1 => Rz(0.0)) + put(3, 2 => Rx(0.0))) / 5,
-            [0.5, 0.5];
+            0.2 * (3.0 * control(3, (2, 3), 1 => Rz(0.0)) + put(3, 2 => Rx(0.0))),
+            [0.5, 0.9, 0.6, 0.1];
             δ = 1e-5,
             in = copy(reg0),
         )

@@ -18,7 +18,7 @@ end
 # primitive blocks
 unsafe_primitive_tangent(::Any) = NoTangent()
 unsafe_primitive_tangent(x::Number) = x
-for GT in [:RotationGate, :ShiftGate, :TimeEvolution, :PhaseGate]
+for GT in [:RotationGate, :ShiftGate, :TimeEvolution, :PhaseGate, :(Scale{<:Number})]
     @eval function recursive_create_tangent(c::$GT)
         lst = map(fieldnames(typeof(c))) do fn
             fn => unsafe_primitive_tangent(getfield(c, fn))

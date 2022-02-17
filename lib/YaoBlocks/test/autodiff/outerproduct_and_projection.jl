@@ -35,8 +35,11 @@ using Test
         @test rmul!(copy(a), 0.3) ≈ a .* 0.3
 
         if ndims(a) == 2
-            @test AD._sum_A_Bconj!(copy(a), B) ≈ AD._sum_A_Bconj!(Matrix(a), B)
+            @test AD._sum_A_Bconj(a, B) ≈ AD._sum_A_Bconj(Matrix(a), B)
         end
+
+        @test 3 * a ≈ Matrix(a) * 3
+        @test a * 3 ≈ Matrix(a) * 3
     end
 end
 
