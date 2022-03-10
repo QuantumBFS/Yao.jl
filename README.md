@@ -68,3 +68,14 @@ julia> optcode = optimize_code(code, uniformsize(code, 2), TreeSA(ntrials=1));
 julia> optcode(tensors...; size_info=uniformsize(code, 2))[] ≈ Yao.zero_state(n)' * (Yao.zero_state(n) |> circuit)
 true
 ```
+
+## References
+
+* Simulating quantum computation by contracting tensor networks
+https://arxiv.org/abs/quant-ph/0511069
+
+* Simulating the Sycamore quantum supremacy circuits
+https://arxiv.org/abs/2103.03074
+
+* Solving the sampling problem of the Sycamore quantum supremacy circuits
+https://arxiv.org/abs/2111.03011
