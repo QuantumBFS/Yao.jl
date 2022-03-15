@@ -1,4 +1,5 @@
 using Test, YaoBlocks, LuxurySparse, BitBasis, YaoBlocks.ConstGate
+using LinearAlgebra
 
 @testset "test builtin gates" begin
 
