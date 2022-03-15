@@ -67,8 +67,6 @@ function projection(y::AbstractMatrix, op::AbstractMatrix)
         ),
     )
     out = _zero(y)
-    @show typeof(y), typeof(out), typeof(op)
-    @show methods(_zero)
     unsafe_projection!(out, op)
 end
 _zero(y) = y
