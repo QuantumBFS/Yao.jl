@@ -98,3 +98,9 @@ end
     @test adjoint(Pu) == Pd
     @test adjoint(Pd) == Pu
 end
+
+@testset "P0/P1" begin
+    @test mat(P0) isa Diagonal
+    @test mat(P0) ≈ [1 0;0 0]
+    @test mat(P1) ≈ [0 0;0 1]
+end

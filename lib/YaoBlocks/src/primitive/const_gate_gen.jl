@@ -11,8 +11,8 @@ using SparseArrays, LinearAlgebra, LuxurySparse
 # since both of them are reflexive.
 const ConstGateDefaultType = ComplexF64
 const SYM_LIST = [
-    (:P0, sparse(ConstGateDefaultType[1 0; 0 0])),
-    (:P1, sparse(ConstGateDefaultType[0 0; 0 1])),
+    (:P0, Diagonal(ConstGateDefaultType[1, 0])),
+    (:P1, Diagonal(ConstGateDefaultType[0, 1])),
     (:X, PermMatrix([2, 1], ConstGateDefaultType[1+0im, 1])),
     (:Y, PermMatrix([2, 1], ConstGateDefaultType[-im, im])),
     (:Z, Diagonal(ConstGateDefaultType[1+0im, -1])),
