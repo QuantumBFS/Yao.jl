@@ -36,9 +36,7 @@ end
     T = ComplexF64
     D = 8
     for y in [pmrand(T, D), sprand(T, D, D, 0.5), Diagonal(randn(T, D))]
-        @show typeof(y)
         @test projection(y, y) == y
-        @show typeof(y)
         l, r = randn(T, D), randn(T, D)
         op = outerprod(l, r)
         @test projection(y, op) == projection(y, Matrix(op))
