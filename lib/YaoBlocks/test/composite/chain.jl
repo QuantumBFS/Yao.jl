@@ -101,6 +101,7 @@ end
 
     @testset "adjoint" begin
         @test adjoint(chain(X, Y, Z, H)) == chain(H, Z, Y, X)
+        @test adjoint(chain()) == chain()
     end
 
     @testset "insert!" begin
