@@ -23,8 +23,8 @@ macro def(ex)
     end
 end
 
-@def P0 = ComplexF64[1 0; 0 0]
-@def P1 = ComplexF64[0 0; 0 1]
+@def P0 = Diagonal(ComplexF64[1, 0])
+@def P1 = Diagonal(ComplexF64[0, 1])
 @def X = PermMatrix([2, 1], ComplexF64[1+0im, 1])
 @def Y = PermMatrix([2, 1], ComplexF64[-im, im])
 @def Z = Diagonal(ComplexF64[1+0im, -1])
