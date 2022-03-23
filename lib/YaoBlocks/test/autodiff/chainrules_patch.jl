@@ -187,3 +187,30 @@ end
     )
     @test fregδ ≈ reinterpret(Float64, regδ.state)
 end
+
+@testset "fix #349" begin
+    N = 6
+    cost = sum([put(N, i=>Z) for i in 1:N])
+    theta = rand(96)
+    c = chain(rand([[control(N, i, mod1(i+1,N)=>Rx(0.0)) for i=1:N]..., [put(N, i=>Ry(0.0)) for i=1:N]..., [put(N, i=>Rx(0.0)) for i=1:N]...], 96))
+    new_var = dispatch(c, :random);
+    function new_loss(theta::AbstractVector{T}) where T
+        new_circ = dispatch(new_var, theta)
+        diff_evalue = expect(cost, zero_state(Complex{T}, N) => new_circ)
+        return 3*real.(diff_evalue)
+    end
+
+    g1 = Zygote.gradient(_theta->new_loss(_theta), theta)[1]
+    g2 = ForwardDiff.gradient(_theta->new_loss(_theta), theta)
+    @test g1 ≈ g2
+
+    function new_loss2(reg::ArrayReg{T}) where T
+        diff_evalue = expect(cost, reg => new_var)
+        return 3*real.(diff_evalue)
+    end
+    regin = rand_state(N)
+    g1 = Zygote.gradient(_theta->new_loss2(_theta), regin)[1]
+    params = reinterpret(real(eltype(regin.state)), regin.state)
+    g2 = ForwardDiff.gradient(p->new_loss2(arrayreg(reinterpret(complex(eltype(p)), p))), params)
+    @test statevec(g1) ≈ reinterpret(ComplexF64, g2)
+end

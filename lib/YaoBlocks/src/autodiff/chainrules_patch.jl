@@ -37,6 +37,7 @@ for GT in [
     :KronBlock,
     :RepeatedBlock,
     :PutBlock,
+    :ControlBlock,
     :Subroutine,
     :CachedBlock,
     :Daggered,
@@ -118,10 +119,14 @@ function rrule(
     out = expect(op, reg_and_circuit)
     out,
     function (outδ)
-        greg, gcircuit = expect_g(op, reg_and_circuit)
-        for b = 1:YaoArrayRegister._asint(nbatch(greg))
-            viewbatch(greg, b).state .*= 2 * outδ[b]
+        reg, c = reg_and_circuit
+        out = copy(reg) |> c
+        goutreg = copy(out) |> op
+        for b = 1:YaoArrayRegister._asint(nbatch(goutreg))
+            viewbatch(goutreg, b).state .*= 2 * outδ[b]
         end
+        # apply backward rule
+        (in, greg), gcircuit = apply_back((out, goutreg), c)
         return (
             NoTangent(),
             NoTangent(),
