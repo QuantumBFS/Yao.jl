@@ -18,7 +18,7 @@ end
 # primitive blocks
 unsafe_primitive_tangent(::Any) = NoTangent()
 unsafe_primitive_tangent(x::Number) = x
-for GT in [:RotationGate, :ShiftGate, :TimeEvolution, :PhaseGate]
+for GT in [:RotationGate, :ShiftGate, :PhaseGate]
     @eval function recursive_create_tangent(c::$GT)
         lst = map(fieldnames(typeof(c))) do fn
             fn => unsafe_primitive_tangent(getfield(c, fn))
@@ -27,6 +27,10 @@ for GT in [:RotationGate, :ShiftGate, :TimeEvolution, :PhaseGate]
         Tangent{typeof(c),typeof(nt)}(nt)
     end
 end
+function recursive_create_tangent(c::TimeEvolution)
+    Tangent{typeof(c)}(; H=NoTangent(), dt=c.dt, tol=NoTangent())
+end
+
 # composite blocks
 unsafe_composite_tangent(::Any) = NoTangent()
 unsafe_composite_tangent(c::AbstractVector{<:AbstractBlock}) = recursive_create_tangent.(c)
@@ -37,6 +41,7 @@ for GT in [
     :KronBlock,
     :RepeatedBlock,
     :PutBlock,
+    :ControlBlock,
     :Subroutine,
     :CachedBlock,
     :Daggered,
@@ -118,10 +123,14 @@ function rrule(
     out = expect(op, reg_and_circuit)
     out,
     function (outδ)
-        greg, gcircuit = expect_g(op, reg_and_circuit)
-        for b = 1:YaoArrayRegister._asint(nbatch(greg))
-            viewbatch(greg, b).state .*= 2 * outδ[b]
+        reg, c = reg_and_circuit
+        out = copy(reg) |> c
+        goutreg = copy(out) |> op
+        for b = 1:YaoArrayRegister._asint(nbatch(goutreg))
+            viewbatch(goutreg, b).state .*= 2 * outδ[b]
         end
+        # apply backward rule
+        (in, greg), gcircuit = apply_back((out, goutreg), c)
         return (
             NoTangent(),
             NoTangent(),
