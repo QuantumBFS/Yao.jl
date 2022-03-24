@@ -18,7 +18,7 @@ end
 # primitive blocks
 unsafe_primitive_tangent(::Any) = NoTangent()
 unsafe_primitive_tangent(x::Number) = x
-for GT in [:RotationGate, :ShiftGate, :TimeEvolution, :PhaseGate]
+for GT in [:RotationGate, :ShiftGate, :PhaseGate]
     @eval function recursive_create_tangent(c::$GT)
         lst = map(fieldnames(typeof(c))) do fn
             fn => unsafe_primitive_tangent(getfield(c, fn))
@@ -27,6 +27,10 @@ for GT in [:RotationGate, :ShiftGate, :TimeEvolution, :PhaseGate]
         Tangent{typeof(c),typeof(nt)}(nt)
     end
 end
+function recursive_create_tangent(c::TimeEvolution)
+    Tangent{typeof(c)}(; H=NoTangent(), dt=c.dt, tol=NoTangent())
+end
+
 # composite blocks
 unsafe_composite_tangent(::Any) = NoTangent()
 unsafe_composite_tangent(c::AbstractVector{<:AbstractBlock}) = recursive_create_tangent.(c)

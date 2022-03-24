@@ -214,3 +214,20 @@ end
     g2 = ForwardDiff.gradient(p->new_loss2(arrayreg(reinterpret(complex(eltype(p)), p))), params)
     @test statevec(g1) ≈ reinterpret(ComplexF64, g2)
 end
+
+@testset "fix #348" begin
+    n = 3
+    h = sum([kron(n, i => Z, i+1=>Z) for i = 1:n-1])
+    function wrap(U::AbstractBlock, θ::Vector{T}) where {T}
+        n = nqubits(U)
+        reg = apply(zero_state(Complex{T}, n), dispatch(U, θ))
+        real(expect(h, reg))
+    end
+
+    hb = sum([put(n, i => X) for i = 1:n])
+    U2 = chain(n, [time_evolve(hb, 0.0)])
+
+    g1 = (wrap(U2, [0.618 + 1e-5]) - wrap(U2, [0.618-1e-5]))/2e-5
+    g2 = Zygote.gradient(p -> wrap(U2, p), [0.618])[1][]
+    @test isapprox(g1, g2, rtol=1e-3)
+end
