@@ -188,7 +188,7 @@ end
     @test fregδ ≈ reinterpret(Float64, regδ.state)
 end
 
-@testset "apply hami" begin
+@testset "apply hami1" begin
     h = 0.2 * put(5, 3 => Z) + 0.5 * put(5, 2 => X) + 0.4 * repeat(5, Z, 1:3)
     reg0 = rand_state(5)
     loss(reg, params) = fidelity(reg0, apply(reg, dispatch(h, params)))
@@ -203,4 +203,48 @@ end
     g1, g2 = Zygote.gradient(loss, reg, params)
     @test g2 ≈ t2
     @test [real.(g1.state)..., imag.(g1.state)...] ≈ t1
+end
+    
+@testset "apply hami2" begin
+    N = 6
+    cost = sum([put(N, i=>Z) for i in 1:N])
+    theta = rand(96)
+    c = chain(rand([[control(N, i, mod1(i+1,N)=>Rx(0.0)) for i=1:N]..., [put(N, i=>Ry(0.0)) for i=1:N]..., [put(N, i=>Rx(0.0)) for i=1:N]...], 96))
+    new_var = dispatch(c, :random);
+    function new_loss(theta::AbstractVector{T}) where T
+        new_circ = dispatch(new_var, theta)
+        diff_evalue = expect(cost, zero_state(Complex{T}, N) => new_circ)
+        return 3*real.(diff_evalue)
+    end
+
+    g1 = Zygote.gradient(_theta->new_loss(_theta), theta)[1]
+    g2 = ForwardDiff.gradient(_theta->new_loss(_theta), theta)
+    @test g1 ≈ g2
+
+    function new_loss2(reg::ArrayReg{T}) where T
+        diff_evalue = expect(cost, reg => new_var)
+        return 3*real.(diff_evalue)
+    end
+    regin = rand_state(N)
+    g1 = Zygote.gradient(_theta->new_loss2(_theta), regin)[1]
+    params = reinterpret(real(eltype(regin.state)), regin.state)
+    g2 = ForwardDiff.gradient(p->new_loss2(arrayreg(reinterpret(complex(eltype(p)), p))), params)
+    @test statevec(g1) ≈ reinterpret(ComplexF64, g2)
+end
+
+@testset "fix #348" begin
+    n = 3
+    h = sum([kron(n, i => Z, i+1=>Z) for i = 1:n-1])
+    function wrap(U::AbstractBlock, θ::Vector{T}) where {T}
+        n = nqubits(U)
+        reg = apply(zero_state(Complex{T}, n), dispatch(U, θ))
+        real(expect(h, reg))
+    end
+
+    hb = sum([put(n, i => X) for i = 1:n])
+    U2 = chain(n, [time_evolve(hb, 0.0)])
+
+    g1 = (wrap(U2, [0.618 + 1e-5]) - wrap(U2, [0.618-1e-5]))/2e-5
+    g2 = Zygote.gradient(p -> wrap(U2, p), [0.618])[1][]
+    @test isapprox(g1, g2, rtol=1e-3)
 end

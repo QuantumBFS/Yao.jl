@@ -115,7 +115,7 @@ Base.setindex!(c::ChainBlock{D}, val::AbstractBlock{D}, index::Integer) where {D
 Base.insert!(c::ChainBlock{D}, index::Integer, val::AbstractBlock{D}) where {D} =
     (_check_block_sizes(c, val); insert!(c.blocks, index, val); c)
 Base.adjoint(blk::ChainBlock{D}) where {D} =
-    ChainBlock(blk.n, map(adjoint, reverse(subblocks(blk))))
+    ChainBlock(blk.n, AbstractBlock{D}[adjoint(b) for b in reverse(subblocks(blk))])
 Base.lastindex(c::ChainBlock) = lastindex(c.blocks)
 ## Iterate contained blocks
 Base.iterate(c::ChainBlock, st = 1) = iterate(c.blocks, st)
