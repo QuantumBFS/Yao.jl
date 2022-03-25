@@ -8,7 +8,7 @@ block_B(n, i) = chain(n, i == j ? put(i => H) : block_A(j, i) for j = i:n)
 qft(n) = chain(block_B(n, i) for i = 1:n)
 
 @testset "is pauli" begin
-    @test is_pauli(-im*X)
+    @test is_pauli(Val(-im)*X)
     @test is_pauli(X, Z, -Z)
     @test !is_pauli(X, Z, -2Z)
 end
@@ -62,7 +62,7 @@ end
     end
 
     @test mat(simplify(X * Y)) ≈ mat(im * Z)
-    @test mat(simplify(im * X * im * Y)) ≈ mat(-im * Z)
+    @test mat(simplify(im * X * im * Y)) ≈ mat(Val(-im) * Z)
     @test mat(simplify(I2 * im * I2)) ≈ mat(im * I2)
 
     @test mat(simplify(X * Y * Y)) ≈ mat(X) ≈ mat(X) * mat(Y) * mat(Y)
@@ -84,7 +84,7 @@ end
 
 @testset "composite strcuture" begin
     g = chain(2, kron(1 => chain(X, Y), 2 => X), control(1, 2 => X))
-    @test simplify(g) == prod([control(2, 1, 2 => X), kron(2, 1 => (-im * Z), 2 => X)])
+    @test simplify(g) == prod([control(2, 1, 2 => X), kron(2, 1 => (Val(-im) * Z), 2 => X)])
 end
 
 @testset "to basic types" begin

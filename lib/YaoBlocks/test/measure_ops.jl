@@ -135,7 +135,7 @@ end
 
 @testset "fix measuring add" begin
     circ_wfn = zero_state(2) |> put(2, 1=>H)
-    sp = put(2, 1=>(X + 1im*Y)/2)
+    sp = put(2, 1=>(X + Val(1im)*Y)/2)
     X_diff = sp + sp'
     @test measure(X_diff, circ_wfn, nshots=100) |> sum ≈ 100.0
 end

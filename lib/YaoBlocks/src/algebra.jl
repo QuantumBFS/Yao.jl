@@ -1,37 +1,40 @@
 # A Simple Computational Algebra System
 
-# scale
+_mul(::Val{X}, ::Val{Y}) where {X, Y} = Val(X*Y)
+_mul(x::Number, y::Number) = x * y
+_neg(::Val{X}) where X = Val(-X)
+_neg(x::Number) = -x
+
+# negate
 Base.:(-)(x::AbstractBlock) = Scale(Val(-1), x)
 Base.:(-)(x::Scale{Val{-1}}) = content(x)
-Base.:(-)(x::Scale{Val{S}}) where {S} = Scale(Val(-S), content(x))
-Base.:(-)(x::Scale) = Scale(-x.alpha, content(x))
+Base.:(-)(x::Scale) = Scale(_neg(x.alpha), content(x))
 
-Base.:(*)(x::AbstractBlock, α::Number) = α * x
+# scaler multiply block
+Base.:(*)(α::T, x::AbstractBlock) where {T<:Union{Val, Number}} = Scale(α, x)
+Base.:(*)(α::T, x::Scale{T2}) where {T<:Val,T2<:Val} = Scale(_mul(α, x.alpha), content(x))
+Base.:(*)(α::T, x::Scale{T2}) where {T<:Number,T2<:Number} = Scale(_mul(α, x.alpha), content(x))
+Base.:(*)(x::AbstractBlock, α::Union{Val, Number}) = α * x
 
-# NOTE: ±,±im should be identical
-Base.:(*)(α::Val{S}, x::AbstractBlock) where {S} = Scale(α, x)
-
-function Base.:(*)(α::T, x::AbstractBlock) where {T<:Number}
-    return α == one(T) ? x :
-           α == -one(T) ? Scale(Val(-1), x) :
-           α == im ? Scale(Val(im), x) : α == -im ? Scale(Val(-im), x) : Scale(α, x)
-end
-
-Base.:(*)(α::T, x::Scale) where {T<:Number} =
-    α == one(T) ? x : Scale(x.alpha * α, content(x))
-Base.:(*)(α::T, x::Scale{Val{S}}) where {T<:Number,S} = α * S * content(x)
-
-Base.:(*)(x::Scale, y::Scale) = (factor(x) * factor(y)) * (content(x) * content(y))
-Base.:(*)(x::Scale, y::AbstractBlock) = factor(x) * chain(y, content(x))
-Base.:(*)(y::AbstractBlock, x::Scale) = factor(x) * chain(content(x), y)
-
-Base.:(+)(xs::AbstractBlock...) = Add(xs...)
+# block multiply block
+Base.:(*)(x::Scale, y::Scale) = (_mul(x.alpha, y.alpha)) * (content(x) * content(y))
+Base.:(*)(x::Scale, y::AbstractBlock) = x.alpha * chain(y, content(x))
+Base.:(*)(y::AbstractBlock, x::Scale) = x.alpha * chain(content(x), y)
 Base.:(*)(xs::AbstractBlock...) = chain(Iterators.reverse(xs)...)
+
+# add
+Base.:(+)(xs::AbstractBlock...) = Add(xs...)
+
+# div
 Base.:(/)(A::AbstractBlock, x::Number) = (1 / x) * A
+
 # reduce
 Base.prod(blocks::AbstractVector{<:AbstractBlock{D}}) where D =
     chain(Iterators.reverse(blocks)...)
 Base.sum(blocks::AbstractVector{<:AbstractBlock{D}}) where D = +(blocks...)
 
+#sub
 Base.:(-)(lhs::AbstractBlock, rhs::AbstractBlock) = Add(lhs, -rhs)
+
+# pow
 Base.:(^)(x::AbstractBlock, n::Int) = chain((copy(x) for k = 1:n)...)

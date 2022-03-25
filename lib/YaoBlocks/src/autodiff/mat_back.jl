@@ -4,7 +4,7 @@ export mat_back!, mat_back
 The matrix gradient of a rotation block.
 """
 @inline function rotgrad(::Type{T}, rb::RotationGate{D}) where {D,T}
-    -sin(rb.theta / 2) / 2 * IMatrix{2^nqudits(rb)}() +
+    -sin(rb.theta / 2) / 2 * IMatrix{D^nqudits(rb)}() +
     im / 2 * cos(rb.theta / 2) * conj(mat(T, rb.block))
 end
 
@@ -15,7 +15,7 @@ end
 function mat_back!(::Type{T}, rb::TimeEvolution, adjy, collector) where {T}
     pushfirst!(
         collector,
-        projection(rb.dt, sum(im .* adjy .* conj.(mat(T, rb.H) * mat(T, rb)))),
+        projection(rb.dt, im * _sum_A_Bconj(adjy, mat(T, rb.H) * mat(T, rb))),
     )
 end
 
@@ -70,11 +70,12 @@ function mat_back!(::Type{T}, rb::ControlBlock, adjy, collector) where {T}
     mat_back!(T, content(rb), adjm, collector)
 end
 
-function mat_back!(::Type{T}, rb::ChainBlock, adjy, collector) where {T}
+function mat_back!(::Type{T}, rb::ChainBlock{D}, adjy, collector) where {T,D}
     np = nparameters(rb)
     np == 0 && return collector
     length(rb) == 1 && return mat_back!(T, rb[1], adjy, collector)
 
+    # cache the tape
     mi = mat(T, rb[1])
     cache = Any[mi]
     for b in rb[2:end-1]
@@ -86,7 +87,13 @@ function mat_back!(::Type{T}, rb::ChainBlock, adjy, collector) where {T}
         b = rb[ib]
         #adjb = ib==1 ? adjy : adjy*cache[ib]'
         mat_back!(T, b, adjb, collector)
-        ib != 1 && (adjb = mat(T, b)' * adjb * mat(T, rb[ib-1]))
+        if ib != 1
+            if adjb isa DenseMatrix
+                adjb = apply!(ArrayReg{D}(apply!(ArrayReg{D}(adjb), b').state'), rb[ib-1]').state'
+            else
+                adjb = mat(T, b)' * adjb * mat(T, rb[ib-1])
+            end
+        end
     end
     return collector
 end
@@ -109,7 +116,17 @@ function mat_back!(::Type{T}, rb::Scale, adjy, collector) where {T}
     np = nparameters(rb)
     np == 0 && return collector
     mat_back!(T, content(rb), factor(rb) * adjy, collector)
+    if niparams(rb) > 0
+        pushfirst!(collector, projection(rb.alpha, _sum_A_Bconj(adjy, mat(T, content(rb)))))
+    end
     return collector
+end
+
+# ∑ A .* B*, A is mutated.
+_sum_A_Bconj(A::AbstractMatrix, B::AbstractMatrix) = sum(A .* conj.(B))
+function _sum_A_Bconj(A::OuterProduct, B::AbstractMatrix)
+    res = conj(A.left' * (B * conj(A.right)))
+    return ndims(res) != 0 ? sum(diag(res)) : res
 end
 
 """

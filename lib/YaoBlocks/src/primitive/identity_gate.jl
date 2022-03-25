@@ -2,7 +2,7 @@ export TrivialGate, IdentityGate, igate
 
 abstract type TrivialGate{D} <: PrimitiveBlock{D} end
 
-mat(::Type{T}, d::TrivialGate{D}) where {T,D} = IMatrix{D^nqubits(d),T}()
+mat(::Type{T}, d::TrivialGate{D}) where {T,D} = IMatrix{D^nqudits(d),T}()
 Base.adjoint(g::TrivialGate) = g
 occupied_locs(g::TrivialGate) = ()
 

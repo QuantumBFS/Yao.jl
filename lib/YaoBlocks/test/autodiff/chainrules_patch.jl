@@ -188,7 +188,24 @@ end
     @test fregδ ≈ reinterpret(Float64, regδ.state)
 end
 
-@testset "fix #349" begin
+@testset "apply hami1" begin
+    h = 0.2 * put(5, 3 => Z) + 0.5 * put(5, 2 => X) + 0.4 * repeat(5, Z, 1:3)
+    reg0 = rand_state(5)
+    loss(reg, params) = fidelity(reg0, apply(reg, dispatch(h, params)))
+
+    reg = rand_state(5)
+    params = randn(3)
+    _adapt(::Type, reg) = reg
+    _adapt(::Type{T}, reg::AbstractArrayReg) where T <:ForwardDiff.Dual = similar(reg, _adapt.(T, reg.state))
+    _adapt(::Type{T}, x::Complex) where T <: ForwardDiff.Dual = T(x.re) + im * T(x.im)
+    t1 = ForwardDiff.gradient(state->loss(ArrayReg{2}(state[1:32] .+ im .* state[33:64]), params), [real.(reg.state)..., imag.(reg.state)...])
+    t2 = ForwardDiff.gradient(params->loss(_adapt(eltype(params), reg), params), params)
+    g1, g2 = Zygote.gradient(loss, reg, params)
+    @test g2 ≈ t2
+    @test [real.(g1.state)..., imag.(g1.state)...] ≈ t1
+end
+    
+@testset "apply hami2" begin
     N = 6
     cost = sum([put(N, i=>Z) for i in 1:N])
     theta = rand(96)

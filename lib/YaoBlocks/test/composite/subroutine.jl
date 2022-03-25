@@ -35,7 +35,7 @@ end
     @test subroutine(put(2=>X), (3,4,5))(5) isa Subroutine
     s = subroutine(put(2=>X), (3,4,5))(5)
     q = subroutine(put(3=>Y), (3,4,5))(5)
-    z = subroutine(put(3=>im*X), (3,4,5))(5)
+    z = subroutine(put(3=>Val(im)*X), (3,4,5))(5)
     @test s' == s
     @test iscommute(s', s)
     @test iscommute(s', z)

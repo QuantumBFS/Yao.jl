@@ -2,10 +2,11 @@ using Test
 using YaoBlocks.AD, YaoBlocks
 using YaoArrayRegister
 using Random
+using YaoArrayRegister: rand_unitary
 
 using SparseArrays, LuxurySparse, LinearAlgebra
 
-@testset "mat rot/shift/phase" begin
+@testset "mat rot/shift/phase/scale" begin
     Random.seed!(5)
     for G in [X, Y, Z, ConstGate.SWAP, ConstGate.CZ, ConstGate.CNOT]
         @test test_mat_back(ComplexF64, rot(G, 0.0), 0.5; δ = 1e-5)
@@ -17,6 +18,16 @@ using SparseArrays, LuxurySparse, LinearAlgebra
 
     G = time_evolve(put(3, 2 => X), 0.0)
     @test test_mat_back(ComplexF64, G, 0.5; δ = 1e-5)
+
+    # NOTE: inputs of chain blocks must be unitary!
+    G = 5.0 * matblock(rand_unitary(2))
+    @test test_mat_back(ComplexF64, G, 0.5; δ = 1e-5)
+    G = chain(Rx(0.5), Val(1.0im) * matblock(rand_unitary(2)), Ry(0.5))
+    @test test_mat_back(ComplexF64, G, [0.1, 0.2]; δ = 1e-5)
+    G = chain(Rx(0.5), 1.0 * matblock(rand_unitary(2)), Ry(0.5))
+    @test test_mat_back(ComplexF64, G, [0.1, -1.0, 1.0]; δ = 1e-5)
+    G = chain(Rx(0.5), 1.0 * Rx(0.6), Ry(0.5))
+    @test test_mat_back(ComplexF64, G, [0.3, -1.0, 0.4, 1.0]; δ = 1e-5)
 end
 
 @testset "mat put block, control block" begin

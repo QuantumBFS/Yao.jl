@@ -16,7 +16,6 @@ using ..YaoBlocks
 
 using SparseArrays, LuxurySparse, LinearAlgebra
 
-include("patches.jl")
 include("NoParams.jl")
 include("outerproduct_and_projection.jl")
 include("adjroutines.jl")

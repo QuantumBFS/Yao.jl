@@ -153,18 +153,10 @@ YaoBlocks.PSwap(n::Int, locs::Tuple{Int,Int}, θ::SymReal) =
 YaoBlocks.pswap(n::Int, i::Int, j::Int, α::SymReal) = PSwap(n, (i, j), α)
 YaoBlocks.pswap(i::Int, j::Int, α::SymReal) = n -> pswap(n, i, j, α)
 
-export subs, chiparams
-chiparams(blk::RotationGate, param) = rot(blk.block, param)
-chiparams(blk::ShiftGate, param) = shift(param)
-chiparams(blk::PhaseGate, param) = phase(param)
-chiparams(blk::TimeEvolution, param) = time_evolve(blk.H, param, tol = blk.tol)
-chiparams(blk::AbstractBlock, params...) =
-    niparams(blk) == length(params) == 0 ? blk :
-    throw(NotImplementedError(:chiparams, (blk, params...)))
-
+export subs
 SymEngine.subs(c::AbstractBlock, args...; kwargs...) = subs(Basic, c, args...; kwargs...)
 function SymEngine.subs(::Type{T}, c::AbstractBlock, args...; kwargs...) where {T}
-    c = chiparams(c, map(x -> T(subs(x, args...; kwargs...)), getiparams(c))...)
+    c = setiparams(c, map(x -> T(subs(x, args...; kwargs...)), getiparams(c))...)
     chsubblocks(c, [subs(T, blk, args..., kwargs...) for blk in subblocks(c)])
 end
 

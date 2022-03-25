@@ -3,7 +3,7 @@ using YaoBase
 
 @testset "Yao/#186" begin
     @test getiparams(phase(0.1)) == 0.1
-    @test getiparams(2 * phase(0.1)) == ()
+    @test getiparams(Val(2) * phase(0.1)) == ()
     @test_throws NotImplementedError setiparams!(rot(X, 0.5), :nothing)
     @test_throws NotImplementedError setiparams(rot(X, 0.5), :nothing)
 end
