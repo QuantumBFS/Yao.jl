@@ -37,6 +37,10 @@ function print_title(io::IO, x::AbstractBlock)
     printstyled(io, "nqudits: ", nqudits(x); bold = false, color = :cyan)
 end
 
+function print_title(io::IO, x::AbstractBlock{2})
+    printstyled(io, "nqubits: ", nqudits(x); bold = false, color = :cyan)
+end
+
 """
     print_annotation(io, root, node, child, k)
 
