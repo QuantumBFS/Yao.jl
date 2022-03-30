@@ -1,4 +1,4 @@
-using Yao, YaoExtensions, Test
+using Yao, Yao.EasyBuild, Test
 
 @vars α β γ
 c = chain(put(3, 2 => Rx(α)), control(3, 2, 1 => Ry(β)), put(3, (1, 2) => rot(kron(X, X), γ)))

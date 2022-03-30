@@ -10,14 +10,13 @@ begin
 	Pkg.activate(mktempdir())
 	Pkg.add("Yao")
 	Pkg.add("YaoPlots")
-	Pkg.add("YaoExtensions")
 end
 
 # ╔═╡ a49017b7-64b9-4519-9a91-457f2a303e1c
 using Yao, YaoPlots
 
 # ╔═╡ 9b314a8a-d521-4b97-a11b-c5226196c6d4
-using YaoExtensions
+using Yao.EasyBuild
 
 # ╔═╡ 8cfe674b-a624-465f-9caa-f839ee83380e
 md"""
@@ -89,7 +88,7 @@ md"you can also create some common states using convenient functions, such as `r
 
 # ╔═╡ 43a17b19-16c3-4637-bcad-47bf0c562251
 md"""
-There are some implemented common components for building a quantum algorithm in the `YaoExtensions` package
+There are some implemented common components for building a quantum algorithm in the `Yao.EasyBuild` package
 """
 
 # ╔═╡ fc647d13-cfce-4093-a5af-6e049a8f66f5

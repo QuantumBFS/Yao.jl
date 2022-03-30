@@ -14,7 +14,8 @@ sreal = SymFunction("Re")
 sabs = SymFunction("abs")
 
 Base.promote_rule(::Type{Bool}, ::Type{Basic}) = Basic
-Base.conj(x::Basic) = Basic(conj(SymEngine.BasicType(x)))
+# NOTE: need to annotate the output because otherwise it is type unstable!
+Base.conj(x::Basic)::Basic = Basic(conj(SymEngine.BasicType(x)))
 Base.conj(x::BasicType) = real(x) - im * imag(x)
 Base.conj(x::BiVarOp) = juliafunc(x)(conj.(get_args(x.x))...)
 Base.conj(x::BasicTrigFunction) = juliafunc(x)(conj.(get_args(x.x)...)...)

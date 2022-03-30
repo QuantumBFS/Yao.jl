@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.20
+# v0.18.4
 
 using Markdown
 using InteractiveUtils
@@ -12,11 +12,17 @@ begin
 	Pkg.add("YaoPlots")
 end
 
+# ╔═╡ db7c91af-1621-4d79-a61c-2ff7b86db491
+Pkg.add("Plots")
+
 # ╔═╡ a49017b7-64b9-4519-9a91-457f2a303e1c
 using Yao, YaoPlots
 
 # ╔═╡ a120d2b5-e408-466e-9394-33e377f90de1
 using Plots, LinearAlgebra
+
+# ╔═╡ 427e33d9-d399-4e5d-9622-431e1fbd2b07
+import Optimisers
 
 # ╔═╡ c788534a-ee16-4972-91ce-b0b3ed2799fa
 md"""
@@ -237,7 +243,7 @@ B(n, k) = chain(n, j==k ? put(k=>H) : A(j, k) for j in k:n)
 qft(n) = chain(B(n, k) for k in 1:n)
 
 # ╔═╡ 35f0bb9a-6676-4afa-864e-14e15f56ff0d
-plot(qft(3))
+YaoPlots.plot(qft(3))
 
 # ╔═╡ 20d1d437-ceb3-4fb8-ab81-51a9aebe1bb3
 md"""
@@ -247,13 +253,13 @@ The `chain` function is used to chain two blocks of same size together:
 """
 
 # ╔═╡ cd837663-02bf-4540-9d75-1c0a456940c7
-plot(chain(X, Y, H))
+YaoPlots.plot(chain(X, Y, H))
 
 # ╔═╡ 76d40c22-3307-4ff8-b0cd-19d8cb815c72
 md"the `put` function is used to put a gate on a specific location, it thus creates a larger block"
 
 # ╔═╡ 81a4bb41-5790-42de-bf8c-ee909cc816df
-plot(put(5, 2=>H))
+YaoPlots.plot(put(5, 2=>H))
 
 # ╔═╡ 960629fa-1409-441d-a3c0-f5276d291c6c
 md"""the control gates are defined using `control` block with another block as its input.
@@ -263,7 +269,7 @@ md"""the control gates are defined using `control` block with another block as i
 """
 
 # ╔═╡ a6aa360a-632a-46d7-b061-f48841042b13
-plot(control(5, 3, 2=>H))
+YaoPlots.plot(control(5, 3, 2=>H))
 
 # ╔═╡ 575c593a-1957-4d97-84b6-622b9a99fa42
 md"the quantum blocks defined for a quantum circuit eventually form a tree-like structure, they are also printed in this way:"
@@ -334,9 +340,6 @@ circuit born machine described in [Jin-Guo Liu, Lei Wang (2018)](https://arxiv.o
 
 first we install one more package for plotting:
 """
-
-# ╔═╡ db7c91af-1621-4d79-a61c-2ff7b86db491
-Pkg.add("Plots")
 
 # ╔═╡ 3b7ba2a8-8759-4ab1-adc1-1a77c389fb41
 md"""
@@ -576,12 +579,6 @@ end
 # ╔═╡ 43a17b19-16c3-4637-bcad-47bf0c562251
 md"Now let's setup the training, we will use the ADAM optimizer from our [quantum algorithm zoo](https://github.com/QuantumBFS/QuAlgorithmZoo.jl)"
 
-# ╔═╡ b7b56dd6-0b23-44fe-b1d3-487383986975
-Pkg.add(url="https://github.com/QuantumBFS/QuAlgorithmZoo.jl.git")
-
-# ╔═╡ 427e33d9-d399-4e5d-9622-431e1fbd2b07
-import QuAlgorithmZoo
-
 # ╔═╡ 0a80c152-1b02-44b2-b5a1-89b93e5239c6
 qcbm = build_circuit(6, 10, [1=>2, 3=>4, 5=>6, 2=>3, 4=>5, 6=>1])
 
@@ -591,7 +588,7 @@ YaoPlots.plot(dispatch!(qcbm, :random)) # initialize the parameters
 # ╔═╡ 4dba452c-ef69-40ce-bd8f-c8a8b189a0a8
 begin
 	κ = RBFKernel(0.25, 0:2^6-1)
-	opt = QuAlgorithmZoo.Adam(lr=0.01)
+	opt = Optimisers.setup(Optimisers.ADAM(0.01), parameters(qcbm));
 end
 
 # ╔═╡ d01425cb-336b-4729-9ef0-7a83fea32f99
@@ -600,7 +597,7 @@ function train(qcbm, κ, opt, target)
     for _ in 1:100
         push!(history, loss(κ, qcbm, target))
         ps = parameters(qcbm)
-        QuAlgorithmZoo.update!(ps, gradient(qcbm, κ, target), opt)
+        Optimisers.update!(opt, ps, gradient(qcbm, κ, target))
         dispatch!(qcbm, ps)
     end
     return history
@@ -724,10 +721,9 @@ Plots.plot(history)
 # ╟─43bc5e0f-083b-432f-ad20-0b0024fce80a
 # ╠═47bfb83f-7b5c-4aee-9ecc-99c836143540
 # ╠═52f516ef-07f5-4eb4-9a50-fc5c55a8378b
-# ╠═8a684763-10e5-4206-9e64-83567ad909da
+# ╟─8a684763-10e5-4206-9e64-83567ad909da
 # ╠═8e06a6e1-3fbf-42b5-ad48-123d89fa543b
 # ╟─43a17b19-16c3-4637-bcad-47bf0c562251
-# ╠═b7b56dd6-0b23-44fe-b1d3-487383986975
 # ╠═427e33d9-d399-4e5d-9622-431e1fbd2b07
 # ╠═0a80c152-1b02-44b2-b5a1-89b93e5239c6
 # ╠═f7cfa8d9-7695-4ad8-930d-cf242059b400

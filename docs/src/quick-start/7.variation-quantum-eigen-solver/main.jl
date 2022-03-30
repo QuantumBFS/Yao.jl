@@ -1,6 +1,6 @@
 # # Variational Quantum Eigen Solver
 
-using Yao, Yao.AD, YaoExtensions
+using Yao, Yao.AD, Yao.EasyBuild
 
 # number of qubits
 n = 4

@@ -67,12 +67,15 @@ qft(4)
 # going to use the subblocks of `QFT`, if you need to use its subblocks, it'd
 # be better to define it under `CompositeBlock`.
 
-struct QFT{N} <: PrimitiveBlock{N} end
-QFT(n::Int) = QFT{n}()
+struct QFT <: PrimitiveBlock{2}
+    n::Int
+end
+
+YaoBlocks.nqudits(q::QFT) = q.n
 
 # Now, let's define its circuit
 
-circuit(::QFT{N}) where N = qft(N)
+circuit(q::QFT) = qft(q.n)
 
 # And forward `mat` to its circuit's matrix
 
@@ -82,7 +85,7 @@ YaoBlocks.mat(::Type{T}, x::QFT) where T = mat(T, circuit(x))
 # this is because we print the type summary by default, you can define
 # your own printing by overloading `print_block`
 
-YaoBlocks.print_block(io::IO, x::QFT{N}) where N = print(io, "QFT($N)")
+YaoBlocks.print_block(io::IO, x::QFT) = print(io, "QFT($(x.n))")
 
 # Since it is possible to use FFT to simulate the results of QFT (like cheating),
 # we could define our custom `apply!` method:
