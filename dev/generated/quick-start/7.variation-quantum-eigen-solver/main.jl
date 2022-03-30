@@ -1,4 +1,4 @@
-using Yao, Yao.AD, YaoExtensions
+using Yao, Yao.AD, Yao.EasyBuild
 
 n = 4
 

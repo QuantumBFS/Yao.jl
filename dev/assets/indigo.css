@@ -20,7 +20,7 @@ html:not(.theme--documenter-dark) body #documenter .docs-sidebar {
     color: #FFFFFF; }
   html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu {
     border-top: none; }
-    html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu .tocitem:hover, html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu li.is-active .tocitem, html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu li.is-active .tocitem:hover, html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu li.is-active ul.internal .tocitem:hover {
+    html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu li.is-active ul.internal .tocitem:hover, html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu li.is-active .tocitem:hover, html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu li.is-active .tocitem, html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu .tocitem:hover {
       color: #FFFFFF;
       background-color: #4595D1; }
     html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu .tocitem {

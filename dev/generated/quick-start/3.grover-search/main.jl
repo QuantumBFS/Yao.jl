@@ -1,23 +1,26 @@
 using Yao
-using YaoExtensions: variational_circuit
+using Yao.EasyBuild: variational_circuit
 using LinearAlgebra
 
 function grover_step!(reg::AbstractRegister, oracle, U::AbstractBlock)
     apply!(reg |> oracle, reflect_circuit(U))
 end
 
-function reflect_circuit(gen::AbstractBlock{N}) where N
+function reflect_circuit(gen::AbstractBlock)
+    N = nqubits(gen)
     reflect0 = control(N, -collect(1:N-1), N=>-Z)
     chain(gen', reflect0, gen)
 end
 
-function solution_state(oracle, gen::AbstractBlock{N}) where N
+function solution_state(oracle, gen::AbstractBlock)
+    N = nqubits(gen)
     reg= zero_state(N) |> gen
     reg.state[real.(statevec(ArrayReg(ones(ComplexF64, 1<<N)) |> oracle)) .> 0] .= 0
     normalize!(reg)
 end
 
-function num_grover_step(oracle, gen::AbstractBlock{N}) where N
+function num_grover_step(oracle, gen::AbstractBlock)
+    N = nqubits(gen)
     reg = zero_state(N) |> gen
     ratio = abs2(solution_state(oracle, gen)'*reg)
     Int(round(pi/4/sqrt(ratio)))-1
@@ -37,9 +40,10 @@ for i = 1:num_grover_step(oracle, gen)
     println("step $(i-1), overlap = $overlap")
 end
 
-function single_try(oracle, gen::AbstractBlock{N}, nstep::Int; nbatch::Int) where N
-    reg = zero_state(N+1; nbatch=nshot)
-    focus!(reg, 1:N) do r
+function single_try(oracle, gen::AbstractBlock, nstep::Int; nbatch::Int)
+    N = nqubits(gen)
+    reg = zero_state(N+1; nbatch)
+    focus(reg, (1:N...,)) do r
         r |> gen
         for i = 1:nstep
             grover_step!(r, oracle, gen)

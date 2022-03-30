@@ -13,14 +13,17 @@ B(n, k) = chain(n, j==k ? put(k=>H) : A(j, k) for j in k:n)
 qft(n) = chain(B(n, k) for k in 1:n)
 qft(4)
 
-struct QFT{N} <: PrimitiveBlock{N} end
-QFT(n::Int) = QFT{n}()
+struct QFT <: PrimitiveBlock{2}
+    n::Int
+end
 
-circuit(::QFT{N}) where N = qft(N)
+YaoBlocks.nqudits(q::QFT) = q.n
+
+circuit(q::QFT) = qft(q.n)
 
 YaoBlocks.mat(::Type{T}, x::QFT) where T = mat(T, circuit(x))
 
-YaoBlocks.print_block(io::IO, x::QFT{N}) where N = print(io, "QFT($N)")
+YaoBlocks.print_block(io::IO, x::QFT) = print(io, "QFT($(x.n))")
 
 using FFTW, LinearAlgebra
 
@@ -37,8 +40,6 @@ r2 = r |> copy |> circuit(QFT(5))
 r1 ≈ r2
 
 QFT(5)'
-
-using Yao
 
 Hadamards(n) = repeat(H, 1:n)
 

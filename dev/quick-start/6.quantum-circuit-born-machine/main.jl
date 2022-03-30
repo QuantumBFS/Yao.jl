@@ -199,20 +199,20 @@ end
 
 # Now let's setup the training
 
-import QuAlgorithmZoo
+import Optimisers
 qcbm = build_circuit(6, 10, [1=>2, 3=>4, 5=>6, 2=>3, 4=>5, 6=>1])
 dispatch!(qcbm, :random) # initialize the parameters
 
 κ = RBFKernel(0.25, 0:2^6-1)
 pg = gaussian_pdf(1:1<<6, 1<<5-0.5, 1<<4);
-opt = QuAlgorithmZoo.Adam(lr=0.01)
+opt = Optimisers.setup(Optimisers.ADAM(0.01), parameters(qcbm));
 
 function train(qcbm, κ, opt, target)
     history = Float64[]
     for _ in 1:100
         push!(history, loss(κ, qcbm, target))
         ps = parameters(qcbm)
-        QuAlgorithmZoo.update!(ps, gradient(qcbm, κ, target), opt)
+        Optimisers.update!(opt, ps, gradient(qcbm, κ, target))
         dispatch!(qcbm, ps)
     end
     return history
