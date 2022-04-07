@@ -20,8 +20,10 @@ end
 
 @testset "mat" begin
     @vars θ γ η
-    for G in [X, Y, Z, ConstGate.T, H, ConstGate.Tdag, ConstGate.T, I2, (0.5+0.5im)*X]
-        @test Matrix(mat(Basic, G)) ≈ Matrix(mat(G))
+    for G in [X, Y, Z, ConstGate.T, H, ConstGate.S, ConstGate.Sdag, ConstGate.Tdag, ConstGate.T, I2, (0.5+0.5im)*X]
+        B = mat(Basic, G)
+        @test eltype(B) === Basic
+        @test Matrix(B) ≈ Matrix(mat(G))
         @test Matrix(mat(Basic, control(4, 3, 2 => G))) ≈ Matrix(control(4, 3, 2 => G))
     end
 

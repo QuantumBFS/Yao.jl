@@ -22,8 +22,8 @@ function SymReg(r::AbstractArrayReg{D,<:Number}) where {D}
     return arrayreg(SparseMatrixCSC(smat); nbatch=nbatch(r), nlevel=D)
 end
 
-_pretty_basic(x) = x
-_pretty_basic(x::Real) = isinteger(x) ? Int(x) : x
+_pretty_basic(x) = Basic(x)
+_pretty_basic(x::Real) = isinteger(x) ? Basic(Int(x)) : Basic(x)
 function _pretty_basic(x::Complex)
     if isreal(x)
         return _pretty_basic(real(x))
