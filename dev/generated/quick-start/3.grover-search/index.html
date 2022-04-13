@@ -116,6 +116,12 @@ number of iter = 3
 number of iter = 4
 number of iter = 5
 number of iter = 6
+number of iter = 7
+number of iter = 8
+number of iter = 9
+number of iter = 10
+number of iter = 11
+number of iter = 12
 success, overlap = 1.0 + 0.0im
 </code></pre><p>The final state has an overlap of <code>1</code> with the target state.</p><h2 id="Amplitude-Amplification"><a class="docs-heading-anchor" href="#Amplitude-Amplification">Amplitude Amplification</a><a id="Amplitude-Amplification-1"></a><a class="docs-heading-anchor-permalink" href="#Amplitude-Amplification" title="Permalink"></a></h2><p>Given a circuit to generate a state, now we want to project out the subspace with [1,3,5,8,9,11,12] fixed to 1 and [4,6] fixed to 0. We can construct an oracle</p><pre><code class="language-julia hljs">evidense = [1, 3, -4, 5, -6, 8, 9, 11, 12]
 function inference_oracle(nbit::Int, locs::Vector{Int})
@@ -130,20 +136,28 @@ reg = zero_state(num_bit) |&gt; gen</code></pre><pre><code class="nohighlight hl
 for i = 1:num_grover_step(oracle, gen)
     grover_step!(reg, oracle, gen)
     println(&quot;step $(i-1), overlap = $(abs(reg&#39;*solution))&quot;)
-end</code></pre><pre><code class="nohighlight hljs">step 0, overlap = 0.14144722259613618
-step 1, overlap = 0.23433905815656186
-step 2, overlap = 0.3251346351984518
-step 3, overlap = 0.4130217502277891
-step 4, overlap = 0.4972142171303207
-step 5, overlap = 0.5769588999272246
-step 6, overlap = 0.651542449883826
-step 7, overlap = 0.7202976867051749
-step 8, overlap = 0.7826095667360886
-step 9, overlap = 0.8379206847776715
-step 10, overlap = 0.8857362603043185
-step 11, overlap = 0.9256285634774584
-step 12, overlap = 0.9572407413635315
-step 13, overlap = 0.9802900101291279
-step 14, overlap = 0.9945701846577931
-step 15, overlap = 0.9999535229600466
-</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../2.qft-phase-estimation/index.html">« Quantum Fourier Transformation and Phase Estimation</a><a class="docs-footer-nextpage" href="../4.shor-algorithm/index.html">Shor&#39;s Algorithm »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.15 on <span class="colophon-date" title="Thursday 7 April 2022 18:33">Thursday 7 April 2022</span>. Using Julia version 1.7.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+end</code></pre><pre><code class="nohighlight hljs">step 0, overlap = 0.09389001801175088
+step 1, overlap = 0.15607351022413027
+step 2, overlap = 0.21764391332578392
+step 3, overlap = 0.2783593660064204
+step 4, overlap = 0.33798136537827994
+step 5, overlap = 0.39627570386493194
+step 6, overlap = 0.45301338921720014
+step 7, overlap = 0.5079715440421988
+step 8, overlap = 0.5609342813119473
+step 9, overlap = 0.6116935524123814
+step 10, overlap = 0.6600499644014486
+step 11, overlap = 0.7058135632659299
+step 12, overlap = 0.7488045801001915
+step 13, overlap = 0.7888541372757221
+step 14, overlap = 0.8258049118274746
+step 15, overlap = 0.859511753451096
+step 16, overlap = 0.8898422546834187
+step 17, overlap = 0.9166772710264325
+step 18, overlap = 0.9399113889715769
+step 19, overlap = 0.9594533400858614
+step 20, overlap = 0.975226359533195
+step 21, overlap = 0.9871684876225804
+step 22, overlap = 0.9952328131986267
+step 23, overlap = 0.9993876579182956
+</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../2.qft-phase-estimation/index.html">« Quantum Fourier Transformation and Phase Estimation</a><a class="docs-footer-nextpage" href="../4.shor-algorithm/index.html">Shor&#39;s Algorithm »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.15 on <span class="colophon-date" title="Wednesday 13 April 2022 19:11">Wednesday 13 April 2022</span>. Using Julia version 1.7.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
