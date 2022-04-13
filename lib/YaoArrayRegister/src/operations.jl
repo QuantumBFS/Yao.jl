@@ -11,7 +11,7 @@ Check if the register is normalized.
 """
 isnormalized(r::AbstractArrayReg) =
     all(sum(copy(r) |> relax!(to_nactive = nqudits(r)) |> probs, dims = 1) .≈ 1)
-isnormalized(r::AdjointArrayReg) = isnormalized(parent(r))
+isnormalized(r::AdjointRegister) = isnormalized(parent(r))
 
 """
     normalize!(r::AbstractArrayReg)
@@ -23,7 +23,7 @@ function LinearAlgebra.normalize!(r::AbstractArrayReg)
     return r
 end
 
-LinearAlgebra.normalize!(r::AdjointArrayReg) = (normalize!(parent(r)); r)
+LinearAlgebra.normalize!(r::AdjointRegister) = (normalize!(parent(r)); r)
 
 LinearAlgebra.norm(r::ArrayReg) = norm(statevec(r))
 LinearAlgebra.norm(r::BatchedArrayReg) =
@@ -33,7 +33,7 @@ LinearAlgebra.norm(r::BatchedArrayReg) =
 
 # neg
 Base.:-(reg::ArrayReg) = ArrayReg(-state(reg))
-Base.:-(reg::AdjointArrayReg) = adjoint(-parent(reg))
+Base.:-(reg::AdjointRegister) = adjoint(-parent(reg))
 
 # +, -
 for op in [:+, :-]
@@ -50,7 +50,7 @@ for op in [:+, :-]
         return arrayreg(transpose(($op)(state(lhs).parent, state(rhs).parent)); nbatch=nbatch(lhs), nlevel=D)
     end
 
-    @eval function Base.$op(lhs::AdjointArrayReg{D}, rhs::AdjointArrayReg{D}) where {D}
+    @eval function Base.$op(lhs::AdjointRegister{D}, rhs::AdjointRegister{D}) where {D}
         r = $op(parent(lhs), parent(rhs))
         return adjoint(r)
     end
@@ -102,7 +102,7 @@ for op in [:*, :/]
         arrayreg($op(state(lhs), rhs); nbatch=nbatch(lhs), nlevel=nlevel(lhs))
     end
 
-    @eval function Base.$op(lhs::AdjointArrayReg, rhs::Number)
+    @eval function Base.$op(lhs::AdjointRegister, rhs::Number)
         r = $op(parent(lhs), rhs')
         return adjoint(r)
     end
@@ -112,7 +112,7 @@ for op in [:*, :/]
             arrayreg(lhs * state(rhs); nbatch=nbatch(rhs), nlevel=nlevel(rhs))
         end
 
-        @eval function Base.$op(lhs::Number, rhs::AdjointArrayReg)
+        @eval function Base.$op(lhs::Number, rhs::AdjointRegister)
             r = lhs' * parent(rhs)
             return adjoint(r)
         end
@@ -158,16 +158,17 @@ end
 # broadcast
 broadcastable(r::AdjointRegister{D, <:BatchedArrayReg{D}}) where {D} = (each for each in r)
 
-for AT in [:AbstractArrayReg, :AdjointArrayReg]
-    @eval function Base.:(==)(lhs::$AT, rhs::$AT)
-        nbatch(lhs) == nbatch(rhs) &&
-        nlevel(lhs) == nlevel(rhs) &&
-        state(lhs) == state(rhs)
-    end
-
-    @eval function Base.isapprox(lhs::$AT, rhs::$AT; kw...)
-        nbatch(lhs) == nbatch(rhs) &&
-        nlevel(lhs) == nlevel(rhs) &&
-        isapprox(state(lhs), state(rhs); kw...)
-    end
+function Base.:(==)(lhs::AbstractArrayReg, rhs::AbstractArrayReg)
+    nbatch(lhs) == nbatch(rhs) &&
+    nlevel(lhs) == nlevel(rhs) &&
+    state(lhs) == state(rhs)
 end
+
+function Base.isapprox(lhs::AbstractArrayReg, rhs::AbstractArrayReg; kw...)
+    nbatch(lhs) == nbatch(rhs) &&
+    nlevel(lhs) == nlevel(rhs) &&
+    isapprox(state(lhs), state(rhs); kw...)
+end
+
+Base.:(==)(lhs::AdjointRegister, rhs::AdjointRegister) = parent(lhs) == parent(rhs)
+Base.isapprox(lhs::AdjointRegister, rhs::AdjointRegister; kw...) = isapprox(parent(lhs), parent(rhs); kw...)
