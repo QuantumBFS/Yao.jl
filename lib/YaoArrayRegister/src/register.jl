@@ -665,3 +665,22 @@ Returns the number of batches.
 nbatch(r::BatchedArrayReg) = r.nbatch
 nbatch(r::ArrayReg) = NoBatch()
 nbatch(r::AdjointArrayReg) = nbatch(parent(r))
+
+"""
+    most_populated(reg::AbstractArrayReg{2}, n::Int)
+
+Find `n` most populated qubit configurations in a quantum register and return these configurations as a vector of `BitStr` instances.
+"""
+function most_populated(reg::ArrayReg{2}, n::Int)
+    imax = sortperm(probs(reg); rev=true)[1:n]
+    return BitStr{nqubits(reg)}.(imax .- 1)
+end
+
+function most_populated(reg::BatchedArrayReg{2}, n::Int)
+    res = Matrix{BitStr{nqubits(reg),Int}}(undef, n, reg.nbatch)
+    for b = 1:nbatch(reg)
+        imax = sortperm(probs(viewbatch(reg, b)); rev=true)[1:n]
+        res[:, b] .= BitStr{nqubits(reg)}.(imax .- 1)
+    end
+    return res
+end

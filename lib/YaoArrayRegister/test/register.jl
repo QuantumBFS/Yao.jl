@@ -270,3 +270,13 @@ end
     @test reg1 ≈ reg2
     @test reorder!(reg1, [2,3,1]).state ≈ reshape(permutedims(reshape(reg2.state, 2, 2, 2, 5), sortperm([2,3,1,4])), 8, 5)
 end
+
+@testset "most_populated" begin
+    reg = arrayreg(ComplexF64[0.0, 0.6, 0.8, 0.0])
+    reg2 = arrayreg(ComplexF64[0.0, 0.6, 0.0, 0.8])
+    mp = most_populated(reg, 1)
+    @test length(mp) == 1 && mp[1] === BitStr{2}(2)
+    @test most_populated(reg, 2) == BitStr{2}.([2, 1])
+    breg = BatchedArrayReg(reg, reg2)
+    @test most_populated(breg, 2) == BitStr{2}.([2 3; 1 1])
+end
