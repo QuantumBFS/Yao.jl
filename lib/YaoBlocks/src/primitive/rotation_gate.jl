@@ -9,8 +9,10 @@ RotationGate, with GT both hermitian and isreflexive.
 
 # Definition
 
+Expression `rot(G, θ)` defines the following gate
+
 ```math
-\\mathbf{I} cos(θ / 2) - im sin(θ / 2) * mat(U)
+\\mathbbm{I} \\cos(θ / 2) - i \\sin(θ / 2) G
 ```
 """
 mutable struct RotationGate{D,T,GT<:AbstractBlock{D}} <: PrimitiveBlock{D}
