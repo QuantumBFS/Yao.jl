@@ -614,15 +614,18 @@ Base.repeat(r::AbstractArrayReg{D}, n::Int) where D =
 
 # NOTE: overload this to make printing more compact
 #       but do not alter the way how type parameters print
+qubit_type(::AbstractArrayReg{2}) = "qubits"
+qubit_type(::AbstractArrayReg) = "qudits"
+
 function Base.show(io::IO, reg::ArrayReg{D,T,MT}) where {D,T,MT}
     print(io, "ArrayReg{$D, $T, $(nameof(MT))...}")
-    print(io, "\n    active qudits: ", nactive(reg), "/", nqudits(reg))
+    print(io, "\n    active $(qubit_type(reg)): ", nactive(reg), "/", nqudits(reg))
     print(io, "\n    nlevel: ", nlevel(reg))
 end
 
 function Base.show(io::IO, reg::BatchedArrayReg{D,T,MT}) where {D,T,MT}
     print(io, "BatchedArrayReg{$D, $T, $(nameof(MT))...}")
-    print(io, "\n    active qudits: ", nactive(reg), "/", nqudits(reg))
+    print(io, "\n    active $(qubit_type(reg)): ", nactive(reg), "/", nqudits(reg))
     print(io, "\n    nlevel: ", nlevel(reg))
     print(io, "\n    nbatch: ", nbatch(reg))
 end
