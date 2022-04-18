@@ -44,7 +44,7 @@ end
 @testset "fidelity grad" begin
     nbit = 4
     Random.seed!(2)
-    for nbatch in [1, 10]
+    for nbatch in [NoBatch(), 10]
         reg1 = rand_state(nbit; nbatch = nbatch)
         reg2 = rand_state(nbit; nbatch = nbatch)
         c1 = qftcirc(nbit)
@@ -85,7 +85,7 @@ end
         )
     end
 
-    nbatch = 1
+    nbatch = NoBatch()
     reg1 = rand_state(nbit; nbatch = nbatch) |> focus!(2, 1, 4)
     reg2 = rand_state(nbit; nbatch = nbatch) |> focus!(2, 1, 4)
     c1 = qftcirc(3)
@@ -115,4 +115,9 @@ end
     npg2 = YaoBlocks.AD.ng(x -> operator_fidelity(c1, dispatch!(c2, x)), parameters(c2))
     @test isapprox(g1, vec(npg1), atol = 1e-5)
     @test isapprox(g2, vec(npg2), atol = 1e-5)
+end
+
+@testset "fix #360" begin
+    greg, (greg2, gcirc) = fidelity'(rand_state(10), rand_state(10)=>put(10, 1=>X))
+    @test gcirc isa Vector
 end
