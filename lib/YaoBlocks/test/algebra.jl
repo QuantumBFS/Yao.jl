@@ -1,6 +1,6 @@
 using Test, YaoBlocks, YaoArrayRegister
 import YaoBlocks.ConstGate: Toffoli
-using YaoBase: QubitMismatchError
+using YaoAPI: QubitMismatchError
 using LinearAlgebra: I
 
 @testset "construction" begin

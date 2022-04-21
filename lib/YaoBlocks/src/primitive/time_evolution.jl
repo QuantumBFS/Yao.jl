@@ -94,7 +94,7 @@ function Base.adjoint(te::TimeEvolution)
 end
 Base.copy(te::TimeEvolution) = TimeEvolution(te.H, te.dt, tol = te.tol)
 
-function YaoBase.isunitary(te::TimeEvolution)
+function YaoAPI.isunitary(te::TimeEvolution)
     iszero(imag(te.dt)) || return false
     return true
 end

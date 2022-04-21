@@ -5,7 +5,7 @@
 # forwarded bindings should be tested in YaoBlocks via blocks.
 
 using PkgBenchmark, BenchmarkTools
-using YaoArrayRegister, BitBasis, Random, YaoBase, StaticArrays, LuxurySparse
+using YaoArrayRegister, BitBasis, Random, YaoAPI, StaticArrays, LuxurySparse
 using LinearAlgebra, SparseArrays
 
 bench(n, U, loc::Tuple) =

@@ -1,4 +1,4 @@
-using YaoBase
+using YaoAPI
 using TupleTools
 export KronBlock, kron
 
@@ -213,6 +213,6 @@ end
 
 Base.adjoint(blk::KronBlock) = KronBlock(blk.n, blk.locs, map(adjoint, blk.blocks))
 
-YaoBase.ishermitian(k::KronBlock) = all(ishermitian, k.blocks) || ishermitian(mat(k))
-YaoBase.isunitary(k::KronBlock) = all(isunitary, k.blocks) || isunitary(mat(k))
-YaoBase.isreflexive(k::KronBlock) = all(isreflexive, k.blocks) || isreflexive(mat(k))
+LinearAlgebra.ishermitian(k::KronBlock) = all(ishermitian, k.blocks) || ishermitian(mat(k))
+YaoAPI.isunitary(k::KronBlock) = all(isunitary, k.blocks) || isunitary(mat(k))
+YaoAPI.isreflexive(k::KronBlock) = all(isreflexive, k.blocks) || isreflexive(mat(k))

@@ -1,4 +1,4 @@
-using YaoBase
+using YaoAPI
 
 export PhaseGate, phase
 
@@ -41,9 +41,9 @@ setiparams!(r::PhaseGate, param::Number) = (r.theta = param; r)
 setiparams(r::PhaseGate, param::Number) = PhaseGate(param)
 
 # fallback to matrix method if it is not real
-YaoBase.isunitary(r::PhaseGate{<:Real}) = true
+YaoAPI.isunitary(r::PhaseGate{<:Real}) = true
 
-function YaoBase.isunitary(r::PhaseGate)
+function YaoAPI.isunitary(r::PhaseGate)
     isreal(r.theta) && return true
     @warn "θ in phase(θ) is not real, got $(r.theta), fallback to matrix-based method"
     return isunitary(mat(r))

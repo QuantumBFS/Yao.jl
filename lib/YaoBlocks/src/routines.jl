@@ -1,5 +1,5 @@
 using SparseArrays, LuxurySparse
-import YaoBase: diff, autostatic
+import YaoArrayRegister: diff, autostatic
 
 """
     cunmat(nbit::Int, cbits::NTuple{C, Int}, cvals::NTuple{C, Int}, U0::AbstractMatrix, locs::NTuple{M, Int}) where {C, M} -> AbstractMatrix

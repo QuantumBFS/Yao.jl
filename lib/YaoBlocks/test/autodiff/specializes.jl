@@ -1,6 +1,6 @@
 using YaoBlocks, YaoBlocks.AD
 using YaoArrayRegister
-using YaoBase: NotImplementedError
+using YaoAPI: NotImplementedError
 using Random, Test
 
 AA(i, j) = control(i, j => shift(2π / (1 << (i - j + 1))))

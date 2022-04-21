@@ -1,4 +1,4 @@
-using YaoBase
+using YaoAPI
 export RepeatedBlock, repeat
 
 """
@@ -33,7 +33,7 @@ end
 function RepeatedBlock(n::Int, block::GT) where {M,D,GT<:AbstractBlock{D}}
     return RepeatedBlock{D,n,GT}(n::Int, block, Tuple(1:nqudits(block):n-nqudits(block)+1))
 end
-YaoBase.nqudits(m::RepeatedBlock) = m.n
+YaoAPI.nqudits(m::RepeatedBlock) = m.n
 
 """
     repeat(n, x::AbstractBlock[, locs]) -> RepeatedBlock{n}
@@ -104,7 +104,7 @@ chsubblocks(x::RepeatedBlock{D}, blk::AbstractBlock{D}) where {D} =
 PropertyTrait(x::RepeatedBlock) = PreserveAll()
 
 mat(::Type{T}, rb::RepeatedBlock{D}) where {T,D} =
-    hilbertkron(rb.n, fill(mat(T, rb.content), length(rb.locs)), [rb.locs...]; nlevel=D)
+    YaoArrayRegister.hilbertkron(rb.n, fill(mat(T, rb.content), length(rb.locs)), [rb.locs...]; nlevel=D)
 mat(::Type{T}, rb::RepeatedBlock{D,0,GT}) where {T,D,GT} = IMatrix{D^nqudits(rb),T}()
 
 function _apply!(r::AbstractRegister, rp::RepeatedBlock)
@@ -133,7 +133,7 @@ Base.adjoint(blk::RepeatedBlock{D}) where {D} =
 Base.copy(x::RepeatedBlock) = RepeatedBlock(nqudits(x), x.content, x.locs)
 Base.:(==)(A::RepeatedBlock, B::RepeatedBlock) = A.locs == B.locs && A.content == B.content
 
-function YaoBase.iscommute(x::RepeatedBlock{D}, y::RepeatedBlock{D}) where {D}
+function YaoAPI.iscommute(x::RepeatedBlock{D}, y::RepeatedBlock{D}) where {D}
     if nqudits(x) != nqudits(y)
         throw(QubitMismatchError("got nqudits = `$(nqudits(x))` and `$(nqudits(y))`"))
     end

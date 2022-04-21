@@ -1,4 +1,4 @@
-using Test, YaoArrayRegister, BitBasis, YaoBase
+using Test, YaoArrayRegister, BitBasis, YaoAPI
 
 function naive_focus!(reg::AbstractArrayReg{D}, bits) where {D}
     B = YaoArrayRegister._asint(nbatch(reg))
@@ -49,10 +49,10 @@ end
     @test (measure!(RemoveMeasured(), reg2); reg2) |> relax!(to_nactive = nqubits(reg2)) ≈
           reg
 
-    @test insert_qudits!(copy(reg), 2; nqudits = 2) |> nactive == 5
-    @test insert_qubits!(copy(reg), 2; nqubits = 2) |> nactive == 5
-    @test insert_qudits!(2; nqudits = 2)(copy(reg)) |> nactive == 5
-    @test insert_qubits!(2; nqubits = 2)(copy(reg)) |> nactive == 5
+    @test insert_qudits!(copy(reg), 2, 2) |> nactive == 5
+    @test insert_qubits!(copy(reg), 2, 2) |> nactive == 5
+    @test insert_qudits!(2, 2)(copy(reg)) |> nactive == 5
+    @test insert_qubits!(2, 2)(copy(reg)) |> nactive == 5
 end
 
 @testset "Focus 2" begin
@@ -89,6 +89,5 @@ end
 end
 
 @testset "partial trace" begin
-    r = join(arrayreg(bit"111"), zero_state(1))
-    @test partial_tr(r, 1) ≈ arrayreg(bit"111")
+    @test partial_tr(1) isa YaoArrayRegister.LegibleLambda
 end

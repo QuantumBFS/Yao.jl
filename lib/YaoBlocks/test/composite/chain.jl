@@ -1,4 +1,4 @@
-using Test, YaoBase, YaoBlocks, YaoArrayRegister
+using Test, YaoAPI, YaoBlocks, YaoArrayRegister
 using LuxurySparse
 
 @testset "test constructors" begin

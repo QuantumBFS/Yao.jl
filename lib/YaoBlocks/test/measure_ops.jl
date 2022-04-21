@@ -1,7 +1,7 @@
 using YaoBlocks, YaoArrayRegister, BitBasis
 using YaoBlocks: eigenbasis
 using Random, Test
-using YaoBase: QubitMismatchError
+using YaoAPI: QubitMismatchError
 
 function check_eigenbasis(op)
     E, V = eigenbasis(op)

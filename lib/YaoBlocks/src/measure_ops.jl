@@ -1,4 +1,4 @@
-import YaoBase: measure!, measure
+import YaoAPI: measure!, measure
 using LinearAlgebra: eigen!
 
 """
@@ -155,7 +155,7 @@ function BlockedBasis(values::AbstractVector{T}) where {T}
     return BlockedBasis(order, unique_values, block_ptr)
 end
 
-function YaoBase.measure!(
+function YaoAPI.measure!(
     ::NoPostProcess,
     bb::BlockedBasis,
     reg::AbstractArrayReg{D,T},
@@ -194,7 +194,7 @@ function YaoBase.measure!(
     return reg isa ArrayReg ? bb.values[res[]] : bb.values[res]
 end
 
-function YaoBase.measure!(
+function YaoAPI.measure!(
     p::ResetTo,
     op::AbstractBlock,
     reg::AbstractRegister,
@@ -204,7 +204,7 @@ function YaoBase.measure!(
     throw(ArgumentError("post processing `$p` is not allowed when measuring an operator."))
 end
  
-function YaoBase.measure!(
+function YaoAPI.measure!(
     p::RemoveMeasured,
     op::AbstractBlock,
     reg::AbstractRegister,

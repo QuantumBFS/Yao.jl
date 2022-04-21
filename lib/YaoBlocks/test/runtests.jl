@@ -1,8 +1,11 @@
 using Test, YaoBlocks
 
 @testset "utils" begin
-    @test projector(0) ≈ [1 0; 0 0]
-    @test projector(1) ≈ [0 0; 0 1]
+    include("utils.jl")
+end
+
+@testset "utils" begin
+    include("error.jl")
 end
 
 @testset "test primitive block" begin

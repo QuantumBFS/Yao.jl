@@ -1,6 +1,51 @@
 using StatsBase, StaticArrays, BitBasis, Random
 export measure, measure!, select, select!
 
+## from original YaoAPI
+YaoAPI.measure!(postprocess::PostProcess, op, reg::AbstractRegister; kwargs...) =
+    measure!(postprocess, op, reg, AllLocs(); kwargs...)
+YaoAPI.measure!(postprocess::PostProcess, reg::AbstractRegister, locs; kwargs...) =
+    measure!(postprocess, ComputationalBasis(), reg, locs; kwargs...)
+YaoAPI.measure!(postprocess::PostProcess, reg::AbstractRegister; kwargs...) =
+    measure!(postprocess, ComputationalBasis(), reg, AllLocs(); kwargs...)
+YaoAPI.measure!(op, reg::AbstractRegister, args...; kwargs...) =
+    measure!(NoPostProcess(), op, reg, args...; kwargs...)
+YaoAPI.measure!(reg::AbstractRegister, args...; kwargs...) =
+    measure!(NoPostProcess(), reg, args...; kwargs...)
+
+YaoAPI.measure(op, reg::AbstractRegister; kwargs...) = measure(op, reg, AllLocs(); kwargs...)
+YaoAPI.measure(reg::AbstractRegister, locs; kwargs...) =
+    measure(ComputationalBasis(), reg, locs; kwargs...)
+YaoAPI.measure(reg::AbstractRegister; kwargs...) =
+    measure(ComputationalBasis(), reg, AllLocs(); kwargs...)
+
+# focus! to specify locations, we that we only need to consider full-space measure in the future.
+function YaoAPI.measure!(
+    postprocess::PostProcess,
+    op,
+    reg::AbstractRegister,
+    locs;
+    kwargs...,
+) where {MODE}
+    nbit = nactive(reg)
+    focus!(reg, locs)
+    res = measure!(postprocess, op, reg, AllLocs(); kwargs...)
+    if postprocess isa RemoveMeasured
+        relax!(reg; to_nactive = nbit - length(locs))
+    else
+        relax!(reg, locs; to_nactive = nbit)
+    end
+    res
+end
+
+function YaoAPI.measure(op, reg::AbstractRegister, locs; kwargs...) where {MODE}
+    nbit = nactive(reg)
+    focus!(reg, locs)
+    res = measure(op, reg, AllLocs(); kwargs...)
+    relax!(reg, locs; to_nactive = nbit)
+    res
+end
+
 function _measure(rng::AbstractRNG, pl::AbstractVector, nshots::Int)
     N = log2i(length(pl))
     sample(rng, basis(BitStr64{N}), Weights(pl), nshots)
@@ -15,7 +60,7 @@ function _measure(rng::AbstractRNG, pl::AbstractMatrix, nshots::Int)
     return res
 end
 
-YaoBase.measure(
+YaoAPI.measure(
     ::ComputationalBasis,
     reg::ArrayReg,
     ::AllLocs;
@@ -23,7 +68,7 @@ YaoBase.measure(
     rng::AbstractRNG = Random.GLOBAL_RNG,
 ) = _measure(rng, reg |> probs, nshots)
 
-function YaoBase.measure(
+function YaoAPI.measure(
     ::ComputationalBasis,
     reg::BatchedArrayReg,
     ::AllLocs;
@@ -34,8 +79,8 @@ function YaoBase.measure(
     return _measure(rng, pl, nshots)
 end
 
-function YaoBase.measure!(
-    ::YaoBase.RemoveMeasured,
+function YaoAPI.measure!(
+    ::YaoAPI.RemoveMeasured,
     ::ComputationalBasis,
     reg::AbstractArrayReg{D},
     ::AllLocs;
@@ -56,8 +101,8 @@ function YaoBase.measure!(
     return reg isa ArrayReg ? res[] : res
 end
 
-function YaoBase.measure!(
-    ::YaoBase.NoPostProcess,
+function YaoAPI.measure!(
+    ::YaoAPI.NoPostProcess,
     ::ComputationalBasis,
     reg::AbstractArrayReg,
     ::AllLocs;
@@ -76,8 +121,8 @@ function YaoBase.measure!(
     return res
 end
 
-function YaoBase.measure!(
-    rst::YaoBase.ResetTo,
+function YaoAPI.measure!(
+    rst::YaoAPI.ResetTo,
     ::ComputationalBasis,
     reg::AbstractArrayReg,
     ::AllLocs;
@@ -86,16 +131,23 @@ function YaoBase.measure!(
     state = rank3(reg)
     M, N, B = size(state)
     nstate = zero(state)
-    res = measure!(YaoBase.RemoveMeasured(), reg; rng = rng)
+    res = measure!(YaoAPI.RemoveMeasured(), reg; rng = rng)
     nstate[Int(rst.x)+1, :, :] = reshape(reg.state, :, B)
     reg.state = reshape(nstate, M, N * B)
     return res
 end
 
-import YaoBase: select, select!
+import YaoAPI: select, select!
 select(r::AbstractArrayReg, bits::AbstractVector{T}) where {T<:Integer} =
     arrayreg(r.state[Int64.(bits).+1, :]; nbatch=nbatch(r), nlevel=nlevel(r))
 select(r::AbstractArrayReg, bit::Integer) = select(r, [bit])
+
+"""
+    select!(b::Integer) -> f(register)
+
+Lazy version of [`select!`](@ref). See also [`select`](@ref).
+"""
+select!(bits...) = @λ(register -> select!(register, bits...))
 
 function select!(r::AbstractArrayReg, bits::AbstractVector{T}) where {T<:Integer}
     r.state = r.state[Int64.(bits).+1, :]

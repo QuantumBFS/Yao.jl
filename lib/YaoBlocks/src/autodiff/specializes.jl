@@ -23,7 +23,7 @@ end
 
 _eval(p::Pair{<:AbstractRegister,<:AbstractBlock}) = copy(p.first) |> p.second
 _eval(reg::AbstractRegister) = reg
-YaoBase.fidelity(p1, p2) = fidelity(_eval(p1), _eval(p2))
+YaoAPI.fidelity(p1, p2) = fidelity(_eval(p1), _eval(p2))
 
 function (::Adjoint{Any,typeof(fidelity)})(
     reg1::Union{AbstractArrayReg,Pair{<:AbstractArrayReg,<:AbstractBlock}},

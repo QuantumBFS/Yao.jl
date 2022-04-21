@@ -1,5 +1,5 @@
 using Test, YaoArrayRegister, BitBasis, LinearAlgebra
-using YaoBase
+using YaoAPI
 using Adapt
 
 @testset "test ArrayReg constructors" begin
@@ -133,7 +133,7 @@ end
     end
 end
 
-@testset "test YaoBase interface" begin
+@testset "test YaoAPI interface" begin
     @testset "test probs" begin
         r = rand_state(5; nbatch = 3)
         @test probs(r) ≈ abs2.(state(r))
@@ -279,4 +279,28 @@ end
     @test most_probable(reg, 2) == BitStr{2}.([2, 1])
     breg = BatchedArrayReg(reg, reg2)
     @test most_probable(breg, 2) == BitStr{2}.([2 3; 1 1])
+end
+
+@testset "mock register" begin
+    # mocked registers
+    struct TestRegister <: AbstractRegister{2} end
+
+    YaoArrayRegister.nqudits(::TestRegister) = 8
+    YaoArrayRegister.nactive(::TestRegister) = 2
+
+    export TestInterfaceRegister
+    struct TestInterfaceRegister <: AbstractRegister{2} end
+
+    @testset "Test general interface" begin
+        @test_throws MethodError nactive(TestInterfaceRegister())
+        @test_throws MethodError nqubits(TestInterfaceRegister())
+        @test_throws MethodError nremain(TestInterfaceRegister())
+    end
+
+    @testset "adjoint register" begin
+        @test adjoint(TestRegister()) isa AdjointRegister
+        @test adjoint(adjoint(TestRegister())) isa TestRegister
+        @test nqubits(adjoint(TestRegister())) == 8
+        @test nactive(adjoint(TestRegister())) == 2
+    end
 end

@@ -1,6 +1,7 @@
 using LinearAlgebra, StaticArrays, LuxurySparse, SparseArrays
 using Test
-import YaoArrayRegister: swaprows!, swapcols!, mulrow!, mulcol!, u1rows!, unrows!
+import YaoArrayRegister: swaprows!, swapcols!, mulrow!, mulcol!, u1rows!, unrows!,
+    batch_normalize, hilbertkron, batch_normalize!, batched_kron, rot_mat, invorder, reorder, logdi
 
 @testset "swaprows! & mulrow!" begin
     a = [1, 2, 3, 5.0]
@@ -81,4 +82,78 @@ end
     # TODO: this use views?
     # @test 0 == @allocated unrows!(v, sinds, sA, work)
     @test unrows!(copy(v), sinds, sA, work) ≈ unrows!(copy(v), inds, A |> Matrix)
+end
+
+@testset "batch normalize" begin
+    s = rand(3, 4)
+    batch_normalize!(s, 1)
+    for i = 1:4
+        @test sum(s[:, i]) ≈ 1
+    end
+
+    s = rand(3, 4)
+    ss = batch_normalize(s, 1)
+    for i = 1:4
+        @test sum(s[:, i]) != 1
+        @test sum(ss[:, i]) ≈ 1
+    end
+end
+
+@testset "hilbertkron" begin
+    A, B, C, D = [randn(2, 2) for i = 1:4]
+    II = IMatrix(2)
+    ⊗ = kron
+    @test hilbertkron(4, [A, B], [3, 1]) ≈ II ⊗ A ⊗ II ⊗ B
+    @test hilbertkron(4, [A ⊗ B, C], [3, 1]) ≈ A ⊗ B ⊗ II ⊗ C
+    @test hilbertkron(4, [A ⊗ B], [1]) ≈ II ⊗ II ⊗ A ⊗ B
+    @test hilbertkron(4, [A ⊗ B, C ⊗ D], [1, 3]) ≈ C ⊗ D ⊗ A ⊗ B
+
+    U = randn(2, 2)
+    U2 = randn(4, 4)
+    m = U2 ⊗ II ⊗ U ⊗ II
+    @test m == hilbertkron(5, [U, U2], [2, 4])
+end
+
+@testset "batched kron" begin
+    A, B, C =
+        rand(ComplexF64, 4, 4, 3), rand(ComplexF64, 4, 4, 3), rand(ComplexF64, 4, 4, 3)
+    D = batched_kron(A, B, C)
+
+    tD = zeros(ComplexF64, 64, 64, 3)
+    for k = 1:3
+        tD[:, :, k] = kron(A[:, :, k], B[:, :, k], C[:, :, k])
+    end
+
+    @test tD ≈ D
+
+    B2 = reshape(transpose(reshape(permutedims(B, (3, 1, 2)), 3, 16)), 4, 4, 3)
+    @test B2 isa Base.ReshapedArray
+    @test Array(B2) ≈ B
+    D2 = batched_kron(A, B2, C)
+    @test tD ≈ D2
+end
+
+@testset "rotmat" begin
+    theta = 0.5
+    @test rot_mat(ComplexF64, Const.X, theta) ≈ ComplexF64[
+        cos(theta / 2) -im*sin(theta / 2)
+        -im*sin(theta / 2) cos(theta / 2)
+    ]
+    @test rot_mat(ComplexF64, Const.X, theta) |> eltype == ComplexF64
+    @test rot_mat(ComplexF32, Const.X, theta) |> eltype == ComplexF32
+end
+
+using LuxurySparse: pmrand
+@testset "reorder" begin
+    ⊗ = kron
+    PA = pmrand(2)
+    PB = pmrand(2)
+    PC = pmrand(2)
+    @test reorder(PC ⊗ PB ⊗ PA, [3, 1, 2]) ≈ PB ⊗ PA ⊗ PC
+    @test invorder(PC ⊗ PB ⊗ PA) ≈ PA ⊗ PB ⊗ PC
+end
+
+@testset "logdi" begin
+    @test logdi(9, 3) == 2
+    @test_throws ArgumentError logdi(9, 5)
 end

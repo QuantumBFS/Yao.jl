@@ -83,4 +83,4 @@ function Base.prepend!(c::Add, list)
     c
 end
 
-YaoBase.ishermitian(ad::Add) = all(ishermitian, ad.list) || ishermitian(mat(ad))
+LinearAlgebra.ishermitian(ad::Add) = all(ishermitian, ad.list) || ishermitian(mat(ad))

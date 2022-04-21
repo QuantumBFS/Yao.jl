@@ -1,8 +1,8 @@
-using Test, YaoBase, YaoArrayRegister, LinearAlgebra, LuxurySparse, SparseArrays
-using YaoBase.Const
+using Test, YaoAPI, YaoArrayRegister, LinearAlgebra, LuxurySparse, SparseArrays
+using YaoArrayRegister.Const
+using YaoArrayRegister: linop2dense, general_controlled_gates
 
 # NOTE: we don't have block here, feel safe to use
-using YaoBase.Const
 
 @testset "test general unitary instruction" begin
     U1 = randn(ComplexF64, 2, 2)
@@ -41,7 +41,7 @@ using YaoBase.Const
     U1 = randn(ComplexF64, 2, 2)
     REGB = BatchedArrayReg(STB, 5)
     @test instruct!(copy(REGB), U1, (3,)).state ≈ instruct!(Val(2), copy(STB), U1, (3,)) ≈ instruct!(Val(2), copy(STB), U1, (3,), (), ())
-    @test instruct!(Val(2), copy(STB), rand_unitary(1), ()) ≈ STB
+    @test instruct!(Val(2), copy(STB), randn(ComplexF64, 2, 2), ()) ≈ STB
 
     # PermMatrix
     U1 = PermMatrix([0.0 -1.0im; 1.0im 0.0im])
