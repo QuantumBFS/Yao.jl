@@ -30,7 +30,7 @@ you can define [`instruct!`](@ref), to provide specialized instructions for the 
 ## Qubit Management Interfaces
 
 ```@docs
-YaoBase.addbits!
+YaoBase.append_qudits!
 YaoBase.reorder!
 ```
 

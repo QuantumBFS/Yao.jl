@@ -3,15 +3,17 @@ export AbstractRegister, AdjointRegister, DensityMatrix
 """
     AbstractRegister{D}
 
-Abstract type for quantum registers. `D` is the number of levels in each qudit.
+Abstract type for quantum registers.
+Type parameter `D` is the number of levels in each qudit.
+For qubits, `D = 2`.
 """
 abstract type AbstractRegister{D} end
 
 
 """
-    AdjointRegister{D, RT} <: AbstractRegister{D}
+    AdjointRegister{D, RT<:AbstractRegister{D}} <: AbstractRegister{D}
 
-Lazy adjoint for a quantum register, `RT` is the parent type.
+Lazy adjoint for a quantum register, `RT` is the parent register type.
 """
 struct AdjointRegister{D,RT<:AbstractRegister{D}} <: AbstractRegister{D}
     parent::RT
@@ -19,12 +21,19 @@ end
 
 
 """
-    instruct!(state, operator[, locs, control_locs, control_configs, theta])
+    instruct!([nlevel=Val(2), ]state, operator, locs[, control_locs, control_configs, theta])
 
-instruction implementation for applying an operator to a quantum state.
+Unified interface for applying an operator to a quantum state.
+It modifies the `state` directly.
 
-This operator will be overloaded for different operator or state with
-different types.
+Positional arguments
+-----------------------------
+    * `nlevel` is the number of levels in each qudit,
+    * `state` is a matrix representing the quantum state, where the first dimension is the active qubit dimension, the second is the batch dimension.
+    * `operator` is a quantum operator, which can be `Val(GATE_SYMBOL)` or a matrix.
+    * `locs` is a tuple for specifying the locations this gate applied.
+    * `control_locs` and `control_configs` are tuples for specifying the control locations and control values.
+    * `theta` is the parameter for the gate, e.g. `Val(:Rx)` gate takes a real number of its parameter.
 """
 @interface instruct!
 
@@ -32,11 +41,8 @@ different types.
 """
     nactive(register) -> Int
 
-Returns the number of active qudits.
-
-!!! note
-
-    Operators always apply on active qudits.
+Returns the number of active qudits in `register`.
+Here, active qudits means the system qubits that operators can be applied on.
 """
 @interface nactive
 
@@ -51,36 +57,37 @@ for more details.
 """
     nqudits(register) -> Int
 
-Returns the (total) number of qudits. See [`nactive`](@ref), [`nremain`](@ref)
-for more details.
+Returns the total number of qudits in `register`.
 """
 @interface nqudits
 
 """
     nremain(register) -> Int
 
-Returns the number of non-active qudits.
+Returns the number of inactive qudits in `register`.
+It equals to subtracting [`nqudits`](@ref) and [`nactive`](@ref).
 """
 @interface nremain
 
 """
-    viewbatch(register, i::Int) -> AbstractRegister{1}
+    viewbatch(register, i::Int) -> AbstractRegister
 
-Returns a view of the i-th slice on batch dimension.
+Returns the `i`-th single register of a batched register.
+The returned instance is a view of the original register, i.e. inplace operation changes the original register directly.
 """
 @interface viewbatch
 
 ###################### Reg Operations: Location and size #####################
 """
-    adddits!(register, n::Int) -> register
-    adddits!(n::Int) -> λ(register)
+    append_qudits!(register, n::Int) -> register
+    append_qudits!(n::Int) -> λ(register)
 
 Add `n` qudits to given register in state |0>.
 i.e. |psi> -> |000> ⊗ |psi>, increased bits have higher indices.
 
 If only an integer is provided, then returns a lambda function.
 """
-@interface addbits!
+@interface append_qudits!
 
 
 """

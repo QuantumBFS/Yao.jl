@@ -150,12 +150,12 @@ end
             @test each == arrayreg(bit"101")
         end
     end
-    @testset "test addbits!" begin
-        @test addbits!(zero_state(3), 3) == zero_state(6)
+    @testset "test append_qudits!" begin
+        @test append_qudits!(zero_state(3), 3) == zero_state(6)
         r = rand_state(3; nbatch = 2)
-        @test addbits!(copy(r), 2) ≈ join(zero_state(2; nbatch = 2), r)
+        @test append_qudits!(copy(r), 2) ≈ join(zero_state(2; nbatch = 2), r)
         r = rand_state(3; nbatch = 1)
-        @test addbits!(copy(r), 2) ≈ join(zero_state(2; nbatch = 1), r)
+        @test append_qudits!(copy(r), 2) ≈ join(zero_state(2; nbatch = 1), r)
     end
 end
 

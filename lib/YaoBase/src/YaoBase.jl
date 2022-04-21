@@ -28,7 +28,7 @@ import YaoAPI:
     nremain,
     nactive,
     viewbatch,
-    addbits!,
+    append_qudits!,
     insert_qudits!,
     insert_qubits!,
     measure,

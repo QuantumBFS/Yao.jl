@@ -19,7 +19,7 @@ The `mat` interface can be replace with any APIs bellow
 
 AbstractRegister, AdjointRegister, AllLocs, ComputationalBasis,
 DensityMatrix, NoPostProcess, NotImplementedError,
-PostProcess, RemoveMeasured, ResetTo, addbits!,
+PostProcess, RemoveMeasured, ResetTo, append_qudits!,
 collapseto!, density_matrix, fidelity, focus!, insert_qubits!, instruct!,
 invorder!, measure, measure!, nactive, nqubits, nqudits, nremain,
 partial_tr, probs, purify, relax!, reorder!, select, select!, tracedist,

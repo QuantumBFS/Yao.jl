@@ -2,7 +2,6 @@ using BitBasis, LegibleLambdas
 
 export @λ, @lambda
 
-addbits!(n::Int) = @λ(register -> addbits!(register, n))
 insert_qudits!(loc::Int; nqudits::Int = 1) =
     @λ(register -> insert_qudits!(register, loc; nqudits = nqudits))
 YaoAPI.insert_qubits!(loc::Int; nqubits::Int = 1) =

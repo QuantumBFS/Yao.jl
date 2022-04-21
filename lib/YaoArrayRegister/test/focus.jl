@@ -44,8 +44,8 @@ end
     reg = rand_state(3; nbatch = 5)
     @test oneto(reg, 2) |> nactive == 2
     @test reg |> nactive == 3
-    @test copy(reg) |> addbits!(2) |> nactive == 5
-    reg2 = copy(reg) |> addbits!(2) |> focus!(4, 5)
+    @test copy(reg) |> append_qudits!(2) |> nactive == 5
+    reg2 = copy(reg) |> append_qudits!(2) |> focus!(4, 5)
     @test (measure!(RemoveMeasured(), reg2); reg2) |> relax!(to_nactive = nqubits(reg2)) ≈
           reg
 

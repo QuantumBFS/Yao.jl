@@ -192,7 +192,8 @@ YaoBase.nqudits(r::AbstractArrayReg{D}) where {D} = logdi(length(r.state) ÷ _as
 YaoBase.nactive(r::AbstractArrayReg{D}) where {D} = logdi(size(r.state, 1), D)
 YaoBase.viewbatch(r::BatchedArrayReg{D}, ind::Int) where D = @inbounds ArrayReg{D}(view(rank3(r), :, :, ind))
 
-function YaoBase.addbits!(r::AbstractArrayReg{D}, n::Int) where {D}
+YaoBase.append_qudits!(n::Int) = @λ(register -> append_qudits!(register, n))
+function YaoBase.append_qudits!(r::AbstractArrayReg{D}, n::Int) where {D}
     raw = state(r)
     M, N = size(raw)
     r.state = similar(r.state, M * (D ^ n), N)
