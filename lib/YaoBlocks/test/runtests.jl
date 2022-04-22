@@ -4,7 +4,7 @@ using Test, YaoBlocks
     include("utils.jl")
 end
 
-@testset "utils" begin
+@testset "error" begin
     include("error.jl")
 end
 

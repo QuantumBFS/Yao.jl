@@ -1,6 +1,6 @@
 using YaoAPI, TupleTools
 
-export focus!, relax!, partial_tr, exchange_sysenv
+export focus!, relax!, partial_tr, exchange_sysenv, focus
 
 
 """

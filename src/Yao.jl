@@ -17,7 +17,7 @@ const 幺 = Yao
 using Reexport
 @reexport using YaoArrayRegister, YaoBlocks, YaoSym
 export EasyBuild
-using YaoArrayRegister.BitBasis
+using YaoArrayRegister.BitBasis, YaoAPI
 
 using YaoBlocks:
     color,

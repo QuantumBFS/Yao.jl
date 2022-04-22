@@ -156,6 +156,7 @@ end
         @test append_qudits!(copy(r), 2) ≈ join(zero_state(2; nbatch = 2), r)
         r = rand_state(3; nbatch = 1)
         @test append_qudits!(copy(r), 2) ≈ join(zero_state(2; nbatch = 1), r)
+        @test copy(r) |> append_qubits!(2) ≈ join(zero_state(2; nbatch = 1), r)
     end
 end
 

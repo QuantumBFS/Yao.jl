@@ -27,4 +27,4 @@ shor(E) = chain(9,
 @vars α β
 s = α * ket"0" + β * ket"1" |> append_qudits!(8)
 E = kron(1=>X, 2=>Z, 3=>Z, 4=>X, 5=>Z, 6=>Z, 7=>X, 8=>Z, 9=>Z);
-s |> shor(E) |> partial_tr(2:9) |> expand
+s |> shor(E) |> expand

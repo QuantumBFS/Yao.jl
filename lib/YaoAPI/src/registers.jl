@@ -131,6 +131,14 @@ Note here, we read the bit string from right to left.
 """
 @interface append_qudits!
 
+"""
+    append_qubits!(register, n::Int) -> register
+    append_qubits!(n::Int) -> λ(register)
+
+Add `n` qudits to given register in state |0>.
+It is an alias of [`append_qudits!`](@ref) function.
+"""
+@interface append_qubits!
 
 """
     insert_qudits!(register, loc::Int, nqudits::Int) -> register
@@ -167,7 +175,7 @@ julia> measure(reg; nshots=3)
     insert_qubits!(loc::Int, nqubits::Int=1) -> λ(register)
 
 Insert `n` qubits to given register in state |0>.
-It is an alias of [`insert_qudits`](@ref) function.
+It is an alias of [`insert_qudits!`](@ref) function.
 """
 @interface insert_qubits!
 
@@ -271,11 +279,6 @@ ArrayReg{2, ComplexF64, Array...}
     partial_tr(register, locs) -> 
 
 Return a register which is the partial traced on `locs`.
-
-Example
--------------------------------
-```jldoctest; setup=:(using Yao)
-```
 """
 @interface partial_tr
 
