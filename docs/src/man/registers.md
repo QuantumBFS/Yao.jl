@@ -1,8 +1,7 @@
 ```@meta
 DocTestSetup = quote
     using Yao
-    using Yao: YaoBase, YaoBlocks, YaoArrayRegister
-    using YaoBase
+    using Yao: YaoBlocks, YaoArrayRegister
     using YaoBlocks
     using YaoArrayRegister
 end
@@ -12,7 +11,7 @@ end
 Quantum circuits process quantum states. A quantum state being processing by a quantum circuit will be stored on a quantum register.
 In **Yao** we provide several types for registers. The default type for registers is the [`ArrayReg`](@ref) which is defined in [YaoArrayRegister.jl](https://github.com/QuantumBFS/YaoArrayRegister.jl).
 
-The registers can be extended by subtyping [`AbstractRegister`](@ref) and define correspinding **register interfaces** defined in [YaoBase.jl](https://github.com/QuantumBFS/YaoBase.jl), which includes:
+The registers can be extended by subtyping [`AbstractRegister`](@ref) and define correspinding **register interfaces** defined in [YaoAPI.jl](https://github.com/QuantumBFS/YaoAPI.jl), which includes:
 
 ## Minimal Required Interfaces
 
@@ -21,8 +20,8 @@ The following interfaces are the minial required interfaces to make a register's
 But if you don't want to work with our default printing, you could define your custom printing with [`Base.show`](https://docs.julialang.org/en/v1/manual/types/#man-custom-pretty-printing-1).
 
 ```@docs
-YaoBase.nqubits
-YaoBase.nactive
+YaoArrayRegister.nqubits
+YaoArrayRegister.nactive
 ```
 
 you can define [`instruct!`](@ref), to provide specialized instructions for the registers from plain storage types.
@@ -30,8 +29,8 @@ you can define [`instruct!`](@ref), to provide specialized instructions for the 
 ## Qubit Management Interfaces
 
 ```@docs
-YaoBase.append_qudits!
-YaoBase.reorder!
+YaoArrayRegister.append_qudits!
+YaoArrayRegister.reorder!
 ```
 
 ## Qubit Scope Management Interfaces
@@ -59,25 +58,33 @@ Julia storage is column major, if we reshape the wave function to a shape of ``2
 
 
 ```@docs
-YaoBase.focus!
-YaoBase.relax!
+YaoArrayRegister.focus!
+YaoArrayRegister.relax!
 ```
 
 ## Measurement Interfaces
 
 ```@docs
-YaoBase.measure
-YaoBase.measure!
-YaoBase.measure_remove!
-YaoBase.measure_collapseto!
-YaoBase.select!
+YaoArrayRegister.measure
+YaoArrayRegister.measure!
+YaoArrayRegister.measure_remove!
+YaoArrayRegister.measure_collapseto!
+YaoArrayRegister.select!
 ```
 
+## Constants
+
+```@eval
+using Latexify, YaoArrayRegisters
+const_list = filter(x->x!==:Const, names(Const))
+name_list = map(string, const_list)
+mdtable(name_list; head=["defined constants"])
+```
 ## Others
 
 ```@docs
-YaoBase.fidelity
-YaoBase.tracedist
-YaoBase.density_matrix
-YaoBase.viewbatch
+YaoArrayRegister.fidelity
+YaoArrayRegister.tracedist
+YaoArrayRegister.density_matrix
+YaoArrayRegister.viewbatch
 ```

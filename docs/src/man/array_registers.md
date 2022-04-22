@@ -2,8 +2,7 @@
 CurrentModule = YaoArrayRegister
 DocTestSetup = quote
     using Yao
-    using Yao: YaoBase, YaoBlocks, YaoArrayRegister
-    using YaoBase
+    using Yao: YaoBlocks, YaoArrayRegister
     using YaoBlocks
     using YaoArrayRegister
 end
