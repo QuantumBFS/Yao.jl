@@ -1,5 +1,3 @@
-using YaoAPI
-
 export PhaseGate, phase
 
 """

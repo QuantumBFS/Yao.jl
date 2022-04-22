@@ -1,5 +1,3 @@
-using YaoAPI, YaoArrayRegister
-import StaticArrays: SMatrix
 export RotationGate, Rx, Ry, Rz, rot
 
 """

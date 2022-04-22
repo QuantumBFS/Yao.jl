@@ -1,5 +1,3 @@
-using YaoAPI
-using TupleTools
 export KronBlock, kron
 
 const KronLocT = Union{Int,UnitRange{Int}}

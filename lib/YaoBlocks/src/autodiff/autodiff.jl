@@ -13,7 +13,8 @@ module AD
 
 using BitBasis, YaoArrayRegister, YaoAPI
 using ..YaoBlocks
-
+import ChainRulesCore:
+    rrule, @non_differentiable, NoTangent, Tangent, backing, AbstractTangent, ZeroTangent
 using SparseArrays, LuxurySparse, LinearAlgebra
 
 include("NoParams.jl")

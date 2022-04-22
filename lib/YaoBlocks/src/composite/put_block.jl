@@ -1,4 +1,3 @@
-using StatsBase
 export PutBlock, put, Swap, swap, PSwap, pswap
 
 """

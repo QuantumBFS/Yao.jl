@@ -1,5 +1,3 @@
-using LinearAlgebra
-
 export Scale, factor
 
 """

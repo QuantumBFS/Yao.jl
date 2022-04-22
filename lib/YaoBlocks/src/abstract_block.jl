@@ -1,5 +1,3 @@
-using YaoAPI, YaoArrayRegister
-
 # properties
 YaoAPI.isunitary(op) = op' * op ≈ IMatrix(size(op, 1))
 YaoAPI.isunitary(op::Number) = op' * op ≈ one(op)

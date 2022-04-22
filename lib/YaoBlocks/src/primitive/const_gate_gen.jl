@@ -1,5 +1,3 @@
-using SparseArrays, LinearAlgebra, LuxurySparse
-
 # TODO: add documents
 # 1. generate a table from SYM_LIST
 # 2. auto attach docs to each gate instance and type

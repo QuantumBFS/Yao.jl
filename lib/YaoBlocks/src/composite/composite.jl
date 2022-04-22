@@ -1,5 +1,3 @@
-using YaoAPI
-
 """
     content(x)
 

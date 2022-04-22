@@ -1,5 +1,3 @@
-using TupleTools
-
 YaoAPI.NotImplementedError(name::Symbol) = NotImplementedError(name, ())
 
 function Base.show(io::IO, e::NotImplementedError)

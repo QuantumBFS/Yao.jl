@@ -7,7 +7,15 @@ module YaoBlocks
 
 using YaoAPI
 using LinearAlgebra
-using YaoArrayRegister: @λ
+using YaoArrayRegister
+using YaoArrayRegister: @λ, matvec, diff, autostatic, rot_mat
+using BitBasis, LuxurySparse
+using StatsBase, TupleTools, InteractiveUtils
+using MLStyle: @match
+using LinearAlgebra: eigen!
+using SparseArrays, LuxurySparse
+using ExponentialUtilities, Random, CacheServers
+import StaticArrays: SMatrix
 
 import YaoAPI:
     apply!,
@@ -38,7 +46,9 @@ import YaoAPI:
     render_params,
     setiparams!,
     subblocks,
-    nparameters
+    nparameters,
+    measure!,
+    measure
 
 export AbstractBlock,
     AbstractContainer,

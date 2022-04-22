@@ -23,6 +23,11 @@ A module contains all constant gate definitions.
 """
 module ConstGate
 import ..YaoBlocks
+using LuxurySparse, YaoAPI, BitBasis
+using YaoArrayRegister: logdi
+import MLStyle: @match
+using SparseArrays, LinearAlgebra
+
 export ConstantGate, PauliGate
 
 """

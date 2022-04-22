@@ -1,5 +1,4 @@
 export projector, print_blocktree
-using InteractiveUtils
 
 """
     projector(x)
@@ -88,27 +87,6 @@ end
         density::Real,
     ) where {T<:Real}
         return T.(sprandn(n, m, density)) + im * T.(sprandn(n, m, density))
-    end
-end
-
-"""
-    autostatic(A[; threshold=8])
-
-Staticize dynamic array `A` by a `threshold`.
-"""
-autostatic(A::AbstractVecOrMat; threshold::Int = 8) =
-    length(A) > (1 << threshold) ? A : staticize(A)
-
-# General definition
-function rot_mat(::Type{T}, gen::AbstractMatrix, theta::Real) where {N,T}
-    I = IMatrix{size(gen, 1),T}()
-    m = I * cos(theta / 2) - im * sin(theta / 2) * gen
-    if eltype(m) != T
-        m2 = similar(m, T)
-        copyto!(m2, m)
-        return m2
-    else
-        return m
     end
 end
 

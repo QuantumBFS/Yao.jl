@@ -1,6 +1,3 @@
-using YaoArrayRegister
-using YaoArrayRegister: matvec
-
 export ControlBlock, control, cnot, cz
 
 struct ControlBlock{BT<:AbstractBlock,C,M} <: AbstractContainer{BT,2}

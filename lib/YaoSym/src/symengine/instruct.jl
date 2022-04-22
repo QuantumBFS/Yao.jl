@@ -1,5 +1,5 @@
 using ..SymEngine
-import YaoBase: rot_mat
+import YaoArrayRegister: rot_mat
 
 rot_mat(::Type{T}, ::Val{:Rx}, theta::Basic) where {T} =
     Basic[cos(theta / 2) -im*sin(theta / 2); -im*sin(theta / 2) cos(theta / 2)]
@@ -12,7 +12,7 @@ rot_mat(::Type{T}, ::Val{:PSWAP}, theta::Basic) where {T} = rot_mat(Basic, Const
 
 for G in [:Rx, :Ry, :Rz, :CPHASE]
     # forward single gates
-    @eval function YaoBase.instruct!(::Val{2},
+    @eval function YaoArrayRegister.instruct!(::Val{2},
         state::AbstractVecOrMat{T},
         g::Val{$(QuoteNode(G))},
         locs::NTuple{N3,Int},
@@ -25,7 +25,7 @@ for G in [:Rx, :Ry, :Rz, :CPHASE]
     end
 
     # forward single gates
-    @eval function YaoBase.instruct!(::Val{2},
+    @eval function YaoArrayRegister.instruct!(::Val{2},
         state::AbstractVecOrMat{T},
         g::Val{$(QuoteNode(G))},
         locs::NTuple{N1,Int},
@@ -34,7 +34,7 @@ for G in [:Rx, :Ry, :Rz, :CPHASE]
         instruct!(Val(2), state, g, locs, (), (), theta)
     end
 
-    @eval function YaoBase.instruct!(::Val{2},
+    @eval function YaoArrayRegister.instruct!(::Val{2},
         state::AbstractVecOrMat{T},
         g::Val{$(QuoteNode(G))},
         locs::Tuple{Int},
@@ -44,7 +44,7 @@ for G in [:Rx, :Ry, :Rz, :CPHASE]
     end
 end
 
-@eval function YaoBase.instruct!(::Val{2},
+@eval function YaoArrayRegister.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
     g::Val{:PSWAP},
     locs::Tuple{Int,Int},
