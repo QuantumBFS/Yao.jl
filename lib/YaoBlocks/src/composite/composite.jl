@@ -1,5 +1,3 @@
-using YaoBase
-
 """
     content(x)
 
@@ -43,14 +41,14 @@ struct PreserveNothing <: PropertyTrait end
 
 PropertyTrait(c::AbstractContainer) = PreserveNothing()
 
-for METHOD in (:ishermitian, :isreflexive, :isunitary)
+for METHOD in (:(LinearAlgebra.ishermitian), :(YaoAPI.isreflexive), :(YaoAPI.isunitary))
     @eval begin
         # forward to trait
-        YaoBase.$METHOD(x::AbstractContainer) = $METHOD(PropertyTrait(x), x)
+        $METHOD(x::AbstractContainer) = $METHOD(PropertyTrait(x), x)
         # forward parent block property
-        YaoBase.$METHOD(::PreserveAll, c::AbstractContainer) = $METHOD(content(c))
+        $METHOD(::PreserveAll, c::AbstractContainer) = $METHOD(content(c))
         # forward to default property by calculating the matrix
-        YaoBase.$METHOD(::PreserveNothing, c::AbstractContainer) = $METHOD(mat(c))
+        $METHOD(::PreserveNothing, c::AbstractContainer) = $METHOD(mat(c))
     end
 end
 

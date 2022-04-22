@@ -1,4 +1,3 @@
-using StatsBase
 export PutBlock, put, Swap, swap, PSwap, pswap
 
 """
@@ -101,7 +100,7 @@ function Base.:(==)(lhs::PutBlock{D,C,GT}, rhs::PutBlock{D,C,GT}) where {D,C,GT}
     return (lhs.n == rhs.n) && (lhs.content == rhs.content) && (lhs.locs == rhs.locs)
 end
 
-function YaoBase.iscommute(x::PutBlock{D}, y::PutBlock{D}) where {D}
+function YaoAPI.iscommute(x::PutBlock{D}, y::PutBlock{D}) where {D}
     _check_block_sizes(x, y)
     if x.locs == y.locs
         return iscommute(x.content, y.content)

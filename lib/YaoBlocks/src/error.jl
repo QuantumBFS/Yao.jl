@@ -1,6 +1,4 @@
-using TupleTools
-
-NotImplementedError(name::Symbol) = NotImplementedError(name, ())
+YaoAPI.NotImplementedError(name::Symbol) = NotImplementedError(name, ())
 
 function Base.show(io::IO, e::NotImplementedError)
     str = join(map(typeof, e.args), ", ::")
@@ -23,7 +21,7 @@ function Base.show(io::IO, e::LocationConflictError)
     # print(io, "locations of $(e.blk1) and $(e.blk2) is conflict.")
 end
 
-function show(io::IO, e::QubitMismatchError)
+function Base.show(io::IO, e::QubitMismatchError)
     print(io, e.msg)
 end
 

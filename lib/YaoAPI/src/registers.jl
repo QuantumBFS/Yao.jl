@@ -3,15 +3,17 @@ export AbstractRegister, AdjointRegister, DensityMatrix
 """
     AbstractRegister{D}
 
-Abstract type for quantum registers. `D` is the number of levels in each qudit.
+Abstract type for quantum registers.
+Type parameter `D` is the number of levels in each qudit.
+For qubits, `D = 2`.
 """
 abstract type AbstractRegister{D} end
 
 
 """
-    AdjointRegister{D, RT} <: AbstractRegister{D}
+    AdjointRegister{D, RT<:AbstractRegister{D}} <: AbstractRegister{D}
 
-Lazy adjoint for a quantum register, `RT` is the parent type.
+Lazy adjoint for a quantum register, `RT` is the parent register type.
 """
 struct AdjointRegister{D,RT<:AbstractRegister{D}} <: AbstractRegister{D}
     parent::RT
@@ -19,12 +21,19 @@ end
 
 
 """
-    instruct!(state, operator[, locs, control_locs, control_configs, theta])
+    instruct!([nlevel=Val(2), ]state, operator, locs[, control_locs, control_configs, theta])
 
-instruction implementation for applying an operator to a quantum state.
+Unified interface for applying an operator to a quantum state.
+It modifies the `state` directly.
 
-This operator will be overloaded for different operator or state with
-different types.
+Positional arguments
+-----------------------------
+    * `nlevel` is the number of levels in each qudit,
+    * `state` is a matrix representing the quantum state, where the first dimension is the active qubit dimension, the second is the batch dimension.
+    * `operator` is a quantum operator, which can be `Val(GATE_SYMBOL)` or a matrix.
+    * `locs` is a tuple for specifying the locations this gate applied.
+    * `control_locs` and `control_configs` are tuples for specifying the control locations and control values.
+    * `theta` is the parameter for the gate, e.g. `Val(:Rx)` gate takes a real number of its parameter.
 """
 @interface instruct!
 
@@ -32,11 +41,8 @@ different types.
 """
     nactive(register) -> Int
 
-Returns the number of active qudits.
-
-!!! note
-
-    Operators always apply on active qudits.
+Returns the number of active qudits in `register`.
+Here, active qudits means the system qubits that operators can be applied on.
 """
 @interface nactive
 
@@ -51,57 +57,125 @@ for more details.
 """
     nqudits(register) -> Int
 
-Returns the (total) number of qudits. See [`nactive`](@ref), [`nremain`](@ref)
-for more details.
+Returns the total number of qudits in `register`.
 """
 @interface nqudits
 
 """
     nremain(register) -> Int
 
-Returns the number of non-active qudits.
+Returns the number of inactive qudits in `register`.
+It equals to subtracting [`nqudits`](@ref) and [`nactive`](@ref).
 """
 @interface nremain
 
 """
-    viewbatch(register, i::Int) -> AbstractRegister{1}
+    viewbatch(register, i::Int) -> AbstractRegister
 
-Returns a view of the i-th slice on batch dimension.
+Returns the `i`-th single register of a batched register.
+The returned instance is a view of the original register, i.e. inplace operation changes the original register directly.
+
+Example
+-------------------------------
+```jldoctest; setup=:(using Yao)
+julia> reg = zero_state(5; nbatch=2)
+BatchedArrayReg{2, ComplexF64, Transpose...}
+    active qubits: 5/5
+    nlevel: 2
+    nbatch: 2
+
+julia> apply!(viewbatch(reg, 2), put(5, 2=>X))
+ArrayReg{2, ComplexF64, SubArray...}
+    active qubits: 5/5
+    nlevel: 2
+
+julia> measure(reg; nshots=3)
+3×2 Matrix{BitBasis.BitStr64{5}}:
+ 00000 ₍₂₎  00010 ₍₂₎
+ 00000 ₍₂₎  00010 ₍₂₎
+ 00000 ₍₂₎  00010 ₍₂₎
+```
 """
 @interface viewbatch
 
 ###################### Reg Operations: Location and size #####################
 """
-    adddits!(register, n::Int) -> register
-    adddits!(n::Int) -> λ(register)
+    append_qudits!(register, n::Int) -> register
+    append_qudits!(n::Int) -> λ(register)
 
 Add `n` qudits to given register in state |0>.
 i.e. |psi> -> |000> ⊗ |psi>, increased bits have higher indices.
 
 If only an integer is provided, then returns a lambda function.
+
+Example
+-------------------------------
+```jldoctest; setup=:(using Yao)
+julia> reg = product_state(bit"01101")
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 5/5
+    nlevel: 2
+
+julia> append_qudits!(reg, 2)
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 7/7
+    nlevel: 2
+
+julia> measure(reg; nshots=3)
+3-element Vector{BitBasis.BitStr64{7}}:
+ 0001101 ₍₂₎
+ 0001101 ₍₂₎
+ 0001101 ₍₂₎
+```
+Note here, we read the bit string from right to left.
 """
-@interface addbits!
-
+@interface append_qudits!
 
 """
-    insert_qudits!(register, loc::Int; nqudits::Int=1) -> register
-    insert_qudits!(loc::Int; nqudits::Int=1) -> λ(register)
+    append_qubits!(register, n::Int) -> register
+    append_qubits!(n::Int) -> λ(register)
 
-Insert `n` qudits to given register in state |0>.
-i.e. |psi> -> |psi> ⊗ |000> ⊗ |psi>, increased bits have higher indices.
+Add `n` qudits to given register in state |0>.
+It is an alias of [`append_qudits!`](@ref) function.
+"""
+@interface append_qubits!
 
-If only an integer is provided, then returns a lambda function.
+"""
+    insert_qudits!(register, loc::Int, nqudits::Int) -> register
+    insert_qudits!(loc::Int, nqudits::Int) -> λ(register)
+
+Insert qudits to given register in state |0>.
+i.e. |psi> -> join(|psi>, |0...>, |psi>), increased bits have higher indices.
+
+
+Example
+-------------------------------
+```jldoctest; setup=:(using Yao)
+julia> reg = product_state(bit"01101")
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 5/5
+    nlevel: 2
+
+julia> insert_qudits!(reg, 2, 2)
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 7/7
+    nlevel: 2
+
+julia> measure(reg; nshots=3)
+3-element Vector{BitBasis.BitStr64{7}}:
+ 0110001 ₍₂₎
+ 0110001 ₍₂₎
+ 0110001 ₍₂₎
+```
 """
 @interface insert_qudits!
 
 """
-    insert_qubits!(register, loc::Int; nqubits::Int=1) -> register
-    insert_qubits!(loc::Int; nqubits::Int=1) -> λ(register)
+    insert_qubits!(register, loc::Int, nqubits::Int=1) -> register
+    insert_qubits!(loc::Int, nqubits::Int=1) -> λ(register)
 
 Insert `n` qubits to given register in state |0>.
-i.e. |psi> -> |psi> ⊗ |000> ⊗ |psi>, increased bits have higher indices.
-
-If only an integer is provided, then returns a lambda function.
+It is an alias of [`insert_qudits!`](@ref) function.
 """
 @interface insert_qubits!
 
@@ -110,32 +184,56 @@ If only an integer is provided, then returns a lambda function.
 
 Focus the wires on specified location.
 
-# Example
+Example
+-------------------------------
+```jldoctest; setup=:(using Yao)
+julia> reg = product_state(bit"01101")
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 5/5
+    nlevel: 2
 
-```julia
-julia> focus!(r, (1, 2, 4))
+julia> focus!(reg, (1,3,4))
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 3/5
+    nlevel: 2
 
+julia> measure(reg; nshots=3)
+3-element Vector{BitBasis.BitStr64{3}}:
+ 111 ₍₂₎
+ 111 ₍₂₎
+ 111 ₍₂₎
+
+julia> measure(apply(reg, put(3, 2=>X)); nshots=3)
+3-element Vector{BitBasis.BitStr64{3}}:
+ 101 ₍₂₎
+ 101 ₍₂₎
+ 101 ₍₂₎
 ```
+
+Here, we prepare a product state and only look at the qubits 1, 3 and 4. The measurement results are all ones.
+With the focued register, we can apply a block of size 3 on it, even though the number of qubits is 5.
 """
 @interface focus!
 
 """
-    focus(f, register, locs...)
+    focus(f, register, locs)
 
 Call a callable `f` under the context of `focus`. See also [`focus!`](@ref).
 
-# Example
+Example
+-------------------------------
+To print the focused register
 
-print the focused register
-
-```julia
+```jldoctest; setup=:(using Yao)
 julia> r = ArrayReg(bit"101100")
-ArrayReg{1,Complex{Float64},Array...}
-    active qudits: 6/6
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 6/6
+    nlevel: 2
 
-julia> focus(x->(println(x);x), r, 1, 2);
-ArrayReg{1,Complex{Float64},Array...}
-    active qudits: 2/6
+julia> focus(x->(println(x);x), r, (1, 2));
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 2/6
+    nlevel: 2
 ```
 """
 @interface focus
@@ -155,11 +253,30 @@ focus(f, r::AbstractRegister, locs::Int...) = focus(f, r, locs)
 
 Inverse transformation of [`focus!`](@ref), where `to_nactive` is the number
  of active bits for target register.
+
+Example
+-------------------------------
+```jldoctest; setup=:(using Yao)
+julia> reg = product_state(bit"01101")
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 5/5
+    nlevel: 2
+
+julia> focus!(reg, (1,3,4))
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 3/5
+    nlevel: 2
+
+julia> relax!(reg, (1,3,4))
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 5/5
+    nlevel: 2
+```
 """
 @interface relax!
 
 """
-    partial_tr(register, locs)
+    partial_tr(register, locs) -> 
 
 Return a register which is the partial traced on `locs`.
 """
@@ -169,6 +286,11 @@ Return a register which is the partial traced on `locs`.
     reorder!(reigster, orders)
 
 Reorder the locations of register by input orders.
+
+Example
+-------------------------------
+```jldoctest; setup=:(using Yao)
+```
 """
 @interface reorder!
 
@@ -176,6 +298,11 @@ Reorder the locations of register by input orders.
     invorder(register)
 
 Inverse the locations of register.
+
+Example
+-------------------------------
+```jldoctest; setup=:(using Yao)
+```
 """
 @interface invorder!
 
@@ -184,6 +311,11 @@ Inverse the locations of register.
 
 Set the `register` to bit string literal `bit_str` (or an equivalent integer). About bit string literal,
 see more in [`@bit_str`](@ref).
+
+Example
+-------------------------------
+```jldoctest; setup=:(using Yao)
+```
 """
 @interface collapseto!
 
@@ -207,6 +339,11 @@ struct NoPostProcess <: PostProcess end
 Return measurement results of qudits in `locs`.
 If `locs` is not provided, all current active qudits are measured (regarding to active qudits,
 see [`focus!`](@ref) and [`relax!`](@ref)).
+
+Example
+-------------------------------
+```jldoctest; setup=:(using Yao)
+```
 """
 @interface measure
 
@@ -218,6 +355,11 @@ Measure current active qudits or qudits at `locs`. After measure and collapse,
     * do nothing if postprocess is `NoPostProcess`
     * reset to result state to `postprocess.config` if `postprocess` is `ResetTo`.
     * remove the qubit if `postprocess` is `RemoveMeasured`
+
+Example
+-------------------------------
+```jldoctest; setup=:(using Yao)
+```
 """
 @interface measure!
 
@@ -228,7 +370,10 @@ Measure current active qudits or qudits at `locs`. After measure and collapse,
 select a subspace of given quantum state based on input eigen state `bits`.
 See also [`select`](@ref).
 
-## Example
+Example
+-------------------------------
+```jldoctest; setup=:(using Yao)
+```
 
 `select!(reg, 0b110)` will select the subspace with (focused) configuration `110`.
 After selection, the focused qubit space is 0, so you may want call `relax!` manually.
@@ -253,6 +398,11 @@ Non-inplace version of [`select!`](@ref).
     probs(register)
 
 Returns the probability distribution of computation basis, aka ``|<x|ψ>|^2``.
+
+Example
+-------------------------------
+```jldoctest; setup=:(using Yao)
+```
 """
 @interface probs
 
@@ -274,7 +424,13 @@ Or its equivalent form (which we use in numerical calculation):
 F(ρ, σ) = sqrt(tr(ρσ) + 2 \\sqrt{det(ρ)det(σ)})
 ```
 
-# Reference
+Example
+-------------------------------
+```jldoctest; setup=:(using Yao)
+```
+
+Reference
+-------------------------------
 
 - Jozsa R. Fidelity for mixed quantum states[J]. Journal of modern optics, 1994, 41(12): 2315-2323.
 - Nielsen M A, Chuang I. Quantum computation and quantum information[J]. 2002.
@@ -296,6 +452,11 @@ Trace distance is defined as following:
 
 ```math
 \\frac{1}{2} || A - B ||_{tr}
+```
+
+Example
+-------------------------------
+```jldoctest; setup=:(using Yao)
 ```
 
 # Reference
@@ -367,6 +528,11 @@ end
     purify(r::DensityMatrix; nbit_env::Int=nactive(r)) -> ArrayReg
 
 Get a purification of target density matrix.
+
+Example
+-------------------------------
+```jldoctest; setup=:(using Yao)
+```
 """
 @interface purify
 

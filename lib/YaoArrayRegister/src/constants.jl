@@ -1,5 +1,3 @@
-export Const
-
 """
     Const
 
@@ -8,7 +6,7 @@ Contains common constant definitions.
 module Const
 
 using LuxurySparse, LinearAlgebra, SparseArrays
-using YaoBase.ASTTools
+using YaoArrayRegister.ASTTools
 
 """
     @def name = value

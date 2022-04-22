@@ -1,4 +1,4 @@
-using Test, YaoBlocks, YaoBase
+using Test, YaoBlocks, YaoAPI
 using LuxurySparse
 
 @testset "baisc" begin

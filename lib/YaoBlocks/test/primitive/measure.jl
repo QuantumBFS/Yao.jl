@@ -1,4 +1,4 @@
-using Test, YaoBase, YaoBlocks, BitBasis, YaoArrayRegister, Random
+using Test, YaoAPI, YaoBlocks, BitBasis, YaoArrayRegister, Random
 using StatsBase: mean
 
 @testset "measure ghz" begin

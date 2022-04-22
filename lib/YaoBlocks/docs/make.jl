@@ -1,5 +1,5 @@
 using Documenter
-using YaoArrayRegister, YaoBase, YaoBlocks
+using YaoArrayRegister, YaoAPI, YaoBlocks
 
 makedocs(
     modules = [YaoBlocks],

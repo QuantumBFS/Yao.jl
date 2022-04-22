@@ -1,5 +1,3 @@
-using YaoBase
-
 export ShiftGate, shift
 
 """
@@ -52,9 +50,9 @@ Base.copy(block::ShiftGate{T}) where {T} = ShiftGate{T}(block.theta)
 Base.:(==)(lhs::ShiftGate, rhs::ShiftGate) = lhs.theta == rhs.theta
 
 # fallback to matrix method if it is not real
-YaoBase.isunitary(r::ShiftGate{<:Real}) = true
+YaoAPI.isunitary(r::ShiftGate{<:Real}) = true
 
-function YaoBase.isunitary(r::ShiftGate)
+function YaoAPI.isunitary(r::ShiftGate)
     isreal(r.theta) && return true
     @warn "θ in ShiftGate is not real, got θ=$(r.theta), fallback to matrix-based method"
     return isunitary(mat(r))

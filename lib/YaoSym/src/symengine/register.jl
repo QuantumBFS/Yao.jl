@@ -1,4 +1,4 @@
-using YaoBase, SparseArrays, BitBasis, YaoArrayRegister
+using SparseArrays, BitBasis, YaoArrayRegister
 using ..SymEngine
 export @ket_str, @bra_str
 export SymReg, AdjointSymReg, SymRegOrAdjointSymReg, expand
@@ -70,10 +70,3 @@ SymEngine.expand(x::SymReg{D}) where {D} = arrayreg(expand.(state(x)); nlevel=D,
 Create a symbolic zero state, same as `ket"000"`, but allows you use an integer.
 """
 szero_state(args...; kwargs...) = zero_state(Basic, args...; kwargs...)
-
-function YaoBase.partial_tr(r::SymReg{D}, locs) where D
-    orders = setdiff(1:nqudits(r), locs)
-    r2 = focus!(copy(r), orders)
-    state = sum(rank3(r2); dims = 2)
-    return arrayreg(reshape(state, :, size(state, 3)); nbatch=nbatch(r), nlevel=D)
-end

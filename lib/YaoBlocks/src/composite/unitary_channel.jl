@@ -1,5 +1,3 @@
-using StatsBase
-using YaoArrayRegister
 export UnitaryChannel
 
 # TODO: replace this with uweight

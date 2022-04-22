@@ -34,7 +34,6 @@ There is also a set of Pluto notebooks available in [the notebooks folder](https
 Pages = [
     "man/array_registers.md",
     "man/blocks.md",
-    "man/base.md",
     "man/registers.md",
     "man/extending_blocks.md",
 ]

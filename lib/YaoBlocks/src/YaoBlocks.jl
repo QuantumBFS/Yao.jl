@@ -5,10 +5,19 @@ This is a component package for [Yao.jl](https://github.com/QuantumBFS/Yao.jl). 
 """
 module YaoBlocks
 
-using YaoBase
+using YaoAPI
 using LinearAlgebra
+using YaoArrayRegister
+using YaoArrayRegister: @λ, matvec, diff, autostatic, rot_mat
+using BitBasis, LuxurySparse
+using StatsBase, TupleTools, InteractiveUtils
+using MLStyle: @match
+using LinearAlgebra: eigen!
+using SparseArrays, LuxurySparse
+using ExponentialUtilities, Random, CacheServers
+import StaticArrays: SMatrix
 
-import YaoBase:
+import YaoAPI:
     apply!,
     apply_back!,
     chcontent,
@@ -37,8 +46,9 @@ import YaoBase:
     render_params,
     setiparams!,
     subblocks,
-    ishermitian,
-    nparameters
+    nparameters,
+    measure!,
+    measure
 
 export AbstractBlock,
     AbstractContainer,
@@ -79,11 +89,14 @@ export AbstractBlock,
     setiparams,
     subblocks,
     ishermitian,
-    nparameters
+    nparameters,
+    rand_unitary,
+    rand_hermitian
 
 export applymatrix, cache_key
 
 include("utils.jl")
+include("error.jl")
 # include("traits.jl")
 
 include("abstract_block.jl")

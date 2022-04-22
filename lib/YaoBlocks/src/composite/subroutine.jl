@@ -1,4 +1,3 @@
-using YaoBase
 export Subroutine, subroutine
 
 """
@@ -24,7 +23,7 @@ function Subroutine(n::Int, block::BT, locs::NTuple{C,Int}) where {N,D,C,BT<:Abs
     end
     return Subroutine{D,BT,C}(n, block, locs)
 end
-YaoBase.nqudits(b::Subroutine) = b.n
+YaoAPI.nqudits(b::Subroutine) = b.n
 
 """
     subroutine(n, block, locs)
@@ -112,9 +111,9 @@ function Base.:(==)(a::Subroutine{D,BT}, b::Subroutine{D,BT}) where {D,BT}
     return a.n == b.n && a.content == b.content && a.locs == b.locs
 end
 
-YaoBase.nactive(c::Subroutine) = length(c.locs)
+YaoAPI.nactive(c::Subroutine) = length(c.locs)
 
-function YaoBase.iscommute(x::Subroutine{D}, y::Subroutine{D}) where {D}
+function YaoAPI.iscommute(x::Subroutine{D}, y::Subroutine{D}) where {D}
     _check_block_sizes(x, y)
     isempty(setdiff(occupied_locs(x), occupied_locs(y))) && return true
     if x.locs == y.locs

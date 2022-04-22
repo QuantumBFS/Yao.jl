@@ -1,5 +1,5 @@
 using Test, YaoBlocks, YaoArrayRegister
-using YaoBase
+using YaoAPI
 
 @testset "Yao/#186" begin
     @test getiparams(phase(0.1)) == 0.1

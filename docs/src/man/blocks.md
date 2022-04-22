@@ -1,8 +1,7 @@
 ```@meta
 DocTestSetup = quote
     using Yao
-    using Yao: YaoBase, YaoBlocks, YaoArrayRegister
-    using YaoBase
+    using Yao: YaoBlocks, YaoArrayRegister
     using YaoBlocks
     using YaoArrayRegister
 end
@@ -38,6 +37,13 @@ We provide the following composite blocks:
 ```@autodocs
 Modules = [YaoBlocks]
 Filter = t -> t isa Type && t <: YaoBlocks.CompositeBlock
+```
+
+## Error and Exceptions
+
+```@autodocs
+Modules = [YaoBlocks]
+Pages = ["error.jl"]
 ```
 
 ## APIs

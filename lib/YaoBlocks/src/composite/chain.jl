@@ -1,5 +1,3 @@
-using YaoBase
-
 export ChainBlock, chain
 
 """
@@ -138,8 +136,8 @@ Base.prepend!(c1::ChainBlock{D}, list::Vector{<:AbstractBlock{D}}) where {D} =
 Base.prepend!(c1::ChainBlock{D}, c2::ChainBlock{D}) where {D} =
     (_check_block_sizes(c1, c2); prepend!(c1.blocks, c2.blocks); c1)
 
-YaoBase.isunitary(c::ChainBlock) = all(isunitary, c.blocks) || isunitary(mat(c))
-YaoBase.isreflexive(c::ChainBlock) =
+YaoAPI.isunitary(c::ChainBlock) = all(isunitary, c.blocks) || isunitary(mat(c))
+YaoAPI.isreflexive(c::ChainBlock) =
     (iscommute(c.blocks...) && all(isreflexive, c.blocks)) || isreflexive(mat(c))
-YaoBase.ishermitian(c::ChainBlock) =
+LinearAlgebra.ishermitian(c::ChainBlock) =
     (all(isreflexive, c.blocks) && iscommute(c.blocks...)) || isreflexive(mat(c))

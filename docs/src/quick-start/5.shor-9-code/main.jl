@@ -25,6 +25,6 @@ shor(E) = chain(9,
 # on an arbitrary 1-qubit pure quantum state ``α|0⟩ + β|1⟩`` and a specific weight-9 error.
 
 @vars α β
-s = α * ket"0" + β * ket"1" |> addbits!(8)
+s = α * ket"0" + β * ket"1" |> append_qudits!(8)
 E = kron(1=>X, 2=>Z, 3=>Z, 4=>X, 5=>Z, 6=>Z, 7=>X, 8=>Z, 9=>Z);
-s |> shor(E) |> partial_tr(2:9) |> expand
+s |> shor(E) |> expand

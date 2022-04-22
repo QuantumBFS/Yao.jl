@@ -2,7 +2,6 @@ using Test
 using YaoBlocks.AD, YaoBlocks
 using YaoArrayRegister
 using Random
-using YaoArrayRegister: rand_unitary
 
 using SparseArrays, LuxurySparse, LinearAlgebra
 

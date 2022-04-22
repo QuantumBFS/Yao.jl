@@ -1,4 +1,4 @@
-using YaoBase
+using YaoAPI
 using YaoBlocks
 using Test
 
@@ -6,27 +6,27 @@ mutable struct EchoReg <: AbstractRegister{2}
     nactive::Int
     nqubits::Int
 end
-YaoBase.nactive(reg::EchoReg) = reg.nactive
-YaoBase.nqudits(reg::EchoReg) = reg.nqubits
+YaoAPI.nactive(reg::EchoReg) = reg.nactive
+YaoAPI.nqudits(reg::EchoReg) = reg.nqubits
 
-function YaoBase.instruct!(::EchoReg, ::Val{G}, locs, args...) where {G}
+function YaoAPI.instruct!(::EchoReg, ::Val{G}, locs, args...) where {G}
     println("apply -> $G on $locs")
     return true
 end
 
-function YaoBase.focus!(reg::EchoReg, locs)
+function YaoAPI.focus!(reg::EchoReg, locs)
     println("focus -> $locs")
     reg.nactive = length(locs)
     return true
 end
 
-function YaoBase.relax!(reg::EchoReg, locs; to_nactive = nqubits(reg))
+function YaoAPI.relax!(reg::EchoReg, locs; to_nactive = nqubits(reg))
     reg.nactive = to_nactive
     println("relax -> $locs/$to_nactive")
     return true
 end
 
-function YaoBase.measure!(
+function YaoAPI.measure!(
     post::PostProcess,
     ::ComputationalBasis,
     reg::EchoReg,

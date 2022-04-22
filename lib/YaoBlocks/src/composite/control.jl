@@ -1,6 +1,3 @@
-using YaoArrayRegister
-using YaoArrayRegister: matvec
-
 export ControlBlock, control, cnot, cz
 
 struct ControlBlock{BT<:AbstractBlock,C,M} <: AbstractContainer{BT,2}
@@ -171,7 +168,7 @@ function Base.copy(ctrl::ControlBlock{BT,C,M}) where {BT,C,M}
     return ControlBlock{BT,C,M}(ctrl.n, ctrl.ctrl_locs, ctrl.ctrl_config, ctrl.content, ctrl.locs)
 end
 
-function YaoBase.iscommute(x::ControlBlock, y::ControlBlock)
+function YaoAPI.iscommute(x::ControlBlock, y::ControlBlock)
     _check_block_sizes(x, y)
     if x.locs == y.locs
         return iscommute(x.content, y.content)

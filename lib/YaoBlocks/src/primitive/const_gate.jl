@@ -23,6 +23,11 @@ A module contains all constant gate definitions.
 """
 module ConstGate
 import ..YaoBlocks
+using LuxurySparse, YaoAPI, BitBasis
+using YaoArrayRegister: logdi
+import MLStyle: @match
+using SparseArrays, LinearAlgebra
+
 export ConstantGate, PauliGate
 
 """
@@ -44,8 +49,8 @@ YaoBlocks.cache_key(x::ConstantGate) = 0x1
 struct IGate{N} <: ConstantGate{N,2} end
 YaoBlocks.mat(::Type{T}, ::IGate{N}) where {T,N} = IMatrix{1 << N,T}()
 
-YaoBase.ishermitian(::IGate) = true
-YaoBase.isunitary(::IGate) = true
+LinearAlgebra.ishermitian(::IGate) = true
+YaoAPI.isunitary(::IGate) = true
 end
 
 # import some frequently-used objects

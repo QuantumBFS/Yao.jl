@@ -1,4 +1,4 @@
-using YaoBase, SparseArrays, BitBasis, YaoArrayRegister
+using SparseArrays, BitBasis, YaoArrayRegister
 export @ket_str, @bra_str
 
 function parse_str(s::String)

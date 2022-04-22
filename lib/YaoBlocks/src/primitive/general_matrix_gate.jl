@@ -1,4 +1,3 @@
-using YaoBase, YaoArrayRegister
 export GeneralMatrixBlock, matblock
 
 """
@@ -19,7 +18,7 @@ struct GeneralMatrixBlock{D,T,MT<:AbstractMatrix{T}} <: PrimitiveBlock{D}
         return new{D,T,MT}(m, n, A)
     end
 end
-YaoBase.nqudits(m::GeneralMatrixBlock) = m.n
+YaoAPI.nqudits(m::GeneralMatrixBlock) = m.n
 
 GeneralMatrixBlock(m::AbstractMatrix; nlevel=2) = GeneralMatrixBlock{nlevel}(logdi.(size(m), nlevel)..., m)
 

@@ -11,9 +11,10 @@ it composable with a general Julia program. You can also check the work-in-progr
 """
 module AD
 
-using BitBasis, YaoArrayRegister, YaoBase
+using BitBasis, YaoArrayRegister, YaoAPI
 using ..YaoBlocks
-
+import ChainRulesCore:
+    rrule, @non_differentiable, NoTangent, Tangent, backing, AbstractTangent, ZeroTangent
 using SparseArrays, LuxurySparse, LinearAlgebra
 
 include("NoParams.jl")

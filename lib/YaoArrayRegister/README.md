@@ -18,7 +18,7 @@ pkg> add YaoArrayRegister
 
 ## Usage
 
-This package implements `AbstractRegister` interface defined in [YaoBase](https://github.com/QuantumBFS/YaoBase.jl), you can use it like other kind of registers intuitively.
+This package implements `AbstractRegister` interfaces on the array storage, you can use it like other kind of registers intuitively.
 
 ## License
 

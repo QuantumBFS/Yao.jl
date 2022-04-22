@@ -7,9 +7,10 @@ able to simulate a quantum circuit alone with this package in principle.
 module YaoArrayRegister
 
 using Adapt
-using YaoBase
+using YaoAPI
 using BitBasis
 using LinearAlgebra
+using LegibleLambdas
 
 export AbstractArrayReg,
     ArrayReg,
@@ -35,7 +36,7 @@ export AbstractArrayReg,
 # BitBasis
 export @bit_str, hypercubic
 
-# YaoBase
+# YaoAPI
 export AbstractRegister,
     AdjointRegister,
     AllLocs,
@@ -48,7 +49,8 @@ export AbstractRegister,
     QubitMismatchError,
     RemoveMeasured,
     ResetTo,
-    addbits!,
+    append_qudits!,
+    append_qubits!,
     collapseto!,
     density_matrix,
     von_neumann_entropy,
@@ -80,7 +82,11 @@ export AbstractRegister,
     ρ,
     basis
 
+# others
+export Const, logdi
 
+include("ast_tools.jl")
+include("constants.jl")
 include("utils.jl")
 include("register.jl")
 include("operations.jl")

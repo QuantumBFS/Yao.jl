@@ -1,6 +1,3 @@
-import ChainRulesCore:
-    rrule, @non_differentiable, NoTangent, Tangent, backing, AbstractTangent, ZeroTangent
-
 function create_circuit_tangent(circuit, params)
     gc = dispatch(circuit, params)
     res = recursive_create_tangent(gc)

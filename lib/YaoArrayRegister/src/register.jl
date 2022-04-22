@@ -6,6 +6,12 @@ struct NoBatch end
 _asint(x::Int) = x
 _asint(::NoBatch) = 1
 
+# interfaces
+YaoAPI.nremain(r::AbstractRegister) = nqudits(r) - nactive(r)
+YaoAPI.nlevel(r::AbstractRegister{D}) where {D} = D
+YaoAPI.nqubits(r::AbstractRegister{2}) = nqudits(r)
+
+# conrete implementations
 
 """
     ArrayReg{D,T,MT<:AbstractMatrix{T}} <: AbstractArrayRegister{D}
@@ -80,7 +86,7 @@ BatchedArrayReg(r::BatchedArrayReg{D,T,<:Transpose}) where {D,T} =
 Base.copy(r::BatchedArrayReg) = BatchedArrayReg(r)
 Base.similar(r::BatchedArrayReg{D}) where D = BatchedArrayReg{D}(similar(state(r)), r.nbatch)
 Base.similar(r::BatchedArrayReg{D}, state::AbstractMatrix) where D = BatchedArrayReg{D}(state, r.nbatch)
-YaoBase.viewbatch(r::ArrayReg, ind::Int) = ind == 1 ? r : error("Index `$ind` out of bounds, should be `1`.")
+YaoAPI.viewbatch(r::ArrayReg, ind::Int) = ind == 1 ? r : error("Index `$ind` out of bounds, should be `1`.")
 
 # convert
 function ArrayReg(r::BatchedArrayReg{D}) where D
@@ -135,6 +141,26 @@ const AdjointArrayReg{D,T,MT} = AdjointRegister{D,<:AbstractArrayReg{D,T,MT}}
 const ArrayRegOrAdjointArrayReg{D,T,MT} =
     Union{AbstractArrayReg{D,T,MT},AdjointArrayReg{D,T,MT}}
 
+Base.parent(reg::AdjointRegister) = reg.parent
+
+function Base.summary(io::IO, reg::AdjointRegister{B,RT}) where {B,RT}
+    print(io, "adjoint(", summary(reg.parent), ")")
+end
+
+"""
+    adjoint(register) -> register
+
+Lazy adjoint for quantum registers.
+"""
+Base.adjoint(reg::AbstractRegister) = AdjointRegister(reg)
+Base.adjoint(reg::AdjointRegister) = parent(reg)
+
+YaoAPI.viewbatch(reg::AdjointRegister, i::Int) = adjoint(viewbatch(parent(reg), i))
+
+for FUNC in [:nqudits, :nremain, :nactive]
+    @eval YaoAPI.$FUNC(r::AdjointRegister) = $FUNC(r.parent)
+end
+
 """
     datatype(register) -> Int
 
@@ -187,12 +213,13 @@ function Base.copyto!(dst::AdjointArrayReg, src::AdjointArrayReg)
 end
 
 # register interface
-YaoBase.nqudits(r::AbstractArrayReg{2}) = log2i(length(r.state) ÷ _asint(nbatch(r)))
-YaoBase.nqudits(r::AbstractArrayReg{D}) where {D} = logdi(length(r.state) ÷ _asint(nbatch(r)), D)
-YaoBase.nactive(r::AbstractArrayReg{D}) where {D} = logdi(size(r.state, 1), D)
-YaoBase.viewbatch(r::BatchedArrayReg{D}, ind::Int) where D = @inbounds ArrayReg{D}(view(rank3(r), :, :, ind))
+YaoAPI.nqudits(r::AbstractArrayReg{2}) = log2i(length(r.state) ÷ _asint(nbatch(r)))
+YaoAPI.nqudits(r::AbstractArrayReg{D}) where {D} = logdi(length(r.state) ÷ _asint(nbatch(r)), D)
+YaoAPI.nactive(r::AbstractArrayReg{D}) where {D} = logdi(size(r.state, 1), D)
+YaoAPI.viewbatch(r::BatchedArrayReg{D}, ind::Int) where D = @inbounds ArrayReg{D}(view(rank3(r), :, :, ind))
 
-function YaoBase.addbits!(r::AbstractArrayReg{D}, n::Int) where {D}
+YaoAPI.append_qudits!(n::Int) = @λ(register -> append_qudits!(register, n))
+function YaoAPI.append_qudits!(r::AbstractArrayReg{D}, n::Int) where {D}
     raw = state(r)
     M, N = size(raw)
     r.state = similar(r.state, M * (D ^ n), N)
@@ -200,8 +227,16 @@ function YaoBase.addbits!(r::AbstractArrayReg{D}, n::Int) where {D}
     r.state[1:M, :] = raw
     return r
 end
+YaoAPI.append_qubits!(reg::AbstractRegister{2}, nqubits::Int) = append_qudits!(reg, nqubits)
+YaoAPI.append_qubits!(nqubits::Int) =
+    @λ(register -> append_qubits!(register, nqubits))
 
-function YaoBase.insert_qudits!(reg::AbstractArrayReg{D}, loc::Int; nqudits::Int = 1) where D
+YaoAPI.insert_qubits!(loc::Int, nqubits::Int) =
+    @λ(register -> insert_qubits!(register, loc, nqubits))
+YaoAPI.insert_qubits!(reg::AbstractRegister{2}, loc::Int, nqubits::Int) = insert_qudits!(reg, loc, nqubits)
+YaoAPI.insert_qudits!(loc::Int, nqudits::Int) =
+    @λ(register -> insert_qudits!(register, loc, nqudits))
+function YaoAPI.insert_qudits!(reg::AbstractArrayReg{D}, loc::Int, nqudits::Int) where D
     na = nactive(reg)
     focus!(reg, 1:loc-1)
     reg2 = join(zero_state(nqudits; nbatch = nbatch(reg), nlevel=D), reg) |> relax! |> focus!((1:na+nqudits)...)
@@ -209,7 +244,7 @@ function YaoBase.insert_qudits!(reg::AbstractArrayReg{D}, loc::Int; nqudits::Int
     reg
 end
 
-function YaoBase.probs(r::ArrayReg)
+function YaoAPI.probs(r::ArrayReg)
     if size(r.state, 2) == 1
         return vec(r.state .|> abs2)
     else
@@ -217,7 +252,7 @@ function YaoBase.probs(r::ArrayReg)
     end
 end
 
-function YaoBase.probs(r::BatchedArrayReg)
+function YaoAPI.probs(r::BatchedArrayReg)
     if size(r.state, 2) == nbatch(r)
         return r.state .|> abs2
     else
@@ -226,14 +261,15 @@ function YaoBase.probs(r::BatchedArrayReg)
     end
 end
 
-function YaoBase.reorder!(r::AbstractArrayReg, orders)
+invorder!(r::AbstractRegister) = reorder!(r, Tuple(nactive(r):-1:1))
+function YaoAPI.reorder!(r::AbstractArrayReg, orders)
     @inbounds for i = 1:size(r.state, 2)
         r.state[:, i] = reorder(r.state[:, i], orders)
     end
     return r
 end
 
-function YaoBase.collapseto!(r::AbstractArrayReg, bit_config::Integer)
+function YaoAPI.collapseto!(r::AbstractArrayReg, bit_config::Integer)
     st = normalize!(r.state[Int(bit_config)+1, :])
     fill!(r.state, 0)
     r.state[Int(bit_config)+1, :] .= st
@@ -255,7 +291,7 @@ For pair input `ψ=>circuit`, the returned gradient is a pair of `gψ=>gparams`,
 with `gψ` the gradient of input state and `gparams` the gradients of circuit parameters.
 For register input, the return value is a register.
 """
-function YaoBase.fidelity(r1::BatchedArrayReg{D}, r2::BatchedArrayReg{D}) where {D}
+function YaoAPI.fidelity(r1::BatchedArrayReg{D}, r2::BatchedArrayReg{D}) where {D}
     B1, B2 = nbatch(r1), nbatch(r2)
     B1 == B2 || throw(DimensionMismatch("Register batch not match!"))
     B = nbatch(r1)
@@ -271,7 +307,7 @@ function YaoBase.fidelity(r1::BatchedArrayReg{D}, r2::BatchedArrayReg{D}) where 
     return res
 end
 
-function YaoBase.fidelity(r1::BatchedArrayReg, r2::ArrayReg)
+function YaoAPI.fidelity(r1::BatchedArrayReg, r2::ArrayReg)
     B = nbatch(r1)
     state1 = rank3(r1)
     state2 = rank3(r2)
@@ -284,9 +320,9 @@ function YaoBase.fidelity(r1::BatchedArrayReg, r2::ArrayReg)
     return res
 end
 
-YaoBase.fidelity(r1::ArrayReg, r2::BatchedArrayReg) = YaoBase.fidelity(r2, r1)
+YaoAPI.fidelity(r1::ArrayReg, r2::BatchedArrayReg) = YaoAPI.fidelity(r2, r1)
 
-function YaoBase.fidelity(r1::ArrayReg, r2::ArrayReg)
+function YaoAPI.fidelity(r1::ArrayReg, r2::ArrayReg)
     state1 = state(r1)
     state2 = state(r2)
     nqudits(r1) == nqudits(r2) || throw(DimensionMismatch("Register size not match!"))
@@ -298,8 +334,8 @@ function YaoBase.fidelity(r1::ArrayReg, r2::ArrayReg)
     end
 end
 
-YaoBase.tracedist(r1::ArrayReg, r2::ArrayReg) = tracedist(ρ(r1), ρ(r2))
-YaoBase.tracedist(r1::BatchedArrayReg, r2::BatchedArrayReg) = tracedist.(r1, r2)
+YaoAPI.tracedist(r1::ArrayReg, r2::ArrayReg) = tracedist(ρ(r1), ρ(r2))
+YaoAPI.tracedist(r1::BatchedArrayReg, r2::BatchedArrayReg) = tracedist.(r1, r2)
 
 
 # properties
@@ -687,3 +723,18 @@ function most_probable(reg::BatchedArrayReg{2}, n::Int)
     end
     return res
 end
+
+"""
+    basis(register) -> UnitRange
+
+Returns an `UnitRange` of the all the bits in the Hilbert space of given register.
+"""
+BitBasis.basis(r::AbstractRegister) = basis(nqudits(r))
+
+
+"""
+    partial_tr(locs) -> f(ρ)
+
+Curried version of `partial_tr(ρ, locs)`.
+"""
+YaoAPI.partial_tr(locs) = @λ(ρ -> partial_tr(ρ, locs))

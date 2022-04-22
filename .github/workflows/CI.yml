@@ -36,7 +36,6 @@ jobs:
         package:
           - Yao
           - YaoAPI
-          - YaoBase
           - YaoArrayRegister
           - YaoBlocks
           - YaoSym

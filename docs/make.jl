@@ -2,8 +2,7 @@ using Documenter
 using DocThemeIndigo
 using Literate
 using Yao
-using Yao: YaoBlocks, YaoArrayRegister, YaoBase, YaoSym
-using YaoBase: BitBasis
+using Yao: YaoBlocks, YaoArrayRegister, YaoSym, BitBasis, YaoAPI
 using YaoBlocks: AD
 using YaoBlocks: Optimise
 
@@ -66,7 +65,6 @@ const PAGES = [
         "man/blocks.md",
         "man/automatic_differentiation.md",
         "man/simplification.md",
-        "man/base.md",
         "man/registers.md",
         "man/bitbasis.md",
         "man/extending_blocks.md",
@@ -78,7 +76,7 @@ const PAGES = [
 indigo = DocThemeIndigo.install(Yao)
 
 makedocs(
-    modules = [Yao, YaoBase, YaoArrayRegister, YaoBlocks, BitBasis, YaoSym, AD, Optimise],
+    modules = [Yao, YaoAPI, YaoArrayRegister, YaoBlocks, BitBasis, YaoSym, AD, Optimise],
     format = Documenter.HTML(
         prettyurls = ("deploy" in ARGS),
         canonical = ("deploy" in ARGS) ? "https://docs.yaoquantum.org/" : nothing,

@@ -1,4 +1,3 @@
-using YaoBase, CacheServers
 export CacheFragment, CachedBlock, update_cache
 export cache, pull, update!, update_cache, clearall!, iscached, iscacheable
 

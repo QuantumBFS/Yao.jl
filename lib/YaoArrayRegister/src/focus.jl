@@ -1,6 +1,6 @@
-using YaoBase, TupleTools
+using YaoAPI, TupleTools
 
-export focus!, relax!, partial_tr, exchange_sysenv
+export focus!, relax!, partial_tr, exchange_sysenv, focus
 
 
 """
@@ -93,10 +93,18 @@ Check if the order specified by `locs` is the same as current order.
 """
 is_order_same(locs) = all(a == b for (a, b) in zip(locs, 1:length(locs)))
 
+"""
+    focus!(locs...) -> f(register) -> register
+
+Lazy version of [`focus!`](@ref), this returns a lambda which requires a register.
+"""
+YaoAPI.focus!(locs::Int...) = focus!(locs)
+YaoAPI.focus!(locs::NTuple{N,Int}) where {N} = @λ(register -> focus!(register, locs))
+YaoAPI.focus!(locs::UnitRange) = @λ(register -> focus!(register, locs))
 # NOTE: locations is not the same with orders
 # locations: some location of the wire
 # orders: includes all the location of the wire in some order
-function YaoBase.focus!(r::AbstractArrayReg{D}, locs) where {D}
+function YaoAPI.focus!(r::AbstractArrayReg{D}, locs) where {D}
     if is_order_same(locs)
         arr = r.state
     else
@@ -107,7 +115,7 @@ function YaoBase.focus!(r::AbstractArrayReg{D}, locs) where {D}
     return r
 end
 
-function YaoBase.relax!(r::AbstractArrayReg{D}, locs; to_nactive::Int = nqudits(r)) where {D}
+function YaoAPI.relax!(r::AbstractArrayReg{D}, locs; to_nactive::Int = nqudits(r)) where {D}
     r.state = reshape(state(r), D^to_nactive, :)
     if !is_order_same(locs)
         new_orders = TupleTools.invperm(move_ahead(to_nactive + 1, locs))
@@ -116,11 +124,32 @@ function YaoBase.relax!(r::AbstractArrayReg{D}, locs; to_nactive::Int = nqudits(
     return r
 end
 
-function YaoBase.partial_tr(r::AbstractArrayReg{D}, locs) where D
-    orders = setdiff(1:nqudits(r), locs)
-    r2 = focus!(copy(r), orders)
-    state = sum(rank3(r2); dims = 2)
-    return normalize!(arrayreg(reshape(state, :, size(state, 3)); nbatch=nbatch(r), nlevel=D))
+YaoAPI.relax!(r::AbstractRegister; to_nactive::Int = nqudits(r)) =
+    relax!(r, (); to_nactive = to_nactive)
+
+"""
+    relax!(locs::Int...; to_nactive=nqudits(register)) -> f(register) -> register
+
+Lazy version of [`relax!`](@ref), it will be evaluated once you feed a register
+to its output lambda.
+"""
+YaoAPI.relax!(locs::Int...; to_nactive::Union{Nothing,Int} = nothing) =
+    relax!(locs; to_nactive = to_nactive)
+
+function YaoAPI.relax!(locs::NTuple{N,Int}; to_nactive::Union{Nothing,Int} = nothing) where {N}
+    lambda = function (r::AbstractRegister)
+        if to_nactive === nothing
+            return relax!(r, locs; to_nactive = nqudits(r))
+        else
+            return relax!(r, locs; to_nactive = to_nactive)
+        end
+    end
+
+    @static if VERSION < v"1.1.0"
+        return LegibleLambda("(register->relax!(register, locs...; to_nactive))", lambda)
+    else
+        return LegibleLambda(:(register -> relax!(register, locs...; to_nactive)), lambda)
+    end
 end
 
 """

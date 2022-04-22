@@ -1,4 +1,4 @@
-using Test, YaoBase, YaoBlocks, YaoArrayRegister
+using Test, YaoAPI, YaoBlocks, YaoArrayRegister
 
 @testset "test chain" begin
     include("chain.jl")

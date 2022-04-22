@@ -1,4 +1,4 @@
-using Test, Random, LinearAlgebra, YaoArrayRegister, YaoBlocks, YaoBase
+using Test, Random, LinearAlgebra, YaoArrayRegister, YaoBlocks, YaoAPI
 
 A = rand(ComplexF64, 4, 4)
 mg = matblock(A)

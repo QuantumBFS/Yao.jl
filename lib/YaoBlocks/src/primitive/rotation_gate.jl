@@ -1,5 +1,3 @@
-using YaoBase, YaoArrayRegister
-import StaticArrays: SMatrix
 export RotationGate, Rx, Ry, Rz, rot
 
 """
@@ -114,9 +112,9 @@ setiparams!(r::RotationGate, param::Number) = (r.theta = param; r)
 setiparams(r::RotationGate, param::Number) = RotationGate(r.block, param)
 
 # fallback to matrix methods if it is not real
-YaoBase.isunitary(r::RotationGate{D,<:Real}) where {D} = true
+YaoAPI.isunitary(r::RotationGate{D,<:Real}) where {D} = true
 
-function YaoBase.isunitary(r::RotationGate)
+function YaoAPI.isunitary(r::RotationGate)
     isreal(r.theta) && return true
     @warn "θ in RotationGate is not real, got θ=$(r.theta), fallback to matrix-based method"
     return isunitary(mat(r))

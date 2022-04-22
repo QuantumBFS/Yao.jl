@@ -1,4 +1,28 @@
-using YaoBase, YaoArrayRegister
+# properties
+YaoAPI.isunitary(op) = op' * op ≈ IMatrix(size(op, 1))
+YaoAPI.isunitary(op::Number) = op' * op ≈ one(op)
+
+YaoAPI.isreflexive(op) = op * op ≈ IMatrix(size(op, 1))
+YaoAPI.isreflexive(op::Number) = op * op ≈ one(op)
+
+"""
+    ishermitian(op) -> Bool
+
+check if this operator is hermitian.
+"""
+LinearAlgebra.ishermitian(op) = op' ≈ op
+
+function YaoAPI.iscommute(ops...)
+    n = length(ops)
+    for i = 1:n
+        for j = i+1:n
+            iscommute(ops[i], ops[j]) || return false
+        end
+    end
+    true
+end
+
+YaoAPI.iscommute(op1, op2) = op1 * op2 ≈ op2 * op1
 
 """
     apply!(register, block)
@@ -77,7 +101,7 @@ chsubblocks(x::AbstractBlock, itr)
 Transform the apply! function of specific block to dense matrix.
 """
 applymatrix(T, g::AbstractBlock) =
-    linop2dense(T, r -> statevec(apply!(ArrayReg(r), g)), nqudits(g))
+    YaoArrayRegister.linop2dense(T, r -> statevec(apply!(ArrayReg(r), g)), nqudits(g))
 applymatrix(g::AbstractBlock) = applymatrix(ComplexF64, g)
 # just use BlockMap maybe? No!
 
@@ -102,15 +126,15 @@ mat_matchreg(reg::AbstractArrayReg{D,T}, x::AbstractBlock) where {D,T} = mat(T,x
 
 Base.Matrix{T}(x::AbstractBlock) where {T} = Matrix(mat(T, x))
 
-# YaoBase interface
-YaoBase.nqubits(block::AbstractBlock{2}) = nqudits(block)
-YaoBase.nlevel(::Type{<:AbstractBlock{D}}) where {D} = D
-YaoBase.nlevel(x::AbstractBlock{D}) where {D} = nlevel(typeof(x))
+# YaoAPI interface
+YaoAPI.nqubits(block::AbstractBlock{2}) = nqudits(block)
+YaoAPI.nlevel(::Type{<:AbstractBlock{D}}) where {D} = D
+YaoAPI.nlevel(x::AbstractBlock{D}) where {D} = nlevel(typeof(x))
 
 # properties
-for each_property in [:isunitary, :isreflexive, :ishermitian]
-    @eval YaoBase.$each_property(x::AbstractBlock) = $each_property(mat(x))
-    @eval YaoBase.$each_property(::Type{T}) where {T<:AbstractBlock} =
+for each_property in [:(YaoAPI.isunitary), :(YaoAPI.isreflexive), :(LinearAlgebra.ishermitian)]
+    @eval $each_property(x::AbstractBlock) = $each_property(mat(x))
+    @eval $each_property(::Type{T}) where {T<:AbstractBlock} =
         $each_property(mat(T))
 end
 
@@ -123,7 +147,7 @@ function iscommute_fallback(op1::AbstractBlock{D}, op2::AbstractBlock{D}) where 
     end
 end
 
-YaoBase.iscommute(op1::AbstractBlock{D}, op2::AbstractBlock{D}) where {D} =
+YaoAPI.iscommute(op1::AbstractBlock{D}, op2::AbstractBlock{D}) where {D} =
     iscommute_fallback(op1, op2)
 
 # parameters
