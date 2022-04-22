@@ -229,7 +229,7 @@ function YaoAPI.append_qudits!(r::AbstractArrayReg{D}, n::Int) where {D}
 end
 YaoAPI.append_qubits!(reg::AbstractRegister{2}, nqubits::Int) = append_qudits!(reg, nqubits)
 YaoAPI.append_qubits!(nqubits::Int) =
-    @λ(register -> append_qubits!(register, nqudits))
+    @λ(register -> append_qubits!(register, nqubits))
 
 YaoAPI.insert_qubits!(loc::Int, nqubits::Int) =
     @λ(register -> insert_qubits!(register, loc, nqubits))
