@@ -165,9 +165,9 @@ pswap(n::Int, i::Int, j::Int, α::Real) = PSwap(n, (i, j), α)
 pswap(i::Int, j::Int, α::Real) = n -> pswap(n, i, j, α)
 
 for (G, GT) in [
-    (:Rx, :(PutBlock{2,1,RotationGate{T,XGate}} where {T})),
-    (:Ry, :(PutBlock{2,1,RotationGate{T,YGate}} where {T})),
-    (:Rz, :(PutBlock{2,1,RotationGate{T,ZGate}} where {T})),
+    (:Rx, :(PutBlock{2,1,RotationGate{2, T,XGate}} where {T})),
+    (:Ry, :(PutBlock{2,1,RotationGate{2, T,YGate}} where {T})),
+    (:Rz, :(PutBlock{2,1,RotationGate{2, T,ZGate}} where {T})),
     (:PSWAP, :(PSwap)),
 ]
     @eval function _apply!(reg::AbstractRegister, g::$GT)
