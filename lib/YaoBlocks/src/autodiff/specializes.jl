@@ -5,8 +5,27 @@ for F in [:expect, :fidelity, :operator_fidelity]
         print(io, "$($F)'")
 end
 
-function (::Adjoint{Any,typeof(expect)})(op::AbstractBlock, reg_or_circuit)
-    expect_g(op, reg_or_circuit)
+(::Adjoint{Any,typeof(expect)})(op::AbstractBlock, reg_or_circuit) = expect'(op, reg_or_circuit, reg_or_circuit)
+function (::Adjoint{Any,typeof(expect)})(op::AbstractBlock, left, right)
+    return expect_gl(op, left, right), expect_gr(op, left, right)
+end
+
+function expect_g(op::AbstractBlock, left::Pair{<:AbstractArrayReg,<:AbstractBlock}, right::Pair{<:AbstractArrayReg,<:AbstractBlock})
+    reg, c = circuit
+    out = copy(reg) |> c
+    outδ = copy(out) |> op
+    (in, inδ), paramsδ = apply_back((out, outδ), c)
+    return inδ => paramsδ .* 2
+end
+
+# right branch
+function expect_gr(op::AbstractBlock, left::AbstractArrayReg, right::AbstractArrayReg)
+    conj(right) |> op'
+end
+
+# left branch
+function expect_gl(op::AbstractBlock, left::AbstractArrayReg, right::AbstractArrayReg)
+    copy(right) |> op
 end
 
 function expect_g(op::AbstractBlock, circuit::Pair{<:AbstractArrayReg,<:AbstractBlock})
@@ -15,10 +34,6 @@ function expect_g(op::AbstractBlock, circuit::Pair{<:AbstractArrayReg,<:Abstract
     outδ = copy(out) |> op
     (in, inδ), paramsδ = apply_back((out, outδ), c)
     return inδ => paramsδ .* 2
-end
-
-function expect_g(op::AbstractBlock, reg::AbstractArrayReg)
-    copy(reg) |> op
 end
 
 _eval(p::Pair{<:AbstractRegister,<:AbstractBlock}) = copy(p.first) |> p.second

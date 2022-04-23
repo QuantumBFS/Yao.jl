@@ -78,6 +78,8 @@ expect(op::AbstractBlock, dm::DensityMatrix{1}) =
 """
     expect(op::AbstractBlock, reg) -> Vector
     expect(op::AbstractBlock, reg => circuit) -> Vector
+    expect(op::AbstractBlock, left, right) -> Vector
+    expect(op::AbstractBlock, left => leftcircuit, right=>rightcircuit) -> Vector
     expect(op::AbstractBlock, density_matrix) -> Vector
 
 Get the expectation value of an operator, the second parameter can be a register `reg` or a pair of input register and circuit `reg => circuit`.
@@ -99,39 +101,44 @@ function expect(op::AbstractBlock, dm::DensityMatrix)
     return sum(transpose(dm.state) .* mop)
 end
 
-expect(op::AbstractBlock, reg::ArrayReg) = reg' * apply!(copy(reg), op)
+expect(op::AbstractBlock, reg::AbstractArrayReg) = expect(op, reg, reg)
+expect(op::AbstractBlock, reg::Pair) = expect(op, reg, reg)
+expect(op::AbstractBlock, left::ArrayReg, right::ArrayReg) = left' * apply!(copy(right), op)
 
-function expect(op::AbstractBlock, reg::BatchedArrayReg)
+function expect(op::AbstractBlock, left::BatchedArrayReg, right::BatchedArrayReg)
+    @assert nbatch(left) == nbatch(right)
+    @assert nqubits(left) == nqubits(right)
+    @assert nactive(left) == nactive(right) == nqubits(op)
     B = YaoArrayRegister._asint(nbatch(reg))
-    ket = apply!(copy(reg), op)
+    ket = apply!(copy(right), op)
     if !(reg.state isa Transpose)
         C = conj!(reshape(ket.state, :, B))
-        A = reshape(reg.state, :, B)
+        A = reshape(left.state, :, B)
         dropdims(sum(A .* C, dims = 1), dims = 1) |> conj
-    elseif size(reg.state, 2) == B
-        Na = size(reg.state, 1)
-        C = conj!(reshape(ket.state.parent, B, Na))
-        A = reshape(reg.state.parent, B, Na)
+    elseif size(left.state, 2) == B  # no environment
+        Na = size(left.state, 1)
+        C = conj!(reshape(right.state.parent, B, Na))
+        A = reshape(left.state.parent, B, Na)
         dropdims(sum(A .* C, dims = 2), dims = 2) |> conj
     else
-        Na = size(reg.state, 1)
-        C = conj!(reshape(ket.state.parent, :, B, Na))
-        A = reshape(reg.state.parent, :, B, Na)
+        Na = size(left.state, 1)
+        C = conj!(reshape(right.state.parent, :, B, Na))
+        A = reshape(left.state.parent, :, B, Na)
         dropdims(sum(A .* C, dims = (1, 3)), dims = (1, 3)) |> conj
     end
 end
 
 for REG in [:ArrayReg, :BatchedArrayReg]
-    @eval function expect(op::Add, reg::$REG)
-        sum(opi -> expect(opi, reg), op)
+    @eval function expect(op::Add, left::$REG, right::$REG)
+        sum(opi -> expect(opi, left, right), op)
     end
-    @eval function expect(op::Scale, reg::$REG)
-        factor(op) * expect(content(op), reg)
+    @eval function expect(op::Scale, left::$REG, right::$REG)
+        factor(op) * expect(content(op), left, right)
     end
 end
 
-function expect(op, plan::Pair{<:AbstractRegister,<:AbstractBlock})
-    expect(op, copy(plan.first) |> plan.second)
+function expect(op, pl::Pair{<:AbstractRegister,<:AbstractBlock}, pr::Pair{<:AbstractRegister,<:AbstractBlock})
+    expect(op, apply(pl.first, pl.second), apply(pr.first, pr.second))
 end
 
 # obtaining Dense Matrix of a block
