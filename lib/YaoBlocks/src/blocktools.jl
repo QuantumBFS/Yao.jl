@@ -109,20 +109,20 @@ function expect(op::AbstractBlock, left::BatchedArrayReg, right::BatchedArrayReg
     @assert nbatch(left) == nbatch(right)
     @assert nqubits(left) == nqubits(right)
     @assert nactive(left) == nactive(right) == nqubits(op)
-    B = YaoArrayRegister._asint(nbatch(reg))
-    ket = apply!(copy(right), op)
-    if !(reg.state isa Transpose)
+    B = YaoArrayRegister._asint(nbatch(left))
+    ket = apply(right, op)
+    if !(left.state isa Transpose)
         C = conj!(reshape(ket.state, :, B))
         A = reshape(left.state, :, B)
         dropdims(sum(A .* C, dims = 1), dims = 1) |> conj
     elseif size(left.state, 2) == B  # no environment
         Na = size(left.state, 1)
-        C = conj!(reshape(right.state.parent, B, Na))
+        C = conj!(reshape(ket.state.parent, B, Na))
         A = reshape(left.state.parent, B, Na)
         dropdims(sum(A .* C, dims = 2), dims = 2) |> conj
     else
         Na = size(left.state, 1)
-        C = conj!(reshape(right.state.parent, :, B, Na))
+        C = conj!(reshape(ket.state.parent, :, B, Na))
         A = reshape(left.state.parent, :, B, Na)
         dropdims(sum(A .* C, dims = (1, 3)), dims = (1, 3)) |> conj
     end
@@ -137,8 +137,10 @@ for REG in [:ArrayReg, :BatchedArrayReg]
     end
 end
 
-function expect(op, pl::Pair{<:AbstractRegister,<:AbstractBlock}, pr::Pair{<:AbstractRegister,<:AbstractBlock})
-    expect(op, apply(pl.first, pl.second), apply(pr.first, pr.second))
+_eval(p::Pair{<:AbstractArrayReg,<:AbstractBlock}; cp::Bool=false) = apply(p.first, p.second)
+_eval(p::AbstractRegister; cp::Bool=false) = cp ? copy(p) : p
+function expect(op, pl::Union{Pair, AbstractRegister}, pr::Union{Pair,AbstractRegister})
+    expect(op, _eval(pl), _eval(pr))
 end
 
 # obtaining Dense Matrix of a block

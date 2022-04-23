@@ -5,39 +5,36 @@ for F in [:expect, :fidelity, :operator_fidelity]
         print(io, "$($F)'")
 end
 
-(::Adjoint{Any,typeof(expect)})(op::AbstractBlock, reg_or_circuit) = expect'(op, reg_or_circuit, reg_or_circuit)
+function _backcirc!(reg, out, outδ)
+    if reg isa Pair
+        (_, inδ), paramsδ = apply_back((out, outδ), reg.second)
+        return regscale!(inδ, 0.5) => paramsδ
+    else
+        return regscale!(outδ, 0.5)
+    end
+end
+#_merge!(p1::Pair, p2::Pair) = regadd!(p1.first, p2.first)=>(p1.second .+ p2.second)
+#_merge!(p1::AbstractArrayReg, p2::AbstractArrayReg) = regadd!(p1, p2)
+_double!(p1::Pair) = regscale!(p1.first, 2)=>(p1.second .*= 2)
+_double!(p1::AbstractArrayReg) = regscale!(p1, 2)
+function (::Adjoint{Any,typeof(expect)})(op::AbstractBlock, reg_or_circuit)
+    out = _eval(reg_or_circuit)
+    outδ = apply(out, op)
+    return _double!(_backcirc!(reg_or_circuit, out, outδ))
+end
 function (::Adjoint{Any,typeof(expect)})(op::AbstractBlock, left, right)
-    return expect_gl(op, left, right), expect_gr(op, left, right)
+    los, ros = _eval(left; cp=true), _eval(right)
+    # left branch
+    loδ = apply(ros, op)
+    g1 = _backcirc!(left, los, loδ)
+    # right branch
+    conj!(los.state)
+    roδ = apply!(los, op')
+    conj!(roδ.state)
+    g2 = _backcirc!(right, ros, roδ)
+    return g1, g2
 end
 
-function expect_g(op::AbstractBlock, left::Pair{<:AbstractArrayReg,<:AbstractBlock}, right::Pair{<:AbstractArrayReg,<:AbstractBlock})
-    reg, c = circuit
-    out = copy(reg) |> c
-    outδ = copy(out) |> op
-    (in, inδ), paramsδ = apply_back((out, outδ), c)
-    return inδ => paramsδ .* 2
-end
-
-# right branch
-function expect_gr(op::AbstractBlock, left::AbstractArrayReg, right::AbstractArrayReg)
-    conj(right) |> op'
-end
-
-# left branch
-function expect_gl(op::AbstractBlock, left::AbstractArrayReg, right::AbstractArrayReg)
-    copy(right) |> op
-end
-
-function expect_g(op::AbstractBlock, circuit::Pair{<:AbstractArrayReg,<:AbstractBlock})
-    reg, c = circuit
-    out = copy(reg) |> c
-    outδ = copy(out) |> op
-    (in, inδ), paramsδ = apply_back((out, outδ), c)
-    return inδ => paramsδ .* 2
-end
-
-_eval(p::Pair{<:AbstractRegister,<:AbstractBlock}) = copy(p.first) |> p.second
-_eval(reg::AbstractRegister) = reg
 YaoAPI.fidelity(p1, p2) = fidelity(_eval(p1), _eval(p2))
 
 function (::Adjoint{Any,typeof(fidelity)})(
@@ -51,19 +48,7 @@ function fidelity_g(
     reg1::Union{AbstractArrayReg,Pair{<:AbstractArrayReg,<:AbstractBlock}},
     reg2::Union{AbstractArrayReg,Pair{<:AbstractArrayReg,<:AbstractBlock}},
 )
-    if reg1 isa Pair
-        in1, c1 = reg1
-        out1 = copy(in1) |> c1
-    else
-        out1 = reg1
-    end
-
-    if reg2 isa Pair
-        in2, c2 = reg2
-        out2 = copy(in2) |> c2
-    else
-        out2 = reg2
-    end
+    out1, out2 = _eval(reg1), _eval(reg2)
     if nremain(out1) != 0
         throw(
             ArgumentError(
@@ -74,27 +59,11 @@ please file an issue if you really need this feature.",
         )
     end
     overlap = out1' * out2
-
     out1δ = copy(out2)
-    regscale!.(viewbatch.(Ref(out1δ), 1:length(overlap)), conj.(overlap) ./ 2 ./ abs.(overlap))
+    regscale!.(viewbatch.(Ref(out1δ), 1:length(overlap)), conj.(overlap) ./ abs.(overlap))
     out2δ = copy(out1)
-    regscale!.(viewbatch.(Ref(out2δ), 1:length(overlap)), overlap ./ 2 ./ abs.(overlap))
-
-    if reg1 isa Pair
-        (_, in1δ), params1δ = apply_back((out1, out1δ), c1)
-        res1 = in1δ => params1δ .* 2
-    else
-        res1 = out1δ
-    end
-
-    if reg2 isa Pair
-        (_, in2δ), params2δ = apply_back((out2, out2δ), c2)
-        res2 = in2δ => params2δ .* 2
-    else
-        res2 = out2δ
-    end
-
-    return res1, res2
+    regscale!.(viewbatch.(Ref(out2δ), 1:length(overlap)), overlap ./ abs.(overlap))
+    return _backcirc!(reg1, out1, out1δ), _backcirc!(reg2, out2, out2δ)
 end
 
 function (::Adjoint{Any,typeof(operator_fidelity)})(b1::AbstractBlock, b2::AbstractBlock)

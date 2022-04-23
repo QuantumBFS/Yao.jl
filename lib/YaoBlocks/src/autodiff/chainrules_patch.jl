@@ -101,40 +101,43 @@ function rrule(::typeof(dispatch), block::AbstractBlock, params)
     end
 end
 
-function rrule(::typeof(expect), op::AbstractBlock, reg::AbstractArrayReg)
-    B = YaoArrayRegister._asint(nbatch(reg))
-    out = expect(op, reg)
-    out, function (outδ)
-        greg = expect_g(op, reg)
-        for b = 1:B
-            viewbatch(greg, b).state .*= 2 * outδ[b]
-        end
-        return (NoTangent(), NoTangent(), greg)
-    end
+function rrule(::typeof(expect), op, reg)
+    return rrule(expect, op, reg, reg)
 end
 
+_createtangent(reg_and_circuit::AbstractArrayReg, g) = g
+function _createtangent(reg_and_circuit::Pair, g)
+    return Tangent{typeof(reg_and_circuit)}(;
+        first = g.first,
+        second = create_circuit_tangent(reg_and_circuit.second, g.second),
+    )
+end
 function rrule(
     ::typeof(expect),
     op::AbstractBlock,
-    reg_and_circuit::Pair{<:AbstractArrayReg,<:AbstractBlock})
-    out = expect(op, reg_and_circuit)
+    left,
+    right
+    )
+    # compute outputs
+    outr = _eval(right)
+    outl = _eval(left)
+    out = expect(op, outl, outr)
     out,
     function (outδ)
-        reg, c = reg_and_circuit
-        out = copy(reg) |> c
-        goutreg = copy(out) |> op
-        for b = 1:YaoArrayRegister._asint(nbatch(goutreg))
-            viewbatch(goutreg, b).state .*= 2 * outδ[b]
-        end
+        # left branch
+        goutregl = apply(outr, op)
+        regscale!.(goutregl, outδ)
+        # right branch
+        goutregr = apply(outl, op')
+        regscale!.(goutregr, outδ[b])
         # apply backward rule
-        (in, greg), gcircuit = apply_back((out, goutreg), c)
+        gl = _backcirc!(left, outl, goutregl)
+        gr = _backcirc!(right, outr, goutregr)
         return (
             NoTangent(),
             NoTangent(),
-            Tangent{typeof(reg_and_circuit)}(;
-                first = greg,
-                second = create_circuit_tangent(reg_and_circuit.second, gcircuit),
-            ),
+            _createtangent(left, gl),
+            _createtangent(right, gr)
         )
     end
 end

@@ -66,6 +66,27 @@ end
     end
 end
 
+@testset "expect, double side" begin
+    for (reg, reg2) in [
+        (rand_state(3, nbatch = NoBatch()), rand_state(3, nbatch=NoBatch())),
+        (rand_state(3, nbatch = 10), rand_state(3, nbatch=10)),
+        (rand_state(3, nbatch = 10, no_transpose_storage = true), rand_state(3, nbatch = 10, no_transpose_storage = true))
+    ]
+        h = put(3, 2 => X)
+        e4 = expect(h, reg, reg2)
+        @test [e4...] ≈ [tr(rank3(reg)[:,:,b]' * mat(h) * rank3(reg2)[:,:,b]) for b=1:YaoArrayRegister._asint(nbatch(reg))]
+        h = put(2, 2 => X)
+        reg, reg2 = reg |> copy |> focus!(1, 2), reg2 |> copy |> focus!(1, 2)
+        e2 = expect(h, reg, reg2)
+        @test [e2...] ≈ [tr(rank3(reg)[:,:,b]' * mat(h) * rank3(reg2)[:,:,b]) for b=1:YaoArrayRegister._asint(nbatch(reg))]
+    end
+    # pair interface
+    circ = put(3, 2=>Ry(0.4))
+    reg, reg2 = (rand_state(3, nbatch = 10)=>circ, rand_state(3, nbatch=10)=>circ)
+    ereg, ereg2 = YaoBlocks._eval(reg), YaoBlocks._eval(reg2)
+    @test expect(h, ereg, ereg2) == expect(h, reg, reg2)
+end
+
 @testset "viewbatch apply" begin
     reg = zero_state(1, nbatch = 2)
     viewbatch(reg, 1) |> X
