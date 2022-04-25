@@ -1,5 +1,5 @@
 using YaoBlocks, YaoArrayRegister, BitBasis
-using YaoBlocks: eigenbasis
+using YaoBlocks: eigenbasis, is_simple_diagonal
 using Random, Test
 using YaoAPI: QubitMismatchError
 
@@ -146,4 +146,25 @@ end
     op = repeat(5, X, 1:5)
     @test_throws ArgumentError measure!(ResetTo(0), op, reg, 2:6)
     @test_throws ArgumentError measure!(RemoveMeasured(), op, reg, 2:6)
+end
+
+@testset "is simple diagonal" begin
+    @test !is_simple_diagonal(X)
+    @test is_simple_diagonal(Z)
+    @test !is_simple_diagonal(matblock(randn(64, 64)))
+    @test !is_simple_diagonal(chain([X,Y]))
+    @test is_simple_diagonal(chain([Z,Z]))
+    @test is_simple_diagonal(rot(Z, 0.5))
+    @test !is_simple_diagonal(rot(X, 0.5))
+    @test !is_simple_diagonal(time_evolve(X, 0.5))
+    @test is_simple_diagonal(time_evolve(Z, 0.5))
+
+    # Rydberg blockade term + zterm
+    block = 0.5 * sum([kron(3, 1=>ConstGate.P1, 2=>ConstGate.P1), kron(3, 2=>ConstGate.P1, 3=>ConstGate.P1)]) + 0.5 * sum([put(3, i=>Z) for i=1:3])
+    @test eigenbasis(block) == (block, igate(3))
+    # Rydberg xterm
+    block = 0.5 * sum([put(3, i=>X) for i=1:3])
+    @test eigenbasis(block) == (
+                0.5 * sum([put(3, i=>Z) for i=1:3]),
+                chain([put(3, i=>H) for i=1:3]))
 end

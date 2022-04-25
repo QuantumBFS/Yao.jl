@@ -8,6 +8,10 @@ one can swith the basis to the eigenbasis of this operator.
 However, `eigenvalues` does not have a specific form.
 """
 function eigenbasis(op::AbstractBlock{D}) where {D}
+    # TODO: add isdiagonal
+    if is_simple_diagonal(op)
+        return op, IdentityGate{D}(nqudits(op))
+    end
     m = mat(op)
     if m isa Diagonal || m isa IMatrix
         op, IdentityGate{D}(nqudits(op))
@@ -15,6 +19,25 @@ function eigenbasis(op::AbstractBlock{D}) where {D}
         E, V = eigen!(Matrix(m))
         matblock(Diagonal(E)), matblock(V)
     end
+end
+
+function is_simple_diagonal(op::AbstractBlock)
+    if nqudits(op) <= 5
+        m = mat(op)
+        return m isa Diagonal || m isa IMatrix
+    else
+        return false
+    end
+end
+function is_simple_diagonal(op::RotationGate)
+    is_simple_diagonal(op.block)
+end
+function is_simple_diagonal(op::TimeEvolution)
+    is_simple_diagonal(op.H)
+end
+# assume composition does not change diagonal property
+function is_simple_diagonal(op::CompositeBlock)
+    return all(is_simple_diagonal, subblocks(op))
 end
 
 for BT in []
@@ -61,6 +84,24 @@ function eigenbasis(op::ChainBlock)
     end
 end
 
+function eigenbasis(op::Add)
+    # detect commute operators
+    if simple_commute_eachother(subblocks(op))
+        E = Add(op.n)
+        blks = chain(op.n)
+        for b in subblocks(op)
+            Ei, Vi = eigenbasis(b)
+            push!(E, Ei)
+            push!(blks, Vi)
+        end
+        return E, blks
+    else
+        if op.n > 5
+            @warn "eigenbasis on blocktype `Add` (size $(op.n)) calls into the fallback implementation, which might be slow. Try using `kron`, `repeat` if items commute to each oher. If this behavior is not what you expected, please file an issue here: https://github.com/QuantumBFS/Yao.jl/issues."
+        end
+        invoke(eigenbasis, Tuple{AbstractBlock}, op)
+    end
+end
 
 for GT in [:PutBlock, :RepeatedBlock, :ControlBlock, :Daggered]
     @eval function eigenbasis(op::$GT)
