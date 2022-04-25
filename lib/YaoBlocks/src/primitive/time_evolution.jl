@@ -43,8 +43,10 @@ content(te::TimeEvolution) = te.H
 chcontent(te::TimeEvolution, blk::AbstractBlock) = time_evolve(blk, te.dt; tol = te.tol)
 
 function mat(::Type{T}, te::TimeEvolution) where {T}
-    return exp(-im * T(te.dt) * Matrix(mat(T, te.H)))
+    return _exp((-im * T(te.dt)) .* mat(T, te.H))
 end
+_exp(m::AbstractMatrix) = exp(m)
+_exp(m::SparseMatrixCSC) = exp(Matrix(m))
 
 struct BlockMap{T,GT<:AbstractBlock} <: AbstractArray{T,2}
     block::GT
