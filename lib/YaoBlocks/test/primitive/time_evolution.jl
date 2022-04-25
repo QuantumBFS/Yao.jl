@@ -14,7 +14,6 @@ function heisenberg(n::Int; periodic::Bool = true)
     Add(res)
 end
 
-
 @testset "constructor:time evolution" begin
     hm = heisenberg(4)
     te = TimeEvolution(hm, 0.2)
@@ -37,6 +36,18 @@ end
 
 @testset "test imaginary time evolution" begin
     hm = heisenberg(4)
+    tei = TimeEvolution(hm, 0.2im)
+    r = rand_state(4)
+    r1 = copy(r) |> tei
+    @test exp(Matrix(mat(hm)) * 0.2) * r.state ≈ r1.state
+
+    @test applymatrix(tei) ≈ mat(tei)
+    @test applymatrix(adjoint(tei)) ≈ applymatrix(tei)'
+    @test !isunitary(tei)
+    @test !isunitary(tei |> mat)
+
+    # diagonal time evolution
+    hm = matblock(Diagonal(randn(1<<4)))
     tei = TimeEvolution(hm, 0.2im)
     r = rand_state(4)
     r1 = copy(r) |> tei

@@ -65,6 +65,10 @@ function LinearAlgebra.mul!(y::AbstractVector, A::BlockMap{T,GT}, x::AbstractVec
 end
 
 function _apply!(reg::AbstractArrayReg{D,T}, te::TimeEvolution) where {D,T}
+    if is_simple_diagonal(te.H)
+        reg.state .*= exp.(-im * te.dt .* diag(mat(te.H)))
+        return reg
+    end
     st = state(reg)
     dt = real(te.dt) == 0 ? imag(te.dt) : -im * te.dt
     A = BlockMap(T, te.H)

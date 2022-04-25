@@ -35,6 +35,9 @@ end
 function is_simple_diagonal(op::TimeEvolution)
     is_simple_diagonal(op.H)
 end
+function is_simple_diagonal(op::GeneralMatrixBlock)
+    op.mat isa Diagonal || op.mat isa IMatrix
+end
 # assume composition does not change diagonal property
 function is_simple_diagonal(op::CompositeBlock)
     return all(is_simple_diagonal, subblocks(op))
