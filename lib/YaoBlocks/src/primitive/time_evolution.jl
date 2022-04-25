@@ -66,7 +66,7 @@ end
 
 function _apply!(reg::AbstractArrayReg{D,T}, te::TimeEvolution) where {D,T}
     if is_simple_diagonal(te.H)
-        reg.state .*= exp.(-im * te.dt .* diag(mat(te.H)))
+        reg.state .*= exp.((-im * te.dt) .* diag(mat(T, te.H)))
         return reg
     end
     st = state(reg)
