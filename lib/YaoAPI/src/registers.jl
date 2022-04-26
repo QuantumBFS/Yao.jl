@@ -292,9 +292,9 @@ ArrayReg{2, ComplexF64, Array...}
 @interface relax!
 
 """
-    partial_tr(register, locs) -> 
+    partial_tr(ρ, locs) -> 
 
-Return a register which is the partial traced on `locs`.
+Return a density matrix which is the partial traced on `locs`.
 """
 @interface partial_tr
 
@@ -302,9 +302,24 @@ Return a register which is the partial traced on `locs`.
     reorder!(reigster, orders)
 
 Reorder the locations of register by input orders.
+For a 3-qubit register, an order `(i, j, k)` specifies the following reordering of qubits
+* move the first qubit go to `i`,
+* move the second qubit go to `j`,
+* move the third qubit go to `k`.
+
+!!! note
+
+    The convention of `reorder!` is different from the `permutedims` function, one can use the `sortperm` function to relate the permutation order and the order in this function.
 
 ### Examples
 ```jldoctest; setup=:(using Yao)
+julia> reg = product_state(bit"010101");
+
+julia> reorder!(reg, (1,4,2,5,3,6));
+
+julia> measure(reg)
+1-element Vector{BitStr64{6}}:
+ 000111 ₍₂₎
 ```
 """
 @interface reorder!
@@ -636,7 +651,7 @@ check if operators are commute.
 ####################### Density Matrix ############
 
 """
-    DensityMatrix{D, T, MT}
+    DensityMatrix{D,T,MT<:AbstractMatrix{T}} <: AbstractRegister{D}
 
 Density Matrix.
 

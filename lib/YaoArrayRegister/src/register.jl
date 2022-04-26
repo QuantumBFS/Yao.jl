@@ -263,9 +263,9 @@ end
 
 YaoAPI.invorder!(r::AbstractRegister) = reorder!(r, Tuple(nactive(r):-1:1))
 function YaoAPI.reorder!(r::AbstractArrayReg, orders)
-    @inbounds for i = 1:size(r.state, 2)
-        r.state[:, i] = reorder(r.state[:, i], orders)
-    end
+    @assert nactive(r) == length(orders)
+    st = reshape(r.state,fill(2,nactive(r))...,size(r.state,2))
+    r.state = reshape(permutedims(st, sortperm([collect(orders)..., length(orders)+1])), size(r.state))
     return r
 end
 
