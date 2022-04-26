@@ -26,7 +26,7 @@ nqudits(blk::ShiftGate) = 1
 
 Create a [`ShiftGate`](@ref) with phase `θ`.
 
-# Example
+### Examples
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> shift(0.1)

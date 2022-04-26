@@ -55,7 +55,6 @@ cache_key(m::GeneralMatrixBlock) = hash(m.mat)
 
 Return the matrix of general matrix block.
 
-
 !!!warn
     
     Instead of converting it to the default data type `ComplexF64`,
