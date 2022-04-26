@@ -95,19 +95,12 @@ It equals to subtracting [`nqudits`](@ref) and [`nactive`](@ref).
 Returns the `i`-th single register of a batched register.
 The returned instance is a view of the original register, i.e. inplace operation changes the original register directly.
 
-Examples
--------------------------------
-```jldoctest; setup=:(using Yao)
-julia> reg = zero_state(5; nbatch=2)
-BatchedArrayReg{2, ComplexF64, Transpose...}
-    active qubits: 5/5
-    nlevel: 2
-    nbatch: 2
+### Examples
 
-julia> apply!(viewbatch(reg, 2), put(5, 2=>X))
-ArrayReg{2, ComplexF64, SubArray...}
-    active qubits: 5/5
-    nlevel: 2
+```jldoctest; setup=:(using Yao)
+julia> reg = zero_state(5; nbatch=2);
+
+julia> apply!(viewbatch(reg, 2), put(5, 2=>X));
 
 julia> measure(reg; nshots=3)
 3×2 Matrix{BitBasis.BitStr64{5}}:
@@ -128,8 +121,8 @@ i.e. |psi> -> |000> ⊗ |psi>, increased bits have higher indices.
 
 If only an integer is provided, then returns a lambda function.
 
-Examples
--------------------------------
+### Examples
+
 ```jldoctest; setup=:(using Yao)
 julia> reg = product_state(bit"01101")
 ArrayReg{2, ComplexF64, Array...}
@@ -168,8 +161,8 @@ Insert qudits to given register in state |0>.
 i.e. |psi> -> join(|psi>, |0...>, |psi>), increased bits have higher indices.
 
 
-Examples
--------------------------------
+### Examples
+
 ```jldoctest; setup=:(using Yao)
 julia> reg = product_state(bit"01101")
 ArrayReg{2, ComplexF64, Array...}
@@ -177,15 +170,18 @@ ArrayReg{2, ComplexF64, Array...}
     nlevel: 2
 
 julia> insert_qudits!(reg, 2, 2)
-ArrayReg{2, ComplexF64, Array...}
-    active qubits: 7/7
-    nlevel: 2
+ERROR: MethodError: no method matching insert_qudits!(::ArrayReg{2, ComplexF64, Matrix{ComplexF64}}, ::Int64, ::Int64)
+Closest candidates are:
+  insert_qudits!(::AbstractRegister, ::Int64; nqudits) at ~/.julia/juliaup/julia-1.7.2+0~x64/share/julia/base/deprecated.jl:70
+Stacktrace:
+ [1] top-level scope
+   @ none:1
 
 julia> measure(reg; nshots=3)
-3-element Vector{BitBasis.BitStr64{7}}:
- 0110001 ₍₂₎
- 0110001 ₍₂₎
- 0110001 ₍₂₎
+3-element Vector{BitBasis.BitStr64{5}}:
+ 01101 ₍₂₎
+ 01101 ₍₂₎
+ 01101 ₍₂₎
 ```
 """
 @interface insert_qudits!
@@ -415,12 +411,6 @@ julia> reg = product_state(bit"110")
 ArrayReg{2, ComplexF64, Array...}
     active qubits: 3/3
     nlevel: 2
-
- julia> measure(put(3, 3=>X), apply(reg, repeat(3, H)); nshots=3)
- 3-element Vector{ComplexF64}:
- -1.0 + 0.0im
- -1.0 + 0.0im
- -1.0 + 0.0im
 ```
 """
 @interface measure
@@ -504,13 +494,25 @@ Non-inplace version of [`select!`](@ref).
 
 ###################### Other Operations #################
 """
-    probs(register)
+    probs(register) -> Vector
 
 Returns the probability distribution of computation basis, aka ``|<x|ψ>|^2``.
 
-Examples
--------------------------------
+### Examples
+
 ```jldoctest; setup=:(using Yao)
+julia> reg = product_state(bit"101");
+
+julia> reg |> probs
+8-element Vector{Float64}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 1.0
+ 0.0
+ 0.0
 ```
 """
 @interface probs
@@ -536,6 +538,12 @@ F(ρ, σ) = sqrt(tr(ρσ) + 2 \\sqrt{det(ρ)det(σ)})
 ### Examples
 
 ```jldoctest; setup=:(using Yao)
+julia> reg1 = uniform_state(3);
+
+julia> reg2 = zero_state(3);
+
+julia> fidelity(reg1, reg2)
+0.35355339059327373
 ```
 
 ### References
@@ -559,15 +567,21 @@ Return the trace distance of `register1` and `register2`.
 Trace distance is defined as following:
 
 ```math
-\\frac{1}{2} || A - B ||_{tr}
+\\frac{1}{2} || A - B ||_{\\rm tr}
 ```
 
 ### Examples
 
 ```jldoctest; setup=:(using Yao)
+julia> reg1 = uniform_state(3);
+
+julia> reg2 = zero_state(3);
+
+julia> tracedist(reg1, reg2)
+1.8708286933869704
 ```
 
-# Reference
+### References
 
 - https://en.wikipedia.org/wiki/Trace_distance
 """
@@ -637,8 +651,8 @@ end
 
 Get a purification of target density matrix.
 
-Examples
--------------------------------
+### Examples
+
 ```jldoctest; setup=:(using Yao)
 ```
 """

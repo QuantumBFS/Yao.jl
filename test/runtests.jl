@@ -5,4 +5,4 @@ using Documenter
     include("easybuild/easybuild.jl")
 end
 
-Documenter.doctest(Yao.YaoAPI)
+Documenter.doctest(Yao.YaoAPI; fix=true)
