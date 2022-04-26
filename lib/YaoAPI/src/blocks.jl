@@ -149,9 +149,10 @@ julia> nlevel(X)
 @interface nlevel
 
 """
-    content(x)
+    content(x) -> block
 
-Returns the content of `x`.
+Returns the content of `x`, this is a specific API for [`AbstractContainer`](@ref)
+that returns a block.
 
 ### Examples
 
@@ -164,7 +165,7 @@ X
 
 
 """
-    chcontent(x, blk)
+    chcontent(x, blk) -> block
 
 Create a similar block of `x` and change its content to blk.
 
@@ -277,7 +278,7 @@ put on (1)
 """
     mat([T=ComplexF64], blk)
 
-Returns the matrix form of given block.
+Returns the most compact matrix form of given block, e.g
 
 ### Examples
 
@@ -291,6 +292,20 @@ julia> mat(Float64, X)
 2×2 LuxurySparse.SDPermMatrix{Float64, Int64, Vector{Float64}, Vector{Int64}}:
  0.0  1.0
  1.0  0.0
+
+julia> mat(kron(X, X))
+4×4 LuxurySparse.SDPermMatrix{ComplexF64, Int64, Vector{ComplexF64}, Vector{Int64}}:
+ 0.0+0.0im  0.0+0.0im  0.0+0.0im  1.0+0.0im
+ 0.0+0.0im  0.0+0.0im  1.0+0.0im  0.0+0.0im
+ 0.0+0.0im  1.0+0.0im  0.0+0.0im  0.0+0.0im
+ 1.0+0.0im  0.0+0.0im  0.0+0.0im  0.0+0.0im
+
+julia> mat(kron(X, X) + put(2, 1=>X))
+4×4 SparseArrays.SparseMatrixCSC{ComplexF64, Int64} with 8 stored entries:
+     ⋅      1.0+0.0im      ⋅      1.0+0.0im
+ 1.0+0.0im      ⋅      1.0+0.0im      ⋅    
+     ⋅      1.0+0.0im      ⋅      1.0+0.0im
+ 1.0+0.0im      ⋅      1.0+0.0im      ⋅    
 ```
 """
 @interface mat
@@ -300,7 +315,6 @@ julia> mat(Float64, X)
     getiparams(block)
 
 Returns the intrinsic parameters of node `block`, default is an empty tuple.
-
 
 ### Examples
 
@@ -404,8 +418,14 @@ Float64
 
 Dispatch parameters in collection to block tree `x`.
 
-!!! note
+### Arguments
 
+- `x`: the block to dispatch parameters on.
+- `collection`: a collection of parameters, e.g a list of numbers,
+    also supports `:zero` and `:random`, here `:random` is equivalent
+    to `rand(nparameters(x))`.
+
+!!! note
     it will try to dispatch the parameters in collection first.
 
 ### Examples
@@ -416,6 +436,12 @@ nqubits: 1
 chain
 ├─ rot(X, 0.2)
 └─ rot(Z, 0.3)
+
+julia> dispatch!(chain(Rx(0.1), Rz(0.2)), :zero)
+nqubits: 1
+chain
+├─ rot(X, 0.0)
+└─ rot(Z, 0.0)
 ```
 """
 @interface dispatch!

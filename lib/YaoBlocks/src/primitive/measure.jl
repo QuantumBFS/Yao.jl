@@ -74,7 +74,7 @@ num_measured(::Measure{D,K}) where {D,K} = K
 
 Create a `Measure` block with number of qudits `n`.
 
-# Example
+### Examples
 
 You can create a `Measure` block on given basis (default is the computational basis).
 

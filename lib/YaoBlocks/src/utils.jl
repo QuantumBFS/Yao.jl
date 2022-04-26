@@ -38,9 +38,20 @@ islinenumbernode(@nospecialize(x)) = x isa LineNumberNode
     rand_unitary([T=ComplexF64], N::Int) -> Matrix
 
 Create a random unitary matrix.
+
+### Examples
+
+```jldoctest
+julia> isunitary(rand_unitary(2))
+true
+
+julia> eltype(rand_unitary(ComplexF32, 2))
+ComplexF32 (alias for Complex{Float32})
+```
 """
 rand_unitary(N::Int) = rand_unitary(ComplexF64, N)
 rand_unitary(::Type{T}, N::Int) where {T} = qr(randn(T, N, N)).Q |> Matrix
+
 """
     sprand_unitary([T=ComplexF64], N::Int, density) -> SparseMatrixCSC
 
@@ -55,6 +66,11 @@ sprand_unitary(::Type{T}, N::Int, density::Real) where {T} =
     rand_hermitian([T=ComplexF64], N::Int) -> Matrix
 
 Create a random hermitian matrix.
+
+```jldoctest
+julia> ishermitian(rand_hermitian(2))
+true
+```
 """
 rand_hermitian(N::Int) = rand_hermitian(ComplexF64, N)
 

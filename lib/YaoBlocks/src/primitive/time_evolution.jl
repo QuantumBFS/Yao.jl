@@ -5,8 +5,11 @@ export TimeEvolution, time_evolve
 
 TimeEvolution, where GT is block type. input matrix should be hermitian.
 
-!!!note:
-    `TimeEvolution` contructor check hermicity of the input block by default, but sometimes it can be slow. Turn off the check manually by specifying optional parameter `check_hermicity = false`.
+!!! note
+
+    `TimeEvolution` contructor check hermicity of the input block by default,
+    but sometimes it can be slow. Turn off the check manually by specifying
+    optional parameter `check_hermicity = false`.
 """
 mutable struct TimeEvolution{D,Tt,HT<:AbstractBlock{D}} <: PrimitiveBlock{D}
     H::HT
@@ -27,14 +30,33 @@ end
 nqudits(te::TimeEvolution) = nqudits(te.H)
 
 """
-    TimeEvolution(H, dt[; tol::Real=1e-7])
+    time_evolve(H, dt[; tol=1e-7, check_hermicity=true])
 
 Create a [`TimeEvolution`](@ref) block with Hamiltonian `H` and time step `dt`. The
 `TimeEvolution` block will use Krylove based `expv` to calculate time propagation.
-
-Optional keywords are tolerance `tol` (default is `1e-7`)
 `TimeEvolution` block can also be used for
-[imaginary time evolution](http://large.stanford.edu/courses/2008/ph372/behroozi2/) if dt is complex.
+[imaginary time evolution](http://large.stanford.edu/courses/2008/ph372/behroozi2/)
+if dt is complex.
+
+### Arguments
+
+- `H` the hamiltonian represented as an `AbstractBlock`.
+- `dt`: the evolution duration (start time is zero).
+
+### Keyword Arguments
+
+- `tol::Real=1e-7`: error tolerance.
+- `check_hermicity=true`: check hermicity or not.
+
+### Examples
+
+```jldoctest
+julia> time_evolve(kron(2, 1=>X, 2=>X), 0.1)
+Time Evolution Δt = 0.1, tol = 1.0e-7
+kron
+├─ 1=>X
+└─ 2=>X
+```
 """
 time_evolve(M::AbstractBlock, dt; kwargs...) = TimeEvolution(M, dt; kwargs...)
 time_evolve(dt; kwargs...) = @λ(M -> time_evolve(M, dt; kwargs...))
