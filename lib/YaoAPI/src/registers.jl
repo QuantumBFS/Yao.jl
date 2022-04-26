@@ -6,6 +6,26 @@ export AbstractRegister, AdjointRegister, DensityMatrix
 Abstract type for quantum registers.
 Type parameter `D` is the number of levels in each qudit.
 For qubits, `D = 2`.
+
+
+### Required methods
+
+* [`instruct!`](@ref)
+
+* [`nqudits`](@ref)
+* [`nactive`](@ref)
+
+* [`insert_qubits!`](@ref)
+* [`append_qubits!`](@ref)
+
+* [`focus!`](@ref)
+* [`relax!`](@ref)
+* [`reorder!`](@ref)
+* [`invorder!`](@ref)
+
+### Optional methods
+* [`nlevel`](@ref)
+* [`nremain`](@ref)
 """
 abstract type AbstractRegister{D} end
 
@@ -26,14 +46,14 @@ end
 Unified interface for applying an operator to a quantum state.
 It modifies the `state` directly.
 
-Positional arguments
------------------------------
-    * `nlevel` is the number of levels in each qudit,
-    * `state` is a matrix representing the quantum state, where the first dimension is the active qubit dimension, the second is the batch dimension.
-    * `operator` is a quantum operator, which can be `Val(GATE_SYMBOL)` or a matrix.
-    * `locs` is a tuple for specifying the locations this gate applied.
-    * `control_locs` and `control_configs` are tuples for specifying the control locations and control values.
-    * `theta` is the parameter for the gate, e.g. `Val(:Rx)` gate takes a real number of its parameter.
+### Arguments
+
+* `nlevel` is the number of levels in each qudit,
+* `state` is a vector or matrix representing the quantum state, where the first dimension is the active qubit dimension, the second is the batch dimension.
+* `operator` is a quantum operator, which can be `Val(GATE_SYMBOL)` or a matrix.
+* `locs::Tuple` is a tuple for specifying the locations this gate applied.
+* `control_locs::Tuple` and `control_configs` are tuples for specifying the control locations and control values.
+* `theta::Real` is the parameter for the gate, e.g. `Val(:Rx)` gate takes a real number of its parameter.
 """
 @interface instruct!
 
@@ -75,7 +95,7 @@ It equals to subtracting [`nqudits`](@ref) and [`nactive`](@ref).
 Returns the `i`-th single register of a batched register.
 The returned instance is a view of the original register, i.e. inplace operation changes the original register directly.
 
-Example
+Examples
 -------------------------------
 ```jldoctest; setup=:(using Yao)
 julia> reg = zero_state(5; nbatch=2)
@@ -108,7 +128,7 @@ i.e. |psi> -> |000> ⊗ |psi>, increased bits have higher indices.
 
 If only an integer is provided, then returns a lambda function.
 
-Example
+Examples
 -------------------------------
 ```jldoctest; setup=:(using Yao)
 julia> reg = product_state(bit"01101")
@@ -148,7 +168,7 @@ Insert qudits to given register in state |0>.
 i.e. |psi> -> join(|psi>, |0...>, |psi>), increased bits have higher indices.
 
 
-Example
+Examples
 -------------------------------
 ```jldoctest; setup=:(using Yao)
 julia> reg = product_state(bit"01101")
@@ -184,8 +204,8 @@ It is an alias of [`insert_qudits!`](@ref) function.
 
 Focus the wires on specified location.
 
-Example
--------------------------------
+### Examples
+
 ```jldoctest; setup=:(using Yao)
 julia> reg = product_state(bit"01101")
 ArrayReg{2, ComplexF64, Array...}
@@ -220,8 +240,8 @@ With the focued register, we can apply a block of size 3 on it, even though the 
 
 Call a callable `f` under the context of `focus`. See also [`focus!`](@ref).
 
-Example
--------------------------------
+### Examples
+
 To print the focused register
 
 ```jldoctest; setup=:(using Yao)
@@ -254,8 +274,8 @@ focus(f, r::AbstractRegister, locs::Int...) = focus(f, r, locs)
 Inverse transformation of [`focus!`](@ref), where `to_nactive` is the number
  of active bits for target register.
 
-Example
--------------------------------
+### Examples
+
 ```jldoctest; setup=:(using Yao)
 julia> reg = product_state(bit"01101")
 ArrayReg{2, ComplexF64, Array...}
@@ -287,21 +307,30 @@ Return a register which is the partial traced on `locs`.
 
 Reorder the locations of register by input orders.
 
-Example
--------------------------------
+### Examples
 ```jldoctest; setup=:(using Yao)
 ```
 """
 @interface reorder!
 
 """
-    invorder(register)
+    invorder!(register)
 
-Inverse the locations of register.
+Inverse the locations of the register.
 
-Example
--------------------------------
+### Examples
+
 ```jldoctest; setup=:(using Yao)
+julia> reg = product_state(bit"010101")
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 6/6
+    nlevel: 2
+
+julia> measure(invorder!(reg); nshots=3)
+3-element Vector{BitBasis.BitStr64{6}}:
+ 101010 ₍₂₎
+ 101010 ₍₂₎
+ 101010 ₍₂₎
 ```
 """
 @interface invorder!
@@ -311,10 +340,18 @@ Example
 
 Set the `register` to bit string literal `bit_str` (or an equivalent integer). About bit string literal,
 see more in [`@bit_str`](@ref).
+This interface is only for emulation.
 
-Example
--------------------------------
+### Examples
+
+The following code collapse a random state to a certain state.
+
 ```jldoctest; setup=:(using Yao)
+julia> measure(collapseto!(rand_state(3), bit"001"); nshots=3)
+3-element Vector{BitBasis.BitStr64{3}}:
+ 001 ₍₂₎
+ 001 ₍₂₎
+ 001 ₍₂₎
 ```
 """
 @interface collapseto!
@@ -336,13 +373,54 @@ struct NoPostProcess <: PostProcess end
 """
     measure([, operator], register[, locs]; nshots=1, rng=Random.GLOBAL_RNG) -> Vector{Int}
 
-Return measurement results of qudits in `locs`.
-If `locs` is not provided, all current active qudits are measured (regarding to active qudits,
+Measure a quantum state and return measurement results of qudits.
+This measurement function a cheating version of `measure!` that does not collapse the input state.
+It also does not need to recompute the quantum state for performing multiple shots measurement.
+
+### Arguments
+* `operator::AbstractBlock` is the operator to measure.
+* `register::AbstractRegister` is the quantum state.
+* `locs` is the qubits to performance the measurement. If `locs` is not provided, all current active qudits are measured (regarding to active qudits,
 see [`focus!`](@ref) and [`relax!`](@ref)).
 
-Example
--------------------------------
+### Keyword arguments
+* `nshots::Int` is the number of shots.
+* `rng` is the random number generator.
+
+### Examples
+
 ```jldoctest; setup=:(using Yao)
+julia> reg = product_state(bit"110")
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 3/3
+    nlevel: 2
+
+julia> measure(reg; nshots=3)
+3-element Vector{BitBasis.BitStr64{3}}:
+ 110 ₍₂₎
+ 110 ₍₂₎
+ 110 ₍₂₎
+
+julia> measure(reg, (2,3); nshots=3)
+3-element Vector{BitBasis.BitStr64{2}}:
+ 11 ₍₂₎
+ 11 ₍₂₎
+ 11 ₍₂₎
+```
+ 
+The following example switches to the X basis for measurement.
+
+```jldoctest; setup=:(using Yao)
+julia> reg = product_state(bit"110")
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 3/3
+    nlevel: 2
+
+ julia> measure(put(3, 3=>X), apply(reg, repeat(3, H)); nshots=3)
+ 3-element Vector{ComplexF64}:
+ -1.0 + 0.0im
+ -1.0 + 0.0im
+ -1.0 + 0.0im
 ```
 """
 @interface measure
@@ -350,15 +428,46 @@ Example
 """
     measure!([postprocess,] [operator, ]register[, locs]; rng=Random.GLOBAL_RNG)
 
-Measure current active qudits or qudits at `locs`. After measure and collapse,
+Measure current active qudits or qudits at `locs`.
+If the operator is not provided, it will measure on the computational basis and collapse to a product state.
+Otherwise, the quantum state collapse to the subspace corresponds to the resulting eigenvalue of the observable.
 
-    * do nothing if postprocess is `NoPostProcess`
-    * reset to result state to `postprocess.config` if `postprocess` is `ResetTo`.
-    * remove the qubit if `postprocess` is `RemoveMeasured`
+### Arguments
 
-Example
--------------------------------
-```jldoctest; setup=:(using Yao)
+* `postprocess` is the postprocessing method, it can be
+    * `NoPostProcess()` (default).
+    * `ResetTo(config)`, reset to result state to `config`. It can not be used if `operator` is provided, because measuring an operator in general does not return a product state.
+    * `RemoveMeasured()`, remove the measured qudits from the register. It is also incompatible with the `operator` argument.
+* `operator::AbstractBlock` is the operator to measure.
+* `register::AbstractRegister` is the quantum state.
+* `locs` is the qubits to performance the measurement. If `locs` is not provided, all current active qudits are measured (regarding to active qudits,
+see [`focus!`](@ref) and [`relax!`](@ref)).
+
+### Keyword arguments
+* `rng` is the random number generator.
+
+### Examples
+
+The following example measures a random state on the computational basis and reset it to a certain bitstring value.
+```jldoctest; setup=:(using Yao, Random; Random.seed!(2))
+julia> reg = rand_state(3);
+
+julia> measure!(ResetTo(bit"011"), reg)
+110 ₍₂₎
+
+julia> measure(reg; nshots=3)
+3-element Vector{BitBasis.BitStr64{3}}:
+ 011 ₍₂₎
+ 011 ₍₂₎
+ 011 ₍₂₎
+
+julia> measure!(RemoveMeasured(), reg, (1,2))
+11 ₍₂₎
+
+julia> reg  # removed qubits are not usable anymore
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 1/1
+    nlevel: 2
 ```
 """
 @interface measure!
@@ -370,8 +479,8 @@ Example
 select a subspace of given quantum state based on input eigen state `bits`.
 See also [`select`](@ref).
 
-Example
--------------------------------
+### Examples
+
 ```jldoctest; setup=:(using Yao)
 ```
 
@@ -399,7 +508,7 @@ Non-inplace version of [`select!`](@ref).
 
 Returns the probability distribution of computation basis, aka ``|<x|ψ>|^2``.
 
-Example
+Examples
 -------------------------------
 ```jldoctest; setup=:(using Yao)
 ```
@@ -424,13 +533,12 @@ Or its equivalent form (which we use in numerical calculation):
 F(ρ, σ) = sqrt(tr(ρσ) + 2 \\sqrt{det(ρ)det(σ)})
 ```
 
-Example
--------------------------------
+### Examples
+
 ```jldoctest; setup=:(using Yao)
 ```
 
-Reference
--------------------------------
+### References
 
 - Jozsa R. Fidelity for mixed quantum states[J]. Journal of modern optics, 1994, 41(12): 2315-2323.
 - Nielsen M A, Chuang I. Quantum computation and quantum information[J]. 2002.
@@ -454,8 +562,8 @@ Trace distance is defined as following:
 \\frac{1}{2} || A - B ||_{tr}
 ```
 
-Example
--------------------------------
+### Examples
+
 ```jldoctest; setup=:(using Yao)
 ```
 
@@ -529,7 +637,7 @@ end
 
 Get a purification of target density matrix.
 
-Example
+Examples
 -------------------------------
 ```jldoctest; setup=:(using Yao)
 ```

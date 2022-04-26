@@ -270,6 +270,9 @@ end
     copyto!(reg1', reg2')
     @test reg1 ≈ reg2
     @test reorder!(reg1, [2,3,1]).state ≈ reshape(permutedims(reshape(reg2.state, 2, 2, 2, 5), sortperm([2,3,1,4])), 8, 5)
+
+    reg = product_state(bit"010101")
+    @test invorder!(reg) ≈ product_state(bit"101010")
 end
 
 @testset "most_probable" begin
