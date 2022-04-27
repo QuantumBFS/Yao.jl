@@ -261,7 +261,7 @@ function YaoAPI.probs(r::BatchedArrayReg)
     end
 end
 
-invorder!(r::AbstractRegister) = reorder!(r, Tuple(nactive(r):-1:1))
+YaoAPI.invorder!(r::AbstractRegister) = reorder!(r, Tuple(nactive(r):-1:1))
 function YaoAPI.reorder!(r::AbstractArrayReg, orders)
     @inbounds for i = 1:size(r.state, 2)
         r.state[:, i] = reorder(r.state[:, i], orders)
