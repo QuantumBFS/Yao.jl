@@ -19,7 +19,7 @@ Returns a global phase gate. Defined with following matrix form:
 e^{iθ} \\mathbf{I}
 ```
 
-# Example
+### Examples
 
 You can create a global phase gate with a phase (a real number).
 

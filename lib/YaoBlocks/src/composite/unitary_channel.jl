@@ -27,7 +27,7 @@ The unitary channel is defined as below in Kraus representation
     uniformly or optionally from given weights, then this unitary will be applied
     to the register. 
 
-# Example
+### Examples
 
 ```jldoctest; setup=:(using YaoBlocks, YaoArrayRegister)
 julia> UnitaryChannel([X, Y, Z])

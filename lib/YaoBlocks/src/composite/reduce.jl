@@ -3,6 +3,16 @@ export Add
 """
     Add{D} <: CompositeBlock{D}
     Add(blocks::AbstractBlock...) -> Add
+
+Type for block addition.
+
+```jldoctest
+julia> X + X
+nqubits: 1
++
+├─ X
+└─ X
+```
 """
 struct Add{D} <: CompositeBlock{D}
     n::Int
