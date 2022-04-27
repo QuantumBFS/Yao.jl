@@ -4,6 +4,7 @@ version = "0.7.4"
 
 [deps]
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
+CuYao = "b48ca7a8-dd42-11e8-2b8e-1b7706800275"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 YaoAPI = "0843a435-28de-4971-9e8b-a9641b2983a8"

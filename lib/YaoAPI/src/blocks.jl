@@ -231,3 +231,27 @@ Note2: now `apply_back!` returns the inversed gradient!
 Back propagate the matrix gradients.
 """
 @interface mat_back!
+
+####################### Operator properties ###############
+"""
+    isunitary(op) -> Bool
+
+check if this operator is a unitary operator.
+"""
+@interface isunitary
+
+"""
+    isreflexive(op) -> Bool
+
+check if this operator is reflexive.
+"""
+@interface isreflexive
+
+"""
+    iscommute(ops...) -> Bool
+
+check if operators are commute.
+"""
+@interface iscommute
+
+

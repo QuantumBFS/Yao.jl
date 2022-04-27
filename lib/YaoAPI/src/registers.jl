@@ -482,15 +482,41 @@ ArrayReg{2, ComplexF64, Array...}
     select!(register::AbstractRegister, bits::Integer...) -> register
 
 select a subspace of given quantum state based on input eigen state `bits`.
-See also [`select`](@ref).
+See also [`select`](@ref) for the non-inplace version.
 
 ### Examples
 
 ```jldoctest; setup=:(using Yao)
+julia> reg = ghz_state(3)
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 3/3
+    nlevel: 2
+
+julia> select!(reg, bit"111")
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 0/0
+    nlevel: 2
+
+julia> norm(reg)
+0.7071067811865476
 ```
 
-`select!(reg, 0b110)` will select the subspace with (focused) configuration `110`.
-After selection, the focused qubit space is 0, so you may want call `relax!` manually.
+The selection only works on the activated qubits, for example
+```
+julia> reg = focus!(ghz_state(3), (1, 2))
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 2/3
+    nlevel: 2
+
+julia> select!(reg, bit"11")
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 0/1
+    nlevel: 2
+
+julia> statevec(reg)
+1×2 Matrix{ComplexF64}:
+ 0.0+0.0im  0.707107+0.0im
+```
 
 !!! tip
 
@@ -503,7 +529,7 @@ After selection, the focused qubit space is 0, so you may want call `relax!` man
 """
     select(register, bits) -> AbstractRegister
 
-Non-inplace version of [`select!`](@ref).
+The non-inplace version of [`select!`](@ref).
 """
 @interface select
 
@@ -626,36 +652,13 @@ struct QubitMismatchError <: Exception
     msg::String
 end
 
-####################### Operator properties ###############
-"""
-    isunitary(op) -> Bool
-
-check if this operator is a unitary operator.
-"""
-@interface isunitary
-
-"""
-    isreflexive(op) -> Bool
-
-check if this operator is reflexive.
-"""
-@interface isreflexive
-
-"""
-    iscommute(ops...) -> Bool
-
-check if operators are commute.
-"""
-@interface iscommute
-
 ####################### Density Matrix ############
 
 """
     DensityMatrix{D,T,MT<:AbstractMatrix{T}} <: AbstractRegister{D}
+    DensityMatrix(state)
 
-Density Matrix.
-
-- `T`: element type
+Density matrix type, where `state` is a matrix. Type parameter `D` is the number of levels.
 """
 struct DensityMatrix{D,T,MT<:AbstractMatrix{T}} <: AbstractRegister{D}
     state::MT
@@ -668,7 +671,30 @@ Get a purification of target density matrix.
 
 ### Examples
 
+The following example shows how to measure a local operator on the register, reduced density matrix and the purified register.
+Their results should be consistent.
+
 ```jldoctest; setup=:(using Yao)
+julia> reg = ghz_state(3)
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 3/3
+    nlevel: 2
+
+julia> r = density_matrix(reg, (2,));
+
+julia> preg = purify(r)
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 1/2
+    nlevel: 2
+
+julia> expect(Z + Y, preg)
+4.266421588589642e-17 + 0.0im
+
+julia> expect(Z + Y, r)
+0.0 + 0.0im
+
+julia> expect(put(3, 2=>(Z + Y)), reg)
+0.0 + 0.0im
 ```
 """
 @interface purify
@@ -677,13 +703,21 @@ Get a purification of target density matrix.
     density_matrix(register)
 
 Returns the density matrix of current active qudits.
+
+### Examples
+
+The following code gets the single site reduce density matrix for the GHZ state.
+
+```jldoctest; setup=:(using Yao)
+julia> reg = ghz_state(3)
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 3/3
+    nlevel: 2
+
+julia> density_matrix(reg, (2,)).state
+2×2 Matrix{ComplexF64}:
+ 0.5+0.0im  0.0+0.0im
+ 0.0-0.0im  0.5+0.0im
+```
 """
 @interface density_matrix
-
-"""
-    ρ(register)
-
-Returns the density matrix of current active qudits. This is the same as
-[`density_matrix`](@ref).
-"""
-@interface ρ

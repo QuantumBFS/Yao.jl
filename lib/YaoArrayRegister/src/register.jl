@@ -511,10 +511,10 @@ function BitBasis.onehot(::Type{T}, nbits::Int, x::Integer, nbatch::Int, nlevel:
 end
 
 """
-    zero_state([T=ComplexF64], n::Int; nbatch::Int=1)
+    zero_state([T=ComplexF64], n::Int; nbatch::Int=NoBatch())
 
 Create an [`AbstractArrayReg`](@ref) with total number of bits `n`.
-See also [`product_state`](@ref), [`rand_state`](@ref), [`uniform_state`](@ref).
+See also [`product_state`](@ref), [`rand_state`](@ref), [`uniform_state`](@ref) and [`ghz_state`](@ref).
 
 # Examples
 
@@ -539,6 +539,24 @@ BatchedArrayReg{2, ComplexF32, Transpose...}
 zero_state(n::Int; kwargs...) = zero_state(ComplexF64, n; kwargs...)
 zero_state(::Type{T}, n::Int; kwargs...) where {T} = product_state(T, n, 0; kwargs...)
 
+"""
+    ghz_state([T=ComplexF64], n::Int; nbatch::Int=NoBatch())
+
+Create an [`AbstractArrayReg`](@ref) with total number of bits `n`.
+
+# Examples
+
+```jldoctest; setup=:(using YaoArrayRegister)
+julia> ghz_state(4)
+```
+"""
+ghz_state(n::Int; kwargs...) = ghz_state(ComplexF64, n; kwargs...)
+function ghz_state(::Type{T}, n::Int; kwargs...) where {T}
+    reg = zero_state(T, n; kwargs...)
+    reg.state[1] = sqrt(0.5)
+    reg.state[end] = sqrt(0.5)
+    return reg
+end
 
 """
     rand_state([T=ComplexF64], n::Int; nbatch=1, no_transpose_storage=false)

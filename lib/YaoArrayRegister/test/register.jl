@@ -57,6 +57,8 @@ end
     @test nqubits(similar(reg)) == 3
     m = randn(ComplexF64, 8, 8)
     @test similar(reg, m).state == m
+
+    @test ghz_state(3) ≈ normalize!(zero_state(3) + product_state(bit"111"))
 end
 
 @testset "test $T initialization methods" for T in [ComplexF64, ComplexF32, ComplexF16]
