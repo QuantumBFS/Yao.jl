@@ -6,7 +6,7 @@ export Add
 
 Type for block addition.
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> X + X
 nqubits: 1
 +

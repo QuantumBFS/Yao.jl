@@ -24,6 +24,7 @@ export AbstractArrayReg,
     # initialization
     product_state,
     zero_state,
+    zero_state_like,
     rand_state,
     ghz_state,
     uniform_state,

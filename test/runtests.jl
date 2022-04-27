@@ -5,4 +5,7 @@ using Documenter
     include("easybuild/easybuild.jl")
 end
 
-Documenter.doctest(Yao.YaoAPI; fix=true)
+Documenter.doctest(Yao.YaoAPI)
+Documenter.doctest(Yao.YaoArrayRegister)
+Documenter.doctest(Yao.YaoBlocks)
+Documenter.doctest(Yao.YaoSym)

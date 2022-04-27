@@ -111,7 +111,7 @@ function _check_reg_input(raw::AbstractMatrix{T}, D::Integer, B::Integer) where 
     if !(ispow(size(raw, 2) ÷ B, D) && size(raw, 2) % B == 0)
         throw(
             DimensionMismatch(
-                "Expect second dimension size to be an integer multiple of batch size $B",
+                "Expect second dimension size to be $D^n multiple of batch size $B",
             ),
         )
     end
@@ -180,17 +180,17 @@ datatype(r::AbstractArrayReg{D,T}) where {D,T} = T
 Construct an array register from bit string literal.
 For bit string literal please read [`@bit_str`](@ref).
 
-# Examples
+### Examples
 
-```jldoctest; setup=:(using YaoArrayRegister)
+```jldoctest; setup=:(using Yao)
 julia> arrayreg(bit"1010")
 ArrayReg{2, ComplexF64, Array...}
-    active qudits: 4/4
+    active qubits: 4/4
     nlevel: 2
 
 julia> arrayreg(ComplexF32, bit"1010")
 ArrayReg{2, ComplexF32, Array...}
-    active qudits: 4/4
+    active qubits: 4/4
     nlevel: 2
 ```
 """
@@ -219,11 +219,11 @@ YaoAPI.nactive(r::AbstractArrayReg{D}) where {D} = logdi(size(r.state, 1), D)
 YaoAPI.viewbatch(r::BatchedArrayReg{D}, ind::Int) where D = @inbounds ArrayReg{D}(view(rank3(r), :, :, ind))
 
 YaoAPI.append_qudits!(n::Int) = @λ(register -> append_qudits!(register, n))
-function YaoAPI.append_qudits!(r::AbstractArrayReg{D}, n::Int) where {D}
+function YaoAPI.append_qudits!(r::AbstractArrayReg{D,T}, n::Int) where {D,T}
     raw = state(r)
     M, N = size(raw)
-    r.state = similar(r.state, M * (D ^ n), N)
-    fill!(r.state, 0)
+    r.state = similar(r.state, M * (D ^ n), N)   # NOTE: does not preserve adjoint
+    fill!(r.state, zero(T))
     r.state[1:M, :] = raw
     return r
 end
@@ -239,9 +239,37 @@ YaoAPI.insert_qudits!(loc::Int, nqudits::Int) =
 function YaoAPI.insert_qudits!(reg::AbstractArrayReg{D}, loc::Int, nqudits::Int) where D
     na = nactive(reg)
     focus!(reg, 1:loc-1)
-    reg2 = join(zero_state(nqudits; nbatch = nbatch(reg), nlevel=D), reg) |> relax! |> focus!((1:na+nqudits)...)
+    reg2 = join(zero_state_like(reg, nqudits), reg) |> relax! |> focus!((1:na+nqudits)...)
     reg.state = reg2.state
     reg
+end
+
+"""
+    zero_state_like(register, n) -> AbstractRegister
+
+Create a register initialized to zero from an existing one.
+
+### Examples
+
+```jldoctest; setup=:(using Yao)
+julia> reg = rand_state(3; nbatch=2)
+BatchedArrayReg{2, ComplexF64, Transpose...}
+    active qubits: 3/3
+    nlevel: 2
+    nbatch: 2
+```
+"""
+function zero_state_like(reg::ArrayReg{D,T}, nqudits::Int) where {D,T}
+    state = similar(reg.state, D^nqudits, size(reg.state, 2))   # NOTE: does not preserve adjoint
+    fill!(state,zero(T))
+    state[1,1:1] .= Ref(one(T))  # broadcast to make it GPU compatible.
+    return ArrayReg{D}(state)
+end
+function zero_state_like(reg::BatchedArrayReg{D,T}, nqudits::Int) where {D,T}
+    state = similar(reg.state, D^nqudits, size(reg.state, 2))   # NOTE: does not preserve adjoint
+    fill!(state, zero(T))
+    reshape(state, :, reg.nbatch)[1,:] .= Ref(one(T))  # broadcast to make it GPU compatible.
+    return BatchedArrayReg{D}(state, reg.nbatch)
 end
 
 function YaoAPI.probs(r::ArrayReg)
@@ -334,7 +362,7 @@ function YaoAPI.fidelity(r1::ArrayReg, r2::ArrayReg)
     end
 end
 
-YaoAPI.tracedist(r1::ArrayReg, r2::ArrayReg) = tracedist(ρ(r1), ρ(r2))
+YaoAPI.tracedist(r1::ArrayReg, r2::ArrayReg) = tracedist(density_matrix(r1), density_matrix(r2))
 YaoAPI.tracedist(r1::BatchedArrayReg, r2::BatchedArrayReg) = tracedist.(r1, r2)
 
 
@@ -414,24 +442,24 @@ Create an [`ArrayReg`](@ref) with bit string literal
 defined with [`@bit_str`](@ref). See also [`zero_state`](@ref),
 [`rand_state`](@ref), [`uniform_state`](@ref).
 
-# Examples
+### Examples
 
-```jldoctest; setup=:(using YaoArrayRegister)
+```jldoctest; setup=:(using Yao)
 julia> product_state(bit"100"; nbatch=2)
 BatchedArrayReg{2, ComplexF64, Transpose...}
-    active qudits: 3/3
+    active qubits: 3/3
     nlevel: 2
     nbatch: 2
 
 julia> r1 = product_state(ComplexF32, bit"100"; nbatch=2)
 BatchedArrayReg{2, ComplexF32, Transpose...}
-    active qudits: 3/3
+    active qubits: 3/3
     nlevel: 2
     nbatch: 2
 
 julia> r2 = product_state(ComplexF32, [0, 0, 1]; nbatch=2)
 BatchedArrayReg{2, ComplexF32, Transpose...}
-    active qudits: 3/3
+    active qubits: 3/3
     nlevel: 2
     nbatch: 2
 
@@ -446,29 +474,29 @@ product_state(bit_str::AbstractVector; nbatch::Union{NoBatch,Int} = NoBatch()) =
     product_state(ComplexF64, bit_str; nbatch = nbatch)
 
 """
-    product_state([T=ComplexF64], total::Int, bit_config::Integer; nbatch=1, no_transpose_storage=false)
+    product_state([T=ComplexF64], total::Int, bit_config::Integer; nbatch=NoBatch(), no_transpose_storage=false)
 
 Create an [`ArrayReg`](@ref) with bit configuration `bit_config`, total number of bits `total`.
 See also [`zero_state`](@ref), [`rand_state`](@ref), [`uniform_state`](@ref).
 
-# Examples
+### Examples
 
-```jldoctest; setup=:(using YaoArrayRegister)
+```jldoctest; setup=:(using Yao)
 julia> product_state(4, 3; nbatch=2)
 BatchedArrayReg{2, ComplexF64, Transpose...}
-    active qudits: 4/4
+    active qubits: 4/4
     nlevel: 2
     nbatch: 2
 
 julia> product_state(4, 0b1001; nbatch=2)
 BatchedArrayReg{2, ComplexF64, Transpose...}
-    active qudits: 4/4
+    active qubits: 4/4
     nlevel: 2
     nbatch: 2
 
 julia> product_state(ComplexF32, 4, 0b101)
 ArrayReg{2, ComplexF32, Array...}
-    active qudits: 4/4
+    active qubits: 4/4
     nlevel: 2
 ```
 
@@ -498,7 +526,7 @@ function product_state(
         raw = onehot(T, total, bit_config, _asint(nbatch), nlevel)
     else
         raw = zeros(T, _asint(nbatch), nlevel ^ total)
-        raw[:, Int(bit_config)+1] .= 1
+        raw[:, Int(bit_config)+1] .= Ref(one(T))
         raw = transpose(raw)
     end
     return arrayreg(raw; nbatch=nbatch, nlevel=nlevel)
@@ -516,22 +544,22 @@ end
 Create an [`AbstractArrayReg`](@ref) with total number of bits `n`.
 See also [`product_state`](@ref), [`rand_state`](@ref), [`uniform_state`](@ref) and [`ghz_state`](@ref).
 
-# Examples
+### Examples
 
-```jldoctest; setup=:(using YaoArrayRegister)
+```jldoctest; setup=:(using Yao)
 julia> zero_state(4)
 ArrayReg{2, ComplexF64, Array...}
-    active qudits: 4/4
+    active qubits: 4/4
     nlevel: 2
 
 julia> zero_state(ComplexF32, 4)
 ArrayReg{2, ComplexF32, Array...}
-    active qudits: 4/4
+    active qubits: 4/4
     nlevel: 2
 
 julia> zero_state(ComplexF32, 4; nbatch=3)
 BatchedArrayReg{2, ComplexF32, Transpose...}
-    active qudits: 4/4
+    active qubits: 4/4
     nlevel: 2
     nbatch: 3
 ```
@@ -544,41 +572,44 @@ zero_state(::Type{T}, n::Int; kwargs...) where {T} = product_state(T, n, 0; kwar
 
 Create an [`AbstractArrayReg`](@ref) with total number of bits `n`.
 
-# Examples
+### Examples
 
-```jldoctest; setup=:(using YaoArrayRegister)
+```jldoctest; setup=:(using Yao)
 julia> ghz_state(4)
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 4/4
+    nlevel: 2
 ```
 """
 ghz_state(n::Int; kwargs...) = ghz_state(ComplexF64, n; kwargs...)
 function ghz_state(::Type{T}, n::Int; kwargs...) where {T}
     reg = zero_state(T, n; kwargs...)
-    reg.state[1] = sqrt(0.5)
-    reg.state[end] = sqrt(0.5)
+    reg.state[1,:] .= Ref(sqrt(inv(T(2))))  # make symbolic feel better
+    reg.state[end,:] .= Ref(sqrt(inv(T(2))))
     return reg
 end
 
 """
-    rand_state([T=ComplexF64], n::Int; nbatch=1, no_transpose_storage=false)
+    rand_state([T=ComplexF64], n::Int; nbatch=NoBatch(), no_transpose_storage=false)
 
 Create a random [`AbstractArrayReg`](@ref) with total number of qudits `n`.
 
-# Examples
+### Examples
 
-```jldoctest; setup=:(using YaoArrayRegister)
+```jldoctest; setup=:(using Yao)
 julia> rand_state(4)
 ArrayReg{2, ComplexF64, Array...}
-    active qudits: 4/4
+    active qubits: 4/4
     nlevel: 2
 
 julia> rand_state(ComplexF64, 4)
 ArrayReg{2, ComplexF64, Array...}
-    active qudits: 4/4
+    active qubits: 4/4
     nlevel: 2
 
 julia> rand_state(ComplexF64, 4; nbatch=2)
 BatchedArrayReg{2, ComplexF64, Transpose...}
-    active qudits: 4/4
+    active qubits: 4/4
     nlevel: 2
     nbatch: 2
 ```
@@ -599,23 +630,23 @@ function rand_state(
 end
 
 """
-    uniform_state([T=ComplexF64], n; nbatch=1, no_transpose_storage=false)
+    uniform_state([T=ComplexF64], n; nbatch=NoBatch(), no_transpose_storage=false)
 
 Create a uniform state: ``\\frac{1}{2^n} \\sum_k |k⟩``. This state
 can also be created by applying [`H`](@ref) (Hadmard gate) on ``|00⋯00⟩`` state.
 
-# Example
+### Example
 
-```jldoctest; setup=:(using YaoArrayRegister)
+```jldoctest; setup=:(using Yao)
 julia> uniform_state(4; nbatch=2)
 BatchedArrayReg{2, ComplexF64, Transpose...}
-    active qudits: 4/4
+    active qubits: 4/4
     nlevel: 2
     nbatch: 2
 
 julia> uniform_state(ComplexF32, 4; nbatch=2)
 BatchedArrayReg{2, ComplexF32, Transpose...}
-    active qudits: 4/4
+    active qubits: 4/4
     nlevel: 2
     nbatch: 2
 ```

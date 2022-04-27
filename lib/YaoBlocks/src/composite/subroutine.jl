@@ -37,10 +37,10 @@ and relax the concentration afterwards.
 Subroutine is equivalent to [`put`](@ref) a block on given position mathematically, but more efficient
 and convenient for large blocks.
 
-```jldoctest; setup=:(using YaoBlocks; using YaoArrayRegister)
+```jldoctest; setup=:(using Yao)
 julia> r = rand_state(3)
 ArrayReg{2, ComplexF64, Array...}
-    active qudits: 3/3
+    active qubits: 3/3
     nlevel: 2
 
 julia> apply!(copy(r), subroutine(X, 1)) ≈ apply!(copy(r), put(1=>X))
@@ -49,21 +49,21 @@ true
 
 It works for in-contigious locs as well
 
-```jldoctest; setup=:(using YaoBlocks; using YaoArrayRegister)
+```jldoctest; setup=:(using Yao)
 julia> r = rand_state(4)
 ArrayReg{2, ComplexF64, Array...}
-    active qudits: 4/4
+    active qubits: 4/4
     nlevel: 2
 
 julia> cc = subroutine(4, kron(X, Y), (1, 3))
-nqudits: 4
+nqubits: 4
 Subroutine: (1, 3)
 └─ kron
    ├─ 1=>X
    └─ 2=>Y
 
 julia> pp = chain(4, put(1=>X), put(3=>Y))
-nqudits: 4
+nqubits: 4
 chain
 ├─ put on (1)
 │  └─ X

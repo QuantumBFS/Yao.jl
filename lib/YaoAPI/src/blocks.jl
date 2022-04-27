@@ -141,7 +141,7 @@ Number of levels in each qudit.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> nlevel(X)
 2
 ```
@@ -156,7 +156,7 @@ that returns a block.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> content(2.0 * X)
 X
 ```
@@ -171,7 +171,7 @@ Create a similar block of `x` and change its content to blk.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> chcontent(2.0 * X, Y)
 [scale: 2.0] Y
 ```
@@ -183,7 +183,7 @@ julia> chcontent(2.0 * X, Y)
 
 Apply a block (of quantum circuit) to a quantum register.
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> r = zero_state(2)
 ArrayReg{2, ComplexF64, Array...}
     active qubits: 2/2
@@ -217,7 +217,7 @@ Return a tuple of occupied locations of `x`.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> occupied_locs(kron(5, 1=>X, 3=>X))
 (1, 3)
 ```
@@ -231,7 +231,7 @@ Returns an iterator of the sub-blocks of a composite block. Default is empty.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> subblocks(chain(X, Y, Z))
 3-element Vector{AbstractBlock{2}}:
  X
@@ -248,7 +248,7 @@ Change the sub-blocks of a [`CompositeBlock`](@ref) with given iterator `itr`.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> chsubblocks(chain(X, Y, Z), [Z, Z])
 nqubits: 1
 chain
@@ -265,7 +265,7 @@ Define how blocks are printed as text in one line.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> print_block(stdout, X)
 X
 
@@ -282,7 +282,7 @@ Returns the most compact matrix form of given block, e.g
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> mat(X)
 2×2 LuxurySparse.SDPermMatrix{ComplexF64, Int64, Vector{ComplexF64}, Vector{Int64}}:
  0.0+0.0im  1.0+0.0im
@@ -303,7 +303,7 @@ julia> mat(kron(X, X))
 julia> mat(kron(X, X) + put(2, 1=>X))
 4×4 SparseArrays.SparseMatrixCSC{ComplexF64, Int64} with 8 stored entries:
      ⋅      1.0+0.0im      ⋅      1.0+0.0im
- 1.0+0.0im      ⋅      1.0+0.0im      ⋅    
+ 1.0+0.0im      ⋅      1.0+0.0im      ⋅
      ⋅      1.0+0.0im      ⋅      1.0+0.0im
  1.0+0.0im      ⋅      1.0+0.0im      ⋅    
 ```
@@ -318,7 +318,7 @@ Returns the intrinsic parameters of node `block`, default is an empty tuple.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> getiparams(Rx(0.1))
 0.1
 ```
@@ -333,7 +333,7 @@ Set the parameters of `block`.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> setiparams!(Rx(0.1), 0.2)
 rot(X, 0.2)
 ```
@@ -347,7 +347,7 @@ Returns all the parameters contained in block tree with given root `block`.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> parameters(chain(Rx(0.1), Rz(0.2)))
 2-element Vector{Float64}:
  0.1
@@ -363,7 +363,7 @@ Return number of parameters in `block`. See also [`niparams`](@ref).
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> nparameters(chain(Rx(0.1), Rz(0.2)))
 2
 ```
@@ -378,7 +378,7 @@ Return number of intrinsic parameters in `block`. See also [`nparameters`](@ref)
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> niparams(Rx(0.1))
 1
 ```
@@ -392,7 +392,7 @@ Return the element type of [`getiparams`](@ref).
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> iparams_eltype(Rx(0.1))
 Float64
 ```
@@ -406,7 +406,7 @@ Return the element type of [`parameters`](@ref).
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> parameters_eltype(chain(Rx(0.1), Rz(0.1f0)))
 Float64
 ```
@@ -430,7 +430,7 @@ Dispatch parameters in collection to block tree `x`.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> dispatch!(chain(Rx(0.1), Rz(0.1)), [0.2, 0.3])
 nqubits: 1
 chain
@@ -454,7 +454,7 @@ This function renders the input parameter to a consumable type to `r`.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> collect(render_params(Rx(0.1), :zero))
 1-element Vector{Float64}:
  0.0
@@ -484,7 +484,7 @@ For register input, the return value is a register.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> r = normalize!(product_state(bit"11") + product_state(bit"00"))
 ArrayReg{2, ComplexF64, Array...}
     active qubits: 2/2
@@ -519,7 +519,7 @@ See arXiv: 0803.2940v2, Equation (2) for reference.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> operator_fidelity(X, X)
 1.0
 

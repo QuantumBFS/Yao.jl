@@ -55,14 +55,14 @@ Return a [`ControlBlock`](@ref) with number of active qubits `n` and control loc
 
 # Example
 
-```jldoctest; setup=:(using YaoBlocks)
+```jldoctest; setup=:(using Yao)
 julia> control(4, (1, 2), 3=>X)
-nqudits: 4
+nqubits: 4
 control(1, 2)
 └─ (3,) X
 
 julia> control(4, 1, 3=>X)
-nqudits: 4
+nqubits: 4
 control(1)
 └─ (3,) X
 ```
@@ -100,7 +100,7 @@ Return a speical [`ControlBlock`](@ref), aka CNOT gate with number of active qub
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> cnot(3, (2, 3), 1)
-nqudits: 3
+nqubits: 3
 control(2, 3)
 └─ (1,) X
 
@@ -120,7 +120,7 @@ Return a speical [`ControlBlock`](@ref), aka CZ gate with number of active qubit
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> cz(2, 1, 2)
 nqubits: 2
 control(1)

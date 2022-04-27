@@ -170,18 +170,15 @@ ArrayReg{2, ComplexF64, Array...}
     nlevel: 2
 
 julia> insert_qudits!(reg, 2, 2)
-ERROR: MethodError: no method matching insert_qudits!(::ArrayReg{2, ComplexF64, Matrix{ComplexF64}}, ::Int64, ::Int64)
-Closest candidates are:
-  insert_qudits!(::AbstractRegister, ::Int64; nqudits) at ~/.julia/juliaup/julia-1.7.2+0~x64/share/julia/base/deprecated.jl:70
-Stacktrace:
- [1] top-level scope
-   @ none:1
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 7/11
+    nlevel: 2
 
 julia> measure(reg; nshots=3)
-3-element Vector{BitBasis.BitStr64{5}}:
- 01101 ₍₂₎
- 01101 ₍₂₎
- 01101 ₍₂₎
+3-element Vector{BitBasis.BitStr64{7}}:
+ 0110001 ₍₂₎
+ 0110001 ₍₂₎
+ 0110001 ₍₂₎
 ```
 """
 @interface insert_qudits!
@@ -318,7 +315,7 @@ julia> reg = product_state(bit"010101");
 julia> reorder!(reg, (1,4,2,5,3,6));
 
 julia> measure(reg)
-1-element Vector{BitStr64{6}}:
+1-element Vector{BitBasis.BitStr64{6}}:
  000111 ₍₂₎
 ```
 """
@@ -735,9 +732,9 @@ This function is only for emulation.
 ```jldoctest; setup=:(using YaoArrayRegister)
 julia> clone(arrayreg(bit"101"; nbatch=3), 4)
 BatchedArrayReg{2, ComplexF64, Array...}
-    active qudits: 3/3
+    active qubits: 3/3
     nlevel: 2
     nbatch: 12
 ```
 """
-@interface function clone end
+@interface clone
