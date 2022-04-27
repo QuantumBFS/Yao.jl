@@ -8,48 +8,16 @@ one can swith the basis to the eigenbasis of this operator.
 However, `eigenvalues` does not have a specific form.
 """
 function eigenbasis(op::AbstractBlock{D}) where {D}
-    # TODO: add isdiagonal
-    if is_simple_diagonal(op)
+    if isdiagonal(op)
         return op, IdentityGate{D}(nqudits(op))
-    end
-    m = mat(op)
-    if m isa Diagonal || m isa IMatrix
-        op, IdentityGate{D}(nqudits(op))
     else
-        E, V = eigen!(Matrix(m))
+        @debug "eigenbasis on blocktype `$(typeof(op))` calls into the fallback implementation, which might be slow. Try using `kron`, `repeat` if items commute to each other."
+        E, V = eigen!(Matrix(mat(op)))
         matblock(Diagonal(E)), matblock(V)
     end
 end
 
-function is_simple_diagonal(op::AbstractBlock)
-    if nqudits(op) <= 5
-        m = mat(op)
-        return m isa Diagonal || m isa IMatrix
-    else
-        return false
-    end
-end
-function is_simple_diagonal(op::RotationGate)
-    is_simple_diagonal(op.block)
-end
-function is_simple_diagonal(op::TimeEvolution)
-    is_simple_diagonal(op.H)
-end
-function is_simple_diagonal(op::GeneralMatrixBlock)
-    op.mat isa Diagonal || op.mat isa IMatrix
-end
 # assume composition does not change diagonal property
-function is_simple_diagonal(op::CompositeBlock)
-    return all(is_simple_diagonal, subblocks(op))
-end
-
-for BT in []
-    @eval function eigenbasis(op::$BT)
-        @warn "eigenbasis on blocktype `$($BT)` calls into the fallback implementation, which might be slow. Try using `kron`, `repeat` if items commute to each oher."
-        invoke(eigenbasis, Tuple{AbstractBlock}, op)
-    end
-end
-
 """
 Return true if operators commute to each other.
 """

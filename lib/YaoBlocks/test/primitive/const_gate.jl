@@ -7,6 +7,7 @@ using LinearAlgebra
         @test isunitary(each) == true
         @test isreflexive(each) == true
         @test ishermitian(each) == true
+        @test isdiagonal(each) == isdiagonal(mat(each))
     end
 
 
@@ -18,18 +19,21 @@ using LinearAlgebra
         @test isunitary(each)
         @test isreflexive(each) == false
         @test ishermitian(each) == false
+        @test isdiagonal(each) == isdiagonal(mat(each)) == true
     end
 
     @testset "test $each" for each in [P0, P1]
         @test isunitary(each) == false
         @test isreflexive(each) == false
         @test ishermitian(each) == true
+        @test isdiagonal(each) == isdiagonal(mat(each)) == true
     end
 
     @testset "test $each" for each in [Pu, Pd]
         @test isunitary(each) == false
         @test isreflexive(each) == false
         @test ishermitian(each) == false
+        @test isdiagonal(each) == isdiagonal(mat(each)) == false
     end
 
     @test nqubits(CNOT) == 2

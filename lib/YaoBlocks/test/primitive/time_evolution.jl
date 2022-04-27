@@ -78,6 +78,9 @@ end
     te = TimeEvolution(kron(Z, Z), 0.5)
     @test applymatrix(te) ≈ mat(te)
     @test mat(te) isa Diagonal
+
+    @test !isdiagonal(time_evolve(X, 0.5))
+    @test isdiagonal(time_evolve(Z, 0.5))
 end
 
 @testset "block map" begin

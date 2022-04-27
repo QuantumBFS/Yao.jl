@@ -37,6 +37,7 @@ end
     @test isreflexive(g) == false
     @test isunitary(g) == true
     @test ishermitian(g) == false
+    @test isdiagonal(g) == isdiagonal(mat(g)) == true
 
     g = ShiftGate{ComplexF64}(0.1 + 0im)
     @test @test_nowarn isunitary(g) == true

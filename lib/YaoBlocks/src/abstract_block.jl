@@ -4,6 +4,9 @@ YaoAPI.isunitary(op::Number) = op' * op ≈ one(op)
 
 YaoAPI.isreflexive(op) = op * op ≈ IMatrix(size(op, 1))
 YaoAPI.isreflexive(op::Number) = op * op ≈ one(op)
+function YaoAPI.isdiagonal(m::AbstractMatrix)
+    return m isa Diagonal || m isa IMatrix
+end
 
 """
     ishermitian(op) -> Bool
@@ -132,6 +135,7 @@ YaoAPI.nlevel(::Type{<:AbstractBlock{D}}) where {D} = D
 YaoAPI.nlevel(x::AbstractBlock{D}) where {D} = nlevel(typeof(x))
 
 # properties
+# NOTE: isdiagonal does fallback to matrix implementation, because it will be used in eigenbasis, and it is known without knowing the matrix.
 for each_property in [:(YaoAPI.isunitary), :(YaoAPI.isreflexive), :(LinearAlgebra.ishermitian)]
     @eval $each_property(x::AbstractBlock) = $each_property(mat(x))
     @eval $each_property(::Type{T}) where {T<:AbstractBlock} =

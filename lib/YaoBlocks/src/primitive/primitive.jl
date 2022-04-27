@@ -13,3 +13,5 @@ include("rotation_gate.jl")
 include("time_evolution.jl")
 include("general_matrix_gate.jl")
 include("measure.jl")
+
+YaoAPI.isdiagonal(p::PrimitiveBlock) = isdiagonal(mat(p))

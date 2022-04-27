@@ -9,6 +9,7 @@ using Random, Test
     @test ishermitian(block)
     @test isreflexive(block)
     @test isunitary(block)
+    @test isdiagonal(block) == isdiagonal(mat(block)) == true
     @test occupied_locs(block) == ()
     @test getiparams(block) == ()
     @test nqudits(igate(3; nlevel=3)) == 3

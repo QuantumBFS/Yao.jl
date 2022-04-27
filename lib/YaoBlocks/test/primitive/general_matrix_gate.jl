@@ -24,3 +24,6 @@ a = rand_unitary(2)
 # fallback test #59, return a correct matrix type for matblock
 a = rand_unitary(2) .|> ComplexF32
 @test eltype(mat(matblock(a))) == ComplexF32
+
+@test !isdiagonal(matblock(randn(64, 64)))
+@test isdiagonal(matblock(Diagonal(randn(128))))

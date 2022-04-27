@@ -65,7 +65,7 @@ function LinearAlgebra.mul!(y::AbstractVector, A::BlockMap{T,GT}, x::AbstractVec
 end
 
 function _apply!(reg::AbstractArrayReg{D,T}, te::TimeEvolution) where {D,T}
-    if is_simple_diagonal(te.H)
+    if isdiagonal(te.H)
         reg.state .*= exp.((-im * te.dt) .* diag(mat(T, te.H)))
         return reg
     end
@@ -98,6 +98,7 @@ function Base.adjoint(te::TimeEvolution)
 end
 Base.copy(te::TimeEvolution) = TimeEvolution(te.H, te.dt, tol = te.tol)
 
+YaoAPI.isdiagonal(r::TimeEvolution) = isdiagonal(r.H)
 function YaoAPI.isunitary(te::TimeEvolution)
     iszero(imag(te.dt)) || return false
     return true

@@ -57,5 +57,6 @@ function YaoAPI.isunitary(r::ShiftGate)
     @warn "θ in ShiftGate is not real, got θ=$(r.theta), fallback to matrix-based method"
     return isunitary(mat(r))
 end
+YaoAPI.isdiagonal(r::ShiftGate) = true
 
 iparams_range(::ShiftGate{T}) where {T} = ((zero(T), T(2.0 * pi)),)
