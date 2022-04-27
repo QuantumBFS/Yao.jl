@@ -24,7 +24,7 @@ nqudits(pb::PutBlock) = pb.n
 Create a [`PutBlock`](@ref) with total number of active qubits, and a pair of
 location and block to put on.
 
-# Example
+### Examples
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> put(4, 1=>X)
@@ -61,7 +61,7 @@ put(total::Int, pa::Pair{<:Any,<:AbstractBlock}) =
 
 Lazy curried version of [`put`](@ref).
 
-# Example
+### Examples
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> put(1=>X)
@@ -120,7 +120,7 @@ PSwap(n::Int, locs::Tuple{Int,Int}, θ::Real) =
 
 Create a `n`-qubit [`Swap`](@ref) gate which swap `loc1` and `loc2`.
 
-# Example
+### Examples
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> swap(4, 1, 2)
@@ -137,7 +137,7 @@ swap(n::Int, loc1::Int, loc2::Int) = Swap(n, (loc1, loc2))
 Create a lambda that takes the total number of active qubits as input. Lazy curried
 version of `swap(n, loc1, loc2)`. See also [`Swap`](@ref).
 
-# Example
+### Examples
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> swap(1, 2)
@@ -160,6 +160,15 @@ occupied_locs(g::Swap) = g.locs
     pswap(i::Int, j::Int, α::Real) -> f(n)
 
 parametrized swap gate.
+
+### Examples
+
+```jldoctest
+julia> pswap(2, 1, 2, 0.1)
+nqubits: 2
+put on (1, 2)
+└─ rot(SWAP, 0.1)
+```
 """
 pswap(n::Int, i::Int, j::Int, α::Real) = PSwap(n, (i, j), α)
 pswap(i::Int, j::Int, α::Real) = n -> pswap(n, i, j, α)

@@ -16,9 +16,27 @@ struct IdentityGate{D} <: TrivialGate{D}
 end
 nqudits(ig::IdentityGate) = ig.n
 
+function print_block(io::IO, x::IdentityGate{2})
+    print(io, "igate(", x.n, ")")
+end
+
+function print_block(io::IO, x::IdentityGate{D}) where {D}
+    print(io, "igate(", x.n, ";nlevel=", D, ")")
+end
+
 """
     igate(n::Int; nlevel=2)
 
 The constructor for identity gate.
+
+### Examples
+
+```jldoctest
+julia> igate(2)
+igate(2)
+
+julia> igate(2; nlevel=3)
+igate(2;nlevel=3)
+```
 """
 igate(n::Int; nlevel=2) = IdentityGate{nlevel}(n)

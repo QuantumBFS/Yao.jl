@@ -8,7 +8,7 @@ export @const_gate
 This macro simplify the definition of a constant gate. It will automatically bind the matrix form
 to a constant which will reduce memory allocation in the runtime.
 
-# Example
+### Examples
 
 ```julia
 @const_gate X = ComplexF64[0 1;1 0]
