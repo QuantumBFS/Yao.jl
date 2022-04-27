@@ -4,15 +4,6 @@ export ShiftGate, shift
     ShiftGate <: PrimitiveBlock
 
 Phase shift gate.
-
-# Definition
-
-```math
-\\begin{pmatrix}
-1 & 0\\
-0 & e^(im θ)
-\\end{pmatrix}
-```
 """
 mutable struct ShiftGate{T} <: PrimitiveBlock{2}
     theta::T
@@ -25,6 +16,13 @@ nqudits(blk::ShiftGate) = 1
     shift(θ)
 
 Create a [`ShiftGate`](@ref) with phase `θ`.
+
+```math
+\\begin{pmatrix}
+1 & 0\\\\
+0 & \\exp^{iθ}
+\\end{pmatrix}
+```
 
 ### Examples
 

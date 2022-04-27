@@ -27,7 +27,7 @@ GeneralMatrixBlock(m::AbstractMatrix; nlevel=2) = GeneralMatrixBlock{nlevel}(log
 
 Create a [`GeneralMatrixBlock`](@ref) with a matrix `m`.
 
-# Example
+### Examples
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> matblock(ComplexF64[0 1;1 0])
@@ -55,7 +55,7 @@ cache_key(m::GeneralMatrixBlock) = hash(m.mat)
 
 Return the matrix of general matrix block.
 
-!!!warn
+!!! warn
     
     Instead of converting it to the default data type `ComplexF64`,
     this will return its contained matrix.
