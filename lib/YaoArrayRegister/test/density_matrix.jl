@@ -4,7 +4,7 @@ using LinearAlgebra
 @testset "test fidelity" begin
     reg = rand_state(3)
     reg_ = rand_state(3)
-    reg2 = repeat(reg, 3)
+    reg2 = clone(reg, 3)
     @test fidelity(reg, reg) ≈ 1
     @test fidelity(reg, reg_) < 1
     @test fidelity(reg2, reg2) ≈ [1, 1, 1]
@@ -18,7 +18,7 @@ using LinearAlgebra
 
     @test isapprox.(
         fidelity(reg, reg_),
-        fidelity(repeat(reg4, 3), repeat(reg5, 3)),
+        fidelity(clone(reg4, 3), clone(reg5, 3)),
         atol = 1e-5,
     ) |> all
 
@@ -32,7 +32,7 @@ using LinearAlgebra
 
     @test isapprox.(
         fidelity(reg, reg_),
-        fidelity(repeat(reg4, 3), repeat(reg5, 3)),
+        fidelity(clone(reg4, 3), clone(reg5, 3)),
         atol = 1e-5,
     ) |> all
 end
@@ -40,7 +40,7 @@ end
 @testset "test trace distance" begin
     reg = rand_state(3)
     reg_ = rand_state(3)
-    reg2 = repeat(reg, 3)
+    reg2 = clone(reg, 3)
     dm = ρ(reg)
     dm_ = ρ(reg_)
     dm2s = ρ.(reg2)
@@ -60,7 +60,7 @@ end
     @test isapprox(tracedist(dm, dm_)[], tracedist(dm4, dm5)[], atol = 1e-5)
     @test isapprox.(
         tracedist(dm, dm_)[],
-        tracedist.(repeat(reg4, 3) .|> density_matrix, repeat(reg5, 3) .|> density_matrix),
+        tracedist.(clone(reg4, 3) .|> density_matrix, clone(reg5, 3) .|> density_matrix),
         atol = 1e-5,
     ) |> all
 end

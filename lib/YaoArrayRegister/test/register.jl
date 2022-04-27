@@ -32,7 +32,7 @@ end
     @test_throws DimensionMismatch BatchedArrayReg(rand(5, 2), 2)
     @test BatchedArrayReg(rand(ComplexF64, 4, 3)) isa BatchedArrayReg{2}
 
-    @test state(arrayreg(bit"101"; nbatch=2)) == repeat(reshape(onehot(bit"101"), :, 1), 1, 2)
+    @test state(arrayreg(bit"101"; nbatch=2)) == clone(reshape(onehot(bit"101"), :, 1), 1, 2)
     @test datatype(arrayreg(ComplexF32, bit"101"; nbatch=2)) == ComplexF32
 
     st = rand(ComplexF64, 4, 6)
@@ -128,8 +128,8 @@ end
         @test nactive(r2) == 2
         @test r1 |> oneto(2) |> nactive == 2
     end
-    @testset "test repeat" begin
-        r = repeat(arrayreg(T, bit"101"; nbatch=3), 4)
+    @testset "test clone" begin
+        r = clone(arrayreg(T, bit"101"; nbatch=3), 4)
         @test nactive(r) == 3
         @test nbatch(r) == 12
     end
@@ -181,8 +181,8 @@ end
     r4 = join(focus!(copy(r2), 1:2), focus!(copy(r1), 1:3))
     @test r4 |> relaxedvec ≈
           focus!(copy(r3), [1, 2, 3, 7, 8, 4, 5, 6, 9, 10, 11, 12]) |> relaxedvec
-    reg5 = focus!(repeat(r1, 3), 1:3)
-    reg6 = focus!(repeat(r2, 3), 1:2)
+    reg5 = focus!(clone(r1, 3), 1:3)
+    reg6 = focus!(clone(r2, 3), 1:2)
     @test (join(reg6, reg5)|>relaxedvec)[:, 1] ≈ r4 |> relaxedvec
 
     # manual trace

@@ -656,9 +656,11 @@ end
 
 """
     DensityMatrix{D,T,MT<:AbstractMatrix{T}} <: AbstractRegister{D}
-    DensityMatrix(state)
+    DensityMatrix{D}(state::AbstractMatrix)
+    DensityMatrix(state::AbstractMatrix; nlevel=2)
 
-Density matrix type, where `state` is a matrix. Type parameter `D` is the number of levels.
+Density matrix type, where `state` is a matrix.
+Type parameter `D` is the number of levels, it can also be specified by a keyword argument `nlevel`.
 """
 struct DensityMatrix{D,T,MT<:AbstractMatrix{T}} <: AbstractRegister{D}
     state::MT
@@ -700,9 +702,9 @@ julia> expect(put(3, 2=>(Z + Y)), reg)
 @interface purify
 
 """
-    density_matrix(register)
+    density_matrix(register, locations)
 
-Returns the density matrix of current active qudits.
+Returns the density matrix for qubits on `locations`.
 
 ### Examples
 

@@ -80,8 +80,8 @@ export AbstractRegister,
     select!,
     tracedist,
     viewbatch,
-    ρ,
-    basis
+    basis,
+    clone
 
 # others
 export Const, logdi

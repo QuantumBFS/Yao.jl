@@ -390,8 +390,8 @@ end
 """
     join(regs...)
 
-concat a list of registers `regs` to a larger register, each register should
-have the same batch size. See also [`repeat`](@ref).
+concatenate a list of registers `regs` to a larger register, each register should
+have the same batch size. See also [`clone`](@ref).
 """
 Base.join(rs::AbstractArrayReg...) = _join(join_datatype(rs...), rs...)
 Base.join(r::AbstractArrayReg) = r
@@ -648,7 +648,7 @@ oneto(r::AbstractArrayReg{D,T,<:Transpose}, n::Int = nqudits(r)) where {D,T} =
     transpose_storage(arrayreg(reshape(r.state, D ^ n, :); nbatch=nbatch(r), nlevel=D))
 
 """
-    repeat(register, n)
+    clone(register, n)
 
 Create an [`ArrayReg`](@ref) by copying the original `register` for `n` times on
 batch dimension.
@@ -656,14 +656,14 @@ batch dimension.
 # Example
 
 ```jldoctest; setup=:(using YaoArrayRegister)
-julia> repeat(arrayreg(bit"101"; nbatch=3), 4)
+julia> clone(arrayreg(bit"101"; nbatch=3), 4)
 BatchedArrayReg{2, ComplexF64, Array...}
     active qudits: 3/3
     nlevel: 2
     nbatch: 12
 ```
 """
-Base.repeat(r::AbstractArrayReg{D}, n::Int) where D =
+clone(r::AbstractArrayReg{D}, n::Int) where D =
     BatchedArrayReg{D}(hcat((state(r) for k = 1:n)...), n * _asint(nbatch(r)))
 
 # NOTE: overload this to make printing more compact
