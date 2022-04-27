@@ -29,6 +29,27 @@ Return a [`ChainBlock`](@ref) which chains a list of blocks with same
 [`nqudits`](@ref). If there is lazy evaluated
 block in `blocks`, chain can infer the number of qudits and create an
 instance itself.
+
+### Examples
+
+```jldoctest
+julia> chain(X, Y, Z)
+nqubits: 1
+chain
+├─ X
+├─ Y
+└─ Z
+
+julia> chain(2, put(1=>X), put(2=>Y), cnot(2, 1))
+nqubits: 2
+chain
+├─ put on (1)
+│  └─ X
+├─ put on (2)
+│  └─ Y
+└─ control(2)
+   └─ (1,) X
+```
 """
 chain(blocks::AbstractBlock{D}...) where {D} = ChainBlock(blocks...)
 function chain(blocks::Union{AbstractBlock{D},Function}...) where {D}
@@ -62,6 +83,21 @@ chain(blocks...) = @λ(n -> chain(n, blocks))
     chain(n)
 
 Return an empty [`ChainBlock`](@ref) which can be used like a list of blocks.
+
+### Examples
+
+```jldoctest
+julia> chain(2)
+nqubits: 2
+chain
+
+
+julia> chain(2; nlevel=3)
+nqudits: 2
+chain
+
+
+```
 """
 chain(n::Int; nlevel=2) = ChainBlock(n::Int, AbstractBlock{nlevel}[])
 

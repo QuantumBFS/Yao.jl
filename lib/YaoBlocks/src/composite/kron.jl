@@ -62,7 +62,7 @@ nqudits(pb::KronBlock) = pb.n
 
 Return a [`KronBlock`](@ref), with total number of qubits `n` and pairs of blocks.
 
-# Example
+### Examples
 
 Use `kron` to construct a `KronBlock`, it will put an `X` gate on the `1`st qubit,
 and a `Y` gate on the `3`rd qubit.
@@ -85,7 +85,7 @@ Base.kron(total::Int) = KronBlock(total)
 Return a [`KronBlock`](@ref), with total number of qubits `n`, and `blocks` should use all
 the locations on `n` wires in quantum circuits.
 
-# Example
+### Examples
 
 You can use kronecker product to composite small blocks to a large blocks.
 
@@ -125,7 +125,7 @@ end
 
 Return a lambda, which will take the total number of qubits as input.
 
-# Example
+### Examples
 
 If you don't know the number of qubit yet, or you are just too lazy, it is fine.
 
