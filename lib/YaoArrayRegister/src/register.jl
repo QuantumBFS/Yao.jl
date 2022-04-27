@@ -647,23 +647,7 @@ oneto(r::AbstractArrayReg{D}, n::Int = nqudits(r)) where {D} =
 oneto(r::AbstractArrayReg{D,T,<:Transpose}, n::Int = nqudits(r)) where {D,T} =
     transpose_storage(arrayreg(reshape(r.state, D ^ n, :); nbatch=nbatch(r), nlevel=D))
 
-"""
-    clone(register, n)
-
-Create an [`ArrayReg`](@ref) by copying the original `register` for `n` times on
-batch dimension.
-
-# Example
-
-```jldoctest; setup=:(using YaoArrayRegister)
-julia> clone(arrayreg(bit"101"; nbatch=3), 4)
-BatchedArrayReg{2, ComplexF64, Array...}
-    active qudits: 3/3
-    nlevel: 2
-    nbatch: 12
-```
-"""
-clone(r::AbstractArrayReg{D}, n::Int) where D =
+YaoAPI.clone(r::AbstractArrayReg{D}, n::Int) where D =
     BatchedArrayReg{D}(hcat((state(r) for k = 1:n)...), n * _asint(nbatch(r)))
 
 # NOTE: overload this to make printing more compact

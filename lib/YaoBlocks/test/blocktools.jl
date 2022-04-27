@@ -54,9 +54,9 @@ end
         rand_state(3, nbatch = 10),
         rand_state(3, nbatch = 10, no_transpose_storage = true),
     ]
-        e1 = expect.(Ref(put(2, 2 => X)), reg |> copy |> focus!(1, 2) .|> ρ)
+        e1 = expect.(Ref(put(2, 2 => X)), reg |> copy |> focus!(1, 2) .|> density_matrix)
         e2 = expect(put(2, 2 => X), reg |> copy |> focus!(1, 2))
-        e3 = expect.(Ref(put(3, 2 => X)), reg .|> ρ)
+        e3 = expect.(Ref(put(3, 2 => X)), reg .|> density_matrix)
         e4 = expect(put(3, 2 => X), reg)
         e5 = expect(put(3, 2 => -X), reg)
         @test e1 ≈ e2

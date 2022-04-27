@@ -23,7 +23,7 @@ PostProcess, RemoveMeasured, ResetTo, append_qudits!,
 collapseto!, density_matrix, fidelity, focus!, insert_qubits!, instruct!,
 invorder!, measure, measure!, nactive, nqubits, nqudits, nremain,
 partial_tr, probs, purify, relax!, reorder!, select, select!, tracedist,
-viewbatch, ρ
+viewbatch, clone
 
 #### Yao Blocks API
 AbstractBlock, AbstractContainer, CompositeBlock, LocationConflictError,

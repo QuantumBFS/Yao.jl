@@ -1,6 +1,5 @@
 YaoAPI.DensityMatrix{D}(state::AbstractMatrix{T}) where {T,D} = DensityMatrix{D,T,typeof(state)}(state)
 YaoAPI.DensityMatrix(state::AbstractMatrix{T}; nlevel=2) where T = DensityMatrix{nlevel}(state)
-YaoAPI.ρ(x) = density_matrix(x)
 
 """
     state(ρ::DensityMatrix)
