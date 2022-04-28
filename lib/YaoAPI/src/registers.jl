@@ -697,7 +697,7 @@ ArrayReg{2, ComplexF64, Array...}
     nlevel: 2
 
 julia> expect(Z + Y, preg)
-4.266421588589642e-17 + 0.0im
+0.0 + 0.0im
 
 julia> expect(Z + Y, r)
 0.0 + 0.0im
