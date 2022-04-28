@@ -91,3 +91,7 @@ end
 @testset "partial trace" begin
     @test partial_tr(1) isa YaoArrayRegister.LegibleLambda
 end
+
+@testset "contiguous shape order" begin
+    @test YaoArrayRegister.contiguous_shape_orders((2, 3, 4), (1, 2, 3)) == ([24], [1])
+end

@@ -315,3 +315,7 @@ end
     @test zero_state_like(rand_state(3), 4) ≈ zero_state(4)
     @test zero_state_like(rand_state(3; nbatch=4), 4) ≈ zero_state(4; nbatch=4)
 end
+
+@testset "basis" begin
+    @test basis(rand_state(3)) == bit"000":bit"111"
+end

@@ -197,6 +197,11 @@ ArrayReg{2, ComplexF32, Array...}
 arrayreg(bitstr::BitStr; nbatch::Union{Int,NoBatch}=NoBatch()) = arrayreg(ComplexF64, bitstr; nbatch=nbatch)
 arrayreg(::Type{T}, bitstr::BitStr; nbatch::Union{Int,NoBatch}=NoBatch()) where {T} = arrayreg(onehot(T, bitstr, _asint(nbatch)); nbatch=nbatch, nlevel=2)
 
+"""
+    transpose_storage(register) -> register
+
+Transpose the register storage. Sometimes transposed storage provides better performance for batched simulation.
+"""
 transpose_storage(reg::AbstractArrayReg{D,T,<:Transpose}) where {D,T} = arrayreg(copy(reg.state); nbatch=nbatch(reg), nlevel=D)
 transpose_storage(reg::AbstractArrayReg) =
     arrayreg(transpose(copy(transpose(reg.state))); nbatch=nbatch(reg), nlevel=nlevel(reg))
@@ -353,7 +358,7 @@ YaoAPI.tracedist(r1::BatchedArrayReg, r2::BatchedArrayReg) = tracedist.(r1, r2)
 
 # properties
 """
-    state(register::AbstractArrayReg) -> raw array
+    state(register::AbstractArrayReg) -> Matrix
 
 Returns the raw array storage of `register`. See also [`statevec`](@ref).
 """
@@ -363,9 +368,11 @@ state(r::AdjointArrayReg) = adjoint(state(parent(r)))
 """
     statevec(r::ArrayReg) -> array
 
-Return a state matrix/vector by droping the last dimension of size 1. See also [`state`](@ref).
+Return a state matrix/vector by droping the last dimension of size 1 (i.e. `nactive(r) = nqudits(r)`).
+See also [`state`](@ref).
 
 !!! warning
+
     `statevec` is not type stable. It may cause performance slow down.
 """
 statevec(r::ArrayRegOrAdjointArrayReg) = matvec(state(r))
@@ -382,8 +389,8 @@ relaxedvec(r::BatchedArrayReg) = reshape(state(r), :, nbatch(r))
 """
     hypercubic(r::ArrayReg) -> AbstractArray
 
-Return the hypercubic form (high dimensional tensor) of this register, only active qudits are considered.
-See also [`rank3`](@ref).
+Return the hypercubic representation (high dimensional tensor) of this register, only active qudits are considered.
+See also [`rank3`](@ref) and [`state`](@ref).
 """
 BitBasis.hypercubic(r::ArrayRegOrAdjointArrayReg) =
     reshape(state(r), ntuple(i -> 2, Val(nactive(r)))..., :)
@@ -391,9 +398,8 @@ BitBasis.hypercubic(r::ArrayRegOrAdjointArrayReg) =
 """
     rank3(r::ArrayReg)
 
-Return the rank 3 tensor representation of state,
-the 3 dimensions are (activated space, remaining space, batch dimension).
-See also [`rank3`](@ref).
+Return the rank 3 tensor representation of state, the 3 dimensions are (activated space, remaining space, batch dimension).
+See also [`hypercubic`](@ref) and [`state`](@ref).
 """
 function rank3(r::ArrayRegOrAdjointArrayReg)
     s = state(r)
@@ -405,6 +411,19 @@ end
 
 concatenate a list of registers `regs` to a larger register, each register should
 have the same batch size. See also [`clone`](@ref).
+
+```jldoctest; setup=:(using Yao)
+julia> reg = join(product_state(bit"111"), zero_state(3))
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 6/6
+    nlevel: 2
+
+julia> measure(reg; nshots=3)
+3-element Vector{BitStr64{6}}:
+ 111000 ₍₂₎
+ 111000 ₍₂₎
+ 111000 ₍₂₎
+```
 """
 Base.join(rs::AbstractArrayReg...) = _join(join_datatype(rs...), rs...)
 Base.join(r::AbstractArrayReg) = r
@@ -617,7 +636,7 @@ end
 """
     uniform_state([T=ComplexF64], n; nbatch=NoBatch(), no_transpose_storage=false)
 
-Create a uniform state: ``\\frac{1}{2^n} \\sum_k |k⟩``. This state
+Create a uniform state: ``\\frac{1}{2^n} \\sum_k |k\\rangle``. This state
 can also be created by applying [`H`](@ref) (Hadmard gate) on ``|00⋯00⟩`` state.
 
 ### Example
@@ -655,7 +674,7 @@ end
     oneto(n::Int) -> f(register)
     oneto(r::AbstractArrayReg, n::Int=nqudits(r))
 
-Returns an register with `1:n` qudits activated.
+Returns an register with `1:n` qudits activated, which is faster than the general purposed [`focus`](@ref) function.
 """
 oneto(n::Int) = r -> oneto(r, n)
 oneto(r::AbstractArrayReg{D}, n::Int = nqudits(r)) where {D} =
@@ -688,8 +707,18 @@ end
     mutual_information(reg::AbstractArrayReg, part1, part2)
 
 Compute the mutual information between locations `part1` and locations `part2` in a quantum state `reg`.
+
+### Example
+
+The mutual information of a GHZ state of any two disjoint parts is always equal to ``\\log 2``.
+
+```jldoctest; setup=:(using Yao)
+julia> mutual_information(ghz_state(4), (1,), (3,4))
+0.6931471805599132
+```
 """
 function mutual_information(reg::AbstractArrayReg, part1, part2)
+    @assert isempty(part1 ∩ part2)
     von_neumann_entropy(reg, part1) .+ von_neumann_entropy(reg, part2) .- von_neumann_entropy(reg, part1 ∪ part2)
 end
 
@@ -699,6 +728,15 @@ end
 
 The entanglement entropy between `part` and the rest part in quantum state `reg`.
 If the input is a density matrix, it returns the entropy of a mixed state.
+
+### Example
+
+The Von Neumann entropy of any segment of GHZ state is ``\\log 2``.
+
+```jldoctest; setup=:(using Yao)
+julia> von_neumann_entropy(ghz_state(3), (1,2))
+0.6931471805599612
+```
 """
 von_neumann_entropy(reg::BatchedArrayReg, part) = von_neumann_entropy.(reg, Ref(part))
 von_neumann_entropy(reg::ArrayReg, part) = von_neumann_entropy(density_matrix(reg, part))
@@ -715,7 +753,7 @@ Base.length(r::BatchedArrayReg) = r.nbatch
 Base.length(r::AdjointRegister{D, <:BatchedArrayReg{D}}) where {D} = length(parent(r))
 
 """
-    nbatch(register) -> Int
+    nbatch(register) -> Union{Int,NoBatch()}
 
 Returns the number of batches.
 """
@@ -727,6 +765,15 @@ nbatch(r::AdjointArrayReg) = nbatch(parent(r))
     most_probable(reg::AbstractArrayReg{2}, n::Int)
 
 Find `n` most probable qubit configurations in a quantum register and return these configurations as a vector of `BitStr` instances.
+
+### Example
+
+```jldoctest; setup=:(using Yao)
+julia> most_probable(ghz_state(3), 2)
+2-element Vector{BitStr64{3}}:
+ 000 ₍₂₎
+ 111 ₍₂₎
+```
 """
 function most_probable(reg::ArrayReg{2}, n::Int)
     imax = sortperm(probs(reg); rev=true)[1:n]
@@ -746,8 +793,21 @@ end
     basis(register) -> UnitRange
 
 Returns an `UnitRange` of the all the bits in the Hilbert space of given register.
+
+```jldoctest; setup=:(using Yao)
+julia> collect(basis(rand_state(3)))
+8-element Vector{BitStr64{3}}:
+ 000 ₍₂₎
+ 001 ₍₂₎
+ 010 ₍₂₎
+ 011 ₍₂₎
+ 100 ₍₂₎
+ 101 ₍₂₎
+ 110 ₍₂₎
+ 111 ₍₂₎
+```
 """
-BitBasis.basis(r::AbstractRegister) = basis(nqudits(r))
+BitBasis.basis(r::AbstractRegister) = basis(BitStr{nactive(r),Int})
 
 
 """

@@ -2,7 +2,7 @@ using Test, YaoBlocks, YaoArrayRegister
 using YaoBlocks: BlockMap
 using LinearAlgebra
 
-function heisenberg(n::Int; periodic::Bool = true)
+function myheisenberg(n::Int; periodic::Bool = true)
     Sx(i) = put(n, i => X)
     Sy(i) = put(n, i => Y)
     Sz(i) = put(n, i => Z)
@@ -15,7 +15,7 @@ function heisenberg(n::Int; periodic::Bool = true)
 end
 
 @testset "constructor:time evolution" begin
-    hm = heisenberg(4)
+    hm = myheisenberg(4)
     te = TimeEvolution(hm, 0.2)
     # copy
     cte = copy(te)
@@ -35,7 +35,7 @@ end
 end
 
 @testset "test imaginary time evolution" begin
-    hm = heisenberg(4)
+    hm = myheisenberg(4)
     tei = TimeEvolution(hm, 0.2im)
     r = rand_state(4)
     r1 = copy(r) |> tei
@@ -60,7 +60,7 @@ end
 end
 
 @testset "test time evolution" begin
-    hm = heisenberg(4)
+    hm = myheisenberg(4)
     te = TimeEvolution(hm, 0.2)
 
     r = rand_state(4)

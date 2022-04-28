@@ -1,13 +1,8 @@
 # NOTE: ArrayReg shares some common interfaces with Array
-
-using LinearAlgebra
-
-export isnormalized, normalize!, regadd!, regsub!, regscale!, norm
-
 """
     isnormalized(r::ArrayReg) -> Bool
 
-Check if the register is normalized.
+Returns true if the register `r` is normalized.
 """
 isnormalized(r::AbstractArrayReg) =
     all(sum(copy(r) |> relax!(to_nactive = nqudits(r)) |> probs, dims = 1) .≈ 1)
@@ -16,7 +11,27 @@ isnormalized(r::AdjointRegister) = isnormalized(parent(r))
 """
     normalize!(r::AbstractArrayReg)
 
-Normalize the register `r` in-place by its `2`-norm.
+Normalize the register `r` by its 2-norm.
+It changes the register directly.
+
+### Examples
+
+The following code creates a normalized GHZ state.
+
+```julia
+julia> reg = product_state(bit"000") + product_state(bit"111");
+
+julia> norm(reg)
+1.4142135623730951
+
+julia> isnormalized(reg)
+false
+
+julia> normalize!(reg);
+
+julia> isnormalized(reg)
+true
+```
 """
 function LinearAlgebra.normalize!(r::AbstractArrayReg)
     batch_normalize!(reshape(r.state, :, _asint(nbatch(r))))
@@ -56,12 +71,22 @@ for op in [:+, :-]
     end
 end
 
+"""
+    regadd!(target, source)
+
+Inplace version of `+` that accumulates `source` to `target`.
+"""
 function regadd!(lhs::AbstractArrayReg{D}, rhs::AbstractArrayReg{D}) where {D}
     @assert nbatch(lhs) == nbatch(rhs)
     lhs.state .+= rhs.state
     lhs
 end
 
+"""
+    regsub!(target, source)
+
+Inplace version of `-` that subtract `source` from `target`.
+"""
 function regsub!(lhs::AbstractArrayReg{D}, rhs::AbstractArrayReg{D}) where {D}
     @assert nbatch(lhs) == nbatch(rhs)
     lhs.state .-= rhs.state
@@ -86,6 +111,11 @@ function regsub!(
     lhs
 end
 
+"""
+    regsub!(target, x)
+
+Inplace version of multiplying a scalar `x` to target.
+"""
 function regscale!(reg::AbstractArrayReg{D,T1,<:Transpose}, x) where {D,T1}
     reg.state.parent .*= x
     reg

@@ -6,9 +6,6 @@
 #
 # In order to make multi threading work, the state vector MUST be named as state
 
-using YaoAPI, BitBasis, LuxurySparse, StaticArrays
-export instruct!
-
 function YaoAPI.instruct!(
     r::BatchedArrayReg{D},
     op,

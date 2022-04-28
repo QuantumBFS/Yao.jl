@@ -1,6 +1,3 @@
-using StatsBase, StaticArrays, BitBasis, Random
-export measure, measure!, select, select!
-
 ## from original YaoAPI
 YaoAPI.measure!(postprocess::PostProcess, op, reg::AbstractRegister; kwargs...) =
     measure!(postprocess, op, reg, AllLocs(); kwargs...)
@@ -141,12 +138,6 @@ import YaoAPI: select, select!
 select(r::AbstractArrayReg, bits::AbstractVector{T}) where {T<:Integer} =
     arrayreg(r.state[Int64.(bits).+1, :]; nbatch=nbatch(r), nlevel=nlevel(r))
 select(r::AbstractArrayReg, bit::Integer) = select(r, [bit])
-
-"""
-    select!(b::Integer) -> f(register)
-
-Lazy version of [`select!`](@ref). See also [`select`](@ref).
-"""
 select!(bits...) = @λ(register -> select!(register, bits...))
 
 function select!(r::AbstractArrayReg, bits::AbstractVector{T}) where {T<:Integer}

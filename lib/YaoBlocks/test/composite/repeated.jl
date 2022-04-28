@@ -17,6 +17,8 @@ using LuxurySparse
     @test isunitary(rp)
     @test (chsubblocks(rp, [Z]) |> subblocks .== [Z]) |> all
     @test occupied_locs(rp) == (1, 2, 3)
+    @test occupied_locs(repeat(5, I2)) == ()
+    @test occupied_locs(repeat(5, X)) == (1, 2, 3, 4, 5)
     @test rp |> copy == rp
     @test YaoBlocks.PropertyTrait(rp) == YaoBlocks.PreserveAll()
 
