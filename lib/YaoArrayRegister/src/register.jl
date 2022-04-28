@@ -260,13 +260,13 @@ BatchedArrayReg{2, ComplexF64, Transpose...}
 ```
 """
 function zero_state_like(reg::ArrayReg{D,T}, nqudits::Int) where {D,T}
-    state = similar(reg.state, D^nqudits, size(reg.state, 2))   # NOTE: does not preserve adjoint
+    state = similar(reg.state, D^nqudits, _asint(nbatch(reg)))   # NOTE: does not preserve adjoint
     fill!(state,zero(T))
     state[1,1:1] .= Ref(one(T))  # broadcast to make it GPU compatible.
     return ArrayReg{D}(state)
 end
 function zero_state_like(reg::BatchedArrayReg{D,T}, nqudits::Int) where {D,T}
-    state = similar(reg.state, D^nqudits, size(reg.state, 2))   # NOTE: does not preserve adjoint
+    state = similar(reg.state, D^nqudits, _asint(nbatch(reg)))   # NOTE: does not preserve adjoint
     fill!(state, zero(T))
     reshape(state, :, reg.nbatch)[1,:] .= Ref(one(T))  # broadcast to make it GPU compatible.
     return BatchedArrayReg{D}(state, reg.nbatch)

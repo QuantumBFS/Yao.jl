@@ -171,7 +171,7 @@ ArrayReg{2, ComplexF64, Array...}
 
 julia> insert_qudits!(reg, 2, 2)
 ArrayReg{2, ComplexF64, Array...}
-    active qubits: 7/11
+    active qubits: 7/7
     nlevel: 2
 
 julia> measure(reg; nshots=3)

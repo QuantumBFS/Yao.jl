@@ -116,14 +116,14 @@ ArrayReg{2, ComplexF64, Array...}
 
 julia> state(r)
 8×1 Matrix{ComplexF64}:
- 0.0 + 0.0im
- 0.0 + 0.0im
- 0.0 + 0.0im
- 0.0 + 0.0im
- 0.0 + 0.0im
- 0.0 + 0.0im
- 0.0 + 0.0im
  1.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
 ```
 
 But you can also specify the target bit configuration you want to collapse to with keyword `resetto`.

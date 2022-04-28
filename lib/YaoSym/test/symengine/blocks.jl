@@ -111,7 +111,7 @@ end
     @test ComplexF64(ex) ≈ expect'(op, reg2)[2][]
 end
 
-function check_dumpload(gate::AbstractBlock{N}) where {N}
+function test_check_dumpload(gate::AbstractBlock{N}) where {N}
     gate2 = eval(YaoBlocks.parse_ex(YaoBlocks.dump_gate(gate), N))
     gate2 == gate || mat(gate2) ≈ mat(gate)
 end
@@ -119,8 +119,8 @@ end
 @testset "dumpload" begin
     # basic types
     @vars θ
-    @test check_dumpload(phase(θ))
-    @test check_dumpload(shift(θ))
-    @test check_dumpload(time_evolve(X, θ))
-    @test check_dumpload(rot(X, θ))
+    @test test_check_dumpload(phase(θ))
+    @test test_check_dumpload(shift(θ))
+    @test test_check_dumpload(time_evolve(X, θ))
+    @test test_check_dumpload(rot(X, θ))
 end
