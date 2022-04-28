@@ -1,7 +1,8 @@
 using YaoBlocks, YaoArrayRegister, BitBasis
-using YaoBlocks: eigenbasis
+using YaoBlocks: eigenbasis, isdiagonal
 using Random, Test
 using YaoAPI: QubitMismatchError
+using LinearAlgebra
 
 function check_eigenbasis(op)
     E, V = eigenbasis(op)
@@ -146,4 +147,15 @@ end
     op = repeat(5, X, 1:5)
     @test_throws ArgumentError measure!(ResetTo(0), op, reg, 2:6)
     @test_throws ArgumentError measure!(RemoveMeasured(), op, reg, 2:6)
+end
+
+@testset "is diagonal" begin
+    # Rydberg blockade term + zterm
+    block = 0.5 * sum([kron(3, 1=>ConstGate.P1, 2=>ConstGate.P1), kron(3, 2=>ConstGate.P1, 3=>ConstGate.P1)]) + 0.5 * sum([put(3, i=>Z) for i=1:3])
+    @test eigenbasis(block) == (block, igate(3))
+    # Rydberg xterm
+    block = 0.5 * sum([put(3, i=>X) for i=1:3])
+    @test eigenbasis(block) == (
+                0.5 * sum([put(3, i=>Z) for i=1:3]),
+                chain([put(3, i=>H) for i=1:3]))
 end

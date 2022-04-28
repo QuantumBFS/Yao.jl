@@ -46,6 +46,7 @@ function YaoAPI.isunitary(r::PhaseGate)
     @warn "θ in phase(θ) is not real, got $(r.theta), fallback to matrix-based method"
     return isunitary(mat(r))
 end
+YaoAPI.isdiagonal(r::PhaseGate) = true
 
 Base.adjoint(blk::PhaseGate) = PhaseGate(-blk.theta)
 Base.copy(block::PhaseGate{T}) where {T} = PhaseGate{T}(block.theta)

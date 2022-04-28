@@ -169,6 +169,8 @@ end
     @test isunitary(g) == true
     @test isreflexive(g) == false
     @test ishermitian(g) == false
+    @test !isdiagonal(chain([X,Y]))
+    @test isdiagonal(chain([Z,Z]))
     @test length(g) == 2
     @test eltype(g) == eltype(g.blocks)
 end

@@ -65,8 +65,10 @@ content(te::TimeEvolution) = te.H
 chcontent(te::TimeEvolution, blk::AbstractBlock) = time_evolve(blk, te.dt; tol = te.tol)
 
 function mat(::Type{T}, te::TimeEvolution) where {T}
-    return exp(-im * T(te.dt) * Matrix(mat(T, te.H)))
+    return _exp((-im * T(te.dt)) .* mat(T, te.H))
 end
+_exp(m::AbstractMatrix) = exp(m)
+_exp(m::SparseMatrixCSC) = exp(Matrix(m))
 
 struct BlockMap{T,GT<:AbstractBlock} <: AbstractArray{T,2}
     block::GT
@@ -85,6 +87,10 @@ function LinearAlgebra.mul!(y::AbstractVector, A::BlockMap{T,GT}, x::AbstractVec
 end
 
 function _apply!(reg::AbstractArrayReg{D,T}, te::TimeEvolution) where {D,T}
+    if isdiagonal(te.H)
+        reg.state .*= exp.((-im * te.dt) .* diag(mat(T, te.H)))
+        return reg
+    end
     st = state(reg)
     dt = real(te.dt) == 0 ? imag(te.dt) : -im * te.dt
     A = BlockMap(T, te.H)
@@ -114,6 +120,7 @@ function Base.adjoint(te::TimeEvolution)
 end
 Base.copy(te::TimeEvolution) = TimeEvolution(te.H, te.dt, tol = te.tol)
 
+YaoAPI.isdiagonal(r::TimeEvolution) = isdiagonal(r.H)
 function YaoAPI.isunitary(te::TimeEvolution)
     iszero(imag(te.dt)) || return false
     return true

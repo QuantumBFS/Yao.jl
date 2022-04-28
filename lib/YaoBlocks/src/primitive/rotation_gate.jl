@@ -119,6 +119,7 @@ function YaoAPI.isunitary(r::RotationGate)
     @warn "θ in RotationGate is not real, got θ=$(r.theta), fallback to matrix-based method"
     return isunitary(mat(r))
 end
+YaoAPI.isdiagonal(op::RotationGate) = isdiagonal(op.block)
 
 Base.adjoint(blk::RotationGate) = RotationGate(blk.block, -blk.theta)
 Base.copy(R::RotationGate) = RotationGate(R.block, R.theta)

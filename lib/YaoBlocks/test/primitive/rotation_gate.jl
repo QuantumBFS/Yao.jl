@@ -53,7 +53,7 @@ end
     @test copy(g) !== g
 end
 
-@testset "isunitary" begin
+@testset "isunitary, isdiagonal" begin
     g = Rx(0.1 + 0im)
     @test @test_nowarn isunitary(g) == true
 
@@ -62,6 +62,9 @@ end
         :warn,
         "θ in RotationGate is not real, got θ=$(g.theta), fallback to matrix-based method",
     ) isunitary(g) == false
+
+    @test isdiagonal(rot(Z, 0.5))
+    @test !isdiagonal(rot(X, 0.5))
 end
 
 @testset "occupied locs" begin

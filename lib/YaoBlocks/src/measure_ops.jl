@@ -8,22 +8,16 @@ one can swith the basis to the eigenbasis of this operator.
 However, `eigenvalues` does not have a specific form.
 """
 function eigenbasis(op::AbstractBlock{D}) where {D}
-    m = mat(op)
-    if m isa Diagonal || m isa IMatrix
-        op, IdentityGate{D}(nqudits(op))
+    if isdiagonal(op)
+        return op, IdentityGate{D}(nqudits(op))
     else
-        E, V = eigen!(Matrix(m))
+        @debug "eigenbasis on blocktype `$(typeof(op))` calls into the fallback implementation, which might be slow. Try using `kron`, `repeat` if items commute to each other."
+        E, V = eigen!(Matrix(mat(op)))
         matblock(Diagonal(E)), matblock(V)
     end
 end
 
-for BT in []
-    @eval function eigenbasis(op::$BT)
-        @warn "eigenbasis on blocktype `$($BT)` calls into the fallback implementation, which might be slow. Try using `kron`, `repeat` if items commute to each oher."
-        invoke(eigenbasis, Tuple{AbstractBlock}, op)
-    end
-end
-
+# assume composition does not change diagonal property
 """
 Return true if operators commute to each other.
 """
@@ -61,6 +55,24 @@ function eigenbasis(op::ChainBlock)
     end
 end
 
+function eigenbasis(op::Add)
+    # detect commute operators
+    if simple_commute_eachother(subblocks(op))
+        E = Add(op.n)
+        blks = chain(op.n)
+        for b in subblocks(op)
+            Ei, Vi = eigenbasis(b)
+            push!(E, Ei)
+            push!(blks, Vi)
+        end
+        return E, blks
+    else
+        if op.n > 5
+            @warn "eigenbasis on blocktype `Add` (size $(op.n)) calls into the fallback implementation, which might be slow. Try using `kron`, `repeat` if items commute to each oher. If this behavior is not what you expected, please file an issue here: https://github.com/QuantumBFS/Yao.jl/issues."
+        end
+        invoke(eigenbasis, Tuple{AbstractBlock}, op)
+    end
+end
 
 for GT in [:PutBlock, :RepeatedBlock, :ControlBlock, :Daggered]
     @eval function eigenbasis(op::$GT)
