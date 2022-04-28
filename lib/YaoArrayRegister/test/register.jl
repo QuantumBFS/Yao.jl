@@ -32,7 +32,7 @@ end
     @test_throws DimensionMismatch BatchedArrayReg(rand(5, 2), 2)
     @test BatchedArrayReg(rand(ComplexF64, 4, 3)) isa BatchedArrayReg{2}
 
-    @test state(arrayreg(bit"101"; nbatch=2)) == clone(reshape(onehot(bit"101"), :, 1), 1, 2)
+    @test state(arrayreg(bit"101"; nbatch=2)) == repeat(reshape(onehot(bit"101"), :, 1), 1, 2)
     @test datatype(arrayreg(ComplexF32, bit"101"; nbatch=2)) == ComplexF32
 
     st = rand(ComplexF64, 4, 6)

@@ -556,9 +556,19 @@ julia> reg |> probs
 @interface probs
 
 """
-    fidelity(register1, register2)
+    fidelity(register1, register2) -> Real/Vector{<:Real}
+    fidelity'(pair_or_reg1, pair_or_reg2) -> (g1, g2)
 
 Return the fidelity between two states.
+Calcuate the fidelity between `r1` and `r2`, if `r1` or `r2` is not pure state
+(`nactive(r) != nqudits(r)`), the fidelity is calcuated by purification. See also
+[`pure_state_fidelity`](@ref), [`purification_fidelity`](@ref).
+
+Obtain the gradient with respect to registers and circuit parameters.
+For pair input `ψ=>circuit`, the returned gradient is a pair of `gψ=>gparams`,
+with `gψ` the gradient of input state and `gparams` the gradients of circuit parameters.
+For register input, the return value is a register.
+
 
 # Definition
 The fidelity of two quantum state for qudits is defined as:
