@@ -1,6 +1,6 @@
 <div align="center"> <img
 src="https://yaoquantum.org/assets/logo.png"
-alt="Yao Logo" width="210"></img>
+alt="Yao Logo" width="400"></img>
 </div>
 
 
