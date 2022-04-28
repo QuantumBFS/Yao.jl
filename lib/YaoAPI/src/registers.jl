@@ -696,14 +696,14 @@ ArrayReg{2, ComplexF64, Array...}
     active qubits: 1/2
     nlevel: 2
 
-julia> expect(Z + Y, preg)
-0.0 + 0.0im
+julia> expect(Z + Y, preg) ≈ 0.0
+true
 
-julia> expect(Z + Y, r)
-0.0 + 0.0im
+julia> expect(Z + Y, r) ≈ 0.0
+true
 
-julia> expect(put(3, 2=>(Z + Y)), reg)
-0.0 + 0.0im
+julia> expect(put(3, 2=>(Z + Y)), reg) ≈ 0.0
+true
 ```
 """
 @interface purify
