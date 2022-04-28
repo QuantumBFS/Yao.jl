@@ -1,5 +1,6 @@
 using Test, Yao
 using Documenter
+using Random
 
 @testset "easybuld" begin
     include("easybuild/easybuild.jl")
