@@ -297,7 +297,7 @@ end
 YaoAPI.invorder!(r::AbstractRegister) = reorder!(r, Tuple(nactive(r):-1:1))
 function YaoAPI.reorder!(r::AbstractArrayReg, orders)
     @assert nactive(r) == length(orders)
-    st = reshape(r.state,fill(2,nactive(r))...,size(r.state,2))
+    st = reshape(r.state,fill(nlevel(r),nactive(r))...,size(r.state,2))
     r.state = reshape(permutedims(st, sortperm([collect(orders)..., length(orders)+1])), size(r.state))
     return r
 end
@@ -393,7 +393,7 @@ Return the hypercubic representation (high dimensional tensor) of this register,
 See also [`rank3`](@ref) and [`state`](@ref).
 """
 BitBasis.hypercubic(r::ArrayRegOrAdjointArrayReg) =
-    reshape(state(r), ntuple(i -> 2, Val(nactive(r)))..., :)
+    reshape(state(r), ntuple(i -> nlevel(r), Val(nactive(r)))..., :)
 
 """
     rank3(r::ArrayReg)
@@ -474,8 +474,8 @@ true
 product_state(bit_str::BitStr; nbatch::Union{NoBatch,Int} = NoBatch()) =
     product_state(ComplexF64, bit_str; nbatch = nbatch)
 
-product_state(bit_str::AbstractVector; nbatch::Union{NoBatch,Int} = NoBatch()) =
-    product_state(ComplexF64, bit_str; nbatch = nbatch)
+product_state(bit_str::AbstractVector; nbatch::Union{NoBatch,Int} = NoBatch(), nlevel::Int=2) =
+    product_state(ComplexF64, bit_str; nbatch = nbatch, nlevel=nlevel)
 
 """
     product_state([T=ComplexF64], total::Int, bit_config::Integer; nbatch=NoBatch(), no_transpose_storage=false)
@@ -515,8 +515,13 @@ product_state(total::Int, bit_config::Integer; kwargs...) =
 product_state(::Type{T}, bit_str::BitStr{N}; kwargs...) where {T,N} =
     product_state(T, N, buffer(bit_str); kwargs...)
 
-product_state(::Type{T}, bit_configs::AbstractVector; kwargs...) where {T} =
-    product_state(T, bit_literal(bit_configs...); kwargs...)
+function product_state(::Type{T}, bit_configs::AbstractVector; nlevel::Int=2, kwargs...) where {T}
+    if nlevel == 2
+        return product_state(T, bit_literal(bit_configs...); nlevel, kwargs...)
+    else
+        return product_state(T, length(bit_configs), sum(k->bit_configs[k] * nlevel^(k-1), 1:length(bit_configs)); nlevel=nlevel, kwargs...)
+    end
+end
 
 function product_state(
     ::Type{T},
@@ -807,7 +812,7 @@ julia> collect(basis(rand_state(3)))
  111 ₍₂₎
 ```
 """
-BitBasis.basis(r::AbstractRegister) = basis(BitStr{nactive(r),Int})
+BitBasis.basis(r::AbstractRegister{2}) = basis(BitStr{nactive(r),Int})
 
 
 """

@@ -123,7 +123,7 @@ function YaoAPI.instruct!(::Val{2},
     locs::Tuple{},
     control_locs::NTuple{C,Int} = (),
     control_bits::NTuple{C,Int} = (),
-) where {T,M,C}
+) where {T,C}
     return state
 end
 
@@ -168,8 +168,7 @@ function _instruct!(
     return state
 end
 
-YaoAPI.instruct!(::Val{2}, state::AbstractVecOrMat, U::IMatrix, locs::NTuple{N,Int}) where {N} =
-    state
+YaoAPI.instruct!(::Val{2}, state::AbstractVecOrMat, U::IMatrix, locs::NTuple{N,Int}) where N = state
 YaoAPI.instruct!(::Val{2}, state::AbstractVecOrMat, U::IMatrix, locs::Tuple{Int}) = state
 
 function YaoAPI.instruct!(::Val{2},
