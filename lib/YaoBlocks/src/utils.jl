@@ -41,7 +41,7 @@ Create a random unitary matrix.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> isunitary(rand_unitary(2))
 true
 
@@ -67,7 +67,7 @@ sprand_unitary(::Type{T}, N::Int, density::Real) where {T} =
 
 Create a random hermitian matrix.
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> ishermitian(rand_hermitian(2))
 true
 ```

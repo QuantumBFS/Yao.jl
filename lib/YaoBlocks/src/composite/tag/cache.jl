@@ -121,13 +121,13 @@ it calls [`mat`](@ref), and use the cached matrix in the following calculations.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> cache(control(3, 1, 2=>X))
-nqudits: 3
+nqubits: 3
 [cached] control(1)
    └─ (2,) X
 
 
 julia> chain(cache(control(3, 1, 2=>X)), repeat(H))
-nqudits: 3
+nqubits: 3
 chain
 └─ [cached] control(1)
       └─ (2,) X

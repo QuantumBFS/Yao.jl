@@ -38,19 +38,16 @@ Create a ket register. See also [`@bra_str`](@ref).
 
 a symbolic quantum state can be created simply by
 
-```jldoctest; setup=:(using YaoSym, SymEngine)
+```jldoctest; setup=:(using Yao, SymEngine)
 julia> ket"110" + 2ket"111"
 |110⟩ + 2.0|111⟩
 ```
 
 qubits can be partially actived by [`focus!`](@ref)
 
-```jldoctest; setup=:(using YaoSym, SymEngine)
+```jldoctest; setup=:(using Yao, SymEngine)
 julia> ket"100" + ket"111" |> focus!(1:2)
-ERROR: UndefVarError: focus! not defined
-Stacktrace:
- [1] top-level scope
-   @ none:1
+|100⟩ + |111⟩
 ```
 
 """
@@ -68,7 +65,7 @@ Create a bra register. See also [`@ket_str`](@ref).
 Similar to `@ket_str` literal, a symbolic quantum state can be created
 by
 
-```jldoctest; setup=:(using YaoSym, SymEngine)
+```jldoctest; setup=:(using Yao, SymEngine)
 julia> bra"111" + 2bra"101"
 2.0⟨101| + ⟨111|
 

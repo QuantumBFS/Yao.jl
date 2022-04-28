@@ -24,7 +24,9 @@ export AbstractArrayReg,
     # initialization
     product_state,
     zero_state,
+    zero_state_like,
     rand_state,
+    ghz_state,
     uniform_state,
     oneto,
     # additional
@@ -79,8 +81,8 @@ export AbstractRegister,
     select!,
     tracedist,
     viewbatch,
-    ρ,
-    basis
+    basis,
+    clone
 
 # others
 export Const, logdi

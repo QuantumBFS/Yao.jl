@@ -4,7 +4,7 @@ using LinearAlgebra
 @testset "test fidelity" begin
     reg = rand_state(3)
     reg_ = rand_state(3)
-    reg2 = repeat(reg, 3)
+    reg2 = clone(reg, 3)
     @test fidelity(reg, reg) ≈ 1
     @test fidelity(reg, reg_) < 1
     @test fidelity(reg2, reg2) ≈ [1, 1, 1]
@@ -18,7 +18,7 @@ using LinearAlgebra
 
     @test isapprox.(
         fidelity(reg, reg_),
-        fidelity(repeat(reg4, 3), repeat(reg5, 3)),
+        fidelity(clone(reg4, 3), clone(reg5, 3)),
         atol = 1e-5,
     ) |> all
 
@@ -32,7 +32,7 @@ using LinearAlgebra
 
     @test isapprox.(
         fidelity(reg, reg_),
-        fidelity(repeat(reg4, 3), repeat(reg5, 3)),
+        fidelity(clone(reg4, 3), clone(reg5, 3)),
         atol = 1e-5,
     ) |> all
 end
@@ -40,10 +40,10 @@ end
 @testset "test trace distance" begin
     reg = rand_state(3)
     reg_ = rand_state(3)
-    reg2 = repeat(reg, 3)
-    dm = ρ(reg)
-    dm_ = ρ(reg_)
-    dm2s = ρ.(reg2)
+    reg2 = clone(reg, 3)
+    dm = density_matrix(reg)
+    dm_ = density_matrix(reg_)
+    dm2s = density_matrix.(reg2)
     @test reg |> probs ≈ dm |> probs
     @test isapprox(tracedist(dm, dm), tracedist(reg, reg), atol = 1e-5)
     @test isapprox(tracedist(dm, dm_), tracedist(reg, reg_), atol = 1e-5)
@@ -60,26 +60,26 @@ end
     @test isapprox(tracedist(dm, dm_)[], tracedist(dm4, dm5)[], atol = 1e-5)
     @test isapprox.(
         tracedist(dm, dm_)[],
-        tracedist.(repeat(reg4, 3) .|> density_matrix, repeat(reg5, 3) .|> density_matrix),
+        tracedist.(clone(reg4, 3) .|> density_matrix, clone(reg5, 3) .|> density_matrix),
         atol = 1e-5,
     ) |> all
 end
 
 @testset "purify" begin
     reg = rand_state(6)
-    reg_p = purify(reg |> ρ)
+    reg_p = purify(reg |> density_matrix)
     @test reg_p |> isnormalized
     @test reg_p |> exchange_sysenv |> probs |> maximum ≈ 1
-    reg_p = purify(reg |> ρ; num_env = 0)
+    reg_p = purify(reg |> density_matrix; num_env = 0)
     @test fidelity(reg, reg_p) ≈ 1
 
     reg = rand_state(6; nbatch = 10)
-    reg_p = BatchedArrayReg(purify.(reg .|> ρ)...)
+    reg_p = BatchedArrayReg(purify.(reg .|> density_matrix)...)
     @test reg_p |> isnormalized
     @test reg_p |> exchange_sysenv |> probs |> maximum ≈ 1
-    reg_p = BatchedArrayReg(purify.(reg .|> ρ; num_env = 0)...)
+    reg_p = BatchedArrayReg(purify.(reg .|> density_matrix; num_env = 0)...)
     @test fidelity(reg, reg_p) ≈ ones(10)
-    reg_p = BatchedArrayReg(purify.(reg .|> ρ; num_env = 2)...)
+    reg_p = BatchedArrayReg(purify.(reg .|> density_matrix; num_env = 2)...)
     @test reg_p |> nqubits == 8
 end
 

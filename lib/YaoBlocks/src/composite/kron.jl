@@ -67,9 +67,9 @@ Return a [`KronBlock`](@ref), with total number of qubits `n` and pairs of block
 Use `kron` to construct a `KronBlock`, it will put an `X` gate on the `1`st qubit,
 and a `Y` gate on the `3`rd qubit.
 
-```jldoctest; setup=:(using YaoBlocks)
+```jldoctest; setup=:(using Yao)
 julia> kron(4, 1=>X, 3=>Y)
-nqudits: 4
+nqubits: 4
 kron
 ├─ 1=>X
 └─ 3=>Y
@@ -89,9 +89,9 @@ the locations on `n` wires in quantum circuits.
 
 You can use kronecker product to composite small blocks to a large blocks.
 
-```jldoctest; setup=:(using YaoBlocks)
+```jldoctest; setup=:(using Yao)
 julia> kron(X, Y, Z, Z)
-nqudits: 4
+nqubits: 4
 kron
 ├─ 1=>X
 ├─ 2=>Y
@@ -129,12 +129,12 @@ Return a lambda, which will take the total number of qubits as input.
 
 If you don't know the number of qubit yet, or you are just too lazy, it is fine.
 
-```jldoctest; setup=:(using YaoBlocks)
+```jldoctest; setup=:(using Yao)
 julia> kron(put(1=>X) for _ in 1:2)
 (n -> kron(n, ((n  ->  put(n, 1 => X)), (n  ->  put(n, 1 => X)))...))
 
 julia> kron(X for _ in 1:2)
-nqudits: 2
+nqubits: 2
 kron
 ├─ 1=>X
 └─ 2=>X

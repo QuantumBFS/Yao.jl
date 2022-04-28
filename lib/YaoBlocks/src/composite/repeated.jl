@@ -40,22 +40,22 @@ YaoAPI.nqudits(m::RepeatedBlock) = m.n
 Create a [`RepeatedBlock`](@ref) with total number of qubits `n` and the block
 to repeat on given location or on all the locations.
 
-# Example
+### Example
 
 This will create a repeat block which puts 4 X gates on each location.
 
-```jldoctest; setup=:(using YaoBlocks)
+```jldoctest; setup=:(using Yao)
 julia> repeat(4, X)
-nqudits: 4
+nqubits: 4
 repeat on (1, 2, 3, 4)
 └─ X
 ```
 
 You can also specify the location
 
-```jldoctest; setup=:(using YaoBlocks)
+```jldoctest; setup=:(using Yao)
 julia> repeat(4, X, (1, 2))
-nqudits: 4
+nqubits: 4
 repeat on (1, 2)
 └─ X
 ```
@@ -63,9 +63,9 @@ repeat on (1, 2)
 But repeat won't copy the gate, thus, if it is a gate with parameter, e.g a `phase(0.1)`, the parameter
 will change simultaneously.
 
-```jldoctest; setup=:(using YaoBlocks)
+```jldoctest; setup=:(using Yao)
 julia> g = repeat(4, phase(0.1))
-nqudits: 4
+nqubits: 4
 repeat on (1, 2, 3, 4)
 └─ phase(0.1)
 
@@ -76,9 +76,21 @@ julia> g.content.theta = 0.2
 0.2
 
 julia> g
-nqudits: 4
+nqubits: 4
 repeat on (1, 2, 3, 4)
 └─ phase(0.2)
+```
+
+Repeat over certain gates will provide speed up.
+
+```julia
+julia> reg = rand_state(20);
+
+julia> @time apply!(reg, repeat(20, X));
+  0.002252 seconds (5 allocations: 656 bytes)
+
+julia> @time apply!(reg, chain([put(20, i=>X) for i=1:20]));
+  0.049362 seconds (82.48 k allocations: 4.694 MiB, 47.11% compilation time)
 ```
 """
 Base.repeat(n::Int, x::AbstractBlock, locs::Int...) = repeat(n, x, locs)

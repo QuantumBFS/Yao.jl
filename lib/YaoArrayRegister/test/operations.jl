@@ -102,5 +102,5 @@ end
     @test nlevel(us) == 3
     println(reg1)
     println(reg2)
-    @test von_neumann_entropy(repeat(reg2, 3), [2,1]) ≈ fill(von_neumann_entropy(reg2, [1,2]), 3)
+    @test von_neumann_entropy(clone(reg2, 3), [2,1]) ≈ fill(von_neumann_entropy(reg2, [1,2]), 3)
 end

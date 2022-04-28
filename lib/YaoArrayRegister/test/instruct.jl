@@ -1,5 +1,5 @@
 using Test, YaoAPI, YaoArrayRegister, LinearAlgebra, LuxurySparse, SparseArrays
-using YaoArrayRegister.Const
+#using YaoArrayRegister.Const
 using YaoArrayRegister: linop2dense, general_controlled_gates
 
 # NOTE: we don't have block here, feel safe to use
@@ -71,33 +71,33 @@ end
     instruct!(Val(2), copy(ST), U1, (3,), (1,), (1,))
 
     @test instruct!(Val(2), copy(ST), U1, (3,), (1,), (1,)) ≈
-          general_controlled_gates(5, [P1], [1], [U1], [3]) * ST
+          general_controlled_gates(5, [Const.P1], [1], [U1], [3]) * ST
     @test instruct!(Val(2), copy(ST), U1, (3,), (1,), (0,)) ≈
-          general_controlled_gates(5, [P0], [1], [U1], [3]) * ST
+          general_controlled_gates(5, [Const.P0], [1], [U1], [3]) * ST
 
     # control U2
     U2 = kron(U1, U1)
     @test instruct!(Val(2), copy(ST), U2, (3, 4), (1,), (1,)) ≈
-          general_controlled_gates(5, [P1], [1], [U2], [3]) * ST
+          general_controlled_gates(5, [Const.P1], [1], [U2], [3]) * ST
 
     # multi-control U2
     @test instruct!(Val(2), copy(ST), U2, (3, 4), (5, 1), (1, 0)) ≈
-          general_controlled_gates(5, [P1, P0], [5, 1], [U2], [3]) * ST
+          general_controlled_gates(5, [Const.P1, Const.P0], [5, 1], [U2], [3]) * ST
 end
 
 
 @testset "test Pauli instructions" begin
-    @testset "test $G instructions" for (G, M) in zip((:X, :Y, :Z), (X, Y, Z))
+    @testset "test $G instructions" for (G, M) in zip((:X, :Y, :Z), (Const.X, Const.Y, Const.Z))
         @test linop2dense(s -> instruct!(Val(2), s, Val(G), (1,)), 1) == M
         @test linop2dense(s -> instruct!(Val(2), s, Val(G), (1, 2, 3)), 3) == kron(M, M, M)
     end
 
-    @testset "test controlled $G instructions" for (G, M) in zip((:X, :Y, :Z), (X, Y, Z))
+    @testset "test controlled $G instructions" for (G, M) in zip((:X, :Y, :Z), (Const.X, Const.Y, Const.Z))
         @test linop2dense(s -> instruct!(Val(2), s, Val(G), (4,), (2, 1), (0, 1)), 4) ≈
-              general_controlled_gates(4, [P0, P1], [2, 1], [M], [4])
+              general_controlled_gates(4, [Const.P0, Const.P1], [2, 1], [M], [4])
 
         @test linop2dense(s -> instruct!(Val(2), s, Val(G), (1,), (2,), (0,)), 2) ≈
-              general_controlled_gates(2, [P0], [2], [M], [1])
+              general_controlled_gates(2, [Const.P0], [2], [M], [1])
     end
 end
 
@@ -107,27 +107,27 @@ end
     Dv = Diagonal(randn(ComplexF64, 2))
 
     @test instruct!(Val(2), copy(ST), Pm, (3,)) ≈
-          kron(I2, Pm, I2, I2) * ST ≈
+          kron(Const.I2, Pm, Const.I2, Const.I2) * ST ≈
           instruct!(Val(2), reshape(copy(ST), :, 1), Pm, (3,))
     @test instruct!(Val(2), copy(ST), Dv, (3,)) ≈
-          kron(I2, Dv, I2, I2) * ST ≈
+          kron(Const.I2, Dv, Const.I2, Const.I2) * ST ≈
           instruct!(Val(2), reshape(copy(ST), :, 1), Dv, (3,))
 end
 
 @testset "swap instruction" begin
     ST = randn(ComplexF64, 1 << 2)
-    @test instruct!(Val(2), copy(ST), Val(:SWAP), (1, 2)) ≈ SWAP * ST
+    @test instruct!(Val(2), copy(ST), Val(:SWAP), (1, 2)) ≈ Const.SWAP * ST
 end
 
 @testset "pswap instruction" begin
     ST = randn(ComplexF64, 1 << 2)
     θ = π / 3
     @test instruct!(Val(2), copy(ST), Val(:PSWAP), (1, 2), θ) ≈
-          (cos(θ / 2) * IMatrix{4}() - im * sin(θ / 2) * SWAP) * ST
+          (cos(θ / 2) * IMatrix{4}() - im * sin(θ / 2) * Const.SWAP) * ST
 
     T = ComplexF64
     theta = 0.5
-    for (R, G) in [(:Rx, X), (:Ry, Y), (:Rz, Z), (:PSWAP, SWAP)]
+    for (R, G) in [(:Rx, Const.X), (:Ry, Const.Y), (:Rz, Const.Z), (:PSWAP, Const.SWAP)]
         @test rot_mat(T, Val(R), theta) ≈ rot_mat(T, G, theta)
     end
     @test rot_mat(T, Val(:CPHASE), theta) ≈

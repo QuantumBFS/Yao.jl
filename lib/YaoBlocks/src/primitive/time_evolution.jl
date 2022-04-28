@@ -50,7 +50,7 @@ if dt is complex.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> time_evolve(kron(2, 1=>X, 2=>X), 0.1)
 Time Evolution Δt = 0.1, tol = 1.0e-7
 kron

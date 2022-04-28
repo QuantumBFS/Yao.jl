@@ -62,9 +62,9 @@ end
     @test res2 == res
 
     # measure_resetto! and measure_remove! for operators are no-longer supported due to its ill property.
-    reg = repeat(ArrayReg(ComplexF64[1, -1] / sqrt(2.0)), 10)
+    reg = clone(ArrayReg(ComplexF64[1, -1] / sqrt(2.0)), 10)
     @test measure!(X, reg) |> mean ≈ -1
-    reg = repeat(ArrayReg(ComplexF64[1.0, 0]), 1000)
+    reg = clone(ArrayReg(ComplexF64[1.0, 0]), 1000)
     @test abs(measure!(X, reg) |> mean) < 0.1
 end
 
@@ -85,9 +85,9 @@ end
     @test size(res) == (100, 32)
     @test reg ≈ reg2
 
-    reg = repeat(ArrayReg([1, -1 + 0im] / sqrt(2.0)), 10)
+    reg = clone(ArrayReg([1, -1 + 0im] / sqrt(2.0)), 10)
     @test measure!(X, reg) |> mean ≈ -1
-    reg = repeat(ArrayReg([1.0, 0 + 0im]), 1000)
+    reg = clone(ArrayReg([1.0, 0 + 0im]), 1000)
     @test abs(measure!(X, reg) |> mean) < 0.1
 
     m = Measure(5)

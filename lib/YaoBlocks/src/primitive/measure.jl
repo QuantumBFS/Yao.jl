@@ -78,24 +78,24 @@ Create a `Measure` block with number of qudits `n`.
 
 You can create a `Measure` block on given basis (default is the computational basis).
 
-```jldoctest; setup=:(using YaoBlocks)
+```jldoctest; setup=:(using Yao)
 julia> Measure(4)
 Measure(4)
 ```
 
 Or you could specify which qudits you are going to measure
 
-```jldoctest; setup=:(using YaoBlocks)
+```jldoctest; setup=:(using Yao)
 julia> Measure(4; locs=1:3)
 Measure(4;locs=(1, 2, 3))
 ```
 
 by default this will collapse the current register to measure results.
 
-```jldoctest; setup=:(using YaoBlocks, YaoArrayRegister, Random; Random.seed!(2))
+```jldoctest; setup=:(using Yao)
 julia> r = normalize!(arrayreg(bit"000") + arrayreg(bit"111"))
 ArrayReg{2, ComplexF64, Array...}
-    active qudits: 3/3
+    active qubits: 3/3
     nlevel: 2
 
 julia> state(r)
@@ -111,7 +111,7 @@ julia> state(r)
 
 julia> r |> Measure(3)
 ArrayReg{2, ComplexF64, Array...}
-    active qudits: 3/3
+    active qubits: 3/3
     nlevel: 2
 
 julia> state(r)
@@ -128,7 +128,7 @@ julia> state(r)
 
 But you can also specify the target bit configuration you want to collapse to with keyword `resetto`.
 
-```jldoctest; setup=:(using YaoBlocks; using BitBasis)
+```jldoctest; setup=:(using Yao)
 julia> m = Measure(4; resetto=bit"0101")
 Measure(4;postprocess=ResetTo{BitStr{4,Int64}}(0101 ₍₂₎))
 

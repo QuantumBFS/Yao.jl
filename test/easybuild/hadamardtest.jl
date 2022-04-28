@@ -8,11 +8,11 @@ single_swap_test(reg, ϕ::Real) = hadamard_test(SWAP, reg, ϕ)
 
 @testset "state overlap" begin
     reg1 = rand_state(3) |> focus!(1,2)
-    rho1 = reg1 |> ρ
+    rho1 = reg1 |> density_matrix
     reg2 = rand_state(3) |> focus!(1,2)
-    rho2 = reg2 |> ρ
+    rho2 = reg2 |> density_matrix
     reg3 = rand_state(3) |> focus!(1,2)
-    rho3 = reg3 |> ρ
+    rho3 = reg3 |> density_matrix
     desired = tr(Matrix(rho1)*Matrix(rho2))
     c = swap_test_circuit(2, 2, 0)
     res = expect(put(5, 1=>Z), join(join(reg2, reg1), zero_state(1)) |> c) |> tr

@@ -31,7 +31,7 @@ The constructor for identity gate.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> igate(2)
 igate(2)
 

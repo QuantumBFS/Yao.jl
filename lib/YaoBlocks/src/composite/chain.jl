@@ -32,7 +32,7 @@ instance itself.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> chain(X, Y, Z)
 nqubits: 1
 chain
@@ -86,7 +86,7 @@ Return an empty [`ChainBlock`](@ref) which can be used like a list of blocks.
 
 ### Examples
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> chain(2)
 nqubits: 2
 chain

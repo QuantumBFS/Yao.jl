@@ -57,6 +57,8 @@ end
     @test nqubits(similar(reg)) == 3
     m = randn(ComplexF64, 8, 8)
     @test similar(reg, m).state == m
+
+    @test ghz_state(3) ≈ normalize!(zero_state(3) + product_state(bit"111"))
 end
 
 @testset "test $T initialization methods" for T in [ComplexF64, ComplexF32, ComplexF16]
@@ -126,8 +128,8 @@ end
         @test nactive(r2) == 2
         @test r1 |> oneto(2) |> nactive == 2
     end
-    @testset "test repeat" begin
-        r = repeat(arrayreg(T, bit"101"; nbatch=3), 4)
+    @testset "test clone" begin
+        r = clone(arrayreg(T, bit"101"; nbatch=3), 4)
         @test nactive(r) == 3
         @test nbatch(r) == 12
     end
@@ -179,8 +181,8 @@ end
     r4 = join(focus!(copy(r2), 1:2), focus!(copy(r1), 1:3))
     @test r4 |> relaxedvec ≈
           focus!(copy(r3), [1, 2, 3, 7, 8, 4, 5, 6, 9, 10, 11, 12]) |> relaxedvec
-    reg5 = focus!(repeat(r1, 3), 1:3)
-    reg6 = focus!(repeat(r2, 3), 1:2)
+    reg5 = focus!(clone(r1, 3), 1:3)
+    reg6 = focus!(clone(r2, 3), 1:2)
     @test (join(reg6, reg5)|>relaxedvec)[:, 1] ≈ r4 |> relaxedvec
 
     # manual trace
@@ -270,6 +272,9 @@ end
     copyto!(reg1', reg2')
     @test reg1 ≈ reg2
     @test reorder!(reg1, [2,3,1]).state ≈ reshape(permutedims(reshape(reg2.state, 2, 2, 2, 5), sortperm([2,3,1,4])), 8, 5)
+
+    reg = product_state(bit"010101")
+    @test invorder!(reg) ≈ product_state(bit"101010")
 end
 
 @testset "most_probable" begin
@@ -304,4 +309,9 @@ end
         @test nqubits(adjoint(TestRegister())) == 8
         @test nactive(adjoint(TestRegister())) == 2
     end
+end
+
+@testset "zero_state_like" begin
+    @test zero_state_like(rand_state(3), 4) ≈ zero_state(4)
+    @test zero_state_like(rand_state(3; nbatch=4), 4) ≈ zero_state(4; nbatch=4)
 end
