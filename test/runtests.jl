@@ -4,6 +4,7 @@ using YaoAPI
 using YaoArrayRegister
 using YaoBlocks
 using YaoSym
+using BitBasis
 using Documenter
 using Random
 
@@ -11,7 +12,7 @@ using Random
     include("easybuild/easybuild.jl")
 end
 
-DocMeta.setdocmeta!(Yao, :DocTestSetup, :(using Yao, YaoAPI, YaoArrayRegister, YaoBlocks, YaoSym); recursive=true)
+DocMeta.setdocmeta!(Yao, :DocTestSetup, :(using Yao, YaoAPI, YaoArrayRegister, YaoBlocks, YaoSym, BitBasis); recursive=true)
 
 Documenter.doctest(YaoAPI; manual=false)
 Documenter.doctest(YaoArrayRegister; manual=false)
