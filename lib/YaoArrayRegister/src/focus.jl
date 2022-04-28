@@ -147,7 +147,7 @@ ArrayReg{2, ComplexF64, Array...}
     nlevel: 2
 
 julia> exchange_sysenv(reg)
-ArrayReg{2, ComplexF64, Array...}
+ArrayReg{2, ComplexF64, Adjoint...}
     active qubits: 3/5
     nlevel: 2
 ```

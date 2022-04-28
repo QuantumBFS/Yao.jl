@@ -419,7 +419,7 @@ ArrayReg{2, ComplexF64, Array...}
     nlevel: 2
 
 julia> measure(reg; nshots=3)
-3-element Vector{BitStr64{6}}:
+3-element Vector{BitBasis.BitStr64{6}}:
  111000 ₍₂₎
  111000 ₍₂₎
  111000 ₍₂₎
@@ -775,7 +775,7 @@ Find `n` most probable qubit configurations in a quantum register and return the
 
 ```jldoctest; setup=:(using Yao)
 julia> most_probable(ghz_state(3), 2)
-2-element Vector{BitStr64{3}}:
+2-element Vector{BitBasis.BitStr64{3}}:
  000 ₍₂₎
  111 ₍₂₎
 ```
@@ -801,7 +801,7 @@ Returns an `UnitRange` of the all the bits in the Hilbert space of given registe
 
 ```jldoctest; setup=:(using Yao)
 julia> collect(basis(rand_state(3)))
-8-element Vector{BitStr64{3}}:
+8-element Vector{BitBasis.BitStr64{3}}:
  000 ₍₂₎
  001 ₍₂₎
  010 ₍₂₎
