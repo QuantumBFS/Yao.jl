@@ -683,7 +683,7 @@ Get a purification of target density matrix.
 The following example shows how to measure a local operator on the register, reduced density matrix and the purified register.
 Their results should be consistent.
 
-```jldoctest; setup=:(using Yao)
+```jldoctest; setup=:(using Yao, Random; Random.seed!(123))
 julia> reg = ghz_state(3)
 ArrayReg{2, ComplexF64, Array...}
     active qubits: 3/3
