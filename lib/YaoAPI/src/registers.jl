@@ -699,7 +699,7 @@ ArrayReg{2, ComplexF64, Array...}
 julia> expect(Z + Y, preg) ≈ 0.0
 true
 
-julia> expect(Z + Y, r) ≈ 0.0
+julia> isapprox(expect(Z + Y, r), 0.0; rtol=1e-10)
 true
 
 julia> expect(put(3, 2=>(Z + Y)), reg) ≈ 0.0
