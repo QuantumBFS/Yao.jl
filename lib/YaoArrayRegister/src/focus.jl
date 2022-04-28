@@ -91,6 +91,13 @@ function YaoAPI.focus!(r::AbstractArrayReg{D}, locs) where {D}
     r.state = reshape(arr, D^length(locs), :)
     return r
 end
+function YaoAPI.focus(f, r::AbstractRegister, locs::NTuple{N, Int}) where N
+    focus!(r, locs)
+    ret = f(r)
+    relax!(r, locs)
+    return ret
+end
+YaoAPI.focus(f, r::AbstractRegister, locs::Int...) = focus(f, r, locs)
 
 function YaoAPI.relax!(r::AbstractArrayReg{D}, locs; to_nactive::Int = nqudits(r)) where {D}
     r.state = reshape(state(r), D^to_nactive, :)

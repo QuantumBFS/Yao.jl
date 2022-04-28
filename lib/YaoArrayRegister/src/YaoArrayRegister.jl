@@ -43,8 +43,7 @@ export AbstractArrayReg,
     regadd!,
     regsub!,
     regscale!,
-    exchange_sysenv,
-    focus
+    exchange_sysenv
 
 # BitBasis
 export @bit_str, hypercubic
@@ -70,6 +69,7 @@ export AbstractRegister,
     mutual_information,
     fidelity,
     focus!,
+    focus,
     insert_qudits!,
     insert_qubits!,
     most_probable,

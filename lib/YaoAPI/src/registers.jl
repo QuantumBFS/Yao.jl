@@ -253,16 +253,6 @@ ArrayReg{2, ComplexF64, Array...}
 """
 @interface focus
 
-function focus(f, r::AbstractRegister, locs::NTuple{N, Int}) where N
-    focus!(r, locs)
-    ret = f(r)
-    relax!(r, locs)
-    return ret
-end
-
-focus(f, r::AbstractRegister, locs::Int...) = focus(f, r, locs)
-
-
 """
     relax!(register[, locs]; to_nactive=nqudits(register)) -> register
     relax!(locs::Int...; to_nactive=nqudits(register)) -> f(register) -> register
