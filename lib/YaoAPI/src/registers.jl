@@ -238,7 +238,7 @@ Call a callable `f` under the context of `focus`. See also [`focus!`](@ref).
 To print the focused register
 
 ```jldoctest; setup=:(using Yao)
-julia> r = ArrayReg(bit"101100")
+julia> r = arrayreg(bit"101100")
 ArrayReg{2, ComplexF64, Array...}
     active qubits: 6/6
     nlevel: 2
