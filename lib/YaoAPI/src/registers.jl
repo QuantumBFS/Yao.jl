@@ -240,7 +240,7 @@ Call a callable `f` under the context of `focus`. See also [`focus!`](@ref).
 To print the focused register
 
 ```jldoctest; setup=:(using Yao)
-julia> r = ArrayReg(bit"101100")
+julia> r = arrayreg(bit"101100")
 ArrayReg{2, ComplexF64, Array...}
     active qubits: 6/6
     nlevel: 2
@@ -679,7 +679,7 @@ Get a purification of target density matrix.
 The following example shows how to measure a local operator on the register, reduced density matrix and the purified register.
 Their results should be consistent.
 
-```jldoctest; setup=:(using Yao)
+```jldoctest; setup=:(using Yao, Random; Random.seed!(123))
 julia> reg = ghz_state(3)
 ArrayReg{2, ComplexF64, Array...}
     active qubits: 3/3
@@ -692,14 +692,14 @@ ArrayReg{2, ComplexF64, Array...}
     active qubits: 1/2
     nlevel: 2
 
-julia> expect(Z + Y, preg)
-4.266421588589642e-17 + 0.0im
+julia> isapprox(expect(Z + Y, preg), 0.0; atol=1e-10)
+true
 
-julia> expect(Z + Y, r)
-0.0 + 0.0im
+julia> isapprox(expect(Z + Y, r), 0.0; atol=1e-10)
+true
 
-julia> expect(put(3, 2=>(Z + Y)), reg)
-0.0 + 0.0im
+julia> isapprox(expect(put(3, 2=>(Z + Y)), reg), 0.0; atol=1e-10)
+true
 ```
 """
 @interface purify
