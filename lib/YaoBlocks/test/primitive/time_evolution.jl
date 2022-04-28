@@ -1,5 +1,6 @@
 using Test, YaoBlocks, YaoArrayRegister
 using YaoBlocks: BlockMap
+using LinearAlgebra
 
 function heisenberg(n::Int; periodic::Bool = true)
     Sx(i) = put(n, i => X)
@@ -13,9 +14,8 @@ function heisenberg(n::Int; periodic::Bool = true)
     Add(res)
 end
 
-const hm = heisenberg(4)
-
 @testset "constructor:time evolution" begin
+    hm = heisenberg(4)
     te = TimeEvolution(hm, 0.2)
     # copy
     cte = copy(te)
@@ -35,6 +35,19 @@ const hm = heisenberg(4)
 end
 
 @testset "test imaginary time evolution" begin
+    hm = heisenberg(4)
+    tei = TimeEvolution(hm, 0.2im)
+    r = rand_state(4)
+    r1 = copy(r) |> tei
+    @test exp(Matrix(mat(hm)) * 0.2) * r.state ≈ r1.state
+
+    @test applymatrix(tei) ≈ mat(tei)
+    @test applymatrix(adjoint(tei)) ≈ applymatrix(tei)'
+    @test !isunitary(tei)
+    @test !isunitary(tei |> mat)
+
+    # diagonal time evolution
+    hm = matblock(Diagonal(randn(1<<4)))
     tei = TimeEvolution(hm, 0.2im)
     r = rand_state(4)
     r1 = copy(r) |> tei
@@ -47,6 +60,7 @@ end
 end
 
 @testset "test time evolution" begin
+    hm = heisenberg(4)
     te = TimeEvolution(hm, 0.2)
 
     r = rand_state(4)
@@ -59,6 +73,14 @@ end
     @test isunitary(te |> mat)
     cte = copy(te)
     @test cte == te
+
+    # diagonal
+    te = TimeEvolution(kron(Z, Z), 0.5)
+    @test applymatrix(te) ≈ mat(te)
+    @test mat(te) isa Diagonal
+
+    @test !isdiagonal(time_evolve(X, 0.5))
+    @test isdiagonal(time_evolve(Z, 0.5))
 end
 
 @testset "block map" begin

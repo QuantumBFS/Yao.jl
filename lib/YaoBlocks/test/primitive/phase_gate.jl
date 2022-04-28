@@ -46,7 +46,7 @@ end
     @test isreflexive(g) == false
     @test isunitary(g) == true
     @test ishermitian(g) == false
-
+    @test isdiagonal(g) == isdiagonal(mat(g)) == true
 
     g = PhaseGate{ComplexF64}(1.0 + 0im)
     @test @test_nowarn isunitary(g) == true

@@ -52,6 +52,11 @@ for METHOD in (:(LinearAlgebra.ishermitian), :(YaoAPI.isreflexive), :(YaoAPI.isu
     end
 end
 
+# diagonal is preserved by all composition!
+function YaoAPI.isdiagonal(op::CompositeBlock)
+    return all(isdiagonal, subblocks(op))
+end
+
 include("chain.jl")
 include("kron.jl")
 include("control.jl")
