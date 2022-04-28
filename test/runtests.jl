@@ -1,4 +1,9 @@
-using Test, Yao
+using Test
+using Yao
+using YaoAPI
+using YaoArrayRegister
+using YaoBlocks
+using YaoSym
 using Documenter
 using Random
 
@@ -6,8 +11,8 @@ using Random
     include("easybuild/easybuild.jl")
 end
 
-Documenter.doctest(Yao.YaoAPI; manual=false)
-Documenter.doctest(Yao.YaoArrayRegister; manual=false)
-Documenter.doctest(Yao.YaoBlocks; manual=false)
-Documenter.doctest(Yao.YaoSym; manual=false)
-Documenter.doctest(Yao)
+Documenter.doctest(YaoAPI; manual=false)
+Documenter.doctest(YaoArrayRegister; manual=false)
+Documenter.doctest(YaoBlocks; manual=false)
+Documenter.doctest(YaoSym; manual=false)
+# Documenter.doctest(Yao)
