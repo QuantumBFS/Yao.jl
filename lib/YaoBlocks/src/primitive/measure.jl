@@ -92,7 +92,7 @@ Measure(4;locs=(1, 2, 3))
 
 by default this will collapse the current register to measure results.
 
-```jldoctest; setup=:(using Yao)
+```jldoctest; setup=:(using Yao, Random; Random.seed!(123))
 julia> r = normalize!(arrayreg(bit"000") + arrayreg(bit"111"))
 ArrayReg{2, ComplexF64, Array...}
     active qubits: 3/3
@@ -116,14 +116,14 @@ ArrayReg{2, ComplexF64, Array...}
 
 julia> state(r)
 8×1 Matrix{ComplexF64}:
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
+ 0.0 + 0.0im
  1.0 + 0.0im
- 0.0 + 0.0im
- 0.0 + 0.0im
- 0.0 + 0.0im
- 0.0 + 0.0im
- 0.0 + 0.0im
- 0.0 + 0.0im
- 0.0 + 0.0im
 ```
 
 But you can also specify the target bit configuration you want to collapse to with keyword `resetto`.
