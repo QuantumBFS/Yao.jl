@@ -34,7 +34,7 @@ end
 
 Create a ket register. See also [`@bra_str`](@ref).
 
-# Example
+### Examples
 
 a symbolic quantum state can be created simply by
 
@@ -60,7 +60,7 @@ end
 
 Create a bra register. See also [`@ket_str`](@ref).
 
-# Example
+### Examples
 
 Similar to `@ket_str` literal, a symbolic quantum state can be created
 by
