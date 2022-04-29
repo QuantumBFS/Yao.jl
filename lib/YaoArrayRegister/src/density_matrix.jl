@@ -2,7 +2,7 @@ YaoAPI.DensityMatrix{D}(state::AbstractMatrix{T}) where {T,D} = DensityMatrix{D,
 YaoAPI.DensityMatrix(state::AbstractMatrix{T}; nlevel=2) where T = DensityMatrix{nlevel}(state)
 
 """
-    state(ρ::DensityMatrix)
+    state(ρ::DensityMatrix) -> Matrix
 
 Return the raw state of density matrix `ρ`.
 """
@@ -21,7 +21,7 @@ YaoAPI.tracedist(dm1::DensityMatrix{D}, dm2::DensityMatrix{D}) where {D} = trace
 
 # TODO: use batch_broadcast in the future
 """
-    probs(ρ)
+    probs(ρ) -> Vector
 
 Returns the probability distribution from a density matrix `ρ`.
 """

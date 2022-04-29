@@ -11,6 +11,8 @@ using YaoAPI
 using BitBasis
 using LinearAlgebra
 using LegibleLambdas
+using StatsBase, Random
+using LuxurySparse, StaticArrays
 
 export AbstractArrayReg,
     ArrayReg,
@@ -33,7 +35,15 @@ export AbstractArrayReg,
     state,
     statevec,
     relaxedvec,
-    rank3
+    rank3,
+    # operations
+    isnormalized,
+    normalize!,
+    norm,
+    regadd!,
+    regsub!,
+    regscale!,
+    exchange_sysenv
 
 # BitBasis
 export @bit_str, hypercubic
@@ -59,6 +69,7 @@ export AbstractRegister,
     mutual_information,
     fidelity,
     focus!,
+    focus,
     insert_qudits!,
     insert_qubits!,
     most_probable,

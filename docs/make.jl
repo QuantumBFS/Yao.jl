@@ -70,6 +70,7 @@ const PAGES = [
         "man/extending_blocks.md",
     ],
     "Benchmark" => "benchmarks.md",
+    "Performance Tips" => "performancetips.md",
     "Developer Notes" => "dev/index.md",
 ]
 

@@ -194,8 +194,10 @@ It is an alias of [`insert_qudits!`](@ref) function.
 
 """
     focus!(register, locs) -> register
+    focus!(locs...) -> f(register) -> register
 
-Focus the wires on specified location.
+Set the active qubits to focused locations, usually used to execute a subroutine.
+If `register` is not provided, returns a lambda that takes a register as input.
 
 ### Examples
 
@@ -251,21 +253,13 @@ ArrayReg{2, ComplexF64, Array...}
 """
 @interface focus
 
-function focus(f, r::AbstractRegister, locs::NTuple{N, Int}) where N
-    focus!(r, locs)
-    ret = f(r)
-    relax!(r, locs)
-    return ret
-end
-
-focus(f, r::AbstractRegister, locs::Int...) = focus(f, r, locs)
-
-
 """
     relax!(register[, locs]; to_nactive=nqudits(register)) -> register
+    relax!(locs::Int...; to_nactive=nqudits(register)) -> f(register) -> register
 
 Inverse transformation of [`focus!`](@ref), where `to_nactive` is the number
  of active bits for target register.
+If the register is not provided, returns a lambda function that takes a register as input.
 
 ### Examples
 
@@ -477,9 +471,11 @@ ArrayReg{2, ComplexF64, Array...}
 """
     select!(dest::AbstractRegister, src::AbstractRegister, bits::Integer...) -> AbstractRegister
     select!(register::AbstractRegister, bits::Integer...) -> register
+    select!(b::Integer) -> f(register)
 
 select a subspace of given quantum state based on input eigen state `bits`.
 See also [`select`](@ref) for the non-inplace version.
+If the register is not provided, it returns a lambda expression that takes a register as the input.
 
 ### Examples
 

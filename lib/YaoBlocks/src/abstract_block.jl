@@ -9,9 +9,9 @@ function YaoAPI.isdiagonal(m::AbstractMatrix)
 end
 
 """
-    ishermitian(op) -> Bool
+    ishermitian(op::AbstractBlock) -> Bool
 
-check if this operator is hermitian.
+Returns true if `op` is hermitian.
 """
 LinearAlgebra.ishermitian(op) = op' ≈ op
 
@@ -27,11 +27,6 @@ end
 
 YaoAPI.iscommute(op1, op2) = op1 * op2 ≈ op2 * op1
 
-"""
-    apply!(register, block)
-
-Apply a block (of quantum circuit) to a quantum register.
-"""
 function apply!(r::AbstractRegister, b::AbstractBlock)
     _check_size(r, b)
     _apply!(r, b)
@@ -50,11 +45,11 @@ function _apply_fallback!(r::AbstractArrayReg{D,T}, b::AbstractBlock) where {D,T
 end
 
 """
-    |>(register, blk)
+    |>(register, circuit) -> register
 
-Pipe operator for quantum circuits.
+Apply a quantum circuits to register, which modifies the register directly.
 
-# Example
+### Example
 
 ```julia
 julia> arrayreg(bit"0") |> X |> Y
@@ -63,7 +58,7 @@ julia> arrayreg(bit"0") |> X |> Y
 !!! warning
 
     `|>` is equivalent to [`apply!`](@ref), which means it has side effects. You
-    need to copy original register, if you do not want to change it in-place.
+    need to use [`apply`](@ref) if you do not want to change it in-place.
 """
 Base.:(|>)(r::AbstractRegister, blk::AbstractBlock) = apply!(r, blk)
 
@@ -77,11 +72,6 @@ function apply!(r::AbstractRegister, blk::Function)
     end
 end
 
-"""
-    occupied_locs(x)
-
-Return a tuple of occupied locations of `x`.
-"""
 occupied_locs(x::AbstractBlock) = (1:nqudits(x)...,)
 
 """
