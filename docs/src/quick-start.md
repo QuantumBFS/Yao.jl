@@ -11,4 +11,4 @@ go deeper into the manual.
 ## Symbolic calculation with Yao block
 ## Plot quantum circuits
 ## Convert quantum circuits to tensor network
-## Simpllify quantum circuit with ZX calculus
+## Simplify quantum circuit with ZX calculus
