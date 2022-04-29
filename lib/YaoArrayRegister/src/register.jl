@@ -550,7 +550,7 @@ end
 """
     zero_state([T=ComplexF64], n::Int; nbatch::Int=NoBatch())
 
-Create an [`AbstractArrayReg`](@ref) with total number of bits `n`.
+Create an [`AbstractArrayReg`](@ref) that initialized to state ``|0\\rangle^{\\otimes n}``.
 See also [`product_state`](@ref), [`rand_state`](@ref), [`uniform_state`](@ref) and [`ghz_state`](@ref).
 
 ### Examples
@@ -579,7 +579,11 @@ zero_state(::Type{T}, n::Int; kwargs...) where {T} = product_state(T, n, 0; kwar
 """
     ghz_state([T=ComplexF64], n::Int; nbatch::Int=NoBatch())
 
-Create an [`AbstractArrayReg`](@ref) with total number of bits `n`.
+Create a GHZ state (or a cat state) that defined as
+
+```math
+\\frac{|0\\rangle^{\\otimes n} + |1\\rangle^{\\otimes n}}{\\sqrt{2}}.
+```
 
 ### Examples
 
@@ -641,8 +645,11 @@ end
 """
     uniform_state([T=ComplexF64], n; nbatch=NoBatch(), no_transpose_storage=false)
 
-Create a uniform state: ``\\frac{1}{2^n} \\sum_k |k\\rangle``. This state
-can also be created by applying [`H`](@ref) (Hadmard gate) on ``|00⋯00⟩`` state.
+Create a uniform state:
+```math
+\\frac{1}{\\sqrt{2^n}} \\sum_{k=0}^{2^{n}-1} |k\\rangle.
+```
+This state can also be created by applying [`H`](@ref) (Hadmard gate) on ``|00⋯00⟩`` state.
 
 ### Example
 
