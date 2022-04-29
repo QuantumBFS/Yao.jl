@@ -109,7 +109,7 @@ Lazy curried version of [`repeat`](@ref).
 Base.repeat(x::AbstractBlock, locs) = @λ(n -> repeat(n, x, locs...))
 
 occupied_locs(rb::RepeatedBlock) =
-    (vcat([(i:i+nqudits(rb.content)-1) for i in rb.locs]...)...,)
+    (vcat([[i .+ occupied_locs(rb.content) .- 1...] for i in rb.locs]...)...,)
 chsubblocks(x::RepeatedBlock{D}, blk::AbstractBlock{D}) where {D} =
     RepeatedBlock(x.n, blk, x.locs)
 PropertyTrait(x::RepeatedBlock) = PreserveAll()

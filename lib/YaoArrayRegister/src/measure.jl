@@ -1,6 +1,3 @@
-using StatsBase, StaticArrays, BitBasis, Random
-export measure, measure!, select, select!
-
 ## from original YaoAPI
 YaoAPI.measure!(postprocess::PostProcess, op, reg::AbstractRegister; kwargs...) =
     measure!(postprocess, op, reg, AllLocs(); kwargs...)
@@ -46,16 +43,15 @@ function YaoAPI.measure(op, reg::AbstractRegister, locs; kwargs...) where {MODE}
     res
 end
 
-function _measure(rng::AbstractRNG, pl::AbstractVector, nshots::Int)
-    N = log2i(length(pl))
-    sample(rng, basis(BitStr64{N}), Weights(pl), nshots)
+function _measure(rng::AbstractRNG, base, pl::AbstractVector, nshots::Int)
+    sample(rng, base, Weights(pl), nshots)
 end
 
-function _measure(rng::AbstractRNG, pl::AbstractMatrix, nshots::Int)
+function _measure(rng::AbstractRNG, base, pl::AbstractMatrix, nshots::Int)
     B = size(pl, 2)
-    res = Matrix{BitStr64{log2i(size(pl, 1))}}(undef, nshots, B)
+    res = Matrix{eltype(base)}(undef, nshots, B)
     for ib = 1:B
-        @inbounds res[:, ib] = _measure(rng, view(pl, :, ib), nshots)
+        @inbounds res[:, ib] = _measure(rng, base, view(pl, :, ib), nshots)
     end
     return res
 end
@@ -66,7 +62,7 @@ YaoAPI.measure(
     ::AllLocs;
     nshots::Int = 1,
     rng::AbstractRNG = Random.GLOBAL_RNG,
-) = _measure(rng, reg |> probs, nshots)
+) = _measure(rng, basis(reg), reg |> probs, nshots)
 
 function YaoAPI.measure(
     ::ComputationalBasis,
@@ -76,7 +72,7 @@ function YaoAPI.measure(
     rng::AbstractRNG = Random.GLOBAL_RNG,
 )
     pl = dropdims(sum(reg |> rank3 .|> abs2, dims = 2), dims = 2)
-    return _measure(rng, pl, nshots)
+    return _measure(rng, basis(reg), pl, nshots)
 end
 
 function YaoAPI.measure!(
@@ -90,9 +86,9 @@ function YaoAPI.measure!(
     B = size(state, 3)
     nstate = similar(reg.state, D ^ nremain(reg), B)
     pl = dropdims(sum(state .|> abs2, dims = 2), dims = 2)
-    res = Vector{BitStr64{nactive(reg)}}(undef, B)
+    res = Vector{eltype(basis(reg))}(undef, B)
     @inbounds for ib = 1:B
-        ires = _measure(rng, view(pl, :, ib), 1)[]
+        ires = _measure(rng, basis(reg), view(pl, :, ib), 1)[]
         # notice ires is `BitStr` type, can be use as indices directly.
         nstate[:, ib] = view(state, Int64(ires) + 1, :, ib) ./ sqrt(pl[Int64(ires)+1, ib])
         res[ib] = ires
@@ -141,12 +137,6 @@ import YaoAPI: select, select!
 select(r::AbstractArrayReg, bits::AbstractVector{T}) where {T<:Integer} =
     arrayreg(r.state[Int64.(bits).+1, :]; nbatch=nbatch(r), nlevel=nlevel(r))
 select(r::AbstractArrayReg, bit::Integer) = select(r, [bit])
-
-"""
-    select!(b::Integer) -> f(register)
-
-Lazy version of [`select!`](@ref). See also [`select`](@ref).
-"""
 select!(bits...) = @λ(register -> select!(register, bits...))
 
 function select!(r::AbstractArrayReg, bits::AbstractVector{T}) where {T<:Integer}

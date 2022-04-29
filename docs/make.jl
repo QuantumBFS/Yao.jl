@@ -68,6 +68,7 @@ const PAGES = [
         "man/bitbasis.md",
     ],
     "Examples" => build("examples"),
+    "Performance Tips" => "performancetips.md",
 ]
 
 indigo = DocThemeIndigo.install(Yao)

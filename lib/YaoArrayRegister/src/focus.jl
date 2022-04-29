@@ -1,21 +1,7 @@
 using YaoAPI, TupleTools
 
-export focus!, relax!, partial_tr, exchange_sysenv, focus
-
-
-"""
-    contiguous_shape_orders(shape, orders)
-
-Merge the shape and orders if the orders are contiguous. Returns the
-new merged shape and order.
-
-# Example
-
-```jldoctest; setup=:(using YaoArrayRegister)
-julia> YaoArrayRegister.contiguous_shape_orders((2, 3, 4), (1, 2, 3))
-([24], [1])
-```
-"""
+# Merge the shape and orders if the orders are contiguous. Returns the
+# new merged shape and order.
 function contiguous_shape_orders(shape, orders)
     new_shape, new_orders = Int[], Int[]
     prv = -1
@@ -86,18 +72,9 @@ function unsafe_group_permutedims(A::AbstractArray, orders)
     return permutedims(reshape(A, s...), o)
 end
 
-"""
-    is_order_same(locs) -> Bool
-
-Check if the order specified by `locs` is the same as current order.
-"""
+# Check if the order specified by `locs` is the same as current order.
 is_order_same(locs) = all(a == b for (a, b) in zip(locs, 1:length(locs)))
 
-"""
-    focus!(locs...) -> f(register) -> register
-
-Lazy version of [`focus!`](@ref), this returns a lambda which requires a register.
-"""
 YaoAPI.focus!(locs::Int...) = focus!(locs)
 YaoAPI.focus!(locs::NTuple{N,Int}) where {N} = @λ(register -> focus!(register, locs))
 YaoAPI.focus!(locs::UnitRange) = @λ(register -> focus!(register, locs))
@@ -114,6 +91,13 @@ function YaoAPI.focus!(r::AbstractArrayReg{D}, locs) where {D}
     r.state = reshape(arr, D^length(locs), :)
     return r
 end
+function YaoAPI.focus(f, r::AbstractRegister, locs::NTuple{N, Int}) where N
+    focus!(r, locs)
+    ret = f(r)
+    relax!(r, locs)
+    return ret
+end
+YaoAPI.focus(f, r::AbstractRegister, locs::Int...) = focus(f, r, locs)
 
 function YaoAPI.relax!(r::AbstractArrayReg{D}, locs; to_nactive::Int = nqudits(r)) where {D}
     r.state = reshape(state(r), D^to_nactive, :)
@@ -127,12 +111,6 @@ end
 YaoAPI.relax!(r::AbstractRegister; to_nactive::Int = nqudits(r)) =
     relax!(r, (); to_nactive = to_nactive)
 
-"""
-    relax!(locs::Int...; to_nactive=nqudits(register)) -> f(register) -> register
-
-Lazy version of [`relax!`](@ref), it will be evaluated once you feed a register
-to its output lambda.
-"""
 YaoAPI.relax!(locs::Int...; to_nactive::Union{Nothing,Int} = nothing) =
     relax!(locs; to_nactive = to_nactive)
 
@@ -156,9 +134,29 @@ end
     exchange_sysenv(reg::AbstractArrayReg) -> AbstractRegister
 
 Exchange system (focused qubits) and environment (remaining qubits).
+
+```jldoctest; setup=:(using Yao)
+julia> reg = rand_state(5)
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 5/5
+    nlevel: 2
+
+julia> focus!(reg, (2,4))
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 2/5
+    nlevel: 2
+
+julia> exchange_sysenv(reg)
+ArrayReg{2, ComplexF64, Adjoint...}
+    active qubits: 3/5
+    nlevel: 2
+```
 """
-function exchange_sysenv(reg::AbstractArrayReg)
+function exchange_sysenv(reg::BatchedArrayReg)
     r3 = rank3(reg)
     M, N, B = size(r3)
     arrayreg(reshape(permutedims(r3, (2, 1, 3)), :, M*B); nbatch=nbatch(reg), nlevel=nlevel(reg))
+end
+function exchange_sysenv(reg::ArrayReg{D}) where D
+    ArrayReg{D}(reg.state')
 end

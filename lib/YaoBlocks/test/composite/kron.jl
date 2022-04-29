@@ -51,6 +51,8 @@ end
         g = kron(2, 2 => X)
         @test m == mat(g)
         @test occupied_locs(g) == (2,)
+        @test occupied_locs(kron(5, 3=>X, 4=>Y)) == (3, 4)
+        @test occupied_locs(kron(5, 3=>X, 4=>I2)) == (3,)
         blks = [Rx(0.3)]
         @test chsubblocks(g, blks) |> subblocks |> collect == blks
 
