@@ -6,6 +6,9 @@ go deeper into the manual.
 ## Create a quantum register
 ## Create quantum circuit with Yao blocks
 ## Create Hamiltonian with Yao blocks
-## Automatic Differentiate a Yao block
+## Automatic differentiate a Yao block
 ## Combine Yao with ChainRules/Zygote
-## Symbolic Calculation with Yao block
+## Symbolic calculation with Yao block
+## Plot quantum circuits
+## Convert quantum circuits to tensor network
+## Simpllify quantum circuit with ZX calculus
