@@ -19,7 +19,7 @@ Eulerφ(N) = length(Z_star(N))
 
 obtain `s` and `r` from `ϕ` that satisfies `|s/r - ϕ| ≦ 1/2r²`
 """
-continued_fraction(ϕ, niter::Int) = niter==0 ? floor(Int, ϕ) : floor(Int, ϕ) + 1//continued_fraction(1/mod(ϕ, 1), niter-1)
+continued_fraction(ϕ, niter::Int) = niter==0 || isinteger(ϕ) ? floor(Int, ϕ) : floor(Int, ϕ) + 1//continued_fraction(1/mod(ϕ, 1), niter-1)
 continued_fraction(ϕ::Rational, niter::Int) = niter==0 || ϕ.den==1 ? floor(Int, ϕ) : floor(Int, ϕ) + 1//continued_fraction(1/mod(ϕ, 1), niter-1)
 
 """
@@ -73,7 +73,7 @@ Estimate the order of `x` to `L`, `r`, from a floating point number `ϕ ∼ s/r`
 function order_from_float(ϕ, x, L)
     k = 1
     rnum = continued_fraction(ϕ, k)
-    while rnum.den < L
+    while rnum.den < L && k < 100
         r = rnum.den
         if is_order(r, x, L)
             return r
