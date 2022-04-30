@@ -9,132 +9,153 @@ end
 
 # [Quantum Registers](@id registers)
 
-A quantum register is a quantum state.
-`Yao` provides two types of quantum registers [`ArrayReg`](@ref) that uses a matrix as its storage and [`BatchedArrayReg`] that has an extra batch dimension.
-
-## Minimal Required Interfaces
-
-The following interfaces are the minial required interfaces to make a register's printing work and be able to accept certain gates/blocks.
-
-But if you don't want to work with our default printing, you could define your custom printing with [`Base.show`](https://docs.julialang.org/en/v1/manual/types/#man-custom-pretty-printing-1).
+A quantum register is a quantum state or a batch of quantum states.
+`Yao` provides two types of quantum registers [`ArrayReg`](@ref) and [`BatchedArrayReg`](@ref).
 
 ```@docs
-YaoArrayRegister.nqubits
-YaoArrayRegister.nactive
-```
-
-you can define [`instruct!`](@ref), to provide specialized instructions for the registers from plain storage types.
-
-## Qubit Management Interfaces
-
-```@docs
-YaoArrayRegister.append_qudits!
-YaoArrayRegister.reorder!
-```
-
-## Qubit Scope Management Interfaces
-
-### LDT format
-Concepturely, a wave function ``|\psi\rangle`` can be represented in a low dimentional tensor (LDT) format of order-3, L(f, r, b).
-
-* f: focused (i.e. operational) dimensions
-* r: remaining dimensions
-* b: batch dimension.
-
-For simplicity, let's ignore batch dimension for the now, we have
-```math
-|\psi\rangle = \sum\limits_{x,y} L(x, y, .) |j\rangle|i\rangle
-```
-
-Given a configuration `x` (in operational space), we want get the i-th bit using `(x<<i) & 0x1`, which means putting the small end the qubit with smaller index. In this representation `L(x)` will get return ``\langle x|\psi\rangle``.
-
-!!! note
-
-    **Why not the other convension**: Using the convention of putting 1st bit on the big end will need to know the total number of qubits `n` in order to know such positional information.
-
-### HDT format
-Julia storage is column major, if we reshape the wave function to a shape of ``2\times2\times ... \times2`` and get the HDT (high dimensional tensor) format representation H, we can use H(``x_1, x_2, ..., x_3``) to get ``\langle x|\psi\rangle``.
-
-
-# Array Registers
-
-We provide [`ArrayReg`](@ref) as built in register type for simulations. It is a simple wrapper of a Julia array, e.g on CPU, we use `Array` by default and on CUDA devices we could use `CuArray`. You don't have to define your custom array type if the storage is array based.
-
-## Constructors
-
-```@docs
+AbstractRegister
+AbstractArrayReg
 ArrayReg
+BatchedArrayReg
 ```
 
 We define some shortcuts to create simulated quantum states easier:
 
 ```@docs
+arrayreg
 product_state
 zero_state
+zero_state_like
 rand_state
 uniform_state
-oneto
-repeat
+ghz_state
+clone
 ```
 
-## Properties
+In a register, qubits are distinguished as active and inactive (or remaining).
+The total number of qubits is the number of active qubits plus the number of remaining qubits. 
+Only active qubits are visible to quantum operators and the number of these qubits are the *size* of a register.
+Making this distinction of qubits allows writing reusable quantum circuits.
+For example, Suppose we want to run a quantum Fourier transformation circuit of size 4 on qubits `(1, 3, 5, 7)`,
+we first set the target qubits to active qubits the reset to inactive, then we apply the circuit on it, finally we unset the inactive qubits.
 
-You can access the storage of an [`ArrayReg`](@ref) with:
+```@docs
+nqudits
+nqubits
+nactive
+nremain
+nbatch,
+nlevel,
+focus!
+focus
+relax!
+zero_state
+exchange_sysenv
+```
+
+## Storage
+
+Both [`ArayReg`](@reef) and [`BatchedArrayReg`](@ref) use matrices as the storage. For example, for a quantum register with ``a`` active qubits, ``r`` remaining qubits and batch size ``b``, the storage is as follows
+
+![](../assets/images/regstorage.svg)
+
+The first dimension of size ``2^a`` is for active qubits, only this subset of qubits are allowed to interact with blocks. Since we reshaped the state vector into a matrix, applying a quantum operator can always be represented as a matrix-matrix multiplication . In practice, most gates have in-place implementation that does not require constructing the operator matrix explicitly.
+
+You can access different views of the storage of an [`ArrayReg`](@ref) with the following functions:
 
 ```@docs
 state
+basis
 statevec
 relaxedvec
 hypercubic
 rank3
+viewbatch
+transpose_storage
 ```
 
 ## Operations
 
-We defined basic arithmatics for [`ArrayReg`](@ref), besides since we do not garantee
-normalization for some operations on [`ArrayReg`](@ref) for simulation, [`normalize!`](@ref) and 
-[`isnormalized`](@ref) is provided to check and normalize the simulated register.
+The list of arithmetic operations for [`ArrayReg`](@ref) include 
+* `+`
+* `-`
+* `*`
+* `/` (scalar)
+* `adjoint`
 
+Then the inner product can be computed as follows.
+
+```julia
+julia> reg = rand_state(3);
+
+julia> reg' * reg
+0.9999999999999998 + 0.0im
+```
+
+```@docs
+AdjointArrayReg
+```
+
+We also have some faster inplace versions of arithematic operations
+```@docs
+regadd!,
+regsub!,
+regscale!,
+```
+
+We also define the following functions for state normalization, and distance measurement.
 ```@docs
 normalize!
 isnormalized
+fidelity
+tracedist
 ```
 
-## Specialized Instructions
+## Resource management and addressing
 
-We define some specialized instruction by specializing [`instruct!`](@ref) to improve the performance for simulation and dispatch them with multiple dispatch.
+```@docs
+add_qudits!
+add_qubits!
+append_qudits!
+append_qubits!
+reorder!
+invorder!
+```
 
-Implemented `instruct!` is listed below:
+Only a subset of qubits that does not interact with other qubits can be removed, the best approach is first measuring it in computational basis first.
+It can be done with the [`measure!`](@ref) function by setting the first argument to `RemoveMeasured()`.
+
+## Instruction set
+
+Although we have matrix representation for Yao blocks, specialized instructions are much faster and memory efficient than using the matrix-matrix product.
+These instructions are specified with the `instruct!` function listed bellow.
+
+```@docs
+YaoArrayRegister.instruct!
+```
 
 ## Measurement
 
-Simulation of measurement is mainly achieved by sampling and projection.
+We have a true measure function `measure!` that collapses the state after the measurement.
+We also have some "cheating" functions to facilitate classical simulation.
 
-#### Sample
-
-Suppose we want to measure operational subspace, we can first get
-```math
-p(x) = \|\langle x|\psi\rangle\|^2 = \sum\limits_{y} \|L(x, y, .)\|^2.
-```
-Then we sample an ``a\sim p(x)``. If we just sample and don't really measure (change wave function), its over.
-
-#### Projection
-```math
-|\psi\rangle' = \sum_y L(a, y, .)/\sqrt{p(a)} |a\rangle |y\rangle
+```@docs
+measure!
+measure
+select!
+select
+collapseto!
+probs
+most_probable,
 ```
 
-Good! then we can just remove the operational qubit space since `x` and `y` spaces are totally decoupled and `x` is known as in state `a`, then we get
+## Density matrices
 
-```math
-|\psi\rangle'_r = \sum_y l(0, y, .) |y\rangle
-```
-
-where `l = L(a:a, :, :)/sqrt(p(a))`.
-
-
-## References
-
-```@autodocs
-Modules = [YaoArrayRegister]
-Order = [:function]
+```@docs
+DensityMatrix
+density_matrix
+partial_tr
+purify
+von_neumann_entropy,
+mutual_information,
 ```
