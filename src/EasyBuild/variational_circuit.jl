@@ -111,4 +111,4 @@ end
 
 variational_circuit(n::Int; kwargs...) = variational_circuit(n, 3, pair_ring(n); kwargs...)
 
-variational_circuit(nbit::Int, nlayer::Int; kwargs...) = variational_circuit(nbit, nlayer, pair_ring(nbit), kwargs...)
+variational_circuit(nbit::Int, nlayer::Int; kwargs...) = variational_circuit(nbit, nlayer, pair_ring(nbit); kwargs...)
