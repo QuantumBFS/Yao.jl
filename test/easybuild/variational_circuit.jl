@@ -31,6 +31,8 @@ end
 end
 
 @testset "entangler" begin
+    c = variational_circuit(5, 5)
+    @test nparameters(c) == 80
     c = variational_circuit(5; entangler=(n,i,j)->put(n,(i,j)=>ConstGate.CZ))
     @test nparameters(c) == 50
     c = variational_circuit(5; entangler=(n,i,j)->put(n,(i,j)=>rot(ConstGate.CNOT, 0.0)))
