@@ -4,7 +4,7 @@ export Add
     Add{D} <: CompositeBlock{D}
     Add(blocks::AbstractBlock...) -> Add
 
-Type for block addition.
+The type for representing the addition of blocks, which can be used to generate Hamiltonians and observables.
 
 ```jldoctest; setup=:(using Yao)
 julia> X + X

@@ -23,12 +23,18 @@ ChainBlock(blocks::AbstractBlock{D}...) where {D} =
 nqudits(c::ChainBlock) = c.n
 
 """
-    chain(blocks...)
+    chain(blocks...) -> ChainBlock
+    chain(n) -> ChainBlock
 
-Return a [`ChainBlock`](@ref) which chains a list of blocks with same
-[`nqudits`](@ref). If there is lazy evaluated
-block in `blocks`, chain can infer the number of qudits and create an
-instance itself.
+Return a [`ChainBlock`](@ref) which chains a list of blocks with the same number of qudits.
+Let ``G_i`` be a sequence of n-qudit blocks, the matrix representation of block `chain(G_1, G_2, \\ldots G_m)` is
+
+```math
+G_m G_{m-1}\\ldots G_1
+```
+
+It is almost equivalent to matrix multiplication except the order is reversed.
+We make its order different from regular matrix multiplication because quantum circuits can be represented more naturally in this form.
 
 ### Examples
 

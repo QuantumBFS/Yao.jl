@@ -10,11 +10,12 @@ struct Daggered{BT<:AbstractBlock,D} <: TagBlock{BT,D}
 end
 
 """
-    Daggered(x)
+    Daggered(block)
 
-Create a [`Daggered`](@ref) block with given block `x`.
+Create a [`Daggered`](@ref) block.
+Let ``G`` be a input block, `G'` or `Daggered(block)` in code represents ``G^\\dagger``.
 
-# Example
+### Examples
 
 The inverse QFT is not hermitian, thus it will be tagged with a `Daggered` block.
 
