@@ -47,6 +47,7 @@ end
     T = ComplexF64
     D = 8
     for y in [pmrand(T, D), sprand(T, D, D, 0.5), Diagonal(randn(T, D))]
+        @info "pmrand", pmrand(ComplexF64, 5), methods(pmrand)
         @info "y", typeof(y)
         @test projection(y, y) == y
         l, r = randn(T, D), randn(T, D)
