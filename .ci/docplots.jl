@@ -3,28 +3,25 @@ using Comonicon, TikzGenerator
 using Yao
 
 imgpath(filename) = pkgdir(Yao, "docs", "src", "assets", filename)
-function brace!(c::Canvas, start, stop, str::String; mirror::Bool, draw="black", thick=true)
-    edge!(c, start, stop; decoration="{brace,$(mirror ? "mirror" : "")raise=0.5cm}",decorate=true, thick, draw)
-end
 
 function matrix!(c::Canvas, offset::Tuple, size::Tuple; text_row="", text_col="")
     dx, dy = offset
     X, Y = size
-    rectangle!(c, dx, dy, dx+X, dy+Y; draw="", line_width=0.05, pattern="grid", fill=false)
-    text!(c, dx-1, dy+Y/2, text_row)
-    brace!(c, (dx, dy), (dx, dy+Y); mirror=false)
-    text!(c, dx+X/2, dy-1, text_col)
-    brace!(c, (dx, dy), (dx+X, dy); mirror=true)
+    rectangle!(c, dx, dy, X, Y; draw="", line_width=0.05, pattern="grid", fill=false)
+    #text!(c, dx-1, dy+Y/2, text_row)
+    brace!(c, (dx, dy), (dx, dy+Y), text_row; mirror=false)
+    #text!(c, dx+X/2, dy-1, text_col)
+    brace!(c, (dx, dy), (dx+X, dy), text_col; mirror=true)
 end
 
 @cast function regstorage()
     canvas(imgpath("regstorage.svg"); libs=["patterns","decorations.pathreplacing"]) do c
         # output register
-        matrix!(c, (0, 0), (5, 3); text_row=raw"\large $2^a$", text_col=raw"\large $2^r \times b$")
+        matrix!(c, (5, 0), (5, 3); text_row=raw"\large $2^a$", text_col=raw"\large $2^r \times b$")
         # input register
-        matrix!(c, (0, 0), (5, 3); text_row=raw"\large $2^a$", text_col=raw"\large $2^r \times b$")
+        #matrix!(c, (-7, 0), (5, 3); text_row=raw"\large $2^a$", text_col=raw"\large $2^r \times b$")
         # input operator
-        matrix!(c, (0, 0); text_row=raw"\large $2^a$", text_col=raw"\large $2^r \times b$")
+        #matrix!(c, (0, 0), (3, 3); text_row=raw"\large $2^a$", text_col=raw"\large $2^r \times b$")
     end
 end
 
