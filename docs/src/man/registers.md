@@ -7,11 +7,10 @@ DocTestSetup = quote
 end
 ```
 
-# [Registers](@id registers)
-Quantum circuits process quantum states. A quantum state being processing by a quantum circuit will be stored on a quantum register.
-In **Yao** we provide several types for registers. The default type for registers is the [`ArrayReg`](@ref) which is defined in [YaoArrayRegister.jl](https://github.com/QuantumBFS/YaoArrayRegister.jl).
+# [Quantum Registers](@id registers)
 
-The registers can be extended by subtyping [`AbstractRegister`](@ref) and define correspinding **register interfaces** defined in [YaoAPI.jl](https://github.com/QuantumBFS/YaoAPI.jl), which includes:
+A quantum register is a quantum state.
+`Yao` provides two types of quantum registers [`ArrayReg`](@ref) that uses a matrix as its storage and [`BatchedArrayReg`] that has an extra batch dimension.
 
 ## Minimal Required Interfaces
 
