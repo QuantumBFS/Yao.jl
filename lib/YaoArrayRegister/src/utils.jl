@@ -17,7 +17,8 @@ function sort_unitary(::Val{D}, U::AbstractMatrix, locs::NTuple{N,Int}) where {D
     if all(each > 0 for each in tuple_diff(locs))
         return U
     else
-        return permutedims(reshape(U, fill(D)...), TupleTools.sortperm(TupleTools.sortperm(locs)))
+        pm = TupleTools.sortperm(TupleTools.sortperm(locs))
+        return reshape(permutedims(reshape(U, fill(D, 2*N)...), (pm..., pm .+ N...)), size(U))
     end
 end
 

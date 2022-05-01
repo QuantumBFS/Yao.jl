@@ -1,6 +1,5 @@
 using YaoArrayRegister
 using Test, LinearAlgebra
-using YaoArrayRegister: accum_instruct!
 using SparseArrays: sprand
 
 @testset "operators" begin

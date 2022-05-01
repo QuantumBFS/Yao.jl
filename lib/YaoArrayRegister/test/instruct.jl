@@ -1,6 +1,6 @@
 using Test, YaoAPI, YaoArrayRegister, LinearAlgebra, LuxurySparse, SparseArrays
 #using YaoArrayRegister.Const
-using YaoArrayRegister: linop2dense, general_controlled_gates
+using YaoArrayRegister: linop2dense, general_controlled_gates, parametric_mat
 
 # NOTE: we don't have block here, feel safe to use
 
@@ -41,7 +41,7 @@ using YaoArrayRegister: linop2dense, general_controlled_gates
     U1 = randn(ComplexF64, 2, 2)
     REGB = BatchedArrayReg(STB, 5)
     @test instruct!(copy(REGB), U1, (3,)).state ≈ instruct!(Val(2), copy(STB), U1, (3,)) ≈ instruct!(Val(2), copy(STB), U1, (3,), (), ())
-    @test instruct!(Val(2), copy(STB), randn(ComplexF64, 2, 2), ()) ≈ STB
+    @test instruct!(arrayreg(copy(STB); nbatch=5), randn(ComplexF64, 2, 2), ()) |> state ≈ STB
 
     # PermMatrix
     U1 = PermMatrix([0.0 -1.0im; 1.0im 0.0im])
@@ -55,12 +55,12 @@ end
         @test_logs (
             :warn,
             "Element Type Mismatch: register Complex{Float32}, operator Complex{Float64}. Converting operator to match, this may cause performance issue",
-        ) instruct!(Val(2), v, Const.CNOT, (1, 2))
+        ) instruct!(arrayreg(v), Const.CNOT, (1, 2))
     else
         @test_logs (
             :warn,
             "Element Type Mismatch: register ComplexF32, operator ComplexF64. Converting operator to match, this may cause performance issue",
-        ) instruct!(Val(2), v, Const.CNOT, (1, 2))
+        ) instruct!(arrayreg(v), Const.CNOT, (1, 2))
     end
 end
 
@@ -128,25 +128,25 @@ end
     T = ComplexF64
     theta = 0.5
     for (R, G) in [(:Rx, Const.X), (:Ry, Const.Y), (:Rz, Const.Z), (:PSWAP, Const.SWAP)]
-        @test rot_mat(T, Val(R), theta) ≈ rot_mat(T, G, theta)
+        @test parametric_mat(T, Val(R), theta) ≈ rot_mat(T, G, theta)
     end
-    @test rot_mat(T, Val(:CPHASE), theta) ≈
+    @test parametric_mat(T, Val(:CPHASE), theta) ≈
           rot_mat(T, Diagonal([1, 1, 1, -1]), theta) * exp(im * theta / 2)
     for ST in [randn(ComplexF64, 1 << 5), randn(ComplexF64, 1 << 5, 10)]
         @test instruct!(Val(2), copy(ST), Val(:H), (4,)) ≈ instruct!(Val(2), copy(ST), Const.H, (4,))
         for R in [:Rx, :Ry, :Rz]
             @test instruct!(Val(2), copy(ST), Val(R), (4,), θ) ≈
-                  instruct!(Val(2), copy(ST), Matrix(rot_mat(T, Val(R), θ)), (4,))
+                  instruct!(Val(2), copy(ST), Matrix(parametric_mat(T, Val(R), θ)), (4,))
             @test instruct!(Val(2), copy(ST), Val(R), (4,), (1,), (0,), θ) ≈
-                  instruct!(Val(2), copy(ST), Matrix(rot_mat(T, Val(R), θ)), (4,), (1,), (0,))
+                  instruct!(Val(2), copy(ST), Matrix(parametric_mat(T, Val(R), θ)), (4,), (1,), (0,))
         end
         for R in [:CPHASE, :PSWAP]
             @test instruct!(Val(2), copy(ST), Val(R), (4, 2), θ) ≈
-                  instruct!(Val(2), copy(ST), Matrix(rot_mat(T, Val(R), θ)), (4, 2))
+                  instruct!(Val(2), copy(ST), Matrix(parametric_mat(T, Val(R), θ)), (4, 2))
             instruct!(Val(2), copy(ST), Val(R), (4, 2), (1,), (0,), θ)
-            instruct!(Val(2), copy(ST), Matrix(rot_mat(T, Val(R), θ)), (4, 2), (1,), (0,))
+            instruct!(Val(2), copy(ST), Matrix(parametric_mat(T, Val(R), θ)), (4, 2), (1,), (0,))
             @test instruct!(Val(2), copy(ST), Val(R), (4, 2), (1,), (0,), θ) ≈
-                  instruct!(Val(2), copy(ST), Matrix(rot_mat(T, Val(R), θ)), (4, 2), (1,), (0,))
+                  instruct!(Val(2), copy(ST), Matrix(parametric_mat(T, Val(R), θ)), (4, 2), (1,), (0,))
         end
     end
 end
@@ -159,10 +159,10 @@ end
 @testset "test empty locs" begin
     st = rand(ComplexF64, 1 << 4)
     pm = pmrand(ComplexF64, 2)
-    @test instruct!(Val(2), copy(st), pm, ()) == st
+    @test instruct!(arrayreg(copy(st)), pm, ()) |> statevec == st
 
     for G in [:Z, :S, :T, :Sdag, :Tdag]
-        @test instruct!(Val(2), copy(st), Val(G), ()) == st
+        @test instruct!(arrayreg(copy(st)), Val(G), ()) |> statevec == st
     end
 end
 

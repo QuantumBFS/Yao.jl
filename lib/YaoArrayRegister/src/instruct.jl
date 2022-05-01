@@ -8,12 +8,12 @@
 
 function YaoAPI.instruct!(r::BatchedArrayReg{D}, operator, locs::Tuple, args...) where {D}
     length(locs) == 0 && return r
-    instruct!(Val(D), r.state, _match_type(r.state, operator), args...)
+    instruct!(Val(D), r.state, _match_type(r.state, operator), locs, args...)
     return r
 end
 function YaoAPI.instruct!(r::ArrayReg{D}, operator, locs::Tuple, args...) where {D}
     length(locs) == 0 && return r
-    instruct!(Val(D), vec(r.state), _match_type(r.state, operator), args...)
+    instruct!(Val(D), vec(r.state), _match_type(r.state, operator), locs, args...)
     return r
 end
 _match_type(::AbstractVecOrMat{T1}, operator::Val) where {T1} = operator
