@@ -462,7 +462,7 @@ julia> r1 = product_state(ComplexF32, bit"100"; nbatch=2);
 
 julia> r2 = product_state(ComplexF32, [0, 0, 1]; nbatch=2);
 
-julia> r3 = product_state(ComplexF32, 3, 0b1001; nbatch=2);
+julia> r3 = product_state(ComplexF32, 3, 0b001; nbatch=2);
 
 julia> r1 ≈ r2   # because we read bit strings from right to left, vectors from left to right.
 true
@@ -777,7 +777,7 @@ julia> collect(basis(rand_state(3)))
  111 ₍₂₎
 ```
 """
-BitBasis.basis(r::AbstractRegister{2}) = basis(BitStr{nactive(r),Int})
+BitBasis.basis(r::AbstractRegister{D}) where D = basis(DitStr{D,nactive(r),Int})
 
 
 """

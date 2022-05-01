@@ -415,7 +415,20 @@ end
 The non-inplace version of applying a block (of quantum circuit) to a quantum register.
 Check `apply!` for the faster inplace version.
 """
-apply(r::AbstractRegister, b) = apply!(copy(r), b)
+# overwrite interface, this one avoids one copy
+function apply(reg::AbstractRegister{D}, block) where D
+    if D == 2
+        return apply!(copy(reg), block)
+    else
+        YaoBlocks._check_size(reg, block)
+        operator = sort_unitary_d(mat(block.content), block.locs)
+        state = statevec(reg)
+        nbits = logdi(size(state, 1), D)
+        stateout = zero(state)
+        accum_instruct!(Val(D), nbits, stateout, state, TupleTools.sort(block.locs), YaoArrayRegister.autostatic(operator))
+        return ArrayReg{D}(stateout)
+    end
+end
 
 function generic_dispatch!(f::Union{Function,Nothing}, x::AbstractBlock, it::Dispatcher)
     x = setiparams(f, x, consume!(it, niparams(x)))

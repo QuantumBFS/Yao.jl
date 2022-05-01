@@ -46,7 +46,7 @@ export AbstractArrayReg,
     exchange_sysenv
 
 # BitBasis
-export @bit_str, hypercubic
+export @bit_str, @dit_str, BitStr, DitStr, hypercubic
 
 # YaoAPI
 export AbstractRegister,
@@ -74,6 +74,7 @@ export AbstractRegister,
     insert_qubits!,
     most_probable,
     instruct!,
+    accum_instruct!,
     invorder!,
     measure,
     measure!,
@@ -106,6 +107,7 @@ include("operations.jl")
 include("focus.jl")
 
 include("instruct.jl")
+include("qudit_instruct.jl")
 
 include("density_matrix.jl")
 include("measure.jl")

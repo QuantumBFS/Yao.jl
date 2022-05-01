@@ -13,11 +13,11 @@ end
 
 Return an sorted unitary operator according to the locations.
 """
-function sort_unitary(U::AbstractMatrix, locs::NTuple{N,Int}) where {N}
+function sort_unitary(::Val{D}, U::AbstractMatrix, locs::NTuple{N,Int}) where {D,N}
     if all(each > 0 for each in tuple_diff(locs))
         return U
     else
-        return reorder(U, TupleTools.sortperm(locs))
+        return permutedims(reshape(U, fill(D)...), TupleTools.sortperm(TupleTools.sortperm(locs)))
     end
 end
 
