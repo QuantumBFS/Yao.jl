@@ -265,7 +265,7 @@ function YaoAPI.instruct!(::Val{2},
     bit_parity = iseven(length(locs)) ? 1 : -1
     factor = T(-im)^length(locs)
 
-    @threads for b in basis(Int, state)
+    @threads for b in basis(state)
         if anyone(b, do_mask)
             i = b + 1
             i_ = flip(b, mask) + 1
@@ -283,7 +283,7 @@ function YaoAPI.instruct!(::Val{2},
     locs::NTuple{N,Int},
 ) where {T,N}
     mask = bmask(Int, locs)
-    @threads for b in basis(Int, state)
+    @threads for b in basis(state)
         if isodd(count_ones(b & mask))
             mulrow!(state, b + 1, -1)
         end
@@ -301,7 +301,7 @@ for (G, FACTOR) in zip(
         locs::NTuple{N,Int},
     ) where {T,N}
         mask = bmask(Int, locs)
-        @threads for b in basis(Int, state)
+        @threads for b in basis(state)
             mulrow!(state, b + 1, $FACTOR^count_ones(b & mask))
         end
         return state

@@ -51,7 +51,7 @@ end
 
 @testset "fix measure output type error" begin
     res = measure(rand_state(1; nbatch = 10))
-    @test res isa Matrix{BitStr64{1}}
+    @test res isa Matrix{<:BitStr{1}}
 end
 
 @testset "fix measure kwargs error" begin

@@ -148,7 +148,7 @@ swap(loc1::Int, loc2::Int) = @λ(n -> swap(n, loc1, loc2))
 
 function mat(::Type{T}, g::Swap) where {T}
     mask = bmask(g.locs[1], g.locs[2])
-    orders = map(b -> swapbits(b, mask) + 1, basis(g.n))
+    orders = map(b -> swapbits(b, mask) + 1, 0:1<<g.n-1)
     return PermMatrix(orders, ones(T, nlevel(g)^g.n))
 end
 

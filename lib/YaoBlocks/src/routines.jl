@@ -192,7 +192,7 @@ function cunmat(
 
     @inbounds colptr[1] = 1
     ctest = controller(cbits, cvals)
-    @inbounds @simd for b in basis(nbit)
+    @inbounds @simd for b in 0:1<<nbit-1
         if ctest(b)
             colptr[b+2] = colptr[b+1] + MM
         else
