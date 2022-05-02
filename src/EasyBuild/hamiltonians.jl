@@ -39,9 +39,9 @@ function rydberg_chain(nbits::Int; Ω::Number=0.0, Δ::Real=0.0, V::Real=0.0, r:
     Y1r = matblock(sparse([3, 2], [2, 3], [1.0im, -1.0im], 3, 3); nlevel=3)
     # single site term in {|1>, |r>}.
     h = Add(nbits; nlevel=3)
-    !iszero(Δ) && push!(h, Δ * sum([put(nbits, i=>Z1r) for i=1:nbits]))
-    !iszero(real(Ω)) && push!(h, real(Ω) * sum([put(nbits, i=>X1r) for i=1:nbits]))
-    !iszero(imag(Ω)) && push!(h, imag(Ω) * sum([put(nbits, i=>Y1r) for i=1:nbits]))
+    !iszero(Δ) && push!(h, (-Δ) * sum([put(nbits, i=>Pr) for i=1:nbits]))
+    !iszero(real(Ω)) && push!(h, real(Ω)/2 * sum([put(nbits, i=>X1r) for i=1:nbits]))
+    !iszero(imag(Ω)) && push!(h, imag(Ω)/2 * sum([put(nbits, i=>Y1r) for i=1:nbits]))
     # interaction
     !iszero(V) && push!(h, V * sum([put(nbits, (i,i+1)=>kron(Pr, Pr)) for i=1:nbits-1]))
     # Raman term

@@ -673,6 +673,25 @@ function Base.show(io::IO, reg::BatchedArrayReg{D,T,MT}) where {D,T,MT}
     print(io, "\n    nbatch: ", nbatch(reg))
 end
 
+print_table(reg::AbstractArrayReg; digits::Int=5) = print_table(stdout, reg; digits)
+function print_table(io::IO, reg::AbstractArrayReg; digits::Int=5)
+    data = rank3(reg)
+    for i in basis(reg)
+        print(io, "$i   ")
+        for b in 1:size(data, 3)
+            for r in 1:size(data, 2)
+                s = round(data[buffer(i)+1,r,b]; digits)
+                print(io, s)
+                if r != size(data, 2)
+                    print(io, ", ")
+                end
+            end
+            b !== size(data, 3) && print(io, "; ")
+        end
+        println(io)
+    end
+end
+
 """
     mutual_information(reg::AbstractArrayReg, part1, part2)
 

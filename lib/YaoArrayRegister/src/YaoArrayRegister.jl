@@ -43,7 +43,8 @@ export AbstractArrayReg,
     regadd!,
     regsub!,
     regscale!,
-    exchange_sysenv
+    exchange_sysenv,
+    print_table
 
 # BitBasis
 export @bit_str, @dit_str, BitStr, DitStr, hypercubic
