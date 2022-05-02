@@ -46,7 +46,7 @@ end
 
 @generated function _instruct!(::Val{D}, state::AbstractVecOrMat, U::AbstractMatrix, subindices::SVector, basestrides::NTuple{BN}) where {D,BN}
     quote
-        sumc = 1 - sum(basestrides)
+        sumc = length(basestrides) == 0 ? 1 : 1 - sum(basestrides)
         Base.Cartesian.@nloops($BN, i, d->1:$D,
                 d->(@inbounds sumc += i_d*basestrides[d]), # PRE
                 d->(@inbounds sumc -= i_d*basestrides[d]), # POST
@@ -62,7 +62,7 @@ end
         x, rem = divrem(x, D)
         res += rem * strides[i]
     end
-    return x
+    return res
 end
 
 # specialize: Diagonal

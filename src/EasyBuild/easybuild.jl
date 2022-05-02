@@ -1,6 +1,8 @@
 module EasyBuild
 using YaoBlocks, YaoBlocks.LuxurySparse, YaoBlocks.YaoAPI, YaoBlocks.YaoArrayRegister
 using YaoBlocks.LinearAlgebra
+using YaoArrayRegister: sparse
+
 include("block_extension/blocks.jl")
 include("general_U4.jl")
 include("phaseestimation.jl")

@@ -96,6 +96,9 @@ export AbstractRegister,
     basis,
     clone
 
+# matrix types
+export IMatrix, PermMatrix, Diagonal, SparseMatrixCSC
+
 # others
 export Const, logdi
 

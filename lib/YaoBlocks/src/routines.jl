@@ -102,11 +102,11 @@ function cunmat(n::Int, cbits::NTuple, cvals::NTuple, U::IMatrix, locs::NTuple)
 end
 
 """
-    unmat(nbit::Int, U::AbstractMatrix, locs::NTuple) -> AbstractMatrix
+    unmat(::Val{D}, nbit::Int, U::AbstractMatrix, locs::NTuple) -> AbstractMatrix
 
 Return the matrix representation of putting matrix at locs.
 """
-function unmat(nbit::Int, U::AbstractMatrix, locs::NTuple)
+function unmat(::Val{2}, nbit::Int, U::AbstractMatrix, locs::NTuple)
     large_mat_check(nbit)
     cunmat(nbit::Int, (), (), U, locs)
 end
@@ -114,7 +114,7 @@ end
 ############################### Dense Matrices ###########################
 function u1mat(nbit::Int, U1::AbstractMatrix, ibit::Int)
     large_mat_check(nbit)
-    unmat(nbit, U1, (ibit,))
+    unmat(Val{2}(), nbit, U1, (ibit,))
 end
 
 u1mat(nbit::Int, U1::Adjoint, ibit::Int) = u1mat(nbit, copy(U1), ibit)
@@ -307,3 +307,56 @@ end
     @inbounds dg.diag[locs] = U.diag
     return dg
 end
+
+function unmat(::Val{D}, nbits::Int, U::AbstractMatrix{T}, locs::NTuple{C}) where {T,C,D}
+    mat = sparse(U)
+    # create stride for indexing
+    strides = ntuple(i->D^(i-1), nbits)
+    baselocs = (setdiff(1:nbits, locs)...,)
+    basestrides = map(i->strides[i], baselocs)
+    substrides = map(i->strides[i], locs)
+
+    # allocate storage
+    m = nnz(mat)
+    basedim = D ^ (nbits - C)
+    is = Vector{Int}(undef, basedim * m)
+    js = Vector{Int}(undef, basedim * m)
+    vs = Vector{T}(undef, basedim * m)
+    CI = CartesianIndices(ntuple(i->D, C))
+    return outerloop!(Val{D}(), Val{C}(), nbits, mat, is, js, vs, CI, substrides, basestrides, basedim)
+end
+
+function outerloop!(::Val{D}, ::Val{C}, nbits, mat, is, js, vs, CI, substrides, basestrides, basedim) where {D,C}
+    offset = 0
+    # does not support multi-threading
+    @inbounds for (i, j, v) in zip(findnz(mat)...)
+        # set indices
+        I, J = CI[i].I, CI[j].I
+        ioffset = sum(i->(I[i]-1) * substrides[i], 1:C)
+        joffset = sum(i->(J[i]-1) * substrides[i], 1:C)
+        innerloop!(Val{D}(), offset, is, js, ioffset, joffset, basestrides)
+        # set values
+        for k=offset+1:offset+basedim
+            vs[k] = v
+        end
+        offset += basedim
+    end
+    N = D^nbits
+    return sparse(is, js, vs, N, N)
+end
+
+@generated function innerloop!(::Val{D}, k, is, js, ioffset::Int, joffset::Int, basestrides::NTuple{BN}) where {D,BN}
+    quote
+        sumc = length(basestrides) == 0 ? 1 : 1 - sum(basestrides)
+        Base.Cartesian.@nloops($BN, i, d->1:$D,
+                d->(@inbounds sumc += i_d*basestrides[d]), # PRE
+                d->(@inbounds sumc -= i_d*basestrides[d]), # POST
+                begin # BODY
+                    k += 1
+                    @inbounds is[k] = ioffset + sumc
+                    @inbounds js[k] = joffset + sumc
+                end)
+
+    end
+end
+

@@ -417,17 +417,7 @@ Check `apply!` for the faster inplace version.
 """
 # overwrite interface, this one avoids one copy
 function apply(reg::AbstractRegister{D}, block) where D
-    if D == 2
-        return apply!(copy(reg), block)
-    else
-        YaoBlocks._check_size(reg, block)
-        operator = sort_unitary_d(mat(block.content), block.locs)
-        state = statevec(reg)
-        nbits = logdi(size(state, 1), D)
-        stateout = zero(state)
-        accum_instruct!(Val(D), nbits, stateout, state, TupleTools.sort(block.locs), YaoArrayRegister.autostatic(operator))
-        return ArrayReg{D}(stateout)
-    end
+    return apply!(copy(reg), block)
 end
 
 function generic_dispatch!(f::Union{Function,Nothing}, x::AbstractBlock, it::Dispatcher)
