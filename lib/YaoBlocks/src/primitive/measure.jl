@@ -188,7 +188,7 @@ Measure(;
 )
 mat(x::Measure) = error("use BlockMap to get its matrix.")
 
-function _apply!(r::AbstractRegister{D}, m::Measure{D}) where {D}
+function YaoAPI.unsafe_apply!(r::AbstractRegister{D}, m::Measure{D}) where {D}
     m.results = measure!(m.postprocess, m.operator, r, m.locations; rng = m.rng)
     return r
 end

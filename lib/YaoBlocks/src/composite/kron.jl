@@ -164,7 +164,7 @@ function mat(::Type{T}, k::KronBlock{D,M}) where {T,D,M}
     end
 end
 
-function _apply!(r::AbstractRegister, k::KronBlock)
+function YaoAPI.unsafe_apply!(r::AbstractRegister, k::KronBlock)
     for (locs, block) in zip(k.locs, k.blocks)
         _instruct!(r, block, Tuple(locs))
     end

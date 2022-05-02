@@ -86,7 +86,7 @@ function LinearAlgebra.mul!(y::AbstractVector, A::BlockMap{T,GT}, x::AbstractVec
     return y
 end
 
-function _apply!(reg::AbstractArrayReg{D,T}, te::TimeEvolution) where {D,T}
+function YaoAPI.unsafe_apply!(reg::AbstractArrayReg{D,T}, te::TimeEvolution) where {D,T}
     if isdiagonal(te.H)
         reg.state .*= exp.((-im * te.dt) .* diag(mat(T, te.H)))
         return reg
