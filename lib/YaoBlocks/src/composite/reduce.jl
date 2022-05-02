@@ -25,7 +25,7 @@ end
 Add(blocks::NTuple{M,AbstractBlock{D}}) where {M,D} = Add(collect(AbstractBlock{D}, blocks))
 Add(n::Int, blocks::AbstractVector{<:AbstractBlock{D}}) where {D} = Add(n, collect(AbstractBlock{D}, blocks))
 Add(blocks::AbstractVector{<:AbstractBlock{D}}) where {D} = Add(collect(AbstractBlock{D}, blocks))
-Add(blocks::AbstractBlock{D}...) where {D} = Add(collect(AbstractBlock{D}, blocks))
+Add(block::AbstractBlock{D}, blocks::AbstractBlock{D}...) where {D} = Add(AbstractBlock{D}[block, blocks...])
 nqudits(add::Add) = add.n
 
 function mat(::Type{T}, x::Add{D}) where {D,T}

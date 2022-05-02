@@ -23,23 +23,37 @@ end
     #@show reg.state
     print_table(reg)
 
+    # |11> -> |W>
+    reg0 = product_state(dit"11;3")
+    te = time_evolve(rydberg_chain(2; Ω=1.0, V=1e5), π/sqrt(2))
+    @test fidelity(reg0 |> te, product_state(dit"12;3") + product_state(dit"21;3") |> normalize!) ≈ 1
+
     #dt = 2.732π/2
     Ω = 1.0
-    τ = 4.29268/Ω/2
-    Δ = 0.377371 * Ω
-    V = 1e5
-    h1 = rydberg_chain(nbits; Ω=Ω, Δ, V)
-    h2 = rydberg_chain(nbits; Ω=-Ω, Δ, V)
-    levine_pichler_pulse = chain(time_evolve(h1, τ), time_evolve(h2, τ))
+    τ = 4.29268/Ω
+    Δf = 0.377371
+    V = 1e3
+    ξ = 3.90242
+    h1 = rydberg_chain(nbits; Ω=Ω, Δ=Δf*Ω, V)
+    h2 = rydberg_chain(nbits; Ω=Ω*exp(im*ξ), Δ=Δf*Ω, V)
+    levine_pichler_pulse = chain(time_evolve(h1, 2τ), time_evolve(h2, 2τ))
+    # half pulse drives |11> to |11>
+    @test isapprox(mat(levine_pichler_pulse[1])[Int(dit"11;3")+1, Int(dit"11;3")+1] |> abs, 1; atol=1e-3)
     @test mat(levine_pichler_pulse) * reg.state ≈ apply(reg, levine_pichler_pulse).state
-    apply!(reg, levine_pichler_pulse)
-    # println()
-    # print_table(reg)
+    reg = apply(reg, levine_pichler_pulse)
     println()
     print_table(reg)
 
+    # TODO: add block[dit"...", dit"..."]
     bases = basis(reg)
-    for (i,j,v) in zip(findnz(SparseMatrixCSC(round.(mat(levine_pichler_pulse), digits=5)))...)
-        abs(v) > 1e-1 && println(bases[i], "→", bases[j], "   ", v)
-    end
+    h = levine_pichler_pulse
+    m = mat(h)
+    i = Int(dit"01;3")+1
+    j = Int(dit"11;3")+1
+    ang1 = angle(m[i, i]) / π
+    ang2 = angle(m[j, j]) / π
+    @show 2*ang1 - ang2-1
+    # for (i,j,v) in zip(findnz(SparseMatrixCSC(round.(mat(h), digits=5)))...)
+    #     abs(v) > 1e-1 && println(bases[i], "→", bases[j], "   ", v)
+    # end
 end

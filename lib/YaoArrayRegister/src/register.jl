@@ -805,3 +805,6 @@ BitBasis.basis(r::AbstractRegister{D}) where D = basis(DitStr{D,nactive(r),Int})
 Curried version of `partial_tr(ρ, locs)`.
 """
 YaoAPI.partial_tr(locs) = @λ(ρ -> partial_tr(ρ, locs))
+
+Base.getindex(reg::ArrayReg{D}, d::DitStr{D}) where D = getindex(reg.state, buffer(d)+1)
+Base.getindex(reg::BatchedArrayReg{D}, d::DitStr{D}) where D = getindex(reg.state, buffer(d)+1, :)

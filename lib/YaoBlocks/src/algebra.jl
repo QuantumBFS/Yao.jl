@@ -31,7 +31,7 @@ Base.:(/)(A::AbstractBlock, x::Number) = (1 / x) * A
 # reduce
 Base.prod(blocks::AbstractVector{<:AbstractBlock{D}}) where D =
     chain(Iterators.reverse(blocks)...)
-Base.sum(blocks::AbstractVector{<:AbstractBlock{D}}) where D = +(blocks...)
+Base.sum(blocks::AbstractVector{<:AbstractBlock{D}}) where D = Add(blocks)
 
 #sub
 Base.:(-)(lhs::AbstractBlock, rhs::AbstractBlock) = Add(lhs, -rhs)
