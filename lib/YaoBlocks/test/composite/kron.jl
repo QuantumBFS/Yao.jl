@@ -122,3 +122,20 @@ end
     T = Float64
     @test mat(T, kron(5)) === mat(T, chain(5)) == IMatrix{1 << 5,Float64}()
 end
+
+@testset "getindex2" begin
+    pb = kron(5, 2=>Y, 3=>X)
+    mpb = mat(pb)
+    allpass = true
+    for i=basis(pb), j=basis(pb)
+        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+    end
+    @test allpass
+    pb = kron(5, 2:3=>matblock(rand_unitary(4)), 4=>X)
+    mpb = mat(pb)
+    allpass = true
+    for i=basis(pb), j=basis(pb)
+        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+    end
+    @test allpass
+end

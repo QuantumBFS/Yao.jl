@@ -15,3 +15,9 @@ include("general_matrix_gate.jl")
 include("measure.jl")
 
 YaoAPI.isdiagonal(p::PrimitiveBlock) = isdiagonal(mat(p))
+
+# Certain blocks, like X block can have faster getindex, but this performance (~2ns) is probably enough!
+# Go to each block file to specialize!
+function unsafe_getindex(op::PrimitiveBlock{D}, i::Integer, j::Integer) where {D}
+    return @inbounds mat(op)[i+1, j+1]
+end

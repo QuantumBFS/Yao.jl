@@ -360,3 +360,82 @@ end
     end
 end
 
+
+####################### getindex ######################
+_take(x::T, ::Val{D}) where {T,D} = mod(x, D)
+_take(x::T, ::Val{2}) where T = x & one(T)
+_take(x::T, ::Val{D}, k::Int) where {T,D} = mod(x, D^k)
+_take(x::T, ::Val{2}, k::Int) where T = x & (one(T) << k - 1)
+_takeat(x::T, ::Val{D}, k::Int) where {T,D} = _take(BitBasis._rshift(Val{D}(), x, k-1), Val{D}())
+function take_and_shift(x, ::Val{D}, k::Int) where D
+    return _take(x, Val{D}(), k), BitBasis._rshift(Val{D}(), x, k)
+end
+# U is an operator
+function getindex2(::Type{T}, ::Val{D}, N::Int, U, locs::NTuple{M}, cbits::NTuple{C}, cvals::NTuple{C}, i::TI, j::TI) where {T,C,M,TI<:Integer,D}
+    subi, subj = 0, 0
+    _i, _j = i, j
+    @inbounds for ibit=1:N
+        ival = _take(_i, Val{D}())
+        jval = _take(_j, Val{D}())
+        _i = BitBasis._rshift(Val{D}(), _i, 1)
+        _j = BitBasis._rshift(Val{D}(), _j, 1)
+        # return zero if rest dimensions do not match
+        if ibit ∉ locs
+            if ival != jval
+                return zero(T)
+            end
+        else
+            subloc_1 = findfirst(==(ibit), locs)-1
+            subi += BitBasis._lshift(Val{D}(), ival, subloc_1)
+            subj += BitBasis._lshift(Val{D}(), jval, subloc_1)
+        end
+    end
+    # check controlled bits
+    @inbounds for k=1:C
+        if cvals[k] != _takeat(i, Val{D}(), cbits[k])
+            return i==j ? one(T) : zero(T)
+        end
+    end
+    # get the target element in U
+    return @inbounds U[DitStr{D,M,TI}(subi), DitStr{D,M,TI}(subj)]
+end
+
+# blocks are operators, locs are sorted
+function kron_getindex2(::Type{T}, ::Val{D}, N::Int, blocks, locs::NTuple{M}, i::TI, j::TI) where {T,D,M,TI}
+    _i, _j = i, j
+    res = one(T)
+    pre = 0
+    #@inbounds
+    @inbounds for k=1:M
+        block = blocks[k]
+        loc = locs[k]  # a range
+        # compute gap: return zero if rest dimensions do not match
+        gapsize = loc.start - pre - 1
+        if gapsize > 0
+            ival, _i = take_and_shift(_i, Val{D}(), gapsize)
+            jval, _j = take_and_shift(_j, Val{D}(), gapsize)
+            if ival != jval
+                return zero(T)
+            end
+        end
+
+        # compute block
+        l = nqudits(block)
+        ival, _i = take_and_shift(_i, Val{D}(), l)
+        jval, _j = take_and_shift(_j, Val{D}(), l)
+        # get the target element in U
+        res *= unsafe_getindex(block, ival, jval)
+        pre = loc.stop
+    end
+    if pre != N  # one extra identity
+        gapsize = N - pre
+        if gapsize > 0
+            ival, _i = take_and_shift(_i, Val{D}(), gapsize)
+            jval, _j = take_and_shift(_j, Val{D}(), gapsize)
+            if ival != jval
+                return zero(T)
+            end
+        end
+    end
+    return res
+end

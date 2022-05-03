@@ -102,3 +102,20 @@ end
     @test c == control(5, (2,3), 1=>X)
     @test copy(c) == c
 end
+
+@testset "getindex2" begin
+    pb = control(3, 2, 1=>Y)
+    mpb = mat(pb)
+    allpass = true
+    for i=basis(pb), j=basis(pb)
+        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+    end
+    @test allpass
+    pb = control(4, 3, (4,2)=>matblock(rand_unitary(4)))
+    mpb = mat(pb)
+    allpass = true
+    for i=basis(pb), j=basis(pb)
+        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+    end
+    @test allpass
+end

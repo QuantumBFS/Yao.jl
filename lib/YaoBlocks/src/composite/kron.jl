@@ -214,3 +214,7 @@ Base.adjoint(blk::KronBlock) = KronBlock(blk.n, blk.locs, map(adjoint, blk.block
 LinearAlgebra.ishermitian(k::KronBlock) = all(ishermitian, k.blocks) || ishermitian(mat(k))
 YaoAPI.isunitary(k::KronBlock) = all(isunitary, k.blocks) || isunitary(mat(k))
 YaoAPI.isreflexive(k::KronBlock) = all(isreflexive, k.blocks) || isreflexive(mat(k))
+
+function unsafe_getindex(k::KronBlock{D}, i::Integer, j::Integer) where {D}
+    kron_getindex2(ComplexF64, Val{D}(), nqudits(k), k.blocks, k.locs, i, j)
+end

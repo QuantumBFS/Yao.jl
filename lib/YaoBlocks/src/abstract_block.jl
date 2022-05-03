@@ -444,3 +444,9 @@ function dispatch(f::Union{Function,Nothing}, x::AbstractBlock, it)
 end
 
 dispatch(x::AbstractBlock, it) = dispatch(nothing, x, it)
+
+BitBasis.basis(b::AbstractBlock{D}) where D = basis(DitStr{D,nqudits(b),Int64})
+function BitBasis.getindex(b::AbstractBlock{D}, i::DitStr{D,N}, j::DitStr{D,N}) where {D,N}
+    @assert nqudits(b) == N
+    return unsafe_getindex(b, buffer(i), buffer(j))
+end

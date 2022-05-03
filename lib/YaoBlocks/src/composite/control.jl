@@ -187,3 +187,7 @@ function YaoAPI.iscommute(x::ControlBlock, y::ControlBlock)
         return iscommute_fallback(x, y)
     end
 end
+
+function unsafe_getindex(ctrl::ControlBlock{D}, i::Integer, j::Integer) where D
+    getindex2(ComplexF64, Val{2}(), nqudits(ctrl), ctrl.content, ctrl.locs, ctrl.ctrl_locs, ctrl.ctrl_config, i, j)
+end

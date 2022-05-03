@@ -186,3 +186,7 @@ for (G, GT) in [
         return reg
     end
 end
+
+function unsafe_getindex(pb::PutBlock{D}, i::Integer, j::Integer) where D
+    getindex2(ComplexF64, Val{D}(), nqudits(pb), pb.content, pb.locs, (), (), i, j)
+end
