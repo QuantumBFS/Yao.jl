@@ -177,3 +177,12 @@ YaoAPI.isreflexive(c::ChainBlock) =
     (iscommute(c.blocks...) && all(isreflexive, c.blocks)) || isreflexive(mat(c))
 LinearAlgebra.ishermitian(c::ChainBlock) =
     (all(isreflexive, c.blocks) && iscommute(c.blocks...)) || isreflexive(mat(c))
+
+# this is not type stable, possible to fix?
+function unsafe_getindex(ad::ChainBlock{D}, i::Integer, j::Integer) where D
+    #length(ad.list) > 0 ? sum(b->unsafe_getindex(b,i,j), ad.list) : 0.0im
+end
+function Base.getindex(b::ChainBlock{D}, i::DitStr{D,N}, j::DitStr{D,N}) where {D,N}
+    @assert nqudits(b) == N
+    return unsafe_getindex(b, buffer(i), buffer(j))
+end

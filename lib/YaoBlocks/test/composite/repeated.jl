@@ -30,3 +30,20 @@ using LuxurySparse
 
     @test mat(repeat(10, X, ())) == IMatrix{1<<10}()
 end
+
+@testset "getindex2" begin
+    pb = repeat(3, Y, (3,2))
+    mpb = mat(pb)
+    allpass = true
+    for i=basis(pb), j=basis(pb)
+        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+    end
+    @test allpass
+    pb = repeat(5, matblock(rand_unitary(3); nlevel=3), (5, 2))
+    mpb = mat(pb)
+    allpass = true
+    for i=basis(pb), j=basis(pb)
+        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+    end
+    @test allpass
+end

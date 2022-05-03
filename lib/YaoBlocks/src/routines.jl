@@ -400,7 +400,7 @@ function getindex2(::Type{T}, ::Val{D}, N::Int, U, locs::NTuple{M}, cbits::NTupl
     return @inbounds U[DitStr{D,M,TI}(subi), DitStr{D,M,TI}(subj)]
 end
 
-# blocks are operators, locs are sorted
+# blocks are operators, locs are sorted ranges
 function kron_getindex2(::Type{T}, ::Val{D}, N::Int, blocks, locs::NTuple{M}, i::TI, j::TI) where {T,D,M,TI}
     _i, _j = i, j
     res = one(T)
@@ -426,6 +426,46 @@ function kron_getindex2(::Type{T}, ::Val{D}, N::Int, blocks, locs::NTuple{M}, i:
         # get the target element in U
         res *= unsafe_getindex(block, ival, jval)
         pre = loc.stop
+    end
+    if pre != N  # one extra identity
+        gapsize = N - pre
+        if gapsize > 0
+            ival, _i = take_and_shift(_i, Val{D}(), gapsize)
+            jval, _j = take_and_shift(_j, Val{D}(), gapsize)
+            if ival != jval
+                return zero(T)
+            end
+        end
+    end
+    return res
+end
+
+# block is an operator, locs are sorted integers
+function repeat_getindex2(::Type{T}, ::Val{D}, N::Int, block, locs::NTuple{M}, i::TI, j::TI) where {T,D,M,TI}
+    _i, _j = i, j
+    res = one(T)
+    n = nqudits(block)
+    pre = 0
+    #@inbounds
+    @inbounds for k=1:M
+        loc = locs[k]  # a range
+        # compute gap: return zero if rest dimensions do not match
+        gapsize = loc - pre - 1
+        if gapsize > 0
+            ival, _i = take_and_shift(_i, Val{D}(), gapsize)
+            jval, _j = take_and_shift(_j, Val{D}(), gapsize)
+            if ival != jval
+                return zero(T)
+            end
+        end
+
+        # compute block
+        l = nqudits(block)
+        ival, _i = take_and_shift(_i, Val{D}(), l)
+        jval, _j = take_and_shift(_j, Val{D}(), l)
+        # get the target element in U
+        res *= unsafe_getindex(block, ival, jval)
+        pre = loc + n-1
     end
     if pre != N  # one extra identity
         gapsize = N - pre

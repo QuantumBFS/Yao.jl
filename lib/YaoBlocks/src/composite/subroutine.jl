@@ -122,3 +122,7 @@ function YaoAPI.iscommute(x::Subroutine{D}, y::Subroutine{D}) where {D}
         return iscommute_fallback(x, y)
     end
 end
+
+function unsafe_getindex(sr::Subroutine{D}, i::Integer, j::Integer) where D
+    getindex2(ComplexF64, Val{D}(), nqudits(sr), sr.content, sr.locs, (), (), i, j)
+end

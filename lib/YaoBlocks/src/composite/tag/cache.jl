@@ -194,3 +194,12 @@ function cache(
 
     return CachedBlock(server, x, level)
 end
+
+function unsafe_getindex(c::CachedBlock, i::Integer, j::Integer)
+    @inbounds mat(c)[i+1, j+1]
+end
+
+function Base.getindex(b::CachedBlock{ST, BT, D}, i::DitStr{D,N}, j::DitStr{D,N}) where {ST,BT,D,N}
+    @assert nqudits(b) == N
+    return unsafe_getindex(b, buffer(i), buffer(j))
+end

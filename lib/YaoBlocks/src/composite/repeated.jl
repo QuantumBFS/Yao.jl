@@ -16,6 +16,8 @@ function RepeatedBlock(n::Int, block::AbstractBlock{D}, locs::NTuple{C,Int}) whe
     nqudits(block) > 1 && throw(
         ArgumentError("RepeatedBlock does not support multi-qubit content for the moment."),
     )
+    # sort the locations
+    locs = TupleTools.sort(locs)
     return RepeatedBlock{D,C,typeof(block)}(n, block, locs)
 end
 
@@ -153,4 +155,8 @@ function YaoAPI.iscommute(x::RepeatedBlock{D}, y::RepeatedBlock{D}) where {D}
     else
         iscommute_fallback(x, y)
     end
+end
+
+function unsafe_getindex(rp::RepeatedBlock{D}, i::Integer, j::Integer) where D
+    repeat_getindex2(ComplexF64, Val{D}(), nqudits(rp), rp.content, rp.locs, i, j)
 end

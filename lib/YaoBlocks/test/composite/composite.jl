@@ -4,6 +4,10 @@ using Test, YaoAPI, YaoBlocks, YaoArrayRegister
     include("chain.jl")
 end
 
+@testset "test add" begin
+    include("add.jl")
+end
+
 @testset "test kron" begin
     include("kron.jl")
 end

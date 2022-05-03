@@ -47,3 +47,7 @@ chsubblocks(blk::Daggered, target::AbstractBlock) = Daggered(target)
 Base.adjoint(x::AbstractBlock) = ishermitian(x) ? x : Daggered(x)
 Base.adjoint(x::Daggered) = content(x)
 Base.copy(x::Daggered) = Daggered(copy(content(x)))
+
+function unsafe_getindex(d::Daggered{D}, i::Integer, j::Integer) where D
+    return unsafe_getindex(content(d), j, i) |> conj
+end

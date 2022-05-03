@@ -94,3 +94,12 @@ function Base.prepend!(c::Add, list)
 end
 
 LinearAlgebra.ishermitian(ad::Add) = all(ishermitian, ad.list) || ishermitian(mat(ad))
+
+# this is not type stable, possible to fix?
+function unsafe_getindex(ad::Add{D}, i::Integer, j::Integer) where D
+    length(ad.list) > 0 ? sum(b->unsafe_getindex(b,i,j), ad.list) : 0.0im
+end
+function Base.getindex(b::Add{D}, i::DitStr{D,N}, j::DitStr{D,N}) where {D,N}
+    @assert nqudits(b) == N
+    return unsafe_getindex(b, buffer(i), buffer(j))
+end

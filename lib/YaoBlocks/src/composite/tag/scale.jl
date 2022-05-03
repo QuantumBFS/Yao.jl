@@ -62,3 +62,7 @@ function _apply!(r::AbstractArrayReg, x::Scale{S}) where {S}
     regscale!(r, factor(x))
     return r
 end
+
+function unsafe_getindex(x::Scale, i::Integer, j::Integer)
+    return unsafe_getindex(content(x), i, j) * factor(x)
+end
