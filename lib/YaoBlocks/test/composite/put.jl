@@ -60,8 +60,8 @@ end
 end
 
 @testset "operators" begin
-    @test size(mat(put(2,1=>matblock(rand_unitary(3))))) == (9, 9)
-    @test size(mat(repeat(2,matblock(rand_unitary(3))))) == (9, 9)
+    @test size(mat(put(2,1=>matblock(rand_unitary(3); nlevel=3)))) == (9, 9)
+    @test size(mat(repeat(2,matblock(rand_unitary(3); nlevel=3)))) == (9, 9)
 end
 
 @testset "put matrix" begin

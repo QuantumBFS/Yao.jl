@@ -60,3 +60,7 @@ end
     @test_throws MethodError measure!(r; nshots = 10)
     @test_throws MethodError measure!(YaoAPI.RemoveMeasured(), r; nshots = 10)
 end
+
+@testset "measure qudits" begin
+    @test measure(product_state(dit"121;3")) == [dit"121;3"]
+end

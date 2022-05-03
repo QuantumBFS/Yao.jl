@@ -318,4 +318,7 @@ end
 
 @testset "basis" begin
     @test basis(rand_state(3)) == bit"000":bit"111"
+    reg = product_state(dit"120;3")
+    @test reg[dit"120;3"] == 1.0
+    @test reg[dit"121;3"] == 0.0
 end
