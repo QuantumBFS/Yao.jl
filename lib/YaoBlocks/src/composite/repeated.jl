@@ -118,7 +118,7 @@ mat(::Type{T}, rb::RepeatedBlock{D}) where {T,D} =
     YaoArrayRegister.hilbertkron(rb.n, fill(mat(T, rb.content), length(rb.locs)), [rb.locs...]; nlevel=D)
 mat(::Type{T}, rb::RepeatedBlock{D,0,GT}) where {T,D,GT} = IMatrix{D^nqudits(rb),T}()
 
-function _apply!(r::AbstractRegister, rp::RepeatedBlock)
+function YaoAPI.unsafe_apply!(r::AbstractRegister, rp::RepeatedBlock)
     m = mat_matchreg(r, rp.content)
     for addr in rp.locs
         instruct!(r, m, Tuple(addr:addr+nqudits(rp.content)-1))
@@ -129,13 +129,13 @@ end
 # specialization
 for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
-    @eval function _apply!(r::AbstractRegister, rp::RepeatedBlock{N,C,$GT}) where {N,C}
+    @eval function YaoAPI.unsafe_apply!(r::AbstractRegister, rp::RepeatedBlock{N,C,$GT}) where {N,C}
         instruct!(r, Val($(QuoteNode(G))), rp.locs)
         return r
     end
 end
 
-_apply!(reg::AbstractRegister, rp::RepeatedBlock{D,0}) where D = reg
+YaoAPI.unsafe_apply!(reg::AbstractRegister, rp::RepeatedBlock{D,0}) where D = reg
 
 cache_key(rb::RepeatedBlock) = (rb.locs, cache_key(rb.content))
 

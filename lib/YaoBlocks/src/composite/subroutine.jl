@@ -94,9 +94,9 @@ occupied_locs(c::Subroutine) = map(i -> c.locs[i], c.content |> occupied_locs)
 chsubblocks(pb::Subroutine{D}, blk::AbstractBlock{D}) where {D} = Subroutine(pb.n, blk, pb.locs)
 PropertyTrait(::Subroutine) = PreserveAll()
 
-function _apply!(r::AbstractRegister, c::Subroutine)
+function YaoAPI.unsafe_apply!(r::AbstractRegister, c::Subroutine)
     focus!(r, c.locs)
-    _apply!(r, c.content)
+    YaoAPI.unsafe_apply!(r, c.content)
     relax!(r, c.locs, to_nactive = nqudits(c))
     return r
 end
