@@ -62,25 +62,3 @@ end
     #     abs(v) > 1e-1 && println(bases[i], "→", bases[j], "   ", v)
     # end
 end
-
-#Δ = 0.377371
-function lp(Δ::T, ξ::T) where T
-    Ω = one(T)
-    τ = T(4.29268/Ω)
-    V = T(1e3)
-    nbits = 2
-    h1 = rydberg_chain(nbits; Ω=Ω, Δ=Δ, V)
-    h2 = rydberg_chain(nbits; Ω=Ω*exp(im*ξ), Δ=Δ, V)
-    levine_pichler_pulse = chain(time_evolve(h1, 2τ), time_evolve(h2, 2τ))
- 
-    m = mat(Complex{T}, levine_pichler_pulse)
-    i = Int(dit"01;3")+1
-    j = Int(dit"11;3")+1
-    ang1 = angle(m[i, i]) / π
-    ang2 = angle(m[j, j]) / π
-
-    #@test isapprox(ang2+2, 4*Δ/sqrt(Δf^2 + 2*Ω^2); rtol=1e-2)
-    #@show 2*ang1 - ang2-1
-    diff = mod(2*ang1 - ang2-1, 2)
-    abs(m[i,i]), abs(m[j,j]), min(abs(diff), abs(diff-2))
-end
