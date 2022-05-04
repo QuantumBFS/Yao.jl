@@ -419,7 +419,7 @@ ArrayReg{2, ComplexF64, Array...}
     nlevel: 2
 
 julia> measure(reg; nshots=3)
-3-element Vector{BitBasis.BitStr64{6}}:
+3-element Vector{DitStr{2, 6, Int64}}:
  111000 ₍₂₎
  111000 ₍₂₎
  111000 ₍₂₎
@@ -452,13 +452,19 @@ See also [`zero_state`](@ref), [`rand_state`](@ref), [`uniform_state`](@ref).
 ### Examples
 
 ```jldoctest; setup=:(using Yao)
-julia> reg = product_state(dit"120/3"; nbatch=2)
+julia> reg = product_state(dit"120;3"; nbatch=2)
+BatchedArrayReg{3, ComplexF64, Transpose...}
+    active qudits: 3/3
+    nlevel: 3
+    nbatch: 2
 
 julia> measure(reg)
+1×2 Matrix{BitBasis.DitStr64{3, 3}}:
+ 120 ₍₃₎  120 ₍₃₎
 
 julia> product_state(bit"100"; nbatch=2);
 
-julia> r1 = product_state(ComplexF32, bit"100"; nbatch=2);
+julia> r1 = product_state(ComplexF32, bit"001"; nbatch=2);
 
 julia> r2 = product_state(ComplexF32, [0, 0, 1]; nbatch=2);
 
@@ -759,7 +765,7 @@ Find `n` most probable qubit configurations in a quantum register and return the
 
 ```jldoctest; setup=:(using Yao)
 julia> most_probable(ghz_state(3), 2)
-2-element Vector{BitBasis.BitStr64{3}}:
+2-element Vector{DitStr{2, 3, Int64}}:
  000 ₍₂₎
  111 ₍₂₎
 ```
@@ -785,7 +791,7 @@ Returns an `UnitRange` of the all the bits in the Hilbert space of given registe
 
 ```jldoctest; setup=:(using Yao)
 julia> collect(basis(rand_state(3)))
-8-element Vector{BitBasis.BitStr64{3}}:
+8-element Vector{DitStr{2, 3, Int64}}:
  000 ₍₂₎
  001 ₍₂₎
  010 ₍₂₎

@@ -121,9 +121,23 @@ function Base.getindex(b::Add{D}, i::DitStr{D,N}, ::Colon) where {D,N}
     T = promote_type(ComplexF64, parameters_eltype(b))
     return _getindex(T, b, i, :)
 end
-function Base.getindex(b::Add{D}, ::Colon, j::EntryTable{DitStr{D,N,TI},T}) where {D,N,TI,T}
-    return _getindex(b, :, j)
+# the performance of this block important! so specialize it will make it slightly faster.
+function Base.getindex(ad::Add{D}, ::Colon, j::EntryTable{DitStr{D,N,TI},T}) where {D,N,TI,T}
+    cfgs = Vector{DitStr{D,N,TI}}[]
+    amps = Vector{T}[]
+    for b in ad.list
+        _single_block!(cfgs, amps, b, j)
+    end
+    return merge(EntryTable(vcat(cfgs...), vcat(amps...)))
 end
-function Base.getindex(b::Add{D}, i::EntryTable{DitStr{D,N,TI},T}, ::Colon) where {D,N,TI,T}
-    return _getindex(b, i, :)
+function _single_block!(cfgs, amps, b, j::EntryTable)
+    for (c, a) in zip(j.configs, j.amplitudes)
+        et = b[:,c]
+        rmul!(et.amplitudes, a)
+        push!(cfgs, et.configs)
+        push!(amps, et.amplitudes)
+    end
+end
+function Base.getindex(ad::Add{D}, i::EntryTable{DitStr{D,N,TI},T}, ::Colon) where {D,N,TI,T}
+    return _getindex(ad, i, :)
 end
