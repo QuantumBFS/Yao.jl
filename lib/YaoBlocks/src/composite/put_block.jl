@@ -80,7 +80,7 @@ function mat(::Type{T}, pb::PutBlock{D,C}) where {T,D,C}
     return unmat(Val{D}(), nqudits(pb), mat(T, pb.content), pb.locs)
 end
 
-function _apply!(r::AbstractRegister, pb::PutBlock{D}) where D
+function YaoAPI.unsafe_apply!(r::AbstractRegister, pb::PutBlock{D}) where D
     instruct!(r, mat_matchreg(r, pb.content), pb.locs)
     return r
 end
@@ -90,7 +90,7 @@ end
 # specialization
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag, :H]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
-    @eval function _apply!(r::AbstractRegister, pb::PutBlock{2,C,<:$GT}) where {C}
+    @eval function YaoAPI.unsafe_apply!(r::AbstractRegister, pb::PutBlock{2,C,<:$GT}) where {C}
         instruct!(r, Val($(QuoteNode(G))), pb.locs)
         return r
     end
@@ -154,7 +154,7 @@ function mat(::Type{T}, g::Swap) where {T}
     return PermMatrix(orders, ones(T, nlevel(g)^g.n))
 end
 
-_apply!(r::AbstractRegister, g::Swap) = (instruct!(r, Val(:SWAP), g.locs); r)
+YaoAPI.unsafe_apply!(r::AbstractRegister, g::Swap) = (instruct!(r, Val(:SWAP), g.locs); r)
 occupied_locs(g::Swap) = g.locs
 
 """
@@ -181,7 +181,7 @@ for (G, GT) in [
     (:Rz, :(PutBlock{2,1,RotationGate{2, T,ZGate}} where {T})),
     (:PSWAP, :(PSwap)),
 ]
-    @eval function _apply!(reg::AbstractRegister, g::$GT)
+    @eval function YaoAPI.unsafe_apply!(reg::AbstractRegister, g::$GT)
         instruct!(reg, Val($(QuoteNode(G))), g.locs, g.content.theta)
         return reg
     end

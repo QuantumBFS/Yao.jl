@@ -124,9 +124,9 @@ function mat(::Type{T}, c::ChainBlock{D}) where {T,D}
     end
 end
 
-function _apply!(r::AbstractRegister, c::ChainBlock)
+function YaoAPI.unsafe_apply!(r::AbstractRegister, c::ChainBlock)
     for each in c.blocks
-        _apply!(r, each)
+        YaoAPI.unsafe_apply!(r, each)
     end
     return r
 end

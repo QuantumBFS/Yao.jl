@@ -141,7 +141,7 @@ function bint2_reader(T, k::Int)
     return b -> (b&mask, b>>k)
 end
 
-function _apply!(reg::ArrayReg, m::KMod)
+function Yao.unsafe_apply!(reg::ArrayReg, m::KMod)
     nstate = zero(reg.state)
 
     reader = bint2_reader(Int, m.k)

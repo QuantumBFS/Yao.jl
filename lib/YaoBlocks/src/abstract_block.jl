@@ -27,12 +27,12 @@ end
 
 YaoAPI.iscommute(op1, op2) = op1 * op2 ≈ op2 * op1
 
-function apply!(r::AbstractRegister, b::AbstractBlock)
+function YaoAPI.apply!(r::AbstractRegister, b::AbstractBlock)
     _check_size(r, b)
-    _apply!(r, b)
+    unsafe_apply!(r, b)
 end
 
-function _apply!(r::AbstractRegister, b::AbstractBlock)
+function YaoAPI.unsafe_apply!(r::AbstractRegister, b::AbstractBlock)
     _apply_fallback!(r, b)
 end
 
