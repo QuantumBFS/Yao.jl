@@ -190,3 +190,6 @@ end
 function unsafe_getindex(pb::PutBlock{D}, i::Integer, j::Integer) where D
     getindex2(ComplexF64, Val{D}(), nqudits(pb), pb.content, pb.locs, (), (), i, j)
 end
+function unsafe_getcol(pb::PutBlock{D}, j::DitStr{D}) where D
+    getindexr(ComplexF64, pb.content, pb.locs, (), (), j)
+end

@@ -179,7 +179,16 @@ LinearAlgebra.ishermitian(c::ChainBlock) =
     (all(isreflexive, c.blocks) && iscommute(c.blocks...)) || isreflexive(mat(c))
 
 # this is not type stable, possible to fix?
-function unsafe_getindex(ad::ChainBlock{D}, i::Integer, j::Integer) where D
+function unsafe_getindex(c::ChainBlock{D}, i::Integer, j::Integer) where D
+    if length(c) == 0
+        return i==j ? 1.0+0im : 0.0im
+    elseif length(c) == 1
+        return unsafe_getindex(c.blocks[1], i, j)
+    else
+        # TODO: change this slow implementation
+        return mat(c)[i+1, j+1]
+        #error("get index of a chain is not yet supported! Try use [`kron`](@ref), [`repeat`](@ref), [`put`](@ref) or file an issue.")
+    end
     #length(ad.list) > 0 ? sum(b->unsafe_getindex(b,i,j), ad.list) : 0.0im
 end
 function Base.getindex(b::ChainBlock{D}, i::DitStr{D,N}, j::DitStr{D,N}) where {D,N}

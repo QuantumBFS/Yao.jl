@@ -101,3 +101,13 @@ end
     @test nlevel(reg2) == 3
     @test isnormalized(reg2)
 end
+
+@testset "getindex2" begin
+    pb = time_evolve(put(3, 2=>Y), 0.5)
+    mpb = mat(pb)
+    allpass = true
+    for i=basis(pb), j=basis(pb)
+        allpass &= pb[i, j] ≈ mpb[Int(i)+1, Int(j)+1]
+    end
+    @test allpass
+end

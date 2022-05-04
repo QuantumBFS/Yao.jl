@@ -132,6 +132,14 @@ end
     end
     @test allpass
  
+    pb = kron(3, 2=>Y, 3=>X)
+    mpb = mat(pb)
+    allpass = true
+    for j=basis(pb)
+        allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+    end
+    @test allpass
+ 
     pb = kron(5, 2=>Y, 3=>X)
     mpb = mat(pb)
     allpass = true
@@ -144,6 +152,14 @@ end
     allpass = true
     for i=basis(pb), j=basis(pb)
         allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+    end
+    @test allpass
+
+    pb = kron(6, 2:3=>matblock(rand_unitary(9); nlevel=3), 1=>matblock(rand_unitary(3); nlevel=3), 5=>matblock(rand_unitary(3); nlevel=3))
+    mpb = mat(pb)
+    allpass = true
+    for j=basis(pb)
+        allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
     end
     @test allpass
 end

@@ -71,3 +71,13 @@ end
     g = rot(put(5, 2 => X), 0.5)
     @test occupied_locs(g) == (2,)
 end
+
+@testset "getindex2" begin
+    pb = rot(Y, 0.4)
+    mpb = mat(pb)
+    allpass = true
+    for i=basis(pb), j=basis(pb)
+        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+    end
+    @test allpass
+end

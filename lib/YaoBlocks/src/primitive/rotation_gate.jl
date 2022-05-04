@@ -133,3 +133,13 @@ cache_key(R::RotationGate) = R.theta
 iparams_range(::RotationGate{D,T,GT}) where {D,T,GT} = ((zero(T), T(2 * pi)),)
 
 occupied_locs(g::RotationGate) = occupied_locs(g.block)
+
+function unsafe_getindex(rg::RotationGate{D,T}, i::Integer, j::Integer) where {D,T}
+    return (i==j ? cos(rg.theta/2) : zero(T)) - im * sin(rg.theta/2) * unsafe_getindex(rg.block, i, j)
+end
+
+function unsafe_getindex(rg::RotationGate{D,T}, ::Colon, j::Integer) where {D,T}
+    res = im * sin(rg.theta/2) * unsafe_getindex(rg.block, :, j)
+    res[j+1] += cos(rg.theta/2)
+    return res
+end

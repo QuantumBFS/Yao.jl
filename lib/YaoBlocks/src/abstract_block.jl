@@ -446,7 +446,48 @@ end
 dispatch(x::AbstractBlock, it) = dispatch(nothing, x, it)
 
 BitBasis.basis(b::AbstractBlock{D}) where D = basis(DitStr{D,nqudits(b),Int64})
+
+################## get index ###################
 function Base.getindex(b::AbstractBlock{D}, i::DitStr{D,N}, j::DitStr{D,N}) where {D,N}
     @assert nqudits(b) == N
     return unsafe_getindex(b, buffer(i), buffer(j))
+end
+struct EntryTable{IT<:DitStr, ET}
+    configs::Vector{IT}
+    amplitudes::Vector{ET}
+end
+function Base.Vector(et::EntryTable{<:DitStr{D,N}, ET}) where {D,N,ET}
+    v = zeros(ET, D^N)
+    for (c, a) in zip(et.configs, et.amplitudes)
+        v[buffer(c)+1] = a
+    end
+    return v
+end
+function SparseArrays.SparseVector(et::EntryTable{<:DitStr{D,N}, ET}) where {D,N,ET}
+    locs = buffer.(et.configs) .+ 1
+    order = sortperm(locs)
+    return SparseVector(D^N, locs[order], et.amplitudes[order])
+end
+SparseArrays.sparse(et::EntryTable) = SparseVector(et)
+Base.vec(et::EntryTable) = Vector(et)
+
+function YaoArrayRegister.print_table(io::IO, t::EntryTable; digits::Int=5)
+    println(io, "$(typeof(t)):")
+    for (i, a) in zip(t.configs, t.amplitudes)
+        println(io, "  $i   $(round(a; digits))")
+    end
+end
+Base.show(io::IO, ::MIME"text/plain", t::EntryTable) = YaoArrayRegister.print_table(io, t; digits=5)
+Base.show(io::IO, t::EntryTable) = YaoArrayRegister.print_table(io, t; digits=5)
+
+
+function Base.getindex(b::AbstractBlock{D}, ::Colon, j::DitStr{D,N,TI}) where {D,N,TI}
+    @assert nqudits(b) == N
+    rows, vals = unsafe_getcol(b, j)
+    return EntryTable(rows, vals)
+end
+function Base.getindex(b::AbstractBlock{D}, i::DitStr{D,N,TI}, ::Colon) where {D,N,TI}
+    @assert nqudits(b) == N
+    rows, vals = unsafe_getcol(b', i)
+    return EntryTable(rows, conj!(vals))
 end

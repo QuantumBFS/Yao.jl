@@ -218,3 +218,6 @@ YaoAPI.isreflexive(k::KronBlock) = all(isreflexive, k.blocks) || isreflexive(mat
 function unsafe_getindex(k::KronBlock{D}, i::Integer, j::Integer) where {D}
     kron_getindex2(ComplexF64, Val{D}(), nqudits(k), k.blocks, k.locs, i, j)
 end
+function unsafe_getcol(pb::KronBlock{D}, j::DitStr{D}) where D
+    kron_getindexr(ComplexF64, pb.blocks, pb.locs, j)
+end

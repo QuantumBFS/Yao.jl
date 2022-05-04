@@ -370,6 +370,7 @@ _takeat(x::T, ::Val{D}, k::Int) where {T,D} = _take(BitBasis._rshift(Val{D}(), x
 function take_and_shift(x, ::Val{D}, k::Int) where D
     return _take(x, Val{D}(), k), BitBasis._rshift(Val{D}(), x, k)
 end
+
 # U is an operator
 function getindex2(::Type{T}, ::Val{D}, N::Int, U, locs::NTuple{M}, cbits::NTuple{C}, cvals::NTuple{C}, i::TI, j::TI) where {T,C,M,TI<:Integer,D}
     subi, subj = 0, 0
@@ -397,7 +398,7 @@ function getindex2(::Type{T}, ::Val{D}, N::Int, U, locs::NTuple{M}, cbits::NTupl
         end
     end
     # get the target element in U
-    return @inbounds U[DitStr{D,M,TI}(subi), DitStr{D,M,TI}(subj)]
+    return unsafe_getindex(U, subi, subj)
 end
 
 # blocks are operators, locs are sorted ranges
@@ -405,7 +406,6 @@ function kron_getindex2(::Type{T}, ::Val{D}, N::Int, blocks, locs::NTuple{M}, i:
     _i, _j = i, j
     res = one(T)
     pre = 0
-    #@inbounds
     @inbounds for k=1:M
         block = blocks[k]
         loc = locs[k]  # a range
@@ -446,7 +446,6 @@ function repeat_getindex2(::Type{T}, ::Val{D}, N::Int, block, locs::NTuple{M}, i
     res = one(T)
     n = nqudits(block)
     pre = 0
-    #@inbounds
     @inbounds for k=1:M
         loc = locs[k]  # a range
         # compute gap: return zero if rest dimensions do not match
@@ -479,3 +478,71 @@ function repeat_getindex2(::Type{T}, ::Val{D}, N::Int, block, locs::NTuple{M}, i
     end
     return res
 end
+
+# U is an operator
+# operator[:,ditstr]
+function getindexr(::Type{T}, U, locs::NTuple{M}, cbits::NTuple{C}, cvals::NTuple{C}, dj::DitStr{D,L,TI}) where {T,C,M,TI,D,L}
+    j = buffer(dj)
+    # check controlled bits
+    @inbounds for k=1:C
+        # not controlled!
+        if cvals[k] != _takeat(j, Val{D}(), cbits[k])
+            return SparseVector(1, TI[j+1], [one(T)])
+        end
+    end
+    # get subindex
+    subj = zero(TI)
+    @inbounds for ind in 1:M
+        subj += BitBasis._lshift(Val{D}(), _takeat(j, Val{D}(), locs[ind]), ind-1)
+    end
+    # get the target element in U
+    rows, vals = unsafe_getcol(U, DitStr{D,M,TI}(subj))
+    # map rows
+    newrows = map(rows) do i
+        subi = DitStr{D,L,TI}(j)
+        @inbounds for ind in 1:M
+            subi += BitBasis._lshift(Val{D}(), _takeat(buffer(i), Val{D}(), ind) - _takeat(subj, Val{D}(), ind), locs[ind]-1)
+        end
+        subi
+    end
+    return newrows, vals
+end
+
+# blocks are operators, locs are sorted ranges
+function kron_getindexr(::Type{T}, blocks, locs::NTuple{M}, j::DitStr{D,L,TI}) where {T,D,L,M,TI}
+    _j = buffer(j)
+    rows = Vector{DitStr{D,L,TI}}[]
+    vals = Vector{T}[]
+    pre = 0
+    @inbounds for k=1:M
+        block = blocks[k]
+        loc = locs[k]  # a range
+        # compute gap: return zero if rest dimensions do not match
+        gapsize = loc.start - pre - 1
+        if gapsize > 0
+            jval, _j = take_and_shift(_j, Val{D}(), gapsize)
+        end
+
+        # compute block
+        l = length(loc)
+        jval, _j = take_and_shift(_j, Val{D}(), l)
+        # get the target element in U
+        subrows, subvals = unsafe_getcol(block, DitStr{D,L,TI}(jval))
+        # map rows to the larger space
+        newrows = map(subrows) do i
+            subi = zero(DitStr{D,L,TI})
+            @inbounds for ind in 1:l
+                subi += BitBasis._lshift(Val{D}(), _takeat(buffer(i), Val{D}(), ind) - _takeat(jval, Val{D}(), ind), loc[ind]-1)
+            end
+            subi
+        end
+        pushfirst!(rows, newrows)
+        pushfirst!(vals, subvals)
+        pre = loc.stop
+    end
+    # kron rows and vals
+    totalrows = foldl(_addkron, rows) .+ j
+    totalvals = kron(vals...)
+    return totalrows, totalvals
+end
+_addkron(x, y)  = vec([x[i]+y[j] for j=1:length(y), i=1:length(x)])
