@@ -200,3 +200,15 @@ end
     @test isapprox(norm(statevec(reg2)), 1.0; atol = 1e-5)
     @test isapprox(statevec(reg1), statevec(reg2))
 end
+
+@testset "push coverage" begin
+    state = randn(ComplexF64, 3^5)
+    # identity fallback
+    @test instruct!(Val(3), copy(state), IMatrix{3,ComplexF64}(), (1,)) == state
+    U = randn(ComplexF64,3,3)
+    # error on control
+    @test_throws ErrorException instruct!(Val(3), state, U, (1,), (2,), (4,))
+    @test instruct!(Val(3), copy(state), U, (1,), (), ()) ≈ instruct!(Val(3), copy(state), U, (1,))
+    U2 = randn(ComplexF64,9,9)
+    @test instruct!(Val(3), copy(state), U2, (3,1), (), ()) ≈ instruct!(Val(3), copy(state), U2, (3,1))
+end

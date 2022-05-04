@@ -128,9 +128,12 @@ end
 
 iparams_range(::TimeEvolution{D,T}) where {D,T} = ((typemin(T), typemax(T)),)
 
-function unsafe_getindex(te::TimeEvolution{D,T}, i::Integer, j::Integer) where {D,T}
-    return apply!(ArrayReg(BitBasis._onehot(Complex{T}, D^nqudits(te), j+1)), te).state[i+1]
+function unsafe_getindex(::Type{T}, te::TimeEvolution{D}, i::Integer, j::Integer) where {D,T}
+    return apply!(ArrayReg{D}(BitBasis._onehot(T, D^nqudits(te), j+1)), te).state[i+1]
 end
-function unsafe_getcol(te::TimeEvolution{D,T}, j::DitStr{D,L,TI}) where {D,T,L,TI}
-    convert.(DitStr{D,L,TI}, basis(te)), statevec(apply(ArrayReg(BitBasis._onehot(Complex{T}, D^nqudits(te), j+1)), te))
+function unsafe_getcol(::Type{T}, te::TimeEvolution{D}, j::DitStr{D,L,TI}) where {D,T,L,TI<:Integer}
+    map(x->DitStr{D,L,TI}(buffer(x)), basis(te)), statevec(apply!(ArrayReg{D}(BitBasis.onehot(T, j)), te))
+end
+function _getindex(te::TimeEvolution{D}, ::Colon, j::EntryTable{DitStr{D,L,TI},T}) where {D,L,TI<:Integer,T}
+    EntryTable(map(x->DitStr{D,L,TI}(buffer(x)), basis(te)), YaoArrayRegister.matchtype(T, statevec(apply!(ArrayReg{D}(vec(j)), te))))
 end

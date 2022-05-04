@@ -136,6 +136,38 @@ function logdi(x::Integer, d::Integer)
 end
 
 ##################### Entry Table #########################
+"""
+    EntryTable{IT<:DitStr, ET}
+
+A table of ditstring-amplitude, which can be used for e.g. indexing and operator or representing the output of operator indexing.
+
+### Examples
+```jldoctest
+julia> EntryTable([dit"121;3", dit"111;3"], [0.6, 0.8im])
+EntryTable{DitStr64{3, 3}, ComplexF64}:
+  121 ₍₃₎   0.6 + 0.0im
+  111 ₍₃₎   0.0 + 0.8im
+```
+
+The following example shows how to create a Hamiltonian and scatter this bit string by this Hamiltonian.
+
+```jldoctest
+julia> b = kron(X,Z,Y)
+nqubits: 3
+kron
+├─ 1=>X
+├─ 2=>Z
+└─ 3=>Y
+
+julia> b[:,bit"010"]
+EntryTable{DitStr{2, 3, Int64}, ComplexF64}:
+  111 ₍₂₎   0.0 - 1.0im
+
+julia> b[:,b[:,bit"010"]]
+EntryTable{DitStr{2, 3, Int64}, ComplexF64}:
+  010 ₍₂₎   1.0 + 0.0im
+```
+"""
 struct EntryTable{IT<:DitStr, ET}
     configs::Vector{IT}
     amplitudes::Vector{ET}
@@ -169,8 +201,28 @@ end
 """
     cleanup(entries::EntryTable; zero_threshold=0.0)
 
-Clean up the entry table by merging items and clean up zeros.
+Clean up the entry table by 1) sort entries, 2) merge items and 3) clean up zeros.
 Any value with amplitude ≤ `zero_threshold` will be regarded as zero.
+
+```jldoctest
+julia> et = EntryTable([bit"000",bit"011",bit"101",bit"101",bit"011",bit"110",bit"110",bit"011",], [1.0 + 0.0im,-1, 1,1,1,-1,1,1,-1])
+EntryTable{DitStr{2, 3, Int64}, ComplexF64}:
+  000 ₍₂₎   1.0 + 0.0im
+  011 ₍₂₎   -1.0 + 0.0im
+  101 ₍₂₎   1.0 + 0.0im
+  101 ₍₂₎   1.0 + 0.0im
+  011 ₍₂₎   1.0 + 0.0im
+  110 ₍₂₎   -1.0 + 0.0im
+  110 ₍₂₎   1.0 + 0.0im
+  011 ₍₂₎   1.0 + 0.0im
+
+
+julia> cleanup(et)
+EntryTable{DitStr{2, 3, Int64}, ComplexF64}:
+  000 ₍₂₎   1.0 + 0.0im
+  011 ₍₂₎   1.0 + 0.0im
+  101 ₍₂₎   2.0 + 0.0im
+```
 """
 function cleanup(et::EntryTable; zero_threshold=0.0)
     EntryTable(_cleanup(et.configs, et.amplitudes; zero_threshold)...)

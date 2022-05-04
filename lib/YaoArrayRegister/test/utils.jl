@@ -157,3 +157,8 @@ end
     @test logdi(9, 3) == 2
     @test_throws ArgumentError logdi(9, 5)
 end
+
+@testset "matchtype" begin
+    @test YaoArrayRegister.matchtype(ComplexF64, randn(2,2)) isa Array{ComplexF64}
+    @test YaoArrayRegister.matchtype(ComplexF64, randn(ComplexF64, 2,2)) isa Array{ComplexF64}
+end

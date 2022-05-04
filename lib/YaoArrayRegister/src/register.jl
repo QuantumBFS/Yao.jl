@@ -679,6 +679,21 @@ function Base.show(io::IO, reg::BatchedArrayReg{D,T,MT}) where {D,T,MT}
     print(io, "\n    nbatch: ", nbatch(reg))
 end
 
+"""
+    print_table([io::IO, ]register; digits::Int=5)
+
+Print configuration-amplitude pairs of the `register`.
+
+```jldoctest
+julia> reg = ghz_state(2);
+
+julia> print_table(ghz_state(2))
+00 ₍₂₎   0.70711 - 0.0im
+01 ₍₂₎   0.0 + 0.0im
+10 ₍₂₎   0.0 + 0.0im
+11 ₍₂₎   0.70711 - 0.0im
+```
+"""
 print_table(reg::AbstractArrayReg; digits::Int=5) = print_table(stdout, reg; digits)
 function print_table(io::IO, reg::AbstractArrayReg; digits::Int=5)
     data = rank3(reg)

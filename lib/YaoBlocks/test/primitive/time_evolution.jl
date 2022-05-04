@@ -116,6 +116,8 @@ end
         for j=basis(pb)
             allpass &= vec(pb[:, j]) ≈ mpb[:, Int(j)+1]
             allpass &= vec(pb[j,:]) ≈ mpb[Int(j)+1,:]
+            allpass &= vec(pb[:, EntryTable([j], [1.0+0im])]) ≈ mpb[:, Int(j)+1]
+            allpass &= vec(pb[EntryTable([j], [1.0+0im]),:]) ≈ mpb[Int(j)+1,:]
         end
         @test allpass
     end

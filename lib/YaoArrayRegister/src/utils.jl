@@ -494,9 +494,9 @@ end
     end
 end
 
-function matchtype(::Type{T}, A::AbstractMatrix{T2}) where {T,T2}
+function matchtype(::Type{T}, A::AbstractArray{T2}) where {T,T2}
     return copyto!(similar(A, T), A)
 end
-function matchtype(::Type{T}, A::AbstractMatrix{T}) where {T}
+function matchtype(::Type{T}, A::AbstractArray{T}) where {T}
     return A
 end

@@ -40,7 +40,8 @@ end
     h2 = rydberg_chain(nbits; Ω=Ω*exp(im*ξ), Δ=Δf*Ω, V)
     levine_pichler_pulse = chain(time_evolve(h1, 2τ), time_evolve(h2, 2τ))
     # half pulse drives |11> to |11>
-    m11 = mat(levine_pichler_pulse[1])[Int(dit"11;3")+1, Int(dit"11;3")+1]
+    i, j = dit"01;3", dit"11;3"
+    m11 = levine_pichler_pulse[1][j, j]
     @test isapprox(m11 |> abs, 1; atol=1e-3)
     @show angle(m11) / π
     @test mat(levine_pichler_pulse) * reg.state ≈ apply(reg, levine_pichler_pulse).state
@@ -48,14 +49,10 @@ end
     println()
     print_table(reg)
 
-    bases = basis(reg)
     h = levine_pichler_pulse
-    m = mat(h)
-    i = Int(dit"01;3")+1
-    j = Int(dit"11;3")+1
-    ang1 = angle(m[i, i]) / π
-    ang2 = angle(m[j, j]) / π
-    @show abs(m[i,i])
+    ang1 = angle(h[i, i]) / π
+    ang2 = angle(h[j, j]) / π
+    @show abs(h[i,i])
     @show 2*ang1, ang2
     @test isapprox(ang2+2, 4*Δf/sqrt(Δf^2 + 2*Ω^2); rtol=1e-2)
     @show ang1

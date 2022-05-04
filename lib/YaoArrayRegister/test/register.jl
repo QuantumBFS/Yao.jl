@@ -24,6 +24,9 @@ using Adapt
     @test similar(reg, m).state == m
     @test viewbatch(reg, 1) == reg
     @test_throws ErrorException viewbatch(reg, 2)
+
+    reg = rand_state(3; nlevel=3, nbatch=2) |> focus!((2,3))
+    print_table(reg)
 end
 
 @testset "test BatchedArrayReg constructors" begin
