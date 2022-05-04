@@ -1,6 +1,7 @@
 using YaoBlocks
 using YaoBlocks: sprand_hermitian, sprand_unitary
 using SparseArrays: sparse
+using BitBasis
 
 @testset "random matrices" begin
     mat = rand_unitary(8)
