@@ -7,8 +7,10 @@ using YaoArrayRegister.SparseArrays
     nbit = 8
     h = heisenberg(nbit) |> cache
     @test ishermitian(h)
+    @test vec(h[:,bit"01001000"] |> cleanup) ≈ mat(h)[:, buffer(bit"01001000")+1]
     h = transverse_ising(nbit, 1.0)
     @test ishermitian(h)
+    @test vec(h[:,bit"01001000"] |> cleanup) ≈ mat(h)[:, buffer(bit"01001000")+1]
 end
 
 # https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.123.170503
