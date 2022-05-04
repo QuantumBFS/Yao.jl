@@ -84,12 +84,3 @@ function lp(Δ::T, ξ::T) where T
     diff = mod(2*ang1 - ang2-1, 2)
     abs(m[i,i]), abs(m[j,j]), min(abs(diff), abs(diff-2))
 end
-
-function f(x)
-    res = lp(x...)
-    (1-res[1]) + (1-res[2]) + res[3]
-end
-
-using ForwardDiff, Optim
-Base.exp(m::AbstractMatrix{Complex{T}}) where T<:ForwardDiff.Dual = YaoBlocks.ExponentialUtilities.exp_generic(m)
-opt = Optim.optimize(f, [0.4, 1.0], LBFGS(); inplace=false)
