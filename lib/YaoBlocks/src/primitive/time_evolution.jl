@@ -131,6 +131,6 @@ iparams_range(::TimeEvolution{D,T}) where {D,T} = ((typemin(T), typemax(T)),)
 function unsafe_getindex(te::TimeEvolution{D,T}, i::Integer, j::Integer) where {D,T}
     return apply!(ArrayReg(BitBasis._onehot(Complex{T}, D^nqudits(te), j+1)), te).state[i+1]
 end
-function unsafe_getindex(te::TimeEvolution{D,T}, ::Colon, j::Integer) where {D,T}
-    return statevec(apply(ArrayReg(BitBasis._onehot(Complex{T}, D^nqudits(te), j+1)), te))
+function unsafe_getcol(te::TimeEvolution{D,T}, j::DitStr{D,L,TI}) where {D,T,L,TI}
+    convert.(Ref(DitStr{D,L,TI}), basis(te)), statevec(apply(ArrayReg(BitBasis._onehot(Complex{T}, D^nqudits(te), j+1)), te))
 end

@@ -398,7 +398,7 @@ function getindex2(::Type{T}, ::Val{D}, N::Int, U, locs::NTuple{M}, cbits::NTupl
         end
     end
     # get the target element in U
-    return unsafe_getindex(U, subi, subj)
+    return unsafe_getindex(T, U, subi, subj)
 end
 
 # blocks are operators, locs are sorted ranges
@@ -424,7 +424,7 @@ function kron_getindex2(::Type{T}, ::Val{D}, N::Int, blocks, locs::NTuple{M}, i:
         ival, _i = take_and_shift(_i, Val{D}(), l)
         jval, _j = take_and_shift(_j, Val{D}(), l)
         # get the target element in U
-        res *= unsafe_getindex(block, ival, jval)
+        res *= unsafe_getindex(T, block, ival, jval)
         pre = loc.stop
     end
     if pre != N  # one extra identity
@@ -463,7 +463,7 @@ function repeat_getindex2(::Type{T}, ::Val{D}, N::Int, block, locs::NTuple{M}, i
         ival, _i = take_and_shift(_i, Val{D}(), l)
         jval, _j = take_and_shift(_j, Val{D}(), l)
         # get the target element in U
-        res *= unsafe_getindex(block, ival, jval)
+        res *= unsafe_getindex(T, block, ival, jval)
         pre = loc + n-1
     end
     if pre != N  # one extra identity
@@ -487,7 +487,7 @@ function getindexr(::Type{T}, U, locs::NTuple{M}, cbits::NTuple{C}, cvals::NTupl
     @inbounds for k=1:C
         # not controlled!
         if cvals[k] != _takeat(j, Val{D}(), cbits[k])
-            return SparseVector(1, TI[j+1], [one(T)])
+            return [dj], [one(T)]
         end
     end
     # get subindex
@@ -496,7 +496,7 @@ function getindexr(::Type{T}, U, locs::NTuple{M}, cbits::NTuple{C}, cvals::NTupl
         subj += BitBasis._lshift(Val{D}(), _takeat(j, Val{D}(), locs[ind]), ind-1)
     end
     # get the target element in U
-    rows, vals = unsafe_getcol(U, DitStr{D,M,TI}(subj))
+    rows, vals = unsafe_getcol(T, U, DitStr{D,M,TI}(subj))
     # map rows
     newrows = map(rows) do i
         subi = DitStr{D,L,TI}(j)
@@ -510,6 +510,9 @@ end
 
 # blocks are operators, locs are sorted ranges
 function kron_getindexr(::Type{T}, blocks, locs::NTuple{M}, j::DitStr{D,L,TI}) where {T,D,L,M,TI}
+    if M == 0
+        return [j], [one(T)]
+    end
     _j = buffer(j)
     rows = Vector{DitStr{D,L,TI}}[]
     vals = Vector{T}[]
@@ -527,7 +530,7 @@ function kron_getindexr(::Type{T}, blocks, locs::NTuple{M}, j::DitStr{D,L,TI}) w
         l = length(loc)
         jval, _j = take_and_shift(_j, Val{D}(), l)
         # get the target element in U
-        subrows, subvals = unsafe_getcol(block, DitStr{D,L,TI}(jval))
+        subrows, subvals = unsafe_getcol(T, block, DitStr{D,L,TI}(jval))
         # map rows to the larger space
         newrows = map(subrows) do i
             subi = zero(DitStr{D,L,TI})

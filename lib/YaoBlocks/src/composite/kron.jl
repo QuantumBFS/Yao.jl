@@ -215,9 +215,9 @@ LinearAlgebra.ishermitian(k::KronBlock) = all(ishermitian, k.blocks) || ishermit
 YaoAPI.isunitary(k::KronBlock) = all(isunitary, k.blocks) || isunitary(mat(k))
 YaoAPI.isreflexive(k::KronBlock) = all(isreflexive, k.blocks) || isreflexive(mat(k))
 
-function unsafe_getindex(k::KronBlock{D}, i::Integer, j::Integer) where {D}
-    kron_getindex2(ComplexF64, Val{D}(), nqudits(k), k.blocks, k.locs, i, j)
+function unsafe_getindex(::Type{T}, k::KronBlock{D}, i::Integer, j::Integer) where {T,D}
+    kron_getindex2(T, Val{D}(), nqudits(k), k.blocks, k.locs, i, j)
 end
-function unsafe_getcol(pb::KronBlock{D}, j::DitStr{D}) where D
-    kron_getindexr(ComplexF64, pb.blocks, pb.locs, j)
+function unsafe_getcol(::Type{T}, pb::KronBlock{D}, j::DitStr{D}) where {T,D}
+    kron_getindexr(T, pb.blocks, pb.locs, j)
 end

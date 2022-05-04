@@ -134,3 +134,69 @@ function logdi(x::Integer, d::Integer)
     end
     return r
 end
+
+##################### Entry Table #########################
+struct EntryTable{IT<:DitStr, ET}
+    configs::Vector{IT}
+    amplitudes::Vector{ET}
+end
+function YaoArrayRegister.print_table(io::IO, t::EntryTable; digits::Int=5)
+    println(io, "$(typeof(t)):")
+    for (i, a) in zip(t.configs, t.amplitudes)
+        println(io, "  $i   $(round(a; digits))")
+    end
+end
+Base.show(io::IO, ::MIME"text/plain", t::EntryTable) = YaoArrayRegister.print_table(io, t; digits=5)
+Base.show(io::IO, t::EntryTable) = YaoArrayRegister.print_table(io, t; digits=5)
+Base.:(==)(e1::EntryTable, e2::EntryTable) = e1.configs == e2.configs && e1.amplitudes == e2.amplitudes
+Base.length(et::EntryTable) = length(et.configs)
+Base.iterate(et::EntryTable, args...) = iterate(zip(et.configs, et.amplitudes), args...)
+
+function Base.Vector(et::EntryTable{<:DitStr{D,N}, ET}) where {D,N,ET}
+    v = zeros(ET, D^N)
+    for (c, a) in et
+        v[buffer(c)+1] += a  # accumulate to support duplicated entries
+    end
+    return v
+end
+function SparseArrays.SparseVector(et::EntryTable{DitStr{D,N,TI}, ET}) where {D,N,ET,TI}
+    length(et.configs) == 0 && return SparseVector(D^N, TI[], ET[])
+    locs = buffer.(et.configs) .+ 1
+    locs, amps = _cleanup(locs, et.amplitudes)
+    return SparseVector(D^N, locs, amps)
+end
+
+# TODO: also clean up zeros
+function cleanup(et::EntryTable)
+    EntryTable(_cleanup(et.configs, et.amplitudes)...)
+end
+function _cleanup(locs, amps)
+    length(locs) == 0 && return locs, amps
+    order = sortperm(locs; by=Int)
+    locs, amps = locs[order], amps[order]
+    k = 1
+    pre = locs[1]
+    @inbounds for i=2:length(locs)
+        this = locs[i]
+        if this != pre
+            k += 1
+            locs[k] = this
+            amps[k] = amps[i]
+        else
+            amps[k] += amps[i]
+        end
+        pre = this
+    end
+    if k != length(locs)
+        resize!(locs, k)
+        resize!(amps, k)
+    end
+    return locs, amps
+end
+
+function Base.merge(et::EntryTable{DitStr{D,N,TI},T}, ets::EntryTable{DitStr{D,N,TI},T}...) where {D,N,TI,T}
+    EntryTable(vcat(et.configs, [e.configs for e in ets]...), vcat(et.amplitudes, [e.amplitudes for e in ets]...))
+end
+
+SparseArrays.sparse(et::EntryTable) = SparseVector(et)
+Base.vec(et::EntryTable) = Vector(et)

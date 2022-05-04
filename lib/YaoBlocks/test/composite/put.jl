@@ -91,13 +91,14 @@ end
 end
 
 @testset "getindex2" begin
-    pb = put(3, 2=>Y)
-    mpb = mat(pb)
-    allpass = true
-    for i=basis(pb), j=basis(pb)
-        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+    for pb in [put(3, 2=>Y), put(4, (4,2)=>matblock(rand_unitary(9); nlevel=3))]
+        mpb = mat(pb)
+        allpass = true
+        for i=basis(pb), j=basis(pb)
+            allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+        end
+        @test allpass
     end
-    @test allpass
 
     # col
     pb = put(4, (1,4)=>matblock(rand_unitary(4)))
@@ -105,14 +106,6 @@ end
     allpass = true
     for j=basis(pb)
         allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
-    end
-    @test allpass
-
-    pb = put(4, (4,2)=>matblock(rand_unitary(9); nlevel=3))
-    mpb = mat(pb)
-    allpass = true
-    for i=basis(pb), j=basis(pb)
-        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
     end
     @test allpass
 

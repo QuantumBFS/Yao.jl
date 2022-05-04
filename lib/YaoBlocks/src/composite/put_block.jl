@@ -187,9 +187,9 @@ for (G, GT) in [
     end
 end
 
-function unsafe_getindex(pb::PutBlock{D}, i::Integer, j::Integer) where D
-    getindex2(ComplexF64, Val{D}(), nqudits(pb), pb.content, pb.locs, (), (), i, j)
+function unsafe_getindex(::Type{T}, pb::PutBlock{D}, i::Integer, j::Integer) where {T,D}
+    getindex2(T, Val{D}(), nqudits(pb), pb.content, pb.locs, (), (), i, j)
 end
-function unsafe_getcol(pb::PutBlock{D}, j::DitStr{D}) where D
-    getindexr(ComplexF64, pb.content, pb.locs, (), (), j)
+function unsafe_getcol(::Type{T}, pb::PutBlock{D}, j::DitStr{D}) where {T,D}
+    getindexr(T, pb.content, pb.locs, (), (), j)
 end

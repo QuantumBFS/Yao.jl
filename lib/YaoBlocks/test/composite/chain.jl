@@ -180,26 +180,20 @@ end
 end
 
 @testset "getindex2" begin
-    pb = chain(3)
-    mpb = mat(pb)
-    allpass = true
-    for i=basis(pb), j=basis(pb)
-        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+    for pb in [chain(3), chain(put(3, 2=>Y)),
+        chain(put(4, (4,2)=>matblock(rand_unitary(9); nlevel=3)), put(4, (3,)=>matblock(rand_unitary(3); nlevel=3)))
+    ]
+        mpb = mat(pb)
+        allpass = true
+        for i=basis(pb), j=basis(pb)
+            allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+        end
+        @test allpass
+        allpass = true
+        for j=basis(pb)
+            allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+            allpass &= vec(pb[j,:]) == mpb[Int(j)+1,:]
+        end
+        @test allpass
     end
-    @test allpass
- 
-    pb = chain(put(3, 2=>Y))
-    mpb = mat(pb)
-    allpass = true
-    for i=basis(pb), j=basis(pb)
-        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
-    end
-    @test allpass
-    pb = chain(put(4, (4,2)=>matblock(rand_unitary(9); nlevel=3)), put(4, (3,)=>matblock(rand_unitary(3); nlevel=3)))
-    mpb = mat(pb)
-    allpass = true
-    for i=basis(pb), j=basis(pb)
-        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
-    end
-    @test allpass
 end

@@ -96,10 +96,26 @@ end
 LinearAlgebra.ishermitian(ad::Add) = all(ishermitian, ad.list) || ishermitian(mat(ad))
 
 # this is not type stable, possible to fix?
-function unsafe_getindex(ad::Add{D}, i::Integer, j::Integer) where D
-    length(ad.list) > 0 ? sum(b->unsafe_getindex(b,i,j), ad.list) : 0.0im
+function unsafe_getindex(::Type{T}, ad::Add{D}, i::Integer, j::Integer) where {T, D}
+    length(ad.list) > 0 ? sum(b->unsafe_getindex(T,b,i,j), ad.list) : zero(T)
+end
+function unsafe_getcol(::Type{T}, ad::Add{D}, j::DitStr{D,N,TI}) where {T,D,N,TI}
+    length(ad.list) == 0 && return DitStr{D,N,TI}[], T[]
+    locs = Vector{DitStr{D,N,TI}}[]
+    amps = Vector{T}[]
+    for block in ad.list
+        loc, amp = unsafe_getcol(T, block, j)
+        push!(locs, loc)
+        push!(amps, amp)
+    end
+    return vcat(locs...), vcat(amps...)
 end
 function Base.getindex(b::Add{D}, i::DitStr{D,N}, j::DitStr{D,N}) where {D,N}
-    @assert nqudits(b) == N
-    return unsafe_getindex(b, buffer(i), buffer(j))
+    invoke(Base.getindex, Tuple{AbstractBlock{D}, DitStr{D,N}, DitStr{D,N}} where {D,N}, b, i, j)
+end
+function Base.getindex(b::Add{D}, i::Colon, j::DitStr{D,N}) where {D,N}
+    invoke(Base.getindex, Tuple{AbstractBlock{D}, Colon, DitStr{D}} where D, b, i, j)
+end
+function Base.getindex(b::Add{D}, i::DitStr{D,N}, j::DitStr{D,N}) where {D,N}
+    invoke(Base.getindex, Tuple{AbstractBlock{D}, DitStr{D}, D} where D, b, i, j)
 end

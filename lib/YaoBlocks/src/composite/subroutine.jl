@@ -123,6 +123,9 @@ function YaoAPI.iscommute(x::Subroutine{D}, y::Subroutine{D}) where {D}
     end
 end
 
-function unsafe_getindex(sr::Subroutine{D}, i::Integer, j::Integer) where D
-    getindex2(ComplexF64, Val{D}(), nqudits(sr), sr.content, sr.locs, (), (), i, j)
+function unsafe_getindex(::Type{T}, sr::Subroutine{D}, i::Integer, j::Integer) where {T,D}
+    getindex2(T, Val{D}(), nqudits(sr), sr.content, sr.locs, (), (), i, j)
+end
+function unsafe_getcol(::Type{T}, pb::Subroutine{D}, j::DitStr{D}) where {T,D}
+    getindexr(T, pb.content, pb.locs, (), (), j)
 end

@@ -179,19 +179,47 @@ LinearAlgebra.ishermitian(c::ChainBlock) =
     (all(isreflexive, c.blocks) && iscommute(c.blocks...)) || isreflexive(mat(c))
 
 # this is not type stable, possible to fix?
-function unsafe_getindex(c::ChainBlock{D}, i::Integer, j::Integer) where D
+function unsafe_getindex(::Type{T}, c::ChainBlock{D}, i::Integer, j::Integer) where {D,T}
     if length(c) == 0
-        return i==j ? 1.0+0im : 0.0im
+        return i==j ? one(T) : zero(T)
     elseif length(c) == 1
-        return unsafe_getindex(c.blocks[1], i, j)
+        return unsafe_getindex(T, c.blocks[1], i, j)
     else
-        # TODO: change this slow implementation
-        return mat(c)[i+1, j+1]
-        #error("get index of a chain is not yet supported! Try use [`kron`](@ref), [`repeat`](@ref), [`put`](@ref) or file an issue.")
+        table = propagate_chain(c.blocks[2:end-1], c.blocks[1][:, DitStr{D,nqudits(c)}(j)])
+        res = zero(T)
+        for (loc, amp) in table
+            res += unsafe_getindex(T, c.blocks[end], i, buffer(loc)) * amp
+        end
+        return res
     end
-    #length(ad.list) > 0 ? sum(b->unsafe_getindex(b,i,j), ad.list) : 0.0im
+end
+
+function unsafe_getcol(::Type{T}, c::ChainBlock{D}, j::DitStr{D,N,TI}) where {D,N,TI,T}
+    if length(c) == 0
+        return [j], [one(T)]
+    elseif length(c) == 1
+        return unsafe_getcol(T, c.blocks[1], j)
+    else
+        table = propagate_chain(c.blocks[2:end], c.blocks[1][:,j])
+        return table.configs, table.amplitudes
+    end
+end
+# propagate the configurations along the chain
+function propagate_chain(blocks, i::EntryTable; cleanup_threshold=Inf)
+    for b in blocks
+        i = b[:,i]
+        if length(i) >= cleanup_threshold
+            i = cleanup(i)
+        end
+    end
+    return i
 end
 function Base.getindex(b::ChainBlock{D}, i::DitStr{D,N}, j::DitStr{D,N}) where {D,N}
-    @assert nqudits(b) == N
-    return unsafe_getindex(b, buffer(i), buffer(j))
+    invoke(Base.getindex, Tuple{AbstractBlock{D}, DitStr{D,N}, DitStr{D,N}} where {D,N}, b, i, j)
+end
+function Base.getindex(b::ChainBlock{D}, ::Colon, j::DitStr{D,N}) where {D,N}
+    invoke(Base.getindex, Tuple{AbstractBlock{D}, Colon, DitStr{D,N}} where {D,N}, b, :, j)
+end
+function Base.getindex(b::ChainBlock{D}, i::DitStr{D,N}, ::Colon) where {D,N}
+    invoke(Base.getindex, Tuple{AbstractBlock{D}, DitStr{D,N}, Colon} where {D,N}, b, i, :)
 end

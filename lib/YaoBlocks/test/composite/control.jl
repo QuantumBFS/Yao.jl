@@ -104,18 +104,17 @@ end
 end
 
 @testset "getindex2" begin
-    pb = control(3, 2, 1=>Y)
-    mpb = mat(pb)
-    allpass = true
-    for i=basis(pb), j=basis(pb)
-        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+    for pb in [control(3, 2, 1=>Y), control(4, 3, (4,2)=>matblock(rand_unitary(4)))]
+        mpb = mat(pb)
+        allpass = true
+        for i=basis(pb), j=basis(pb)
+            allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+        end
+        @test allpass
+        allpass = true
+        for j=basis(pb)
+            allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+        end
+        @test allpass
     end
-    @test allpass
-    pb = control(4, 3, (4,2)=>matblock(rand_unitary(4)))
-    mpb = mat(pb)
-    allpass = true
-    for i=basis(pb), j=basis(pb)
-        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
-    end
-    @test allpass
 end

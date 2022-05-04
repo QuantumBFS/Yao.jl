@@ -18,12 +18,12 @@ YaoAPI.isdiagonal(p::PrimitiveBlock) = isdiagonal(mat(p))
 
 # Certain blocks, like X block can have faster getindex, but this performance (~2ns) is probably enough!
 # Go to each block file to specialize!
-function unsafe_getindex(op::PrimitiveBlock{D}, i::Integer, j::Integer) where {D}
-    return @inbounds mat(op)[i+1, j+1]
+function unsafe_getindex(::Type{T}, op::PrimitiveBlock{D}, i::Integer, j::Integer) where {T,D}
+    return @inbounds mat(T, op)[i+1, j+1]
 end
-function unsafe_getcol(op::PrimitiveBlock{D}, j::DitStr{D}) where {D}
+function unsafe_getcol(::Type{T}, op::PrimitiveBlock{D}, j::DitStr{D}) where {T,D}
     # TODO: check luxury sparse implementation
-    return getcol(mat(op), j)
+    return getcol(mat(T, op), j)
 end
 function getcol(op::AbstractMatrix, j::DitStr{D,N,TI}) where {D,N,TI}
     res = op[:,buffer(j)+1]

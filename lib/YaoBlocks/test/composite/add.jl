@@ -48,18 +48,19 @@ using LinearAlgebra: I
 end
 
 @testset "getindex2" begin
-    pb = put(3, 3=>Y) + control(3, (2,), 1=>X)
-    mpb = mat(pb)
-    allpass = true
-    for i=basis(pb), j=basis(pb)
-        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+    for pb in [put(3, 3=>Y) + control(3, (2,), 1=>X),
+                put(5, 2=>Y) + control(5, (2,), (4,3)=>matblock(rand_unitary(4)))
+                ]
+        mpb = mat(pb)
+        allpass = true
+        for i=basis(pb), j=basis(pb)
+            allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+        end
+        @test allpass
+        allpass = true
+        for j=basis(pb)
+            allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+        end
+        @test allpass
     end
-    @test allpass
-    pb = put(5, 2=>Y) + control(5, (2,), (4,3)=>matblock(rand_unitary(4)))
-    mpb = mat(pb)
-    allpass = true
-    for i=basis(pb), j=basis(pb)
-        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
-    end
-    @test allpass
 end

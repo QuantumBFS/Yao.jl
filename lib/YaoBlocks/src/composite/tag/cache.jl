@@ -195,11 +195,19 @@ function cache(
     return CachedBlock(server, x, level)
 end
 
-function unsafe_getindex(c::CachedBlock, i::Integer, j::Integer)
-    @inbounds mat(c)[i+1, j+1]
+function unsafe_getindex(::Type{T}, c::CachedBlock, i::Integer, j::Integer) where T
+    @inbounds mat(T, c)[i+1, j+1]
+end
+function unsafe_getcol(::Type{T}, c::CachedBlock, j::DitStr) where {T}
+    @inbounds mat(T, c)[:, j+1]
 end
 
 function Base.getindex(b::CachedBlock{ST, BT, D}, i::DitStr{D,N}, j::DitStr{D,N}) where {ST,BT,D,N}
-    @assert nqudits(b) == N
-    return unsafe_getindex(b, buffer(i), buffer(j))
+    invoke(Base.getindex, Tuple{AbstractBlock{D}, DitStr{D,N}, DitStr{D,N}} where {D,N}, b, i, j)
+end
+function Base.getindex(b::CachedBlock{ST, BT, D}, ::Colon, j::DitStr{D,N}) where {ST,BT,D,N}
+    invoke(Base.getindex, Tuple{AbstractBlock{D}, Colon, DitStr{D,N}} where {D,N}, b, :, j)
+end
+function Base.getindex(b::CachedBlock{ST, BT, D}, i::DitStr{D,N}, ::Colon) where {ST,BT,D,N}
+    invoke(Base.getindex, Tuple{AbstractBlock{D}, DitStr{D,N}, Colon} where {D,N}, b, i, :)
 end
