@@ -218,8 +218,16 @@ function Base.getindex(b::ChainBlock{D}, i::DitStr{D,N}, j::DitStr{D,N}) where {
     invoke(Base.getindex, Tuple{AbstractBlock{D}, DitStr{D,N}, DitStr{D,N}} where {D,N}, b, i, j)
 end
 function Base.getindex(b::ChainBlock{D}, ::Colon, j::DitStr{D,N}) where {D,N}
-    invoke(Base.getindex, Tuple{AbstractBlock{D}, Colon, DitStr{D,N}} where {D,N}, b, :, j)
+    T = promote_type(ComplexF64, parameters_eltype(b))
+    return _getindex(T, b, :, j)
 end
 function Base.getindex(b::ChainBlock{D}, i::DitStr{D,N}, ::Colon) where {D,N}
-    invoke(Base.getindex, Tuple{AbstractBlock{D}, DitStr{D,N}, Colon} where {D,N}, b, i, :)
+    T = promote_type(ComplexF64, parameters_eltype(b))
+    return _getindex(T, b, i, :)
+end
+function Base.getindex(b::ChainBlock{D}, ::Colon, j::EntryTable{DitStr{D,N,TI},T}) where {D,N,TI,T}
+    return _getindex(b, :, j)
+end
+function Base.getindex(b::ChainBlock{D}, i::EntryTable{DitStr{D,N,TI},T}, ::Colon) where {D,N,TI,T}
+    return _getindex(b, i, :)
 end

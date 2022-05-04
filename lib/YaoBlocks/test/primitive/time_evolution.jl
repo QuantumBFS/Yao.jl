@@ -103,11 +103,20 @@ end
 end
 
 @testset "getindex2" begin
-    pb = time_evolve(put(3, 2=>Y), 0.5)
-    mpb = mat(pb)
-    allpass = true
-    for i=basis(pb), j=basis(pb)
-        allpass &= pb[i, j] ≈ mpb[Int(i)+1, Int(j)+1]
+    for pb in [time_evolve(put(3, 2=>Y), 0.5), time_evolve(cache(put(3, (3,1)=>matblock(rand_hermitian(9); nlevel=3))), 0.5)
+            ]
+        mpb = mat(pb)
+        allpass = true
+        for i=basis(pb), j=basis(pb)
+            allpass &= pb[i, j] ≈ mpb[Int(i)+1, Int(j)+1]
+        end
+        @test allpass
+
+        allpass = true
+        for j=basis(pb)
+            allpass &= vec(pb[:, j]) ≈ mpb[:, Int(j)+1]
+            allpass &= vec(pb[j,:]) ≈ mpb[Int(j)+1,:]
+        end
+        @test allpass
     end
-    @test allpass
 end

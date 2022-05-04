@@ -109,3 +109,21 @@ end
     @test mat(P0) ≈ [1 0;0 0]
     @test mat(P1) ≈ [0 0;0 1]
 end
+
+@testset "getindex2" begin
+    for pb in [X, Y, Z, I2, S, T, Pu, Pd, P0, P1]
+        mpb = mat(pb)
+        allpass = true
+        for i=basis(pb), j=basis(pb)
+            allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+        end
+        @test allpass
+
+        allpass = true
+        for j=basis(pb)
+            allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+            allpass &= vec(pb[j,:]) == mpb[Int(j)+1,:]
+        end
+        @test allpass
+    end
+end

@@ -22,7 +22,7 @@ function unsafe_getindex(::Type{T}, op::PrimitiveBlock{D}, i::Integer, j::Intege
     return @inbounds mat(T, op)[i+1, j+1]
 end
 function unsafe_getcol(::Type{T}, op::PrimitiveBlock{D}, j::DitStr{D}) where {T,D}
-    # TODO: check luxury sparse implementation
+    # TODO: check luxury sparse implementation of M[:,j]
     return getcol(mat(T, op), j)
 end
 function getcol(op::AbstractMatrix, j::DitStr{D,N,TI}) where {D,N,TI}

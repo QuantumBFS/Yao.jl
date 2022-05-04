@@ -455,20 +455,33 @@ function Base.getindex(b::AbstractBlock{D}, i::DitStr{D,N}, j::DitStr{D,N}) wher
     return unsafe_getindex(T, b, buffer(i), buffer(j))
 end
 function Base.getindex(b::AbstractBlock{D}, ::Colon, j::DitStr{D,N,TI}) where {D,N,TI}
-    @assert nqudits(b) == N
     T = promote_type(ComplexF64, parameters_eltype(b))
+    return _getindex(T, b, :, j)
+end
+function Base.getindex(b::AbstractBlock{D}, i::DitStr{D,N,TI}, ::Colon) where {D,N,TI}
+    T = promote_type(ComplexF64, parameters_eltype(b))
+    return _getindex(T, b, i, :)
+end
+function Base.getindex(b::AbstractBlock{D}, ::Colon, j::EntryTable{DitStr{D,N,TI},T}) where {D,N,TI,T}
+    return _getindex(b, :, j)
+end
+function Base.getindex(b::AbstractBlock{D}, i::EntryTable{DitStr{D,N,TI},T}, ::Colon) where {D,N,TI,T}
+    return _getindex(b, i, :)
+end
+function _getindex(::Type{T}, b::AbstractBlock{D}, ::Colon, j::DitStr{D,N,TI}) where {T, D,N,TI}
+    @assert nqudits(b) == N
     rows, vals = unsafe_getcol(T, b, j)
     return EntryTable(rows, vals)
 end
-function Base.getindex(b::AbstractBlock{D}, i::DitStr{D,N,TI}, ::Colon) where {D,N,TI}
-    res = b'[:,i]
+function _getindex(::Type{T}, b::AbstractBlock{D}, i::DitStr{D,N,TI}, ::Colon) where {D,N,TI,T}
+    res = _getindex(T, b', :,i)
     conj!(res.amplitudes)
     return res
 end
-function Base.getindex(b::AbstractBlock{D}, ::Colon, j::EntryTable{DitStr{D,N,TI},T}) where {D,N,TI,T}
+function _getindex(b::AbstractBlock{D}, ::Colon, j::EntryTable{DitStr{D,N,TI},T}) where {D,N,TI,T}
     return merge([(et = b[:,bs]; rmul!(et.amplitudes, amp); et) for (bs, amp) in zip(j.configs, j.amplitudes)]...)
 end
-function Base.getindex(b::AbstractBlock{D}, i::EntryTable{DitStr{D,N,TI},T}, ::Colon) where {D,N,TI,T}
+function _getindex(b::AbstractBlock{D}, i::EntryTable{DitStr{D,N,TI},T}, ::Colon) where {D,N,TI,T}
     res = b'[:,i]
     conj!(res.amplitudes)
     return res

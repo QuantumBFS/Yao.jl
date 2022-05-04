@@ -46,7 +46,6 @@ end
     println()
     print_table(reg)
 
-    # TODO: add block[dit"...", dit"..."]
     bases = basis(reg)
     h = levine_pichler_pulse
     m = mat(h)

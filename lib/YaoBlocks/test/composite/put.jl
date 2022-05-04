@@ -98,22 +98,13 @@ end
             allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
         end
         @test allpass
-    end
 
-    # col
-    pb = put(4, (1,4)=>matblock(rand_unitary(4)))
-    mpb = mat(pb)
-    allpass = true
-    for j=basis(pb)
-        allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+        allpass = true
+        for j=basis(pb)
+            allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+            allpass &= vec(pb[:, EntryTable([j], [1.0+0im])]) == mpb[:, Int(j)+1]
+            allpass &= vec(pb[j,:]) == mpb[Int(j)+1,:]
+        end
+        @test allpass
     end
-    @test allpass
-
-    pb = put(4, (4,2)=>matblock(rand_unitary(9); nlevel=3))
-    mpb = mat(pb)
-    allpass = true
-    for j=basis(pb)
-        allpass &= sparse(pb[:, j]) ≈ sparse(mpb[:, Int(j)+1])
-    end
-    @test allpass
 end

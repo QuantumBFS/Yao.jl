@@ -58,7 +58,7 @@ end
 function force_getrowconj(::Type{T}, mb::GeneralMatrixBlock, i::DitStr{D}) where {T,D}
     locs, vals = getcol(mb.mat', i)
     if eltype(vals) != T
-        vals = convert.(Ref(T), vals)
+        vals = convert.(T, vals)
     end
     return locs, vals
 end

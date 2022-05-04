@@ -114,6 +114,7 @@ end
         allpass = true
         for j=basis(pb)
             allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+            allpass &= vec(pb[j, :]) == mpb[Int(j)+1, :]
         end
         @test allpass
     end

@@ -27,3 +27,25 @@ a = rand_unitary(2) .|> ComplexF32
 
 @test !isdiagonal(matblock(randn(64, 64)))
 @test isdiagonal(matblock(Diagonal(randn(128))))
+
+@testset "getindex2" begin
+    for pb in [matblock(mat(kron(X,X))),
+            matblock(rand_unitary(9); nlevel=3),
+            matblock(mat(igate(2))),
+            matblock(sprand(ComplexF64, 4,4,0.5)),
+            ]
+        mpb = mat(pb)
+        allpass = true
+        for i=basis(pb), j=basis(pb)
+            allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+        end
+        @test allpass
+
+        allpass = true
+        for j=basis(pb)
+            allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+            allpass &= vec(pb[j,:]) == mpb[Int(j)+1,:]
+        end
+        @test allpass
+    end
+end

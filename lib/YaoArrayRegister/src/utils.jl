@@ -494,3 +494,9 @@ end
     end
 end
 
+function matchtype(::Type{T}, A::AbstractMatrix{T2}) where {T,T2}
+    return copyto!(similar(A, T), A)
+end
+function matchtype(::Type{T}, A::AbstractMatrix{T}) where {T}
+    return A
+end

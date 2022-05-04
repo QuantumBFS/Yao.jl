@@ -81,3 +81,22 @@ end
     end
     @test allpass
 end
+
+@testset "getindex2" begin
+    for pb in [Rx(0.5), rot(SWAP, 0.5), shift(0.5), phase(0.5)
+            ]
+        mpb = mat(pb)
+        allpass = true
+        for i=basis(pb), j=basis(pb)
+            allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+        end
+        @test allpass
+
+        allpass = true
+        for j=basis(pb)
+            allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+            allpass &= vec(pb[j,:]) == mpb[Int(j)+1,:]
+        end
+        @test allpass
+    end
+end

@@ -176,11 +176,11 @@ function YaoAPI.instruct!(::Val{2},
 end
 
 function YaoAPI.instruct!(::Val{2},
-    state::AbstractVecOrMat,
+    state::AbstractVecOrMat{T},
     ::Val{:H},
     locs::NTuple{N,Int},
-) where {N}
-    instruct!(Val(2), state, YaoArrayRegister.Const.H, locs)
+) where {T, N}
+    instruct!(Val(2), state, matchtype(T, YaoArrayRegister.Const.H), locs)
 end
 
 function YaoAPI.instruct!(::Val{2},

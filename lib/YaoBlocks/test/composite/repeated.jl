@@ -32,24 +32,20 @@ using LuxurySparse
 end
 
 @testset "getindex2" begin
-    pb = repeat(3, Y, (3,2))
-    mpb = mat(pb)
-    allpass = true
-    for i=basis(pb), j=basis(pb)
-        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
-    end
-    @test allpass
-    pb = repeat(5, matblock(rand_unitary(3); nlevel=3), (5, 2))
-    mpb = mat(pb)
-    allpass = true
-    for i=basis(pb), j=basis(pb)
-        allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
-    end
-    @test allpass
+    for pb in [repeat(3, Y, (3,2)), repeat(5, matblock(rand_unitary(3); nlevel=3), (5, 2))]
+        mpb = mat(pb)
+        allpass = true
+        for i=basis(pb), j=basis(pb)
+            allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+        end
+        @test allpass
 
-    allpass = true
-    for j=basis(pb)
-        allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+        allpass = true
+        for j=basis(pb)
+            allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+            allpass &= vec(pb[:, EntryTable([j], [1.0+0im])]) == mpb[:, Int(j)+1]
+            allpass &= vec(pb[j, :]) == mpb[Int(j)+1, :]
+        end
+        @test allpass
     end
-    @test allpass
 end
