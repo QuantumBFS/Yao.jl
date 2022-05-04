@@ -2,6 +2,7 @@ using YaoBlocks
 using YaoBlocks: sprand_hermitian, sprand_unitary
 using SparseArrays: sparse
 using BitBasis
+using Test
 
 @testset "random matrices" begin
     mat = rand_unitary(8)
@@ -28,4 +29,7 @@ end
     end
     e1 = EntryTable([bit"001"], [2.0])
     @test merge(e1,e1,e1) == EntryTable([bit"001",bit"001",bit"001"], fill(2.0, 3))
+
+    et = EntryTable([bit"000",bit"011",bit"101",bit"101",bit"011",bit"110",bit"110",bit"011",], [1.0 + 0.0im,-1, 1,1,1,-1,1,1,-1])
+    @test cleanup(et) |> length == 3
 end

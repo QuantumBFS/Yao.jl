@@ -132,5 +132,5 @@ function unsafe_getindex(te::TimeEvolution{D,T}, i::Integer, j::Integer) where {
     return apply!(ArrayReg(BitBasis._onehot(Complex{T}, D^nqudits(te), j+1)), te).state[i+1]
 end
 function unsafe_getcol(te::TimeEvolution{D,T}, j::DitStr{D,L,TI}) where {D,T,L,TI}
-    convert.(Ref(DitStr{D,L,TI}), basis(te)), statevec(apply(ArrayReg(BitBasis._onehot(Complex{T}, D^nqudits(te), j+1)), te))
+    convert.(DitStr{D,L,TI}, basis(te)), statevec(apply(ArrayReg(BitBasis._onehot(Complex{T}, D^nqudits(te), j+1)), te))
 end

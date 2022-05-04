@@ -75,3 +75,28 @@ import .ConstGate:
 
 occupied_locs(::I2Gate) = ()
 nqudits(::ConstantGate{N}) where N = N
+
+function unsafe_getindex(::Type{T}, rg::XGate, i::Integer, j::Integer) where {T}
+    i==j ? zero(T) : one(T)
+end
+function unsafe_getindex(::Type{T}, rg::YGate, i::Integer, j::Integer) where {T}
+    if i==j
+        zero(T)
+    elseif i > j
+        T(im)
+    else
+        T(-im)
+    end
+end
+function unsafe_getindex(::Type{T}, rg::ZGate, i::Integer, j::Integer) where {T}
+    if i==j
+        if i==0
+            one(T)
+        else
+            -one(T)
+        end
+    else
+        zero(T)
+    end
+end
+# NOTE: no speedup if I specialize `unsafe_getcol`

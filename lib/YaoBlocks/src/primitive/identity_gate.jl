@@ -40,3 +40,10 @@ igate(2;nlevel=3)
 ```
 """
 igate(n::Int; nlevel=2) = IdentityGate{nlevel}(n)
+
+function unsafe_getindex(::Type{T}, rg::IdentityGate{D}, i::Integer, j::Integer) where {D,T}
+    i==j ? one(T) : zero(T)
+end
+function unsafe_getcol(::Type{T}, rg::IdentityGate{D}, j::DitStr{D}) where {D,T}
+    [j], [one(T)]
+end

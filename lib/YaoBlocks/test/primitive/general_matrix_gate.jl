@@ -1,4 +1,6 @@
 using Test, Random, LinearAlgebra, YaoArrayRegister, YaoBlocks, YaoAPI
+using SparseArrays: sprand
+using YaoArrayRegister.LuxurySparse: pmrand
 
 A = rand(ComplexF64, 4, 4)
 mg = matblock(A)

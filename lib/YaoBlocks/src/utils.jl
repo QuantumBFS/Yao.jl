@@ -162,15 +162,20 @@ end
 function SparseArrays.SparseVector(et::EntryTable{DitStr{D,N,TI}, ET}) where {D,N,ET,TI}
     length(et.configs) == 0 && return SparseVector(D^N, TI[], ET[])
     locs = buffer.(et.configs) .+ 1
-    locs, amps = _cleanup(locs, et.amplitudes)
+    locs, amps = _cleanup(locs, et.amplitudes; zero_threshold=0.0)
     return SparseVector(D^N, locs, amps)
 end
 
-# TODO: also clean up zeros
-function cleanup(et::EntryTable)
-    EntryTable(_cleanup(et.configs, et.amplitudes)...)
+"""
+    cleanup(entries::EntryTable; zero_threshold=0.0)
+
+Clean up the entry table by merging items and clean up zeros.
+Any value with amplitude ≤ `zero_threshold` will be regarded as zero.
+"""
+function cleanup(et::EntryTable; zero_threshold=0.0)
+    EntryTable(_cleanup(et.configs, et.amplitudes; zero_threshold)...)
 end
-function _cleanup(locs, amps)
+function _cleanup(locs, amps; zero_threshold)
     length(locs) == 0 && return locs, amps
     order = sortperm(locs; by=Int)
     locs, amps = locs[order], amps[order]
@@ -179,13 +184,18 @@ function _cleanup(locs, amps)
     @inbounds for i=2:length(locs)
         this = locs[i]
         if this != pre
-            k += 1
+            if abs(amps[k]) > zero_threshold
+                k += 1
+            end
             locs[k] = this
             amps[k] = amps[i]
         else
             amps[k] += amps[i]
         end
         pre = this
+    end
+    if abs(amps[k]) <= zero_threshold
+        k -= 1
     end
     if k != length(locs)
         resize!(locs, k)

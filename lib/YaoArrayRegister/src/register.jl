@@ -466,7 +466,7 @@ julia> product_state(bit"100"; nbatch=2);
 
 julia> r1 = product_state(ComplexF32, bit"001"; nbatch=2);
 
-julia> r2 = product_state(ComplexF32, [0, 0, 1]; nbatch=2);
+julia> r2 = product_state(ComplexF32, [1, 0, 0]; nbatch=2);
 
 julia> r3 = product_state(ComplexF32, 3, 0b001; nbatch=2);
 
