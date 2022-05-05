@@ -99,4 +99,20 @@ function unsafe_getindex(::Type{T}, rg::ZGate, i::Integer, j::Integer) where {T}
         zero(T)
     end
 end
-# NOTE: no speedup if I specialize `unsafe_getcol`
+# NOTE: The above function has no speedup if I specialize `unsafe_getcol`
+
+# NOTE: The following function fixes the problem of having too many entries when get a column.
+function unsafe_getcol(::Type{T}, rg::ConstGate.P0Gate, j::DitStr{2}) where {T}
+    if iszero(j)
+        return [j], [one(T)]
+    else
+        return typeof(j)[], T[]
+    end
+end
+function unsafe_getcol(::Type{T}, rg::ConstGate.P1Gate, j::DitStr{2}) where {T}
+    if iszero(j)
+        return typeof(j)[], T[]
+    else
+        return [j], [one(T)]
+    end
+end

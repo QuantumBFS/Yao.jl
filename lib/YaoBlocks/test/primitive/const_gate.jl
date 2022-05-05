@@ -126,4 +126,9 @@ end
         end
         @test allpass
     end
+    # regression test
+    @test P0[:,bit"0"] |> length == 1
+    @test P0[:,bit"1"] |> length == 0
+    @test P1[:,bit"0"] |> length == 0
+    @test P1[:,bit"1"] |> length == 1
 end
