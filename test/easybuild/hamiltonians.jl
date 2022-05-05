@@ -38,6 +38,7 @@ end
     ξ = 3.90242
     h1 = rydberg_chain(nbits; Ω=Ω, Δ=Δf*Ω, V)
     h2 = rydberg_chain(nbits; Ω=Ω*exp(im*ξ), Δ=Δf*Ω, V)
+    @test ishermitian(h1) && ishermitian(h2)
     levine_pichler_pulse = chain(time_evolve(h1, 2τ), time_evolve(h2, 2τ))
     # half pulse drives |11> to |11>
     i, j = dit"01;3", dit"11;3"
