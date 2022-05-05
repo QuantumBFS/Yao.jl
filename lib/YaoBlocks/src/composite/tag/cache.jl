@@ -207,15 +207,15 @@ function Base.getindex(b::CachedBlock{ST, BT, D}, i::DitStr{D,N}, j::DitStr{D,N}
 end
 function Base.getindex(b::CachedBlock{ST, BT, D}, ::Colon, j::DitStr{D,N}) where {D,N,ST,BT}
     T = promote_type(ComplexF64, parameters_eltype(b))
-    return _getindex(T, b, :, j)
+    return cleanup(_getindex(T, b, :, j))
 end
 function Base.getindex(b::CachedBlock{ST, BT, D}, i::DitStr{D,N}, ::Colon) where {D,N,ST,BT}
     T = promote_type(ComplexF64, parameters_eltype(b))
-    return _getindex(T, b, i, :)
+    return cleanup(_getindex(T, b, i, :))
 end
 function Base.getindex(b::CachedBlock{ST, BT, D}, ::Colon, j::EntryTable{DitStr{D,N,TI},T}) where {D,N,TI,T,ST,BT}
-    return _getindex(b, :, j)
+    return cleanup(_getindex(b, :, j))
 end
 function Base.getindex(b::CachedBlock{ST, BT, D}, i::EntryTable{DitStr{D,N,TI},T}, ::Colon) where {D,N,TI,T,ST,BT}
-    return _getindex(b, i, :)
+    return cleanup(_getindex(b, i, :))
 end

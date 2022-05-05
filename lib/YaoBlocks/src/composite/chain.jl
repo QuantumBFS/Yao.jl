@@ -206,7 +206,7 @@ function unsafe_getcol(::Type{T}, c::ChainBlock{D}, j::DitStr{D,N,TI}) where {D,
     end
 end
 # propagate the configurations along the chain
-function propagate_chain(blocks, i::EntryTable; cleanup_threshold=Inf)
+function propagate_chain(blocks, i::EntryTable; cleanup_threshold=0)
     for b in blocks
         i = b[:,i]
         if length(i) >= cleanup_threshold

@@ -30,6 +30,19 @@ end
     e1 = EntryTable([bit"001"], [2.0])
     @test merge(e1,e1,e1) == EntryTable([bit"001",bit"001",bit"001"], fill(2.0, 3))
 
+    # case 1, has zero values
+    @test !isclean(EntryTable([bit"110", bit"111"], [0.0im, 0.1]))
+    # case 2, has duplicated entries
+    @test !isclean(EntryTable([bit"110", bit"110"], [1.0im, 0.1]))
+    # case 3, has inversed order
+    @test !isclean(EntryTable([bit"111", bit"110"], [0.0im, 0.1]))
+
     et = EntryTable([bit"000",bit"011",bit"101",bit"101",bit"011",bit"110",bit"110",bit"011",], [1.0 + 0.0im,-1, 1,1,1,-1,1,1,-1])
-    @test cleanup(et) |> length == 3
+    @test_throws ErrorException et[bit"000"]
+    @test !isclean(et)
+    cet = cleanup(et)
+    @test cet |> length == 3
+    @test isclean(cet)
+    @test cet[bit"000"] == 1.0+0im
+    @test cet[bit"111"] == 0.0im
 end

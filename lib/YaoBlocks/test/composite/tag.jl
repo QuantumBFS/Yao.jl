@@ -90,6 +90,7 @@ end
         allpass = true
         for i=basis(pb), j=basis(pb)
             allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+            allpass &= isclean(pb[:,j])
         end
         @test allpass
     end

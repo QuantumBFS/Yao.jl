@@ -456,17 +456,17 @@ function Base.getindex(b::AbstractBlock{D}, i::DitStr{D,N}, j::DitStr{D,N}) wher
 end
 function Base.getindex(b::AbstractBlock{D}, ::Colon, j::DitStr{D,N,TI}) where {D,N,TI}
     T = promote_type(ComplexF64, parameters_eltype(b))
-    return _getindex(T, b, :, j)
+    return cleanup(_getindex(T, b, :, j))
 end
 function Base.getindex(b::AbstractBlock{D}, i::DitStr{D,N,TI}, ::Colon) where {D,N,TI}
     T = promote_type(ComplexF64, parameters_eltype(b))
-    return _getindex(T, b, i, :)
+    return cleanup(_getindex(T, b, i, :))
 end
 function Base.getindex(b::AbstractBlock{D}, ::Colon, j::EntryTable{DitStr{D,N,TI},T}) where {D,N,TI,T}
-    return _getindex(b, :, j)
+    return cleanup(_getindex(b, :, j))
 end
 function Base.getindex(b::AbstractBlock{D}, i::EntryTable{DitStr{D,N,TI},T}, ::Colon) where {D,N,TI,T}
-    return _getindex(b, i, :)
+    return cleanup(_getindex(b, i, :))
 end
 function _getindex(::Type{T}, b::AbstractBlock{D}, ::Colon, j::DitStr{D,N,TI}) where {T, D,N,TI}
     @assert nqudits(b) == N
@@ -479,7 +479,7 @@ function _getindex(::Type{T}, b::AbstractBlock{D}, i::DitStr{D,N,TI}, ::Colon) w
     return res
 end
 function _getindex(b::AbstractBlock{D}, ::Colon, j::EntryTable{DitStr{D,N,TI},T}) where {D,N,TI,T}
-    return merge([(et = b[:,bs]; rmul!(et.amplitudes, amp); et) for (bs, amp) in zip(j.configs, j.amplitudes)]...)
+    return merge([(et = _getindex(T,b,:,bs); rmul!(et.amplitudes, amp); et) for (bs, amp) in zip(j.configs, j.amplitudes)]...)
 end
 function _getindex(b::AbstractBlock{D}, i::EntryTable{DitStr{D,N,TI},T}, ::Colon) where {D,N,TI,T}
     res = _getindex(b',:,i)

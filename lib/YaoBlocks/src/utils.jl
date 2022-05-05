@@ -224,13 +224,13 @@ EntryTable{DitStr{2, 3, Int64}, ComplexF64}:
   101 ₍₂₎   2.0 + 0.0im
 ```
 """
-function cleanup(et::EntryTable; zero_threshold=0.0)
+function cleanup(et::EntryTable; zero_threshold=0)
     EntryTable(_cleanup(et.configs, et.amplitudes; zero_threshold)...)
 end
 function _cleanup(locs, amps; zero_threshold)
     length(locs) == 0 && return locs, amps
     order = sortperm(locs; by=Int)
-    locs, amps = locs[order], amps[order]
+    @inbounds locs, amps = locs[order], amps[order]
     k = 1
     pre = locs[1]
     @inbounds for i=2:length(locs)
@@ -256,8 +256,49 @@ function _cleanup(locs, amps; zero_threshold)
     return locs, amps
 end
 
+"""
+    isclean(entries::EntryTable; zero_threshold=0.0)
+
+Return true if the entries are ordered, unique and amplitudes are nonzero.
+Any value with amplitude ≤ `zero_threshold` will be regarded as zero.
+"""
+function isclean(et::EntryTable; zero_threshold=0)
+    local kpre
+    for (i, (k, v)) in enumerate(et)
+        abs(v) <= zero_threshold && return false
+        if i==1
+            kpre = k
+            continue
+        else
+            if buffer(k) <= buffer(kpre)
+                return false
+            else
+                kpre = k
+            end
+        end
+    end
+    return true
+end
+
 function Base.merge(et::EntryTable{DitStr{D,N,TI},T}, ets::EntryTable{DitStr{D,N,TI},T}...) where {D,N,TI,T}
     EntryTable(vcat(et.configs, [e.configs for e in ets]...), vcat(et.amplitudes, [e.amplitudes for e in ets]...))
+end
+
+function unsafe_getindex(et::EntryTable{T,ET}, i::T) where {T,ET}
+    ind = searchsortedfirst(et.configs, i; by=Int)
+    if ind > length(et)
+        return zero(ET)
+    else
+        return et.amplitudes[ind]
+    end
+end
+
+function Base.getindex(et::EntryTable{T}, i::T) where T
+    if !isclean(et)
+        error("entry table is not clean, please use `cleanup` to clean up the table first!")
+    else
+        return unsafe_getindex(et, i)
+    end
 end
 
 SparseArrays.sparse(et::EntryTable) = SparseVector(et)
