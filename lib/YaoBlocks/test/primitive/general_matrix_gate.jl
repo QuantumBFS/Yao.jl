@@ -30,7 +30,7 @@ a = rand_unitary(2) .|> ComplexF32
 @test !isdiagonal(matblock(randn(64, 64)))
 @test isdiagonal(matblock(Diagonal(randn(128))))
 
-@testset "getindex2" begin
+@testset "instruct_get_element" begin
     for pb in [matblock(mat(kron(X,X))),
             matblock(rand_unitary(9); nlevel=3),
             matblock(mat(igate(2))),

@@ -189,8 +189,8 @@ function YaoAPI.iscommute(x::ControlBlock, y::ControlBlock)
 end
 
 function unsafe_getindex(::Type{T}, ctrl::ControlBlock, i::Integer, j::Integer) where {T,D}
-    getindex2(T, Val{2}(), nqudits(ctrl), ctrl.content, ctrl.locs, ctrl.ctrl_locs, ctrl.ctrl_config, i, j)
+    instruct_get_element(T, Val{2}(), nqudits(ctrl), ctrl.content, ctrl.locs, ctrl.ctrl_locs, ctrl.ctrl_config, i, j)
 end
 function unsafe_getcol(::Type{T}, ctrl::ControlBlock, j::DitStr{D}) where {T,D}
-    getindexr(T, ctrl.content, ctrl.locs, ctrl.ctrl_locs, ctrl.ctrl_config, j)
+    instruct_get_column(T, ctrl.content, ctrl.locs, ctrl.ctrl_locs, ctrl.ctrl_config, j)
 end

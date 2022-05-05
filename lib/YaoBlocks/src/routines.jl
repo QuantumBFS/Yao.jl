@@ -362,22 +362,33 @@ end
 
 
 ####################### getindex ######################
-_take(x::T, ::Val{D}) where {T,D} = mod(x, D)
-_take(x::T, ::Val{2}) where T = x & one(T)
-_take(x::T, ::Val{D}, k::Int) where {T,D} = mod(x, D^k)
-_take(x::T, ::Val{2}, k::Int) where T = x & (one(T) << k - 1)
-_takeat(x::T, ::Val{D}, k::Int) where {T,D} = _take(BitBasis._rshift(Val{D}(), x, k-1), Val{D}())
-function take_and_shift(x, ::Val{D}, k::Int) where D
-    return _take(x, Val{D}(), k), BitBasis._rshift(Val{D}(), x, k)
+# take last dit
+_take_last(x::T, ::Val{D}) where {T,D} = mod(x, D)
+_take_last(x::T, ::Val{2}) where T = x & one(T)
+# take last k-th dit
+_take_last(x::T, ::Val{D}, k::Int) where {T,D} = mod(x, D^k)
+_take_last(x::T, ::Val{2}, k::Int) where T = x & (one(T) << k - 1)
+# take k-th dit
+_takeat(x::T, ::Val{D}, k::Int) where {T,D} = _take_last(BitBasis._rshift(Val{D}(), x, k-1), Val{D}())
+function take_last_and_shift(x, ::Val{D}, k::Int) where D
+    return _take_last(x, Val{D}(), k), BitBasis._rshift(Val{D}(), x, k)
 end
 
-# U is an operator
-function getindex2(::Type{T}, ::Val{D}, N::Int, U, locs::NTuple{M}, cbits::NTuple{C}, cvals::NTuple{C}, i::TI, j::TI) where {T,C,M,TI<:Integer,D}
-    subi, subj = 0, 0
+# Implements general multi-control, multi-qudit getindex(block, :, j).
+# `T` is the return type
+# `D` is the `D` in qudits.
+# `N` is the the number of qudits.
+# `U` is an content (operator) in e.g. put block
+# `locs` is the `locs` in e.g. put block
+# `cbits` is the control locations in e.g. control block
+# `cvals` is the target controlled value in e.g. control block
+# `i` and `j` are the row and column indices to get.
+function instruct_get_element(::Type{T}, ::Val{D}, N::Int, U, locs::NTuple{M}, cbits::NTuple{C}, cvals::NTuple{C}, i::TI, j::TI) where {T,C,M,TI<:Integer,D}
+    subi, subj = 0, 0  # subspace location (in U)
     _i, _j = i, j
     @inbounds for ibit=1:N
-        ival = _take(_i, Val{D}())
-        jval = _take(_j, Val{D}())
+        ival = _take_last(_i, Val{D}())
+        jval = _take_last(_j, Val{D}())
         _i = BitBasis._rshift(Val{D}(), _i, 1)
         _j = BitBasis._rshift(Val{D}(), _j, 1)
         # return zero if rest dimensions do not match
@@ -401,8 +412,9 @@ function getindex2(::Type{T}, ::Val{D}, N::Int, U, locs::NTuple{M}, cbits::NTupl
     return unsafe_getindex(T, U, subi, subj)
 end
 
+# same as `instruct_get_element`, but faster!
 # blocks are operators, locs are sorted ranges
-function kron_getindex2(::Type{T}, ::Val{D}, N::Int, blocks, locs::NTuple{M}, i::TI, j::TI) where {T,D,M,TI}
+function kron_instruct_get_element(::Type{T}, ::Val{D}, N::Int, blocks, locs::NTuple{M}, i::TI, j::TI) where {T,D,M,TI}
     _i, _j = i, j
     res = one(T)
     pre = 0
@@ -412,8 +424,8 @@ function kron_getindex2(::Type{T}, ::Val{D}, N::Int, blocks, locs::NTuple{M}, i:
         # compute gap: return zero if rest dimensions do not match
         gapsize = loc.start - pre - 1
         if gapsize > 0
-            ival, _i = take_and_shift(_i, Val{D}(), gapsize)
-            jval, _j = take_and_shift(_j, Val{D}(), gapsize)
+            ival, _i = take_last_and_shift(_i, Val{D}(), gapsize)
+            jval, _j = take_last_and_shift(_j, Val{D}(), gapsize)
             if ival != jval
                 return zero(T)
             end
@@ -421,8 +433,8 @@ function kron_getindex2(::Type{T}, ::Val{D}, N::Int, blocks, locs::NTuple{M}, i:
 
         # compute block
         l = nqudits(block)
-        ival, _i = take_and_shift(_i, Val{D}(), l)
-        jval, _j = take_and_shift(_j, Val{D}(), l)
+        ival, _i = take_last_and_shift(_i, Val{D}(), l)
+        jval, _j = take_last_and_shift(_j, Val{D}(), l)
         # get the target element in U
         res *= unsafe_getindex(T, block, ival, jval)
         pre = loc.stop
@@ -430,8 +442,8 @@ function kron_getindex2(::Type{T}, ::Val{D}, N::Int, blocks, locs::NTuple{M}, i:
     if pre != N  # one extra identity
         gapsize = N - pre
         if gapsize > 0
-            ival, _i = take_and_shift(_i, Val{D}(), gapsize)
-            jval, _j = take_and_shift(_j, Val{D}(), gapsize)
+            ival, _i = take_last_and_shift(_i, Val{D}(), gapsize)
+            jval, _j = take_last_and_shift(_j, Val{D}(), gapsize)
             if ival != jval
                 return zero(T)
             end
@@ -440,8 +452,9 @@ function kron_getindex2(::Type{T}, ::Val{D}, N::Int, blocks, locs::NTuple{M}, i:
     return res
 end
 
+# same as `kron_instruct_get_element`, but faster!
 # block is an operator, locs are sorted integers
-function repeat_getindex2(::Type{T}, ::Val{D}, N::Int, block, locs::NTuple{M}, i::TI, j::TI) where {T,D,M,TI}
+function repeat_instruct_get_element(::Type{T}, ::Val{D}, N::Int, block, locs::NTuple{M}, i::TI, j::TI) where {T,D,M,TI}
     _i, _j = i, j
     res = one(T)
     n = nqudits(block)
@@ -451,8 +464,8 @@ function repeat_getindex2(::Type{T}, ::Val{D}, N::Int, block, locs::NTuple{M}, i
         # compute gap: return zero if rest dimensions do not match
         gapsize = loc - pre - 1
         if gapsize > 0
-            ival, _i = take_and_shift(_i, Val{D}(), gapsize)
-            jval, _j = take_and_shift(_j, Val{D}(), gapsize)
+            ival, _i = take_last_and_shift(_i, Val{D}(), gapsize)
+            jval, _j = take_last_and_shift(_j, Val{D}(), gapsize)
             if ival != jval
                 return zero(T)
             end
@@ -460,8 +473,8 @@ function repeat_getindex2(::Type{T}, ::Val{D}, N::Int, block, locs::NTuple{M}, i
 
         # compute block
         l = nqudits(block)
-        ival, _i = take_and_shift(_i, Val{D}(), l)
-        jval, _j = take_and_shift(_j, Val{D}(), l)
+        ival, _i = take_last_and_shift(_i, Val{D}(), l)
+        jval, _j = take_last_and_shift(_j, Val{D}(), l)
         # get the target element in U
         res *= unsafe_getindex(T, block, ival, jval)
         pre = loc + n-1
@@ -469,8 +482,8 @@ function repeat_getindex2(::Type{T}, ::Val{D}, N::Int, block, locs::NTuple{M}, i
     if pre != N  # one extra identity
         gapsize = N - pre
         if gapsize > 0
-            ival, _i = take_and_shift(_i, Val{D}(), gapsize)
-            jval, _j = take_and_shift(_j, Val{D}(), gapsize)
+            ival, _i = take_last_and_shift(_i, Val{D}(), gapsize)
+            jval, _j = take_last_and_shift(_j, Val{D}(), gapsize)
             if ival != jval
                 return zero(T)
             end
@@ -479,9 +492,15 @@ function repeat_getindex2(::Type{T}, ::Val{D}, N::Int, block, locs::NTuple{M}, i
     return res
 end
 
-# U is an operator
-# operator[:,ditstr]
-function getindexr(::Type{T}, U, locs::NTuple{M}, cbits::NTuple{C}, cvals::NTuple{C}, dj::DitStr{D,L,TI}) where {T,C,M,TI,D,L}
+# Implements general multi-control, multi-qudit getindex(block, :, j).
+# `T` is the return type
+# `U` is an content (operator) in e.g. put block
+# `locs` is the `locs` in e.g. put block
+# `cbits` is the control locations in e.g. control block
+# `cvals` is the target controlled value in e.g. control block
+# `dj` is the column index as a `DitStr`.
+# Returns operator[:,dj]
+function instruct_get_column(::Type{T}, U, locs::NTuple{M}, cbits::NTuple{C}, cvals::NTuple{C}, dj::DitStr{D,L,TI}) where {T,C,M,TI,D,L}
     j = buffer(dj)
     # check controlled bits
     @inbounds for k=1:C
@@ -508,8 +527,8 @@ function getindexr(::Type{T}, U, locs::NTuple{M}, cbits::NTuple{C}, cvals::NTupl
     return newrows, vals
 end
 
-# blocks are operators, locs are sorted ranges
-function kron_getindexr(::Type{T}, blocks, locs::NTuple{M}, j::DitStr{D,L,TI}) where {T,D,L,M,TI}
+# `blocks` is a list of operators, locs are sorted ranges
+function kron_instruct_get_column(::Type{T}, blocks, locs::NTuple{M}, j::DitStr{D,L,TI}) where {T,D,L,M,TI}
     if M == 0
         return [j], [one(T)]
     end
@@ -523,12 +542,12 @@ function kron_getindexr(::Type{T}, blocks, locs::NTuple{M}, j::DitStr{D,L,TI}) w
         # compute gap: return zero if rest dimensions do not match
         gapsize = loc.start - pre - 1
         if gapsize > 0
-            jval, _j = take_and_shift(_j, Val{D}(), gapsize)
+            jval, _j = take_last_and_shift(_j, Val{D}(), gapsize)
         end
 
         # compute block
         l = length(loc)
-        jval, _j = take_and_shift(_j, Val{D}(), l)
+        jval, _j = take_last_and_shift(_j, Val{D}(), l)
         # get the target element in U
         subrows, subvals = unsafe_getcol(T, block, DitStr{D,L,TI}(jval))
         # map rows to the larger space

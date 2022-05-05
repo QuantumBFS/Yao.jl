@@ -47,7 +47,7 @@ using LinearAlgebra: I
     @test_throws QubitMismatchError apply!(rand_state(2), Add(put(10, 2 => X)))
 end
 
-@testset "getindex2" begin
+@testset "instruct_get_element" begin
     for pb in [put(3, 3=>Y) + control(3, (2,), 1=>X),
                 put(5, 2=>Y) + control(5, (2,), (4,3)=>matblock(rand_unitary(4)))
                 ]

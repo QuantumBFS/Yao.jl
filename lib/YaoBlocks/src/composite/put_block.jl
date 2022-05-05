@@ -188,8 +188,8 @@ for (G, GT) in [
 end
 
 function unsafe_getindex(::Type{T}, pb::PutBlock{D}, i::Integer, j::Integer) where {T,D}
-    getindex2(T, Val{D}(), nqudits(pb), pb.content, pb.locs, (), (), i, j)
+    instruct_get_element(T, Val{D}(), nqudits(pb), pb.content, pb.locs, (), (), i, j)
 end
 function unsafe_getcol(::Type{T}, pb::PutBlock{D}, j::DitStr{D}) where {T,D}
-    getindexr(T, pb.content, pb.locs, (), (), j)
+    instruct_get_column(T, pb.content, pb.locs, (), (), j)
 end

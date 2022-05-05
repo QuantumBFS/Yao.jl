@@ -72,7 +72,7 @@ end
     @test occupied_locs(g) == (2,)
 end
 
-@testset "getindex2" begin
+@testset "instruct_get_element" begin
     pb = rot(Y, 0.4)
     mpb = mat(pb)
     allpass = true
@@ -82,7 +82,7 @@ end
     @test allpass
 end
 
-@testset "getindex2" begin
+@testset "instruct_get_element" begin
     for pb in [Rx(0.5), rot(SWAP, 0.5), shift(0.5), phase(0.5)
             ]
         mpb = mat(pb)

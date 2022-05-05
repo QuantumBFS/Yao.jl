@@ -44,7 +44,7 @@ end
     @test YaoBlocks.PropertyTrait(s) == YaoBlocks.PreserveAll()
 end
 
-@testset "getindex2" begin
+@testset "instruct_get_element" begin
     for pb in [subroutine(3, Y, (2,)), subroutine(4, matblock(rand_unitary(4)), (4,2))]
         mpb = mat(pb)
         allpass = true

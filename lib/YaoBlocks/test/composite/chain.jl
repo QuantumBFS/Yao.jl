@@ -179,7 +179,7 @@ end
     @test mat(chain(2)) == IMatrix{4,ComplexF64}()
 end
 
-@testset "getindex2" begin
+@testset "instruct_get_element" begin
     for pb in [chain(3), chain(put(3, 2=>Y)),
         chain(put(4, (4,2)=>matblock(rand_unitary(9); nlevel=3)), put(4, (3,)=>matblock(rand_unitary(3); nlevel=3)))
     ]

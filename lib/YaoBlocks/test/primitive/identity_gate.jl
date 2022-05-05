@@ -17,7 +17,7 @@ using Random, Test
 end
 
 
-@testset "getindex2" begin
+@testset "instruct_get_element" begin
     for pb in [igate(1), igate(2; nlevel=3)
             ]
         mpb = mat(pb)

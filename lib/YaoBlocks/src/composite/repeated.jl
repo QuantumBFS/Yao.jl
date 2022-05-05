@@ -158,10 +158,10 @@ function YaoAPI.iscommute(x::RepeatedBlock{D}, y::RepeatedBlock{D}) where {D}
 end
 
 function unsafe_getindex(::Type{T}, rp::RepeatedBlock{D}, i::Integer, j::Integer) where {T,D}
-    repeat_getindex2(T, Val{D}(), nqudits(rp), rp.content, rp.locs, i, j)
+    repeat_instruct_get_element(T, Val{D}(), nqudits(rp), rp.content, rp.locs, i, j)
 end
 
 function unsafe_getcol(::Type{T}, pb::RepeatedBlock{D,C}, j::DitStr{D}) where {T,D,C}
     n = nqudits(pb.content)
-    kron_getindexr(T, ntuple(i->pb.content, C), ntuple(i->(pb.locs[i]:pb.locs[i]+n-1), C), j)
+    kron_instruct_get_column(T, ntuple(i->pb.content, C), ntuple(i->(pb.locs[i]:pb.locs[i]+n-1), C), j)
 end

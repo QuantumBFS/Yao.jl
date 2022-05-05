@@ -31,7 +31,7 @@ using LuxurySparse
     @test mat(repeat(10, X, ())) == IMatrix{1<<10}()
 end
 
-@testset "getindex2" begin
+@testset "instruct_get_element" begin
     for pb in [repeat(3, Y, (3,2)), repeat(5, matblock(rand_unitary(3); nlevel=3), (5, 2))]
         mpb = mat(pb)
         allpass = true

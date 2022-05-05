@@ -78,7 +78,7 @@ end
     @test chsubblocks(dg, X) == Daggered(X)
 end
 
-@testset "getindex2: dagger, scale" begin
+@testset "instruct_get_element: dagger, scale" begin
     for pb in [3*put(3, 2=>2*matblock(rand_unitary(2)))', Val(2) * Daggered(put(4, (4,2)=>-matblock(rand_unitary(9); nlevel=3)))]
         mpb = mat(pb)
         allpass = true

@@ -123,7 +123,7 @@ end
     @test mat(T, kron(5)) === mat(T, chain(5)) == IMatrix{1 << 5,Float64}()
 end
 
-@testset "getindex2" begin
+@testset "instruct_get_element" begin
     for pb in [kron(3), kron(3, 2=>Y, 3=>X),
             kron(6, 2:3=>matblock(rand_unitary(9); nlevel=3), 1=>matblock(rand_unitary(3); nlevel=3), 5=>matblock(rand_unitary(3); nlevel=3))]
         mpb = mat(pb)

@@ -90,7 +90,7 @@ end
     @test mat(put(1, 1=>RP1)) ≈ mat(RP1)
 end
 
-@testset "getindex2" begin
+@testset "instruct_get_element" begin
     for pb in [put(3, 2=>Y), put(4, (4,2)=>matblock(rand_unitary(9); nlevel=3))]
         mpb = mat(pb)
         allpass = true

@@ -110,7 +110,7 @@ end
     @test mat(P1) ≈ [0 0;0 1]
 end
 
-@testset "getindex2" begin
+@testset "instruct_get_element" begin
     for pb in [X, Y, Z, I2, S, T, Pu, Pd, P0, P1]
         mpb = mat(pb)
         allpass = true

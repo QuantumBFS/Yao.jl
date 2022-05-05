@@ -83,7 +83,7 @@ end
     @test pull(C) ≈ mat(C)
 end
 
-@testset "getindex2" begin
+@testset "instruct_get_element" begin
     for pb in [put(3, 2=>Y) |> cache, put(4, (4,2)=>matblock(rand_unitary(9); nlevel=3)) |> cache]
         mpb = mat(pb)
         allpass = true

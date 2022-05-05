@@ -102,7 +102,7 @@ end
     @test isnormalized(reg2)
 end
 
-@testset "getindex2" begin
+@testset "instruct_get_element" begin
     for pb in [time_evolve(put(3, 2=>Y), 0.5), time_evolve(cache(put(3, (3,1)=>matblock(rand_hermitian(9); nlevel=3))), 0.5)
             ]
         mpb = mat(pb)
