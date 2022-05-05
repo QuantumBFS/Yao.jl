@@ -115,6 +115,7 @@ occupied_locs(c::ChainBlock) =
 chsubblocks(pb::ChainBlock{D}, blocks::Vector{<:AbstractBlock{D}}) where {D} =
     length(blocks) == 0 ? ChainBlock(pb.n, AbstractBlock{D}[]) : ChainBlock(pb.n, blocks)
 chsubblocks(pb::ChainBlock, it) = chain(it...)
+chsubblocks(x::ChainBlock, it::AbstractBlock) = chsubblocks(x, (it,))
 
 function mat(::Type{T}, c::ChainBlock{D}) where {T,D}
     if isempty(c.blocks)

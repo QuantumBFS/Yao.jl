@@ -142,7 +142,7 @@ end
 A table of ditstring-amplitude, which can be used for e.g. indexing and operator or representing the output of operator indexing.
 
 ### Examples
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> EntryTable([dit"121;3", dit"111;3"], [0.6, 0.8im])
 EntryTable{DitStr64{3, 3}, ComplexF64}:
   121 ₍₃₎   0.6 + 0.0im
@@ -151,7 +151,7 @@ EntryTable{DitStr64{3, 3}, ComplexF64}:
 
 The following example shows how to create a Hamiltonian and scatter this bit string by this Hamiltonian.
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> b = kron(X,Z,Y)
 nqubits: 3
 kron
@@ -204,7 +204,7 @@ end
 Clean up the entry table by 1) sort entries, 2) merge items and 3) clean up zeros.
 Any value with amplitude ≤ `zero_threshold` will be regarded as zero.
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> et = EntryTable([bit"000",bit"011",bit"101",bit"101",bit"011",bit"110",bit"110",bit"011",], [1.0 + 0.0im,-1, 1,1,1,-1,1,1,-1])
 EntryTable{DitStr{2, 3, Int64}, ComplexF64}:
   000 ₍₂₎   1.0 + 0.0im

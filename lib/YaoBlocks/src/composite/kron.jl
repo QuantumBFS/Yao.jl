@@ -149,6 +149,7 @@ Base.kron(blocks::Base.Generator) = kron(blocks...)
 occupied_locs(k::KronBlock) = (vcat([[getindex.(Ref(loc), occupied_locs(b))...] for (loc, b) in zip(k.locs, k.blocks)]...)...,)
 subblocks(x::KronBlock) = x.blocks
 chsubblocks(pb::KronBlock, it) = KronBlock(pb.n, pb.locs, (it...,))
+chsubblocks(x::KronBlock, it::AbstractBlock) = chsubblocks(x, (it,))
 cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
 color(::Type{T}) where {T<:KronBlock} = :cyan
 

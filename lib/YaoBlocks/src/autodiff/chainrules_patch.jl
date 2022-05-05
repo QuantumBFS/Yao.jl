@@ -83,7 +83,7 @@ function rrule(::typeof(apply), reg::AbstractArrayReg, block::AbstractBlock)
         return (NoTangent(), inδ, create_circuit_tangent(block, paramsδ))
     end
 end
-function rrule(::typeof(apply), reg::AbstractArrayReg, block::Add)
+function rrule(::typeof(apply), reg::AbstractArrayReg, block::AbstractAdd)
     out = apply(reg, block)
     out, function (outδ)
         (in, inδ), paramsδ = apply_back((copy(out), outδ), block; in = reg)

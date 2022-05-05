@@ -684,7 +684,7 @@ end
 
 Print configuration-amplitude pairs of the `register`.
 
-```jldoctest
+```jldoctest; setup=:(using Yao)
 julia> reg = ghz_state(2);
 
 julia> print_table(ghz_state(2))

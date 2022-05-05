@@ -1,6 +1,23 @@
 export Add, AbstractAdd
 
 # We need this abstract type for supporting Hamiltonian types.
+"""
+    AbstractAdd{D} <: CompositeBlock{D}
+
+The abstract add interface, aimed to support Hamiltonian types.
+
+### Required Interfaces
+* `chsubblocks`
+* `subblocks`
+
+### Provides
+* `unsafe_apply!` and its backward
+* `mat` and its backward
+* `adjoint`
+* `occupied_locs`
+* `getindex` over dit strings
+* `ishermitian`
+"""
 abstract type AbstractAdd{D} <: CompositeBlock{D} end
 
 """
@@ -38,6 +55,7 @@ function mat(::Type{T}, x::AbstractAdd{D}) where {D,T}
 end
 
 chsubblocks(x::Add, it) = Add(it)
+chsubblocks(x::Add, it::AbstractBlock) = chsubblocks(x, (it,))
 
 function YaoAPI.unsafe_apply!(r::AbstractRegister, x::AbstractAdd)
     blocks = subblocks(x)
@@ -61,10 +79,10 @@ function Base.:(==)(lhs::Add{D}, rhs::Add{D}) where {D}
     nqudits(lhs) == nqudits(rhs) && (length(lhs.list) == length(rhs.list)) && all(lhs.list .== rhs.list)
 end
 
-for FUNC in [:length, :iterate, :getindex, :eltype, :eachindex, :popfirst!, :lastindex]
+for FUNC in [:length, :iterate, :eltype, :eachindex, :popfirst!, :lastindex]
     @eval Base.$FUNC(x::Add, args...) = $FUNC(subblocks(x), args...)
 end
-
+Base.getindex(x::Add, i::Integer) = getindex(subblocks(x), i)
 Base.getindex(c::Add{D}, index::Union{UnitRange,Vector}) where {D} =
     Add(c.n, getindex(c.list, index))
 Base.setindex!(c::Add{D}, val::AbstractBlock{D}, index::Integer) where {D} =
@@ -103,7 +121,7 @@ LinearAlgebra.ishermitian(ad::AbstractAdd) = all(ishermitian, subblocks(ad)) || 
 # this is not type stable, possible to fix?
 function unsafe_getindex(::Type{T}, ad::AbstractAdd{D}, i::Integer, j::Integer) where {T, D}
     blocks = subblocks(ad)
-    isempty(blocks) ? sum(b->unsafe_getindex(T,b,i,j), subblocks(ad)) : zero(T)
+    !isempty(blocks) ? sum(b->unsafe_getindex(T,b,i,j), subblocks(ad)) : zero(T)
 end
 function unsafe_getcol(::Type{T}, ad::AbstractAdd{D}, j::DitStr{D,N,TI}) where {T,D,N,TI}
     blocks = subblocks(ad)

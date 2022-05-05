@@ -125,7 +125,7 @@ function apply_back!(st, circuit::ChainBlock, collector)
     return st
 end
 
-function apply_back!(st, circuit::Add, collector; in)
+function apply_back!(st, circuit::AbstractAdd, collector; in)
     out, outδ = st
     adjmat = outerprod(outδ, in)
     for blk in Base.Iterators.reverse(subblocks(circuit))
