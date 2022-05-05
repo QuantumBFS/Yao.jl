@@ -95,7 +95,8 @@ export AbstractBlock,
     rand_unitary,
     rand_hermitian,
     EntryTable,
-    cleanup
+    cleanup,
+    isclean
 
 export applymatrix, cache_key
 
