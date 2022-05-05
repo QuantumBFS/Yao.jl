@@ -178,3 +178,24 @@ end
 @testset "Yao/#204" begin
     @test mat(chain(2)) == IMatrix{4,ComplexF64}()
 end
+
+@testset "instruct_get_element" begin
+    for pb in [chain(3), chain(put(3, 2=>Y)),
+        chain(put(4, (4,2)=>matblock(rand_unitary(9); nlevel=3)), put(4, (3,)=>matblock(rand_unitary(3); nlevel=3)))
+    ]
+        mpb = mat(pb)
+        allpass = true
+        for i=basis(pb), j=basis(pb)
+            allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+        end
+        @test allpass
+        allpass = true
+        for j=basis(pb)
+            allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+            allpass &= vec(pb[:, EntryTable([j], [1.0+0im])]) == mpb[:, Int(j)+1]
+            allpass &= vec(pb[j,:]) == mpb[Int(j)+1,:]
+            allpass &= vec(pb[EntryTable([j], [1.0+0im]),:]) == mpb[Int(j)+1,:]
+        end
+        @test allpass
+    end
+end

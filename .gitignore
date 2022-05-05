@@ -4,6 +4,7 @@
 *.jl.*.cov
 *.jl.mem
 _*.yao
+_local/
 
 docs/build/
 docs/site/

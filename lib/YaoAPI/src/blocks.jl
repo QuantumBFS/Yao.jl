@@ -204,7 +204,7 @@ ArrayReg{2, ComplexF64, Array...}
     nlevel: 2
 
 julia> measure(r;nshots=10)
-10-element Vector{BitBasis.BitStr64{2}}:
+10-element Vector{DitStr{2, 2, Int64}}:
  01 ₍₂₎
  01 ₍₂₎
  01 ₍₂₎
@@ -322,7 +322,7 @@ julia> mat(kron(X, X))
  1.0+0.0im  0.0+0.0im  0.0+0.0im  0.0+0.0im
 
 julia> mat(kron(X, X) + put(2, 1=>X))
-4×4 SparseArrays.SparseMatrixCSC{ComplexF64, Int64} with 8 stored entries:
+4×4 SparseMatrixCSC{ComplexF64, Int64} with 8 stored entries:
      ⋅      1.0+0.0im      ⋅      1.0+0.0im
  1.0+0.0im      ⋅      1.0+0.0im      ⋅
      ⋅      1.0+0.0im      ⋅      1.0+0.0im

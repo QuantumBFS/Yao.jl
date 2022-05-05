@@ -34,3 +34,5 @@ end
 
 # it does nothing
 @test chsubblocks(X, Y) === X
+@test X[bit"1", bit"0"] == 1
+@test X[bit"1", bit"1"] == 0

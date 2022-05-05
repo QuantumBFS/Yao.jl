@@ -104,7 +104,7 @@ function mat_back!(::Type{T}, rb::KronBlock, adjy, collector) where {T}
     return collector
 end
 
-function mat_back!(::Type{T}, rb::Add, adjy, collector) where {T}
+function mat_back!(::Type{T}, rb::AbstractAdd, adjy, collector) where {T}
     nparameters(rb) == 0 && return collector
     for b in subblocks(rb)[end:-1:1]
         mat_back!(T, b, adjy, collector)

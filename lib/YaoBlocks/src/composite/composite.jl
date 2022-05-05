@@ -63,12 +63,8 @@ include("control.jl")
 include("put_block.jl")
 include("repeated.jl")
 include("subroutine.jl")
-include("reduce.jl")
+include("add.jl")
 include("unitary_channel.jl")
-
-chsubblocks(x::ChainBlock, it::AbstractBlock) = chsubblocks(x, (it,))
-chsubblocks(x::KronBlock, it::AbstractBlock) = chsubblocks(x, (it,))
-chsubblocks(x::Add, it::AbstractBlock) = chsubblocks(x, (it,))
 
 # tag blocks
 include("tag/tag.jl")

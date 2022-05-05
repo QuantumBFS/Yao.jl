@@ -104,6 +104,6 @@ function map_address(blk::Scale, info::AddressInfo)
     Scale(blk.alpha, map_address(content(blk), info))
 end
 
-function map_address(blk::Add, info::AddressInfo)
-    Add(info.nbits, map(b -> map_address(b, info), subblocks(blk)))
+function map_address(blk::AbstractAdd, info::AddressInfo)
+    chsubblocks(blk, map(b -> map_address(b, info), subblocks(blk)))
 end

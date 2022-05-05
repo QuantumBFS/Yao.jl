@@ -6,53 +6,21 @@
 #
 # In order to make multi threading work, the state vector MUST be named as state
 
-function YaoAPI.instruct!(
-    r::BatchedArrayReg{D},
-    op,
-    locs::Tuple,
-    control_locs::Tuple,
-    control_bits::Tuple,
-) where {D}
-    instruct!(Val(D), r.state, op, locs, control_locs, control_bits)
+function YaoAPI.instruct!(r::BatchedArrayReg{D}, operator, locs::Tuple, args...) where {D}
+    length(locs) == 0 && return r
+    instruct!(Val(D), r.state, _match_type(r.state, operator), locs, args...)
     return r
 end
-
-function YaoAPI.instruct!(
-    r::ArrayReg{D},
-    op,
-    locs::Tuple,
-    control_locs::Tuple,
-    control_bits::Tuple,
-) where {D}
-    instruct!(Val(D), vec(r.state), op, locs, control_locs, control_bits)
+function YaoAPI.instruct!(r::ArrayReg{D}, operator, locs::Tuple, args...) where {D}
+    length(locs) == 0 && return r
+    instruct!(Val(D), vec(r.state), _match_type(r.state, operator), locs, args...)
     return r
 end
-
-function YaoAPI.instruct!(r::BatchedArrayReg{D}, op, locs::Tuple) where {D}
-    instruct!(Val(D), r.state, op, locs)
-    return r
-end
-
-function YaoAPI.instruct!(r::ArrayReg{D}, op, locs::Tuple) where D
-    instruct!(Val(D), vec(r.state), op, locs)
-    return r
-end
-
-function YaoAPI.instruct!(
-    r::AbstractArrayReg{D},
-    op,
-    locs::Tuple,
-    control_locs::Tuple,
-    control_bits::Tuple,
-    theta::Number,
-) where {D}
-    instruct!(Val(D), r.state, op, locs, control_locs, control_bits, theta)
-    return r
-end
-
-function YaoAPI.instruct!(r::AbstractArrayReg{D}, op, locs::Tuple, theta::Number) where {D}
-    instruct!(Val(D), r.state, op, locs, theta)
-    return r
+_match_type(::AbstractVecOrMat{T1}, operator::Val) where {T1} = operator
+_match_type(::AbstractVecOrMat{T1}, operator::AbstractMatrix{T1}) where {T1} = operator
+function _match_type(::AbstractVecOrMat{T1}, operator::AbstractMatrix{T2}) where {T1,T2}
+    @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
+    return copyto!(similar(operator, T1), operator)
 end
 
 """
@@ -77,68 +45,27 @@ macro threads(ex)
     end)
 end
 
-# to avoid potential ambiguity, we limit them to tuple for now
-# but they only has to be an iterator over integers
-const Locations{T} = NTuple{N,T} where {N}
-const BitConfigs{T} = NTuple{N,T} where {N}
-
+# the most generic matrix interface.
 function YaoAPI.instruct!(::Val{2},
-    state::AbstractVecOrMat{T1},
-    operator::AbstractMatrix{T2},
+    state::AbstractVecOrMat{T},
+    operator::AbstractMatrix{T},
     locs::NTuple{M,Int},
-    control_locs::NTuple{C,Int} = (),
-    control_bits::NTuple{C,Int} = (),
-) where {T1,T2,M,C}
+    control_locs::NTuple{C,Int},
+    control_bits::NTuple{C,Int},
+) where {T,M,C}
+    # prepare instruct
+    N = log2dim1(state)
+    operator = sort_unitary(Val(2), operator, locs)  # make locs ordered
 
-    @warn "Element Type Mismatch: register $(T1), operator $(T2). Converting operator to match, this may cause performance issue"
-    return instruct!(Val(2),
-        state,
-        copyto!(similar(operator, T1), operator),
-        locs,
-        control_locs,
-        control_bits,
-    )
-end
-
-function _prepare_instruct(
-    state,
-    U,
-    locs::NTuple{M},
-    control_locs,
-    control_bits::NTuple{C},
-) where {M,C}
-    N, MM = log2dim1(state), size(U, 1)
-
+    # get itercontrol and locs_raw
     locked_bits = MVector(control_locs..., locs...)
     locked_vals = MVector(control_bits..., (0 for k = 1:M)...)
     locs_raw_it = (b + 1 for b in itercontrol(N, setdiff(1:N, locs), zeros(Int, N - M)))
     locs_raw = SVector(locs_raw_it...)
     ic = itercontrol(N, locked_bits, locked_vals)
-    return locs_raw, ic
-end
 
-function YaoAPI.instruct!(::Val{2},
-    state::AbstractVecOrMat{T},
-    operator::AbstractMatrix{T},
-    locs::Tuple{},
-    control_locs::NTuple{C,Int} = (),
-    control_bits::NTuple{C,Int} = (),
-) where {T,C}
-    return state
-end
-
-function YaoAPI.instruct!(::Val{2},
-    state::AbstractVecOrMat{T},
-    operator::AbstractMatrix{T},
-    locs::NTuple{M,Int},
-    control_locs::NTuple{C,Int} = (),
-    control_bits::NTuple{C,Int} = (),
-) where {T,M,C}
-    operator = sort_unitary(operator, locs)
-    locs_raw, ic = _prepare_instruct(state, operator, locs, control_locs, control_bits)
     return _instruct!(state, autostatic(operator), locs_raw, ic)
 end
-
 function _instruct!(
     state::AbstractVecOrMat{T},
     U::AbstractMatrix{T},
@@ -167,15 +94,22 @@ function _instruct!(
     end
     return state
 end
-
-YaoAPI.instruct!(::Val{2}, state::AbstractVecOrMat, U::IMatrix, locs::NTuple{N,Int}) where N = state
-YaoAPI.instruct!(::Val{2}, state::AbstractVecOrMat, U::IMatrix, locs::Tuple{Int}) = state
-
-function YaoAPI.instruct!(::Val{2},
+function YaoAPI.instruct!(::Val{2},  # fallback to controlled case
     state::AbstractVecOrMat{T},
-    U1::AbstractMatrix{T},
-    (loc,)::Tuple{Int},
-) where {T}
+    operator::AbstractMatrix{T},
+    locs::NTuple{M,Int}
+) where {T,M}
+    if M == 1
+        return single_qubit_instruct!(state, operator, locs[1])
+    end
+    instruct!(Val(2), state, operator, locs, (), ())
+end
+
+# specialize: IMatrix
+YaoAPI.instruct!(::Val{2}, state::AbstractVecOrMat, U::IMatrix, locs::NTuple{N,Int}) where N = state
+
+# specialize: single qubit generic matrix
+function single_qubit_instruct!(state::AbstractVecOrMat{T}, U1::AbstractMatrix{T}, loc::Int) where {T}
     a, c, b, d = U1
     instruct_kernel(state, loc, 1 << (loc - 1), 1 << loc, a, b, c, d)
     return state
@@ -190,13 +124,12 @@ end
     return state
 end
 
-function YaoAPI.instruct!(::Val{2},
-    state::AbstractVecOrMat{T},
-    U1::SDPermMatrix{T},
-    (loc,)::Tuple{Int},
-) where {T}
+# specialize: single qubit IMatrix
+single_qubit_instruct!(state::AbstractVecOrMat, U::IMatrix, loc::Int) = state
+
+# specialize: single qubit permutation matrix
+function single_qubit_instruct!(state::AbstractVecOrMat{T}, U1::SDPermMatrix{T}, loc::Int) where {T}
     U1.perm[1] == 1 && return instruct!(Val(2),state, Diagonal(U1), (loc,))
-    mask = bmask(loc)
     b, c = U1.vals
     step = 1 << (loc - 1)
     step_2 = 1 << loc
@@ -209,12 +142,8 @@ function YaoAPI.instruct!(::Val{2},
     return state
 end
 
-function YaoAPI.instruct!(::Val{2},
-    state::AbstractVecOrMat{T},
-    U1::SDDiagonal{T},
-    (loc,)::Tuple{Int},
-) where {T}
-    mask = bmask(loc)
+# specialize: single qubit diagonal matrix
+function single_qubit_instruct!(state::AbstractVecOrMat{T}, U1::SDDiagonal{T}, loc::Int) where {T}
     a, d = U1.diag
     step = 1 << (loc - 1)
     step_2 = 1 << loc
@@ -227,7 +156,7 @@ function YaoAPI.instruct!(::Val{2},
     return state
 end
 
-# specialization
+# specialize: named gates
 # paulis
 function YaoAPI.instruct!(::Val{2},
     state::AbstractVecOrMat,
@@ -247,13 +176,12 @@ function YaoAPI.instruct!(::Val{2},
 end
 
 function YaoAPI.instruct!(::Val{2},
-    state::AbstractVecOrMat,
+    state::AbstractVecOrMat{T},
     ::Val{:H},
     locs::NTuple{N,Int},
-) where {N}
-    instruct!(Val(2), state, YaoArrayRegister.Const.H, locs)
+) where {T, N}
+    instruct!(Val(2), state, matchtype(T, YaoArrayRegister.Const.H), locs)
 end
-
 
 function YaoAPI.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
@@ -265,7 +193,7 @@ function YaoAPI.instruct!(::Val{2},
     bit_parity = iseven(length(locs)) ? 1 : -1
     factor = T(-im)^length(locs)
 
-    @threads for b in basis(Int, state)
+    @threads for b in basis(state)
         if anyone(b, do_mask)
             i = b + 1
             i_ = flip(b, mask) + 1
@@ -283,7 +211,7 @@ function YaoAPI.instruct!(::Val{2},
     locs::NTuple{N,Int},
 ) where {T,N}
     mask = bmask(Int, locs)
-    @threads for b in basis(Int, state)
+    @threads for b in basis(state)
         if isodd(count_ones(b & mask))
             mulrow!(state, b + 1, -1)
         end
@@ -301,7 +229,7 @@ for (G, FACTOR) in zip(
         locs::NTuple{N,Int},
     ) where {T,N}
         mask = bmask(Int, locs)
-        @threads for b in basis(Int, state)
+        @threads for b in basis(state)
             mulrow!(state, b + 1, $FACTOR^count_ones(b & mask))
         end
         return state
@@ -345,15 +273,15 @@ function rot_mat(::Type{T}, gen::AbstractMatrix, theta::Real) where {N,T}
     end
 end
 # Specialized
-rot_mat(::Type{T}, ::Val{:Rx}, theta::Number) where {T} =
+parametric_mat(::Type{T}, ::Val{:Rx}, theta::Number) where {T} =
     T[cos(theta / 2) -im*sin(theta / 2); -im*sin(theta / 2) cos(theta / 2)]
-rot_mat(::Type{T}, ::Val{:Ry}, theta::Number) where {T} =
+parametric_mat(::Type{T}, ::Val{:Ry}, theta::Number) where {T} =
     T[cos(theta / 2) -sin(theta / 2); sin(theta / 2) cos(theta / 2)]
-rot_mat(::Type{T}, ::Val{:Rz}, theta::Number) where {T} =
+parametric_mat(::Type{T}, ::Val{:Rz}, theta::Number) where {T} =
     Diagonal(T[exp(-im * theta / 2), exp(im * theta / 2)])
-rot_mat(::Type{T}, ::Val{:CPHASE}, theta::Number) where {T} =
+parametric_mat(::Type{T}, ::Val{:CPHASE}, theta::Number) where {T} =
     Diagonal(T[1, 1, 1, exp(im * theta)])
-rot_mat(::Type{T}, ::Val{:PSWAP}, theta::Number) where {T} = rot_mat(T, Const.SWAP, theta)
+parametric_mat(::Type{T}, ::Val{:PSWAP}, theta::Number) where {T} = rot_mat(T, Const.SWAP, theta)
 
 for G in [:Rx, :Ry, :Rz, :CPHASE]
     # forward single gates
@@ -365,7 +293,7 @@ for G in [:Rx, :Ry, :Rz, :CPHASE]
         control_bits::NTuple{N2,Int},
         theta::Number,
     ) where {T,N1,N2,N3}
-        m = rot_mat(T, g, theta)
+        m = parametric_mat(T, g, theta)
         instruct!(Val(2), state, m, locs, control_locs, control_bits)
         return state
     end
@@ -410,7 +338,7 @@ function YaoAPI.instruct!(::Val{2},
     locs::NTuple{N,Int},
     theta::Number,
 ) where {T,N}
-    m = rot_mat(T, Val(:CPHASE), theta)
+    m = parametric_mat(T, Val(:CPHASE), theta)
     instruct!(Val(2), state, m, locs)
     return state
 end

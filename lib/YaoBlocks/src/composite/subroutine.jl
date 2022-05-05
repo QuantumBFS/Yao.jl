@@ -122,3 +122,10 @@ function YaoAPI.iscommute(x::Subroutine{D}, y::Subroutine{D}) where {D}
         return iscommute_fallback(x, y)
     end
 end
+
+function unsafe_getindex(::Type{T}, sr::Subroutine{D}, i::Integer, j::Integer) where {T,D}
+    instruct_get_element(T, Val{D}(), nqudits(sr), sr.content, sr.locs, (), (), i, j)
+end
+function unsafe_getcol(::Type{T}, pb::Subroutine{D}, j::DitStr{D}) where {T,D}
+    instruct_get_column(T, pb.content, pb.locs, (), (), j)
+end

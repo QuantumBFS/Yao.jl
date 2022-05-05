@@ -115,6 +115,7 @@ occupied_locs(c::ChainBlock) =
 chsubblocks(pb::ChainBlock{D}, blocks::Vector{<:AbstractBlock{D}}) where {D} =
     length(blocks) == 0 ? ChainBlock(pb.n, AbstractBlock{D}[]) : ChainBlock(pb.n, blocks)
 chsubblocks(pb::ChainBlock, it) = chain(it...)
+chsubblocks(x::ChainBlock, it::AbstractBlock) = chsubblocks(x, (it,))
 
 function mat(::Type{T}, c::ChainBlock{D}) where {T,D}
     if isempty(c.blocks)
@@ -177,3 +178,57 @@ YaoAPI.isreflexive(c::ChainBlock) =
     (iscommute(c.blocks...) && all(isreflexive, c.blocks)) || isreflexive(mat(c))
 LinearAlgebra.ishermitian(c::ChainBlock) =
     (all(isreflexive, c.blocks) && iscommute(c.blocks...)) || isreflexive(mat(c))
+
+# this is not type stable, possible to fix?
+function unsafe_getindex(::Type{T}, c::ChainBlock{D}, i::Integer, j::Integer) where {D,T}
+    if length(c) == 0
+        return i==j ? one(T) : zero(T)
+    elseif length(c) == 1
+        return unsafe_getindex(T, c.blocks[1], i, j)
+    else
+        table = propagate_chain(c.blocks[2:end-1], c.blocks[1][:, DitStr{D,nqudits(c)}(j)])
+        res = zero(T)
+        for (loc, amp) in table
+            res += unsafe_getindex(T, c.blocks[end], i, buffer(loc)) * amp
+        end
+        return res
+    end
+end
+
+function unsafe_getcol(::Type{T}, c::ChainBlock{D}, j::DitStr{D,N,TI}) where {D,N,TI,T}
+    if length(c) == 0
+        return [j], [one(T)]
+    elseif length(c) == 1
+        return unsafe_getcol(T, c.blocks[1], j)
+    else
+        table = propagate_chain(c.blocks[2:end], c.blocks[1][:,j])
+        return table.configs, table.amplitudes
+    end
+end
+# propagate the configurations along the chain
+function propagate_chain(blocks, i::EntryTable; cleanup_threshold=Inf)
+    for b in blocks
+        i = b[:,i]
+        if length(i) >= cleanup_threshold
+            i = cleanup(i)
+        end
+    end
+    return i
+end
+function Base.getindex(b::ChainBlock{D}, i::DitStr{D,N}, j::DitStr{D,N}) where {D,N}
+    invoke(Base.getindex, Tuple{AbstractBlock{D}, DitStr{D,N}, DitStr{D,N}} where {D,N}, b, i, j)
+end
+function Base.getindex(b::ChainBlock{D}, ::Colon, j::DitStr{D,N}) where {D,N}
+    T = promote_type(ComplexF64, parameters_eltype(b))
+    return _getindex(T, b, :, j)
+end
+function Base.getindex(b::ChainBlock{D}, i::DitStr{D,N}, ::Colon) where {D,N}
+    T = promote_type(ComplexF64, parameters_eltype(b))
+    return _getindex(T, b, i, :)
+end
+function Base.getindex(b::ChainBlock{D}, ::Colon, j::EntryTable{DitStr{D,N,TI},T}) where {D,N,TI,T}
+    return _getindex(b, :, j)
+end
+function Base.getindex(b::ChainBlock{D}, i::EntryTable{DitStr{D,N,TI},T}, ::Colon) where {D,N,TI,T}
+    return _getindex(b, i, :)
+end

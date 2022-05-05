@@ -43,10 +43,11 @@ export AbstractArrayReg,
     regadd!,
     regsub!,
     regscale!,
-    exchange_sysenv
+    exchange_sysenv,
+    print_table
 
 # BitBasis
-export @bit_str, hypercubic
+export @bit_str, @dit_str, BitStr, DitStr, hypercubic
 
 # YaoAPI
 export AbstractRegister,
@@ -74,6 +75,7 @@ export AbstractRegister,
     insert_qubits!,
     most_probable,
     instruct!,
+    accum_instruct!,
     invorder!,
     measure,
     measure!,
@@ -95,6 +97,9 @@ export AbstractRegister,
     basis,
     clone
 
+# matrix types
+export IMatrix, PermMatrix, Diagonal, SparseMatrixCSC
+
 # others
 export Const, logdi
 
@@ -106,6 +111,7 @@ include("operations.jl")
 include("focus.jl")
 
 include("instruct.jl")
+include("qudit_instruct.jl")
 
 include("density_matrix.jl")
 include("measure.jl")

@@ -195,7 +195,7 @@ ArrayReg{2, ComplexF32, Array...}
 ```
 """
 arrayreg(bitstr::BitStr; nbatch::Union{Int,NoBatch}=NoBatch()) = arrayreg(ComplexF64, bitstr; nbatch=nbatch)
-arrayreg(::Type{T}, bitstr::BitStr; nbatch::Union{Int,NoBatch}=NoBatch()) where {T} = arrayreg(onehot(T, bitstr, _asint(nbatch)); nbatch=nbatch, nlevel=2)
+arrayreg(::Type{T}, bitstr::BitStr; nbatch::Union{Int,NoBatch}=NoBatch()) where {T} = arrayreg(onehot(T, bitstr; nbatch=_asint(nbatch)); nbatch=nbatch, nlevel=2)
 
 """
     transpose_storage(register) -> register
@@ -419,7 +419,7 @@ ArrayReg{2, ComplexF64, Array...}
     nlevel: 2
 
 julia> measure(reg; nshots=3)
-3-element Vector{BitBasis.BitStr64{6}}:
+3-element Vector{DitStr{2, 6, Int64}}:
  111000 ₍₂₎
  111000 ₍₂₎
  111000 ₍₂₎
@@ -440,112 +440,76 @@ join_datatype(::Type{T}) where {T} = T
 
 # initialization methods
 """
-    product_state([T=ComplexF64], bit_str; nbatch=NoBatch())
+    product_state([T=ComplexF64], dit_str; nbatch=NoBatch(), no_transpose_storage=false)
+    product_state([T=ComplexF64], nbits::Int, val::Int; nbatch=NoBatch(), nlevel=2, no_transpose_storage=false)
+    product_state([T=ComplexF64], vector; nbatch=NoBatch(), nlevel=2, no_transpose_storage=false)
 
-Create an [`ArrayReg`](@ref) with bit string literal
-defined with [`@bit_str`](@ref). See also [`zero_state`](@ref),
-[`rand_state`](@ref), [`uniform_state`](@ref).
-
-### Examples
-
-```jldoctest; setup=:(using Yao)
-julia> product_state(bit"100"; nbatch=2)
-BatchedArrayReg{2, ComplexF64, Transpose...}
-    active qubits: 3/3
-    nlevel: 2
-    nbatch: 2
-
-julia> r1 = product_state(ComplexF32, bit"100"; nbatch=2)
-BatchedArrayReg{2, ComplexF32, Transpose...}
-    active qubits: 3/3
-    nlevel: 2
-    nbatch: 2
-
-julia> r2 = product_state(ComplexF32, [0, 0, 1]; nbatch=2)
-BatchedArrayReg{2, ComplexF32, Transpose...}
-    active qubits: 3/3
-    nlevel: 2
-    nbatch: 2
-
-julia> r1 ≈ r2   # because we read bit strings from right to left, vectors from left to right.
-true
-```
-"""
-product_state(bit_str::BitStr; nbatch::Union{NoBatch,Int} = NoBatch()) =
-    product_state(ComplexF64, bit_str; nbatch = nbatch)
-
-product_state(bit_str::AbstractVector; nbatch::Union{NoBatch,Int} = NoBatch(), nlevel::Int=2) =
-    product_state(ComplexF64, bit_str; nbatch = nbatch, nlevel=nlevel)
-
-"""
-    product_state([T=ComplexF64], total::Int, bit_config::Integer; nbatch=NoBatch(), no_transpose_storage=false)
-
-Create an [`ArrayReg`](@ref) with bit configuration `bit_config`, total number of bits `total`.
+Create an [`ArrayReg`](@ref) of product state.
+The configuration can be specified with a dit string, which can be defined with [`@bit_str`](@ref) or [`@dit_str`](@ref).
+Or equivalently, it can be specified explicitly with `nbits`, `val` and `nlevel`.
 See also [`zero_state`](@ref), [`rand_state`](@ref), [`uniform_state`](@ref).
 
 ### Examples
 
 ```jldoctest; setup=:(using Yao)
-julia> product_state(4, 3; nbatch=2)
-BatchedArrayReg{2, ComplexF64, Transpose...}
-    active qubits: 4/4
-    nlevel: 2
+julia> reg = product_state(dit"120;3"; nbatch=2)
+BatchedArrayReg{3, ComplexF64, Transpose...}
+    active qudits: 3/3
+    nlevel: 3
     nbatch: 2
 
-julia> product_state(4, 0b1001; nbatch=2)
-BatchedArrayReg{2, ComplexF64, Transpose...}
-    active qubits: 4/4
-    nlevel: 2
-    nbatch: 2
+julia> measure(reg)
+1×2 Matrix{BitBasis.DitStr64{3, 3}}:
+ 120 ₍₃₎  120 ₍₃₎
 
-julia> product_state(ComplexF32, 4, 0b101)
-ArrayReg{2, ComplexF32, Array...}
-    active qubits: 4/4
-    nlevel: 2
+julia> product_state(bit"100"; nbatch=2);
+
+julia> r1 = product_state(ComplexF32, bit"001"; nbatch=2);
+
+julia> r2 = product_state(ComplexF32, [1, 0, 0]; nbatch=2);
+
+julia> r3 = product_state(ComplexF32, 3, 0b001; nbatch=2);
+
+julia> r1 ≈ r2   # because we read bit strings from right to left, vectors from left to right.
+true
+
+julia> r1 ≈ r3
+true
 ```
-
-!!! warning
-
-    This interface will not check whether the number of required digits
-    for the bit configuration matches the total number of bits.
 """
-product_state(total::Int, bit_config::Integer; kwargs...) =
-    product_state(ComplexF64, total, bit_config; kwargs...)
-
-product_state(::Type{T}, bit_str::BitStr{N}; kwargs...) where {T,N} =
-    product_state(T, N, buffer(bit_str); kwargs...)
-
-function product_state(::Type{T}, bit_configs::AbstractVector; nlevel::Int=2, kwargs...) where {T}
-    if nlevel == 2
-        return product_state(T, bit_literal(bit_configs...); nlevel, kwargs...)
-    else
-        return product_state(T, length(bit_configs), sum(k->bit_configs[k] * nlevel^(k-1), 1:length(bit_configs)); nlevel=nlevel, kwargs...)
-    end
-end
-
-function product_state(
-    ::Type{T},
-    total::Int,
-    bit_config::Integer;
-    nbatch::Union{Int,NoBatch} = NoBatch(),
-    nlevel::Int=2,
-    no_transpose_storage::Bool = false,
-) where {T}
+function product_state(::Type{T}, bit_str::DitStr{D,N,Ti};
+        nbatch::Union{Int,NoBatch} = NoBatch(),
+        no_transpose_storage::Bool = false,
+        ) where {D,T,N,Ti}
     if nbatch isa NoBatch || no_transpose_storage
-        raw = onehot(T, total, bit_config, _asint(nbatch), nlevel)
+        raw = zeros(T, D ^ N, _asint(nbatch))
     else
-        raw = zeros(T, _asint(nbatch), nlevel ^ total)
-        raw[:, Int(bit_config)+1] .= Ref(one(T))
+        # transposed storage
+        raw = zeros(T, _asint(nbatch), D ^ N)
         raw = transpose(raw)
     end
-    return arrayreg(raw; nbatch=nbatch, nlevel=nlevel)
+    raw[buffer(bit_str)+1,:] .= Ref(one(T))
+    return arrayreg(raw; nbatch=nbatch, nlevel=D)
+end
+# vector input
+function product_state(::Type{T}, bit_configs::AbstractVector;
+        nlevel::Int=2, kwargs...) where {T}
+    return product_state(T, DitStr{nlevel}(bit_configs); kwargs...)
+end
+# integer input
+function product_state(::Type{T}, total::Int, val::Integer;
+        nlevel::Int=2,
+        kwargs...) where {T}
+    product_state(T, DitStr{nlevel,total}(val); kwargs...)
 end
 
-function BitBasis.onehot(::Type{T}, nbits::Int, x::Integer, nbatch::Int, nlevel::Int) where {T}
-    v = zeros(T, nlevel ^ nbits, nbatch)
-    v[x+1, :] .= 1
-    return v
-end
+# default type
+product_state(dit_str::DitStr; kwargs...) =
+    product_state(ComplexF64, dit_str; kwargs...)
+product_state(vector::AbstractVector; kwargs...) =
+    product_state(ComplexF64, vector; kwargs...)
+product_state(total::Int, val::Integer; kwargs...) =
+    product_state(ComplexF64, total, val; kwargs...)
 
 """
     zero_state([T=ComplexF64], n::Int; nbatch::Int=NoBatch())
@@ -716,6 +680,40 @@ function Base.show(io::IO, reg::BatchedArrayReg{D,T,MT}) where {D,T,MT}
 end
 
 """
+    print_table([io::IO, ]register; digits::Int=5)
+
+Print configuration-amplitude pairs of the `register`.
+
+```jldoctest; setup=:(using Yao)
+julia> reg = ghz_state(2);
+
+julia> print_table(ghz_state(2))
+00 ₍₂₎   0.70711 - 0.0im
+01 ₍₂₎   0.0 + 0.0im
+10 ₍₂₎   0.0 + 0.0im
+11 ₍₂₎   0.70711 - 0.0im
+```
+"""
+print_table(reg::AbstractArrayReg; digits::Int=5) = print_table(stdout, reg; digits)
+function print_table(io::IO, reg::AbstractArrayReg; digits::Int=5)
+    data = rank3(reg)
+    for i in basis(reg)
+        print(io, "$i   ")
+        for b in 1:size(data, 3)
+            for r in 1:size(data, 2)
+                s = round(data[buffer(i)+1,r,b]; digits)
+                print(io, s)
+                if r != size(data, 2)
+                    print(io, ", ")
+                end
+            end
+            b !== size(data, 3) && print(io, "; ")
+        end
+        println(io)
+    end
+end
+
+"""
     mutual_information(reg::AbstractArrayReg, part1, part2)
 
 Compute the mutual information between locations `part1` and locations `part2` in a quantum state `reg`.
@@ -782,7 +780,7 @@ Find `n` most probable qubit configurations in a quantum register and return the
 
 ```jldoctest; setup=:(using Yao)
 julia> most_probable(ghz_state(3), 2)
-2-element Vector{BitBasis.BitStr64{3}}:
+2-element Vector{DitStr{2, 3, Int64}}:
  000 ₍₂₎
  111 ₍₂₎
 ```
@@ -808,7 +806,7 @@ Returns an `UnitRange` of the all the bits in the Hilbert space of given registe
 
 ```jldoctest; setup=:(using Yao)
 julia> collect(basis(rand_state(3)))
-8-element Vector{BitBasis.BitStr64{3}}:
+8-element Vector{DitStr{2, 3, Int64}}:
  000 ₍₂₎
  001 ₍₂₎
  010 ₍₂₎
@@ -819,7 +817,7 @@ julia> collect(basis(rand_state(3)))
  111 ₍₂₎
 ```
 """
-BitBasis.basis(r::AbstractRegister{2}) = basis(BitStr{nactive(r),Int})
+BitBasis.basis(r::AbstractRegister{D}) where D = basis(DitStr{D,nactive(r),Int})
 
 
 """
@@ -828,3 +826,6 @@ BitBasis.basis(r::AbstractRegister{2}) = basis(BitStr{nactive(r),Int})
 Curried version of `partial_tr(ρ, locs)`.
 """
 YaoAPI.partial_tr(locs) = @λ(ρ -> partial_tr(ρ, locs))
+
+Base.getindex(reg::ArrayReg{D}, d::DitStr{D}) where D = getindex(reg.state, buffer(d)+1)
+Base.getindex(reg::BatchedArrayReg{D}, d::DitStr{D}) where D = getindex(reg.state, buffer(d)+1, :)

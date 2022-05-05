@@ -102,11 +102,11 @@ function cunmat(n::Int, cbits::NTuple, cvals::NTuple, U::IMatrix, locs::NTuple)
 end
 
 """
-    unmat(nbit::Int, U::AbstractMatrix, locs::NTuple) -> AbstractMatrix
+    unmat(::Val{D}, nbit::Int, U::AbstractMatrix, locs::NTuple) -> AbstractMatrix
 
 Return the matrix representation of putting matrix at locs.
 """
-function unmat(nbit::Int, U::AbstractMatrix, locs::NTuple)
+function unmat(::Val{2}, nbit::Int, U::AbstractMatrix, locs::NTuple)
     large_mat_check(nbit)
     cunmat(nbit::Int, (), (), U, locs)
 end
@@ -114,7 +114,7 @@ end
 ############################### Dense Matrices ###########################
 function u1mat(nbit::Int, U1::AbstractMatrix, ibit::Int)
     large_mat_check(nbit)
-    unmat(nbit, U1, (ibit,))
+    unmat(Val{2}(), nbit, U1, (ibit,))
 end
 
 u1mat(nbit::Int, U1::Adjoint, ibit::Int) = u1mat(nbit, copy(U1), ibit)
@@ -192,7 +192,7 @@ function cunmat(
 
     @inbounds colptr[1] = 1
     ctest = controller(cbits, cvals)
-    @inbounds @simd for b in basis(nbit)
+    @inbounds @simd for b in 0:1<<nbit-1
         if ctest(b)
             colptr[b+2] = colptr[b+1] + MM
         else
@@ -307,3 +307,264 @@ end
     @inbounds dg.diag[locs] = U.diag
     return dg
 end
+
+function unmat(::Val{D}, nbits::Int, U::AbstractMatrix{T}, locs::NTuple{C}) where {T,C,D}
+    mat = sparse(U)
+    # create stride for indexing
+    strides = ntuple(i->D^(i-1), nbits)
+    baselocs = (setdiff(1:nbits, locs)...,)
+    basestrides = map(i->strides[i], baselocs)
+    substrides = map(i->strides[i], locs)
+
+    # allocate storage
+    m = nnz(mat)
+    basedim = D ^ (nbits - C)
+    is = Vector{Int}(undef, basedim * m)
+    js = Vector{Int}(undef, basedim * m)
+    vs = Vector{T}(undef, basedim * m)
+    CI = CartesianIndices(ntuple(i->D, C))
+    return outerloop!(Val{D}(), Val{C}(), nbits, mat, is, js, vs, CI, substrides, basestrides, basedim)
+end
+
+function outerloop!(::Val{D}, ::Val{C}, nbits, mat, is, js, vs, CI, substrides, basestrides, basedim) where {D,C}
+    offset = 0
+    # does not support multi-threading
+    @inbounds for (i, j, v) in zip(findnz(mat)...)
+        # set indices
+        I, J = CI[i].I, CI[j].I
+        ioffset = sum(i->(I[i]-1) * substrides[i], 1:C)
+        joffset = sum(i->(J[i]-1) * substrides[i], 1:C)
+        innerloop!(Val{D}(), offset, is, js, ioffset, joffset, basestrides)
+        # set values
+        for k=offset+1:offset+basedim
+            vs[k] = v
+        end
+        offset += basedim
+    end
+    N = D^nbits
+    return sparse(is, js, vs, N, N)
+end
+
+@generated function innerloop!(::Val{D}, k, is, js, ioffset::Int, joffset::Int, basestrides::NTuple{BN}) where {D,BN}
+    quote
+        sumc = length(basestrides) == 0 ? 1 : 1 - sum(basestrides)
+        Base.Cartesian.@nloops($BN, i, d->1:$D,
+                d->(@inbounds sumc += i_d*basestrides[d]), # PRE
+                d->(@inbounds sumc -= i_d*basestrides[d]), # POST
+                begin # BODY
+                    k += 1
+                    @inbounds is[k] = ioffset + sumc
+                    @inbounds js[k] = joffset + sumc
+                end)
+
+    end
+end
+
+
+####################### getindex ######################
+# take last dit
+_take_last(x::T, ::Val{D}) where {T,D} = mod(x, D)
+_take_last(x::T, ::Val{2}) where T = x & one(T)
+# take last k-th dit
+_take_last(x::T, ::Val{D}, k::Int) where {T,D} = mod(x, D^k)
+_take_last(x::T, ::Val{2}, k::Int) where T = x & (one(T) << k - 1)
+# take k-th dit
+_takeat(x::T, ::Val{D}, k::Int) where {T,D} = _take_last(BitBasis._rshift(Val{D}(), x, k-1), Val{D}())
+function take_last_and_shift(x, ::Val{D}, k::Int) where D
+    return _take_last(x, Val{D}(), k), BitBasis._rshift(Val{D}(), x, k)
+end
+
+# Implements general multi-control, multi-qudit getindex(block, :, j).
+# `T` is the return type
+# `D` is the `D` in qudits.
+# `N` is the the number of qudits.
+# `U` is an content (operator) in e.g. put block
+# `locs` is the `locs` in e.g. put block
+# `cbits` is the control locations in e.g. control block
+# `cvals` is the target controlled value in e.g. control block
+# `i` and `j` are the row and column indices to get.
+function instruct_get_element(::Type{T}, ::Val{D}, N::Int, U, locs::NTuple{M}, cbits::NTuple{C}, cvals::NTuple{C}, i::TI, j::TI) where {T,C,M,TI<:Integer,D}
+    subi, subj = 0, 0  # subspace location (in U)
+    _i, _j = i, j
+    @inbounds for ibit=1:N
+        ival = _take_last(_i, Val{D}())
+        jval = _take_last(_j, Val{D}())
+        _i = BitBasis._rshift(Val{D}(), _i, 1)
+        _j = BitBasis._rshift(Val{D}(), _j, 1)
+        # return zero if rest dimensions do not match
+        if ibit ∉ locs
+            if ival != jval
+                return zero(T)
+            end
+        else
+            subloc_1 = findfirst(==(ibit), locs)-1
+            subi += BitBasis._lshift(Val{D}(), ival, subloc_1)
+            subj += BitBasis._lshift(Val{D}(), jval, subloc_1)
+        end
+    end
+    # check controlled bits
+    @inbounds for k=1:C
+        if cvals[k] != _takeat(i, Val{D}(), cbits[k])
+            return i==j ? one(T) : zero(T)
+        end
+    end
+    # get the target element in U
+    return unsafe_getindex(T, U, subi, subj)
+end
+
+# same as `instruct_get_element`, but faster!
+# blocks are operators, locs are sorted ranges
+function kron_instruct_get_element(::Type{T}, ::Val{D}, N::Int, blocks, locs::NTuple{M}, i::TI, j::TI) where {T,D,M,TI}
+    _i, _j = i, j
+    res = one(T)
+    pre = 0
+    @inbounds for k=1:M
+        block = blocks[k]
+        loc = locs[k]  # a range
+        # compute gap: return zero if rest dimensions do not match
+        gapsize = loc.start - pre - 1
+        if gapsize > 0
+            ival, _i = take_last_and_shift(_i, Val{D}(), gapsize)
+            jval, _j = take_last_and_shift(_j, Val{D}(), gapsize)
+            if ival != jval
+                return zero(T)
+            end
+        end
+
+        # compute block
+        l = nqudits(block)
+        ival, _i = take_last_and_shift(_i, Val{D}(), l)
+        jval, _j = take_last_and_shift(_j, Val{D}(), l)
+        # get the target element in U
+        res *= unsafe_getindex(T, block, ival, jval)
+        pre = loc.stop
+    end
+    if pre != N  # one extra identity
+        gapsize = N - pre
+        if gapsize > 0
+            ival, _i = take_last_and_shift(_i, Val{D}(), gapsize)
+            jval, _j = take_last_and_shift(_j, Val{D}(), gapsize)
+            if ival != jval
+                return zero(T)
+            end
+        end
+    end
+    return res
+end
+
+# same as `kron_instruct_get_element`, but faster!
+# block is an operator, locs are sorted integers
+function repeat_instruct_get_element(::Type{T}, ::Val{D}, N::Int, block, locs::NTuple{M}, i::TI, j::TI) where {T,D,M,TI}
+    _i, _j = i, j
+    res = one(T)
+    n = nqudits(block)
+    pre = 0
+    @inbounds for k=1:M
+        loc = locs[k]  # a range
+        # compute gap: return zero if rest dimensions do not match
+        gapsize = loc - pre - 1
+        if gapsize > 0
+            ival, _i = take_last_and_shift(_i, Val{D}(), gapsize)
+            jval, _j = take_last_and_shift(_j, Val{D}(), gapsize)
+            if ival != jval
+                return zero(T)
+            end
+        end
+
+        # compute block
+        l = nqudits(block)
+        ival, _i = take_last_and_shift(_i, Val{D}(), l)
+        jval, _j = take_last_and_shift(_j, Val{D}(), l)
+        # get the target element in U
+        res *= unsafe_getindex(T, block, ival, jval)
+        pre = loc + n-1
+    end
+    if pre != N  # one extra identity
+        gapsize = N - pre
+        if gapsize > 0
+            ival, _i = take_last_and_shift(_i, Val{D}(), gapsize)
+            jval, _j = take_last_and_shift(_j, Val{D}(), gapsize)
+            if ival != jval
+                return zero(T)
+            end
+        end
+    end
+    return res
+end
+
+# Implements general multi-control, multi-qudit getindex(block, :, j).
+# `T` is the return type
+# `U` is an content (operator) in e.g. put block
+# `locs` is the `locs` in e.g. put block
+# `cbits` is the control locations in e.g. control block
+# `cvals` is the target controlled value in e.g. control block
+# `dj` is the column index as a `DitStr`.
+# Returns operator[:,dj]
+function instruct_get_column(::Type{T}, U, locs::NTuple{M}, cbits::NTuple{C}, cvals::NTuple{C}, dj::DitStr{D,L,TI}) where {T,C,M,TI,D,L}
+    j = buffer(dj)
+    # check controlled bits
+    @inbounds for k=1:C
+        # not controlled!
+        if cvals[k] != _takeat(j, Val{D}(), cbits[k])
+            return [dj], [one(T)]
+        end
+    end
+    # get subindex
+    subj = zero(TI)
+    @inbounds for ind in 1:M
+        subj += BitBasis._lshift(Val{D}(), _takeat(j, Val{D}(), locs[ind]), ind-1)
+    end
+    # get the target element in U
+    rows, vals = unsafe_getcol(T, U, DitStr{D,M,TI}(subj))
+    # map rows
+    newrows = map(rows) do i
+        subi = DitStr{D,L,TI}(j)
+        @inbounds for ind in 1:M
+            subi += BitBasis._lshift(Val{D}(), _takeat(buffer(i), Val{D}(), ind) - _takeat(subj, Val{D}(), ind), locs[ind]-1)
+        end
+        subi
+    end
+    return newrows, vals
+end
+
+# `blocks` is a list of operators, locs are sorted ranges
+function kron_instruct_get_column(::Type{T}, blocks, locs::NTuple{M}, j::DitStr{D,L,TI}) where {T,D,L,M,TI}
+    if M == 0
+        return [j], [one(T)]
+    end
+    _j = buffer(j)
+    rows = Vector{DitStr{D,L,TI}}[]
+    vals = Vector{T}[]
+    pre = 0
+    @inbounds for k=1:M
+        block = blocks[k]
+        loc = locs[k]  # a range
+        # compute gap: return zero if rest dimensions do not match
+        gapsize = loc.start - pre - 1
+        if gapsize > 0
+            jval, _j = take_last_and_shift(_j, Val{D}(), gapsize)
+        end
+
+        # compute block
+        l = length(loc)
+        jval, _j = take_last_and_shift(_j, Val{D}(), l)
+        # get the target element in U
+        subrows, subvals = unsafe_getcol(T, block, DitStr{D,L,TI}(jval))
+        # map rows to the larger space
+        newrows = map(subrows) do i
+            subi = zero(DitStr{D,L,TI})
+            @inbounds for ind in 1:l
+                subi += BitBasis._lshift(Val{D}(), _takeat(buffer(i), Val{D}(), ind) - _takeat(jval, Val{D}(), ind), loc[ind]-1)
+            end
+            subi
+        end
+        pushfirst!(rows, newrows)
+        pushfirst!(vals, subvals)
+        pre = loc.stop
+    end
+    # kron rows and vals
+    totalrows = foldl(_addkron, rows) .+ j
+    totalvals = kron(vals...)
+    return totalrows, totalvals
+end
+_addkron(x, y)  = vec([x[i]+y[j] for j=1:length(y), i=1:length(x)])

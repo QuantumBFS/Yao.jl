@@ -15,3 +15,23 @@ using Random, Test
     @test nqudits(igate(3; nlevel=3)) == 3
     @test mat(igate(3; nlevel=3)) == YaoBlocks.IMatrix{27}()
 end
+
+
+@testset "instruct_get_element" begin
+    for pb in [igate(1), igate(2; nlevel=3)
+            ]
+        mpb = mat(pb)
+        allpass = true
+        for i=basis(pb), j=basis(pb)
+            allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+        end
+        @test allpass
+
+        allpass = true
+        for j=basis(pb)
+            allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+            allpass &= vec(pb[j,:]) == mpb[Int(j)+1,:]
+        end
+        @test allpass
+    end
+end

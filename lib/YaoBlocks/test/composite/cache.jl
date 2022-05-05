@@ -82,3 +82,22 @@ end
     update_cache(ComplexF64, C)
     @test pull(C) ≈ mat(C)
 end
+
+@testset "instruct_get_element" begin
+    for pb in [put(3, 2=>Y) |> cache, put(4, (4,2)=>matblock(rand_unitary(9); nlevel=3)) |> cache]
+        mpb = mat(pb)
+        allpass = true
+        for i=basis(pb), j=basis(pb)
+            allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+        end
+        @test allpass
+        allpass = true
+        for j=basis(pb)
+            allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+            allpass &= vec(pb[:, EntryTable([j], [1.0+0im])]) == mpb[:, Int(j)+1]
+            allpass &= vec(pb[j,:]) == mpb[Int(j)+1,:]
+            allpass &= vec(pb[EntryTable([j], [1.0+0im]),:]) == mpb[Int(j)+1,:]
+        end
+        @test allpass
+    end
+end

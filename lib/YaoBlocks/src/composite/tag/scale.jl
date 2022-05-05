@@ -62,3 +62,12 @@ function YaoAPI.unsafe_apply!(r::AbstractArrayReg, x::Scale{S}) where {S}
     regscale!(r, factor(x))
     return r
 end
+
+function unsafe_getindex(::Type{T}, x::Scale, i::Integer, j::Integer) where T
+    return unsafe_getindex(T, content(x), i, j) * factor(x)
+end
+
+function unsafe_getcol(::Type{T}, x::Scale, j::DitStr) where T
+    locs, vals = unsafe_getcol(T, content(x), j)
+    return locs, rmul!(vals, factor(x))
+end

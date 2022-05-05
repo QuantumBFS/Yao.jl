@@ -21,7 +21,7 @@ YaoAPI = "0843a435-28de-4971-9e8b-a9641b2983a8"
 YaoArrayRegister = "e600142f-9330-5003-8abb-0ebd767abc51"
 
 [compat]
-BitBasis = "0.7"
+BitBasis = "0.8"
 CacheServers = "0.2"
 ChainRulesCore = "1.11"
 ExponentialUtilities = "1.5"

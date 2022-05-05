@@ -86,7 +86,7 @@ end
     @test applymatrix(g) ≈ mat(Toffoli) |> invorder
     @test occupied_locs(g) == (3, 2, 1)
     g = ControlBlock(3, (2,), CNOT, (3, 1))
-    g2 = PutBlock(3, Toffoli, (2, 3, 1))
+    g2 = PutBlock(3, Toffoli, (3, 2, 1))
     g3 = ControlBlock(3, (3, 2), X, (1,))
     @test applymatrix(g) == applymatrix(g2) == applymatrix(g3)
     @test mat(g) == mat(g2)
@@ -101,4 +101,21 @@ end
     c = control((2,3), 1=>X)(5)
     @test c == control(5, (2,3), 1=>X)
     @test copy(c) == c
+end
+
+@testset "instruct_get_element" begin
+    for pb in [control(3, 2, 1=>Y), control(4, 3, (4,2)=>matblock(rand_unitary(4)))]
+        mpb = mat(pb)
+        allpass = true
+        for i=basis(pb), j=basis(pb)
+            allpass &= pb[i, j] == mpb[Int(i)+1, Int(j)+1]
+        end
+        @test allpass
+        allpass = true
+        for j=basis(pb)
+            allpass &= vec(pb[:, j]) == mpb[:, Int(j)+1]
+            allpass &= vec(pb[j, :]) == mpb[Int(j)+1, :]
+        end
+        @test allpass
+    end
 end

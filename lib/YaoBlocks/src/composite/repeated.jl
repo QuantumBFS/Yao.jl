@@ -16,6 +16,8 @@ function RepeatedBlock(n::Int, block::AbstractBlock{D}, locs::NTuple{C,Int}) whe
     nqudits(block) > 1 && throw(
         ArgumentError("RepeatedBlock does not support multi-qubit content for the moment."),
     )
+    # sort the locations
+    locs = TupleTools.sort(locs)
     return RepeatedBlock{D,C,typeof(block)}(n, block, locs)
 end
 
@@ -153,4 +155,13 @@ function YaoAPI.iscommute(x::RepeatedBlock{D}, y::RepeatedBlock{D}) where {D}
     else
         iscommute_fallback(x, y)
     end
+end
+
+function unsafe_getindex(::Type{T}, rp::RepeatedBlock{D}, i::Integer, j::Integer) where {T,D}
+    repeat_instruct_get_element(T, Val{D}(), nqudits(rp), rp.content, rp.locs, i, j)
+end
+
+function unsafe_getcol(::Type{T}, pb::RepeatedBlock{D,C}, j::DitStr{D}) where {T,D,C}
+    n = nqudits(pb.content)
+    kron_instruct_get_column(T, ntuple(i->pb.content, C), ntuple(i->(pb.locs[i]:pb.locs[i]+n-1), C), j)
 end

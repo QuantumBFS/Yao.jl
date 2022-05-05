@@ -122,7 +122,7 @@ function expect(op::AbstractBlock, reg::BatchedArrayReg)
 end
 
 for REG in [:ArrayReg, :BatchedArrayReg]
-    @eval function expect(op::Add, reg::$REG)
+    @eval function expect(op::AbstractAdd, reg::$REG)
         sum(opi -> expect(opi, reg), op)
     end
     @eval function expect(op::Scale, reg::$REG)

@@ -134,3 +134,131 @@ function logdi(x::Integer, d::Integer)
     end
     return r
 end
+
+##################### Entry Table #########################
+"""
+    EntryTable{IT<:DitStr, ET}
+
+A table of ditstring-amplitude, which can be used for e.g. indexing and operator or representing the output of operator indexing.
+
+### Examples
+```jldoctest; setup=:(using Yao)
+julia> EntryTable([dit"121;3", dit"111;3"], [0.6, 0.8im])
+EntryTable{DitStr64{3, 3}, ComplexF64}:
+  121 ₍₃₎   0.6 + 0.0im
+  111 ₍₃₎   0.0 + 0.8im
+```
+
+The following example shows how to create a Hamiltonian and scatter this bit string by this Hamiltonian.
+
+```jldoctest; setup=:(using Yao)
+julia> b = kron(X,Z,Y)
+nqubits: 3
+kron
+├─ 1=>X
+├─ 2=>Z
+└─ 3=>Y
+
+julia> b[:,bit"010"]
+EntryTable{DitStr{2, 3, Int64}, ComplexF64}:
+  111 ₍₂₎   0.0 - 1.0im
+
+julia> b[:,b[:,bit"010"]]
+EntryTable{DitStr{2, 3, Int64}, ComplexF64}:
+  010 ₍₂₎   1.0 + 0.0im
+```
+"""
+struct EntryTable{IT<:DitStr, ET}
+    configs::Vector{IT}
+    amplitudes::Vector{ET}
+end
+function YaoArrayRegister.print_table(io::IO, t::EntryTable; digits::Int=5)
+    println(io, "$(typeof(t)):")
+    for (i, a) in zip(t.configs, t.amplitudes)
+        println(io, "  $i   $(round(a; digits))")
+    end
+end
+Base.show(io::IO, ::MIME"text/plain", t::EntryTable) = YaoArrayRegister.print_table(io, t; digits=5)
+Base.show(io::IO, t::EntryTable) = YaoArrayRegister.print_table(io, t; digits=5)
+Base.:(==)(e1::EntryTable, e2::EntryTable) = e1.configs == e2.configs && e1.amplitudes == e2.amplitudes
+Base.length(et::EntryTable) = length(et.configs)
+Base.iterate(et::EntryTable, args...) = iterate(zip(et.configs, et.amplitudes), args...)
+
+function Base.Vector(et::EntryTable{<:DitStr{D,N}, ET}) where {D,N,ET}
+    v = zeros(ET, D^N)
+    for (c, a) in et
+        v[buffer(c)+1] += a  # accumulate to support duplicated entries
+    end
+    return v
+end
+function SparseArrays.SparseVector(et::EntryTable{DitStr{D,N,TI}, ET}) where {D,N,ET,TI}
+    length(et.configs) == 0 && return SparseVector(D^N, TI[], ET[])
+    locs = buffer.(et.configs) .+ 1
+    locs, amps = _cleanup(locs, et.amplitudes; zero_threshold=0.0)
+    return SparseVector(D^N, locs, amps)
+end
+
+"""
+    cleanup(entries::EntryTable; zero_threshold=0.0)
+
+Clean up the entry table by 1) sort entries, 2) merge items and 3) clean up zeros.
+Any value with amplitude ≤ `zero_threshold` will be regarded as zero.
+
+```jldoctest; setup=:(using Yao)
+julia> et = EntryTable([bit"000",bit"011",bit"101",bit"101",bit"011",bit"110",bit"110",bit"011",], [1.0 + 0.0im,-1, 1,1,1,-1,1,1,-1])
+EntryTable{DitStr{2, 3, Int64}, ComplexF64}:
+  000 ₍₂₎   1.0 + 0.0im
+  011 ₍₂₎   -1.0 + 0.0im
+  101 ₍₂₎   1.0 + 0.0im
+  101 ₍₂₎   1.0 + 0.0im
+  011 ₍₂₎   1.0 + 0.0im
+  110 ₍₂₎   -1.0 + 0.0im
+  110 ₍₂₎   1.0 + 0.0im
+  011 ₍₂₎   1.0 + 0.0im
+
+
+julia> cleanup(et)
+EntryTable{DitStr{2, 3, Int64}, ComplexF64}:
+  000 ₍₂₎   1.0 + 0.0im
+  011 ₍₂₎   1.0 + 0.0im
+  101 ₍₂₎   2.0 + 0.0im
+```
+"""
+function cleanup(et::EntryTable; zero_threshold=0.0)
+    EntryTable(_cleanup(et.configs, et.amplitudes; zero_threshold)...)
+end
+function _cleanup(locs, amps; zero_threshold)
+    length(locs) == 0 && return locs, amps
+    order = sortperm(locs; by=Int)
+    locs, amps = locs[order], amps[order]
+    k = 1
+    pre = locs[1]
+    @inbounds for i=2:length(locs)
+        this = locs[i]
+        if this != pre
+            if abs(amps[k]) > zero_threshold
+                k += 1
+            end
+            locs[k] = this
+            amps[k] = amps[i]
+        else
+            amps[k] += amps[i]
+        end
+        pre = this
+    end
+    if abs(amps[k]) <= zero_threshold
+        k -= 1
+    end
+    if k != length(locs)
+        resize!(locs, k)
+        resize!(amps, k)
+    end
+    return locs, amps
+end
+
+function Base.merge(et::EntryTable{DitStr{D,N,TI},T}, ets::EntryTable{DitStr{D,N,TI},T}...) where {D,N,TI,T}
+    EntryTable(vcat(et.configs, [e.configs for e in ets]...), vcat(et.amplitudes, [e.amplitudes for e in ets]...))
+end
+
+SparseArrays.sparse(et::EntryTable) = SparseVector(et)
+Base.vec(et::EntryTable) = Vector(et)
