@@ -22,43 +22,35 @@ end
     apply!(reg, time_evolve(rydberg_chain(nbits; r=1.0), π/4))
     expected = join(fill(arrayreg([1.0, -im, 0]; nlevel=3), nbits)...) |> normalize!
     @test reg ≈ expected
-    #@show reg.state
-    print_table(reg)
 
     # |11> -> |W>
     reg0 = product_state(dit"11;3")
     te = time_evolve(rydberg_chain(2; Ω=1.0, V=1e5), π/sqrt(2))
     @test fidelity(reg0 |> te, product_state(dit"12;3") + product_state(dit"21;3") |> normalize!) ≈ 1
 
-    #dt = 2.732π/2
-    Ω = 1.0
+    # the Levine-Pichler Pulse
+    Ω = -1.0   # sign flipped
     τ = 4.29268/Ω
-    Δf = 0.377371
+    Δ = 0.377371*Ω
     V = 1e3
-    ξ = 3.90242
-    h1 = rydberg_chain(nbits; Ω=Ω, Δ=Δf*Ω, V)
-    h2 = rydberg_chain(nbits; Ω=Ω*exp(im*ξ), Δ=Δf*Ω, V)
-    @test ishermitian(h1) && ishermitian(h2)
-    levine_pichler_pulse = chain(time_evolve(h1, 2τ), time_evolve(h2, 2τ))
-    # half pulse drives |11> to |11>
-    i, j = dit"01;3", dit"11;3"
-    m11 = levine_pichler_pulse[1][j, j]
-    @test isapprox(m11 |> abs, 1; atol=1e-3)
-    @show angle(m11) / π
-    @test mat(levine_pichler_pulse) * reg.state ≈ apply(reg, levine_pichler_pulse).state
-    reg = apply(reg, levine_pichler_pulse)
-    println()
-    print_table(reg)
+    ξ = -3.90242  # sign flipped
+    h1 = rydberg_chain(nbits; Ω=Ω, Δ, V)
+    h2 = rydberg_chain(nbits; Ω=Ω*exp(im*ξ), Δ, V)
+    pulse = chain(time_evolve(h1, τ), time_evolve(h2, τ))
 
-    h = levine_pichler_pulse
-    ang1 = angle(h[i, i]) / π
-    ang2 = angle(h[j, j]) / π
-    @show abs(h[i,i])
-    @show 2*ang1, ang2
-    @test isapprox(ang2+2, 4*Δf/sqrt(Δf^2 + 2*Ω^2); rtol=1e-2)
-    @show ang1
-    @show 2*ang1 - ang2-1
-    # for (i,j,v) in zip(findnz(SparseMatrixCSC(round.(mat(h), digits=5)))...)
-    #     abs(v) > 1e-1 && println(bases[i], "→", bases[j], "   ", v)
-    # end
+    @test ishermitian(h1) && ishermitian(h2)
+
+    i, j = dit"01;3", dit"11;3"
+
+    # half pulse drives |11> to |11>
+    # the first pulse completes a circle
+    @test isapprox(pulse[1][j, j]|> abs, 1; atol=1e-3)
+    @test mat(pulse) * reg.state ≈ apply(reg, pulse).state
+    reg = apply(reg, pulse)
+
+    ang1 = angle(pulse[i, i]) / π
+    ang2 = angle(pulse[j, j]) / π
+    @test isapprox(abs(pulse[i,i]), 1; atol=1e-2)
+    @test isapprox(abs(pulse[j,j]), 1; atol=1e-2)
+    @test isapprox(mod(2*ang1 - ang2, 2), 1, atol=1e-2)
 end
