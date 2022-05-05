@@ -209,7 +209,7 @@ print_block(io::IO, c::CachedBlock) = print_block(io, content(c))
 print_block(io::IO, c::Add) = printstyled(io, "+"; bold = true, color = color(Add))
 print_block(io::IO, c::TagBlock) = nothing
 print_block(io::IO, c::GeneralMatrixBlock) =
-    printstyled(io, "matblock(...)"; color = color(GeneralMatrixBlock))
+    printstyled(io, c.tag; color = color(GeneralMatrixBlock))
 
 function print_block(io::IO, c::Measure{D,K,OT}) where {D,K,OT}
     strs = String[]
