@@ -38,7 +38,7 @@ end
     h1 = rydberg_chain(nbits; Ω=Ω, Δ, V)
     h2 = rydberg_chain(nbits; Ω=Ω*exp(im*ξ), Δ, V)
     pulse = chain(time_evolve(h1, τ), time_evolve(h2, τ))
-
+    @test mat(pulse) * reg.state ≈ apply(reg, pulse).state
     @test ishermitian(h1) && ishermitian(h2)
 
     i, j = dit"01;3", dit"11;3"
@@ -46,8 +46,6 @@ end
     # half pulse drives |11> to |11>
     # the first pulse completes a circle
     @test isapprox(pulse[1][j, j]|> abs, 1; atol=1e-3)
-    @test mat(pulse) * reg.state ≈ apply(reg, pulse).state
-    reg = apply(reg, pulse)
 
     ang1 = angle(pulse[i, i]) / π
     ang2 = angle(pulse[j, j]) / π
