@@ -14,6 +14,7 @@ using YaoArrayRegister.SparseArrays
 end
 
 # https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.123.170503
+# Acknology: Jonathan Wurtz and Madelyn Cain for extremely helpful discussion!
 @testset "Levine Pichler pulse" begin
     nbits = 2
     reg = zero_state(nbits; nlevel=3)
