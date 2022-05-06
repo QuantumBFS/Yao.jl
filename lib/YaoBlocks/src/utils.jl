@@ -241,7 +241,7 @@ function _cleanup(locs, amps; zero_threshold)
         this = locs[i]
         if this != pre
             # made complicated to support Basic
-            if _iszero(amps[k], zero_threshold)
+            if !_iszero(amps[k], zero_threshold)
                 k += 1
             end
             locs[k] = this
@@ -261,7 +261,7 @@ function _cleanup(locs, amps; zero_threshold)
     return locs, amps
 end
 
-_iszero(ampk, zero_threshold) = iszero(zero_threshold) ? iszero(ampk) : abs(ampk) > zero_threshold
+_iszero(ampk, zero_threshold) = iszero(zero_threshold) ? iszero(ampk) : abs(ampk) <= zero_threshold
 
 """
     isclean(entries::EntryTable; zero_threshold=0.0)
