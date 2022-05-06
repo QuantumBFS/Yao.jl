@@ -186,7 +186,7 @@ function unsafe_getindex(::Type{T}, c::ChainBlock{D}, i::Integer, j::Integer) wh
     elseif length(c) == 1
         return unsafe_getindex(T, c.blocks[1], i, j)
     else
-        table = propagate_chain(c.blocks[2:end-1], c.blocks[1][:, DitStr{D,nqudits(c)}(j)])
+        table = propagate_chain(c.blocks[2:end-1], _getindex(T, c.blocks[1],:,DitStr{D,nqudits(c)}(j)))
         res = zero(T)
         for (loc, amp) in table
             res += unsafe_getindex(T, c.blocks[end], i, buffer(loc)) * amp
@@ -201,7 +201,7 @@ function unsafe_getcol(::Type{T}, c::ChainBlock{D}, j::DitStr{D,N,TI}) where {D,
     elseif length(c) == 1
         return unsafe_getcol(T, c.blocks[1], j)
     else
-        table = propagate_chain(c.blocks[2:end], c.blocks[1][:,j])
+        table = propagate_chain(c.blocks[2:end], _getindex(T,c.blocks[1],:,j))
         return table.configs, table.amplitudes
     end
 end

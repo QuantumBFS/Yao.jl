@@ -175,7 +175,11 @@ end
 function YaoArrayRegister.print_table(io::IO, t::EntryTable; digits::Int=5)
     println(io, "$(typeof(t)):")
     for (i, a) in zip(t.configs, t.amplitudes)
-        println(io, "  $i   $(round(a; digits))")
+        # to support symbolic
+        if a isa AbstractFloat || a isa Complex
+            a = round(a; digits)
+        end
+        println(io, "  $i   $a")
     end
 end
 Base.show(io::IO, ::MIME"text/plain", t::EntryTable) = YaoArrayRegister.print_table(io, t; digits=5)
@@ -236,7 +240,8 @@ function _cleanup(locs, amps; zero_threshold)
     @inbounds for i=2:length(locs)
         this = locs[i]
         if this != pre
-            if abs(amps[k]) > zero_threshold
+            # made complicated to support Basic
+            if _iszero(amps[k], zero_threshold)
                 k += 1
             end
             locs[k] = this
@@ -246,7 +251,7 @@ function _cleanup(locs, amps; zero_threshold)
         end
         pre = this
     end
-    if abs(amps[k]) <= zero_threshold
+    if _iszero(amps[k], zero_threshold)
         k -= 1
     end
     if k != length(locs)
@@ -255,6 +260,8 @@ function _cleanup(locs, amps; zero_threshold)
     end
     return locs, amps
 end
+
+_iszero(ampk, zero_threshold) = iszero(zero_threshold) ? iszero(ampk) : abs(ampk) > zero_threshold
 
 """
     isclean(entries::EntryTable; zero_threshold=0.0)

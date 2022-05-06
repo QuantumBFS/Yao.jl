@@ -479,7 +479,7 @@ function _getindex(::Type{T}, b::AbstractBlock{D}, i::DitStr{D,N,TI}, ::Colon) w
     return res
 end
 function _getindex(b::AbstractBlock{D}, ::Colon, j::EntryTable{DitStr{D,N,TI},T}) where {D,N,TI,T}
-    return merge([(et = _getindex(T,b,:,bs); rmul!(et.amplitudes, amp); et) for (bs, amp) in zip(j.configs, j.amplitudes)]...)
+    return merge([(et = _getindex(T,b,:,bs); rmul!(et.amplitudes, amp); et) for (bs, amp) in j]...)
 end
 function _getindex(b::AbstractBlock{D}, i::EntryTable{DitStr{D,N,TI},T}, ::Colon) where {D,N,TI,T}
     res = _getindex(b',:,i)
