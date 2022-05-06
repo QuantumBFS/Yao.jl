@@ -1,6 +1,6 @@
 export Lattice53, rand_google53
 
-entangler_google53(nbits::Int, i::Int, j::Int) = put(nbits, (i,j)=>FSimGate(π/2, π/6))
+entangler_google53(::Type{T}, nbits::Int, i::Int, j::Int) where T = put(nbits, (i,j)=>FSimGate(T(π)/2, T(π)/6))
 
 struct Lattice53
     labels::Matrix{Int}
@@ -76,29 +76,30 @@ function print_lattice53(lattice, pattern)
 end
 
 """
-    rand_google53(depth::Int; nbits=53) -> AbstactBlock
+    rand_google53([T=Float64], depth::Int; nbits=53) -> AbstactBlock
 
-Google supremacy circuit with 53 qubits, also know as the Sycamore quantum supremacy circuits.
+Google supremacy circuit with 53 qubits, also know as the Sycamore quantum supremacy circuits. `T` is the parameter type.
 
 References
 -------------------------
 * Arute, Frank, et al. "Quantum supremacy using a programmable superconducting processor." Nature 574.7779 (2019): 505-510.
 """
-function rand_google53(depth::Int; nbits::Int=53)
+rand_google53(depth::Int; nbits::Int=53) = rand_google53(Float64, depth; nbits=53)
+function rand_google53(::Type{T}, depth::Int; nbits::Int=53) where T
     c = chain(nbits)
     lattice = Lattice53(nbits=nbits)
     k = 0
     for pattern in Iterators.cycle(['A', 'B', 'C', 'D', 'C', 'D', 'A', 'B'])
-        push!(c, rand_google53_layer(lattice, pattern))
+        push!(c, rand_google53_layer(T, lattice, pattern))
         k += 1
         k>=depth && break
     end
     return c
 end
 
-function rand_google53_layer(lattice, pattern)
+function rand_google53_layer(::Type{T}, lattice, pattern) where T
     nbit = nbits(lattice)
     chain(nbit, chain(nbit, [put(nbit, i=>rand([SqrtW, SqrtX, SqrtY])) for i=1:nbit]),
-        chain(nbit, [entangler_google53(nbit,i,j) for (i,j) in pattern53(lattice, pattern)])
+        chain(nbit, [entangler_google53(T, nbit,i,j) for (i,j) in pattern53(lattice, pattern)])
         )
 end
