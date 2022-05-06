@@ -18,16 +18,16 @@ using Yao.EasyBuild: pair_ring, pair_square, merged_rotor, rotor, rotorset
 end
 
 @testset "rotter, collect_blocks, num_gradient, opgrad" begin
-    @test  merged_rotor(true, true) == Rx(0.0)
-    @test  merged_rotor(false, false) == merged_rotor() == chain(Rz(0.0), Rx(0.0), Rz(0.0))
-    @test  merged_rotor(false, true) == chain(Rz(0.0), Rx(0.0))
-    @test  merged_rotor(true, false) == chain(Rx(0.0), Rz(0.0))
-    @test collect_blocks(RotationGate, rotorset(:Merged, 5, true, false)) |> length == 10
+    @test  merged_rotor(Float64, true, true) == Rx(0.0)
+    @test  merged_rotor(Float64, false, false) == merged_rotor(Float64) == chain(Rz(0.0), Rx(0.0), Rz(0.0))
+    @test  merged_rotor(Float64, false, true) == chain(Rz(0.0), Rx(0.0))
+    @test  merged_rotor(Float64, true, false) == chain(Rx(0.0), Rz(0.0))
+    @test collect_blocks(RotationGate, rotorset(Float64, :Merged, 5, true, false)) |> length == 10
 
-    @test rotor(5, 2, true, true) isa ChainBlock
-    @test rotor(5, 2, true, true) |> length == 1
-    @test rotor(5, 2, true, true) |> nqubits == 5
-    @test collect_blocks(PutBlock{2, <:Any, <:RotationGate}, rotorset(:Split, 5, true, false)) |> length == 10
+    @test rotor(Float64, 5, 2, true, true) isa ChainBlock
+    @test rotor(Float64, 5, 2, true, true) |> length == 1
+    @test rotor(Float64, 5, 2, true, true) |> nqubits == 5
+    @test collect_blocks(PutBlock{2, <:Any, <:RotationGate}, rotorset(Float64, :Split, 5, true, false)) |> length == 10
 end
 
 @testset "entangler" begin
