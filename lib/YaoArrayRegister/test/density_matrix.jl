@@ -122,9 +122,9 @@ end
     # focused state is viewed as mixed state
     f1 = focus!(copy(reg1), (2, 1))
     f2 = focus!(copy(reg2), (2, 1))
-    @test fidelity(r1, r2) ≈ fidelity(f1, f2)
+    @test isapprox(fidelity(r1, r2), fidelity(f1, f2); atol=1e-6)
 
     # fidelity between focused and pure state
     f1 = rand_state(2)
-    @test fidelity(density_matrix(f1, (1,2)), r2) ≈ fidelity(f1, f2)
+    @test isapprox(fidelity(density_matrix(f1, (1,2)), r2), fidelity(f1, f2); atol=1e-6)
 end
