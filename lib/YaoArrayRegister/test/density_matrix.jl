@@ -42,6 +42,7 @@ end
     reg_ = rand_state(3)
     reg2 = clone(reg, 3)
     dm = density_matrix(reg)
+    @test copy(dm) == dm
     dm_ = density_matrix(reg_)
     dm2s = density_matrix.(reg2)
     @test reg |> probs ≈ dm |> probs
@@ -102,4 +103,28 @@ end
     reg = zero_state(4; nlevel=3)
     r = density_matrix(reg, [1,2])
     @test nqudits(r) == 2
+end
+
+@testset "density matrix" begin
+    # pure state
+    reg1 = rand_state(3)
+    reg2 = rand_state(3)
+    r1 = density_matrix(reg1, (2,1,3))
+    r2 = density_matrix(reg2, (2,1,3))
+    @test isapprox(fidelity(reg1, reg2), fidelity(r1, r2); atol=1e-10)
+    
+    # mixed state
+    r1 = density_matrix(reg1, (2,1))
+    r2 = density_matrix(reg2, (2,1))
+    expected = abs(tr(sqrt(sqrt(r1.state) * r2.state * sqrt(r1.state))))
+    @test isapprox(expected, fidelity(r1, r2); atol=1e-5)
+
+    # focused state is viewed as mixed state
+    f1 = focus!(copy(reg1), (2, 1))
+    f2 = focus!(copy(reg2), (2, 1))
+    @test fidelity(r1, r2) ≈ fidelity(f1, f2)
+
+    # fidelity between focused and pure state
+    f1 = rand_state(2)
+    @test fidelity(density_matrix(f1, (1,2)), r2) ≈ fidelity(f1, f2)
 end
