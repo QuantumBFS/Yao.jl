@@ -77,6 +77,11 @@ Some quantum algorithms are implemented with Yao in [QuAlgorithmZoo](https://git
 - [**STABLE**](https://quantumbfs.github.io/Yao.jl/stable) — most recently tagged version of the documentation.
 - [**LATEST**](https://quantumbfs.github.io/Yao.jl/latest) — in-development version of the documentation.
 
+## Monthly Community Call
+
+We are running a monthly community call, please sign up in Julia slack channel
+by DM `Roger-luo` your email address. Or follow [our twitter](https://twitter.com/YaoProject).
+
 ## Communication
 
 - Github issues: Please feel free to ask questions and report bugs, feature request in issues
