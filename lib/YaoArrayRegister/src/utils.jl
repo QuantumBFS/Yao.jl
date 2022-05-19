@@ -338,19 +338,26 @@ autostatic(A::AbstractVecOrMat; threshold::Int = 8) =
 
 ################### Fidelity ###################
 """
-    density_fidelity(ρ1, ρ2)
+    density_matrix_fidelity(ρ, σ)
 
 General fidelity (including mixed states) between two density matrix for qudits.
 
-# Definition
+### Definition
 
 ```math
-F(ρ, σ)^2 = tr(ρσ) + 2 \\sqrt{det(ρ)det(σ)}
+F(\\rho, \\sigma) = {\\rm Tr}\\sqrt{\\sqrt{\\rho}\\sigma\\sqrt{\\rho}}
 ```
 """
-function density_fidelity(ρ1::AbstractMatrix, ρ2::AbstractMatrix)
-    return sqrt(tr(ρ1 * ρ2) + 2 * sqrt(det(ρ1) * det(ρ2)))
+function density_matrix_fidelity(ρ::AbstractMatrix, σ::AbstractMatrix)
+    E1, U1 = eigen(ρ)
+    E2, U2 = eigen(σ)
+    E1 .= max.(E1, zero(eltype(E1)))
+    E2 .= max.(E2, zero(eltype(E2)))
+    sq1 = U1 * Diagonal(sqrt.(E1)) * U1'
+    sq2 = U2 * Diagonal(sqrt.(E2)) * U2'
+    return sum(svd(sq1 * sq2).S)
 end
+
 
 """
     pure_state_fidelity(v1::Vector, v2::Vector)
@@ -369,7 +376,7 @@ Reference:
 """
 function purification_fidelity(m1::Matrix, m2::Matrix)
     O = m1' * m2
-    return tr(sqrt(O * O'))
+    return sum(svd(O).S)
 end
 
 """

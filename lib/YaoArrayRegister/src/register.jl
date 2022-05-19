@@ -343,9 +343,9 @@ YaoAPI.fidelity(r1::ArrayReg, r2::BatchedArrayReg) = YaoAPI.fidelity(r2, r1)
 function YaoAPI.fidelity(r1::ArrayReg, r2::ArrayReg)
     state1 = state(r1)
     state2 = state(r2)
-    nqudits(r1) == nqudits(r2) || throw(DimensionMismatch("Register size not match!"))
+    nactive(r1) == nactive(r2) || throw(DimensionMismatch("Register size not match!"))
 
-    if size(state1, 2) == 1
+    if size(state1, 2) == 1 && size(state2, 2) == 1
         return pure_state_fidelity(state1[:, 1], state2[:, 1])
     else
         return purification_fidelity(state1, state2)
