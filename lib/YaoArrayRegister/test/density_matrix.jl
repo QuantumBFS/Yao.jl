@@ -103,3 +103,8 @@ end
     r = density_matrix(reg, [1,2])
     @test nqudits(r) == 2
 end
+
+@testset "density_fidelity" begin
+    reg = ghz_state(5)
+    @test density_fidelity(density_matrix(reg), density_matrix(reg)) ≈ 1.0 rtol=1e-7
+end

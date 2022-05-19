@@ -95,6 +95,7 @@ export AbstractRegister,
     tracedist,
     viewbatch,
     basis,
+    density_fidelity,
     clone
 
 # matrix types

@@ -345,12 +345,15 @@ General fidelity (including mixed states) between two density matrix for qudits.
 # Definition
 
 ```math
-F(ρ, σ)^2 = tr(ρσ) + 2 \\sqrt{det(ρ)det(σ)}
+F(ρ, σ)^2 = tr(sqrt(√ρ⋅σ⋅√ρ))^2
 ```
 """
-function density_fidelity(ρ1::AbstractMatrix, ρ2::AbstractMatrix)
-    return sqrt(tr(ρ1 * ρ2) + 2 * sqrt(det(ρ1) * det(ρ2)))
+function density_fidelity(ρ::AbstractMatrix, σ::AbstractMatrix)
+    rho_sqrt = sqrt(ρ)
+    return tr(sqrt(rho_sqrt * σ * rho_sqrt))^2
 end
+
+density_fidelity(ρ::DensityMatrix, σ::DensityMatrix) = density_fidelity(ρ.state, σ.state)
 
 """
     pure_state_fidelity(v1::Vector, v2::Vector)
