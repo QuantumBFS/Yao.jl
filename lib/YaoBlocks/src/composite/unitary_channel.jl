@@ -76,8 +76,8 @@ UnitaryChannel(it, weights) = UnitaryChannel(collect(it), weights)
 UnitaryChannel(it) = UnitaryChannel(collect(it))
 nqudits(uc::UnitaryChannel) = uc.n
 
-function _apply!(r::AbstractRegister, x::UnitaryChannel)
-    _apply!(r, sample(x.operators, x.weights))
+function YaoAPI.unsafe_apply!(r::AbstractRegister, x::UnitaryChannel)
+    YaoAPI.unsafe_apply!(r, sample(x.operators, x.weights))
 end
 
 function mat(::Type{T}, x::UnitaryChannel) where {T}

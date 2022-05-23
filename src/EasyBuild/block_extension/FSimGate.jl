@@ -14,6 +14,7 @@ mutable struct FSimGate{T<:Number} <: PrimitiveBlock{2}
     phi::T
 end
 YaoBlocks.nqudits(fs::FSimGate) = 2
+YaoBlocks.print_block(io::IO, block::FSimGate) = print(io, "FSim(θ=$(block.theta), ϕ=$(block.phi))")
 
 function Base.:(==)(fs1::FSimGate, fs2::FSimGate)
     return fs1.theta == fs2.theta && fs1.phi == fs2.phi

@@ -93,7 +93,10 @@ export AbstractBlock,
     ishermitian,
     nparameters,
     rand_unitary,
-    rand_hermitian
+    rand_hermitian,
+    EntryTable,
+    cleanup,
+    isclean
 
 export applymatrix, cache_key
 

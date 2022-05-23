@@ -84,17 +84,17 @@ function CacheServers.pull(c::CachedBlock)
     return pull(c.server, c.content)
 end
 
-function _apply!(r::AbstractArrayReg{D,T}, c::CachedBlock, signal) where {D,T}
+function YaoAPI.unsafe_apply!(r::AbstractArrayReg{D,T}, c::CachedBlock, signal) where {D,T}
     if signal > c.level
         r.state .= mat(T, c) * r
     else
-        _apply!(r, c.content)
+        YaoAPI.unsafe_apply!(r, c.content)
     end
     return r
 end
 
-_apply!(r::AbstractRegister, c::CachedBlock) = _apply!(r, c.content)
-_apply!(r::AbstractArrayReg{D,T}, c::CachedBlock) where {D,T} = (r.state .= mat(T, c) * r.state; r)
+YaoAPI.unsafe_apply!(r::AbstractRegister, c::CachedBlock) = YaoAPI.unsafe_apply!(r, c.content)
+YaoAPI.unsafe_apply!(r::AbstractArrayReg{D,T}, c::CachedBlock) where {D,T} = (r.state .= mat(T, c) * r.state; r)
 
 Base.similar(c::CachedBlock, level::Int) = CachedBlock(c.server, c.content, level)
 Base.copy(c::CachedBlock) = CachedBlock(c.server, copy(c.content), c.level)
@@ -193,4 +193,29 @@ function cache(
     end
 
     return CachedBlock(server, x, level)
+end
+
+function unsafe_getindex(::Type{T}, c::CachedBlock, i::Integer, j::Integer) where T
+    @inbounds mat(T, c)[i+1, j+1]
+end
+function unsafe_getcol(::Type{T}, c::CachedBlock, j::DitStr) where {T}
+    @inbounds getcol(mat(T, c), j)
+end
+
+function Base.getindex(b::CachedBlock{ST, BT, D}, i::DitStr{D,N}, j::DitStr{D,N}) where {ST,BT,D,N}
+    invoke(Base.getindex, Tuple{AbstractBlock{D}, DitStr{D,N}, DitStr{D,N}} where {D,N}, b, i, j)
+end
+function Base.getindex(b::CachedBlock{ST, BT, D}, ::Colon, j::DitStr{D,N}) where {D,N,ST,BT}
+    T = promote_type(ComplexF64, parameters_eltype(b))
+    return cleanup(_getindex(T, b, :, j))
+end
+function Base.getindex(b::CachedBlock{ST, BT, D}, i::DitStr{D,N}, ::Colon) where {D,N,ST,BT}
+    T = promote_type(ComplexF64, parameters_eltype(b))
+    return cleanup(_getindex(T, b, i, :))
+end
+function Base.getindex(b::CachedBlock{ST, BT, D}, ::Colon, j::EntryTable{DitStr{D,N,TI},T}) where {D,N,TI,T,ST,BT}
+    return cleanup(_getindex(b, :, j))
+end
+function Base.getindex(b::CachedBlock{ST, BT, D}, i::EntryTable{DitStr{D,N,TI},T}, ::Colon) where {D,N,TI,T,ST,BT}
+    return cleanup(_getindex(b, i, :))
 end

@@ -48,3 +48,24 @@ chsubblocks(blk::Daggered, target::AbstractBlock) = Daggered(target)
 Base.adjoint(x::AbstractBlock) = ishermitian(x) ? x : Daggered(x)
 Base.adjoint(x::Daggered) = content(x)
 Base.copy(x::Daggered) = Daggered(copy(content(x)))
+
+function unsafe_getindex(::Type{T}, d::Daggered, i::Integer, j::Integer) where {T}
+    return unsafe_getindex(T, content(d), j, i) |> conj
+end
+function unsafe_getcol(::Type{T}, d::Daggered, j::DitStr{D}) where {T,D}
+    locs, vals = force_getrowconj(T, content(d), j)
+    return locs, vals
+end
+function force_getrowconj(::Type{T}, mb::GeneralMatrixBlock, i::DitStr{D}) where {T,D}
+    locs, vals = getcol(mb.mat', i)
+    if eltype(vals) != T
+        vals = convert.(T, vals)
+    end
+    return locs, vals
+end
+function force_getrowconj(::Type{T}, mb::AbstractBlock{D}, i::DitStr{D}) where {T,D}
+    if nqudits(mb) > 10  # for block size larger than 10, throw a warning
+        @warn "fallback to slow get row implementation! Try avoid using `Daggered` type or implement the `force_getrowconj` method for your block."
+    end
+    return getcol(mat(T, mb)', i)
+end

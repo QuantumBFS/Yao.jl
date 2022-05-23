@@ -24,6 +24,9 @@ using Adapt
     @test similar(reg, m).state == m
     @test viewbatch(reg, 1) == reg
     @test_throws ErrorException viewbatch(reg, 2)
+
+    reg = rand_state(3; nlevel=3, nbatch=2) |> focus!((2,3))
+    print_table(reg)
 end
 
 @testset "test BatchedArrayReg constructors" begin
@@ -79,7 +82,7 @@ end
 
         st = state(product_state(T, 4, 0; nbatch = 3))
         for k = 1:3
-            @test st[:, k] ≈ onehot(T, 4, 0)
+            @test st[:, k] ≈ onehot(T, BitStr64{4}(0))
         end
         @test eltype(product_state(Float64, 4, 0).state) == Float64
     end
@@ -91,7 +94,7 @@ end
         st = state(zero_state(T, 4; nbatch = 4))
         @test st isa Transpose
         for k = 1:4
-            @test st[:, k] ≈ onehot(T, 4, 0)
+            @test st[:, k] ≈ onehot(T, BitStr64{4}(0))
         end
         @test eltype(zero_state(Float64, 4).state) == Float64
     end
@@ -318,4 +321,7 @@ end
 
 @testset "basis" begin
     @test basis(rand_state(3)) == bit"000":bit"111"
+    reg = product_state(dit"120;3")
+    @test reg[dit"120;3"] == 1.0
+    @test reg[dit"121;3"] == 0.0
 end

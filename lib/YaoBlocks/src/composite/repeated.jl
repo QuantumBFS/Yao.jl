@@ -16,6 +16,8 @@ function RepeatedBlock(n::Int, block::AbstractBlock{D}, locs::NTuple{C,Int}) whe
     nqudits(block) > 1 && throw(
         ArgumentError("RepeatedBlock does not support multi-qubit content for the moment."),
     )
+    # sort the locations
+    locs = TupleTools.sort(locs)
     return RepeatedBlock{D,C,typeof(block)}(n, block, locs)
 end
 
@@ -125,7 +127,7 @@ mat(::Type{T}, rb::RepeatedBlock{D}) where {T,D} =
     YaoArrayRegister.hilbertkron(rb.n, fill(mat(T, rb.content), length(rb.locs)), [rb.locs...]; nlevel=D)
 mat(::Type{T}, rb::RepeatedBlock{D,0,GT}) where {T,D,GT} = IMatrix{D^nqudits(rb),T}()
 
-function _apply!(r::AbstractRegister, rp::RepeatedBlock)
+function YaoAPI.unsafe_apply!(r::AbstractRegister, rp::RepeatedBlock)
     m = mat_matchreg(r, rp.content)
     for addr in rp.locs
         instruct!(r, m, Tuple(addr:addr+nqudits(rp.content)-1))
@@ -136,13 +138,13 @@ end
 # specialization
 for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
-    @eval function _apply!(r::AbstractRegister, rp::RepeatedBlock{N,C,$GT}) where {N,C}
+    @eval function YaoAPI.unsafe_apply!(r::AbstractRegister, rp::RepeatedBlock{N,C,$GT}) where {N,C}
         instruct!(r, Val($(QuoteNode(G))), rp.locs)
         return r
     end
 end
 
-_apply!(reg::AbstractRegister, rp::RepeatedBlock{D,0}) where D = reg
+YaoAPI.unsafe_apply!(reg::AbstractRegister, rp::RepeatedBlock{D,0}) where D = reg
 
 cache_key(rb::RepeatedBlock) = (rb.locs, cache_key(rb.content))
 
@@ -160,4 +162,13 @@ function YaoAPI.iscommute(x::RepeatedBlock{D}, y::RepeatedBlock{D}) where {D}
     else
         iscommute_fallback(x, y)
     end
+end
+
+function unsafe_getindex(::Type{T}, rp::RepeatedBlock{D}, i::Integer, j::Integer) where {T,D}
+    repeat_instruct_get_element(T, Val{D}(), nqudits(rp), rp.content, rp.locs, i, j)
+end
+
+function unsafe_getcol(::Type{T}, pb::RepeatedBlock{D,C}, j::DitStr{D}) where {T,D,C}
+    n = nqudits(pb.content)
+    kron_instruct_get_column(T, ntuple(i->pb.content, C), ntuple(i->(pb.locs[i]:pb.locs[i]+n-1), C), j)
 end

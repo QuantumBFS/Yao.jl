@@ -60,8 +60,17 @@ cache_key(x::Scale) = (factor(x), cache_key(content(x)))
 mat(::Type{T}, x::Scale) where {T} = T(x.alpha) * mat(T, content(x))
 mat(::Type{T}, x::Scale{Val{S}}) where {T,S} = T(S) * mat(T, content(x))
 
-function _apply!(r::AbstractArrayReg, x::Scale{S}) where {S}
-    _apply!(r, content(x))
+function YaoAPI.unsafe_apply!(r::AbstractArrayReg, x::Scale{S}) where {S}
+    YaoAPI.unsafe_apply!(r, content(x))
     regscale!(r, factor(x))
     return r
+end
+
+function unsafe_getindex(::Type{T}, x::Scale, i::Integer, j::Integer) where T
+    return unsafe_getindex(T, content(x), i, j) * factor(x)
+end
+
+function unsafe_getcol(::Type{T}, x::Scale, j::DitStr) where T
+    locs, vals = unsafe_getcol(T, content(x), j)
+    return locs, rmul!(vals, factor(x))
 end

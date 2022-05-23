@@ -94,9 +94,9 @@ occupied_locs(c::Subroutine) = map(i -> c.locs[i], c.content |> occupied_locs)
 chsubblocks(pb::Subroutine{D}, blk::AbstractBlock{D}) where {D} = Subroutine(pb.n, blk, pb.locs)
 PropertyTrait(::Subroutine) = PreserveAll()
 
-function _apply!(r::AbstractRegister, c::Subroutine)
+function YaoAPI.unsafe_apply!(r::AbstractRegister, c::Subroutine)
     focus!(r, c.locs)
-    _apply!(r, c.content)
+    YaoAPI.unsafe_apply!(r, c.content)
     relax!(r, c.locs, to_nactive = nqudits(c))
     return r
 end
@@ -121,4 +121,11 @@ function YaoAPI.iscommute(x::Subroutine{D}, y::Subroutine{D}) where {D}
     else
         return iscommute_fallback(x, y)
     end
+end
+
+function unsafe_getindex(::Type{T}, sr::Subroutine{D}, i::Integer, j::Integer) where {T,D}
+    instruct_get_element(T, Val{D}(), nqudits(sr), sr.content, sr.locs, (), (), i, j)
+end
+function unsafe_getcol(::Type{T}, pb::Subroutine{D}, j::DitStr{D}) where {T,D}
+    instruct_get_column(T, pb.content, pb.locs, (), (), j)
 end

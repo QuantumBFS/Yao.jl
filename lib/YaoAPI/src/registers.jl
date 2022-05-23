@@ -103,7 +103,7 @@ julia> reg = zero_state(5; nbatch=2);
 julia> apply!(viewbatch(reg, 2), put(5, 2=>X));
 
 julia> measure(reg; nshots=3)
-3×2 Matrix{BitBasis.BitStr64{5}}:
+3×2 Matrix{DitStr{2, 5, Int64}}:
  00000 ₍₂₎  00010 ₍₂₎
  00000 ₍₂₎  00010 ₍₂₎
  00000 ₍₂₎  00010 ₍₂₎
@@ -135,7 +135,7 @@ ArrayReg{2, ComplexF64, Array...}
     nlevel: 2
 
 julia> measure(reg; nshots=3)
-3-element Vector{BitBasis.BitStr64{7}}:
+3-element Vector{DitStr{2, 7, Int64}}:
  0001101 ₍₂₎
  0001101 ₍₂₎
  0001101 ₍₂₎
@@ -175,7 +175,7 @@ ArrayReg{2, ComplexF64, Array...}
     nlevel: 2
 
 julia> measure(reg; nshots=3)
-3-element Vector{BitBasis.BitStr64{7}}:
+3-element Vector{DitStr{2, 7, Int64}}:
  0110001 ₍₂₎
  0110001 ₍₂₎
  0110001 ₍₂₎
@@ -213,13 +213,13 @@ ArrayReg{2, ComplexF64, Array...}
     nlevel: 2
 
 julia> measure(reg; nshots=3)
-3-element Vector{BitBasis.BitStr64{3}}:
+3-element Vector{DitStr{2, 3, Int64}}:
  111 ₍₂₎
  111 ₍₂₎
  111 ₍₂₎
 
 julia> measure(apply(reg, put(3, 2=>X)); nshots=3)
-3-element Vector{BitBasis.BitStr64{3}}:
+3-element Vector{DitStr{2, 3, Int64}}:
  101 ₍₂₎
  101 ₍₂₎
  101 ₍₂₎
@@ -309,7 +309,7 @@ julia> reg = product_state(bit"010101");
 julia> reorder!(reg, (1,4,2,5,3,6));
 
 julia> measure(reg)
-1-element Vector{BitBasis.BitStr64{6}}:
+1-element Vector{DitStr{2, 6, Int64}}:
  000111 ₍₂₎
 ```
 """
@@ -329,7 +329,7 @@ ArrayReg{2, ComplexF64, Array...}
     nlevel: 2
 
 julia> measure(invorder!(reg); nshots=3)
-3-element Vector{BitBasis.BitStr64{6}}:
+3-element Vector{DitStr{2, 6, Int64}}:
  101010 ₍₂₎
  101010 ₍₂₎
  101010 ₍₂₎
@@ -350,7 +350,7 @@ The following code collapse a random state to a certain state.
 
 ```jldoctest; setup=:(using Yao)
 julia> measure(collapseto!(rand_state(3), bit"001"); nshots=3)
-3-element Vector{BitBasis.BitStr64{3}}:
+3-element Vector{DitStr{2, 3, Int64}}:
  001 ₍₂₎
  001 ₍₂₎
  001 ₍₂₎
@@ -398,13 +398,13 @@ ArrayReg{2, ComplexF64, Array...}
     nlevel: 2
 
 julia> measure(reg; nshots=3)
-3-element Vector{BitBasis.BitStr64{3}}:
+3-element Vector{DitStr{2, 3, Int64}}:
  110 ₍₂₎
  110 ₍₂₎
  110 ₍₂₎
 
 julia> measure(reg, (2,3); nshots=3)
-3-element Vector{BitBasis.BitStr64{2}}:
+3-element Vector{DitStr{2, 2, Int64}}:
  11 ₍₂₎
  11 ₍₂₎
  11 ₍₂₎
@@ -452,7 +452,7 @@ julia> measure!(ResetTo(bit"011"), reg)
 110 ₍₂₎
 
 julia> measure(reg; nshots=3)
-3-element Vector{BitBasis.BitStr64{3}}:
+3-element Vector{DitStr{2, 3, Int64}}:
  011 ₍₂₎
  011 ₍₂₎
  011 ₍₂₎

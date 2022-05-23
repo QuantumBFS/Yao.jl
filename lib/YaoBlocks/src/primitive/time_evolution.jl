@@ -87,7 +87,7 @@ function LinearAlgebra.mul!(y::AbstractVector, A::BlockMap{T,GT}, x::AbstractVec
     return y
 end
 
-function _apply!(reg::AbstractArrayReg{D,T}, te::TimeEvolution) where {D,T}
+function YaoAPI.unsafe_apply!(reg::AbstractArrayReg{D,T}, te::TimeEvolution) where {D,T}
     if isdiagonal(te.H)
         reg.state .*= exp.((-im * te.dt) .* diag(mat(T, te.H)))
         return reg
@@ -128,3 +128,13 @@ function YaoAPI.isunitary(te::TimeEvolution)
 end
 
 iparams_range(::TimeEvolution{D,T}) where {D,T} = ((typemin(T), typemax(T)),)
+
+function unsafe_getindex(::Type{T}, te::TimeEvolution{D}, i::Integer, j::Integer) where {D,T}
+    return apply!(ArrayReg{D}(BitBasis._onehot(T, D^nqudits(te), j+1)), te).state[i+1]
+end
+function unsafe_getcol(::Type{T}, te::TimeEvolution{D}, j::DitStr{D,L,TI}) where {D,T,L,TI<:Integer}
+    map(x->DitStr{D,L,TI}(buffer(x)), basis(te)), statevec(apply!(ArrayReg{D}(BitBasis.onehot(T, j)), te))
+end
+function _getindex(te::TimeEvolution{D}, ::Colon, j::EntryTable{DitStr{D,L,TI},T}) where {D,L,TI<:Integer,T}
+    EntryTable(map(x->DitStr{D,L,TI}(buffer(x)), basis(te)), YaoArrayRegister.matchtype(T, statevec(apply!(ArrayReg{D}(vec(j)), te))))
+end

@@ -1,4 +1,4 @@
-export heisenberg, transverse_ising
+export heisenberg, transverse_ising, rydberg_chain
 
 """
     heisenberg(nbit::Int; periodic::Bool=true)
@@ -28,4 +28,24 @@ function transverse_ising(nbit::Int, h::Number; periodic::Bool=true)
         repeat(nbit,Z,(i,i%nbit+1))
     end |> sum
     ising_term + h*sum(map(i->put(nbit,i=>X), 1:nbit))
+end
+
+# a 3 level hamiltonian
+function rydberg_chain(nbits::Int; Ω::Number=0.0, Δ::Real=0.0, V::Real=0.0, r::Real=0.0)
+    Pr = matblock(sparse([3], [3], [1.0+0im], 3, 3); nlevel=3, tag="|r⟩⟨r|")
+    Z1r = matblock(sparse([2, 3], [2, 3], [1.0+0im, -1.0], 3, 3); nlevel=3)
+    X1r = matblock(sparse([2, 3], [3, 2], [1.0+0im, 1.0], 3, 3); nlevel=3, tag="|1⟩⟨r| + |r⟩⟨1|")
+    X01 = matblock(sparse([1, 2], [2, 1], [1.0+0im, 1.0], 3, 3); nlevel=3, tag="|1⟩⟨0| + |0⟩⟨1|")
+    Y1r = matblock(sparse([3, 2], [2, 3], [1.0im, -1.0im], 3, 3); nlevel=3, tag="i|1⟩⟨0| - i|0⟩⟨1|")
+    # single site term in {|1>, |r>}.
+    h = Add(nbits; nlevel=3)
+    !isapprox(Δ, 0; atol=1e-12) && push!(h, (-Δ) * sum([put(nbits, i=>Pr) for i=1:nbits]))
+    #!iszero(Δ) && push!(h, (-Δ/2) * sum([put(nbits, i=>Z1r) for i=1:nbits]))
+    !isapprox(real(Ω), 0; atol=1e-12) && push!(h, real(Ω)/2 * sum([put(nbits, i=>X1r) for i=1:nbits]))
+    !isapprox(imag(Ω), 0; atol=1e-12) && push!(h, imag(Ω)/2 * sum([put(nbits, i=>Y1r) for i=1:nbits]))
+    # interaction
+    !isapprox(V, 0; atol=1e-12) && nbits > 1 && push!(h, V * sum([put(nbits, (i,i+1)=>kron(Pr, Pr)) for i=1:nbits-1]))
+    # Raman term
+    !isapprox(r, 0; atol=1e-12) && push!(h, r * sum([put(nbits, i=>X01) for i=1:nbits]))
+    return h
 end

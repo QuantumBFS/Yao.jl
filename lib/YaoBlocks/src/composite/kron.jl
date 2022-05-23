@@ -160,6 +160,7 @@ Base.kron(blocks::Base.Generator) = kron(blocks...)
 occupied_locs(k::KronBlock) = (vcat([[getindex.(Ref(loc), occupied_locs(b))...] for (loc, b) in zip(k.locs, k.blocks)]...)...,)
 subblocks(x::KronBlock) = x.blocks
 chsubblocks(pb::KronBlock, it) = KronBlock(pb.n, pb.locs, (it...,))
+chsubblocks(x::KronBlock, it::AbstractBlock) = chsubblocks(x, (it,))
 cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
 color(::Type{T}) where {T<:KronBlock} = :cyan
 
@@ -175,7 +176,7 @@ function mat(::Type{T}, k::KronBlock{D,M}) where {T,D,M}
     end
 end
 
-function _apply!(r::AbstractRegister, k::KronBlock)
+function YaoAPI.unsafe_apply!(r::AbstractRegister, k::KronBlock)
     for (locs, block) in zip(k.locs, k.blocks)
         _instruct!(r, block, Tuple(locs))
     end
@@ -225,3 +226,10 @@ Base.adjoint(blk::KronBlock) = KronBlock(blk.n, blk.locs, map(adjoint, blk.block
 LinearAlgebra.ishermitian(k::KronBlock) = all(ishermitian, k.blocks) || ishermitian(mat(k))
 YaoAPI.isunitary(k::KronBlock) = all(isunitary, k.blocks) || isunitary(mat(k))
 YaoAPI.isreflexive(k::KronBlock) = all(isreflexive, k.blocks) || isreflexive(mat(k))
+
+function unsafe_getindex(::Type{T}, k::KronBlock{D}, i::Integer, j::Integer) where {T,D}
+    kron_instruct_get_element(T, Val{D}(), nqudits(k), k.blocks, k.locs, i, j)
+end
+function unsafe_getcol(::Type{T}, pb::KronBlock{D}, j::DitStr{D}) where {T,D}
+    kron_instruct_get_column(T, pb.blocks, pb.locs, j)
+end

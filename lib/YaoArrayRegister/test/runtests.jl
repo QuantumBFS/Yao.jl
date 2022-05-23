@@ -15,6 +15,10 @@ end
     include("instruct.jl")
 end
 
+@testset "test qudit instructions" begin
+    include("qudit_instruct.jl")
+end
+
 @testset "test measure" begin
     include("measure.jl")
 end

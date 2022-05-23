@@ -84,9 +84,11 @@ PropertyTrait(::PutBlock) = PreserveAll()
 cache_key(pb::PutBlock) = cache_key(pb.content)
 
 mat(::Type{T}, pb::PutBlock{2,1}) where {T} = u1mat(pb.n, mat(T, pb.content), pb.locs...)
-mat(::Type{T}, pb::PutBlock{2,C}) where {T,C} = unmat(pb.n, mat(T, pb.content), pb.locs)
+function mat(::Type{T}, pb::PutBlock{D,C}) where {T,D,C}
+    return unmat(Val{D}(), nqudits(pb), mat(T, pb.content), pb.locs)
+end
 
-function _apply!(r::AbstractRegister, pb::PutBlock{D}) where D
+function YaoAPI.unsafe_apply!(r::AbstractRegister, pb::PutBlock{D}) where D
     instruct!(r, mat_matchreg(r, pb.content), pb.locs)
     return r
 end
@@ -96,7 +98,7 @@ end
 # specialization
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag, :H]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
-    @eval function _apply!(r::AbstractRegister, pb::PutBlock{2,C,<:$GT}) where {C}
+    @eval function YaoAPI.unsafe_apply!(r::AbstractRegister, pb::PutBlock{2,C,<:$GT}) where {C}
         instruct!(r, Val($(QuoteNode(G))), pb.locs)
         return r
     end
@@ -156,11 +158,11 @@ swap(loc1::Int, loc2::Int) = @λ(n -> swap(n, loc1, loc2))
 
 function mat(::Type{T}, g::Swap) where {T}
     mask = bmask(g.locs[1], g.locs[2])
-    orders = map(b -> swapbits(b, mask) + 1, basis(g.n))
+    orders = map(b -> swapbits(b, mask) + 1, 0:1<<g.n-1)
     return PermMatrix(orders, ones(T, nlevel(g)^g.n))
 end
 
-_apply!(r::AbstractRegister, g::Swap) = (instruct!(r, Val(:SWAP), g.locs); r)
+YaoAPI.unsafe_apply!(r::AbstractRegister, g::Swap) = (instruct!(r, Val(:SWAP), g.locs); r)
 occupied_locs(g::Swap) = g.locs
 
 """
@@ -187,8 +189,15 @@ for (G, GT) in [
     (:Rz, :(PutBlock{2,1,RotationGate{2, T,ZGate}} where {T})),
     (:PSWAP, :(PSwap)),
 ]
-    @eval function _apply!(reg::AbstractRegister, g::$GT)
+    @eval function YaoAPI.unsafe_apply!(reg::AbstractRegister, g::$GT)
         instruct!(reg, Val($(QuoteNode(G))), g.locs, g.content.theta)
         return reg
     end
+end
+
+function unsafe_getindex(::Type{T}, pb::PutBlock{D}, i::Integer, j::Integer) where {T,D}
+    instruct_get_element(T, Val{D}(), nqudits(pb), pb.content, pb.locs, (), (), i, j)
+end
+function unsafe_getcol(::Type{T}, pb::PutBlock{D}, j::DitStr{D}) where {T,D}
+    instruct_get_column(T, pb.content, pb.locs, (), (), j)
 end

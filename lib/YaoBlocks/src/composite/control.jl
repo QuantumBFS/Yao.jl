@@ -146,7 +146,7 @@ cz(ctrl_locs, loc::Int) = @λ(n -> cz(n, ctrl_locs, loc))
 mat(::Type{T}, c::ControlBlock{BT,C}) where {T,BT,C} =
     cunmat(c.n, c.ctrl_locs, c.ctrl_config, mat(T, c.content), c.locs)
 
-function _apply!(r::AbstractRegister, c::ControlBlock)
+function YaoAPI.unsafe_apply!(r::AbstractRegister, c::ControlBlock)
     instruct!(r, mat_matchreg(r, c.content), c.locs, c.ctrl_locs, c.ctrl_config)
     return r
 end
@@ -155,7 +155,7 @@ end
 for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
 
-    @eval function _apply!(r::AbstractRegister, c::ControlBlock{<:$GT})
+    @eval function YaoAPI.unsafe_apply!(r::AbstractRegister, c::ControlBlock{<:$GT})
         instruct!(r, Val($(QuoteNode(G))), c.locs, c.ctrl_locs, c.ctrl_config)
         return r
     end
@@ -198,4 +198,11 @@ function YaoAPI.iscommute(x::ControlBlock, y::ControlBlock)
     else
         return iscommute_fallback(x, y)
     end
+end
+
+function unsafe_getindex(::Type{T}, ctrl::ControlBlock, i::Integer, j::Integer) where {T,D}
+    instruct_get_element(T, Val{2}(), nqudits(ctrl), ctrl.content, ctrl.locs, ctrl.ctrl_locs, ctrl.ctrl_config, i, j)
+end
+function unsafe_getcol(::Type{T}, ctrl::ControlBlock, j::DitStr{D}) where {T,D}
+    instruct_get_column(T, ctrl.content, ctrl.locs, ctrl.ctrl_locs, ctrl.ctrl_config, j)
 end

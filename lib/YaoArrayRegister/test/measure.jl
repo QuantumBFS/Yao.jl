@@ -51,7 +51,7 @@ end
 
 @testset "fix measure output type error" begin
     res = measure(rand_state(1; nbatch = 10))
-    @test res isa Matrix{BitStr64{1}}
+    @test res isa Matrix{<:BitStr{1}}
 end
 
 @testset "fix measure kwargs error" begin
@@ -59,4 +59,8 @@ end
     @test length(measure(r; nshots = 10)) == 10
     @test_throws MethodError measure!(r; nshots = 10)
     @test_throws MethodError measure!(YaoAPI.RemoveMeasured(), r; nshots = 10)
+end
+
+@testset "measure qudits" begin
+    @test measure(product_state(dit"121;3")) == [dit"121;3"]
 end

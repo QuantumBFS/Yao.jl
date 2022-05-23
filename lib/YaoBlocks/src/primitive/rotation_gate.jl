@@ -95,9 +95,9 @@ mat(::Type{T}, R::RotationGate{1,<:Any,<:YGate}) where {T} =
 # mat(R::RotationGate{1, T, ZGate{Complex{T}}}) where T =
 #     SMatrix{2, 2, Complex{T}}(cos(R.theta/2)-im*sin(R.theta/2), 0, 0, cos(R.theta/2)+im*sin(R.theta/2))
 
-function _apply!(r::ArrayReg, rb::RotationGate)
+function YaoAPI.unsafe_apply!(r::ArrayReg, rb::RotationGate)
     v0 = copy(r.state)
-    _apply!(r, rb.block)
+    unsafe_apply!(r, rb.block)
     # NOTE: we should not change register's memory address,
     # or batch operations may fail
     r.state .= -im * sin(rb.theta / 2) * r.state + cos(rb.theta / 2) * v0
@@ -133,3 +133,14 @@ cache_key(R::RotationGate) = R.theta
 iparams_range(::RotationGate{D,T,GT}) where {D,T,GT} = ((zero(T), T(2 * pi)),)
 
 occupied_locs(g::RotationGate) = occupied_locs(g.block)
+
+function unsafe_getindex(::Type{T}, rg::RotationGate{D}, i::Integer, j::Integer) where {D,T}
+    return (i==j ? cos(T(rg.theta)/2) : zero(T)) - im * sin(T(rg.theta)/2) * unsafe_getindex(T, rg.block, i, j)
+end
+function unsafe_getcol(::Type{T}, rg::RotationGate{D}, j::DitStr{D}) where {D,T}
+    rows, vals = unsafe_getcol(T, rg.block, j)
+    rmul!(vals, -im * sin(T(rg.theta)/2))
+    push!(rows, j)
+    push!(vals, cos(T(rg.theta)/2))
+    return rows, vals
+end

@@ -183,6 +183,15 @@ julia> chcontent(2.0 * X, Y)
 
 Apply a block (of quantum circuit) to a quantum register.
 
+!!! note
+
+    to overload `apply!` for a new block, please overload the
+    [`unsafe_apply!`](@ref) function with same interface. Then
+    the `apply!` interface will do the size checks on inputs
+    automatically.
+
+### Examples
+
 ```jldoctest; setup=:(using Yao)
 julia> r = zero_state(2)
 ArrayReg{2, ComplexF64, Array...}
@@ -195,7 +204,7 @@ ArrayReg{2, ComplexF64, Array...}
     nlevel: 2
 
 julia> measure(r;nshots=10)
-10-element Vector{BitBasis.BitStr64{2}}:
+10-element Vector{DitStr{2, 2, Int64}}:
  01 ₍₂₎
  01 ₍₂₎
  01 ₍₂₎
@@ -209,6 +218,15 @@ julia> measure(r;nshots=10)
 ```
 """
 @interface apply!
+
+"""
+    unsafe_apply!(r, block)
+
+Similar to [`apply!`](@ref), but will not check the size of the
+register and block, this is mainly used for overloading new blocks,
+use at your own risk.
+"""
+@interface unsafe_apply!
 
 """
     occupied_locs(x)
@@ -304,7 +322,7 @@ julia> mat(kron(X, X))
  1.0+0.0im  0.0+0.0im  0.0+0.0im  0.0+0.0im
 
 julia> mat(kron(X, X) + put(2, 1=>X))
-4×4 SparseArrays.SparseMatrixCSC{ComplexF64, Int64} with 8 stored entries:
+4×4 SparseMatrixCSC{ComplexF64, Int64} with 8 stored entries:
      ⋅      1.0+0.0im      ⋅      1.0+0.0im
  1.0+0.0im      ⋅      1.0+0.0im      ⋅
      ⋅      1.0+0.0im      ⋅      1.0+0.0im

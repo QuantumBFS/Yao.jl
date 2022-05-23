@@ -27,12 +27,12 @@ end
 
 YaoAPI.iscommute(op1, op2) = op1 * op2 ≈ op2 * op1
 
-function apply!(r::AbstractRegister, b::AbstractBlock)
+function YaoAPI.apply!(r::AbstractRegister, b::AbstractBlock)
     _check_size(r, b)
-    _apply!(r, b)
+    unsafe_apply!(r, b)
 end
 
-function _apply!(r::AbstractRegister, b::AbstractBlock)
+function YaoAPI.unsafe_apply!(r::AbstractRegister, b::AbstractBlock)
     _apply_fallback!(r, b)
 end
 
@@ -415,7 +415,10 @@ end
 The non-inplace version of applying a block (of quantum circuit) to a quantum register.
 Check `apply!` for the faster inplace version.
 """
-apply(r::AbstractRegister, b) = apply!(copy(r), b)
+# overwrite interface, this one avoids one copy
+function apply(reg::AbstractRegister{D}, block) where D
+    return apply!(copy(reg), block)
+end
 
 function generic_dispatch!(f::Union{Function,Nothing}, x::AbstractBlock, it::Dispatcher)
     x = setiparams(f, x, consume!(it, niparams(x)))
@@ -441,3 +444,45 @@ function dispatch(f::Union{Function,Nothing}, x::AbstractBlock, it)
 end
 
 dispatch(x::AbstractBlock, it) = dispatch(nothing, x, it)
+
+BitBasis.basis(b::AbstractBlock{D}) where D = basis(DitStr{D,nqudits(b),Int64})
+
+################## get index ###################
+
+function Base.getindex(b::AbstractBlock{D}, i::DitStr{D,N}, j::DitStr{D,N}) where {D,N}
+    T = promote_type(ComplexF64, parameters_eltype(b))
+    @assert nqudits(b) == N
+    return unsafe_getindex(T, b, buffer(i), buffer(j))
+end
+function Base.getindex(b::AbstractBlock{D}, ::Colon, j::DitStr{D,N,TI}) where {D,N,TI}
+    T = promote_type(ComplexF64, parameters_eltype(b))
+    return cleanup(_getindex(T, b, :, j))
+end
+function Base.getindex(b::AbstractBlock{D}, i::DitStr{D,N,TI}, ::Colon) where {D,N,TI}
+    T = promote_type(ComplexF64, parameters_eltype(b))
+    return cleanup(_getindex(T, b, i, :))
+end
+function Base.getindex(b::AbstractBlock{D}, ::Colon, j::EntryTable{DitStr{D,N,TI},T}) where {D,N,TI,T}
+    return cleanup(_getindex(b, :, j))
+end
+function Base.getindex(b::AbstractBlock{D}, i::EntryTable{DitStr{D,N,TI},T}, ::Colon) where {D,N,TI,T}
+    return cleanup(_getindex(b, i, :))
+end
+function _getindex(::Type{T}, b::AbstractBlock{D}, ::Colon, j::DitStr{D,N,TI}) where {T, D,N,TI}
+    @assert nqudits(b) == N
+    rows, vals = unsafe_getcol(T, b, j)
+    return EntryTable(rows, vals)
+end
+function _getindex(::Type{T}, b::AbstractBlock{D}, i::DitStr{D,N,TI}, ::Colon) where {D,N,TI,T}
+    res = _getindex(T, b', :,i)
+    conj!(res.amplitudes)
+    return res
+end
+function _getindex(b::AbstractBlock{D}, ::Colon, j::EntryTable{DitStr{D,N,TI},T}) where {D,N,TI,T}
+    return merge([(et = _getindex(T,b,:,bs); rmul!(et.amplitudes, amp); et) for (bs, amp) in j]...)
+end
+function _getindex(b::AbstractBlock{D}, i::EntryTable{DitStr{D,N,TI},T}, ::Colon) where {D,N,TI,T}
+    res = _getindex(b',:,i)
+    conj!(res.amplitudes)
+    return res
+end
