@@ -1,44 +1,21 @@
 export UnitaryChannel
 
-# TODO: replace this with uweight
-# when StatsBase 0.33 is out
-_uweights(n) = weights(ones(n))
-
 # NOTE: this can have a better support in YaoIR directly with StatsBase
 # as an compiled instruction, but store the weights is the best solution
 # here
 
 """
-    UnitaryChannel(operators[, weights])
+    UnitaryChannel{D, W<:AbstractVector} <: CompositeBlock{D}
+    UnitaryChannel(operators, weights)
 
-Create a unitary channel, optionally weighted from an list of weights.
+Create a unitary channel, where `weights` is a real vector that sum up to 1.
 The unitary channel is defined as below in Kraus representation
 
 ```math
 ϕ(ρ) = \\sum_i U_i ρ U_i^†
 ```
 
-!!! note
-    Unitary channel will only normalize the weights when calculating the matrix form,
-    thus you should be careful when you need this condition for other purpose.
-
-!!! note
-    when applying a `UnitaryChannel` on the register, a unitary will be sampled
-    uniformly or optionally from given weights, then this unitary will be applied
-    to the register. 
-
 ### Examples
-
-```jldoctest; setup=:(using Yao)
-julia> UnitaryChannel([X, Y, Z])
-nqubits: 1
-unitary_channel
-├─ [1.0] X
-├─ [1.0] Y
-└─ [1.0] Z
-```
-
-Or with weights
 
 ```jldoctest; setup=:(using Yao)
 julia> UnitaryChannel([X, Y, Z], [0.1, 0.2, 0.7])
@@ -49,35 +26,28 @@ unitary_channel
 └─ [0.7] Z
 ```
 """
-struct UnitaryChannel{W<:AbstractWeights} <: CompositeBlock{2}
+struct UnitaryChannel{D, W<:AbstractVector} <: CompositeBlock{D}
     n::Int
-    operators::Vector{AbstractBlock{2}}
+    operators::Vector{AbstractBlock{D}}
     weights::W
 
-    function UnitaryChannel(operators::Vector)
-        w = _uweights(length(operators))
-        n = _check_block_sizes(operators)
-        new{typeof(w)}(n, operators, w)
-    end
-
-    function UnitaryChannel(operators::Vector, w::AbstractWeights)
-        n = _check_block_sizes(operators)
-        new{typeof(w)}(n, operators, w)
-    end
-
     function UnitaryChannel(operators::Vector, w::AbstractVector)
-        w = weights(w)
+        @assert length(operators) == length(w)
         n = _check_block_sizes(operators)
         new{typeof(w)}(n, operators, w)
     end
 end
 
 UnitaryChannel(it, weights) = UnitaryChannel(collect(it), weights)
-UnitaryChannel(it) = UnitaryChannel(collect(it))
 nqudits(uc::UnitaryChannel) = uc.n
 
-function YaoAPI.unsafe_apply!(r::AbstractRegister, x::UnitaryChannel)
-    YaoAPI.unsafe_apply!(r, sample(x.operators, x.weights))
+function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::UnitaryChannel) where {D,T}
+    out = similar(r.state)
+    fill!(out, zero(T))
+    for (w, o) in zip(x.weights[2:end], x.operators[2:end])
+        out .+= w .* unsafe_apply!(copy(r), o).state
+    end
+    return DensityMatrix{D}(out)
 end
 
 function mat(::Type{T}, x::UnitaryChannel) where {T}

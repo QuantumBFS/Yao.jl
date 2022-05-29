@@ -95,6 +95,8 @@ For register input, the return value is a register.
     For batched register, `expect(op, reg=>circuit)` returns a vector of size number of batch as output. However, one can not differentiate over a vector loss, so `expect'(op, reg=>circuit)` accumulates the gradient over batch, rather than returning a batched gradient of parameters.
 """
 function expect(op::AbstractBlock, dm::DensityMatrix)
+    # NOTE: we use matrix form here because the matrix size is known to be small,
+    # while applying a circuit on a reduced density matrix might take much more than constructing the matrix.
     mop = mat(op)
     return sum(transpose(dm.state) .* mop)
 end

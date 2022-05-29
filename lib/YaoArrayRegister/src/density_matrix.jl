@@ -45,9 +45,56 @@ end
 # obtaining matrix from Yao.DensityMatrix
 LinearAlgebra.Matrix(d::DensityMatrix) = d.state
 
+function zero_state_like(dm::DensityMatrix{D,T}, n::Int) where {D,T}
+    state = similar(dm.state, D^n, D^n)   # NOTE: does not preserve adjoint
+    fill!(state,zero(T))
+    state[1:1,1:1] .= Ref(one(T))  # broadcast to make it GPU compatible.
+    return DensityMatrix{D}(state)
+end
+
 von_neumann_entropy(dm::DensityMatrix) = von_neumann_entropy(Matrix(dm))
 function von_neumann_entropy(dm::AbstractMatrix)
     p = max.(eigvals(dm), eps(real(eltype(dm))))
     return von_neumann_entropy(p)
 end
 von_neumann_entropy(v::AbstractVector) = -sum(x->x*log(x), v)
+
+function partial_tr(dm::DensityMatrix{D,T}, locs) where {D,T}
+    nbits = nqudits(dm)
+    m = nbits-length(locs)
+    strides = ntuple(i->D^(i-1), nbits)
+    out_strides = ntuple(i->D^(i-1), m)
+    remainlocs = (setdiff(1:nbits, locs)...,)
+    remain_strides = map(i->strides[i], remainlocs)
+    trace_strides = map(i->strides[i], locs)
+    state = similar(dm.state, D^m, D^m)   # NOTE: does not preserve adjoint
+    fill!(state, zero(T))
+    partial_tr!(Val{D}(), state, dm.state, trace_strides, out_strides, remain_strides)
+    return DensityMatrix{D}(state)
+end
+
+@generated function partial_tr!(::Val{D}, out::AbstractMatrix, dm::AbstractMatrix, trace_strides::NTuple{K,Int}, out_strides::NTuple{M,Int}, remain_strides::NTuple{M,Int}) where {D,K,M}
+    quote
+        sumc = length(remain_strides) == 0 ? 1 : 1 - sum(remain_strides)
+        suma = length(out_strides) == 0 ? 1 : 1 - sum(out_strides)
+        Base.Cartesian.@nloops($M, i, d->1:$D,
+                d->(@inbounds sumc += i_d*remain_strides[d]; @inbounds suma += i_d*out_strides[d]), # PRE
+                d->(@inbounds sumc -= i_d*remain_strides[d]; @inbounds suma -= i_d*out_strides[d]), # POST
+                begin # BODY
+                    sumd = length(remain_strides) == 0 ? 1 : 1 - sum(remain_strides)
+                    sumb = length(out_strides) == 0 ? 1 : 1 - sum(out_strides)
+                    Base.Cartesian.@nloops($M, j, d->1:$D,
+                        d->(@inbounds sumd += j_d*remain_strides[d]; @inbounds sumb += j_d*out_strides[d]), # PRE
+                        d->(@inbounds sumd -= j_d*remain_strides[d]; @inbounds sumb -= j_d*out_strides[d]), # POST
+                        begin
+                            sume = length(trace_strides) == 0 ? 1 : 1 - sum(trace_strides)
+                            Base.Cartesian.@nloops($K, k, d->1:$D,
+                                d->(@inbounds sume += k_d*trace_strides[d]), # PRE
+                                d->(@inbounds sume -= k_d*trace_strides[d]), # POST
+                                @inbounds out[suma, sumb] += dm[sumc+sume-1, sumd+sume-1]
+                                )
+                        end)
+                end)
+
+    end
+end

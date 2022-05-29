@@ -39,6 +39,13 @@ end
     dms = reg .|> density_matrix
     op = put(4, 3 => X)
     @test expect.(Ref(op), dms) ≈ expect(op, reg)
+
+    # test partial trace
+    reg = rand_state(4)
+    dm = reg |> density_matrix
+    dmt = partial_tr(dm, (3,4))
+    h = matblock(rand_hermitian(4))
+    @test expect(h, dmt) ≈ expect(put(4, (1,2)=>h), dm)
 end
 
 @testset "insert_qubits!" begin
