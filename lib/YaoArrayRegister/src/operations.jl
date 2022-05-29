@@ -47,22 +47,25 @@ LinearAlgebra.norm(r::BatchedArrayReg) =
 # basic arithmatics
 
 # neg
-Base.:-(reg::ArrayReg) = ArrayReg(-state(reg))
+Base.:-(reg::Union{AbstractArrayReg{D},DensityMatrix{D}}) where D = chstate(reg, -state(reg))
 Base.:-(reg::AdjointRegister) = adjoint(-parent(reg))
 
 # +, -
 for op in [:+, :-]
     @eval function Base.$op(lhs::AbstractArrayReg{D}, rhs::AbstractArrayReg{D}) where D
         @assert nbatch(lhs) == nbatch(rhs)
-        return arrayreg(($op)(state(lhs), state(rhs)); nbatch=nbatch(lhs), nlevel=D)
+        return chstate(lhs, ($op)(state(lhs), state(rhs)))
     end
-
+    @eval function Base.$op(lhs::DensityMatrix{D}, rhs::DensityMatrix{D}) where D
+        @assert nbatch(lhs) == nbatch(rhs)
+        return chstate(lhs, ($op)(state(lhs), state(rhs)))
+    end
     @eval function Base.$op(
         lhs::AbstractArrayReg{D,T1,<:Transpose},
         rhs::AbstractArrayReg{D,T2,<:Transpose},
     ) where {D,T1,T2}
         @assert nbatch(lhs) == nbatch(rhs)
-        return arrayreg(transpose(($op)(state(lhs).parent, state(rhs).parent)); nbatch=nbatch(lhs), nlevel=D)
+        return chstate(lhs, transpose(($op)(state(lhs).parent, state(rhs).parent)))
     end
 
     @eval function Base.$op(lhs::AdjointRegister{D}, rhs::AdjointRegister{D}) where {D}
@@ -76,21 +79,37 @@ end
 
 Inplace version of `+` that accumulates `source` to `target`.
 """
-function regadd!(lhs::AbstractArrayReg{D}, rhs::AbstractArrayReg{D}) where {D}
-    @assert nbatch(lhs) == nbatch(rhs)
-    lhs.state .+= rhs.state
-    lhs
-end
+function regadd! end
 
 """
     regsub!(target, source)
 
 Inplace version of `-` that subtract `source` from `target`.
 """
-function regsub!(lhs::AbstractArrayReg{D}, rhs::AbstractArrayReg{D}) where {D}
-    @assert nbatch(lhs) == nbatch(rhs)
-    lhs.state .-= rhs.state
-    lhs
+function regsub! end
+
+"""
+    regscale!(target, x)
+
+Inplace version of multiplying a scalar `x` to target.
+"""
+function regscale! end
+
+for T in [:ArrayReg, :DensityMatrix, :BatchedArrayReg]
+    @eval function regadd!(lhs::$T{D}, rhs::$T{D}) where {D}
+        @assert nbatch(lhs) == nbatch(rhs)
+        lhs.state .+= rhs.state
+        lhs
+    end
+    @eval function regsub!(lhs::$T{D}, rhs::$T{D}) where {D}
+        @assert nbatch(lhs) == nbatch(rhs)
+        lhs.state .-= rhs.state
+        lhs
+    end
+    @eval function regscale!(reg::$T{D}, x) where {D}
+        reg.state .*= x
+        reg
+    end
 end
 
 function regadd!(
@@ -111,25 +130,15 @@ function regsub!(
     lhs
 end
 
-"""
-    regsub!(target, x)
-
-Inplace version of multiplying a scalar `x` to target.
-"""
 function regscale!(reg::AbstractArrayReg{D,T1,<:Transpose}, x) where {D,T1}
     reg.state.parent .*= x
     reg
 end
 
-function regscale!(reg::AbstractArrayReg{D}, x) where {D}
-    reg.state .*= x
-    reg
-end
-
 # *, /
 for op in [:*, :/]
-    @eval function Base.$op(lhs::AbstractArrayReg, rhs::Number)
-        arrayreg($op(state(lhs), rhs); nbatch=nbatch(lhs), nlevel=nlevel(lhs))
+    @eval function Base.$op(lhs::Union{AbstractArrayReg,DensityMatrix}, rhs::Number)
+        chstate(lhs, $op(state(lhs), rhs))
     end
 
     @eval function Base.$op(lhs::AdjointRegister, rhs::Number)
@@ -138,8 +147,8 @@ for op in [:*, :/]
     end
 
     if op == :*
-        @eval function Base.$op(lhs::Number, rhs::AbstractArrayReg)
-            arrayreg(lhs * state(rhs); nbatch=nbatch(rhs), nlevel=nlevel(rhs))
+        @eval function Base.$op(lhs::Number, rhs::Union{AbstractArrayReg,DensityMatrix})
+            chstate(rhs, lhs * state(rhs))
         end
 
         @eval function Base.$op(lhs::Number, rhs::AdjointRegister)

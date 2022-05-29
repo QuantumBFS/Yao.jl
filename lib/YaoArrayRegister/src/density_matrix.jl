@@ -14,6 +14,8 @@ Base.isapprox(ρ::DensityMatrix, σ::DensityMatrix; kwargs...) = nlevel(ρ) == n
 YaoAPI.nqubits(ρ::DensityMatrix) = nqudits(ρ)
 YaoAPI.nqudits(ρ::DensityMatrix{D}) where {D} = logdi(size(state(ρ), 1), D)
 YaoAPI.nactive(ρ::DensityMatrix) = nqudits(ρ)
+nbatch(::DensityMatrix) = NoBatch()
+chstate(reg::DensityMatrix{D}, state) where D = DensityMatrix{D}(state)
 
 function YaoAPI.density_matrix(reg::ArrayReg, qubits)
     freg = focus!(copy(reg), qubits)
@@ -59,7 +61,7 @@ function von_neumann_entropy(dm::AbstractMatrix)
 end
 von_neumann_entropy(v::AbstractVector) = -sum(x->x*log(x), v)
 
-function partial_tr(dm::DensityMatrix{D,T}, locs) where {D,T}
+function YaoAPI.partial_tr(dm::DensityMatrix{D,T}, locs) where {D,T}
     nbits = nqudits(dm)
     m = nbits-length(locs)
     strides = ntuple(i->D^(i-1), nbits)

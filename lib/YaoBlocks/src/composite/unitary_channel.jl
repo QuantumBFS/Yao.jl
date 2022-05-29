@@ -31,23 +31,32 @@ struct UnitaryChannel{D, W<:AbstractVector} <: CompositeBlock{D}
     operators::Vector{AbstractBlock{D}}
     weights::W
 
-    function UnitaryChannel(operators::Vector, w::AbstractVector)
-        @assert length(operators) == length(w)
+    function UnitaryChannel(operators::Vector{AbstractBlock{D}}, w::AbstractVector) where D
+        @assert length(operators) == length(w) && length(w) != 0
+        if !(sum(w) ≈ 1)
+            error("The sum of weights must be 1!")
+        end
         n = _check_block_sizes(operators)
-        new{typeof(w)}(n, operators, w)
+        new{D,typeof(w)}(n, operators, w)
     end
 end
 
-UnitaryChannel(it, weights) = UnitaryChannel(collect(it), weights)
+function UnitaryChannel(it, weights)
+    length(it) == 0 && error("The input operator list size can not be 0!")
+    D = nlevel(first(it))
+    UnitaryChannel(collect(AbstractBlock{D}, it), weights)
+end
 nqudits(uc::UnitaryChannel) = uc.n
 
 function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::UnitaryChannel) where {D,T}
-    out = similar(r.state)
-    fill!(out, zero(T))
-    for (w, o) in zip(x.weights[2:end], x.operators[2:end])
-        out .+= w .* unsafe_apply!(copy(r), o).state
+    r0 = copy(r)
+    unsafe_apply!(r, first(x.operators))
+    r.state .*= first(x.weights)
+    for (w, o) in zip(x.weights[2:end-1], x.operators[2:end-1])
+        r.state .+= w .* unsafe_apply!(copy(r0), o).state
     end
-    return DensityMatrix{D}(out)
+    r.state .+= last(x.weights) .* unsafe_apply!(r0, last(x.operators)).state
+    return r
 end
 
 function mat(::Type{T}, x::UnitaryChannel) where {T}

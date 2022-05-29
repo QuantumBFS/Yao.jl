@@ -65,6 +65,11 @@ function YaoAPI.unsafe_apply!(r::AbstractArrayReg, x::Scale{S}) where {S}
     regscale!(r, factor(x))
     return r
 end
+function YaoAPI.unsafe_apply!(r::DensityMatrix, x::Scale{S}) where {S}
+    YaoAPI.unsafe_apply!(r, content(x))
+    regscale!(r, abs2(factor(x)))
+    return r
+end
 
 function unsafe_getindex(::Type{T}, x::Scale, i::Integer, j::Integer) where T
     return unsafe_getindex(T, content(x), i, j) * factor(x)

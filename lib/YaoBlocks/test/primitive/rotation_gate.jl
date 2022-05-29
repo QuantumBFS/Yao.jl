@@ -101,3 +101,9 @@ end
         @test allpass
     end
 end
+
+@testset "density matrix" begin
+    reg = rand_state(1)
+    r = density_matrix(reg)
+    @test density_matrix(apply(reg, Rx(0.4))) ≈ apply(r, Rx(0.4))
+end
