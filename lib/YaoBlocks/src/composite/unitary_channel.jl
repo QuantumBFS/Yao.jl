@@ -81,8 +81,7 @@ function YaoAPI.unsafe_apply!(r::AbstractRegister, x::UnitaryChannel)
 end
 
 function mat(::Type{T}, x::UnitaryChannel) where {T}
-    U = sample(x.operators, x.weights)
-    return mat(T, U)
+    error("`UnitaryChannel` does not have a matrix representation!")
 end
 
 subblocks(x::UnitaryChannel) = x.operators

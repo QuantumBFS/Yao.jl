@@ -19,10 +19,18 @@ end
 nqudits(pb::PutBlock) = pb.n
 
 """
-    put(total::Int, pair)
+    put(n::Int, locations => subblock) => PutBlock
 
-Create a [`PutBlock`](@ref) with total number of active qubits, and a pair of
-location and block to put on.
+Create a `n`-qudit [`PutBlock`](@ref). The second argument is a pair of locations and subblock,
+where the locations can be a tuple, an integer or a range and the subblock size should match the length of locations.
+Let ``I`` be a ``2\\times 2`` identity matrix and ``G`` be a ``2\\times 2`` matrix, the matrix representation of `put(n, i=>G)` is defined as
+
+```math
+I^{\\otimes i-1} \\otimes G \\otimes I^{\\otimes n-i}
+```
+
+For multiple locations, the expression can be complicated, 
+which corresponds to the matrix representation of multi-qubit gate applied on `n`-qubit space in quantum computing.
 
 ### Examples
 

@@ -58,9 +58,20 @@ KronBlock(blk::KronBlock) = copy(blk)
 nqudits(pb::KronBlock) = pb.n
 
 """
-    kron(n, blocks::Pair{<:Any, <:AbstractBlock}...)
+    kron(n, locs_and_blocks::Pair{<:Any, <:AbstractBlock}...) -> KronBlock
 
-Return a [`KronBlock`](@ref), with total number of qubits `n` and pairs of blocks.
+Returns a `n`-qudit [`KronBlock`](@ref). The inputs contains a list of location-block pairs, where a location can be an integer or a range.
+It is conceptually a [`chain`](@ref) of [`put`](@ref) block without address conflicts,
+but it has a richer type information that can be useful for various purposes such as more efficient [`mat`](@ref) function.
+
+Let ``I`` be a ``2\\times 2`` identity matrix, ``G`` and ``H`` be two ``2\\times 2`` matrix,
+the matrix representation of `kron(n, i=>G, j=>H)` is defined as
+
+```math
+I^{\\otimes i-1} \\otimes G \\otimes I^{\\otimes j-i-1} \\otimes H \\otimes I^{n-j}
+```
+
+For multiple locations, the expression can be complicated.
 
 ### Examples
 

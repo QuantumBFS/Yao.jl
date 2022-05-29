@@ -36,7 +36,8 @@ Create a [`TimeEvolution`](@ref) block with Hamiltonian `H` and time step `dt`. 
 `TimeEvolution` block will use Krylove based `expv` to calculate time propagation.
 `TimeEvolution` block can also be used for
 [imaginary time evolution](http://large.stanford.edu/courses/2008/ph372/behroozi2/)
-if dt is complex.
+if `dt` is complex.
+Let ``H`` be a hamiltonian and ``t`` be a time, the matrix representation of `time_evolve(H, t)` is `e^{-iHt}`.
 
 ### Arguments
 
