@@ -19,7 +19,6 @@ end
 
 @testset "check compare" begin
     @test UnitaryChannel([X, Y, Z], [1, 0, 0]) == UnitaryChannel([X, Y, Z], [1, 0, 0])
-    @test UnitaryChannel([X, Y, Z], [1, 0, 0]) != UnitaryChannel([X, Y, Z], [1, 1, 0])
     @test_throws AssertionError UnitaryChannel([X, Y], [1, 1, 0])
 end
 
@@ -35,6 +34,6 @@ end
 end
 
 @testset "density matrix" begin
-    @test_throws AssertionError UnitaryChannel(put.(6, [1 => X, 3 => Y, 5 => Z]), [0.1, 0.3, 0.1])
+    @test_throws ErrorException UnitaryChannel(put.(6, [1 => X, 3 => Y, 5 => Z]), [0.1, 0.3, 0.1])
     channel = UnitaryChannel(put.(6, [1 => X, 3 => Y, 5 => Z]), [0.1, 0.3, 0.6])
 end
