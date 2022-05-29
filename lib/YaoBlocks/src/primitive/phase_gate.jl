@@ -16,7 +16,7 @@ nqudits(pg::PhaseGate) = 1
 Returns a global phase gate. Defined with following matrix form:
 
 ```math
-e^{iθ} \\mathbf{I}
+e^{iθ} I
 ```
 
 ### Examples

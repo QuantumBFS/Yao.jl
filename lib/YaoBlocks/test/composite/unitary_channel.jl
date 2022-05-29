@@ -7,14 +7,13 @@ using Test
     @test apply!(copy(r), channel) == apply!(copy(r), X)
 
     r = rand_state(3)
-    @test apply!(copy(r), put(3, 1 => channel)) == apply!(copy(r), put(3, 1 => X))
+    # broken because Unitary channel does not have a matrix representation
+    @test_broken apply!(copy(r), put(3, 1 => channel)) == apply!(copy(r), put(3, 1 => X))
     @test_throws QubitMismatchError apply!(copy(r), channel)
 end
 
 @testset "check mat" begin
-    @test mat(UnitaryChannel([X, Y, Z], [1, 0, 0])) == mat(X)
-    @test mat(UnitaryChannel([X, Y, Z], [0, 1, 0])) == mat(Y)
-    @test mat(UnitaryChannel([X, Y, Z], [0, 0, 1])) == mat(Z)
+    @test_throws ErrorException mat(UnitaryChannel([X, Y, Z], [1, 0, 0]))
 end
 
 @testset "check compare" begin

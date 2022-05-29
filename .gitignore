@@ -22,3 +22,12 @@ _*.dat
 __pycache__/
 
 Manifest.toml
+
+docs/src/assets/*.pdf
+*.tex
+*.fdb_latexmk
+*.aux
+*.pdb_latexmk
+*.synctex.gz
+*.fls
+*.log

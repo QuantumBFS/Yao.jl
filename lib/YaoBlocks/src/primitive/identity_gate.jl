@@ -27,7 +27,8 @@ end
 """
     igate(n::Int; nlevel=2)
 
-The constructor for identity gate.
+The constructor for [`IdentityGate`](@ref).
+Let ``I_d`` be a ``d \\times d`` identity matrix, `igate(n; nlevel=d)` is defined as ``I_d^{\\otimes n}``.
 
 ### Examples
 

@@ -37,12 +37,19 @@ end
 YaoAPI.nqudits(m::RepeatedBlock) = m.n
 
 """
-    repeat(n, x::AbstractBlock[, locs]) -> RepeatedBlock{n}
+    repeat(n, subblock::AbstractBlock[, locs]) -> RepeatedBlock{n}
 
-Create a [`RepeatedBlock`](@ref) with total number of qubits `n` and the block
-to repeat on given location or on all the locations.
+Create a `n`-qudit [`RepeatedBlock`](@ref) block, which is conceptually a [`kron`] block with all gates being the same.
+If `locs` is provided, repeat on `locs`, otherwise repeat on all locations.
+Let ``G`` be a ``2\\times 2`` matrix, the matrix representation of `repeat(n, X)` is
 
-### Example
+```math
+X^{\\otimes n}
+```
+
+The `RepeatedBlock` can be used to accelerate repeated applying certain gate types: `X`, `Y`, `Z`, `S`, `T`, `Sdag`, and `Tdag`.
+
+### Examples
 
 This will create a repeat block which puts 4 X gates on each location.
 

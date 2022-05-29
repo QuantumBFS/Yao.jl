@@ -28,11 +28,11 @@ YaoAPI.nqudits(b::Subroutine) = b.n
 """
     subroutine(n, block, locs)
 
-Create a [`Subroutine`](@ref) block with total number of current active qubits `n`,
-which concentrates given wire location together to `length(locs)` active qubits,
-and relax the concentration afterwards.
+Create a `n`-qudit [`Subroutine`](@ref) block, where the `subblock` is a subprogram of size `m`, and `locs` is a tuple or range of length `m`.
+It runs a quantum subprogram with smaller size on a subset of locations.
+While its mathematical definition is the same as the [`put`](@ref) block, while it is more suited for running a larger chunk of circuit.
 
-# Example
+### Examples
 
 Subroutine is equivalent to [`put`](@ref) a block on given position mathematically, but more efficient
 and convenient for large blocks.
