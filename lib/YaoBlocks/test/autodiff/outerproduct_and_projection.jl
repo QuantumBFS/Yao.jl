@@ -46,13 +46,10 @@ end
 @testset "projection" begin
     T = ComplexF64
     D = 8
-    for y in [pmrand(T, D), sprand(T, D, D, 0.5), Diagonal(randn(T, D))]
-        @info "pmrand", pmrand(ComplexF64, 5), methods(pmrand)
-        @info "y", typeof(y)
+    for y in Any[pmrand(T, D), sprand(T, D, D, 0.5), Diagonal(randn(T, D))]
         @test projection(y, y) == y
         l, r = randn(T, D), randn(T, D)
         op = outerprod(l, r)
-        @info "op", typeof(op)
         @test projection(y, op) == projection(y, Matrix(op))
     end
 end

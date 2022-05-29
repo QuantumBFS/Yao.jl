@@ -50,11 +50,13 @@ nqudits(uc::UnitaryChannel) = uc.n
 
 function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::UnitaryChannel) where {D,T}
     r0 = copy(r)
-    unsafe_apply!(r, first(x.operators))
-    r.state .*= first(x.weights)
+    # first
+    regscale!(unsafe_apply!(r, first(x.operators)), first(x.weights))
     for (w, o) in zip(x.weights[2:end-1], x.operators[2:end-1])
+        @show w, o
         r.state .+= w .* unsafe_apply!(copy(r0), o).state
     end
+    # last
     r.state .+= last(x.weights) .* unsafe_apply!(r0, last(x.operators)).state
     return r
 end

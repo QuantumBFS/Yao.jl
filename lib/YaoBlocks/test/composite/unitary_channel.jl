@@ -35,5 +35,9 @@ end
 
 @testset "density matrix" begin
     @test_throws ErrorException UnitaryChannel(put.(6, [1 => X, 3 => Y, 5 => Z]), [0.1, 0.3, 0.1])
-    channel = UnitaryChannel(put.(6, [1 => X, 3 => Y, 5 => Z]), [0.1, 0.3, 0.6])
+    ops = put.(6, [1 => chain(Rx(0.4), Ry(0.5), Rz(0.4)), 3 => Y, 5 => Z])
+    channel = UnitaryChannel(ops, [0.3, 0.1, 0.6])
+    r = density_matrix(rand_state(12), (3,2,1,5,6,9))
+    ms = mat.(ops)
+    @test apply(r, channel).state ≈ channel.weights[1] * ms[1] * r.state * ms[1]' + channel.weights[2] * ms[2] * r.state * ms[2]' + channel.weights[3] * ms[3] * r.state * ms[3]'
 end
