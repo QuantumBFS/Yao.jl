@@ -6,6 +6,47 @@
 #
 # In order to make multi threading work, the state vector MUST be named as state
 
+function YaoAPI.instruct!(r::DensityMatrix{D}, operator, locs::Tuple) where {D}
+    length(locs) == 0 && return r
+    # TODO: check cuda implementation
+    n = nqudits(r)
+    instruct!(Val(D), vec(r.state), operator, locs)
+    instruct!(Val(D), vec(r.state), _conj(operator), locs .+ n)
+    return r
+end
+function YaoAPI.instruct!(r::DensityMatrix{D}, operator, locs::Tuple, control_locs, control_bits) where {D}
+    length(locs) == 0 && return r
+    n = nqudits(r)
+    instruct!(Val(D), vec(r.state), _match_type(r.state, operator), locs, control_locs, control_bits)
+    instruct!(Val(D), vec(r.state), _match_type(r.state, _conj(operator)), locs .+ n, control_locs .+ n, control_bits)
+    return r
+end
+function YaoAPI.instruct!(r::DensityMatrix{D}, operator, locs::Tuple, theta::Number) where {D}
+    length(locs) == 0 && return r
+    n = nqudits(r)
+    instruct!(Val(D), vec(r.state), _match_type(r.state, operator), locs, theta)
+    operator, theta = _conj(operator, theta)
+    instruct!(Val(D), vec(r.state), _match_type(r.state, operator), locs .+ n, theta)
+    return r
+end
+_conj(x::AbstractArray) = conj(x)
+_conj(::Val{:X}) = Val(:X)
+_conj(::Val{:Y}) = conj(Const.Y)
+_conj(::Val{:Z}) = Val(:Z)
+_conj(::Val{:S}) = Val(:Sdag)
+_conj(::Val{:T}) = Val(:Tdag)
+_conj(::Val{:H}) = Val(:H)
+_conj(::Val{:Sdag}) = Val(:S)
+_conj(::Val{:Tdag}) = Val(:T)
+_conj(::Val{:SWAP}) = Val(:SWAP)
+
+# parameterized
+_conj(::Val{:Rx}, theta) = Val(:Rx), -conj(theta)
+_conj(::Val{:Ry}, theta) = Val(:Ry), conj(theta)
+_conj(::Val{:Rz}, theta) = Val(:Rz), -conj(theta)
+_conj(::Val{:PSWAP}, theta) = Val(:PSWAP), -conj(theta)
+_conj(::Val{:CPHASE}, theta) = Val(:CPHASE), -conj(theta)
+
 function YaoAPI.instruct!(r::BatchedArrayReg{D}, operator, locs::Tuple, args...) where {D}
     length(locs) == 0 && return r
     instruct!(Val(D), r.state, _match_type(r.state, operator), locs, args...)

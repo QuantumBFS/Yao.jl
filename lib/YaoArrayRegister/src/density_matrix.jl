@@ -9,6 +9,7 @@ Return the raw state of density matrix `ρ`.
 state(ρ::DensityMatrix) = ρ.state
 Base.copy(ρ::DensityMatrix{D}) where D = DensityMatrix{D}(copy(ρ.state))
 Base.:(==)(ρ::DensityMatrix, σ::DensityMatrix) = nlevel(ρ) == nlevel(σ) && ρ.state == σ.state
+Base.isapprox(ρ::DensityMatrix, σ::DensityMatrix; kwargs...) = nlevel(ρ) == nlevel(σ) && isapprox(ρ.state, σ.state; kwargs...)
 
 YaoAPI.nqubits(ρ::DensityMatrix) = nqudits(ρ)
 YaoAPI.nqudits(ρ::DensityMatrix{D}) where {D} = logdi(size(state(ρ), 1), D)
@@ -27,7 +28,7 @@ YaoAPI.tracedist(dm1::DensityMatrix{D}, dm2::DensityMatrix{D}) where {D} = trace
 
 Returns the probability distribution from a density matrix `ρ`.
 """
-YaoAPI.probs(m::DensityMatrix) = diag(m.state)
+YaoAPI.probs(m::DensityMatrix) = real.(diag(m.state))
 
 function YaoAPI.fidelity(m::DensityMatrix, n::DensityMatrix)
     return density_matrix_fidelity(m.state, n.state)

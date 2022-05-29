@@ -64,3 +64,8 @@ end
 @testset "measure qudits" begin
     @test measure(product_state(dit"121;3")) == [dit"121;3"]
 end
+
+@testset "measure density matrix" begin
+    reg = product_state(bit"011101")
+    @test measure(density_matrix(reg); nshots=3) == fill(bit"011101", 3)
+end

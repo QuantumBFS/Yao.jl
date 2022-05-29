@@ -212,3 +212,41 @@ end
     U2 = randn(ComplexF64,9,9)
     @test instruct!(Val(3), copy(state), U2, (3,1), (), ()) ≈ instruct!(Val(3), copy(state), U2, (3,1))
 end
+
+@testset "density matrix instruct" begin
+    for G in [pmrand(ComplexF64,4), Diagonal(randn(ComplexF64,4)), sprand(ComplexF64,4,4,0.5), IMatrix{4}()]
+        reg = rand_state(8)
+        reg1 = instruct!(copy(reg), G, (4,2), (1,), (0,))
+        r = density_matrix(reg)
+        instruct!(r, G, (4,2), (1,), (0,))
+        @test r ≈ density_matrix(reg1)
+    end
+    for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag, :H]
+        reg = rand_state(8)
+        reg1 = instruct!(copy(reg), Val(G), (4,))
+        r = density_matrix(reg)
+        instruct!(r, Val(G), (4,))
+        @test r ≈ density_matrix(reg1)
+    end
+    for G in [:SWAP]
+        reg = rand_state(8)
+        reg1 = instruct!(copy(reg), Val(G), (4,2))
+        r = density_matrix(reg)
+        instruct!(r, Val(G), (4,2))
+        @test r ≈ density_matrix(reg1)
+    end
+    for G in [:CPHASE, :PSWAP]
+        reg = rand_state(8)
+        reg1 = instruct!(copy(reg), Val(G), (4,2), 0.5)
+        r = density_matrix(reg)
+        instruct!(r, Val(G), (4,2), 0.5)
+        @test r ≈ density_matrix(reg1)
+    end
+    for G in [:Rx, :Ry, :Rz]
+        reg = rand_state(8)
+        reg1 = instruct!(copy(reg), Val(G), (4,), 0.5)
+        r = density_matrix(reg)
+        instruct!(r, Val(G), (4,), 0.5)
+        @test r ≈ density_matrix(reg1)
+    end
+end
