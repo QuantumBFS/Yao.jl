@@ -141,26 +141,26 @@ function bint2_reader(T, k::Int)
     return b -> (b&mask, b>>k)
 end
 
-function Yao.unsafe_apply!(reg::ArrayReg, m::KMod)
+function Yao.unsafe_apply!(reg::AbstractArrayReg, m::KMod)
     nstate = zero(reg.state)
 
     reader = bint2_reader(Int, m.k)
-    for b in basis(reg)
+    for b in 0:1<<m.n-1
         k, i = reader(b)
-        _i = i >= m.L ? i : mod(i*powermod(m.a, m.k, m.L), m.L)
+        _i = i >= m.L ? i : mod(i*powermod(m.a, k, m.L), m.L)
         _b = k + _i<<m.k + 1
-        for j in 1:YaoArrayRegister._asint(nbatch(reg))
+        for j in 1:size(nstate,2)
             @inbounds nstate[_b,j] = reg.state[b+1,j]
         end
     end
-    reg.state = nstate
+    reg.state .= nstate
     reg
 end
 
 function Yao.mat(::Type{T}, m::KMod) where {T}
     perm = Vector{Int}(undef, 1<<m.n)
     reader = bint2_reader(Int, m.k)
-    for b in basis(m.n)
+    for b in 0:1<<m.n-1
         k, i = reader(b)
         _i = i >= m.L ? i : mod(i*powermod(m.a, k, m.L), m.L)
         _b = k + _i<<m.k + 1
@@ -184,7 +184,7 @@ function shor(L::Int, ver=Val(:quantum); maxtry=100)
     res = NumberTheory.factor_a_power_b(L)
     res !== nothing && return res[1]
 
-    for i in 1:maxtry
+    for _ = 1:maxtry
         ## step 1
         x = NumberTheory.rand_primeto(L)
 
@@ -283,5 +283,5 @@ end
 
 # ## Run
 # Factorizing `15`, you should see `3` or `5`, please report a bug if it is not...
-using Random; Random.seed!(129) #src
+using Random; Random.seed!(109) #src
 shor(15, Val(:quantum))
