@@ -363,6 +363,8 @@ YaoAPI.tracedist(r1::BatchedArrayReg, r2::BatchedArrayReg) = tracedist.(r1, r2)
 Returns the raw array storage of `register`. See also [`statevec`](@ref).
 """
 state(r::AbstractArrayReg) = r.state
+chstate(::ArrayReg{D}, state) where D = ArrayReg{D}(state)
+chstate(reg::BatchedArrayReg{D}, state) where D = BatchedArrayReg{D}(state, nbatch(reg))
 state(r::AdjointArrayReg) = adjoint(state(parent(r)))
 
 """

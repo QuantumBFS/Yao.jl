@@ -41,10 +41,6 @@ end
 
     @test state(apply!(arrayreg(bit"1"), g)) ≈ state(arrayreg(bit"0"))
     @test pull(g) ≈ mat(X)
-
-    clear!(g)
-    @test state(unsafe_apply!(arrayreg(bit"1"), g, 2)) ≈ state(arrayreg(bit"0"))
-    @test_throws KeyError pull(g)
 end
 
 @testset "direct inherited methods" begin
@@ -101,4 +97,10 @@ end
         end
         @test allpass
     end
+end
+
+@testset "density matrix" begin
+    reg = rand_state(3)
+    r = density_matrix(reg)
+    @test density_matrix(apply(reg, cache(put(3, 2=>X)))) ≈ apply(r, cache(put(3, 2=>X)))
 end

@@ -64,6 +64,14 @@ YaoAPI.measure(
     rng::AbstractRNG = Random.GLOBAL_RNG,
 ) = _measure(rng, basis(reg), reg |> probs, nshots)
 
+YaoAPI.measure(
+    ::ComputationalBasis,
+    reg::DensityMatrix,
+    ::AllLocs;
+    nshots::Int = 1,
+    rng::AbstractRNG = Random.GLOBAL_RNG,
+) = _measure(rng, basis(reg), reg |> probs, nshots)
+
 function YaoAPI.measure(
     ::ComputationalBasis,
     reg::BatchedArrayReg,

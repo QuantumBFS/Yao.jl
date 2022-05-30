@@ -128,3 +128,24 @@ end
     f1 = rand_state(2)
     @test isapprox(fidelity(density_matrix(f1, (1,2)), r2), fidelity(f1, f2); atol=1e-6)
 end
+
+@testset "zero_state_like" begin
+    rho = density_matrix(zero_state(3))
+    @test zero_state_like(rho, 3) ≈ rho
+end
+
+@testset "partial trace" begin
+    rho = density_matrix(product_state(bit"001"))
+    @test partial_tr(rho, (1,2)) ≈ density_matrix(product_state(bit"0"))
+    @test partial_tr(rho, (3,2)) ≈ density_matrix(product_state(bit"1"))
+end
+
+@testset "algebra" begin
+    r = density_matrix(product_state(bit"001"))
+    @test (r + r).state ≈ r.state .* 2
+    @test (r - r).state ≈ zero(r.state)
+    @test regscale!(copy(r), 3.0).state ≈ r.state .* 3
+    @test regadd!(copy(r), r).state ≈ r.state .* 2
+    @test regsub!(copy(r), r).state ≈ zero(r.state)
+    @test -(r).state ≈ -r.state
+end

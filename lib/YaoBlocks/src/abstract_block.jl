@@ -43,6 +43,11 @@ function _apply_fallback!(r::AbstractArrayReg{D,T}, b::AbstractBlock) where {D,T
     r.state .= mat(T, b) * r.state
     return r
 end
+function _apply_fallback!(r::DensityMatrix{D,T}, b::AbstractBlock) where {D,T}
+    m = mat(T, b)
+    r.state .= m * r.state * m'
+    return r
+end
 
 """
     |>(register, circuit) -> register

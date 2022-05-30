@@ -88,19 +88,24 @@ function mat(::Type{T}, R::RotationGate{D}) where {D,T}
 end
 
 # Specialized
-mat(::Type{T}, R::RotationGate{1,<:Any,<:XGate}) where {T} =
+mat(::Type{T}, R::RotationGate{D,<:Any,<:XGate}) where {D,T} =
     T[cos(R.theta / 2) -im*sin(R.theta / 2); -im*sin(R.theta / 2) cos(R.theta / 2)]
-mat(::Type{T}, R::RotationGate{1,<:Any,<:YGate}) where {T} =
+mat(::Type{T}, R::RotationGate{D,<:Any,<:YGate}) where {D,T} =
     T[cos(R.theta / 2) -sin(R.theta / 2); sin(R.theta / 2) cos(R.theta / 2)]
 # mat(R::RotationGate{1, T, ZGate{Complex{T}}}) where T =
 #     SMatrix{2, 2, Complex{T}}(cos(R.theta/2)-im*sin(R.theta/2), 0, 0, cos(R.theta/2)+im*sin(R.theta/2))
 
-function YaoAPI.unsafe_apply!(r::ArrayReg, rb::RotationGate)
+function YaoAPI.unsafe_apply!(r::AbstractArrayReg{D}, rb::RotationGate{D}) where D
     v0 = copy(r.state)
     unsafe_apply!(r, rb.block)
     # NOTE: we should not change register's memory address,
     # or batch operations may fail
-    r.state .= -im * sin(rb.theta / 2) * r.state + cos(rb.theta / 2) * v0
+    r.state .= (-im * sin(rb.theta / 2)) .* r.state .+ cos(rb.theta / 2) .* v0
+    return r
+end
+function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, rb::RotationGate{D}) where {T,D}
+    m = mat(T, rb)
+    r.state .= m * r.state * m'
     return r
 end
 

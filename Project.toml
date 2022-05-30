@@ -5,6 +5,7 @@ version = "0.7.4"
 [deps]
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+LuxurySparse = "d05aeea4-b7d4-55ac-b691-9e7fabb07ba2"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 YaoAPI = "0843a435-28de-4971-9e8b-a9641b2983a8"
 YaoArrayRegister = "e600142f-9330-5003-8abb-0ebd767abc51"
@@ -23,9 +24,9 @@ julia = "1"
 [extras]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 SymEngine = "123dc426-2d89-5057-bbad-38513e3affd8"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test", "LinearAlgebra", "Documenter", "Random", "SymEngine"]

@@ -95,3 +95,9 @@ end
         @test allpass
     end
 end
+
+@testset "density matrix" begin
+    reg = rand_state(3)
+    r = density_matrix(reg)
+    @test density_matrix(apply(reg, 2*put(3, 2=>X))) ≈ apply(r, 2*put(3, 2=>X))
+end

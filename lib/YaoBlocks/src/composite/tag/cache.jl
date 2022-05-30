@@ -84,17 +84,9 @@ function CacheServers.pull(c::CachedBlock)
     return pull(c.server, c.content)
 end
 
-function YaoAPI.unsafe_apply!(r::AbstractArrayReg{D,T}, c::CachedBlock, signal) where {D,T}
-    if signal > c.level
-        r.state .= mat(T, c) * r
-    else
-        YaoAPI.unsafe_apply!(r, c.content)
-    end
-    return r
-end
-
 YaoAPI.unsafe_apply!(r::AbstractRegister, c::CachedBlock) = YaoAPI.unsafe_apply!(r, c.content)
 YaoAPI.unsafe_apply!(r::AbstractArrayReg{D,T}, c::CachedBlock) where {D,T} = (r.state .= mat(T, c) * r.state; r)
+YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, c::CachedBlock) where {D,T} = (m = mat(T, c); r.state .= m * r.state * m'; r)
 
 Base.similar(c::CachedBlock, level::Int) = CachedBlock(c.server, c.content, level)
 Base.copy(c::CachedBlock) = CachedBlock(c.server, copy(c.content), c.level)

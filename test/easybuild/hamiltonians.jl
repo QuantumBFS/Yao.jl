@@ -1,6 +1,6 @@
 using Yao, Yao.EasyBuild
 using Test
-using Yao.ConstGate
+using Yao.ConstGate, BitBasis
 using YaoArrayRegister.SparseArrays
 
 @testset "solving hamiltonian" begin
@@ -30,7 +30,7 @@ end
     @test fidelity(reg0 |> te, product_state(dit"12;3") + product_state(dit"21;3") |> normalize!) ≈ 1
 
     # the Levine-Pichler Pulse
-    Ω = -1.0   # sign flipped
+    Ω = 1.0   # sign flipped
     τ = 4.29268/Ω
     Δ = 0.377371*Ω
     V = 1e3
