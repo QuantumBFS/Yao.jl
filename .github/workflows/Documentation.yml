@@ -16,11 +16,6 @@ jobs:
           version: 1
       - name: Install dependencies
         run: julia --project=docs/ .ci/run.jl doc
-      - name: setup non-registered dependencies
-        run: |
-          using Pkg
-          Pkg.add(PackageSpec(url="https://github.com/QuantumBFS/QuAlgorithmZoo.jl.git"))
-        shell: julia --project=docs --color=yes {0}
       - name: Build and deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For authentication with GitHub Actions token
