@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Grover Search · Documentation | Yao</title><script data-outdated-warner src="../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.044/juliamono.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../assets/documenter.js"></script><script src="../../../siteinfo.js"></script><script src="../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../assets/themeswap.js"></script><link href="../../../assets/indigo.css" rel="stylesheet" type="text/css"/><link href="https://yaoquantum.org/assets/favicon-light.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../../index.html"><img src="../../../assets/logo.png" alt="Documentation | Yao logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../../index.html">Documentation | Yao</a></span></div><form class="docs-search" action="../../../search.html"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../../index.html">Home</a></li><li><a class="tocitem" href="../../../quick-start.html">Quick Start</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../../../man/registers.html">Quantum Registers</a></li><li><a class="tocitem" href="../../../man/blocks.html">Blocks</a></li><li><a class="tocitem" href="../../../man/symbolic.html">Symbolic Computation</a></li><li><a class="tocitem" href="../../../man/automatic_differentiation.html">Automatic Differentiation</a></li><li><a class="tocitem" href="../../../man/simplification.html">Simplification</a></li><li><a class="tocitem" href="../../../man/bitbasis.html">BitBasis</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../1.prepare-ghz-state/index.html">Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</a></li><li><a class="tocitem" href="../2.qft-phase-estimation/index.html">Quantum Fourier Transformation and Phase Estimation</a></li><li class="is-active"><a class="tocitem" href="index.html">Grover Search</a><ul class="internal"><li><a class="tocitem" href="#Grover-Step"><span>Grover Step</span></a></li><li><a class="tocitem" href="#Rejection-Sampling"><span>Rejection Sampling</span></a></li><li><a class="tocitem" href="#Amplitude-Amplification"><span>Amplitude Amplification</span></a></li></ul></li><li><a class="tocitem" href="../4.shor-algorithm/index.html">Shor&#39;s Algorithm</a></li><li><a class="tocitem" href="../5.shor-9-code/index.html">Shor&#39;s 9 qubit code</a></li><li><a class="tocitem" href="../6.quantum-circuit-born-machine/index.html">Quantum Circuit Born Machine</a></li><li><a class="tocitem" href="../7.variation-quantum-eigen-solver/index.html">Variational Quantum Eigen Solver</a></li></ul></li><li><a class="tocitem" href="../../../performancetips.html">Performance Tips</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href="index.html">Grover Search</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="index.html">Grover Search</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/QuantumBFS/Yao.jl/blob/master/docs/src/examples/3.grover-search/main.jl" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><p><a href="https://mybinder.org/v2/gh/QuantumBFS/Yao.jl/gh-pages?filepath=v0.8.0/generated/examples/3.grover-search/main.ipynb"><img src="https://mybinder.org/badge_logo.svg" alt/></a> <a href="https://nbviewer.jupyter.org/github/QuantumBFS/Yao.jl/blob/gh-pages/v0.8.0/generated/examples/3.grover-search/main.ipynb"><img src="https://img.shields.io/badge/show-nbviewer-579ACA.svg" alt/></a> <a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/QuantumBFS/tutorials/tree/gh-pages/dev/generated/examples/3.grover-search"><img src="https://img.shields.io/badge/download-project-orange" alt/></a></p><h1 id="Grover"><a class="docs-heading-anchor" href="#Grover">Grover Search</a><a id="Grover-1"></a><a class="docs-heading-anchor-permalink" href="#Grover" title="Permalink"></a></h1><pre><code class="language-julia hljs">using Yao
+using Yao.EasyBuild: variational_circuit
+using LinearAlgebra</code></pre><h2 id="Grover-Step"><a class="docs-heading-anchor" href="#Grover-Step">Grover Step</a><a id="Grover-Step-1"></a><a class="docs-heading-anchor-permalink" href="#Grover-Step" title="Permalink"></a></h2><p>A single grover step is consist of applying oracle circuit and reflection circuit. The <code>reflection_circuit</code> function takes the wave function generator <code>U</code> as the input and returns <code>U|0&gt;&lt;0|U&#39;</code>.</p><pre><code class="language-julia hljs">function grover_step!(reg::AbstractRegister, oracle, U::AbstractBlock)
+    apply!(reg |&gt; oracle, reflect_circuit(U))
+end
+
+function reflect_circuit(gen::AbstractBlock)
+    N = nqubits(gen)
+    reflect0 = control(N, -collect(1:N-1), N=&gt;-Z)
+    chain(gen&#39;, reflect0, gen)
+end</code></pre><pre><code class="nohighlight hljs">reflect_circuit (generic function with 1 method)</code></pre><p>Compute the propotion of target states to estimate the number of iterations, which requires computing the output state.</p><pre><code class="language-julia hljs">function solution_state(oracle, gen::AbstractBlock)
+    N = nqubits(gen)
+    reg= zero_state(N) |&gt; gen
+    reg.state[real.(statevec(ArrayReg(ones(ComplexF64, 1&lt;&lt;N)) |&gt; oracle)) .&gt; 0] .= 0
+    normalize!(reg)
+end
+
+function num_grover_step(oracle, gen::AbstractBlock)
+    N = nqubits(gen)
+    reg = zero_state(N) |&gt; gen
+    ratio = abs2(solution_state(oracle, gen)&#39;*reg)
+    Int(round(pi/4/sqrt(ratio)))-1
+end</code></pre><pre><code class="nohighlight hljs">num_grover_step (generic function with 1 method)</code></pre><h4 id="Run"><a class="docs-heading-anchor" href="#Run">Run</a><a id="Run-1"></a><a class="docs-heading-anchor-permalink" href="#Run" title="Permalink"></a></h4><p>First, we define the problem by an oracle, it finds bit string <code>bit&quot;000001100100&quot;</code>.</p><pre><code class="language-julia hljs">num_bit = 12
+oracle = matblock(Diagonal((v = ones(ComplexF64, 1&lt;&lt;num_bit); v[Int(bit&quot;000001100100&quot;)+1]*=-1; v)))</code></pre><pre><code class="nohighlight hljs">matblock(...)</code></pre><p>then solve the above problem</p><pre><code class="language-julia hljs">gen = repeat(num_bit, H, 1:num_bit)
+reg = zero_state(num_bit) |&gt; gen
+
+target_state = solution_state(oracle, gen)
+
+for i = 1:num_grover_step(oracle, gen)
+    grover_step!(reg, oracle, gen)
+    overlap = abs(reg&#39;*target_state)
+    println(&quot;step $(i-1), overlap = $overlap&quot;)
+end</code></pre><pre><code class="nohighlight hljs">step 0, overlap = 0.04685974121093736
+step 1, overlap = 0.0780487209558483
+step 2, overlap = 0.10916148124670066
+step 3, overlap = 0.14016763852852288
+step 4, overlap = 0.17103691335084453
+step 5, overlap = 0.20173915993747182
+step 6, overlap = 0.23224439562572258
+step 7, overlap = 0.26252283014636996
+step 8, overlap = 0.29254489471570244
+step 9, overlap = 0.322281270911289
+step 10, overlap = 0.35170291930325104
+step 11, overlap = 0.3807811078130809
+step 12, overlap = 0.40948743977231195
+step 13, overlap = 0.4377938816536402
+step 14, overlap = 0.46567279044741594
+step 15, overlap = 0.49309694065677034
+step 16, overlap = 0.5200395508850146
+step 17, overlap = 0.5464743099893477
+step 18, overlap = 0.5723754027753314
+step 19, overlap = 0.5977175352070423
+step 20, overlap = 0.6224759591082774
+step 21, overlap = 0.6466264963306958
+step 22, overlap = 0.6701455623652912
+step 23, overlap = 0.6930101893741392
+step 24, overlap = 0.7151980486199263
+step 25, overlap = 0.7366874722713579
+step 26, overlap = 0.7574574745631494
+step 27, overlap = 0.7774877722899375
+step 28, overlap = 0.7967588046140988
+step 29, overlap = 0.8152517521681291
+step 30, overlap = 0.8329485554329328
+step 31, overlap = 0.8498319323740713
+step 32, overlap = 0.8658853953187506
+step 33, overlap = 0.8810932670570639
+step 34, overlap = 0.8954406961517668
+step 35, overlap = 0.9089136714416339
+step 36, overlap = 0.9214990357242339
+step 37, overlap = 0.9331844986047592
+step 38, overlap = 0.9439586484983656
+step 39, overlap = 0.953810963774298
+step 40, overlap = 0.9627318230309194
+step 41, overlap = 0.9707125144916121
+step 42, overlap = 0.9777452445123718
+step 43, overlap = 0.983823145192787
+step 44, overlap = 0.9889402810829753
+step 45, overlap = 0.9930916549799182
+step 46, overlap = 0.9962732128075449
+step 47, overlap = 0.9984818475757891
+step 48, overlap = 0.9997154024147601
+</code></pre><h2 id="Rejection-Sampling"><a class="docs-heading-anchor" href="#Rejection-Sampling">Rejection Sampling</a><a id="Rejection-Sampling-1"></a><a class="docs-heading-anchor-permalink" href="#Rejection-Sampling" title="Permalink"></a></h2><p>In practise, it is often not possible to determine the number of iterations before actual running. we can use rejection sampling technique to avoid estimating the number of grover steps.</p><p>In a single try, we <code>apply</code> the grover algorithm for <code>nstep</code> times.</p><pre><code class="language-julia hljs">function single_try(oracle, gen::AbstractBlock, nstep::Int; nbatch::Int)
+    N = nqubits(gen)
+    reg = zero_state(N+1; nbatch)
+    focus(reg, (1:N...,)) do r
+        r |&gt; gen
+        for i = 1:nstep
+            grover_step!(r, oracle, gen)
+        end
+        return r
+    end
+    reg |&gt; checker
+    res = measure!(RemoveMeasured(), reg, (N+1))
+    return res, reg
+end</code></pre><pre><code class="nohighlight hljs">single_try (generic function with 1 method)</code></pre><p>After running the grover search, we have a checker program that flips the ancilla qubit if the output is the desired value, we assume the checker program can be implemented in polynomial time. to gaurante the output is correct. We contruct a checker &quot;program&quot;, if the result is correct, flip the ancilla qubit</p><pre><code class="language-julia hljs">ctrl = -collect(1:num_bit); ctrl[[3,6,7]] *= -1
+checker = control(num_bit+1,ctrl, num_bit+1=&gt;X)</code></pre><pre><code class="nohighlight hljs">nqubits: 13
+control(¬1, ¬2, 3, ¬4, ¬5, 6, 7, ¬8, ¬9, ¬10, ¬11, ¬12)
+└─ (13,) X</code></pre><p>The register is batched, with batch dimension <code>nshot</code>. <a href="generated/examples/3.grover-search/@ref Yao.focus!"><code>focus!</code></a> views the first 1-N qubts as system. For a batched register, <a href="../../../man/registers.html#YaoAPI.measure!"><code>measure!</code></a> returns a vector of bitstring as output.</p><h4 id="Run-2"><a class="docs-heading-anchor" href="#Run-2">Run</a><a class="docs-heading-anchor-permalink" href="#Run-2" title="Permalink"></a></h4><pre><code class="language-julia hljs">maxtry = 100
+nshot = 3
+
+for nstep = 0:maxtry
+    println(&quot;number of iter = $nstep&quot;)
+    res, regi = single_try(oracle, gen, nstep; nbatch=3)
+
+    # success!
+    if any(==(1), res)
+        overlap_final = viewbatch(regi, findfirst(==(1), res))&#39;*target_state
+        println(&quot;success, overlap = $(overlap_final)&quot;)
+        break
+    end
+end</code></pre><pre><code class="nohighlight hljs">number of iter = 0
+number of iter = 1
+number of iter = 2
+number of iter = 3
+number of iter = 4
+number of iter = 5
+number of iter = 6
+number of iter = 7
+number of iter = 8
+number of iter = 9
+number of iter = 10
+number of iter = 11
+success, overlap = -1.0 + 0.0im
+</code></pre><p>The final state has an overlap of <code>1</code> with the target state.</p><h2 id="Amplitude-Amplification"><a class="docs-heading-anchor" href="#Amplitude-Amplification">Amplitude Amplification</a><a id="Amplitude-Amplification-1"></a><a class="docs-heading-anchor-permalink" href="#Amplitude-Amplification" title="Permalink"></a></h2><p>Given a circuit to generate a state, now we want to project out the subspace with [1,3,5,8,9,11,12] fixed to 1 and [4,6] fixed to 0. We can construct an oracle</p><pre><code class="language-julia hljs">evidense = [1, 3, -4, 5, -6, 8, 9, 11, 12]
+function inference_oracle(nbit::Int, locs::Vector{Int})
+    control(nbit, locs[1:end-1], abs(locs[end]) =&gt; (locs[end]&gt;0 ? Z : -Z))
+end
+oracle = inference_oracle(nqubits(reg), evidense)</code></pre><pre><code class="nohighlight hljs">nqubits: 12
+control(1, 3, ¬4, 5, ¬6, 8, 9, 11)
+└─ (12,) Z</code></pre><p>We use a variational circuit generator defined in <code>Yao.EasyBuild</code></p><pre><code class="language-julia hljs">gen = dispatch!(variational_circuit(num_bit), :random)
+reg = zero_state(num_bit) |&gt; gen</code></pre><pre><code class="nohighlight hljs">ArrayReg{2, ComplexF64, Array...}
+    active qubits: 12/12
+    nlevel: 2</code></pre><h4 id="Run-3"><a class="docs-heading-anchor" href="#Run-3">Run</a><a class="docs-heading-anchor-permalink" href="#Run-3" title="Permalink"></a></h4><pre><code class="language-julia hljs">solution = solution_state(oracle, gen)
+for i = 1:num_grover_step(oracle, gen)
+    grover_step!(reg, oracle, gen)
+    println(&quot;step $(i-1), overlap = $(abs(reg&#39;*solution))&quot;)
+end</code></pre><pre><code class="nohighlight hljs">step 0, overlap = 0.15118098704887828
+step 1, overlap = 0.2502496859493706
+step 2, overlap = 0.34675890533104625
+step 3, overlap = 0.4397215775400651
+step 4, overlap = 0.5281869079545243
+step 5, overlap = 0.6112500994296755
+step 6, overlap = 0.6880616062945959
+step 7, overlap = 0.757835823253181
+step 8, overlap = 0.8198591203219636
+step 9, overlap = 0.8734971416257908
+step 10, overlap = 0.9182012934014527
+step 11, overlap = 0.9535143548518815
+step 12, overlap = 0.9790751544647684
+step 13, overlap = 0.9946222639676043
+step 14, overlap = 0.9999966721384628
+</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../2.qft-phase-estimation/index.html">« Quantum Fourier Transformation and Phase Estimation</a><a class="docs-footer-nextpage" href="../4.shor-algorithm/index.html">Shor&#39;s Algorithm »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.18 on <span class="colophon-date" title="Tuesday 31 May 2022 00:50">Tuesday 31 May 2022</span>. Using Julia version 1.7.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

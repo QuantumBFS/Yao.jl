@@ -1,0 +1,88 @@
+@font-face {
+  font-family: JuliaMono;
+  src: local("JuliaMono"), url("https://cdn.jsdelivr.net/gh/cormullion/juliamono/webfonts/JuliaMono-Regular.woff2"); }
+
+html.theme--documenter-dark pre,
+html.theme--documenter-dark code {
+  font-family: "JuliaMono"; }
+
+html:not(.theme--documenter-dark) body #documenter a {
+  color: #4595D1; }
+
+html:not(.theme--documenter-dark) body #documenter a:hover, html:not(.theme--documenter-dark) body #documenter a:focus {
+  color: #194E82; }
+
+html:not(.theme--documenter-dark) body #documenter .docs-sidebar {
+  box-shadow: none;
+  color: #FFFFFF;
+  background-color: #194E82; }
+  html:not(.theme--documenter-dark) body #documenter .docs-sidebar .docs-package-name a, html:not(.theme--documenter-dark) body #documenter .docs-sidebar .docs-package-name a:hover {
+    color: #FFFFFF; }
+  html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu {
+    border-top: none; }
+    html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu li.is-active ul.internal .tocitem:hover, html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu li.is-active .tocitem:hover, html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu li.is-active .tocitem, html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu .tocitem:hover {
+      color: #FFFFFF;
+      background-color: #4595D1; }
+    html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu .tocitem {
+      color: #FFFFFF;
+      background: none; }
+    html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu li.is-active {
+      border-top: none;
+      border-bottom: none; }
+      html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu li.is-active ul.internal {
+        margin: 0;
+        border-top: none; }
+        html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu li.is-active ul.internal li {
+          margin-top: 0; }
+        html:not(.theme--documenter-dark) body #documenter .docs-sidebar ul.docs-menu li.is-active ul.internal .tocitem {
+          color: #194E82;
+          background-color: #FFFFFF;
+          padding: 0.5em;
+          padding-left: 1em; }
+
+html:not(.theme--documenter-dark) body #documenter article#documenter-page a.docs-heading-anchor {
+  color: #194E82; }
+
+html:not(.theme--documenter-dark) body #documenter pre, html:not(.theme--documenter-dark) body #documenter code {
+  color: inherit;
+  font-family: "JuliaMono"; }
+  html:not(.theme--documenter-dark) body #documenter pre .hljs-meta, html:not(.theme--documenter-dark) body #documenter code .hljs-meta {
+    color: #4595D1; }
+  html:not(.theme--documenter-dark) body #documenter pre .hljs-keyword, html:not(.theme--documenter-dark) body #documenter code .hljs-keyword {
+    color: #194E82; }
+
+.admonition.is-category-terminology {
+  background-color: #FFFEDD;
+  border-color: #FFEC8B; }
+  .admonition.is-category-terminology > .admonition-header {
+    background-color: #FFEC8B;
+    color: black; }
+    .admonition.is-category-terminology > .admonition-header:before {
+      content: "Terminology: ";
+      font-family: inherit;
+      font-weight: bold; }
+
+html.theme--documenter-dark .admonition.is-category-terminology {
+  border-color: #FFEC8B; }
+
+details {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-bottom: 1rem;
+  background: aliceblue; }
+
+html.theme--documenter-dark details {
+  background: #282f2f; }
+
+.video-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; }
+
+.video-container > iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0; }
