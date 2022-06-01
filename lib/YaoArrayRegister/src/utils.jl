@@ -349,8 +349,8 @@ F(\\rho, \\sigma) = {\\rm Tr}\\sqrt{\\sqrt{\\rho}\\sigma\\sqrt{\\rho}}
 ```
 """
 function density_matrix_fidelity(ρ::AbstractMatrix, σ::AbstractMatrix)
-    E1, U1 = eigen(ρ)
-    E2, U2 = eigen(σ)
+    E1, U1 = eigen(Hermitian(ρ))
+    E2, U2 = eigen(Hermitian(σ))
     E1 .= max.(E1, zero(eltype(E1)))
     E2 .= max.(E2, zero(eltype(E2)))
     sq1 = U1 * Diagonal(sqrt.(E1)) * U1'
