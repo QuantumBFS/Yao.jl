@@ -72,8 +72,6 @@ collect_blocks(::Type{T}, x::AbstractBlock) where {T<:AbstractBlock} =
 #expect(op::AbstractBlock, r::AbstractRegister) = r' * apply!(copy(r), op)
 
 #expect(op::AbstractBlock, dm::DensityMatrix) = mapslices(x->sum(mat(op).*x)[], dm.state, dims=[1,2]) |> vec
-expect(op::AbstractBlock, dm::DensityMatrix{1}) =
-    sum(mat(op) .* dropdims(dm.state, dims = 3))
 
 """
     expect(op::AbstractBlock, reg) -> Vector

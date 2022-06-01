@@ -352,5 +352,5 @@ function print_annotation(
     k::Int,
 )
     print_annotation(io, child)
-    printstyled(io, "[", node.weights[k], "] "; color = :cyan)
+    printstyled(io, "[", node.probs[k], "] "; color = :cyan)
 end

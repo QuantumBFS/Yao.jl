@@ -5,6 +5,10 @@ using Test
     r = rand_state(1)
     @test_throws ErrorException UnitaryChannel([X, Y, Z], [1, 0.2, 0])
     channel = UnitaryChannel([X, Y, Z], [1, 0, 0])
+    print(channel)
+    k1 = cache_key(channel)
+    k2 = cache_key(chsubblocks(channel, [Z, Z, Z]))
+    @test k1 != k2
     # broken because Unitary channel does not have a matrix representation
     @test_throws ErrorException apply!(copy(r), channel)
     @test apply!(density_matrix(r), channel) ≈ density_matrix(apply!(copy(r), X))
@@ -39,5 +43,10 @@ end
     channel = UnitaryChannel(ops, [0.3, 0.1, 0.6])
     r = density_matrix(rand_state(12), (3,2,1,5,6,9))
     ms = mat.(ops)
-    @test apply(r, channel).state ≈ channel.weights[1] * ms[1] * r.state * ms[1]' + channel.weights[2] * ms[2] * r.state * ms[2]' + channel.weights[3] * ms[3] * r.state * ms[3]'
+    @test apply(r, channel).state ≈ channel.probs[1] * ms[1] * r.state * ms[1]' + channel.probs[2] * ms[2] * r.state * ms[2]' + channel.probs[3] * ms[3] * r.state * ms[3]'
+
+    channel1 = unitary_channel([put(6, 2=>chain(Rx(0.4), Ry(0.5), Rz(0.4))), put(6, 3=>Y), put(6, 2=>Z)], [0.3, 0.1, 0.6])
+    ops = unitary_channel([put(2, 1=>chain(Rx(0.4), Ry(0.5), Rz(0.4))), put(2,2=>Y), put(2,1=>Z)], [0.3, 0.1, 0.6])
+    channel2 = put(6, (2,3)=>ops)
+    @test apply(r, channel1) ≈ apply(r, channel2)
 end

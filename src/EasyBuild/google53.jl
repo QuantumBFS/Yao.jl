@@ -84,7 +84,7 @@ References
 -------------------------
 * Arute, Frank, et al. "Quantum supremacy using a programmable superconducting processor." Nature 574.7779 (2019): 505-510.
 """
-rand_google53(depth::Int; nbits::Int=53) = rand_google53(Float64, depth; nbits=53)
+rand_google53(depth::Int; nbits::Int=53) = rand_google53(Float64, depth; nbits)
 function rand_google53(::Type{T}, depth::Int; nbits::Int=53) where T
     c = chain(nbits)
     lattice = Lattice53(nbits=nbits)
