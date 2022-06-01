@@ -53,7 +53,6 @@ function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::UnitaryChannel) where {D
     # first
     regscale!(unsafe_apply!(r, first(x.operators)), first(x.weights))
     for (w, o) in zip(x.weights[2:end-1], x.operators[2:end-1])
-        @show w, o
         r.state .+= w .* unsafe_apply!(copy(r0), o).state
     end
     # last
