@@ -1,6 +1,6 @@
 name = "YaoBlocks"
 uuid = "418bc28f-b43b-5e0b-a6e7-61bbc1a2c1df"
-version = "0.13.0"
+version = "0.13.1"
 
 [deps]
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
@@ -31,8 +31,8 @@ MLStyle = "0.3, 0.4"
 StaticArrays = "0.12, 1.0"
 StatsBase = "0.32, 0.33"
 TupleTools = "1.2"
-YaoArrayRegister = "0.9"
 YaoAPI = "0.4"
+YaoArrayRegister = "0.9"
 julia = "1"
 
 [extras]
