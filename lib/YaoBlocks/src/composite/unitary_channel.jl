@@ -17,8 +17,8 @@ struct UnitaryChannel{D, W<:AbstractVector} <: CompositeBlock{D}
 
     function UnitaryChannel(operators::Vector{AbstractBlock{D}}, w::AbstractVector) where D
         @assert length(operators) == length(w) && length(w) != 0
-        if !(sum(w) ≈ 1)
-            error("The sum of probs must be 1!")
+        if !(all(x->x>=0, w) && sum(w) ≈ 1)
+            error("The probabilities must be ⩾ 0 and its sum must be 1!")
         end
         n = _check_block_sizes(operators)
         new{D,typeof(w)}(n, operators, w)
