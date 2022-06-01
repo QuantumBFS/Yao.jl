@@ -9,7 +9,7 @@ else
 end
 
 """
-    sort_unitary(U, locations::NTuple{N, Int}) -> U
+    sort_unitary(::Val{D}, U, locations::NTuple{N, Int}) -> U
 
 Return an sorted unitary operator according to the locations.
 """
