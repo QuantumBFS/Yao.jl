@@ -1,4 +1,4 @@
-using YaoBlocks
+using Yao.YaoBlocks
 export LabelBlock
 
 """

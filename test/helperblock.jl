@@ -24,5 +24,5 @@ using Test, Compose
     c2 = chain(5, [put(5, (2,3)=>label(SWAP, "SWAP")), put(5, 2=>label(I2, "id")), put(5, 2=>label(X, "X")), control(5, (5,3), (2,4,1)=>put(3, (1,2)=>label(SWAP, "SWAP")))])
 
     @test vizcircuit(c1) isa Compose.Context
-    @test_throws ErrorException vizcircuit(c2)
+    @test vizcircuit(c2) isa Compose.Context
 end
