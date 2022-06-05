@@ -31,7 +31,6 @@ using KrylovKit: eigsolve
 n = 8
 h = transverse_ising(n, 1.0)
 w, v = eigsolve(mat(h), 1, :SR, ishermitian=true)
-w[1]
 
 Random.seed!(0)
 circuit = dispatch!(variational_circuit(n, 100), :random);
