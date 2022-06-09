@@ -356,7 +356,7 @@ get_cbrush_texts(c, ::ZGate) = (c.gatestyles.c, "")
 plot(blk::AbstractBlock; kwargs...) = vizcircuit(blk; kwargs...)
 function vizcircuit(blk::AbstractBlock; w_depth=0.85, w_line=0.75, scale=1.0, show_ending_bar=false, starting_texts=nothing, starting_offset=-0.3, ending_texts=nothing, ending_offset=0.3, graphsize=1.0, gatestyles=CircuitStyles.GateStyles(), backend=CircuitStyles.ComposeSVG())
     CircuitStyles.scale[] = scale
-    img = circuit_canvas(nqubits(blk); w_depth, w_line, show_ending_bar, starting_texts, starting_offset, ending_texts, ending_offset, graphsize, gatestyles, backend) do c
+    img = circuit_canvas(nqudits(blk); w_depth, w_line, show_ending_bar, starting_texts, starting_offset, ending_texts, ending_offset, graphsize, gatestyles, backend) do c
         blk >> c
     end
     CircuitStyles.scale[] = 1.0

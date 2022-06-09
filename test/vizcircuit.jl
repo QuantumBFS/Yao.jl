@@ -42,6 +42,8 @@ end
 	@test vizcircuit(control(10, (2, -3), 6=>X)) isa Context
 	@test vizcircuit(control(10, (2, -3), 6=>im*X)) isa Context
 	@test plot(put(7, (2,3)=>matblock(randn(4,4)))) isa Context
+    # qudit
+    @test vizcircuit(put(10, 6=>matblock(rand_unitary(3); nlevel=3, tag="3 level"))) isa Context
 end
 
 @testset "fix #3" begin
