@@ -120,3 +120,9 @@ end
         @test allpass
     end
 end
+
+@testset "fix dispatch" begin
+    circuit1 = control(10, (2, -6, 4), (9, 1)=>chain(put(2, 1=>X), rot(kron(X, X), 0.3)))
+    circuit2 = control(10, (2, -6, 4), (9, 1)=>matblock(mat(chain(put(2, 1=>X), rot(kron(X, X), 0.3)))))
+    @test mat(circuit1) ≈ mat(circuit2)
+end

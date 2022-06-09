@@ -65,10 +65,10 @@ It is conceptually a [`chain`](@ref) of [`put`](@ref) block without address conf
 but it has a richer type information that can be useful for various purposes such as more efficient [`mat`](@ref) function.
 
 Let ``I`` be a ``2\\times 2`` identity matrix, ``G`` and ``H`` be two ``2\\times 2`` matrix,
-the matrix representation of `kron(n, i=>G, j=>H)` is defined as
+the matrix representation of `kron(n, i=>G, j=>H)` (assume ``j > i``) is defined as
 
 ```math
-I^{\\otimes i-1} \\otimes G \\otimes I^{\\otimes j-i-1} \\otimes H \\otimes I^{n-j}
+I^{\\otimes n-j} \\otimes H \\otimes I^{\\otimes j-i-1} \\otimes G \\otimes I^{i-1}
 ```
 
 For multiple locations, the expression can be complicated.

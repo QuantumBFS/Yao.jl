@@ -20,7 +20,7 @@ Create a [`ShiftGate`](@ref) with phase `θ`.
 ```math
 \\begin{pmatrix}
 1 & 0\\\\
-0 & \\e^{iθ}
+0 & e^{i\\theta}
 \\end{pmatrix}
 ```
 

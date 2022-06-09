@@ -26,7 +26,7 @@ where the locations can be a tuple, an integer or a range and the subblock size 
 Let ``I`` be a ``2\\times 2`` identity matrix and ``G`` be a ``2\\times 2`` matrix, the matrix representation of `put(n, i=>G)` is defined as
 
 ```math
-I^{\\otimes i-1} \\otimes G \\otimes I^{\\otimes n-i}
+I^{\\otimes n-i} \\otimes G \\otimes I^{\\otimes i-1}
 ```
 
 For multiple locations, the expression can be complicated, 
