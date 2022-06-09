@@ -76,10 +76,10 @@ Returns a [`UnitaryChannel`](@ref) instance, where ``operators` is a list of ope
 The unitary channel is defined as below
 
 ```math
-ϕ(ρ) = \\sum_i p_i U_i ρ U_i^†,
+\\phi(\\rho) = \\sum_i p_i U_i ρ U_i^\\dagger,
 ```
 
-where ``ρ`` in a [`DensityMatrix`](@ref) as the register to apply on, ``p_i`` is the i-th element in `probs`, `U_i` is the i-th operator in `operators`.
+where ``\\rho`` in a [`DensityMatrix`](@ref) as the register to apply on, ``p_i`` is the i-th element in `probs`, `U_i` is the i-th operator in `operators`.
 
 ### Examples
 

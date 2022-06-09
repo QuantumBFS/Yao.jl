@@ -96,7 +96,7 @@ function large_mat_check(n::Int)
     return nothing
 end
 
-function cunmat(n::Int, cbits::NTuple, cvals::NTuple, U::IMatrix, locs::NTuple)
+function cunmat(n::Int, cbits::NTuple{C,Int}, cvals::NTuple{C,Int}, U::IMatrix, locs::NTuple{M,Int}) where {C,M}
     large_mat_check(n)
     IMatrix{1 << n}()
 end
@@ -206,6 +206,17 @@ function cunmat(
         unij!(mat, locs_raw .+ i, U)
     end
     return mat
+end
+
+# the fallback
+function cunmat(
+    nbit::Int,
+    cbits::NTuple{C,Int},
+    cvals::NTuple{C,Int},
+    U0::AbstractMatrix,
+    locs::NTuple{M,Int},
+) where {C,M}
+    return cunmat(nbit, cbits, cvals, Matrix(U0), locs)
 end
 
 ############################### SparseMatrix ##############################
