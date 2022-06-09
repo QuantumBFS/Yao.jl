@@ -208,6 +208,17 @@ function cunmat(
     return mat
 end
 
+# the fallback
+function cunmat(
+    nbit::Int,
+    cbits::NTuple{C,Int},
+    cvals::NTuple{C,Int},
+    U0::AbstractMatrix,
+    locs::NTuple{M,Int},
+) where {C,M}
+    return cunmat(nbit, cbits, cvals, Matrix(U0), locs)
+end
+
 ############################### SparseMatrix ##############################
 function cunmat(
     nbit::Int,
