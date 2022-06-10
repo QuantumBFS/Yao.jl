@@ -131,24 +131,19 @@ reg = zero_state(num_bit) |&gt; gen</code></pre><pre><code class="nohighlight hl
 for i = 1:num_grover_step(oracle, gen)
     grover_step!(reg, oracle, gen)
     println(&quot;step $(i-1), overlap = $(abs(reg&#39;*solution))&quot;)
-end</code></pre><pre><code class="nohighlight hljs">step 0, overlap = 0.11176149951023032
-step 1, overlap = 0.18557710031922017
-step 2, overlap = 0.25835865220506726
-step 3, overlap = 0.32970061113662363
-step 4, overlap = 0.39920545459801193
-step 5, overlap = 0.46648589661261763
-step 6, overlap = 0.5311670457283486
-step 7, overlap = 0.5928884939397138
-step 8, overlap = 0.6513063249071003
-step 9, overlap = 0.7060950302833024
-step 10, overlap = 0.7569493234693961
-step 11, overlap = 0.803585840693581
-step 12, overlap = 0.8457447199344552
-step 13, overlap = 0.8831910488908514
-step 14, overlap = 0.9157161739300415
-step 15, overlap = 0.9431388627207498
-step 16, overlap = 0.9653063140727174
-step 17, overlap = 0.9820950093558982
-step 18, overlap = 0.9934114007551325
-step 19, overlap = 0.9991924325252873
+end</code></pre><pre><code class="nohighlight hljs">step 0, overlap = 0.14727396608461799
+step 1, overlap = 0.24386840162082757
+step 2, overlap = 0.3380967066803797
+step 3, overlap = 0.42904463217284955
+step 4, overlap = 0.5158297568543766
+step 5, overlap = 0.5976100490100498
+step 6, overlap = 0.6735920362573321
+step 7, overlap = 0.7430385042031005
+step 8, overlap = 0.8052756492581629
+step 9, overlap = 0.8596996162091493
+step 10, overlap = 0.9057823571170585
+step 11, overlap = 0.9430767546965624
+step 12, overlap = 0.9712209604665334
+step 13, overlap = 0.9899419055809422
+step 14, overlap = 0.9990579502763237
 </code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../2.qft-phase-estimation/index.html">« Quantum Fourier Transformation and Phase Estimation</a><a class="docs-footer-nextpage" href="../4.shor-algorithm/index.html">Shor&#39;s Algorithm »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.19 on <span class="colophon-date" title="Friday 10 June 2022 03:12">Friday 10 June 2022</span>. Using Julia version 1.7.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
