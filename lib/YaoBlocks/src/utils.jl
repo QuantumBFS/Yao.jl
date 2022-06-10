@@ -288,6 +288,7 @@ function isclean(et::EntryTable; zero_threshold=0)
 end
 
 function Base.merge(et::EntryTable{DitStr{D,N,TI},T}, ets::EntryTable{DitStr{D,N,TI},T}...) where {D,N,TI,T}
+    length(ets) == 0 && return et
     EntryTable(vcat(et.configs, [e.configs for e in ets]...), vcat(et.amplitudes, [e.amplitudes for e in ets]...))
 end
 
