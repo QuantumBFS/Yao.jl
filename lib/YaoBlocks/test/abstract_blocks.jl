@@ -40,3 +40,22 @@ end
     @test setiparams(+, Rx(0.3), 0.5) == Rx(0.8)
     @test YaoBlocks.parameters_range(chain(Z, shift(0.3), phase(0.2), Rx(0.5), time_evolve(X, 0.5), Ry(0.5))) == [(0.0, 2π), (0.0, 2π), (0.0, 2π), (-Inf, Inf), (0.0, 2π)]
 end
+
+@testset "indexing pxp" begin
+    function proj(::Type{T}, configs::AbstractVector{<:DitStr{D,N}}) where {T,D,N}
+        mask = zeros(T, D^N)
+        for c in configs
+            mask[Int(c)+1] = one(T)
+        end
+        return matblock(Diagonal(mask); tag="Projector")
+    end
+    display(mat(proj(ComplexF64, [bit"00"])))
+    function pxp(neighbors, i::Int)
+        n = length(neighbors)
+        P = chain([put(n, (i,j)=>proj(ComplexF64, [bit"10", bit"01", bit"00"])) for j in neighbors[i]])
+        P * put(n, i=>X) * P
+    end
+    h = sum([pxp([[2], [1,3], [2, 4], [3, 5], [4]], i) for i=1:5])
+    @test length(h[:,bit"11000"]) == 2
+    @test length(h[:,bit"10100"]) == 3
+end
