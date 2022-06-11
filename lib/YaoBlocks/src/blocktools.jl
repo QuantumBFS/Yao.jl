@@ -172,6 +172,17 @@ function gatecount!(c::RepeatedBlock, storage::AbstractDict)
     storage
 end
 
+# NOTE: static scale defines a gate, dynamic scale is parameter.
+function gatecount!(c::Scale{S}, storage::AbstractDict) where S
+    if S <: Val
+        k = typeof(c)
+        storage[k] = get(storage, k, 0) + 1
+    else
+        gatecount!(c.content, storage)
+    end
+    return storage
+end
+
 # default: do not recurse
 function gatecount!(c::AbstractBlock, storage::AbstractDict)
     k = typeof(c)
