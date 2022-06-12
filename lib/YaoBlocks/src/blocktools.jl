@@ -156,11 +156,9 @@ function operator_fidelity(b1::AbstractBlock, b2::AbstractBlock)
 end
 
 gatecount(blk::AbstractBlock) = gatecount!(blk, Dict{Type{<:AbstractBlock},Int}())
-function gatecount!(
-    c::Union{ChainBlock,KronBlock,PutBlock,Add,CachedBlock},
-    storage::AbstractDict,
-)
-    (gatecount!.(c |> subblocks, Ref(storage)); storage)
+
+for BT in [:ChainBlock, :KronBlock, :Add, :PutBlock, :CachedBlock]
+    @eval gatecount!(c::$BT, storage::AbstractDict) = (gatecount!.(c |> subblocks, Ref(storage)); storage)
 end
 
 function gatecount!(c::RepeatedBlock, storage::AbstractDict)
@@ -174,12 +172,20 @@ function gatecount!(c::RepeatedBlock, storage::AbstractDict)
     storage
 end
 
-function gatecount!(c::Union{PrimitiveBlock,Daggered,ControlBlock}, storage::AbstractDict)
-    k = typeof(c)
-    if haskey(storage, k)
-        storage[k] += 1
+# NOTE: static scale defines a gate, dynamic scale is parameter.
+function gatecount!(c::Scale{S}, storage::AbstractDict) where S
+    if S <: Val
+        k = typeof(c)
+        storage[k] = get(storage, k, 0) + 1
     else
-        storage[k] = 1
+        gatecount!(c.content, storage)
     end
+    return storage
+end
+
+# default: do not recurse
+function gatecount!(c::AbstractBlock, storage::AbstractDict)
+    k = typeof(c)
+    storage[k] = get(storage, k, 0) + 1
     storage
 end
