@@ -716,9 +716,13 @@ function print_table(io::IO, reg::AbstractArrayReg; digits::Int=5)
 end
 
 """
-    mutual_information(reg::AbstractArrayReg, part1, part2)
+    mutual_information(register_or_rho, part1, part2)
 
-Compute the mutual information between locations `part1` and locations `part2` in a quantum state `reg`.
+Returns the mutual information between subsystems `part1` and `part2` of the input quantum register or density matrix:
+
+```math
+S(\\rho_A) + S(\\rho_B) - S(\\rho_{AB})
+```
 
 ### Example
 
@@ -730,7 +734,7 @@ julia> mutual_information(ghz_state(4), (1,), (3,4))
 ```
 """
 function mutual_information(reg::AbstractArrayReg, part1, part2)
-    @assert isempty(part1 ∩ part2)
+    @assert_locs_safe nqudits(dm) vcat(part1, part2)
     von_neumann_entropy(reg, part1) .+ von_neumann_entropy(reg, part2) .- von_neumann_entropy(reg, part1 ∪ part2)
 end
 

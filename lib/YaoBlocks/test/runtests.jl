@@ -4,10 +4,6 @@ using Test, YaoBlocks
     include("utils.jl")
 end
 
-@testset "error" begin
-    include("error.jl")
-end
-
 @testset "test primitive block" begin
     include("primitive/primitive.jl")
 end

@@ -21,7 +21,14 @@ function YaoAPI.density_matrix(reg::ArrayReg, qubits)
     freg = focus!(copy(reg), qubits)
     return density_matrix(freg)
 end
+function YaoAPI.density_matrix(dm::DensityMatrix, locs)
+    n = nqudits(dm)
+    @assert_locs_safe n (locs...,)
+    return partial_tr(dm, setdiff(1:n, locs))
+end
 YaoAPI.density_matrix(reg::ArrayReg{D}) where D = DensityMatrix{D}(reg.state * reg.state')
+YaoAPI.density_matrix(rho::DensityMatrix) = copy(rho)
+
 YaoAPI.tracedist(dm1::DensityMatrix{D}, dm2::DensityMatrix{D}) where {D} = trace_norm(dm1.state .- dm2.state)
 
 # TODO: use batch_broadcast in the future
@@ -54,6 +61,15 @@ function zero_state_like(dm::DensityMatrix{D,T}, n::Int) where {D,T}
     return DensityMatrix{D}(state)
 end
 
+"""
+    von_neumann_entropy(rho) -> Real
+
+Return the von-Neumann entropy for the input density matrix:
+
+```math
+-{\\rm Tr}(\\rho\\ln\\rho)
+```
+"""
 von_neumann_entropy(dm::DensityMatrix) = von_neumann_entropy(Matrix(dm))
 function von_neumann_entropy(dm::AbstractMatrix)
     p = max.(eigvals(dm), eps(real(eltype(dm))))
@@ -61,14 +77,47 @@ function von_neumann_entropy(dm::AbstractMatrix)
 end
 von_neumann_entropy(v::AbstractVector) = -sum(x->x*log(x), v)
 
+function mutual_information(dm::DensityMatrix, part1, part2)
+    n = nqudits(dm)
+    @assert_locs_safe n vcat(part1, part2)
+    return von_neumann_entropy(density_matrix(dm, part1)) + von_neumann_entropy(density_matrix(dm, part2)) - 
+        von_neumann_entropy(length(part1) + length(part2) == n ? dm : density_matrix(dm, part1 ∪ part2))
+end
+
+"""
+    relative_entropy(rho1, rho2) -> Real
+
+The relative entropy between two density matrices ``\\rho_1`` and ``\\rho_2`` is defined as:
+```math
+S(\\rho_1||\\rho_2) = \\rho_1\\ln\\rho_1 - \\rho_1\\ln\\rho_2,
+```
+which is equivalent to subtracting the cross entropy ``S(\\rho_1, \\rho_2)``, by the entropy of ``\\rho_1``.
+"""
+function relative_entropy(dm1::DensityMatrix, dm2::DensityMatrix)
+    - von_neumann_entropy(dm1) + cross_entropy(dm1, dm2)
+end
+
+"""
+    cross_entropy(rho1, rho2) -> Real
+
+The cross entropy between two density matrices ``\\rho_1`` and ``\\rho_2`` is defined as:
+```math
+S(\\rho_1, \\rho_2) = - \\rho_1\\ln\\rho_2.
+```
+"""
+function cross_entropy(dm1::DensityMatrix, dm2::DensityMatrix)
+    - real(sum(transpose(dm1.state) .* log(dm2.state)))
+end
+
 function YaoAPI.partial_tr(dm::DensityMatrix{D,T}, locs) where {D,T}
     nbits = nqudits(dm)
+    @assert_locs_safe nbits (locs...,)
     m = nbits-length(locs)
     strides = ntuple(i->D^(i-1), nbits)
     out_strides = ntuple(i->D^(i-1), m)
     remainlocs = (setdiff(1:nbits, locs)...,)
     remain_strides = map(i->strides[i], remainlocs)
-    trace_strides = map(i->strides[i], locs)
+    trace_strides = ntuple(i->strides[locs[i]], length(locs))
     state = similar(dm.state, D^m, D^m)   # NOTE: does not preserve adjoint
     fill!(state, zero(T))
     partial_tr!(Val{D}(), state, dm.state, trace_strides, out_strides, remain_strides)

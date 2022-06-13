@@ -101,8 +101,6 @@ export AbstractBlock,
 export applymatrix, cache_key
 
 include("utils.jl")
-include("error.jl")
-# include("traits.jl")
 
 include("abstract_block.jl")
 

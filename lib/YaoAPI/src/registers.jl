@@ -757,9 +757,9 @@ true
 @interface purify
 
 """
-    density_matrix(register, locations)
+    density_matrix(register_or_rho[, locations])
 
-Returns the density matrix for qubits on `locations`.
+Returns the reduced density matrix for qubits at `locations` (default: all qubits).
 
 ### Examples
 
