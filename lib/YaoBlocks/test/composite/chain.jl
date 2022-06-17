@@ -173,6 +173,7 @@ end
     @test isdiagonal(chain([Z,Z]))
     @test length(g) == 2
     @test eltype(g) == eltype(g.blocks)
+    @test ishermitian(ChainBlock(put(2, 1=>X), put(2, 1=>2X)))
 end
 
 @testset "Yao/#204" begin

@@ -183,7 +183,7 @@ YaoAPI.isunitary(c::ChainBlock) = all(isunitary, c.blocks) || isunitary(mat(c))
 YaoAPI.isreflexive(c::ChainBlock) =
     (iscommute(c.blocks...) && all(isreflexive, c.blocks)) || isreflexive(mat(c))
 LinearAlgebra.ishermitian(c::ChainBlock) =
-    (all(isreflexive, c.blocks) && iscommute(c.blocks...)) || isreflexive(mat(c))
+    (all(ishermitian, c.blocks) && iscommute(c.blocks...)) || ishermitian(mat(c))
 
 # this is not type stable, possible to fix?
 function unsafe_getindex(::Type{T}, c::ChainBlock{D}, i::Integer, j::Integer) where {D,T}
