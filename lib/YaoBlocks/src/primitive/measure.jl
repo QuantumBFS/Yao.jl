@@ -22,6 +22,9 @@ mutable struct Measure{D,K,OT,LT<:Union{NTuple{K,Int},AllLocs},PT<:PostProcess,R
         postprocess::PT,
     ) where {RNG,D,K,OT,LT<:Union{NTuple{K,Int},AllLocs},PT<:PostProcess}
         locations isa AllLocs || @assert_locs_safe n locations
+        if !(operator isa ComputationalBasis)
+            @assert nqudits(operator) == (locations isa AllLocs ? n : length(locations)) "operator size `$(nqudits(operator))` does not match measurement location `$locations`"
+        end
         new{D,K,OT,LT,PT,RNG}(n, rng, operator, locations, postprocess)
     end
 end
