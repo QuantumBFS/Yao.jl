@@ -153,9 +153,7 @@ apply_back!(st, block::Measure, collector) =
 function backward_params!(st, block::Rotor, collector)
     in, outδ = st
     Σ = generator(block)
-    g =
-        dropdims(sum(conj.(state(in |> Σ)) .* state(outδ), dims = (1, 2)), dims = (1, 2)) |>
-        as_scalar
+    g = vec(state(in |> Σ))' * vec(state(outδ)) |> as_scalar
     pushfirst!(collector, -imag(g) / 2)
     in |> Σ
     nothing
