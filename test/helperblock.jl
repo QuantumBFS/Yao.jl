@@ -1,5 +1,5 @@
-using YaoPlots, Yao
-using Test, Compose
+using YaoPlots, Yao, Luxor
+using Test
 
 @testset "LabelBlock" begin
     x = put(5, (2,3)=>matblock(rand_unitary(4)))
@@ -20,9 +20,9 @@ using Test, Compose
     @test YaoPlots.is_continuous_chunk([1,2,4]) == false
     @test YaoPlots.is_continuous_chunk([3,2,4]) == true
     
-    c1 = chain(5, [put(5, (2,3)=>label(SWAP, "SWAP")), put(5, 2=>label(I2, "id")), put(5, 2=>label(X, "X")), control(5, (5,3), (2,4,1)=>put(3, (1,3)=>label(SWAP, "SWAP")))])
-    c2 = chain(5, [put(5, (2,3)=>label(SWAP, "SWAP")), put(5, 2=>label(I2, "id")), put(5, 2=>label(X, "X")), control(5, (5,3), (2,4,1)=>put(3, (1,2)=>label(SWAP, "SWAP")))])
+    c1 = chain(5, [put(5, (2,3)=>addlabel(SWAP, "SWAP")), put(5, 2=>addlabel(I2, "id")), put(5, 2=>addlabel(X, "X")), control(5, (5,3), (2,4,1)=>put(3, (1,3)=>addlabel(SWAP, "SWAP")))])
+    c2 = chain(5, [put(5, (2,3)=>addlabel(SWAP, "SWAP")), put(5, 2=>addlabel(I2, "id")), put(5, 2=>addlabel(X, "X")), control(5, (5,3), (2,4,1)=>put(3, (1,2)=>addlabel(SWAP, "SWAP")))])
 
-    @test vizcircuit(c1) isa Compose.Context
-    @test vizcircuit(c2) isa Compose.Context
+    @test vizcircuit(c1) isa Drawing
+    @test vizcircuit(c2) isa Drawing
 end

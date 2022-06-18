@@ -1,27 +1,13 @@
 name = "YaoPlots"
 uuid = "32cfe2d9-419e-45f2-8191-2267705d8dbc"
-version = "0.7.5"
+version = "0.8.0"
 
 [deps]
-BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
-Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
-Compose = "a81c6b42-2e10-5240-aca2-a61377ecd94b"
-GraphPlot = "a2cc645c-3eea-5389-862e-a155d0052231"
-Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
-Multigraphs = "7ebac608-6c66-46e6-9856-b5f43e107bac"
-Viznet = "52a3aca4-6234-47fd-b74a-806bdf78ede9"
+Luxor = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
 Yao = "5872b779-8223-5990-8dd0-5abbb0748c8c"
-ZXCalculus = "3525faa3-032d-4235-a8d4-8c2939a218dd"
 
 [compat]
-BitBasis = "0.8"
-Colors = "0.11, 0.12"
-Compose = "0.8, 0.9"
-GraphPlot = "0.5"
-Graphs = "1.7"
-Multigraphs = "0.3"
-Viznet = "0.3.1"
-ZXCalculus = "0.5"
+Luxor = "3"
 Yao = "0.8"
 julia = "1"
 

@@ -23,13 +23,13 @@ end
 
 YaoBlocks.PropertyTrait(::LabelBlock) = YaoBlocks.PreserveAll()
 YaoBlocks.mat(::Type{T}, blk::LabelBlock) where {T} = mat(T, content(blk))
-YaoBlocks.apply!(reg::YaoBlocks.AbstractRegister, blk::LabelBlock) = apply!(reg, content(blk))
+YaoBlocks.unsafe_apply!(reg::YaoBlocks.AbstractRegister, blk::LabelBlock) = YaoBlocks.unsafe_apply!(reg, content(blk))
 YaoBlocks.chsubblocks(blk::LabelBlock, target::AbstractBlock) = LabelBlock(target, blk.name)
 
 Base.adjoint(x::LabelBlock) = LabelBlock(adjoint(content(x)), endswith(x.name, "†") ? x.name[1:end-1] : x.name*"†")
 Base.copy(x::LabelBlock) = LabelBlock(copy(content(x)), x.name)
 YaoBlocks.Optimise.to_basictypes(block::LabelBlock) = block
 
-export label
-label(b::AbstractBlock, str::String) = LabelBlock(b, str)
+export addlabel
+addlabel(b::AbstractBlock, str::String) = LabelBlock(b, str)
 

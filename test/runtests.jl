@@ -1,4 +1,4 @@
-using YaoPlots, ZXCalculus, Graphs
+using YaoPlots
 using Test
 
 @testset "helperblock" begin
@@ -7,8 +7,4 @@ end
 
 @testset "vizcircuit" begin
     include("vizcircuit.jl")
-end
-
-@testset "zx_plot" begin
-    include("zx_plot.jl")
 end
