@@ -57,7 +57,7 @@ end
     # NOTE: some machines have a small allocation
     @test 32 >= @allocated unrows!(v, inds, dg)
     @test unrows!(copy(v), inds, dg) ≈ unrows!(copy(v), [1, 3], dg)
-    @test unrows!(copy(v), inds, IMatrix{1 << 2}()) == v
+    @test unrows!(copy(v), inds, IMatrix(4)) == v
 end
 
 @testset "permmatrix unrows!" begin

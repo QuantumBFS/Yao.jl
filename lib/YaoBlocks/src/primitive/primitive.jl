@@ -40,6 +40,6 @@ end
 function getcol(op::Diagonal, j::DitStr{D,N,TI}) where {D,N,TI}
     return [j], [op.diag[buffer(j)+1]]
 end
-function getcol(::IMatrix{T}, j::DitStr{D,N,TI}) where {D,N,TI,T}
-    return [j], [one(T)]
+function getcol(A::IMatrix, j::DitStr{D,N,TI}) where {D,N,TI}
+    return [j], [one(eltype(A))]
 end

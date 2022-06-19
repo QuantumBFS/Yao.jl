@@ -165,12 +165,12 @@ cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
 color(::Type{T}) where {T<:KronBlock} = :cyan
 
 function mat(::Type{T}, k::KronBlock{D,M}) where {T,D,M}
-    M == 0 && return IMatrix{D^k.n,T}()
+    M == 0 && return IMatrix{T}(D^k.n)
     ntrail = k.n - last(last(k.locs))  # number of trailing bits
     num_bit_list = map(i -> first(k.locs[i]) - (i > 1 ? last(k.locs[i-1]) : 0) - 1, 1:M)
     return reduce(
         Iterators.reverse(zip(subblocks(k), num_bit_list)),
-        init = IMatrix{D^ntrail,T}(),
+        init = IMatrix{T}(D^ntrail),
     ) do x, y
         kron(x, mat(T, y[1]), IMatrix(D^y[2]))
     end

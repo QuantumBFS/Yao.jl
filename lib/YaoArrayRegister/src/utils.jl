@@ -507,3 +507,7 @@ end
 function matchtype(::Type{T}, A::AbstractArray{T}) where {T}
     return A
 end
+
+@static if !hasmethod(IMatrix{Float64}, Tuple{Int})
+    LuxurySparse.IMatrix{T}(n::Int) where T = IMatrix{n,T}()
+end

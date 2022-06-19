@@ -98,7 +98,7 @@ end
 
 function cunmat(n::Int, cbits::NTuple{C,Int}, cvals::NTuple{C,Int}, U::IMatrix, locs::NTuple{M,Int}) where {C,M}
     large_mat_check(n)
-    IMatrix{1 << n}()
+    IMatrix(1 << n)
 end
 
 """

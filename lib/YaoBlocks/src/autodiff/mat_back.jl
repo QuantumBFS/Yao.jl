@@ -4,7 +4,7 @@ export mat_back!, mat_back
 The matrix gradient of a rotation block.
 """
 @inline function rotgrad(::Type{T}, rb::RotationGate{D}) where {D,T}
-    -sin(rb.theta / 2) / 2 * IMatrix{D^nqudits(rb)}() +
+    -sin(rb.theta / 2) / 2 * IMatrix(D^nqudits(rb)) +
     im / 2 * cos(rb.theta / 2) * conj(mat(T, rb.block))
 end
 

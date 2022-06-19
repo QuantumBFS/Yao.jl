@@ -176,7 +176,7 @@ end
 end
 
 @testset "Yao/#204" begin
-    @test mat(chain(2)) == IMatrix{4,ComplexF64}()
+    @test mat(chain(2)) == IMatrix{ComplexF64}(4)
 end
 
 @testset "instruct_get_element" begin

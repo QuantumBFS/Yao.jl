@@ -303,7 +303,7 @@ end
 
 # General definition
 function rot_mat(::Type{T}, gen::AbstractMatrix, theta::Real) where {N,T}
-    I = IMatrix{size(gen, 1),T}()
+    I = IMatrix{T}(size(gen, 1))
     m = I * cos(theta / 2) - im * sin(theta / 2) * gen
     if eltype(m) != T
         m2 = similar(m, T)

@@ -99,29 +99,60 @@ function expect(op::AbstractBlock, dm::DensityMatrix)
     return sum(transpose(dm.state) .* mop)
 end
 
-expect(op::AbstractBlock, reg::ArrayReg) = reg' * apply!(copy(reg), op)
+# NOTE: assume an register has a bra. Can we define it for density matrix?
+expect(op::AbstractBlock, reg::AbstractRegister) = reg' * apply!(copy(reg), op)
 
 function expect(op::AbstractBlock, reg::BatchedArrayReg)
     B = YaoArrayRegister._asint(nbatch(reg))
     ket = apply!(copy(reg), op)
-    if !(reg.state isa Transpose)
-        C = conj!(reshape(ket.state, :, B))
+    if !(reg.state isa Transpose)  # not-transposed storage
+        C = reshape(ket.state, :, B)
         A = reshape(reg.state, :, B)
-        dropdims(sum(A .* C, dims = 1), dims = 1) |> conj
-    elseif size(reg.state, 2) == B
-        Na = size(reg.state, 1)
-        C = conj!(reshape(ket.state.parent, B, Na))
-        A = reshape(reg.state.parent, B, Na)
-        dropdims(sum(A .* C, dims = 2), dims = 2) |> conj
+        # reduce over the 1st dimension
+        conjsumprod1(A, C)
+    elseif size(reg.state, 2) == B  # transposed storage, no environment qubits
+        # reduce over the second dimension
+        conjsumprod2(reg.state.parent, ket.state.parent)
     else
-        Na = size(reg.state, 1)
-        C = conj!(reshape(ket.state.parent, :, B, Na))
-        A = reshape(reg.state.parent, :, B, Na)
-        dropdims(sum(A .* C, dims = (1, 3)), dims = (1, 3)) |> conj
+        C = reshape(ket.state.parent, :, B, size(reg.state, 1))
+        A = reshape(reg.state.parent, :, B, size(reg.state, 1))
+        # reduce over the 1st and 3rd dimension
+        conjsumprod13(A, C)
     end
 end
 
-for REG in [:ArrayReg, :BatchedArrayReg]
+# TODO: make it GPU compatible!
+# dropdims(sum(conj.(A) .* C, dims = 1), dims = 1)
+function conjsumprod1(A::AbstractArray, C::AbstractArray)
+    Na, B = size(A)
+    res = zeros(eltype(C), B)
+    @inbounds for b=1:B, i=1:Na
+        res[b] += conj(A[i, b]) * C[i, b]
+    end
+    res
+end
+
+# dropdims(sum(conj.(A) .* C, dims = 2), dims = 2)
+function conjsumprod2(A::AbstractArray, C::AbstractArray)
+    B, Na = size(A)
+    res = zeros(eltype(C), B)
+    @inbounds for i=1:Na, b=1:B
+        res[b] += conj(A[b, i]) * C[b, i]
+    end
+    res
+end
+
+# dropdims(sum(conj.(A) .* C, dims = (1, 3)), dims = (1, 3))
+function conjsumprod13(A::AbstractArray, C::AbstractArray)
+    Nr, B, Na = size(A)
+    res = zeros(eltype(C), B)
+    @inbounds for i=1:Na, b=1:B, r=1:size(C, 1)
+        res[b] += conj(A[r, b, i]) * C[r, b, i]
+    end
+    res
+end
+
+for REG in [:AbstractRegister, :BatchedArrayReg]
     @eval function expect(op::AbstractAdd, reg::$REG)
         sum(opi -> expect(opi, reg), op)
     end
