@@ -96,7 +96,16 @@ function expect(op::AbstractBlock, dm::DensityMatrix)
     # NOTE: we use matrix form here because the matrix size is known to be small,
     # while applying a circuit on a reduced density matrix might take much more than constructing the matrix.
     mop = mat(op)
+    # TODO: switch to `IterNz`
+    # sum(x->dm.state[x[2],x[1]]*x[3], IterNz(mop))
     return sum(transpose(dm.state) .* mop)
+end
+function expect(op::AbstractAdd, reg::DensityMatrix)
+    # NOTE: this is faster in e.g. when the op is Heisenberg
+    invoke(expect, Tuple{AbstractBlock, DensityMatrix}, op, reg)
+end
+function expect(op::Scale, reg::DensityMatrix)
+    factor(op) * expect(content(op), reg)
 end
 
 # NOTE: assume an register has a bra. Can we define it for density matrix?
