@@ -51,6 +51,12 @@ end
     m1 = unmat(Val(2), nbit, mmm, (2,))
     m2 = YaoArrayRegister.linop2dense(v -> instruct!(Val(2), v, mmm, (2,)), nbit)
     @test m1 ≈ m2
+
+    nbit = 4
+    mmm = igate(2) |> mat
+    m1 = unmat(Val(2), nbit, mmm, (2,1))
+    m2 = YaoArrayRegister.linop2dense(v -> instruct!(Val(2), v, mmm, (2,1)), nbit)
+    @test m1 ≈ m2
 end
 
 @testset "fix-static and adjoint for mat" begin
