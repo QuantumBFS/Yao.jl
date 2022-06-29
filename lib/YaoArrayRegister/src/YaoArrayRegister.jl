@@ -103,9 +103,9 @@ export IMatrix, PermMatrix, Diagonal, SparseMatrixCSC
 # others
 export Const, logdi
 
+include("utils.jl")
 include("ast_tools.jl")
 include("constants.jl")
-include("utils.jl")
 include("register.jl")
 include("operations.jl")
 include("focus.jl")

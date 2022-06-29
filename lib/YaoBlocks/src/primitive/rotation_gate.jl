@@ -83,7 +83,7 @@ content(x::RotationGate) = x.block
 chcontent(x::RotationGate, gen::AbstractBlock) = RotationGate(gen, x.theta)
 # General definition
 function mat(::Type{T}, R::RotationGate{D}) where {D,T}
-    I = IMatrix{D^nqudits(R),T}()
+    I = IMatrix{T}(D^nqudits(R))
     return I * cos(T(R.theta) / 2) - im * sin(T(R.theta) / 2) * mat(T, R.block)
 end
 

@@ -50,5 +50,5 @@ Broadcast.broadcasted(
 Broadcast.broadcasted(
     ::LinearAlgebra.StructuredMatrixStyle{Diagonal},
     ::typeof(_pretty_basic),
-    a::IMatrix{N,T},
-) where {N, T} = IMatrix{N,Basic}()
+    a::IMatrix,
+) = IMatrix{Basic}(size(a, 1))

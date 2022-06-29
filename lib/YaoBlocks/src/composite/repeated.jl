@@ -125,7 +125,7 @@ PropertyTrait(x::RepeatedBlock) = PreserveAll()
 
 mat(::Type{T}, rb::RepeatedBlock{D}) where {T,D} =
     YaoArrayRegister.hilbertkron(rb.n, fill(mat(T, rb.content), length(rb.locs)), [rb.locs...]; nlevel=D)
-mat(::Type{T}, rb::RepeatedBlock{D,0,GT}) where {T,D,GT} = IMatrix{D^nqudits(rb),T}()
+mat(::Type{T}, rb::RepeatedBlock{D,0,GT}) where {T,D,GT} = IMatrix{T}(D^nqudits(rb))
 
 function YaoAPI.unsafe_apply!(r::AbstractRegister, rp::RepeatedBlock)
     m = mat_matchreg(r, rp.content)

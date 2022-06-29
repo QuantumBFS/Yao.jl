@@ -123,7 +123,7 @@ end
     ST = randn(ComplexF64, 1 << 2)
     θ = π / 3
     @test instruct!(Val(2), copy(ST), Val(:PSWAP), (1, 2), θ) ≈
-          (cos(θ / 2) * IMatrix{4}() - im * sin(θ / 2) * Const.SWAP) * ST
+          (cos(θ / 2) * IMatrix(4) - im * sin(θ / 2) * Const.SWAP) * ST
 
     T = ComplexF64
     theta = 0.5
@@ -153,7 +153,7 @@ end
 
 @testset "Yao.jl/#189" begin
     st = rand(1 << 4)
-    @test instruct!(Val(2), st, IMatrix{2,Float64}(), (1,)) == st
+    @test instruct!(Val(2), st, IMatrix{Float64}(2), (1,)) == st
 end
 
 @testset "test empty locs" begin
@@ -204,7 +204,7 @@ end
 @testset "push coverage" begin
     state = randn(ComplexF64, 3^5)
     # identity fallback
-    @test instruct!(Val(3), copy(state), IMatrix{3,ComplexF64}(), (1,)) == state
+    @test instruct!(Val(3), copy(state), IMatrix{ComplexF64}(3), (1,)) == state
     U = randn(ComplexF64,3,3)
     # error on control
     @test_throws ErrorException instruct!(Val(3), state, U, (1,), (2,), (4,))
@@ -214,7 +214,7 @@ end
 end
 
 @testset "density matrix instruct" begin
-    for G in [pmrand(ComplexF64,4), Diagonal(randn(ComplexF64,4)), sprand(ComplexF64,4,4,0.5), IMatrix{4}()]
+    for G in [pmrand(ComplexF64,4), Diagonal(randn(ComplexF64,4)), sprand(ComplexF64,4,4,0.5), IMatrix(4)]
         reg = rand_state(8)
         reg1 = instruct!(copy(reg), G, (4,2), (1,), (0,))
         r = density_matrix(reg)

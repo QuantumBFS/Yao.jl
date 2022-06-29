@@ -125,7 +125,7 @@ chsubblocks(x::ChainBlock, it::AbstractBlock) = chsubblocks(x, (it,))
 
 function mat(::Type{T}, c::ChainBlock{D}) where {T,D}
     if isempty(c.blocks)
-        return IMatrix{D^nqudits(c),T}()
+        return IMatrix{T}(D^nqudits(c))
     else
         return prod(x -> mat(T, x), Iterators.reverse(c.blocks))
     end

@@ -18,7 +18,7 @@ const SYM_LIST = [
     (:Sdag, Diagonal(ConstGateDefaultType[1, -im])),
     (:T, Diagonal(ConstGateDefaultType[1, exp(π * im / 4)])),
     (:Tdag, Diagonal(ConstGateDefaultType[1, exp(-π * im / 4)])),
-    (:I2, IMatrix{2,ConstGateDefaultType}()),
+    (:I2, IMatrix{ConstGateDefaultType}(2)),
     (:H, (elem = 1 / sqrt(2); ConstGateDefaultType[elem elem; elem -elem])),
     (:CNOT, PermMatrix([1, 4, 3, 2], ones(ConstGateDefaultType, 4))),
     (:CZ, Diagonal(ConstGateDefaultType[1, 1, 1, -1])),
