@@ -100,7 +100,7 @@ end;
 
 # Next we write functions for calculating the expansion coefficients and a single optimization step.
 # We will absorb the factor of ``1/2^n`` into the learning rate.
-  
+
 function calculate_omegas(n, reg, h, pauli_strings)
     iω = []
     for P in pauli_strings

@@ -2,7 +2,7 @@ export TrivialGate, IdentityGate, igate
 
 abstract type TrivialGate{D} <: PrimitiveBlock{D} end
 
-mat(::Type{T}, d::TrivialGate{D}) where {T,D} = IMatrix{D^nqudits(d),T}()
+mat(::Type{T}, d::TrivialGate{D}) where {T,D} = IMatrix{T}(D^nqudits(d))
 Base.adjoint(g::TrivialGate) = g
 occupied_locs(g::TrivialGate) = ()
 
@@ -48,3 +48,6 @@ end
 function unsafe_getcol(::Type{T}, rg::IdentityGate{D}, j::DitStr{D}) where {D,T}
     [j], [one(T)]
 end
+
+LinearAlgebra.ishermitian(::IdentityGate) = true
+YaoAPI.isunitary(::IdentityGate) = true

@@ -65,10 +65,10 @@ It is conceptually a [`chain`](@ref) of [`put`](@ref) block without address conf
 but it has a richer type information that can be useful for various purposes such as more efficient [`mat`](@ref) function.
 
 Let ``I`` be a ``2\\times 2`` identity matrix, ``G`` and ``H`` be two ``2\\times 2`` matrix,
-the matrix representation of `kron(n, i=>G, j=>H)` is defined as
+the matrix representation of `kron(n, i=>G, j=>H)` (assume ``j > i``) is defined as
 
 ```math
-I^{\\otimes i-1} \\otimes G \\otimes I^{\\otimes j-i-1} \\otimes H \\otimes I^{n-j}
+I^{\\otimes n-j} \\otimes H \\otimes I^{\\otimes j-i-1} \\otimes G \\otimes I^{i-1}
 ```
 
 For multiple locations, the expression can be complicated.
@@ -165,12 +165,12 @@ cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
 color(::Type{T}) where {T<:KronBlock} = :cyan
 
 function mat(::Type{T}, k::KronBlock{D,M}) where {T,D,M}
-    M == 0 && return IMatrix{D^k.n,T}()
+    M == 0 && return IMatrix{T}(D^k.n)
     ntrail = k.n - last(last(k.locs))  # number of trailing bits
     num_bit_list = map(i -> first(k.locs[i]) - (i > 1 ? last(k.locs[i-1]) : 0) - 1, 1:M)
     return reduce(
         Iterators.reverse(zip(subblocks(k), num_bit_list)),
-        init = IMatrix{D^ntrail,T}(),
+        init = IMatrix{T}(D^ntrail),
     ) do x, y
         kron(x, mat(T, y[1]), IMatrix(D^y[2]))
     end

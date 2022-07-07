@@ -30,7 +30,7 @@ phase(0.1)
 """
 phase(θ::Real) = PhaseGate(θ)
 
-mat(::Type{T}, gate::PhaseGate) where {T} = exp(T(im * gate.theta)) * IMatrix{2,T}()
+mat(::Type{T}, gate::PhaseGate) where {T} = exp(T(im * gate.theta)) * IMatrix{T}(2)
 
 # parametric interface
 niparams(::Type{<:PhaseGate}) = 1

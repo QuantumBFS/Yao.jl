@@ -413,10 +413,27 @@ julia> measure(reg, (2,3); nshots=3)
 The following example switches to the X basis for measurement.
 
 ```jldoctest; setup=:(using Yao)
-julia> reg = product_state(bit"110")
+julia> reg = apply!(product_state(bit"100"), repeat(3, H, 1:3))
 ArrayReg{2, ComplexF64, Array...}
     active qubits: 3/3
     nlevel: 2
+
+julia> measure(repeat(3, X, 1:3), reg; nshots=3)
+3-element Vector{ComplexF64}:
+ -1.0 + 0.0im
+ -1.0 + 0.0im
+ -1.0 + 0.0im
+
+julia> reg = apply!(product_state(bit"101"), repeat(3, H, 1:3))
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 3/3
+    nlevel: 2
+
+julia> measure(repeat(3, X, 1:3), reg; nshots=3)
+3-element Vector{ComplexF64}:
+ 1.0 - 0.0im
+ 1.0 - 0.0im
+ 1.0 - 0.0im
 ```
 """
 @interface measure
@@ -465,6 +482,41 @@ ArrayReg{2, ComplexF64, Array...}
     active qubits: 1/1
     nlevel: 2
 ```
+
+Measuring an operator will project the state to the subspace associated with the returned eigenvalue.
+
+```jldoctest; setup=:(using Yao, Random; Random.seed!(2))
+julia> reg = uniform_state(3)
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 3/3
+    nlevel: 2
+
+julia> print_table(reg)
+000 ₍₂₎   0.35355 + 0.0im
+001 ₍₂₎   0.35355 + 0.0im
+010 ₍₂₎   0.35355 + 0.0im
+011 ₍₂₎   0.35355 + 0.0im
+100 ₍₂₎   0.35355 + 0.0im
+101 ₍₂₎   0.35355 + 0.0im
+110 ₍₂₎   0.35355 + 0.0im
+111 ₍₂₎   0.35355 + 0.0im
+
+julia> measure!(repeat(3, Z, 1:3), reg)
+-1.0 + 0.0im
+
+julia> print_table(reg)
+000 ₍₂₎   0.0 + 0.0im
+001 ₍₂₎   0.5 + 0.0im
+010 ₍₂₎   0.5 + 0.0im
+011 ₍₂₎   0.0 + 0.0im
+100 ₍₂₎   0.5 + 0.0im
+101 ₍₂₎   0.0 + 0.0im
+110 ₍₂₎   0.0 + 0.0im
+111 ₍₂₎   0.5 + 0.0im
+```
+
+Here, we measured the parity operator, as a result, 
+the resulting state collapsed to the subspace with either even or odd parity.
 """
 @interface measure!
 
@@ -566,18 +618,16 @@ with `gψ` the gradient of input state and `gparams` the gradients of circuit pa
 For register input, the return value is a register.
 
 
-# Definition
+### Definition
 The fidelity of two quantum state for qudits is defined as:
 
 ```math
 F(ρ, σ) = tr(\\sqrt{\\sqrt{ρ}σ\\sqrt{ρ}})
 ```
 
-Or its equivalent form (which we use in numerical calculation):
+!!! note
 
-```math
-F(ρ, σ) = sqrt(tr(ρσ) + 2 \\sqrt{det(ρ)det(σ)})
-```
+    This definition is different from [the one in Wiki](https://en.wikipedia.org/wiki/Fidelity_of_quantum_states) by a square.
 
 ### Examples
 

@@ -27,7 +27,7 @@ nqudits(c::ChainBlock) = c.n
     chain(n) -> ChainBlock
 
 Return a [`ChainBlock`](@ref) which chains a list of blocks with the same number of qudits.
-Let ``G_i`` be a sequence of n-qudit blocks, the matrix representation of block `chain(G_1, G_2, \\ldots G_m)` is
+Let ``G_i`` be a sequence of n-qudit blocks, the matrix representation of block `chain(G_1, G_2, ..., G_m)` is
 
 ```math
 G_m G_{m-1}\\ldots G_1
@@ -125,7 +125,7 @@ chsubblocks(x::ChainBlock, it::AbstractBlock) = chsubblocks(x, (it,))
 
 function mat(::Type{T}, c::ChainBlock{D}) where {T,D}
     if isempty(c.blocks)
-        return IMatrix{D^nqudits(c),T}()
+        return IMatrix{T}(D^nqudits(c))
     else
         return prod(x -> mat(T, x), Iterators.reverse(c.blocks))
     end
@@ -183,7 +183,7 @@ YaoAPI.isunitary(c::ChainBlock) = all(isunitary, c.blocks) || isunitary(mat(c))
 YaoAPI.isreflexive(c::ChainBlock) =
     (iscommute(c.blocks...) && all(isreflexive, c.blocks)) || isreflexive(mat(c))
 LinearAlgebra.ishermitian(c::ChainBlock) =
-    (all(isreflexive, c.blocks) && iscommute(c.blocks...)) || isreflexive(mat(c))
+    (all(ishermitian, c.blocks) && iscommute(c.blocks...)) || ishermitian(mat(c))
 
 # this is not type stable, possible to fix?
 function unsafe_getindex(::Type{T}, c::ChainBlock{D}, i::Integer, j::Integer) where {D,T}

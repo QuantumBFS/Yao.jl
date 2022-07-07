@@ -6,6 +6,7 @@ using YaoArrayRegister
 @testset "NoParams" begin
     c = chain(put(3, 2 => Ry(0.2)), put(3, 1 => Rx(0.5)))
     np = chain(NoParams(put(3, 2 => Ry(0.2))), put(3, 1 => Rx(0.5)))
+    @test gatecount(np) == gatecount(c)
     reg = rand_state(3)
     @test content(np[1]) == put(3, 2 => Ry(0.2))
     @test parameters(np) == [0.5]

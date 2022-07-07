@@ -1,6 +1,7 @@
 using Test, YaoBlocks, LuxurySparse, YaoAPI
 using YaoBlocks.ConstGate
 import YaoBlocks: u1mat, unmat, cunmat, unij!
+using YaoArrayRegister
 
 @testset "dense-u1mat-unmat" begin
     nbit = 4
@@ -25,6 +26,9 @@ end
     res = mat(I2) ⊗ mat(I2) ⊗ mat(P1) ⊗ mat(I2) + mat(I2) ⊗ mat(I2) ⊗ mat(P0) ⊗ mat(P1)
     m3 = cunmat(nbit, (2,), (0,), mat(P1), (1,))
     @test m3 ≈ res
+    # cunmat fallback
+    m4 = cunmat(nbit, (2,), (0,), view(mat(P1), :,:), (1,))
+    @test m4 ≈ res
 end
 
 @testset "perm-unij-unmat" begin
@@ -46,6 +50,12 @@ end
     mmm = Z |> mat
     m1 = unmat(Val(2), nbit, mmm, (2,))
     m2 = YaoArrayRegister.linop2dense(v -> instruct!(Val(2), v, mmm, (2,)), nbit)
+    @test m1 ≈ m2
+
+    nbit = 4
+    mmm = igate(2) |> mat
+    m1 = unmat(Val(2), nbit, mmm, (2,1))
+    m2 = YaoArrayRegister.linop2dense(v -> instruct!(Val(2), v, mmm, (2,1)), nbit)
     @test m1 ≈ m2
 end
 

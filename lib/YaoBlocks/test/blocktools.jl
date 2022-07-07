@@ -32,7 +32,7 @@ end
 @testset "density matrix" begin
     reg = rand_state(4)
     dm = reg |> density_matrix
-    op = put(4, 3 => X)
+    op = 3*(2*put(4, 3 => X) + put(4, 2=>Y))
     @test expect(op, dm) ≈ expect(op, reg)
 
     reg = rand_state(4; nbatch = 3)

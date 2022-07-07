@@ -10,7 +10,7 @@ RotationGate, with GT both hermitian and isreflexive.
 Expression `rot(G, θ)` defines the following gate
 
 ```math
-\\cos \\frac{θ}{2}I - i \\sin \\frac{θ}{2} G
+\\cos \\frac{\\theta}{2}I - i \\sin \\frac{\\theta}{2} G
 ```
 """
 mutable struct RotationGate{D,T,GT<:AbstractBlock{D}} <: PrimitiveBlock{D}
@@ -83,7 +83,7 @@ content(x::RotationGate) = x.block
 chcontent(x::RotationGate, gen::AbstractBlock) = RotationGate(gen, x.theta)
 # General definition
 function mat(::Type{T}, R::RotationGate{D}) where {D,T}
-    I = IMatrix{D^nqudits(R),T}()
+    I = IMatrix{T}(D^nqudits(R))
     return I * cos(T(R.theta) / 2) - im * sin(T(R.theta) / 2) * mat(T, R.block)
 end
 

@@ -101,3 +101,10 @@ end
     r = density_matrix(reg)
     @test density_matrix(apply(reg, 2*put(3, 2=>X))) ≈ apply(r, 2*put(3, 2=>X))
 end
+
+@testset "gatecount" begin
+    @test gatecount(0.3 * X) == Dict(typeof(X)=>1)
+    @test gatecount(Val(0.1) * X) == Dict(typeof(Val(0.1)*X)=>1)
+    @test gatecount(cache(Val(0.1) * X)) == Dict(typeof(Val(0.1)*X)=>1)
+    @test gatecount(Daggered(X)) == Dict(typeof(Daggered(X))=>1)
+end
