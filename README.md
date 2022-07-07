@@ -82,6 +82,9 @@ Some quantum algorithms are implemented with Yao in [QuAlgorithmZoo](https://git
 We are running a monthly community call, please sign up in Julia slack channel
 by DM `Roger-luo` your email address. Or follow [our twitter](https://twitter.com/YaoProject).
 
+If you have anything interesting to share up to 40min, or just want to talk about your experience in a brief 10min, let us know!
+Please sign up with a topic using this [Google sheet](https://docs.google.com/spreadsheets/d/1b6hUvo5H3_ez42zibUji42iwMrq_nNpgPg7lqLBlWUw/edit?usp=sharing).
+
 ## Communication
 
 - Github issues: Please feel free to ask questions and report bugs, feature request in issues
