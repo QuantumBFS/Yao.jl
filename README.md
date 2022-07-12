@@ -44,8 +44,6 @@ julia> import Yao, YaoToEinsum
 
 julia> using YaoExtensions: qft_circuit
 
-julia> using OMEinsumContractionOrders: optimize_code, TreeSA, uniformsize
-
 julia> n = 10;
 
 julia> circuit = qft_circuit(n);
@@ -53,7 +51,7 @@ julia> circuit = qft_circuit(n);
 # convert circuit (open in both left and right) to einsum notation (code) and tensors.
 julia> code, tensors = YaoToEinsum.yao2einsum(circuit);
 
-# optimize code, for more methods, check `OMEinsumContractionOrders`.
+# optimize contraction order, for more algorithms, please check `OMEinsumContractionOrders`.
 julia> optcode = optimize_code(code, uniformsize(code, 2), TreeSA(ntrials=1));
 
 julia> reshape(optcode(tensors...; size_info=uniformsize(code, 2)), 1<<n, 1<<n) ≈ Yao.mat(circuit)
