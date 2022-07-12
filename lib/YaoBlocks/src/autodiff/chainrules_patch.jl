@@ -176,12 +176,16 @@ function rrule(::typeof(copy), reg::AbstractArrayReg)
 end
 
 for (BT, BLOCKS) in [(:Add, :(outδ.list)) (:ChainBlock, :(outδ.blocks))]
-    for ST in [:AbstractVector, :Tuple]
-        @eval function rrule(::Type{BT}, source::$ST) where {BT<:$BT}
-            out = BT(source)
-            out, function (outδ)
-                return (NoTangent(), $ST($BLOCKS))
-            end
+    @eval function rrule(::Type{BT}, source::AbstractVector) where {BT<:$BT}
+        out = BT(source)
+        out, function (outδ)
+            return (NoTangent(), collect($BLOCKS))
+        end
+    end
+    @eval function rrule(::Type{BT}, source::Tuple) where {BT<:$BT}
+        out = BT(source)
+        out, function (outδ)
+            return (NoTangent(), ($BLOCKS...,))
         end
     end
     @eval function rrule(::Type{BT}, args::AbstractBlock...) where {BT<:$BT}
