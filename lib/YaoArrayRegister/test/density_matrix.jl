@@ -161,3 +161,7 @@ end
     @test regsub!(copy(r), r).state ≈ zero(r.state)
     @test -(r).state ≈ -r.state
 end
+
+@testset "printing" begin
+    show(stdout, MIME"text/plain"(), rand_density_matrix(3))
+end
