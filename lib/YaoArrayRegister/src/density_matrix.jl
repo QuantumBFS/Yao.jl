@@ -51,6 +51,24 @@ function rand_density_matrix(::Type{T}, n::Int; nlevel::Int=2, pure::Bool=false)
     return partial_tr(dm, 1:n)
 end
 
+completely_mixed_state(n::Int; nlevel::Int=2) = completely_mixed_state(ComplexF64, n; nlevel)
+
+function completely_mixed_state(::Type{T}, n::Int; nlevel::Int=2) where T
+    return DensityMatrix{nlevel}(Matrix(IMatrix{T}(nlevel^n)))
+end
+
+function Base.show(io::IO, mime::MIME"text/plain", dm::DensityMatrix)
+    indent = get(io, :indent, 0)
+    summary(io, dm)
+    println(io)
+    println(io, " "^(indent+2), "state:")
+    s = sprint(dm.state) do io, x
+        show(io, mime, x)
+    end
+    s = map(s->" "^(indent+4) * s, split(s, '\n'))
+    join(io, s[2:end], '\n')
+end
+
 # Density matrices are hermitian
 Base.adjoint(dm::DensityMatrix) = dm
 LinearAlgebra.ishermitian(dm::DensityMatrix) =  true
