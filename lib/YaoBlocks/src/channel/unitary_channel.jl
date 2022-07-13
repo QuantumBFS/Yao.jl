@@ -1,5 +1,3 @@
-export UnitaryChannel, unitary_channel
-
 # NOTE: this can have a better support in YaoIR directly with StatsBase
 # as an compiled instruction, but store the probabilities is the best solution
 # here

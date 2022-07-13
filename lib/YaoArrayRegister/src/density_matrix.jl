@@ -1,5 +1,18 @@
-YaoAPI.DensityMatrix{D}(state::AbstractMatrix{T}) where {T,D} = DensityMatrix{D,T,typeof(state)}(state)
-YaoAPI.DensityMatrix(state::AbstractMatrix{T}; nlevel=2) where T = DensityMatrix{nlevel}(state)
+
+"""
+    DensityMatrix{D,T,MT<:AbstractMatrix{T}} <: AbstractRegister{D}
+    DensityMatrix{D}(state::AbstractMatrix)
+    DensityMatrix(state::AbstractMatrix; nlevel=2)
+
+Density matrix type, where `state` is a matrix.
+Type parameter `D` is the number of levels, it can also be specified by a keyword argument `nlevel`.
+"""
+struct DensityMatrix{D,T,MT<:AbstractMatrix{T}} <: AbstractRegister{D}
+    state::MT
+end
+
+DensityMatrix{D}(state::AbstractMatrix{T}) where {T,D} = DensityMatrix{D,T,typeof(state)}(state)
+DensityMatrix(state::AbstractMatrix{T}; nlevel=2) where T = DensityMatrix{nlevel}(state)
 
 """
     state(ρ::DensityMatrix) -> Matrix
@@ -15,7 +28,36 @@ YaoAPI.nqubits(ρ::DensityMatrix) = nqudits(ρ)
 YaoAPI.nqudits(ρ::DensityMatrix{D}) where {D} = logdi(size(state(ρ), 1), D)
 YaoAPI.nactive(ρ::DensityMatrix) = nqudits(ρ)
 nbatch(::DensityMatrix) = NoBatch()
-chstate(reg::DensityMatrix{D}, state) where D = DensityMatrix{D}(state)
+chstate(::DensityMatrix{D}, state) where D = DensityMatrix{D}(state)
+
+"""
+    rand_density_matrix([T=ComplexF64], n::Int; nlevel::Int=2, pure::Bool=false)
+
+Generate a random density matrix by partial tracing half of the pure state.
+
+!!! note
+
+    The generated density matrix is not strict hermitian due to rounding error.
+    If you need to check hermicity, do not use `ishermitian` consider using
+    `isapprox(dm.state, dm.state')` or explicit mark it as `Hermitian`.
+"""
+function rand_density_matrix(n::Int; nlevel::Int=2, pure::Bool=false)
+    return rand_density_matrix(ComplexF64, n; nlevel, pure)
+end
+
+function rand_density_matrix(::Type{T}, n::Int; nlevel::Int=2, pure::Bool=false) where T
+    pure && return density_matrix(rand_state(T, n; nlevel))
+
+    N = nlevel^n
+    Q, _ = qr(randn(N, N))
+    st = Q * Diagonal(rand(N)) * transpose(Q)
+    st = st ./ tr(st)
+    return DensityMatrix{nlevel}(st)
+end
+
+# Density matrices are hermitian
+Base.adjoint(dm::DensityMatrix) = dm
+LinearAlgebra.ishermitian(dm::DensityMatrix) =  true
 
 function YaoAPI.density_matrix(reg::ArrayReg, qubits)
     freg = focus!(copy(reg), qubits)
@@ -23,6 +65,18 @@ function YaoAPI.density_matrix(reg::ArrayReg, qubits)
 end
 YaoAPI.density_matrix(reg::ArrayReg{D}) where D = DensityMatrix{D}(reg.state * reg.state')
 YaoAPI.tracedist(dm1::DensityMatrix{D}, dm2::DensityMatrix{D}) where {D} = trace_norm(dm1.state .- dm2.state)
+
+"""
+    is_density_matrix(dm::AbstractMatrix; kw...)
+
+Test if given matrix is a density matrix. The keyword
+is the same as `isapprox`. See also `isapprox`.
+"""
+function is_density_matrix(dm::AbstractMatrix; kw...)
+    return isapprox(tr(dm), 1.0; kw...) &&
+        isapprox(dm, dm';kw...) &&
+        isposdef(Hermitian(dm))
+end
 
 # TODO: use batch_broadcast in the future
 """

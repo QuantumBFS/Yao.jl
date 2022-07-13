@@ -127,6 +127,12 @@ end
     # fidelity between focused and pure state
     f1 = rand_state(2)
     @test isapprox(fidelity(density_matrix(f1, (1,2)), r2), fidelity(f1, f2); atol=1e-6)
+
+    dm = rand_density_matrix(2)
+    @test is_density_matrix(dm.state)
+
+    dm = rand_density_matrix(2; pure=true)
+    @test tr(dm.state^2) ≈ 1
 end
 
 @testset "zero_state_like" begin
