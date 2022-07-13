@@ -47,12 +47,8 @@ end
 
 function rand_density_matrix(::Type{T}, n::Int; nlevel::Int=2, pure::Bool=false) where T
     pure && return density_matrix(rand_state(T, n; nlevel))
-
-    N = nlevel^n
-    Q, _ = qr(randn(T, N, N))
-    st = Q * Diagonal(rand(N)) * transpose(Q)
-    st = st ./ tr(st)
-    return DensityMatrix{nlevel}(st)
+    dm = density_matrix(rand_state(T, 2n; nlevel))
+    return partial_tr(dm, 1:n)
 end
 
 # Density matrices are hermitian
@@ -116,6 +112,7 @@ end
 von_neumann_entropy(v::AbstractVector) = -sum(x->x*log(x), v)
 
 function YaoAPI.partial_tr(dm::DensityMatrix{D,T}, locs) where {D,T}
+    locs = Tuple(locs)
     nbits = nqudits(dm)
     m = nbits-length(locs)
     strides = ntuple(i->D^(i-1), nbits)
