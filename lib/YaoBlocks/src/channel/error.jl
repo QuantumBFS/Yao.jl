@@ -1,8 +1,37 @@
+"""
+    bit_flip_channel(n::Int, p::Real, locs::NTuple{N, Int}) where N
+
+Create a bit flip channel as [`UnitaryChannel`](@ref).
+
+```math
+p⋅ρ + (1-p)⋅XρX
+```
+
+### Arguments
+
+- `n`: number of qubits.
+- `p`: probability of bit flips.
+- `locs`: locations of qubits that has this error to occur.
+"""
 function bit_flip_channel(n::Int, p::Real, locs::NTuple{N, Int}) where N
     opX = repeat(n, X, locs)
     return UnitaryChannel([igate(n), opX], [p, 1-p])
 end
 
+"""
+    phase_flip_channel(n::Int, p::Real, locs::NTuple{N, Int}) where N
+
+Create a phase flip channel as [`UnitaryChannel`](@ref).
+
+```math
+p⋅ρ + (1-p)⋅ZρZ
+```
+
+### Arguments
+- `n`: number of qubits.
+- `p`: probability of this error to occur.
+- `locs`: locations of qubits that has this error to occur.
+"""
 function phase_flip_channel(n::Int, p::Real, locs::NTuple{N, Int}) where N
     opZ = repeat(n, Z, locs)
     return UnitaryChannel([igate(n), opZ], [p, 1-p])    
@@ -21,6 +50,17 @@ function YaoAPI.unsafe_apply!(dm::DensityMatrix, ch::DepolarizingChannel)
     return dm
 end
 
+"""
+    depolarizing_channel(n::Int, p::Real)
+
+Create a depolarizing channel.
+
+# Arguments
+
+### Arguments
+- `n`: number of qubits.
+- `p`: probability of this error to occur.
+"""
 function depolarizing_channel(n::Int, p::Real)
     return DepolarizingChannel(n, p)
 end
