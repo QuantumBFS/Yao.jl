@@ -50,7 +50,7 @@ function rand_density_matrix(::Type{T}, n::Int; nlevel::Int=2, pure::Bool=false)
 
     N = nlevel^n
     Q, _ = qr(randn(T, N, N))
-    st = Q * Diagonal(rand(T, N)) * transpose(Q)
+    st = Q * Diagonal(rand(N)) * transpose(Q)
     st = st ./ tr(st)
     return DensityMatrix{nlevel}(st)
 end
