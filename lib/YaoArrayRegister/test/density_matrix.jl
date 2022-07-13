@@ -130,9 +130,15 @@ end
 
     dm = rand_density_matrix(2)
     @test is_density_matrix(dm.state)
+    @test eltype(dm.state) === ComplexF64
+
+    dm = rand_density_matrix(ComplexF32, 2)
+    @test is_density_matrix(dm.state)
+    @test eltype(dm.state) === ComplexF32
 
     dm = rand_density_matrix(2; pure=true)
     @test tr(dm.state^2) ≈ 1
+    @test eltype(dm.state) === ComplexF64
 end
 
 @testset "zero_state_like" begin

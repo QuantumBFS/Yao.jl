@@ -49,8 +49,8 @@ function rand_density_matrix(::Type{T}, n::Int; nlevel::Int=2, pure::Bool=false)
     pure && return density_matrix(rand_state(T, n; nlevel))
 
     N = nlevel^n
-    Q, _ = qr(randn(N, N))
-    st = Q * Diagonal(rand(N)) * transpose(Q)
+    Q, _ = qr(randn(T, N, N))
+    st = Q * Diagonal(rand(T, N)) * transpose(Q)
     st = st ./ tr(st)
     return DensityMatrix{nlevel}(st)
 end
