@@ -1,29 +1,3 @@
-function single_qubit_error_composite_probabilties(total::Int, p::Real)
-    return map(0:1<<total-1) do syndrome
-        prod(1:total) do i
-            if readbit(syndrome, i) == 1
-                (1 - p)
-            else
-                p
-            end
-        end
-    end
-end
-
-function single_qubit_error_composite_operators(err, n::Int, locs::NTuple)
-    total = length(locs)
-    return map(0:1<<total-1) do syndrome
-        syndrome == 0 && return igate(n)
-        op = chain(n)
-        for i in 1:total
-            if readbit(syndrome, i) == 1
-                push!(op, put(locs[i]=>err))
-            end
-        end
-        op
-    end
-end
-
 """
     bit_flip_channel(n::Int, locs::NTuple{N, Int}; p::Real) where N
 
@@ -43,26 +17,20 @@ p⋅ρ + (1-p)⋅XρX
 
 - `p`: probability of bit flips.
 """
-function bit_flip_channel(n::Int, locs::NTuple{N, Int}; p::Real) where N
-    ps = single_qubit_error_composite_probabilties(N, p)
-    op = single_qubit_error_composite_operators(X, n, locs)
-    return UnitaryChannel(op, ps)
+function bit_flip_channel(n::Int, loc::Int; p::Real)
+    return UnitaryChannel([igate(n), put(n, loc=>X)], [p, 1-p])
 end
 
-function pauli_error_channel(n::Int, locs::NTuple{N, Int}; pz::Real, px::Real=pz, py::Real=pz) where N
+function pauli_error_channel(n::Int, loc::Int; pz::Real, px::Real=pz, py::Real=pz)
     pz + px + py ≤ 1 || throw(ArgumentError("sum of error probability is larger than 1"))
-
-    # TODO: figure out the cumulated probability
-    return chain(
-        UnitaryChannel(
-            [igate(n), put(n, loc=>X), put(n, loc=>Y), put(n, loc=>Z)],
-            [1-(px+py+pz), px, py, pz],
-        ) for loc in locs
+    return UnitaryChannel(
+        [igate(n), put(n, loc=>X), put(n, loc=>Y), put(n, loc=>Z)],
+        [1-(px+py+pz), px, py, pz],
     )
 end
 
 """
-    phase_flip_channel(n::Int, locs::NTuple{N, Int}; p::Real) where N
+    phase_flip_channel(n::Int, locs::NTuple{N, Int}; p::Real)
 
 Create a phase flip channel as [`UnitaryChannel`](@ref). If number of `locs`
 is larger than 1, then the cumulated error channel will be applied.
@@ -78,10 +46,8 @@ p⋅ρ + (1-p)⋅ZρZ
 ### Keyword Arguments
 - `p`: probability of this error to occur.
 """
-function phase_flip_channel(n::Int, locs::NTuple{N, Int}; p::Real) where N
-    ps = single_qubit_error_composite_probabilties(N, p)
-    op = single_qubit_error_composite_operators(Z, n, locs)
-    return UnitaryChannel(op, ps)   
+function phase_flip_channel(n::Int, loc::Int; p::Real)
+    return UnitaryChannel([igate(n), put(n, loc=>Z)], [p, 1-p])
 end
 
 struct DepolarizingChannel{T} <: PrimitiveBlock{2}
