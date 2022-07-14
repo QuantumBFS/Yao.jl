@@ -65,3 +65,8 @@ end
 @testset "autodiff" begin
     include("autodiff/autodiff.jl")
 end
+
+@testset "channel" begin
+    include("channel/error.jl")
+    include("channel/unitary_channel.jl")
+end
