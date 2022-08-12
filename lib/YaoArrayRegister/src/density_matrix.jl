@@ -100,3 +100,11 @@ end
 
     end
 end
+
+"""
+$(TYPEDSIGNATURES)
+"""
+function Base.join(r0::DensityMatrix{D}, rs::DensityMatrix{D}...) where {D}
+    st = kron(state(r0), state.(rs)...)
+    return DensityMatrix{D}(st)
+end

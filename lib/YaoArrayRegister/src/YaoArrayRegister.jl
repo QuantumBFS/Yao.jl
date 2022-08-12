@@ -13,6 +13,7 @@ using LinearAlgebra
 using LegibleLambdas
 using StatsBase, Random
 using LuxurySparse, StaticArrays
+using DocStringExtensions
 
 export AbstractArrayReg,
     ArrayReg,
