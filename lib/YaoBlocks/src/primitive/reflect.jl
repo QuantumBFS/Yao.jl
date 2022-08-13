@@ -21,7 +21,7 @@ reflect(ArrayReg{1, Complex{Float64}, Array...})
 """
 reflect(v::AbstractArrayReg, θ::Real=π)::ReflectGate = time_evolve(Projector(v), θ)
 
-function unsafe_apply!(r::AbstractArrayReg, g::ReflectGate)
+function YaoAPI.unsafe_apply!(r::AbstractArrayReg, g::ReflectGate)
     v = state(g.H.psi)
     r.state .= r.state .- (1-exp(-im*g.dt)) .* (v * (v' * r.state))
     return r

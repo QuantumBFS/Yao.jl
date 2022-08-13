@@ -39,6 +39,8 @@ export AbstractArrayReg,
     rank3,
     # operations
     isnormalized,
+    isseparable,
+    safe_remove!,
     normalize!,
     norm,
     regadd!,

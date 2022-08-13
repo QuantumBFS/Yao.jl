@@ -211,3 +211,35 @@ end
 
 Base.:(==)(lhs::AdjointRegister, rhs::AdjointRegister) = parent(lhs) == parent(rhs)
 Base.isapprox(lhs::AdjointRegister, rhs::AdjointRegister; kw...) = isapprox(parent(lhs), parent(rhs); kw...)
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns true if the `parts` are seperable from the rest parts.
+i.e. let `B` be the specified part and `A` be the rest part.
+The register can be represented as `A ⊗ B`.
+"""
+function isseparable(reg::AbstractArrayReg{D}, parts) where D
+    n = nactive(reg)
+    p = length(parts)
+    r = reorder!(copy(reg), sortperm([parts..., setdiff(1:n, parts)...]))
+    if reg isa BatchedArrayReg
+        return all(x->rank(reshape(x.state, D^p, :)) == 1, r)
+    else
+        return rank(reshape(r.state, D^p, :)) == 1
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Remove a qubit not entangled with the rest parts safely.
+"""
+function safe_remove!(reg::AbstractArrayReg, parts)
+    if isseparable(reg, parts)
+        measure!(RemoveMeasured(), reg, parts)
+        return reg
+    else
+        error("Qubits at locations $(parts) are entangled with the rest qubits.")
+    end
+end

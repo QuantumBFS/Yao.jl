@@ -83,3 +83,4 @@ Base.adjoint(x::GeneralMatrixBlock) = Daggered(x)
 function isdiagonal(op::GeneralMatrixBlock)
     op.mat isa Diagonal || op.mat isa IMatrix
 end
+Base.setindex!(A::GeneralMatrixBlock, val, args::DitStr...) = setindex!(A.mat, val, (buffer.(args) .+ 1)...)

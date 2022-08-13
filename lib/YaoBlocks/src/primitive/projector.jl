@@ -36,7 +36,7 @@ projector(ArrayReg{1, Complex{Float64}, Array...})
 """
 projector(v::AbstractArrayReg)::Projector = Projector(v)
 
-function unsafe_apply!(r::AbstractArrayReg, g::Projector{D, T}) where {D, T}
+function YaoAPI.unsafe_apply!(r::AbstractArrayReg, g::Projector{D, T}) where {D, T}
     v = state(g.psi)
     r.state .= v' * r.state .* v
     return r
