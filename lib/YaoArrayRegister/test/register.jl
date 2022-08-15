@@ -30,6 +30,7 @@ using Adapt
 end
 
 @testset "test BatchedArrayReg constructors" begin
+    @test BatchedArrayReg(rand_state(3), rand_state(3; nbatch=3), rand_state(3)).nbatch == 5
     @test BatchedArrayReg(rand(4, 6), 3) isa BatchedArrayReg{2}
     @test_throws DimensionMismatch BatchedArrayReg(rand(4, 3), 2)
     @test_throws DimensionMismatch BatchedArrayReg(rand(5, 2), 2)
