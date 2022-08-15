@@ -94,7 +94,7 @@ end
 
 @testset "more (push test coverage)" begin
     reg1 = focus!(rand_state(5; nbatch=5), (2, 3))
-    reg2 = focus!(rand_state(5), (2, 3))
+    reg2 = focus!(rand_state(5; nbatch=5), (2, 3))
     @test fidelity(reg1, reg2) ≈ fidelity(reg2, reg1)
     @test join(reg1) == reg1
     us = uniform_state(3; nlevel=3, nbatch=2)
@@ -102,7 +102,7 @@ end
     @test nlevel(us) == 3
     println(reg1)
     println(reg2)
-    @test von_neumann_entropy(clone(reg2, 3), [2,1]) ≈ fill(von_neumann_entropy(reg2, [1,2]), 3)
+    @test von_neumann_entropy(clone(reg2, 3), [2,1]) ≈ repeat(von_neumann_entropy(reg2, [1,2]), 3)
 end
 
 @testset "separable and safe remove" begin

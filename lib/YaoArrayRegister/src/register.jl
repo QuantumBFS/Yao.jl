@@ -436,6 +436,7 @@ julia> measure(reg; nshots=3)
 ```
 """
 function Base.join(r0::AbstractArrayReg{D}, rs::AbstractArrayReg{D}...)::AbstractArrayReg where D
+    length(rs) == 0 && return r0
     state = batched_kron(rank3(r0), rank3.(rs)...)
     return arrayreg(reshape(state, size(state, 1), :), nbatch=nbatch(rs[1]), nlevel=D)
 end
