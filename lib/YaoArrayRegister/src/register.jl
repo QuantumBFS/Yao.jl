@@ -87,8 +87,8 @@ function BatchedArrayReg(reg0::AbstractArrayReg{D}, regs::AbstractArrayReg{D}...
     n = nqudits(reg0)
     na = nactive(reg0)
     @assert all(reg->nqudits(reg) == n && nactive(reg) == na, regs) "Number of (active) qudits do not match."
-    state = cat(rank3.(reg)...; dims=3)
-    return BatchedArrayReg{D}(reshape(state, :, size(state, 3)))
+    state = cat(rank3(reg0), rank3.(regs)...; dims=3)
+    return BatchedArrayReg{D}(reshape(state, :, size(state, 3)), size(state, 3))
 end
 
 Base.copy(r::BatchedArrayReg) = BatchedArrayReg(r)
