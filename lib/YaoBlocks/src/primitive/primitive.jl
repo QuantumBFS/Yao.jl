@@ -11,6 +11,8 @@ include("phase_gate.jl")
 include("shift_gate.jl")
 include("rotation_gate.jl")
 include("time_evolution.jl")
+include("projector.jl")
+include("reflect.jl")
 include("general_matrix_gate.jl")
 include("measure.jl")
 

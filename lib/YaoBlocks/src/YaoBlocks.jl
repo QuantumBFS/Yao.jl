@@ -15,6 +15,7 @@ using MLStyle: @match
 using LinearAlgebra: eigen!
 using SparseArrays, LuxurySparse
 using ExponentialUtilities, Random, CacheServers
+using DocStringExtensions
 import StaticArrays: SMatrix
 
 import YaoAPI:
@@ -101,6 +102,7 @@ export AbstractBlock,
 export applymatrix, cache_key
 
 include("utils.jl")
+include("outerproduct_and_projection.jl")
 include("error.jl")
 # include("traits.jl")
 
