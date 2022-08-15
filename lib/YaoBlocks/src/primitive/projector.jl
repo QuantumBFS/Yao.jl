@@ -29,9 +29,9 @@ Create a [`Projector`](@ref) with an quantum state vector `v`.
 
 ### Example
 
-```jldoctest; setup=:(using YaoBlocks)
+```jldoctest; setup=:(using YaoBlocks, YaoArrayRegister)
 julia> projector(rand_state(3))
-projector(ArrayReg{1, Complex{Float64}, Array...})
+|s⟩⟨s|, nqudits = 3
 ```
 """
 projector(v::AbstractArrayReg)::Projector = Projector(v)
