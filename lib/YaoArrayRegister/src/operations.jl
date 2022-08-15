@@ -237,6 +237,7 @@ end
 $(TYPEDSIGNATURES)
 
 Remove qubits that are not entangled with the rest qudits safely.
+i.e. `isseparable(reg, locs)` must return true.
 """
 function safe_remove!(reg::AbstractArrayReg, locs)
     if isseparable(reg, locs)
