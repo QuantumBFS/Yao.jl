@@ -420,7 +420,7 @@ end
 $(TYPEDSIGNATURES)
 
 Concatenate a list of registers, each register should
-have the same batch number of level and size. See also [`clone`](@ref).
+have the same number of level and batch size. See also [`clone`](@ref).
 
 ```jldoctest; setup=:(using Yao)
 julia> reg = join(product_state(bit"111"), zero_state(3))
