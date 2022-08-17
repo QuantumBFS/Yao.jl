@@ -221,6 +221,15 @@ A state ``|ψ⟩`` is separable if
 |\\psi\\rangle = |a\\rangle \\otimes |b\\rangle
 ```
 where ``|a⟩`` is defined on the state space at `locs`.
+
+### Examples
+```jldoctest; setup=:(using YaoArrayRegister)
+julia> isseparable(product_state(bit"01100"), 1:2)
+true
+
+julia> isseparable(ghz_state(5), 1:2)
+false
+```
 """
 function isseparable(reg::AbstractArrayReg{D}, locs) where D
     n = nactive(reg)
@@ -238,6 +247,20 @@ $(TYPEDSIGNATURES)
 
 Remove qubits that are not entangled with the rest qudits safely.
 i.e. `isseparable(reg, locs)` must return true.
+
+### Examples
+```jldoctest; setup=:(using YaoArrayRegister)
+julia> reg = join(ghz_state(3), ghz_state(2));
+
+julia> safe_remove!(copy(reg), 1:2)
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 3/3
+    nlevel: 2
+
+julia> safe_remove!(copy(reg), 1:3)
+ERROR: Qubits at locations 1:3 are entangled with the rest qubits.
+[...]
+```
 """
 function safe_remove!(reg::AbstractArrayReg, locs)
     if isseparable(reg, locs)
