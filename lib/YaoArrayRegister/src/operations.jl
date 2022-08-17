@@ -211,3 +211,62 @@ end
 
 Base.:(==)(lhs::AdjointRegister, rhs::AdjointRegister) = parent(lhs) == parent(rhs)
 Base.isapprox(lhs::AdjointRegister, rhs::AdjointRegister; kw...) = isapprox(parent(lhs), parent(rhs); kw...)
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns true if qudits at `locs` are seperable from the rest qudits.
+A state ``|ψ⟩`` is separable if
+```math
+|\\psi\\rangle = |a\\rangle \\otimes |b\\rangle
+```
+where ``|a⟩`` is defined on the state space at `locs`.
+
+### Examples
+```jldoctest; setup=:(using YaoArrayRegister)
+julia> isseparable(product_state(bit"01100"), 1:2)
+true
+
+julia> isseparable(ghz_state(5), 1:2)
+false
+```
+"""
+function isseparable(reg::AbstractArrayReg{D}, locs) where D
+    n = nactive(reg)
+    p = length(locs)
+    r = reorder!(copy(reg), sortperm([locs..., setdiff(1:n, locs)...]))
+    if reg isa BatchedArrayReg
+        return all(x->rank(reshape(x.state, D^p, :)) == 1, r)
+    else
+        return rank(reshape(r.state, D^p, :)) == 1
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Remove qubits that are not entangled with the rest qudits safely.
+i.e. `isseparable(reg, locs)` must return true.
+
+### Examples
+```jldoctest; setup=:(using YaoArrayRegister)
+julia> reg = join(ghz_state(3), ghz_state(2));
+
+julia> safe_remove!(copy(reg), 1:2)
+ArrayReg{2, ComplexF64, Array...}
+    active qubits: 3/3
+    nlevel: 2
+
+julia> safe_remove!(copy(reg), 1:3)
+ERROR: Qubits at locations 1:3 are entangled with the rest qubits.
+[...]
+```
+"""
+function safe_remove!(reg::AbstractArrayReg, locs)
+    if isseparable(reg, locs)
+        measure!(RemoveMeasured(), reg, locs)
+        return reg
+    else
+        error("Qubits at locations $(locs) are entangled with the rest qubits.")
+    end
+end

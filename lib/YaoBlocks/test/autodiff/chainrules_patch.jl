@@ -16,7 +16,7 @@ end
             Tuple{Nothing, Vector{NamedTuple{(:block, :theta),Tuple{Nothing,Float64}}}},
         }[(n=nothing, blocks = [(block = nothing, theta = 1.0)],)],
     )
-    @test_broken Zygote.gradient(
+    @test Zygote.gradient(
         x -> getfield(getfield(x, :content), :theta),
         Daggered(Rx(0.5)),
     )[1] == (content = (block = nothing, theta = 1.0),)

@@ -149,3 +149,10 @@ end
     @test regsub!(copy(r), r).state ≈ zero(r.state)
     @test -(r).state ≈ -r.state
 end
+
+@testset "join" begin
+    r1 = density_matrix(arrayreg(bit"110"))
+    r2 = density_matrix(arrayreg(bit"101"))
+    r = join(r2, r1)
+    @test measure(r) == [bit"101110"]
+end
