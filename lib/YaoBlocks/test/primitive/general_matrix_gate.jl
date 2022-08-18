@@ -52,3 +52,9 @@ a = rand_unitary(2) .|> ComplexF32
         @test allpass
     end
 end
+
+@testset "setting index" begin
+    h = matblock(zeros(ComplexF64, 2, 2))
+    h[bit"1", bit"0"] = 1
+    @test ishermitian(h + h')
+end

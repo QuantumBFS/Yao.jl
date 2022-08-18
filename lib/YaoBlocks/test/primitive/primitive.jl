@@ -32,6 +32,14 @@ end
     include("measure.jl")
 end
 
+@testset "reflect" begin
+    include("reflect.jl")
+end
+
+@testset "projector" begin
+    include("projector.jl")
+end
+
 # it does nothing
 @test chsubblocks(X, Y) === X
 @test X[bit"1", bit"0"] == 1
