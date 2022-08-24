@@ -68,6 +68,6 @@ end
 
 @testset "use routines" begin
     rows, vals = YaoBlocks.unsafe_getcol(ComplexF64, put(5, 1=>ConstGate.P1), bit"00000")
-    @test eltype(rows) isa DitStr
-    @test eltype(cols) isa ComplexF64
+    @test eltype(rows) <: DitStr
+    @test eltype(vals) <: ComplexF64
 end
