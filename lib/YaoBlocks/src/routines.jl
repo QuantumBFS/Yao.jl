@@ -532,7 +532,7 @@ function instruct_get_column(::Type{T}, U, locs::NTuple{M}, cbits::NTuple{C}, cv
     for (idx, row) in enumerate(rows)
         subi = DitStr{D,L,TI}(j)
         @inbounds for ind in 1:M
-            subi += BitBasis._lshift(Val{D}(), _takeat(buffer(i), Val{D}(), ind) - _takeat(subj, Val{D}(), ind), locs[ind]-1)
+            subi += BitBasis._lshift(Val{D}(), _takeat(buffer(row), Val{D}(), ind) - _takeat(subj, Val{D}(), ind), locs[ind]-1)
         end
         newrows[idx] = subi
     end
