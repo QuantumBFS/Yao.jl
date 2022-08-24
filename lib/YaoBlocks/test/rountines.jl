@@ -65,3 +65,9 @@ end
     @test mat(put(3, 2 => G1')) ≈ mat(put(3, 2 => matblock(G1)))'
     @test mat(put(7, (3, 2, 1, 5, 4, 6) => G6')) ≈ mat(put(7, (3, 2, 1, 5, 4, 6) => G6))'
 end
+
+@testset "use routines" begin
+    rows, vals = YaoBlocks.unsafe_getcol(ComplexF64, put(5, 1=>ConstGate.P1), bit"00000")
+    @test eltype(rows) isa DitStr
+    @test eltype(cols) isa ComplexF64
+end
