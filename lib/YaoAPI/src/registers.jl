@@ -373,7 +373,7 @@ struct RemoveMeasured <: PostProcess end
 struct NoPostProcess <: PostProcess end
 
 """
-    measure([, operator], register[, locs]; nshots=1, rng=Random.GLOBAL_RNG) -> Vector{Int}
+    measure([, operator], register[, locs]; nshots=1, rng=Random.GLOBAL_RNG) -> Vector{DitStr}
 
 Measure a quantum state and return measurement results of qudits.
 This measurement function a cheating version of `measure!` that does not collapse the input state.
