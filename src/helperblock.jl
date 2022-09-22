@@ -33,3 +33,18 @@ YaoBlocks.Optimise.to_basictypes(block::LabelBlock) = block
 export addlabel
 addlabel(b::AbstractBlock, str::String) = LabelBlock(b, str)
 
+# to fix issue 
+function YaoBlocks.print_tree(
+   io::IO,
+   root::AbstractBlock,
+   node::LabelBlock,
+   depth::Int = 1,
+   islast::Bool = false,
+   active_levels = ();
+   maxdepth = 5,
+   charset = YaoBlocks.BlockTreeCharSet(),
+   title = true,
+   compact = false,
+)
+   print(io, node.name)
+end

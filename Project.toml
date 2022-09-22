@@ -1,6 +1,6 @@
 name = "YaoPlots"
 uuid = "32cfe2d9-419e-45f2-8191-2267705d8dbc"
-version = "0.8.0"
+version = "0.8.1"
 
 [deps]
 Luxor = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"

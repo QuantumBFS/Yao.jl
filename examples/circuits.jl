@@ -41,7 +41,7 @@ vizcircuit(chain(5, [put(5, 2=>ConstGate.Sdag), put(5, 3=>ConstGate.Tdag),
     put(5, (2,)=>shift(0.4π)),
     ]), filename=joinpath(@__DIR__, "constgates.png"))
 
-vizcircuit(chain(5, [put(5, (2,3)=>matblock(Matrix(SWAP), tag="SWAP")'), put(5, 2=>matblock(mat(I2), tag="id")), put(5, 2=>addlabel(X, "X")), control(5, (5,3), (2,4,1)=>put(3, (1,3)=>addlabel(SWAP, "SWAP")))]), filename=joinpath(@__DIR__, "multiqubit.png"))
+vizcircuit(chain(5, [put(5, (2,3)=>matblock(Matrix(SWAP), tag="SWAP")'), put(5, 2=>matblock(mat(I2), tag="id")), put(5, 2=>addlabel(X, "Xr")), control(5, (5,3), (2,4,1)=>put(3, (1,3)=>addlabel(SWAP, "SWAP")))]), filename=joinpath(@__DIR__, "multiqubit.png"))
 
 YaoPlots.darktheme!()
 YaoPlots.CircuitStyles.gate_bgcolor[] = "transparent"  # default is transparent
