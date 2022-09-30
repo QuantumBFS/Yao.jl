@@ -15,7 +15,6 @@ using MLStyle: @match
 using LinearAlgebra: eigen!
 using SparseArrays, LuxurySparse
 using ExponentialUtilities, Random, CacheServers
-using DocStringExtensions
 import StaticArrays: SMatrix
 
 import YaoAPI:

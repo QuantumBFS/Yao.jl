@@ -3,7 +3,8 @@ export ReflectGate, reflect
 ReflectGate{D, T, Tt, AT<:AbstractArrayReg{D, T}} = TimeEvolution{D,Tt,Projector{D,T,AT}}
 
 """
-$(TYPEDSIGNATURES)
+    reflect(v::AbstractArrayReg) -> ReflectGate{D,T} where {D,T}
+    reflect(v::AbstractArrayReg, θ::Real) -> ReflectGate{D,T} where {D,T}
 
 Create a [`ReflectGate`](@ref) with respect to an quantum state vector `v`.
 It defines the following gate operation.

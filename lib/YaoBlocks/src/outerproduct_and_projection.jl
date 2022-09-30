@@ -2,7 +2,7 @@ export LowRankMatrix, OuterProduct, projection, outerprod
 abstract type LowRankMatrix{T} <: AbstractMatrix{T} end
 
 """
-$(TYPEDEF)
+    struct OuterProduct{T, ATL<:(AbstractArray{T}), ATR<:(AbstractArray{T})} <: LowRankMatrix{T}
 
 If `ATL(R) <: AbstractVector`, it represents an outer product `x.left*transpose(x.right)`.
 Else if `ATL(R) <: AbstractMatrix`, then it is an outer product `x.left*transpose(x.right)`.

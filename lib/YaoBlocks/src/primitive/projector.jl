@@ -1,7 +1,7 @@
 export Projector, projector
 
 """
-$(TYPEDEF)
+    struct Projector{D, T, AT<:(AbstractArrayReg{D, T})} <: PrimitiveBlock{D}
 
 Projection operator to target state `psi`.
 
@@ -23,7 +23,7 @@ nqudits(v::Projector) = nqudits(v.psi)
 print_block(io::IO, p::Projector) = print(io, "|s⟩⟨s|, nqudits = $(nqudits(p))")
 
 """
-$(TYPEDSIGNATURES)
+    project(x::AbstractArrayReg) -> Projector
 
 Create a [`Projector`](@ref) with an quantum state vector `v`.
 
