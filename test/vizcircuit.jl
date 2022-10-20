@@ -79,3 +79,14 @@ end
 @testset "regression" begin
 	@test vizcircuit(put(10, (8,2,3)=>EasyBuild.heisenberg(3)), starting_texts=string.(1:10), ending_texts=string.(1:10), show_ending_bar=true) isa Drawing
 end
+
+@testset "readme" begin
+    circuit = chain(
+        4,    
+        kron(X, H, H, H),
+        kron(1=>Y, 4=>H), 
+        put(2=>Y),
+    )
+    YaoPlots.CircuitStyles.barrier_for_chain[] = true
+    @test vizcircuit(circuit) isa Drawing
+end

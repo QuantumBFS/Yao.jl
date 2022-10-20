@@ -1,6 +1,7 @@
 module CircuitStyles
     using Luxor
     const unit = Ref(60)    # number of points in a unit
+    const barrier_for_chain = Ref(false)
     const r = Ref(0.2)
     const lw = Ref(1.0)
     const textsize = Ref(16.0)
@@ -284,7 +285,20 @@ end
 
 # composite
 function draw!(c::CircuitGrid, p::ChainBlock, address, controls)
-    draw!.(Ref(c), subblocks(p), Ref(address), Ref(controls))
+    for block in subblocks(p)
+        draw!(c, block, address, controls)
+        CircuitStyles.barrier_for_chain[] && set_barrier!(c, Int[address..., controls...])
+    end
+end
+
+function set_barrier!(c::CircuitGrid, locs::AbstractVector{Int})
+    front = maximum(c.frontier[locs])
+    for loc in locs
+        if c.frontier[loc] < front
+            CircuitStyles.render(c.gatestyles.line, c[(c.frontier[loc], loc); (front, loc)])
+            c.frontier[loc] = front
+        end
+    end
 end
 
 function draw!(c::CircuitGrid, p::PutBlock, address, controls)
@@ -327,7 +341,10 @@ for B in [:LabelBlock, :GeneralMatrixBlock, :Add]
 end
 for GT in [:KronBlock, :RepeatedBlock, :CachedBlock, :Subroutine, :(YaoBlocks.AD.NoParams)]
     @eval function draw!(c::CircuitGrid, p::$GT, address, controls)
+        barrier_style = CircuitStyles.barrier_for_chain[]
+        CircuitStyles.barrier_for_chain[] = false
         draw!(c, YaoBlocks.Optimise.to_basictypes(p), address, controls)
+        CircuitStyles.barrier_for_chain[] = barrier_style
     end
 end
 for (GATE, SYM) in [(:XGate, :Rx), (:YGate, :Ry), (:ZGate, :Rz)]
