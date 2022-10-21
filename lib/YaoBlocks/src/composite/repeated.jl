@@ -31,7 +31,7 @@ function RepeatedBlock(n::Int, block::AbstractBlock{D}, locs::UnitRange{Int}) wh
 end
 
 
-function RepeatedBlock(n::Int, block::GT) where {M,D,GT<:AbstractBlock{D}}
+function RepeatedBlock(n::Int, block::GT) where {D,GT<:AbstractBlock{D}}
     return RepeatedBlock{D,n,GT}(n::Int, block, Tuple(1:nqudits(block):n-nqudits(block)+1))
 end
 YaoAPI.nqudits(m::RepeatedBlock) = m.n
