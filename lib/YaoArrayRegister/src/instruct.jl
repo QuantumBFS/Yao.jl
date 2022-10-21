@@ -302,7 +302,7 @@ for (G, FACTOR) in zip(
 end
 
 # General definition
-function rot_mat(::Type{T}, gen::AbstractMatrix, theta::Real) where {N,T}
+function rot_mat(::Type{T}, gen::AbstractMatrix, theta::Real) where {T}
     I = IMatrix{T}(size(gen, 1))
     m = I * cos(theta / 2) - im * sin(theta / 2) * gen
     if eltype(m) != T
@@ -345,7 +345,7 @@ end # for
     ::Val{:Rx},
     (loc,)::Tuple{Int},
     theta::Number,
-) where {T,N}
+) where {T}
     b, a = sincos(theta / 2)
     instruct_kernel(state, loc, 1 << (loc - 1), 1 << loc, a, -im * b, -im * b, a)
     return state
@@ -356,7 +356,7 @@ function YaoAPI.instruct!(::Val{2},
     ::Val{:Ry},
     (loc,)::Tuple{Int},
     theta::Number,
-) where {T,N}
+) where {T}
     b, a = sincos(theta / 2)
     instruct_kernel(state, loc, 1 << (loc - 1), 1 << loc, a, -b, b, a)
     return state
@@ -367,7 +367,7 @@ function YaoAPI.instruct!(::Val{2},
     ::Val{:Rz},
     (loc,)::Tuple{Int},
     theta::Number,
-) where {T,N}
+) where {T}
     a = exp(-im * theta / 2)
     instruct_kernel(state, loc, 1 << (loc - 1), 1 << loc, a, zero(T), zero(T), a')
     return state
@@ -475,7 +475,7 @@ for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
         locs::Tuple{Int},
         control_locs::Int,
         control_bits::Int,
-    ) where {N} = instruct!(Val(2), state, g, locs..., control_locs, control_bits)
+    ) = instruct!(Val(2), state, g, locs..., control_locs, control_bits)
 
 end
 

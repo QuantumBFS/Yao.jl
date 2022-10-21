@@ -12,7 +12,7 @@ struct Subroutine{D,BT<:AbstractBlock,C} <: AbstractContainer{BT,D}
     locs::NTuple{C,Int}
 end
 
-function Subroutine(n::Int, block::BT, locs::NTuple{C,Int}) where {N,D,C,BT<:AbstractBlock{D}}
+function Subroutine(n::Int, block::BT, locs::NTuple{C,Int}) where {D,C,BT<:AbstractBlock{D}}
     @assert_locs_safe n locs
     if !(length(locs) == nqudits(block) && n>= nqudits(block))
         throw(
