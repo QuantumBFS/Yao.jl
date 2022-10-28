@@ -121,7 +121,7 @@ end
 
 Compute the sandwich function ⟨bra|op|ket⟩.
 """
-sandwich(bra::AbstractRegister, op::AbstractBlock, reg::AbstractRegister) = bra' * apply!(copy(reg), op)
+sandwich(bra::AbstractArrayReg, op::AbstractBlock, reg::AbstractArrayReg) = bra' * apply!(copy(reg), op)
 
 function sandwich(bra::BatchedArrayReg, op::AbstractBlock, reg::BatchedArrayReg)
     @assert nbatch(bra) == nbatch(reg)
@@ -174,7 +174,7 @@ function conjsumprod13(A::AbstractArray, C::AbstractArray)
     res
 end
 
-for REG in [:AbstractRegister, :BatchedArrayReg]
+for REG in [:AbstractArrayReg, :BatchedArrayReg]
     @eval function sandwich(bra::$REG, op::AbstractAdd, reg::$REG)
         sum(opi -> sandwich(bra, opi, reg), op)
     end
