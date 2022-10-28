@@ -51,9 +51,7 @@ end
     ket = arrayreg(bit"100") + 2 * arrayreg(bit"110") + 3 * arrayreg(bit"111")
 
     focus!(ket, 2:3)
-    t = bra' * ket
-    relax!(t, 1)
-    @test state(t) ≈ [1, 0]
+    @test_throws ErrorException bra' * ket
 
     relax!(ket, 2:3)
     focus!(ket, 1)
@@ -66,7 +64,7 @@ end
     reg1 = rand_state(2; nbatch = 10)
     reg2 = rand_state(5; nbatch = 10)
     focus!(reg2, 2:3)
-    @test all(reg1' * reg2 .≈ reg1' .* reg2)
+    @test_throws ErrorException reg1' * reg2
 end
 
 @testset "inplace funcs" begin

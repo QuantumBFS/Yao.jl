@@ -74,9 +74,9 @@ collect_blocks(::Type{T}, x::AbstractBlock) where {T<:AbstractBlock} =
 #expect(op::AbstractBlock, dm::DensityMatrix) = mapslices(x->sum(mat(op).*x)[], dm.state, dims=[1,2]) |> vec
 
 """
-    expect(op::AbstractBlock, reg) -> Vector
-    expect(op::AbstractBlock, reg => circuit) -> Vector
-    expect(op::AbstractBlock, density_matrix) -> Vector
+    expect(op::AbstractBlock, reg) -> Real
+    expect(op::AbstractBlock, reg => circuit) -> Real
+    expect(op::AbstractBlock, density_matrix) -> Real
 
 Get the expectation value of an operator, the second parameter can be a register `reg` or a pair of input register and circuit `reg => circuit`.
 
@@ -92,13 +92,21 @@ For register input, the return value is a register.
 
     For batched register, `expect(op, reg=>circuit)` returns a vector of size number of batch as output. However, one can not differentiate over a vector loss, so `expect'(op, reg=>circuit)` accumulates the gradient over batch, rather than returning a batched gradient of parameters.
 """
+function expect(op::AbstractBlock, reg::AbstractRegister)
+    # NOTE: broadcast because the input register can be a batched one
+    return safe_real.(sandwich(reg, op, reg))
+end
+function expect(op, plan::Pair{<:AbstractRegister,<:AbstractBlock})
+    expect(op, copy(plan.first) |> plan.second)
+end
+
 function expect(op::AbstractBlock, dm::DensityMatrix)
     # NOTE: we use matrix form here because the matrix size is known to be small,
     # while applying a circuit on a reduced density matrix might take much more than constructing the matrix.
     mop = mat(op)
     # TODO: switch to `IterNz`
     # sum(x->dm.state[x[2],x[1]]*x[3], IterNz(mop))
-    return sum(transpose(dm.state) .* mop)
+    return safe_real(sum(transpose(dm.state) .* mop))
 end
 function expect(op::AbstractAdd, reg::DensityMatrix)
     # NOTE: this is faster in e.g. when the op is Heisenberg
@@ -108,23 +116,28 @@ function expect(op::Scale, reg::DensityMatrix)
     factor(op) * expect(content(op), reg)
 end
 
-# NOTE: assume an register has a bra. Can we define it for density matrix?
-expect(op::AbstractBlock, reg::AbstractRegister) = reg' * apply!(copy(reg), op)
+"""
+    sandwich(bra::AbstractRegister, op::AbstractBlock, ket::AbstracRegister) -> Complex
 
-function expect(op::AbstractBlock, reg::BatchedArrayReg)
+Compute the sandwich function ⟨bra|op|ket⟩.
+"""
+sandwich(bra::AbstractRegister, op::AbstractBlock, reg::AbstractRegister) = bra' * apply!(copy(reg), op)
+
+function sandwich(bra::BatchedArrayReg, op::AbstractBlock, reg::BatchedArrayReg)
+    @assert nbatch(bra) == nbatch(reg)
     B = YaoArrayRegister._asint(nbatch(reg))
     ket = apply!(copy(reg), op)
-    if !(reg.state isa Transpose)  # not-transposed storage
+    if !(bra.state isa Transpose)  # not-transposed storage
         C = reshape(ket.state, :, B)
-        A = reshape(reg.state, :, B)
+        A = reshape(bra.state, :, B)
         # reduce over the 1st dimension
         conjsumprod1(A, C)
-    elseif size(reg.state, 2) == B  # transposed storage, no environment qubits
+    elseif size(bra.state, 2) == B  # transposed storage, no environment qubits
         # reduce over the second dimension
-        conjsumprod2(reg.state.parent, ket.state.parent)
+        conjsumprod2(bra.state.parent, ket.state.parent)
     else
-        C = reshape(ket.state.parent, :, B, size(reg.state, 1))
-        A = reshape(reg.state.parent, :, B, size(reg.state, 1))
+        C = reshape(ket.state.parent, :, B, size(bra.state, 1))
+        A = reshape(bra.state.parent, :, B, size(bra.state, 1))
         # reduce over the 1st and 3rd dimension
         conjsumprod13(A, C)
     end
@@ -162,16 +175,12 @@ function conjsumprod13(A::AbstractArray, C::AbstractArray)
 end
 
 for REG in [:AbstractRegister, :BatchedArrayReg]
-    @eval function expect(op::AbstractAdd, reg::$REG)
-        sum(opi -> expect(opi, reg), op)
+    @eval function sandwich(bra::$REG, op::AbstractAdd, reg::$REG)
+        sum(opi -> sandwich(bra, opi, reg), op)
     end
-    @eval function expect(op::Scale, reg::$REG)
-        factor(op) * expect(content(op), reg)
+    @eval function sandwich(bra::$REG, op::Scale, reg::$REG)
+        factor(op) * sandwich(bra, content(op), reg)
     end
-end
-
-function expect(op, plan::Pair{<:AbstractRegister,<:AbstractBlock})
-    expect(op, copy(plan.first) |> plan.second)
 end
 
 # obtaining Dense Matrix of a block

@@ -158,16 +158,28 @@ for op in [:*, :/]
     end
 end
 
-function Base.:*(bra::AdjointRegister{D,<:ArrayReg}, ket::ArrayReg{D}) where D
-    if nremain(bra) == nremain(ket)
-        return dot(relaxedvec(parent(bra)), relaxedvec(ket))
-    elseif nremain(bra) == 0 # <s|active> |remain>
-        return ArrayReg{D}(state(bra) * state(ket))
-    else
-        error(
-            "partially contract ⟨bra|ket⟩ is not supported, expect ⟨bra| to be fully actived. nactive(bra)/nqudits(bra)=$(nactive(bra))/$(nqudits(bra))",
+"""
+$TYPEDSIGNATURES
+
+The overlap between `ket` and `bra`, which is only defined for two fully activated equal sized registers.
+It is only slightly different from [`inner_product`](@ref) in that it always returns a complex number.
+
+### Examples
+```jldoctest; setup=:(using YaoArrayRegister)
+julia> reg1 = ghz_state(3);
+
+julia> reg2 = uniform_state(3);
+
+julia> reg1' * reg2
+0.5 + 0.0im
+```
+"""
+function Base.:*(bra::AdjointRegister{D,<:ArrayReg}, ket::ArrayReg{D})::Number where D
+    # check the register sizes
+    nqudits(bra) == nqudits(ket) && nremain(bra) == nremain(ket) || error(
+            "partially contract ⟨bra|ket⟩ is not supported, expect ⟨bra| and |ket⟩ to have the same size. Got nactive(bra)/nqudits(bra)=$(nactive(bra))/$(nqudits(bra)), nactive(ket)/nqudits(ket)=$(nactive(ket))/$(nqudits(ket))",
         )
-    end
+    return dot(relaxedvec(parent(bra)), relaxedvec(ket))
 end
 
 Base.:*(bra::AdjointRegister{D,<:BatchedArrayReg{D}}, ket::BatchedArrayReg{D}) where D = bra .* ket
@@ -175,23 +187,17 @@ function Base.:*(
     bra::AdjointRegister{D,<:BatchedArrayReg{D, T1, <:Transpose}},
     ket::BatchedArrayReg{D,T2,<:Transpose},
 ) where {D,T1,T2}
-    if nremain(bra) == nremain(ket) == 0 # all active
-        A, C = parent(state(parent(bra))), parent(state(ket))
-        res = zeros(eltype(promote_type(T1, T2)), nbatch(ket))
-        #return mapreduce((x, y) -> conj(x) * y, +, ; dims=2)
-        for j = 1:size(A, 2)
-            for i = 1:size(A, 1)
-                @inbounds res[i] += conj(A[i, j]) * C[i, j]
-            end
-        end
-        res
-    elseif nremain(bra) == 0 # <s|active> |remain>
-        bra .* ket
-    else
-        error(
-            "partially contract ⟨bra|ket⟩ is not supported, expect ⟨bra| to be fully actived. nactive(bra)/nqudits(bra)=$(nactive(bra))/$(nqudits(bra))",
+    nqudits(bra) == nqudits(ket) && nremain(bra) == nremain(ket) && nbatch(bra) == nbatch(ket) || error(
+            "partially contract ⟨bra|ket⟩ is not supported, expect ⟨bra| and |ket⟩ to have the same size. Got nactive(bra)/nqudits(bra)/nbatch(bra)=$(nactive(bra))/$(nqudits(bra))/$(nbatch(bra)), nactive(ket)/nqudits(ket)=$(nactive(ket))/$(nqudits(ket))/$(nbatch(ket))",
         )
+    A, C = parent(state(parent(bra))), parent(state(ket))
+    res = zeros(eltype(promote_type(T1, T2)), nbatch(ket))
+    for j = 1:size(A, 2)
+        for i = 1:size(A, 1)
+            @inbounds res[i] += conj(A[i, j]) * C[i, j]
+        end
     end
+    res
 end
 
 # broadcast
