@@ -192,12 +192,10 @@ function Base.:*(
         )
     A, C = parent(state(parent(bra))), parent(state(ket))
     res = zeros(eltype(promote_type(T1, T2)), nbatch(ket))
-    for j = 1:size(A, 2)
-        for i = 1:size(A, 1)
-            @inbounds res[i] += conj(A[i, j]) * C[i, j]
-        end
+    for j in 1:size(A, 2), i in 1:size(A, 1)
+        @inbounds res[i] += conj(A[i, j]) * C[i, j]
     end
-    res
+    return res
 end
 
 # broadcast
