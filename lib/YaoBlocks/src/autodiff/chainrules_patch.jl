@@ -122,7 +122,7 @@ function rrule(
     function (outδ)
         reg, c = reg_and_circuit
         out = copy(reg) |> c
-        goutreg = copy(out) |> op
+        goutreg = 2copy(out) |> op
         for b = 1:YaoArrayRegister._asint(nbatch(goutreg))
             viewbatch(goutreg, b).state .*= outδ[b]
         end
