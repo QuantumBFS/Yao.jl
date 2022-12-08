@@ -107,7 +107,7 @@ function rrule(::typeof(expect), op::AbstractBlock, reg::AbstractArrayReg)
     out, function (outδ)
         greg = expect_g(op, reg)
         for b = 1:B
-            viewbatch(greg, b).state .*= 2 * outδ[b]
+            viewbatch(greg, b).state .*= outδ[b]
         end
         return (NoTangent(), NoTangent(), greg)
     end
@@ -122,9 +122,9 @@ function rrule(
     function (outδ)
         reg, c = reg_and_circuit
         out = copy(reg) |> c
-        goutreg = copy(out) |> op
+        goutreg = 2copy(out) |> op
         for b = 1:YaoArrayRegister._asint(nbatch(goutreg))
-            viewbatch(goutreg, b).state .*= 2 * outδ[b]
+            viewbatch(goutreg, b).state .*= outδ[b]
         end
         # apply backward rule
         (in, greg), gcircuit = apply_back((out, goutreg), c)

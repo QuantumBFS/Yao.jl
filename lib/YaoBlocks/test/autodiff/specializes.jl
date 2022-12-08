@@ -18,7 +18,7 @@ function state_numgrad(f, reg)
         reg.state[i] -= 2e-5im
         ineg = f(reg)
         reg.state[i] += 1e-5im
-        ((pos - neg) + im * (ipos - ineg)) / 2e-5 / 2
+        ((pos - neg) + im * (ipos - ineg)) / 2e-5
     end
 end
 
