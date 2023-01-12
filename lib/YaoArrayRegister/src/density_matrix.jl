@@ -8,6 +8,7 @@ Return the raw state of density matrix `ρ`.
 """
 state(ρ::DensityMatrix) = ρ.state
 Base.copy(ρ::DensityMatrix{D}) where D = DensityMatrix{D}(copy(ρ.state))
+Base.similar(ρ::DensityMatrix{D}) where {D} = DensityMatrix{D}(similar(ρ.state))
 Base.:(==)(ρ::DensityMatrix, σ::DensityMatrix) = nlevel(ρ) == nlevel(σ) && ρ.state == σ.state
 Base.isapprox(ρ::DensityMatrix, σ::DensityMatrix; kwargs...) = nlevel(ρ) == nlevel(σ) && isapprox(ρ.state, σ.state; kwargs...)
 
