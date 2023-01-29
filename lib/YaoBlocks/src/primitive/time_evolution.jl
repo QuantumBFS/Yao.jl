@@ -89,7 +89,8 @@ end
 
 function YaoAPI.unsafe_apply!(reg::AbstractArrayReg{D,T}, te::TimeEvolution) where {D,T}
     if isdiagonal(te.H)
-        reg.state .*= exp.((-im * te.dt) .* diag(mat(T, te.H)))
+        # `compatible_multiplicative_operand` is used to ensure GPU compatibility.
+        reg.state .*= exp.((-im * te.dt) .* ExponentialUtilities.compatible_multiplicative_operand(reg.state, diag(mat(T, te.H))))
         return reg
     end
     st = state(reg)
@@ -97,6 +98,8 @@ function YaoAPI.unsafe_apply!(reg::AbstractArrayReg{D,T}, te::TimeEvolution) whe
     A = BlockMap(T, te.H)
     @inbounds for j = 1:size(st, 2)
         v = view(st, :, j)
+        # TODO: opnorm could be estimated by inspecting the block operation.
+        # We should fix it in the future in improve the accuracy.
         Ks = arnoldi(A, v; tol = te.tol, ishermitian = true, opnorm = 1.0)
         expv!(v, dt, Ks)
     end
