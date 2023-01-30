@@ -130,5 +130,5 @@ end
     )    
     @test circuit_depth(GHZ) == 5
     @test circuit_depth(test_circuit) == 8
-    @test circuit_depth(test_circuit, false) == 7
+    @test circuit_depth(test_circuit, count_measure=false) == 7
 end

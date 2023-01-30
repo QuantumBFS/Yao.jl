@@ -240,7 +240,7 @@ If `count_measure` is true, `Measure` blocks are also counted.
 """
 # TODO: define a TimedBlock that wraps around other blocks, and adds that much time to `currdepth`
 
-function circuit_depth(c::ChainBlock, count_measure::Bool=true)
+function circuit_depth(c::ChainBlock; count_measure::Bool=true)
     deptharr = fill(0, c.n)
     touches = collect ∘ occupied_locs
     for g in c
