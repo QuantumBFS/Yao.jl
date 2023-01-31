@@ -99,26 +99,26 @@ end
 end
 
 @testset "circuit depth" begin
-    @const_gate U4 = rand(ComplexF64, 4, 4)
-    @const_gate U2 = rand(ComplexF64, 4, 4)
-    @const_gate U = rand(ComplexF64, 4, 4)
-    test_circuit = chain(
+    @const_gate cd_U4 = rand(ComplexF64, 4, 4)
+    @const_gate cd_U2 = rand(ComplexF64, 4, 4)
+    @const_gate cd_U = rand(ComplexF64, 4, 4)
+    cd_test_circuit = chain(
         5,
         put(1=>X),
         put(2=>X),
         put(3=>X),
-        control(1, (4, 5)=>U4),
-        control(2, (4,5)=>U2),
+        control(1, (4, 5)=>cd_U4),
+        control(2, (4,5)=>cd_U2),
         put(1=>H),
         control(1, 2=>T),
         put(2=>H),
-        control(3, (4,5)=>U),
+        control(3, (4,5)=>cd_U),
         control(1, 3=>T),
         control(2, 3=>T),
         put(3=>H),
         Measure(locs=[1,2,3])
     )
-    GHZ = chain(
+    cd_test_GHZ = chain(
         4,
         put(1=>X),
         repeat(H, 2:4),
@@ -128,7 +128,7 @@ end
         control(4, 3=>X),
         repeat(H, 1:4),
     )    
-    @test circuit_depth(GHZ) == 5
-    @test circuit_depth(test_circuit) == 8
-    @test circuit_depth(test_circuit, count_measure=false) == 7
+    @test circuit_depth(cd_test_GHZ) == 5
+    @test circuit_depth(cd_test_circuit) == 8
+    @test circuit_depth(cd_test_circuit, count_measure=false) == 7
 end
