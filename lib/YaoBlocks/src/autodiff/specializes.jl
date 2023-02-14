@@ -12,13 +12,13 @@ end
 function expect_g(op::AbstractBlock, circuit::Pair{<:AbstractArrayReg,<:AbstractBlock})
     reg, c = circuit
     out = copy(reg) |> c
-    outδ = copy(out) |> op
+    outδ = 2copy(out) |> op
     (in, inδ), paramsδ = apply_back((out, outδ), c)
-    return inδ => paramsδ .* 2
+    return inδ => paramsδ
 end
 
 function expect_g(op::AbstractBlock, reg::AbstractArrayReg)
-    copy(reg) |> op
+    2copy(reg) |> op
 end
 
 _eval(p::Pair{<:AbstractRegister,<:AbstractBlock}) = copy(p.first) |> p.second
@@ -61,20 +61,20 @@ please file an issue if you really need this feature.",
     overlap = out1' * out2
 
     out1δ = copy(out2)
-    regscale!.(viewbatch.(Ref(out1δ), 1:length(overlap)), conj.(overlap) ./ 2 ./ abs.(overlap))
+    regscale!.(viewbatch.(Ref(out1δ), 1:length(overlap)), conj.(overlap) ./ abs.(overlap))
     out2δ = copy(out1)
-    regscale!.(viewbatch.(Ref(out2δ), 1:length(overlap)), overlap ./ 2 ./ abs.(overlap))
+    regscale!.(viewbatch.(Ref(out2δ), 1:length(overlap)), overlap ./ abs.(overlap))
 
     if reg1 isa Pair
         (_, in1δ), params1δ = apply_back((out1, out1δ), c1)
-        res1 = in1δ => params1δ .* 2
+        res1 = in1δ => params1δ
     else
         res1 = out1δ
     end
 
     if reg2 isa Pair
         (_, in2δ), params2δ = apply_back((out2, out2δ), c2)
-        res2 = in2δ => params2δ .* 2
+        res2 = in2δ => params2δ
     else
         res2 = out2δ
     end

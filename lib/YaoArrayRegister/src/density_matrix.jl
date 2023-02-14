@@ -21,6 +21,7 @@ Return the raw state of density matrix `ρ`.
 """
 state(ρ::DensityMatrix) = ρ.state
 Base.copy(ρ::DensityMatrix{D}) where D = DensityMatrix{D}(copy(ρ.state))
+Base.similar(ρ::DensityMatrix{D}) where {D} = DensityMatrix{D}(similar(ρ.state))
 Base.:(==)(ρ::DensityMatrix, σ::DensityMatrix) = nlevel(ρ) == nlevel(σ) && ρ.state == σ.state
 Base.isapprox(ρ::DensityMatrix, σ::DensityMatrix; kwargs...) = nlevel(ρ) == nlevel(σ) && isapprox(ρ.state, σ.state; kwargs...)
 
@@ -168,4 +169,12 @@ end
                 end)
 
     end
+end
+
+"""
+$(TYPEDSIGNATURES)
+"""
+function Base.join(r0::DensityMatrix{D}, rs::DensityMatrix{D}...) where {D}
+    st = kron(state(r0), state.(rs)...)
+    return DensityMatrix{D}(st)
 end

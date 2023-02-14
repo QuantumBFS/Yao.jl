@@ -23,7 +23,7 @@ function YaoAPI.measure!(
     reg::AbstractRegister,
     locs;
     kwargs...,
-) where {MODE}
+)
     nbit = nactive(reg)
     focus!(reg, locs)
     res = measure!(postprocess, op, reg, AllLocs(); kwargs...)
@@ -35,7 +35,7 @@ function YaoAPI.measure!(
     res
 end
 
-function YaoAPI.measure(op, reg::AbstractRegister, locs; kwargs...) where {MODE}
+function YaoAPI.measure(op, reg::AbstractRegister, locs; kwargs...)
     nbit = nactive(reg)
     focus!(reg, locs)
     res = measure(op, reg, AllLocs(); kwargs...)

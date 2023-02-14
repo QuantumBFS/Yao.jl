@@ -100,8 +100,8 @@ end;
 
 # Next we write functions for calculating the expansion coefficients and a single optimization step.
 # We will absorb the factor of ``1/2^n`` into the learning rate.
-  
-function calculate_omegas(reg, h, pauli_strings)
+
+function calculate_omegas(n, reg, h, pauli_strings)
     iω = []
     for P in pauli_strings
         push!(iω, real(expect(h, reg => time_evolve(P, π/4)) - expect(h, reg => time_evolve(P, -π/4))))
@@ -109,7 +109,7 @@ function calculate_omegas(reg, h, pauli_strings)
     iω
 end;
 
-function step_and_cost!(circuit, h, α, pauli_strings)
+function step_and_cost!(n, circuit, h, α, pauli_strings)
     iω = calculate_omegas(n, zero_state(n) |> circuit, h, pauli_strings)
 
     for (iωʲ, P) in zip(iω, pauli_strings)

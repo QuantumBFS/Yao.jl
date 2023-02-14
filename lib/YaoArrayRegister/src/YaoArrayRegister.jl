@@ -13,6 +13,7 @@ using LinearAlgebra
 using LegibleLambdas
 using StatsBase, Random
 using LuxurySparse, StaticArrays
+using DocStringExtensions
 
 export AbstractArrayReg,
     ArrayReg,
@@ -41,6 +42,8 @@ export AbstractArrayReg,
     rank3,
     # operations
     isnormalized,
+    isseparable,
+    safe_remove!,
     normalize!,
     norm,
     regadd!,
