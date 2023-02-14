@@ -16,7 +16,21 @@ using LinearAlgebra
 
     dm = rand_density_matrix(3)
     ch = depolarizing_channel(3;p=0.2)
-    @test (0.8 * dm.state + 0.1 * IMatrix(1<<3)) ≈ apply(dm, ch).state
+    @test (0.8 .* dm.state .+ (0.2 / 2^3) .* IMatrix(1<<3)) ≈ apply(dm, ch).state
+
+    dm = rand_density_matrix(3)
+    ch = depolarizing_channel(3, p=1.)
+    @test apply(dm, ch).state ≈ IMatrix(1<<3) ./ 2^3
+
+    dm = rand_density_matrix(1)
+    ch1 = single_qubit_depolarizing_channel(1, 1, p=0.1)
+    ch2 = depolarizing_channel(1, p=0.1)
+    @test apply(dm, ch1) ≈ apply(dm, ch2)
+
+    dm = rand_density_matrix(2)
+    ch1 = two_qubit_depolarizing_channel(2, (1,2), p=0.1)
+    ch2 = depolarizing_channel(2, p=0.1)
+    @test apply(dm, ch1) ≈ apply(dm, ch2)
 end
 
 @testset "pauli channel" begin
