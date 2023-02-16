@@ -7,4 +7,4 @@ export UnitaryChannel, unitary_channel,
     pauli_error_channel
 
 include("unitary_channel.jl")
-include("error.jl")
+include("error_channel.jl")

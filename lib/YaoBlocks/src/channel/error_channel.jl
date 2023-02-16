@@ -68,16 +68,14 @@ end
 
 Create a global depolarizing channel.
 
-# Arguments
-
 ### Arguments
 - `n`: number of qubits.
 
 ### Keyword Arguments
 - `p`: probability of this error to occur.
 
-# See also
-[single_qubit_depolarizing_channel](@ref) and [two_qubit_depolarizing_channel](@ref)
+### See also
+[`single_qubit_depolarizing_channel`](@ref) and [`two_qubit_depolarizing_channel`](@ref)
 for depolarizing channels acting on only one or two qubits.
 """
 function depolarizing_channel(n::Int; p::Real)
@@ -90,13 +88,11 @@ end
 Create a single-qubit depolarizing channel.
 
 The factor of 3/4 in front of p ensures that 
-``single_qubit_depolarizing_channel(1, 1, p) == depolarizing_channel(1, p)``
+`single_qubit_depolarizing_channel(1, 1, p) == depolarizing_channel(1, p)`
 
 ```math
 (1 - 3p/4 ⋅ρ) + p/4⋅(XρX + YρY + ZρZ)
 ```
-
-# Arguments
 
 ### Arguments
 - `n`: number of qubits.
@@ -112,9 +108,8 @@ end
 """
     two_qubit_depolarizing_channel(n::Int, locs::NTuple{2,Int}; p::Real)
 
-Create a two-qubit depolarizing channel.
-
-# Arguments
+Create a two-qubit depolarizing channel. Note that this is different from 
+applying two `single_qubit_depolarizing_channel(...)` to `locs`!
 
 ### Arguments
 - `n`: number of qubits.
