@@ -45,6 +45,13 @@ function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::UnitaryChannel) where {D
     return r
 end
 
+function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, 
+                              k::KronBlock{D,M,NTuple{M,U}}) where {D,M,T,U<:UnitaryChannel}
+    for (locs, block) in zip(k.locs, k.blocks)
+        YaoAPI.unsafe_apply!(r, put(k.n, locs => block))
+    end
+end
+
 function mat(::Type{T}, x::UnitaryChannel) where {T}
     error("`UnitaryChannel` does not have a matrix representation!")
 end
