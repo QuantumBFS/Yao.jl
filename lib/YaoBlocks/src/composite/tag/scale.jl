@@ -32,6 +32,7 @@ end
 content(x::Scale) = x.content
 factor(x::Scale{<:Number}) = x.alpha
 factor(x::Scale{Val{X}}) where {X} = X
+Base.iszero(x::Scale) = iszero(factor(x))
 
 # parameter interface
 getiparams(s::Scale{<:Number}) = (factor(s),)
@@ -60,22 +61,32 @@ cache_key(x::Scale) = (factor(x), cache_key(content(x)))
 mat(::Type{T}, x::Scale) where {T} = T(x.alpha) * mat(T, content(x))
 mat(::Type{T}, x::Scale{Val{S}}) where {T,S} = T(S) * mat(T, content(x))
 
-function YaoAPI.unsafe_apply!(r::AbstractArrayReg, x::Scale{S}) where {S}
+function YaoAPI.unsafe_apply!(r::AbstractArrayReg{D,T}, x::Scale{S}) where {S,D,T}
+    if iszero(x)
+        fill!(r.state, zero(T))
+        return r
+    end
     YaoAPI.unsafe_apply!(r, content(x))
     regscale!(r, factor(x))
     return r
 end
-function YaoAPI.unsafe_apply!(r::DensityMatrix, x::Scale{S}) where {S}
+function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::Scale{S}) where {S,D,T}
+    if iszero(x)
+        fill!(r.state, zero(T))
+        return r
+    end
     YaoAPI.unsafe_apply!(r, content(x))
     regscale!(r, abs2(factor(x)))
     return r
 end
 
 function unsafe_getindex(::Type{T}, x::Scale, i::Integer, j::Integer) where T
+    iszero(x) && return zero(T)
     return unsafe_getindex(T, content(x), i, j) * factor(x)
 end
 
 function unsafe_getcol(::Type{T}, x::Scale, j::DitStr) where T
+    iszero(x) && return DitStr{nlevel(x),nqudits(x),Int}[], T[]
     locs, vals = unsafe_getcol(T, content(x), j)
     return locs, rmul!(vals, factor(x))
 end

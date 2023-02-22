@@ -82,6 +82,7 @@ YaoAPI.focus!(locs::UnitRange) = @λ(register -> focus!(register, locs))
 # locations: some location of the wire
 # orders: includes all the location of the wire in some order
 function YaoAPI.focus!(r::AbstractArrayReg{D}, locs) where {D}
+    @assert all(x->x>=1 && x<=nactive(r), locs) "locations out of range [1, $(nactive(r))]: got $locs"
     if is_order_same(locs)
         arr = r.state
     else

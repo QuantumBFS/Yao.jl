@@ -68,8 +68,6 @@ function YaoAPI.unsafe_apply!(r::AbstractRegister, x::AbstractAdd)
     r
 end
 
-export Add
-
 subblocks(x::Add) = x.list
 cache_key(x::Add) = map(cache_key, subblocks(x))
 Base.copy(x::Add) = Add(x.n, copy(subblocks(x)))

@@ -185,7 +185,7 @@ for F in [:setiparams!, :setiparams]
 
         $F(x::AbstractBlock, it::Union{Tuple,AbstractArray,Base.Generator}) = $F(x, it...)
         $F(x::AbstractBlock, a::Number, xs::Number...) =
-            error("setparams!(x, θ...) is not implemented")
+            error("setiparams!(x, θ...) is not implemented")
         $F(x::AbstractBlock, it::Symbol) = $F(x, render_params(x, it))
 
         $F(f::Function, x::AbstractBlock, it) =
