@@ -1,18 +1,5 @@
-
-"""
-    DensityMatrix{D,T,MT<:AbstractMatrix{T}} <: AbstractRegister{D}
-    DensityMatrix{D}(state::AbstractMatrix)
-    DensityMatrix(state::AbstractMatrix; nlevel=2)
-
-Density matrix type, where `state` is a matrix.
-Type parameter `D` is the number of levels, it can also be specified by a keyword argument `nlevel`.
-"""
-struct DensityMatrix{D,T,MT<:AbstractMatrix{T}} <: AbstractRegister{D}
-    state::MT
-end
-
-DensityMatrix{D}(state::AbstractMatrix{T}) where {T,D} = DensityMatrix{D,T,typeof(state)}(state)
-DensityMatrix(state::AbstractMatrix{T}; nlevel=2) where T = DensityMatrix{nlevel}(state)
+YaoAPI.DensityMatrix{D}(state::AbstractMatrix{T}) where {T,D} = DensityMatrix{D,T,typeof(state)}(state)
+YaoAPI.DensityMatrix(state::AbstractMatrix{T}; nlevel=2) where T = DensityMatrix{nlevel}(state)
 
 """
     state(ρ::DensityMatrix) -> Matrix
@@ -47,9 +34,8 @@ function rand_density_matrix(n::Int; nlevel::Int=2, pure::Bool=false)
 end
 
 function rand_density_matrix(::Type{T}, n::Int; nlevel::Int=2, pure::Bool=false) where T
-    pure && return density_matrix(rand_state(T, n; nlevel))
-    dm = density_matrix(rand_state(T, 2n; nlevel))
-    return partial_tr(dm, 1:n)
+    return pure ? density_matrix(rand_state(T, n; nlevel)) :
+                  density_matrix(rand_state(T, 2n; nlevel), n+1:2n)
 end
 
 completely_mixed_state(n::Int; nlevel::Int=2) = completely_mixed_state(ComplexF64, n; nlevel)
@@ -58,16 +44,15 @@ function completely_mixed_state(::Type{T}, n::Int; nlevel::Int=2) where T
     return DensityMatrix{nlevel}(Matrix(IMatrix{T}(nlevel^n)))
 end
 
-function Base.show(io::IO, mime::MIME"text/plain", dm::DensityMatrix)
-    indent = get(io, :indent, 0)
-    summary(io, dm)
-    println(io)
-    println(io, " "^(indent+2), "state:")
-    s = sprint(dm.state) do io, x
-        show(io, mime, x)
-    end
-    s = map(s->" "^(indent+4) * s, split(s, '\n'))
-    join(io, s[2:end], '\n')
+# Move this to YaoAPI and dispatch on `AbstractRegister{D}`?
+# Could then remove from YaoArrayRegister/src/register.jl and here
+qubit_type(::DensityMatrix{2}) = "qubits"
+qubit_type(::DensityMatrix) = "qudits"
+
+function Base.show(io::IO, dm::DensityMatrix{D,T,MT}) where {D,T,MT}
+    print(io, "DensityMatrix{$D, $T, $(nameof(MT))...}")
+    print(io, "\n    active $(qubit_type(dm)): ", nactive(dm), "/", nqudits(dm))
+    print(io, "\n    nlevel: ", nlevel(dm))
 end
 
 # Density matrices are hermitian
