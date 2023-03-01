@@ -1,6 +1,6 @@
 name = "YaoAPI"
 uuid = "0843a435-28de-4971-9e8b-a9641b2983a8"
-version = "0.4.3"
+version = "0.4.4"
 
 [compat]
 julia = "1"
