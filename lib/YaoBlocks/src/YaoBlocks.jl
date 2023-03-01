@@ -112,6 +112,8 @@ include("abstract_block.jl")
 include("routines.jl")
 include("primitive/primitive.jl")
 include("composite/composite.jl")
+include("channel/channel.jl")
+
 
 include("algebra.jl")
 include("blocktools.jl")
