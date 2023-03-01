@@ -118,8 +118,10 @@ end
     reg = rand_state(3)
     r = density_matrix(reg)
     r_similar = similar(r)
+    r_manual = DensityMatrix(reg.state * reg.state')
     @test copy(r) == r
     @test r_similar isa DensityMatrix
+    @test r_manual ≈ r
     @test nqubits(r) == nqubits(r_similar)
     @test nlevel(r) == nlevel(r_similar)
 
@@ -144,6 +146,21 @@ end
     # fidelity between focused and pure state
     f1 = rand_state(2)
     @test isapprox(fidelity(density_matrix(f1, (1,2)), r2), fidelity(f1, f2); atol=1e-6)
+
+    dm = rand_density_matrix(2)
+    @test is_density_matrix(dm.state)
+    @test eltype(dm.state) === ComplexF64
+
+    dm = rand_density_matrix(ComplexF32, 2)
+    @test is_density_matrix(dm.state)
+    @test eltype(dm.state) === ComplexF32
+
+    dm = rand_density_matrix(2; pure=true)
+    @test tr(dm.state^2) ≈ 1
+    @test eltype(dm.state) === ComplexF64
+
+    dm = completely_mixed_state(2)
+    @test dm.state == I(4)
 end
 
 @testset "zero_state_like" begin
@@ -165,6 +182,10 @@ end
     @test regadd!(copy(r), r).state ≈ r.state .* 2
     @test regsub!(copy(r), r).state ≈ zero(r.state)
     @test -(r).state ≈ -r.state
+end
+
+@testset "printing" begin
+    show(stdout, MIME"text/plain"(), rand_density_matrix(3))
 end
 
 @testset "join" begin

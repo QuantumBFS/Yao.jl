@@ -29,6 +29,9 @@ export AbstractArrayReg,
     zero_state,
     zero_state_like,
     rand_state,
+    rand_density_matrix,
+    completely_mixed_state,
+    is_density_matrix,
     ghz_state,
     uniform_state,
     oneto,
@@ -113,13 +116,12 @@ include("ast_tools.jl")
 include("error.jl")
 include("constants.jl")
 include("register.jl")
+include("density_matrix.jl")
 include("operations.jl")
 include("focus.jl")
 
 include("instruct.jl")
 include("qudit_instruct.jl")
-
-include("density_matrix.jl")
 include("measure.jl")
 
 include("deprecations.jl")

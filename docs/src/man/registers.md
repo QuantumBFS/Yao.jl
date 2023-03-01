@@ -154,6 +154,8 @@ most_probable,
 ```@docs
 DensityMatrix
 density_matrix
+rand_density_matrix
+completely_mixed_state
 partial_tr
 purify
 von_neumann_entropy,

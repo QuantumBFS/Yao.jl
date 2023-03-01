@@ -16,7 +16,48 @@ YaoAPI.nqubits(ρ::DensityMatrix) = nqudits(ρ)
 YaoAPI.nqudits(ρ::DensityMatrix{D}) where {D} = logdi(size(state(ρ), 1), D)
 YaoAPI.nactive(ρ::DensityMatrix) = nqudits(ρ)
 nbatch(::DensityMatrix) = NoBatch()
-chstate(reg::DensityMatrix{D}, state) where D = DensityMatrix{D}(state)
+chstate(::DensityMatrix{D}, state) where D = DensityMatrix{D}(state)
+
+"""
+    rand_density_matrix([T=ComplexF64], n::Int; nlevel::Int=2, pure::Bool=false)
+
+Generate a random density matrix by partial tracing half of the pure state.
+
+!!! note
+
+    The generated density matrix is not strict hermitian due to rounding error.
+    If you need to check hermicity, do not use `ishermitian` consider using
+    `isapprox(dm.state, dm.state')` or explicit mark it as `Hermitian`.
+"""
+function rand_density_matrix(n::Int; nlevel::Int=2, pure::Bool=false)
+    return rand_density_matrix(ComplexF64, n; nlevel, pure)
+end
+
+function rand_density_matrix(::Type{T}, n::Int; nlevel::Int=2, pure::Bool=false) where T
+    return pure ? density_matrix(rand_state(T, n; nlevel)) :
+                  density_matrix(rand_state(T, 2n; nlevel), n+1:2n)
+end
+
+completely_mixed_state(n::Int; nlevel::Int=2) = completely_mixed_state(ComplexF64, n; nlevel)
+
+function completely_mixed_state(::Type{T}, n::Int; nlevel::Int=2) where T
+    return DensityMatrix{nlevel}(Matrix(IMatrix{T}(nlevel^n)))
+end
+
+# Move this to YaoAPI and dispatch on `AbstractRegister{D}`?
+# Could then remove from YaoArrayRegister/src/register.jl and here
+qubit_type(::DensityMatrix{2}) = "qubits"
+qubit_type(::DensityMatrix) = "qudits"
+
+function Base.show(io::IO, dm::DensityMatrix{D,T,MT}) where {D,T,MT}
+    print(io, "DensityMatrix{$D, $T, $(nameof(MT))...}")
+    print(io, "\n    active $(qubit_type(dm)): ", nactive(dm), "/", nqudits(dm))
+    print(io, "\n    nlevel: ", nlevel(dm))
+end
+
+# Density matrices are hermitian
+Base.adjoint(dm::DensityMatrix) = dm
+LinearAlgebra.ishermitian(dm::DensityMatrix) =  true
 
 function YaoAPI.density_matrix(reg::ArrayReg, qubits)
     freg = focus!(copy(reg), qubits)
@@ -31,6 +72,18 @@ YaoAPI.density_matrix(reg::ArrayReg{D}) where D = DensityMatrix{D}(reg.state * r
 YaoAPI.density_matrix(rho::DensityMatrix) = copy(rho)
 
 YaoAPI.tracedist(dm1::DensityMatrix{D}, dm2::DensityMatrix{D}) where {D} = trace_norm(dm1.state .- dm2.state)
+
+"""
+    is_density_matrix(dm::AbstractMatrix; kw...)
+
+Test if given matrix is a density matrix. The keyword
+is the same as `isapprox`. See also `isapprox`.
+"""
+function is_density_matrix(dm::AbstractMatrix; kw...)
+    return isapprox(tr(dm), 1.0; kw...) &&
+        isapprox(dm, dm';kw...) &&
+        isposdef(Hermitian(dm))
+end
 
 # TODO: use batch_broadcast in the future
 """
@@ -111,6 +164,7 @@ function cross_entropy(dm1::DensityMatrix, dm2::DensityMatrix)
 end
 
 function YaoAPI.partial_tr(dm::DensityMatrix{D,T}, locs) where {D,T}
+    locs = Tuple(locs)
     nbits = nqudits(dm)
     @assert_locs_safe nbits (locs...,)
     m = nbits-length(locs)
