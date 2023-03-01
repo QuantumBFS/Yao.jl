@@ -11,6 +11,8 @@ include("phase_gate.jl")
 include("shift_gate.jl")
 include("rotation_gate.jl")
 include("time_evolution.jl")
+include("projector.jl")
+include("reflect.jl")
 include("general_matrix_gate.jl")
 include("measure.jl")
 
@@ -40,6 +42,6 @@ end
 function getcol(op::Diagonal, j::DitStr{D,N,TI}) where {D,N,TI}
     return [j], [op.diag[buffer(j)+1]]
 end
-function getcol(::IMatrix{T}, j::DitStr{D,N,TI}) where {D,N,TI,T}
-    return [j], [one(T)]
+function getcol(A::IMatrix, j::DitStr{D,N,TI}) where {D,N,TI}
+    return [j], [one(eltype(A))]
 end

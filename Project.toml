@@ -1,6 +1,6 @@
 name = "Yao"
 uuid = "5872b779-8223-5990-8dd0-5abbb0748c8c"
-version = "0.8.2"
+version = "0.8.6"
 
 [deps]
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
@@ -14,7 +14,7 @@ YaoSym = "3b27209a-d3d6-11e9-3c0f-41eb92b2cb9d"
 
 [compat]
 BitBasis = "0.8"
-LuxurySparse = "0.6"
+LuxurySparse = "0.7"
 Reexport = "1"
 YaoAPI = "0.4"
 YaoArrayRegister = "0.9"

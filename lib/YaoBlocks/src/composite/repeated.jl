@@ -31,7 +31,7 @@ function RepeatedBlock(n::Int, block::AbstractBlock{D}, locs::UnitRange{Int}) wh
 end
 
 
-function RepeatedBlock(n::Int, block::GT) where {M,D,GT<:AbstractBlock{D}}
+function RepeatedBlock(n::Int, block::GT) where {D,GT<:AbstractBlock{D}}
     return RepeatedBlock{D,n,GT}(n::Int, block, Tuple(1:nqudits(block):n-nqudits(block)+1))
 end
 YaoAPI.nqudits(m::RepeatedBlock) = m.n
@@ -125,7 +125,7 @@ PropertyTrait(x::RepeatedBlock) = PreserveAll()
 
 mat(::Type{T}, rb::RepeatedBlock{D}) where {T,D} =
     YaoArrayRegister.hilbertkron(rb.n, fill(mat(T, rb.content), length(rb.locs)), [rb.locs...]; nlevel=D)
-mat(::Type{T}, rb::RepeatedBlock{D,0,GT}) where {T,D,GT} = IMatrix{D^nqudits(rb),T}()
+mat(::Type{T}, rb::RepeatedBlock{D,0,GT}) where {T,D,GT} = IMatrix{T}(D^nqudits(rb))
 
 function YaoAPI.unsafe_apply!(r::AbstractRegister, rp::RepeatedBlock)
     m = mat_matchreg(r, rp.content)

@@ -98,7 +98,7 @@ end
 
 function cunmat(n::Int, cbits::NTuple{C,Int}, cvals::NTuple{C,Int}, U::IMatrix, locs::NTuple{M,Int}) where {C,M}
     large_mat_check(n)
-    IMatrix{1 << n}()
+    IMatrix(1 << n)
 end
 
 """
@@ -528,12 +528,13 @@ function instruct_get_column(::Type{T}, U, locs::NTuple{M}, cbits::NTuple{C}, cv
     # get the target element in U
     rows, vals = unsafe_getcol(T, U, DitStr{D,M,TI}(subj))
     # map rows
-    newrows = map(rows) do i
+    newrows = Vector{DitStr{D,L,TI}}(undef, length(rows))
+    for (idx, row) in enumerate(rows)
         subi = DitStr{D,L,TI}(j)
         @inbounds for ind in 1:M
-            subi += BitBasis._lshift(Val{D}(), _takeat(buffer(i), Val{D}(), ind) - _takeat(subj, Val{D}(), ind), locs[ind]-1)
+            subi += BitBasis._lshift(Val{D}(), _takeat(buffer(row), Val{D}(), ind) - _takeat(subj, Val{D}(), ind), locs[ind]-1)
         end
-        subi
+        newrows[idx] = subi
     end
     return newrows, vals
 end

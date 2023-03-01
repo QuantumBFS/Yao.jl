@@ -107,7 +107,7 @@ function rrule(::typeof(expect), op::AbstractBlock, reg::AbstractArrayReg)
     out, function (outδ)
         greg = expect_g(op, reg)
         for b = 1:B
-            viewbatch(greg, b).state .*= 2 * outδ[b]
+            viewbatch(greg, b).state .*= outδ[b]
         end
         return (NoTangent(), NoTangent(), greg)
     end
@@ -122,9 +122,9 @@ function rrule(
     function (outδ)
         reg, c = reg_and_circuit
         out = copy(reg) |> c
-        goutreg = copy(out) |> op
+        goutreg = 2copy(out) |> op
         for b = 1:YaoArrayRegister._asint(nbatch(goutreg))
-            viewbatch(goutreg, b).state .*= 2 * outδ[b]
+            viewbatch(goutreg, b).state .*= outδ[b]
         end
         # apply backward rule
         (in, greg), gcircuit = apply_back((out, goutreg), c)
@@ -176,12 +176,16 @@ function rrule(::typeof(copy), reg::AbstractArrayReg)
 end
 
 for (BT, BLOCKS) in [(:Add, :(outδ.list)) (:ChainBlock, :(outδ.blocks))]
-    for ST in [:AbstractVector, :Tuple]
-        @eval function rrule(::Type{BT}, source::$ST) where {BT<:$BT}
-            out = BT(source)
-            out, function (outδ)
-                return (NoTangent(), $ST($BLOCKS))
-            end
+    @eval function rrule(::Type{BT}, source::AbstractVector) where {BT<:$BT}
+        out = BT(source)
+        out, function (outδ)
+            return (NoTangent(), collect($BLOCKS))
+        end
+    end
+    @eval function rrule(::Type{BT}, source::Tuple) where {BT<:$BT}
+        out = BT(source)
+        out, function (outδ)
+            return (NoTangent(), ($BLOCKS...,))
         end
     end
     @eval function rrule(::Type{BT}, args::AbstractBlock...) where {BT<:$BT}

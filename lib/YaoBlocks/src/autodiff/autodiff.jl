@@ -18,7 +18,6 @@ import ChainRulesCore:
 using SparseArrays, LuxurySparse, LinearAlgebra
 
 include("NoParams.jl")
-include("outerproduct_and_projection.jl")
 include("adjroutines.jl")
 include("mat_back.jl")
 include("apply_back.jl")

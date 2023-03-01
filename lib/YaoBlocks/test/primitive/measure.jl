@@ -35,6 +35,7 @@ end
         end
     end
     @test Measure(5; locs = (1, 2), resetto = 0b0011).postprocess isa ResetTo{BitStr64{2}}
+    @test_throws AssertionError Measure(5; locs = (1, 2), resetto = 0b0011, operator=put(5, 2=>X))
 end
 
 @testset "error handling" begin
@@ -90,8 +91,9 @@ end
     reg = clone(ArrayReg([1.0, 0 + 0im]), 1000)
     @test abs(measure!(X, reg) |> mean) < 0.1
 
-    m = Measure(5)
-    @test chmeasureoperator(m, X) == Measure(5, operator = X)
+    m = Measure(1)
+    @test chmeasureoperator(m, X) == Measure(1, operator = X)
+    @test_throws AssertionError chmeasureoperator(m, put(5, 2=>X))
 end
 
 @testset "measure an operator correctly" begin

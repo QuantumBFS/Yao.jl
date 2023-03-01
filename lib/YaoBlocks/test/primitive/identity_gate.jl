@@ -13,7 +13,7 @@ using Random, Test
     @test occupied_locs(block) == ()
     @test getiparams(block) == ()
     @test nqudits(igate(3; nlevel=3)) == 3
-    @test mat(igate(3; nlevel=3)) == YaoBlocks.IMatrix{27}()
+    @test mat(igate(3; nlevel=3)) == YaoBlocks.IMatrix(27)
 end
 
 

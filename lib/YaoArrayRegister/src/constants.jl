@@ -30,7 +30,7 @@ end
 @def Sdag = Diagonal(ComplexF64[1, -im])
 @def T = Diagonal(ComplexF64[1, exp(π * im / 4)])
 @def Tdag = Diagonal(ComplexF64[1, exp(-π * im / 4)])
-@def I2 = IMatrix{2,ComplexF64}()
+@def I2 = IMatrix{ComplexF64}(2)
 @def H = (elem = 1 / sqrt(2); ComplexF64[elem elem; elem -elem])
 @def CNOT = PermMatrix([1, 4, 3, 2], ones(ComplexF64, 4))
 @def CZ = Diagonal([1.0 + 0im, 1, 1, -1])

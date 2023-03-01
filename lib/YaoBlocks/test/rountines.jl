@@ -51,6 +51,12 @@ end
     m1 = unmat(Val(2), nbit, mmm, (2,))
     m2 = YaoArrayRegister.linop2dense(v -> instruct!(Val(2), v, mmm, (2,)), nbit)
     @test m1 ≈ m2
+
+    nbit = 4
+    mmm = igate(2) |> mat
+    m1 = unmat(Val(2), nbit, mmm, (2,1))
+    m2 = YaoArrayRegister.linop2dense(v -> instruct!(Val(2), v, mmm, (2,1)), nbit)
+    @test m1 ≈ m2
 end
 
 @testset "fix-static and adjoint for mat" begin
@@ -58,4 +64,10 @@ end
     G6 = matblock(rand_unitary(1 << 6))
     @test mat(put(3, 2 => G1')) ≈ mat(put(3, 2 => matblock(G1)))'
     @test mat(put(7, (3, 2, 1, 5, 4, 6) => G6')) ≈ mat(put(7, (3, 2, 1, 5, 4, 6) => G6))'
+end
+
+@testset "use routines" begin
+    rows, vals = YaoBlocks.unsafe_getcol(ComplexF64, put(5, 1=>ConstGate.P1), bit"00000")
+    @test eltype(rows) <: DitStr
+    @test eltype(vals) <: ComplexF64
 end

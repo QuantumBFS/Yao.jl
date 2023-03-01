@@ -618,18 +618,16 @@ with `gψ` the gradient of input state and `gparams` the gradients of circuit pa
 For register input, the return value is a register.
 
 
-# Definition
+### Definition
 The fidelity of two quantum state for qudits is defined as:
 
 ```math
 F(ρ, σ) = tr(\\sqrt{\\sqrt{ρ}σ\\sqrt{ρ}})
 ```
 
-Or its equivalent form (which we use in numerical calculation):
+!!! note
 
-```math
-F(ρ, σ) = sqrt(tr(ρσ) + 2 \\sqrt{det(ρ)det(σ)})
-```
+    This definition is different from [the one in Wiki](https://en.wikipedia.org/wiki/Fidelity_of_quantum_states) by a square.
 
 ### Examples
 

@@ -83,6 +83,14 @@ BatchedArrayReg(r::BatchedArrayReg{D}) where {D} = BatchedArrayReg{D}(copy(r.sta
 BatchedArrayReg(r::BatchedArrayReg{D,T,<:Transpose}) where {D,T} =
         BatchedArrayReg{D}(Transpose(copy(r.state.parent)), r.nbatch)
 
+function BatchedArrayReg(reg0::AbstractArrayReg{D}, regs::AbstractArrayReg{D}...) where D
+    n = nqudits(reg0)
+    na = nactive(reg0)
+    @assert all(reg->nqudits(reg) == n && nactive(reg) == na, regs) "Number of (active) qudits do not match."
+    state = cat(rank3(reg0), rank3.(regs)...; dims=3)
+    return BatchedArrayReg{D}(reshape(state, :, size(state, 3)), size(state, 3))
+end
+
 Base.copy(r::BatchedArrayReg) = BatchedArrayReg(r)
 Base.similar(r::BatchedArrayReg{D}) where D = BatchedArrayReg{D}(similar(state(r)), r.nbatch)
 Base.similar(r::BatchedArrayReg{D}, state::AbstractMatrix) where D = BatchedArrayReg{D}(state, r.nbatch)
@@ -194,8 +202,8 @@ ArrayReg{2, ComplexF32, Array...}
     nlevel: 2
 ```
 """
-arrayreg(bitstr::BitStr; nbatch::Union{Int,NoBatch}=NoBatch()) = arrayreg(ComplexF64, bitstr; nbatch=nbatch)
-arrayreg(::Type{T}, bitstr::BitStr; nbatch::Union{Int,NoBatch}=NoBatch()) where {T} = arrayreg(onehot(T, bitstr; nbatch=_asint(nbatch)); nbatch=nbatch, nlevel=2)
+arrayreg(ditstr::DitStr; nbatch::Union{Int,NoBatch}=NoBatch()) = arrayreg(ComplexF64, ditstr; nbatch=nbatch)
+arrayreg(::Type{T}, ditstr::DitStr{D}; nbatch::Union{Int,NoBatch}=NoBatch()) where {T,D} = arrayreg(onehot(T, ditstr; nbatch=_asint(nbatch)); nbatch=nbatch, nlevel=D)
 
 """
     transpose_storage(register) -> register
@@ -409,10 +417,10 @@ function rank3(r::ArrayRegOrAdjointArrayReg)
 end
 
 """
-    join(regs...)
+$(TYPEDSIGNATURES)
 
-concatenate a list of registers `regs` to a larger register, each register should
-have the same batch size. See also [`clone`](@ref).
+Concatenate a list of registers, each register should
+have the same number of level and batch size. See also [`clone`](@ref).
 
 ```jldoctest; setup=:(using Yao)
 julia> reg = join(product_state(bit"111"), zero_state(3))
@@ -427,18 +435,11 @@ julia> measure(reg; nshots=3)
  111000 ₍₂₎
 ```
 """
-Base.join(rs::AbstractArrayReg...) = _join(join_datatype(rs...), rs...)
-Base.join(r::AbstractArrayReg) = r
-function _join(::Type{T}, rs0::AbstractArrayReg{D}, rs::AbstractArrayReg{D}...) where {T,D}
-    state = batched_kron(rank3(rs0), rank3.(rs)...)
+function Base.join(r0::AbstractArrayReg{D}, rs::AbstractArrayReg{D}...)::AbstractArrayReg where D
+    length(rs) == 0 && return r0
+    state = batched_kron(rank3(r0), rank3.(rs)...)
     return arrayreg(reshape(state, size(state, 1), :), nbatch=nbatch(rs[1]), nlevel=D)
 end
-
-join_datatype(r::AbstractArrayReg{D,T}, rs::AbstractArrayReg{D,T}...) where {D,T} = join_datatype(T, r, rs...)
-join_datatype(::Type{T}, r::AbstractArrayReg{D,T1}, rs::AbstractArrayReg...) where {T,T1,D} =
-    join_datatype(promote_type(T, T1), rs...)
-join_datatype(::Type{T}) where {T} = T
-
 
 # initialization methods
 """
@@ -778,9 +779,9 @@ nbatch(r::ArrayReg) = NoBatch()
 nbatch(r::AdjointArrayReg) = nbatch(parent(r))
 
 """
-    most_probable(reg::AbstractArrayReg{2}, n::Int)
+$(TYPEDSIGNATURES)
 
-Find `n` most probable qubit configurations in a quantum register and return these configurations as a vector of `BitStr` instances.
+Find `n` most probable qubit configurations in a quantum register and return these configurations as a vector of `DitStr` instances.
 
 ### Example
 
@@ -791,16 +792,15 @@ julia> most_probable(ghz_state(3), 2)
  111 ₍₂₎
 ```
 """
-function most_probable(reg::ArrayReg{2}, n::Int)
+function most_probable(reg::ArrayReg{D}, n::Int) where D
     imax = sortperm(probs(reg); rev=true)[1:n]
-    return BitStr{nqubits(reg)}.(imax .- 1)
+    return DitStr{D,nqudits(reg)}.(imax .- 1)
 end
 
-function most_probable(reg::BatchedArrayReg{2}, n::Int)
-    res = Matrix{BitStr{nqubits(reg),Int}}(undef, n, reg.nbatch)
+function most_probable(reg::BatchedArrayReg{D}, n::Int) where D
+    res = Matrix{DitStr{D,nqudits(reg),Int}}(undef, n, reg.nbatch)
     for b = 1:nbatch(reg)
-        imax = sortperm(probs(viewbatch(reg, b)); rev=true)[1:n]
-        res[:, b] .= BitStr{nqubits(reg)}.(imax .- 1)
+        res[:, b] .= most_probable(viewbatch(reg, b), n)
     end
     return res
 end

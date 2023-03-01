@@ -13,6 +13,7 @@ using LinearAlgebra
 using LegibleLambdas
 using StatsBase, Random
 using LuxurySparse, StaticArrays
+using DocStringExtensions
 
 export AbstractArrayReg,
     ArrayReg,
@@ -38,6 +39,8 @@ export AbstractArrayReg,
     rank3,
     # operations
     isnormalized,
+    isseparable,
+    safe_remove!,
     normalize!,
     norm,
     regadd!,
@@ -105,10 +108,10 @@ export IMatrix, PermMatrix, Diagonal, SparseMatrixCSC
 # others
 export Const, logdi
 
+include("utils.jl")
 include("ast_tools.jl")
 include("error.jl")
 include("constants.jl")
-include("utils.jl")
 include("register.jl")
 include("operations.jl")
 include("focus.jl")

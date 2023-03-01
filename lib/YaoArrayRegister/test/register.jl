@@ -30,6 +30,7 @@ using Adapt
 end
 
 @testset "test BatchedArrayReg constructors" begin
+    @test BatchedArrayReg(rand_state(3), rand_state(3; nbatch=3), rand_state(3)).nbatch == 5
     @test BatchedArrayReg(rand(4, 6), 3) isa BatchedArrayReg{2}
     @test_throws DimensionMismatch BatchedArrayReg(rand(4, 3), 2)
     @test_throws DimensionMismatch BatchedArrayReg(rand(5, 2), 2)
@@ -288,6 +289,10 @@ end
     @test most_probable(reg, 2) == BitStr{2}.([2, 1])
     breg = BatchedArrayReg(reg, reg2)
     @test most_probable(breg, 2) == BitStr{2}.([2 3; 1 1])
+    reg1 = 0.6 * arrayreg(dit"120;3") + 0.8 * arrayreg(dit"222;3")
+    reg2 = 0.8 * arrayreg(dit"120;3") + 0.6 * arrayreg(dit"222;3")
+    @test most_probable(reg1, 1) == [dit"222;3"]
+    @test most_probable(BatchedArrayReg(reg1, reg2), 1) == reshape([dit"222;3", dit"120;3"], 1, :)
 end
 
 @testset "mock register" begin

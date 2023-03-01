@@ -16,7 +16,7 @@ end
             Tuple{Nothing, Vector{NamedTuple{(:block, :theta),Tuple{Nothing,Float64}}}},
         }[(n=nothing, blocks = [(block = nothing, theta = 1.0)],)],
     )
-    @test_broken Zygote.gradient(
+    @test Zygote.gradient(
         x -> getfield(getfield(x, :content), :theta),
         Daggered(Rx(0.5)),
     )[1] == (content = (block = nothing, theta = 1.0),)
@@ -247,4 +247,29 @@ end
     g1 = (wrap(U2, [0.618 + 1e-5]) - wrap(U2, [0.618-1e-5]))/2e-5
     g2 = Zygote.gradient(p -> wrap(U2, p), [0.618])[1][]
     @test isapprox(g1, g2, rtol=1e-3)
+end
+
+@testset "zygote add" begin
+    function loss(theta::AbstractVector{T}, alpha::AbstractVector{T}, var, N) where T
+        cost = Add([PutBlock(N, Scale(alpha[i], Z), (i,)) for i in 1:N])
+        reg = apply(zero_state(Complex{T}, N), dispatch(var, theta))
+        return real((reg' * apply(reg, cost))^2)
+    end
+    var = chain(put(6, i=>Rx(randn())) for i=1:6)
+    params = parameters(var)
+    alpha = rand(6)
+    gt1 = Zygote.gradient(_theta -> loss(_theta, alpha, var, 6), params)[1]
+    gt1f = ForwardDiff.gradient(_theta -> loss(_theta, eltype(_theta).(alpha), var, 6), params)
+    ga1 = Zygote.gradient(_alpha -> loss(params, _alpha, var, 6), alpha)[1]
+    ga1f = ForwardDiff.gradient(_alpha -> loss(eltype(_alpha).(params), _alpha, var, 6), alpha)
+    @test gt1 ≈ gt1f
+    @test ga1 ≈ ga1f
+
+    # tuple version
+    function loss(theta, alpha, var, N)
+        cost = Add(([PutBlock(N, Scale(alpha[i], Z), (i,)) for i in 1:N]...,))
+        reg = apply(zero_state(N), dispatch(var, theta))
+        return real((reg' * apply(reg, cost))^2)
+    end
+    @test Zygote.gradient(_theta -> loss(_theta, alpha, var, 6), params)[1] ≈ gt1
 end

@@ -45,12 +45,6 @@ include("const_gate_gen.jl")
 const PauliGate = Union{I2Gate,XGate,YGate,ZGate}
 
 YaoBlocks.cache_key(x::ConstantGate) = 0x1
-
-struct IGate{N} <: ConstantGate{N,2} end
-YaoBlocks.mat(::Type{T}, ::IGate{N}) where {T,N} = IMatrix{1 << N,T}()
-
-LinearAlgebra.ishermitian(::IGate) = true
-YaoAPI.isunitary(::IGate) = true
 end
 
 # import some frequently-used objects

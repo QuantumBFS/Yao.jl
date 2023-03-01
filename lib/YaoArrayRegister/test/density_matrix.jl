@@ -42,7 +42,6 @@ end
     reg_ = rand_state(3)
     reg2 = clone(reg, 3)
     dm = density_matrix(reg)
-    @test copy(dm) == dm
     dm_ = density_matrix(reg_)
     dm2s = density_matrix.(reg2)
     @test reg |> probs ≈ dm |> probs
@@ -106,6 +105,15 @@ end
 end
 
 @testset "density matrix" begin
+    # copy and similar
+    reg = rand_state(3)
+    r = density_matrix(reg)
+    r_similar = similar(r)
+    @test copy(r) == r
+    @test r_similar isa DensityMatrix
+    @test nqubits(r) == nqubits(r_similar)
+    @test nlevel(r) == nlevel(r_similar)
+
     # pure state
     reg1 = rand_state(3)
     reg2 = rand_state(3)
@@ -148,4 +156,11 @@ end
     @test regadd!(copy(r), r).state ≈ r.state .* 2
     @test regsub!(copy(r), r).state ≈ zero(r.state)
     @test -(r).state ≈ -r.state
+end
+
+@testset "join" begin
+    r1 = density_matrix(arrayreg(bit"110"))
+    r2 = density_matrix(arrayreg(bit"101"))
+    r = join(r2, r1)
+    @test measure(r) == [bit"101110"]
 end
