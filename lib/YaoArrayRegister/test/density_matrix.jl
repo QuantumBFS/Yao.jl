@@ -84,7 +84,7 @@ end
 end
 
 @testset "reduce density matrix" begin
-    reg = (product_state(bit"00000") + product_state(bit"11111")) / sqrt(2)
+    reg = ghz_state(4)
     rdm = density_matrix(reg, (1,))
     @test Matrix(rdm) ≈ [1/2 0; 0 1/2]
     reg = product_state([1, 0, 0])
@@ -93,15 +93,24 @@ end
 end
 
 @testset "von_neumann_entropy" begin
-    reg = (product_state(bit"00000") + product_state(bit"11111")) / sqrt(2)
+    reg = ghz_state(4)
     rho = density_matrix(reg)
     p = eigvals(statevec(reg) * statevec(reg)')
     p = max.(p, eps(Float64))
     @test von_neumann_entropy(rho) ≈ -sum(p .* log.(p)) rtol=1e-12
 
-    reg = zero_state(4; nlevel=3)
-    r = density_matrix(reg, [1,2])
+    rho = density_matrix(reg, 1:2)
+    @test von_neumann_entropy(rho) ≈ log(2)
     @test nqudits(r) == 2
+end
+
+@testset "mutual_information" begin 
+    reg = product_state(bit"1001")
+    @test mutual_information(reg, (1,2), (3,4)) ≈ 0.
+    rho = density_matrix(reg, 1:2)
+    @test mutual_information(rho, (1,), (2,)) ≈ 0.
+
+    reg = ghz_state(4)
 end
 
 @testset "density matrix" begin

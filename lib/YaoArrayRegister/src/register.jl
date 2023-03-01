@@ -735,7 +735,7 @@ julia> mutual_information(ghz_state(4), (1,), (3,4))
 ```
 """
 function mutual_information(reg::AbstractArrayReg, part1, part2)
-    @assert_locs_safe nqudits(dm) vcat(part1, part2)
+    @assert_locs_safe nqudits(reg) vcat(part1, part2)
     von_neumann_entropy(reg, part1) .+ von_neumann_entropy(reg, part2) .- von_neumann_entropy(reg, part1 ∪ part2)
 end
 
