@@ -1,16 +1,12 @@
 """
-    bit_flip_channel(p::Real)
+    pauli_error_channel(; px::Real, py::Real=px, pz::Real=px)
 
-Create a bit flip channel as a [`UnitaryChannel`](@ref).
+Create the Pauli error channel as a [`UnitaryChannel`](@ref)
 
-```math
-p⋅ρ + (1-p)⋅XρX
+```math 
+    (1 - (p_x + p_y + p_z))⋅ρ + p_x⋅XρX + p_y⋅YρY  + p_z⋅ZρZ
 ```
 """
-function bit_flip_channel(p::Real)
-    return unitary_channel([I2, X], [p, 1-p])
-end
-
 function pauli_error_channel(; px::Real, py::Real=px, pz::Real=px)
     pz + px + py ≤ 1 || throw(ArgumentError("sum of error probability is larger than 1"))
     return UnitaryChannel(
@@ -20,16 +16,29 @@ function pauli_error_channel(; px::Real, py::Real=px, pz::Real=px)
 end
 
 """
+    bit_flip_channel(p::Real)
+
+Create a bit flip channel as a [`UnitaryChannel`](@ref).
+
+```math
+(1-p)⋅ρ + p⋅XρX
+```
+"""
+function bit_flip_channel(p::Real)
+    return unitary_channel([I2, X], [1-p, p])
+end
+
+"""
     phase_flip_channel(::Real)
 
 Create a phase flip channel as [`UnitaryChannel`](@ref).
 
 ```math
-p⋅ρ + (1-p)⋅ZρZ
+(1-p)⋅ρ + p⋅ZρZ
 ```
 """
 function phase_flip_channel(p::Real)
-    return UnitaryChannel([I2, Z], [p, 1-p])
+    return UnitaryChannel([I2, Z], [1-p, p])
 end
 
 struct DepolarizingChannel{T} <: PrimitiveBlock{2}
