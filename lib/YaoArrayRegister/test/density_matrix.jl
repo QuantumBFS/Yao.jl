@@ -101,16 +101,29 @@ end
 
     rho = density_matrix(reg, 1:2)
     @test von_neumann_entropy(rho) ≈ log(2)
-    @test nqudits(r) == 2
+    @test von_neumann_entropy(rho) ≈ von_neumann_entropy(reg, 1:2)
 end
 
 @testset "mutual_information" begin 
     reg = product_state(bit"1001")
-    @test mutual_information(reg, (1,2), (3,4)) ≈ 0.
+    @test mutual_information(reg, (1,2), (3,4)) ≈ 0. atol=1e-10
     rho = density_matrix(reg, 1:2)
-    @test mutual_information(rho, (1,), (2,)) ≈ 0.
+    @test mutual_information(rho, (1,), (2,)) ≈ 0. atol=1e-10
 
     reg = ghz_state(4)
+    @test mutual_information(reg, (1,2), (3,4)) ≈ 2log(2)
+    @test_throws LocationConflictError mutual_information(reg, (1, 2), (1, 3))
+    
+    rho = density_matrix(reg, (1, 2))
+    @test mutual_information(rho, (1,), (2,)) ≈ log(2)
+end
+
+@testset "cross_entropy" begin 
+    rho = density_matrix(rand_state(2))
+    @test YaoArrayRegister.cross_entropy(rho, rho) ≈ von_neumann_entropy(rho) atol=1e-10
+    rho1 = density_matrix(product_state(bit"10"))
+    rho2 = density_matrix(product_state(bit"01"))
+    @test YaoArrayRegister.cross_entropy(rho1, rho2) ≈ 0. atol=1e-10
 end
 
 @testset "density matrix" begin

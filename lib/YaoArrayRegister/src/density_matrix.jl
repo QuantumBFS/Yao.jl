@@ -133,8 +133,9 @@ von_neumann_entropy(v::AbstractVector) = -sum(x->x*log(x), v)
 
 function mutual_information(dm::DensityMatrix, part1, part2)
     n = nqudits(dm)
-    @assert_locs_safe n vcat(part1, part2)
-    return von_neumann_entropy(density_matrix(dm, part1)) + von_neumann_entropy(density_matrix(dm, part2)) - 
+    @assert_locs_safe n part1 ∪ part2
+    return von_neumann_entropy(density_matrix(dm, part1)) + 
+        von_neumann_entropy(density_matrix(dm, part2)) - 
         von_neumann_entropy(length(part1) + length(part2) == n ? dm : density_matrix(dm, part1 ∪ part2))
 end
 
@@ -154,9 +155,9 @@ end
 """
     cross_entropy(rho1, rho2) -> Real
 
-The cross entropy between two density matrices ``\\rho_1`` and ``\\rho_2`` is defined as:
+The cross entropy between two density matrices ``ρ_1`` and ``ρ_2`` is defined as:
 ```math
-S(\\rho_1, \\rho_2) = - \\rho_1\\ln\\rho_2.
+S(ρ_1, ρ_2) = - ρ_1\\ln ρ_2.
 ```
 """
 function cross_entropy(dm1::DensityMatrix, dm2::DensityMatrix)
