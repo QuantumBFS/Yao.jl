@@ -32,10 +32,8 @@ _sort(x::Tuple; by = identity) = TupleTools.sort(x, by = by)
 # NOTE: this method assumes its input is not empty, it gets rid of errors
 nonempty_minimum(x::UnitRange) = x.start
 nonempty_minimum(x::Integer) = x
-nonempty_minimum(x::Tuple) = minimum(x)
 nonempty_maximum(x::UnitRange) = x.stop
 nonempty_maximum(x::Integer) = x
-nonempty_maximum(x::Tuple) = maximum(x)
 
 const AddressVector{T} = Vector{T} where {T<:Union{Integer,UnitRange}}
 const AddressNTuple{N,T} = NTuple{N,T} where {T<:Union{Integer,UnitRange}}
