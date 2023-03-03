@@ -7,12 +7,12 @@ using LinearAlgebra
     dm = rand_density_matrix(3)
     ch = put(3, 1 => phase_flip_channel(0.2))
     opZ = mat(put(3, 1=>Z))
-    @test 0.2 * dm.state + 0.8 * opZ * dm.state * opZ ≈ apply(dm, ch).state
+    @test 0.8 * dm.state + 0.2 * opZ * dm.state * opZ ≈ apply(dm, ch).state
 
     dm = rand_density_matrix(3)
     ch = put(3, 1 => bit_flip_channel(0.2))
     opX = mat(put(3, 1=>X))
-    @test 0.2 * dm.state + 0.8 * opX * dm.state * opX ≈ apply(dm, ch).state
+    @test 0.8 * dm.state + 0.2 * opX * dm.state * opX ≈ apply(dm, ch).state
 
     dm = rand_density_matrix(3)
     ch = depolarizing_channel(3; p=0.2)
