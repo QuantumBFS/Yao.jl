@@ -41,7 +41,7 @@ end
 completely_mixed_state(n::Int; nlevel::Int=2) = completely_mixed_state(ComplexF64, n; nlevel)
 
 function completely_mixed_state(::Type{T}, n::Int; nlevel::Int=2) where T
-    return DensityMatrix{nlevel}(Matrix(IMatrix{T}(nlevel^n)))
+    return DensityMatrix{nlevel}(diagm(0 => fill(one(T) / nlevel^n, nlevel^n)))
 end
 
 # Move this to YaoAPI and dispatch on `AbstractRegister{D}`?
@@ -57,7 +57,7 @@ end
 
 # Density matrices are hermitian
 Base.adjoint(dm::DensityMatrix) = dm
-LinearAlgebra.ishermitian(dm::DensityMatrix) =  true
+LinearAlgebra.ishermitian(dm::DensityMatrix) =  true # remove if not covered by tests?
 
 function YaoAPI.density_matrix(reg::ArrayReg, qubits)
     freg = focus!(copy(reg), qubits)
@@ -133,7 +133,7 @@ von_neumann_entropy(v::AbstractVector) = -sum(x->x*log(x), v)
 
 function mutual_information(dm::DensityMatrix, part1, part2)
     n = nqudits(dm)
-    @assert_locs_safe n part1 ∪ part2
+    @assert_locs_safe n collect(Iterators.flatten((part1, part2)))
     return von_neumann_entropy(density_matrix(dm, part1)) + 
         von_neumann_entropy(density_matrix(dm, part2)) - 
         von_neumann_entropy(length(part1) + length(part2) == n ? dm : density_matrix(dm, part1 ∪ part2))

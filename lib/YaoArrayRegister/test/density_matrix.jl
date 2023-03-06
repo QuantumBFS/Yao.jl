@@ -118,12 +118,16 @@ end
     @test mutual_information(rho, (1,), (2,)) ≈ log(2)
 end
 
-@testset "cross_entropy" begin 
-    rho = density_matrix(rand_state(2))
+@testset "relative and cross_entropy" begin 
+    rho = rand_density_matrix(2)
     @test YaoArrayRegister.cross_entropy(rho, rho) ≈ von_neumann_entropy(rho) atol=1e-10
-    rho1 = density_matrix(product_state(bit"10"))
-    rho2 = density_matrix(product_state(bit"01"))
-    @test YaoArrayRegister.cross_entropy(rho1, rho2) ≈ 0. atol=1e-10
+
+    rho1 = density_matrix(product_state(bit"0"))
+    rho1.state[2,2] += eps(Float64)
+    rho2 = density_matrix(ghz_state(2), (1,))
+    @test YaoArrayRegister.relative_entropy(rho, rho) ≈ 0 atol=1e-10
+    @test YaoArrayRegister.relative_entropy(rho1, rho2) ≈ log(2) atol=1e-10
+    @test YaoArrayRegister.relative_entropy(rho2, rho1) ≈ -log(eps(Float64))/2 - von_neumann_entropy(rho2) atol=1e-10
 end
 
 @testset "density matrix" begin
@@ -133,6 +137,7 @@ end
     r_similar = similar(r)
     r_manual = DensityMatrix(reg.state * reg.state')
     @test copy(r) == r
+    @test densit_matrix(r) == r
     @test r_similar isa DensityMatrix
     @test r_manual ≈ r
     @test nqubits(r) == nqubits(r_similar)
@@ -146,8 +151,8 @@ end
     @test isapprox(fidelity(reg1, reg2), fidelity(r1, r2); atol=1e-10)
     
     # mixed state
-    r1 = density_matrix(reg1, (2,1))
-    r2 = density_matrix(reg2, (2,1))
+    r1 = density_matrix(reg1, 1:2)
+    r2 = density_matrix(reg2, 1:2)
     expected = abs(tr(sqrt(sqrt(r1.state) * r2.state * sqrt(r1.state))))
     @test isapprox(expected, fidelity(r1, r2); atol=1e-5)
 
@@ -173,7 +178,7 @@ end
     @test eltype(dm.state) === ComplexF64
 
     dm = completely_mixed_state(2)
-    @test dm.state == I(4)
+    @test dm.state == I(4) ./ 4
 end
 
 @testset "zero_state_like" begin
