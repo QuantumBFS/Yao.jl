@@ -105,16 +105,22 @@ end
 end
 
 @testset "density matrix" begin
-    # copy and similar
+    # copy, copyto! and similar
     reg = rand_state(3)
     r = density_matrix(reg)
-    r_similar = similar(r)
-    r_manual = DensityMatrix(reg.state * reg.state')
     @test copy(r) == r
-    @test r_similar isa DensityMatrix
+
+    r_manual = DensityMatrix(reg.state * reg.state')
     @test r_manual ≈ r
+
+    r_similar = similar(r)
+    @test r_similar isa DensityMatrix
     @test nqubits(r) == nqubits(r_similar)
     @test nlevel(r) == nlevel(r_similar)
+
+    r_rand = rand_density_matrix(3)
+    copyto!(r_rand, r)
+    @test r_rand  ≈ r
 
     # pure state
     reg1 = rand_state(3)
