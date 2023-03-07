@@ -137,7 +137,7 @@ end
     r_similar = similar(r)
     r_manual = DensityMatrix(reg.state * reg.state')
     @test copy(r) == r
-    @test densit_matrix(r) == r
+    @test density_matrix(r) == r
     @test r_similar isa DensityMatrix
     @test r_manual ≈ r
     @test nqubits(r) == nqubits(r_similar)
@@ -151,8 +151,8 @@ end
     @test isapprox(fidelity(reg1, reg2), fidelity(r1, r2); atol=1e-10)
     
     # mixed state
-    r1 = density_matrix(reg1, 1:2)
-    r2 = density_matrix(reg2, 1:2)
+    r1 = density_matrix(reg1, (2, 1))
+    r2 = density_matrix(reg2, (2, 1))
     expected = abs(tr(sqrt(sqrt(r1.state) * r2.state * sqrt(r1.state))))
     @test isapprox(expected, fidelity(r1, r2); atol=1e-5)
 
@@ -163,7 +163,7 @@ end
 
     # fidelity between focused and pure state
     f1 = rand_state(2)
-    @test isapprox(fidelity(density_matrix(f1, (1,2)), r2), fidelity(f1, f2); atol=1e-6)
+    @test fidelity(density_matrix(f1, (1, 2)), r2) ≈ fidelity(f1, f2) atol=1e-6
 
     dm = rand_density_matrix(2)
     @test is_density_matrix(dm.state)

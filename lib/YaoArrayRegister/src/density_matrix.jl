@@ -55,10 +55,6 @@ function Base.show(io::IO, dm::DensityMatrix{D,T,MT}) where {D,T,MT}
     print(io, "\n    nlevel: ", nlevel(dm))
 end
 
-# Density matrices are hermitian
-Base.adjoint(dm::DensityMatrix) = dm
-LinearAlgebra.ishermitian(dm::DensityMatrix) =  true # remove if not covered by tests?
-
 function YaoAPI.density_matrix(reg::ArrayReg, qubits)
     freg = focus!(copy(reg), qubits)
     return density_matrix(freg)
