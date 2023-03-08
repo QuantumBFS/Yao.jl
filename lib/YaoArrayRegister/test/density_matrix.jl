@@ -131,17 +131,23 @@ end
 end
 
 @testset "density matrix" begin
-    # copy and similar
+    # copy, copyto! and similar
     reg = rand_state(3)
     r = density_matrix(reg)
-    r_similar = similar(r)
-    r_manual = DensityMatrix(reg.state * reg.state')
     @test copy(r) == r
     @test density_matrix(r) == r
-    @test r_similar isa DensityMatrix
+
+    r_manual = DensityMatrix(reg.state * reg.state')
     @test r_manual ≈ r
+
+    r_similar = similar(r)
+    @test r_similar isa DensityMatrix
     @test nqubits(r) == nqubits(r_similar)
     @test nlevel(r) == nlevel(r_similar)
+
+    r_rand = rand_density_matrix(3)
+    copyto!(r_rand, r)
+    @test r_rand  ≈ r
 
     # pure state
     reg1 = rand_state(3)
@@ -154,12 +160,12 @@ end
     r1 = density_matrix(reg1, (2, 1))
     r2 = density_matrix(reg2, (2, 1))
     expected = abs(tr(sqrt(sqrt(r1.state) * r2.state * sqrt(r1.state))))
-    @test isapprox(expected, fidelity(r1, r2); atol=1e-5)
+    @test expected ≈ fidelity(r1, r2) atol=1e-5
 
     # focused state is viewed as mixed state
     f1 = focus!(copy(reg1), (2, 1))
     f2 = focus!(copy(reg2), (2, 1))
-    @test isapprox(fidelity(r1, r2), fidelity(f1, f2); atol=1e-6)
+    @test fidelity(r1, r2) ≈ fidelity(f1, f2) atol=1e-6
 
     # fidelity between focused and pure state
     f1 = rand_state(2)

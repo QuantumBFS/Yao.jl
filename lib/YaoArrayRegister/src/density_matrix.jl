@@ -12,6 +12,11 @@ Base.similar(ρ::DensityMatrix{D}) where {D} = DensityMatrix{D}(similar(ρ.state
 Base.:(==)(ρ::DensityMatrix, σ::DensityMatrix) = nlevel(ρ) == nlevel(σ) && ρ.state == σ.state
 Base.isapprox(ρ::DensityMatrix, σ::DensityMatrix; kwargs...) = nlevel(ρ) == nlevel(σ) && isapprox(ρ.state, σ.state; kwargs...)
 
+function Base.copyto!(dst::DensityMatrix{D}, src::DensityMatrix{D}) where D
+    copyto!(dst.state, src.state)
+    return dst
+end
+
 YaoAPI.nqubits(ρ::DensityMatrix) = nqudits(ρ)
 YaoAPI.nqudits(ρ::DensityMatrix{D}) where {D} = logdi(size(state(ρ), 1), D)
 YaoAPI.nactive(ρ::DensityMatrix) = nqudits(ρ)
