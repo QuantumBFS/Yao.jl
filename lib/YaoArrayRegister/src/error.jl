@@ -26,8 +26,6 @@ function Base.show(io::IO, e::QubitMismatchError)
 end
 
 
-export islocs_inbounds, islocs_conflict
-
 _sort(x::Vector; by = identity) = sort(x, by = by)
 _sort(x::Tuple; by = identity) = TupleTools.sort(x, by = by)
 
@@ -87,7 +85,6 @@ end
 
 # NOTE: we may use @assert in the future
 #       these macro will help us keep original APIs
-export @assert_locs_safe, @assert_locs_inbounds
 
 """
     @assert_locs_inbounds <number of total qudits> <locations list> [<msg>]

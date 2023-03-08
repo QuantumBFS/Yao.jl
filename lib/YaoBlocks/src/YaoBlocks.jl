@@ -103,7 +103,6 @@ export applymatrix, cache_key
 
 include("utils.jl")
 include("outerproduct_and_projection.jl")
-include("error.jl")
 # include("traits.jl")
 
 include("abstract_block.jl")

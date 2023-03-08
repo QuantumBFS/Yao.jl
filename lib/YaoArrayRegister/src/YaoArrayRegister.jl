@@ -101,7 +101,9 @@ export AbstractRegister,
     tracedist,
     viewbatch,
     basis,
-    clone
+    clone,
+    @assert_locs_safe,
+    @assert_locs_inbounds
 
 # matrix types
 export IMatrix, PermMatrix, Diagonal, SparseMatrixCSC
@@ -111,6 +113,7 @@ export Const, logdi
 
 include("utils.jl")
 include("ast_tools.jl")
+include("error.jl")
 include("constants.jl")
 include("register.jl")
 include("density_matrix.jl")

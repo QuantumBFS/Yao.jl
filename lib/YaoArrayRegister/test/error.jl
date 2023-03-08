@@ -1,4 +1,4 @@
-using Test, YaoBlocks
+using Test, YaoArrayRegister
 
 @testset "errors" begin
     @test_throws ErrorException @assert_locs_inbounds 4 (1, 2, 3, 4, 5)
