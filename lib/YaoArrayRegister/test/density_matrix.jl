@@ -137,6 +137,7 @@ end
     @test copy(r) == r
     @test density_matrix(r) == r
 
+
     r_manual = DensityMatrix(reg.state * reg.state')
     @test r_manual ≈ r
 
