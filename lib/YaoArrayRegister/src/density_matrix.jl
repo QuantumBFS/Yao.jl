@@ -43,11 +43,16 @@ function rand_density_matrix(::Type{T}, n::Int; nlevel::Int=2, pure::Bool=false)
                   density_matrix(rand_state(T, 2n; nlevel), n+1:2n)
 end
 
-completely_mixed_state(n::Int; nlevel::Int=2) = completely_mixed_state(ComplexF64, n; nlevel)
+"""
+    completely_mixed_state([T=ComplexF64], n::Int; nlevel::Int=2)
 
+Generate the completely mixed state with density matrix `I(n) ./ nlevel^n`.
+"""
 function completely_mixed_state(::Type{T}, n::Int; nlevel::Int=2) where T
     return DensityMatrix{nlevel}(diagm(0 => fill(one(T) / nlevel^n, nlevel^n)))
 end
+
+completely_mixed_state(n::Int; nlevel::Int=2) = completely_mixed_state(ComplexF64, n; nlevel)
 
 # Move this to YaoAPI and dispatch on `AbstractRegister{D}`?
 # Could then remove from YaoArrayRegister/src/register.jl and here
@@ -77,8 +82,8 @@ YaoAPI.tracedist(dm1::DensityMatrix{D}, dm2::DensityMatrix{D}) where {D} = trace
 """
     is_density_matrix(dm::AbstractMatrix; kw...)
 
-Test if given matrix is a density matrix. The keyword
-is the same as `isapprox`. See also `isapprox`.
+Test if given matrix is a density matrix. The keyword is the same as `isapprox`.
+See also `isapprox`.
 """
 function is_density_matrix(dm::AbstractMatrix; kw...)
     return isapprox(tr(dm), 1.0; kw...) &&

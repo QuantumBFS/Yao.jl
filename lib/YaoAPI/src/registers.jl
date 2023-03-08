@@ -283,7 +283,7 @@ ArrayReg{2, ComplexF64, Array...}
 @interface relax!
 
 """
-    partial_tr(ρ, locs) -> 
+    partial_tr(ρ, locs) -> DensityMatrix
 
 Return a density matrix which is the partial traced on `locs`.
 """

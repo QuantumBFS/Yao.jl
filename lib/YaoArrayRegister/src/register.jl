@@ -266,8 +266,9 @@ Create a register initialized to zero from an existing one.
 
 ```jldoctest; setup=:(using Yao)
 julia> reg = rand_state(3; nbatch=2)
+julia> zero_state_like(reg, 2)
 BatchedArrayReg{2, ComplexF64, Transpose...}
-    active qubits: 3/3
+    active qubits: 2/2
     nlevel: 2
     nbatch: 2
 ```
