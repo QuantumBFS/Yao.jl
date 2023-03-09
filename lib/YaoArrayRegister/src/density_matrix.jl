@@ -54,14 +54,9 @@ end
 
 completely_mixed_state(n::Int; nlevel::Int=2) = completely_mixed_state(ComplexF64, n; nlevel)
 
-# Move this to YaoAPI and dispatch on `AbstractRegister{D}`?
-# Could then remove from YaoArrayRegister/src/register.jl and here
-qubit_type(::DensityMatrix{2}) = "qubits"
-qubit_type(::DensityMatrix) = "qudits"
-
 function Base.show(io::IO, dm::DensityMatrix{D,T,MT}) where {D,T,MT}
     print(io, "DensityMatrix{$D, $T, $(nameof(MT))...}")
-    print(io, "\n    active $(qubit_type(dm)): ", nactive(dm), "/", nqudits(dm))
+    print(io, "\n    active $(YaoAPI.qubit_type(dm)): ", nactive(dm), "/", nqudits(dm))
     print(io, "\n    nlevel: ", nlevel(dm))
 end
 

@@ -29,6 +29,14 @@ For qubits, `D = 2`.
 """
 abstract type AbstractRegister{D} end
 
+"""
+    qubit_type(::AbstractRegister{2})
+    qubit_type(::AbstractRegister)
+
+Return "qubit" or "qudit" for pretty printing of registers.
+"""
+qubit_type(::AbstractRegister{2}) = "qubits"
+qubit_type(::AbstractRegister) = "qudits"
 
 """
     AdjointRegister{D, RT<:AbstractRegister{D}} <: AbstractRegister{D}
