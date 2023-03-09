@@ -83,7 +83,7 @@ put on (1, 2)
 
 But, wait, why there's no `4` in the definition above? This is because
 all the functions in `Yao` that requires to input the number of qubits as its
-first arguement could be lazy (curried), and let other constructors to infer the total
+first argument could be lazy (curried), and let other constructors to infer the total
 number of qubits later, e.g
 
 ````julia
@@ -94,7 +94,7 @@ put(1=>X)
 (n -> put(n, 1 => X))
 ````
 
-which will return a lambda that ask for a single arguement `n`.
+which will return a lambda that ask for a single argument `n`.
 
 ````julia
 put(1=>X)(4)

@@ -3,6 +3,7 @@ using Test
 
 @testset "test utils" begin
     include("utils.jl")
+    include("error.jl")
 end
 
 @testset "test ArrayReg" begin

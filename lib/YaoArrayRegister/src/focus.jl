@@ -82,10 +82,12 @@ YaoAPI.focus!(locs::UnitRange) = @λ(register -> focus!(register, locs))
 # locations: some location of the wire
 # orders: includes all the location of the wire in some order
 function YaoAPI.focus!(r::AbstractArrayReg{D}, locs) where {D}
+    n = nactive(r)
+    @assert_locs_safe n (locs...,)
     if is_order_same(locs)
         arr = r.state
     else
-        new_orders = move_ahead(nactive(r) + 1, locs)
+        new_orders = move_ahead(n + 1, locs)
         arr = group_permutedims(hypercubic(r), new_orders)
     end
     r.state = reshape(arr, D^length(locs), :)
