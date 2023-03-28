@@ -12,6 +12,10 @@ using Random
     include("easybuild/easybuild.jl")
 end
 
+@testset "braket" begin
+    include("braket.jl")
+end
+
 DocMeta.setdocmeta!(Yao, :DocTestSetup, :(using Yao, YaoAPI, YaoArrayRegister, YaoBlocks, YaoSym, BitBasis); recursive=true)
 
 Documenter.doctest(YaoAPI; manual=false)
