@@ -195,17 +195,15 @@ begin
 end
 
 # ╔═╡ dc0b86be-06e4-11eb-24db-4f56cb821e0f
-begin
-	if input==bit"00"
-		Matrix(superdense_coding_circuit) == Matrix(chain(2))
-	elseif input==bit"01"
-		Matrix(superdense_coding_circuit) == Matrix(chain(2, put(1=>Z)))
-	elseif input==bit"10"
-		Matrix(superdense_coding_circuit) == Matrix(chain(2, put(1=>X)))
-	elseif input==bit"11"
-		Matrix(superdense_coding_circuit) == Matrix(chain(2, put(1=>Y)))
-	end && typeof(input) != Int64 ? md"✅" : md"❌"
-end
+if input==bit"00"
+	Matrix(superdense_coding_circuit) == Matrix(chain(2))
+elseif input==bit"01"
+	Matrix(superdense_coding_circuit) == Matrix(chain(2, put(1=>Z)))
+elseif input==bit"10"
+	Matrix(superdense_coding_circuit) == Matrix(chain(2, put(1=>X)))
+elseif input==bit"11"
+	Matrix(superdense_coding_circuit) == Matrix(chain(2, put(1=>Y)))
+end && typeof(input) != Int64 ? md"✅" : md"❌"
 
 # ╔═╡ 28ccce76-06e1-11eb-1c70-b3d7779a062e
 Bobs_part = ((Alice_and_Bobs_second_entangled_qubit |> superdense_coding_circuit) |> reversebellcircuit) |> r->measure(r, nshots=1000)
@@ -226,17 +224,15 @@ begin
 end
 
 # ╔═╡ b1392da2-06e5-11eb-3632-7d96a1b81a24
-begin
-	if Bobs_part[1]==bit"00"
-		Bobs_qubit == input_to_teleportation_circuit
-	elseif Bobs_part[1]==bit"01"
-		Bobs_qubit == (input_to_teleportation_circuit |> ZGate())
-	elseif Bobs_part[1]==bit"10"
-		Bobs_qubit == (input_to_teleportation_circuit |> XGate())
-	elseif Bobs_part[1]==bit"11"
-		Bobs_qubit == (input_to_teleportation_circuit |> YGate())
-	end && (length(state(input_to_teleportation_circuit)) == 2) && (sum(Bobs_part .== Bobs_part[1]) == 1000) ? md"✅" : md"❌"
-end
+if Bobs_part[1]==bit"00"
+	Bobs_qubit == input_to_teleportation_circuit
+elseif Bobs_part[1]==bit"01"
+	Bobs_qubit == (input_to_teleportation_circuit |> ZGate())
+elseif Bobs_part[1]==bit"10"
+	Bobs_qubit == (input_to_teleportation_circuit |> XGate())
+elseif Bobs_part[1]==bit"11"
+	Bobs_qubit == (input_to_teleportation_circuit |> YGate())
+end && (length(state(input_to_teleportation_circuit)) == 2) && (sum(Bobs_part .== Bobs_part[1]) == 1000) ? md"✅" : md"❌"
 
 # ╔═╡ 83df1840-06e7-11eb-2502-173dac5d4963
 md"Seems to work... Although, wouldn't using the information from superdense coding make teleportation pointless."
