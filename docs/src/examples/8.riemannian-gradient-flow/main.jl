@@ -1,6 +1,7 @@
 # # Riemannian gradient flow optimizer
 
-# In this tutorial we will present the Riemannian gradient descent algorithm described in [Wiersema and Killoran (2022)](https://arxiv.org/pdf/2202.06976.pdf).
+# In this tutorial we will present the Riemannian gradient descent algorithm described in [Miao and Barthel (2021)](https://arxiv.org/pdf/2108.13401.pdf)
+# and [Wiersema and Killoran (2022)](https://arxiv.org/pdf/2202.06976.pdf)
 # As opposed to most standard optimization algorithms that optimize parameters of variational quantum circuits,
 # this algorithm optimizes a function directly over the special unitary group by following the gradient flow over the manifold.
 # Let's start by importing the necessary packages.
