@@ -23,6 +23,7 @@ end
 module YaoArrayRegisterBenchmarks
     using ..BenchmarkUtils: replace_imports
     using Yao
+    using Yao.YaoBlocks: sprand_hermitian
     include(replace_imports, "../lib/YaoArrayRegister/benchmark/benchmarks.jl")
 end
 
