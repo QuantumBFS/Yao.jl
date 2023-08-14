@@ -164,7 +164,7 @@ end
 
 The backward function of `apply!`. Returns a tuple of ((input register, gradient of input register), parameter gradients)
 """
-function apply_back(st::Tuple{<:AbstractArrayReg,<:AbstractArrayReg}, block::AbstractBlock; kwargs...)
+function apply_back(st::Tuple{<:AbstractArrayReg, <:AbstractArrayReg}, block::AbstractBlock; kwargs...)
     col = []
     in, inδ = apply_back!(st, block, col; kwargs...)
     (in, inδ), col
