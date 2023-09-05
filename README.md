@@ -42,7 +42,9 @@ If a qubit of initial state or final state is not specified, the circuit will ha
 ```julia
 julia> import Yao, YaoToEinsum
 
-julia> using YaoExtensions: qft_circuit
+julia> using Yao.EasyBuild: qft_circuit
+
+julia> using YaoToEinsum: uniformsize, TreeSA, optimize_code
 
 julia> n = 10;
 
