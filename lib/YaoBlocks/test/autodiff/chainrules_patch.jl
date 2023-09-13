@@ -273,3 +273,19 @@ end
     end
     @test Zygote.gradient(_theta -> loss(_theta, alpha, var, 6), params)[1] ≈ gt1
 end
+
+@testset "zygote apply back" begin
+    function loss3(c, θs)
+        # the assign is nessesary!
+        c = dispatch(c, θs)
+        reg = zero_state(nqubits(c))
+        reg = apply(reg, c)
+        v = vec(reg.state)
+        real(sum(abs2.(v .* v)))
+    end
+    N = 5
+    c = chain(rand([[control(N, i, mod1(i+1,N)=>Rx(0.0)) for i=1:N]..., [put(N, i=>Ry(0.0)) for i=1:N]..., [put(N, i=>Rx(0.0)) for i=1:N]...], 6))
+    loss3(c, rand(nparameters(c)))
+    zygote_grad = Zygote.gradient(θs->loss3(c, θs), rand(nparameters(c)))[1]
+    @test zygote_grad isa Vector
+end
