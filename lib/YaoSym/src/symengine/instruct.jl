@@ -1,6 +1,3 @@
-using ..SymEngine
-import YaoArrayRegister: parametric_mat
-
 parametric_mat(::Type{T}, ::Val{:Rx}, theta::Basic) where {T} =
     Basic[cos(theta / 2) -im*sin(theta / 2); -im*sin(theta / 2) cos(theta / 2)]
 parametric_mat(::Type{T}, ::Val{:Ry}, theta::Basic) where {T} =

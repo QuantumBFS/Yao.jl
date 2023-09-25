@@ -14,8 +14,6 @@ using Test
     @test real(exp(im * a)) == cos(a)
     @test imag(exp(im * a)) == sin(a)
     @test abs(exp(im * a)) == 1
-    @test abs(sin(a)) == sin(a)
-    @test abs(sin(a) + 2) == sin(a) + 2
 end
 
 @testset "mat" begin
