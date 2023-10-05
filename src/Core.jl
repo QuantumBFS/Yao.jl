@@ -8,7 +8,7 @@ function Base.show(io::IO, c::TensorNetwork)
     print(io, contraction_complexity(c))
 end
 function Base.show(io::IO, ::MIME"text/plain", c::TensorNetwork)
-    print(io, c)
+    Base.show(io, c)
 end
 function Base.iterate(c::TensorNetwork, state=1)
     if state > 2

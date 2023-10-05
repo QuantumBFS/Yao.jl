@@ -1,8 +1,9 @@
 # YaoToEinsum
 
 [![CI](https://github.com/QuantumBFS/YaoToEinsum.jl/workflows/CI/badge.svg)](https://github.com/QuantumBFS/YaoToEinsum.jl/actions)
+[![codecov](https://codecov.io/gh/QuantumBFS/YaoToEinsum.jl/graph/badge.svg?token=ZwzRcQCksQ)](https://codecov.io/gh/QuantumBFS/YaoToEinsum.jl)
 
-Convert Yao circuit to OMEinsum notation for tensor network based simulation.
+Convert [Yao](https://github.com/QuantumBFS/Yao.jl) circuit to tensor networks (einsum).
 
 ## Installation
 
@@ -12,7 +13,7 @@ Convert Yao circuit to OMEinsum notation for tensor network based simulation.
 pkg> add YaoToEinsum
 ```
 
-## Example
+## Using
 This package contains one main function `yao2einsum(circuit; initial_state=Dict(), final_state=Dict(), optimizer=TreeSA())`.
 It transform a [`Yao`](https://github.com/QuantumBFS/Yao.jl) circuit to a generalized tensor network (einsum notation).  The return value is a `TensorNetwork` object.
 
@@ -54,6 +55,6 @@ julia> contract(network)[] ≈ Yao.zero_state(n)' * (Yao.zero_state(n) |> circui
 true
 ```
 
-## References
-
+## Contribute and Cite
+If you have any questions or suggestions, please feel free to open an issue or pull request.
 If you use this package in your work, please cite the relevant part of the papers included in [CITATION.bib](CITATION.bib).
