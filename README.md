@@ -56,11 +56,4 @@ true
 
 ## References
 
-* Simulating quantum computation by contracting tensor networks
-https://arxiv.org/abs/quant-ph/0511069
-
-* Simulating the Sycamore quantum supremacy circuits
-https://arxiv.org/abs/2103.03074
-
-* Solving the sampling problem of the Sycamore quantum supremacy circuits
-https://arxiv.org/abs/2111.03011
+If you use this package in your work, please cite the relevant part of the papers included in [CITATION.bib](CITATION.bib).
