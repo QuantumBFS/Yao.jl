@@ -6,66 +6,51 @@ Convert Yao circuit to OMEinsum notation for tensor network based simulation.
 
 ## Installation
 
-<p>
-YaoToEinsum is a &nbsp;
-    <a href="https://julialang.org">
-        <img src="https://raw.githubusercontent.com/JuliaLang/julia-logo-graphics/master/images/julia.ico" width="16em">
-        Julia Language
-    </a>
-    &nbsp; package. To install YaoToEinsum,
-    please <a href="https://docs.julialang.org/en/v1/manual/getting-started/">open
-    Julia's interactive session (known as REPL)</a> and press <kbd>]</kbd> key in the REPL to use the package mode, then type the following command
-</p>
-
-For stable release
+`YaoToEinsum` is a [Julia language](https://julialang.org/) package. To install `YaoToEinsum`, please [open Julia's interactive session (known as REPL)](https://docs.julialang.org/en/v1/manual/getting-started/) and press <kbd>]</kbd> key in the REPL to use the package mode, then type the following command
 
 ```julia
 pkg> add YaoToEinsum
 ```
 
-For current master
-
-```julia
-pkg> add YaoToEinsum#master
-```
-
-If you have problem to install the package, please [file us an issue](https://github.com/QuantumBFS/YaoToEinsum.jl/issues/new).
-
 ## Example
-This package contains one main function `yao2einsum(circuit; initial_state=Dict(), final_state=Dict())`.
-It transform a [`Yao`](https://github.com/QuantumBFS/Yao.jl) circuit to a generalized tensor network (einsum) notation. 
-This function returns a 2-tuple of (einsum code, input tensors). 
-`initial_state` and `final_state` specifies the initial state and final state.
-They can specified as a dictionary with integer keys, with value either integer or a single qubit register.
-If a qubit of initial state or final state is not specified, the circuit will have open edges.
+This package contains one main function `yao2einsum(circuit; initial_state=Dict(), final_state=Dict(), optimizer=TreeSA())`.
+It transform a [`Yao`](https://github.com/QuantumBFS/Yao.jl) circuit to a generalized tensor network (einsum notation).  The return value is a `TensorNetwork` object.
+
+* `initial_state` and `final_state` are for specifying the initial state and final state.
+If any of them is not specified, the function will return a tensor network with open legs.
+* `optimizer` is for optimizing the contraction order of the tensor network. The default value is `TreeSA()`. Please check the README of [OMEinsumContractors.jl](https://github.com/TensorBFS/OMEinsumContractionOrders.jl) for more information.
 
 ```julia
 julia> import Yao, YaoToEinsum
 
 julia> using Yao.EasyBuild: qft_circuit
 
-julia> using YaoToEinsum: uniformsize, TreeSA, optimize_code
+julia> using YaoToEinsum: TreeSA
 
 julia> n = 10;
 
 julia> circuit = qft_circuit(n);
 
-# convert circuit (open in both left and right) to einsum notation (code) and tensors.
-julia> code, tensors = YaoToEinsum.yao2einsum(circuit);
+# convert this circuit to tensor network
+julia> network = YaoToEinsum.yao2einsum(circuit)
+TensorNetwork
+Time complexity: 2^20.03816881914695
+Space complexity: 2^20.0
+Read-write complexity: 2^20.07564105083201
 
-# optimize contraction order, for more algorithms, please check `OMEinsumContractionOrders`.
-julia> optcode = optimize_code(code, uniformsize(code, 2), TreeSA(ntrials=1));
-
-julia> reshape(optcode(tensors...; size_info=uniformsize(code, 2)), 1<<n, 1<<n) ≈ Yao.mat(circuit)
+julia> reshape(contract(network), 1<<n, 1<<n) ≈ Yao.mat(circuit)
 true
 
-# convert circuit (applied on product state `initial_state` and projected to output state `final_state`)
-julia> code, tensors = YaoToEinsum.yao2einsum(circuit;
-        initial_state=Dict([i=>0 for i=1:n]), final_state=Dict([i=>0 for i=1:n]));
+# convert circuit sandwiched by zero states
+julia> network = YaoToEinsum.yao2einsum(circuit;
+        initial_state=Dict([i=>0 for i=1:n]), final_state=Dict([i=>0 for i=1:n]),
+        optimizer=TreeSA(; nslices=3)) # slicing technique
+TensorNetwork
+Time complexity: 2^12.224001674198101
+Space complexity: 2^5.0
+Read-write complexity: 2^13.036173612553485
 
-julia> optcode = optimize_code(code, uniformsize(code, 2), TreeSA(ntrials=1));
-
-julia> optcode(tensors...; size_info=uniformsize(code, 2))[] ≈ Yao.zero_state(n)' * (Yao.zero_state(n) |> circuit)
+julia> contract(network)[] ≈ Yao.zero_state(n)' * (Yao.zero_state(n) |> circuit)
 true
 ```
 
