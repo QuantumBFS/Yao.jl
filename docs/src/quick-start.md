@@ -58,14 +58,14 @@ sum(kron(5, i=>Z, mod1(i+1, 5)=>Z) for i in 1:5)
 ## Automatic differentiate a Yao block
 
 Yao has its own automatic differentiation rule implemented, this allows one obtain
-gradients of a loss function by simply putting a `'` mark behind [`expect`](@ref)
+gradients of a loss function by simply putting a `'` mark following [`expect`](@ref)
 or [`fidelity`](@ref), e.g
 
 ```@repl quick-start
 expect'(X, zero_state(1)=>Rx(0.2))
 ```
 
-or for fiedlity
+or for fidelity
 
 ```@repl quick-start
 fidelity'(zero_state(1)=>Rx(0.1), zero_state(1)=>Rx(0.2))
