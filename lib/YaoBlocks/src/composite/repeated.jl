@@ -128,9 +128,8 @@ mat(::Type{T}, rb::RepeatedBlock{D}) where {T,D} =
 mat(::Type{T}, rb::RepeatedBlock{D,0,GT}) where {T,D,GT} = IMatrix{T}(D^nqudits(rb))
 
 function YaoAPI.unsafe_apply!(r::AbstractRegister, rp::RepeatedBlock)
-    m = mat_matchreg(r, rp.content)
     for addr in rp.locs
-        instruct!(r, m, Tuple(addr:addr+nqudits(rp.content)-1))
+        YaoAPI.unsafe_apply!(r, put(nqudits(rp), addr:addr+nqudits(rp.content)-1=>rp.content))
     end
     return r
 end
