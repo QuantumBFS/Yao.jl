@@ -8,15 +8,12 @@ sangle = SymFunction("angle")
 Base.promote_rule(::Type{Bool}, ::Type{Basic}) = Basic
 # NOTE: need to annotate the output because otherwise it is type unstable!
 Base.abs(x::Basic)::Basic = Basic(abs(SymEngine.BasicType(x)))
-#Base.abs(x::BasicComplexNumber)::Basic = sqrt(real(x)^2 + imag(x)^2)
-# abs(a) ^ real(b) * exp(-angle(a) * imag(b))
 function Base.abs(x::BasicType{Val{:Pow}})
     a, b = get_args(x.x)
     abs(a)^real(b) * exp(-angle(a) * imag(b))
 end
 
 Base.angle(x::Basic)::Basic = Basic(angle(SymEngine.BasicType(x)))
-#Base.angle(x::BasicComplexNumber)::Basic = atan(imag(x), real(x))
 Base.angle(x::BasicType)::Basic = sangle(x.x)
 Base.angle(::BasicType{Val{:Symbol}})::Basic = Basic(0)
 Base.angle(::BasicType{Val{:Constant}})::Basic = Basic(0)
