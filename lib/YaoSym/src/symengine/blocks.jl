@@ -17,6 +17,7 @@ Base.angle(x::Basic)::Basic = Basic(angle(SymEngine.BasicType(x)))
 Base.angle(x::BasicType)::Basic = sangle(x.x)
 Base.angle(::BasicType{Val{:Symbol}})::Basic = Basic(0)
 Base.angle(::BasicType{Val{:Constant}})::Basic = Basic(0)
+Base.angle(::SymEngine.BasicRealNumber)::Basic = Basic(0)
 
 Base.conj(x::BiVarOp) = juliafunc(x)(conj.(get_args(x.x))...)
 Base.conj(x::BasicTrigFunction) = juliafunc(x)(conj.(get_args(x.x)...)...)
