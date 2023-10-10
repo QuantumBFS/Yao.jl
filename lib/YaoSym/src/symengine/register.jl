@@ -1,9 +1,3 @@
-using SparseArrays, BitBasis, YaoArrayRegister
-using ..SymEngine
-export @ket_str, @bra_str
-export SymReg, AdjointSymReg, SymRegOrAdjointSymReg, expand
-export szero_state
-
 YaoArrayRegister._warn_type(raw::AbstractMatrix{Basic}) = nothing
 
 const SymReg{D,MT} = AbstractArrayReg{D,Basic,MT} where {MT<:AbstractMatrix{Basic}}
@@ -34,7 +28,7 @@ function _pretty_basic(x::Complex)
     end
 end
 
-function ket_m(s)
+function ket_m(s::AbstractString)
     v, N = parse_str(s)
     st = spzeros(Basic, 1 << N, 1)
     st[v+1] = 1

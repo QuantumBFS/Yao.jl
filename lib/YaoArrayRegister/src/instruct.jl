@@ -221,8 +221,10 @@ function YaoAPI.instruct!(::Val{2},
     ::Val{:H},
     locs::NTuple{N,Int},
 ) where {T, N}
-    instruct!(Val(2), state, matchtype(T, YaoArrayRegister.Const.H), locs)
+    instruct!(Val(2), state, _hadamard_matrix(T), locs)
 end
+# this is an interface for future extension (e.g. in YaoSym)
+_hadamard_matrix(::Type{T}) where T = matchtype(T, YaoArrayRegister.Const.H)
 
 function YaoAPI.instruct!(::Val{2},
     state::AbstractVecOrMat{T},
