@@ -499,9 +499,13 @@ vizcircuit(; kwargs...) = c->vizcircuit(c; kwargs...)
 function darktheme!()
     const CircuitStyles.linecolor[] = "#FFFFFF"
     const CircuitStyles.textcolor[] = "#FFFFFF"
+    const BlochStyles.color[] = "#FFFFFF"
+    BlochStyles.axes_colors .= ["#FFFFFF", "#FFFFFF", "#FFFFFF"]
 end
 
 function lighttheme!()
     const CircuitStyles.linecolor[] = "#000000"
     const CircuitStyles.textcolor[] = "#000000"
+    const BlochStyles.color[] = "#000000"
+    BlochStyles.axes_colors .= ["#000000", "#000000", "#000000"]
 end

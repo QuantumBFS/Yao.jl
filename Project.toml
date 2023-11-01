@@ -3,11 +3,14 @@ uuid = "32cfe2d9-419e-45f2-8191-2267705d8dbc"
 version = "0.8.1"
 
 [deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Luxor = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
+Thebes = "8b424ff8-82f5-59a4-86a6-de3761897198"
 Yao = "5872b779-8223-5990-8dd0-5abbb0748c8c"
 
 [compat]
 Luxor = "3"
+Thebes = "0.9"
 Yao = "0.8"
 julia = "1"
 

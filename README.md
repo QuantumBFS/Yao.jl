@@ -16,6 +16,19 @@ If you are using a Pluto/Jupyter notebook, Atom/VSCode editor, you should see th
 
 ![qft](examples/qft.png)
 
+## Example 2: Visualize a single qubit
+```julia
+using YaoPlots, Yao
+
+reg = zero_state(1) |> Rx(π/8) |> Rx(π/8)
+rho = density_matrix(ghz_state(2), 1)
+
+bloch_sphere("|ψ⟩"=>reg, "ρ"=>rho; show_projection_lines=true)
+```
+
+Similarly, you will see
+![bloch](examples/bloch.png)
+
 See more [examples](examples/circuits.jl).
 
 ### Adjusting the plot attributes
