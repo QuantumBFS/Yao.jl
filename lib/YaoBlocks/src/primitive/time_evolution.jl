@@ -87,10 +87,12 @@ function LinearAlgebra.mul!(y::AbstractVector, A::BlockMap{T,GT}, x::AbstractVec
     return y
 end
 
+compatible_multiplicative_operand(::AbstractArray, source::AbstractArray) = source
+
 function YaoAPI.unsafe_apply!(reg::AbstractArrayReg{D,T}, te::TimeEvolution) where {D,T}
     if isdiagonal(te.H)
         # `compatible_multiplicative_operand` is used to ensure GPU compatibility.
-        reg.state .*= exp.((-im * te.dt) .* ExponentialUtilities.compatible_multiplicative_operand(reg.state, diag(mat(T, te.H))))
+        reg.state .*= exp.((-im * te.dt) .* compatible_multiplicative_operand(reg.state, diag(mat(T, te.H))))
         return reg
     end
     st = state(reg)
@@ -98,10 +100,14 @@ function YaoAPI.unsafe_apply!(reg::AbstractArrayReg{D,T}, te::TimeEvolution) whe
     A = BlockMap(T, te.H)
     @inbounds for j = 1:size(st, 2)
         v = view(st, :, j)
-        # TODO: opnorm could be estimated by inspecting the block operation.
-        # We should fix it in the future in improve the accuracy.
-        Ks = arnoldi(A, v; tol = te.tol, ishermitian = true, opnorm = 1.0)
-        expv!(v, dt, Ks)
+        v_out, info = exponentiate(A, dt, v,
+                                   tol=te.tol,
+                                   krylovdim=min(1000, size(A,1)),
+                                   ishermitian=true,
+                                   eager=true,)
+        # info.converged is 1 if it converged and 0 otherwise
+        Bool(info.converged) || @warn "Application of $(typeof(te)) did not converge. error = $(info.normres) but tol=$(te.tol)"
+        v .= v_out
     end
     return reg
 end
@@ -124,11 +130,8 @@ function Base.adjoint(te::TimeEvolution)
 end
 Base.copy(te::TimeEvolution) = TimeEvolution(te.H, te.dt, tol = te.tol)
 
-YaoAPI.isdiagonal(r::TimeEvolution) = isdiagonal(r.H)
-function YaoAPI.isunitary(te::TimeEvolution)
-    iszero(imag(te.dt)) || return false
-    return true
-end
+YaoAPI.isdiagonal(te::TimeEvolution) = isdiagonal(te.H)
+YaoAPI.isunitary(te::TimeEvolution) = iszero(imag(te.dt))
 
 iparams_range(::TimeEvolution{D,T}) where {D,T} = ((typemin(T), typemax(T)),)
 

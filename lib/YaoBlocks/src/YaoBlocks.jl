@@ -14,7 +14,8 @@ using StatsBase, TupleTools, InteractiveUtils
 using MLStyle: @match
 using LinearAlgebra: eigen!
 using SparseArrays, LuxurySparse
-using ExponentialUtilities, Random, CacheServers
+using Random, CacheServers
+import KrylovKit: exponentiate
 using DocStringExtensions
 import StaticArrays: SMatrix
 
