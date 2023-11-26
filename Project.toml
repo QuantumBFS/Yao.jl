@@ -9,6 +9,7 @@ Thebes = "8b424ff8-82f5-59a4-86a6-de3761897198"
 Yao = "5872b779-8223-5990-8dd0-5abbb0748c8c"
 
 [compat]
+LinearAlgebra = "1"
 Luxor = "3"
 Thebes = "0.9"
 Yao = "0.8"
