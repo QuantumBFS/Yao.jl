@@ -7,8 +7,10 @@ using SymEngine
 @testset "YaoToEinsum.jl" begin
     n = 5
     a = rand_unitary(4)[:, 1:2]
+    a1 = rand_unitary(4)[:, 2]
     mb = matblock(OuterProduct(conj.(a), a))
-    for c in [put(n, 2=>Y), put(n, 2=>ConstGate.P0), put(n, (2, 1)=>mb), put(n, 2=>ConstGate.P1), put(n, (5,3)=>SWAP), put(n, (4,2)=>ConstGate.CNOT), put(n, (2,3,1)=>kron(ConstGate.CNOT, X)),
+    mb1 = matblock(OuterProduct(conj.(a1), a1))
+    for c in [put(n, 2=>Y), put(n, 2=>ConstGate.P0), put(n, (3,2)=>mb1), put(n, (2, 1)=>mb), put(n, 2=>ConstGate.P1), put(n, (5,3)=>SWAP), put(n, (4,2)=>ConstGate.CNOT), put(n, (2,3,1)=>kron(ConstGate.CNOT, X)),
             put(n, 2=>Z), control(n, -3, 2=>X), control(n, 3, 2=>X), control(n, (2, -1), 3=>Y), control(n, (4,1,-2), 5=>Z)]
         @show c
         C = chain([put(n, i=>Rx(rand()*2π)) for i=1:n]..., c)
