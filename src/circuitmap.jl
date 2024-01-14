@@ -26,6 +26,19 @@ function add_matrix!(eb::EinBuilder{T}, k::Int, m::AbstractMatrix, locs::Vector)
         nlabels = [newlabel!(eb) for _=1:k]
         add_tensor!(eb, reshape(Matrix{T}(m), fill(2, 2k)...), [nlabels..., eb.slots[locs]...])
         eb.slots[locs] .= nlabels
+    elseif m isa Yao.OuterProduct  # low rank
+        nlabels = [newlabel!(eb) for _=1:k]
+        K = rank(m)
+        if K == 1  # projector
+            add_tensor!(eb, reshape(Vector{T}(m.right), fill(2, k)...), [eb.slots[locs]...])
+            add_tensor!(eb, reshape(Vector{T}(m.left), fill(2, k)...), [nlabels...])
+            eb.slots[locs] .= nlabels
+        else
+            midlabel = newlabel!(eb)
+            add_tensor!(eb, reshape(Matrix{T}(m.right), fill(2, k)..., K), [eb.slots[locs]..., midlabel])
+            add_tensor!(eb, reshape(Matrix{T}(m.left), fill(2, k)..., K), [nlabels..., midlabel])
+            eb.slots[locs] .= nlabels
+        end
     else
         add_tensor!(eb, reshape(Vector{T}(diag(m)), fill(2, k)...), eb.slots[locs])
     end
@@ -38,6 +51,19 @@ function add_gate!(eb::EinBuilder{T}, b::PutBlock{2,2,ConstGate.SWAPGate}) where
     eb.slots[b.locs[1]] = lj
     return eb
 end
+
+# projection gate, todo: generalize to arbitrary low rank gate
+function add_gate!(eb::EinBuilder{T}, b::PutBlock{2,1,ConstGate.P0Gate}) where {T}
+    add_matrix!(eb, 1, Yao.OuterProduct(T[1, 0], T[1, 0]), collect(b.locs))
+    return eb
+end
+
+# projection gate, todo: generalize to arbitrary low rank gate
+function add_gate!(eb::EinBuilder{T}, b::PutBlock{2,1,ConstGate.P1Gate}) where {T}
+    add_matrix!(eb, 1, Yao.OuterProduct(T[0, 1], T[0, 1]), collect(b.locs))
+    return eb
+end
+
 
 # control gates
 function add_gate!(eb::EinBuilder{T}, b::ControlBlock{BT,C,M}) where {T, BT,C,M}
