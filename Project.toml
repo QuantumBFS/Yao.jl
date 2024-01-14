@@ -16,7 +16,7 @@ YaoToEinsumCUDAExt = "CUDA"
 
 [compat]
 CUDA = "4, 5"
-OMEinsum = "0.7"
+OMEinsum = "0.8"
 Yao = "0.8"
 julia = "1.9"
 
