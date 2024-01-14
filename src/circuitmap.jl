@@ -22,10 +22,8 @@ function add_gate!(eb::EinBuilder{T}, b::PutBlock{D,C}) where {T,D,C}
 end
 # general and diagonal gates
 function add_matrix!(eb::EinBuilder{T}, k::Int, m::AbstractMatrix, locs::Vector) where T
-    if !isdiag(m)
-        nlabels = [newlabel!(eb) for _=1:k]
-        add_tensor!(eb, reshape(Matrix{T}(m), fill(2, 2k)...), [nlabels..., eb.slots[locs]...])
-        eb.slots[locs] .= nlabels
+    if isdiag(m)
+        add_tensor!(eb, reshape(Vector{T}(diag(m)), fill(2, k)...), eb.slots[locs])
     elseif m isa Yao.OuterProduct  # low rank
         nlabels = [newlabel!(eb) for _=1:k]
         K = rank(m)
@@ -40,7 +38,9 @@ function add_matrix!(eb::EinBuilder{T}, k::Int, m::AbstractMatrix, locs::Vector)
             eb.slots[locs] .= nlabels
         end
     else
-        add_tensor!(eb, reshape(Vector{T}(diag(m)), fill(2, k)...), eb.slots[locs])
+        nlabels = [newlabel!(eb) for _=1:k]
+        add_tensor!(eb, reshape(Matrix{T}(m), fill(2, 2k)...), [nlabels..., eb.slots[locs]...])
+        eb.slots[locs] .= nlabels
     end
     return eb
 end
