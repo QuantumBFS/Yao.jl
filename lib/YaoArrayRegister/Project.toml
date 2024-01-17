@@ -1,6 +1,6 @@
 name = "YaoArrayRegister"
 uuid = "e600142f-9330-5003-8abb-0ebd767abc51"
-version = "0.9.7"
+version = "0.9.8"
 
 [deps]
 Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
@@ -19,7 +19,7 @@ YaoAPI = "0843a435-28de-4971-9e8b-a9641b2983a8"
 
 [compat]
 Adapt = "3"
-BitBasis = "0.8"
+BitBasis = "0.8, 0.9"
 DocStringExtensions = "0.8, 0.9"
 LegibleLambdas = "0.3"
 LuxurySparse = "0.7"
