@@ -51,7 +51,9 @@ import YaoAPI:
     subblocks,
     nparameters,
     measure!,
-    measure
+    measure,
+    apply_back!,
+    mat_back!
 
 export AbstractBlock,
     AbstractContainer,
