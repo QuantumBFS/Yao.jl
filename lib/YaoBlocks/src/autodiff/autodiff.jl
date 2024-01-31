@@ -15,6 +15,7 @@ using BitBasis, YaoArrayRegister, YaoAPI
 using ..YaoBlocks
 import ChainRulesCore:
     rrule, @non_differentiable, NoTangent, Tangent, backing, AbstractTangent, ZeroTangent
+import YaoAPI: mat_back!, apply_back!
 using SparseArrays, LuxurySparse, LinearAlgebra
 
 include("NoParams.jl")
