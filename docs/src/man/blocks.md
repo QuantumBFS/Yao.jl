@@ -56,33 +56,41 @@ Constant blocks are used quite often and in numerical simulation we would expect
 
 In Yao, you can simply define a constant block with [`@const_gate`](@ref), with the corresponding matrix:
 
-```@repl
-using YaoBlocks, BitBasis # hide
+```@setup const_block
+using YaoBlocks, BitBasis, Yao
+```
+
+```@repl const_block
 @const_gate Rand = rand(ComplexF64, 4, 4)
 ```
 
 This will automatically create a type `RandGate{T}` and a constant binding `Rand` to the instance of `RandGate{ComplexF64}`,
 and it will also bind a Julia constant for the given matrix, so when you call `mat(Rand)`, no allocation will happen.
 
-```@repl
+```@repl const_block
 @allocated mat(Rand)
+```
+For the more general case of defining a constant block acting on qudits, you can provide `nlevel` information. For instance, the following code will define a constant block on a qutrit.
+
+```@repl const_block
+@const_gate Rand_qutrit = rand(ComplexF64, 3, 3) nlevel=3
 ```
 
 If you want to use other data type like `ComplexF32`, you could directly call `Rand(ComplexF32)`, which will create a new instance with data type `ComplexF32`.
 
-```@repl
+```@repl const_block
 Rand(ComplexF32)
 ```
 
 But remember this won't bind the matrix, it only binds **the matrix you give**
 
-```@repl
+```@repl const_block
 @allocated mat(Rand(ComplexF32))
 ```
 
 so if you want to make the matrix call `mat` for `ComplexF32` to have zero allocation as well, you need to do it explicitly.
 
-```@repl
+```@repl const_block
 @const_gate Rand::ComplexF32
 ```
 
