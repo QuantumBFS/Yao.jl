@@ -2,7 +2,7 @@ using Documenter
 using DocThemeIndigo
 using Literate
 using Yao
-using Yao: YaoBlocks, YaoArrayRegister, YaoSym, BitBasis, YaoAPI
+using Yao: YaoBlocks, YaoArrayRegister, YaoSym, BitBasis, YaoAPI, YaoPlots
 using YaoBlocks: AD
 using YaoBlocks: Optimise
 
@@ -63,6 +63,7 @@ const PAGES = [
         "man/registers.md",
         "man/blocks.md",
         "man/symbolic.md",
+        "man/plot.md",
         "man/automatic_differentiation.md",
         "man/simplification.md",
         "man/bitbasis.md",

@@ -2,6 +2,7 @@ using YaoPlots, Test
 using LinearAlgebra: normalize!, eigen
 using Luxor: Drawing
 using YaoBlocks
+using YaoArrayRegister
 
 @testset "spherical coo" begin
     for i=1:10

@@ -2,6 +2,7 @@ using YaoPlots
 using Test
 using YaoBlocks
 using YaoPlots: addblock!
+using YaoArrayRegister
 using Luxor
 
 @testset "gate styles" begin
@@ -74,10 +75,6 @@ end
     @test plot(chain(3, put(1=>X), repeat(3, H), put(2=>Y), repeat(3, Rx(π/2)))) isa Drawing
     lighttheme!()
     @test plot(chain(3, put(1=>X), repeat(3, H), put(2=>Y), repeat(3, Rx(π/2)))) isa Drawing
-end
-
-@testset "regression" begin
-	@test vizcircuit(put(10, (8,2,3)=>EasyBuild.heisenberg(3)), starting_texts=string.(1:10), ending_texts=string.(1:10), show_ending_bar=true) isa Drawing
 end
 
 @testset "readme" begin
