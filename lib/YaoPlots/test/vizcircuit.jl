@@ -1,7 +1,7 @@
 using YaoPlots
 using Test
 using YaoBlocks
-using YaoPlots: addblock!
+using YaoPlots: addblock!, CircuitGrid, circuit_canvas
 using YaoArrayRegister
 using Luxor
 
