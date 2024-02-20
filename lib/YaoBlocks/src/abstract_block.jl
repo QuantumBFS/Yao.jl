@@ -339,7 +339,7 @@ render_params(r::AbstractBlock, ::Val{:zero}) =
 """
     cache_type(::Type) -> DataType
 
-Return the element type that a [`CacheFragment`](@ref)
+Return the element type that a `CacheFragment`
 will use.
 """
 cache_type(::Type{<:AbstractBlock}) = Any
@@ -420,7 +420,6 @@ end
 The non-inplace version of applying a block (of quantum circuit) to a quantum register.
 Check `apply!` for the faster inplace version.
 """
-# overwrite interface, this one avoids one copy
 function apply(reg::AbstractRegister{D}, block) where D
     return apply!(copy(reg), block)
 end

@@ -1,7 +1,9 @@
 ```@meta
+CurrentModule = YaoArrayRegister
 DocTestSetup = quote
     using Yao
-    using Yao: YaoBlocks, YaoArrayRegister
+    using BitBasis
+    using YaoAPI
     using YaoBlocks
     using YaoArrayRegister
 end
@@ -44,18 +46,17 @@ nqudits
 nqubits
 nactive
 nremain
-nbatch,
-nlevel,
+nbatch
+nlevel
 focus!
 focus
 relax!
-zero_state
 exchange_sysenv
 ```
 
 ## Storage
 
-Both [`ArayReg`](@reef) and [`BatchedArrayReg`](@ref) use matrices as the storage. For example, for a quantum register with ``a`` active qubits, ``r`` remaining qubits and batch size ``b``, the storage is as follows
+Both [`ArrayReg`](@ref) and [`BatchedArrayReg`](@ref) use matrices as the storage. For example, for a quantum register with ``a`` active qubits, ``r`` remaining qubits and batch size ``b``, the storage is as follows
 
 ![](../assets/images/regstorage.svg)
 
@@ -98,9 +99,9 @@ AdjointArrayReg
 
 We also have some faster inplace versions of arithematic operations
 ```@docs
-regadd!,
-regsub!,
-regscale!,
+regadd!
+regsub!
+regscale!
 ```
 
 We also define the following functions for state normalization, and distance measurement.
@@ -114,8 +115,8 @@ tracedist
 ## Resource management and addressing
 
 ```@docs
-add_qudits!
-add_qubits!
+insert_qudits!
+insert_qubits!
 append_qudits!
 append_qubits!
 reorder!
@@ -146,7 +147,7 @@ select!
 select
 collapseto!
 probs
-most_probable,
+most_probable
 ```
 
 ## Density matrices
@@ -158,6 +159,6 @@ rand_density_matrix
 completely_mixed_state
 partial_tr
 purify
-von_neumann_entropy,
-mutual_information,
+von_neumann_entropy
+mutual_information
 ```

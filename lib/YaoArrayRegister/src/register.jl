@@ -1,5 +1,10 @@
 import BitBasis: BitStr, BitStr64
 
+"""
+    AbstractArrayReg
+
+Abstract type for quantum registers that are represented by an array.
+"""
 abstract type AbstractArrayReg{D,T,AT} <: AbstractRegister{D} end
 
 struct NoBatch end
@@ -26,8 +31,7 @@ is the numerical type for each amplitude, it is `ComplexF64` by default.
 !!! warning
 
     `ArrayReg` constructor will not normalize the quantum state. If you need a
-    normalized quantum state remember to use `normalize!(register)` on the register or
-    normalize the input raw array with `normalize` or [`batched_normalize!`](@ref).
+    normalized quantum state remember to use `normalize!(register)` on the register.
 """
 mutable struct ArrayReg{D,T,MT<:AbstractMatrix{T}} <: AbstractArrayReg{D,T,MT}
     state::MT
@@ -63,8 +67,7 @@ is the numerical type for each amplitude, it is `ComplexF64` by default.
 !!! warning
 
     `BatchedArrayReg` constructor will not normalize the quantum state. If you need a
-    normalized quantum state remember to use `normalize!(register)` on the register or
-    normalize the input raw array with `normalize` or [`batched_normalize!`](@ref).
+    normalized quantum state remember to use `normalize!(register)` on the register.
 """
 mutable struct BatchedArrayReg{D,T,MT<:AbstractMatrix{T}} <: AbstractArrayReg{D,T,MT}
     state::MT
@@ -145,6 +148,11 @@ end
 Adapt.@adapt_structure ArrayReg
 Adapt.@adapt_structure BatchedArrayReg
 
+"""
+    AdjointArrayReg{D,T,MT} = AdjointRegister{D,<:AbstractArrayReg{D,T,MT}}
+
+Adjoint array register type, it is used to represent the bra in the Dirac notation.
+"""
 const AdjointArrayReg{D,T,MT} = AdjointRegister{D,<:AbstractArrayReg{D,T,MT}}
 const ArrayRegOrAdjointArrayReg{D,T,MT} =
     Union{AbstractArrayReg{D,T,MT},AdjointArrayReg{D,T,MT}}
@@ -618,7 +626,7 @@ Create a uniform state:
 ```math
 \\frac{1}{\\sqrt{2^n}} \\sum_{k=0}^{2^{n}-1} |k\\rangle.
 ```
-This state can also be created by applying [`H`](@ref) (Hadmard gate) on ``|00⋯00⟩`` state.
+This state can also be created by applying `H` (Hadmard gate) on ``|00⋯00⟩`` state.
 
 ### Example
 

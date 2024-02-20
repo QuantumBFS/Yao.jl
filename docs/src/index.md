@@ -26,7 +26,7 @@ The tutorials are written with [Literate](https://github.com/fredrikekre/Literat
 
 ## Pluto Notebooks
 
-There is also a set of Pluto notebooks available in [the notebooks folder](https://github.com/QuantumBFS/Yao.jl/notebooks)
+There is also a set of Pluto notebooks available in [the notebooks folder](notebooks)
 
 ## Manual
 

@@ -6,7 +6,7 @@ EditURL = "<unknown>/docs/src/quick-start/1.prepare-ghz-state/main.jl"
 [![](https://img.shields.io/badge/show-nbviewer-579ACA.svg)](<unknown>/generated//home/roger/code/julia/Yao/docs/src/quick-start/1.prepare-ghz-state/main.ipynb)
 [![](https://img.shields.io/badge/download-project-orange)](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/QuantumBFS/tutorials/tree/gh-pages/dev/generated//home/roger/code/julia/Yao/docs/src/quick-start/1.prepare-ghz-state)
 
-# [Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit](@id example-ghz)
+# [Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit](@id tutorial-ghz)
 
 First, you have to use this package in Julia.
 

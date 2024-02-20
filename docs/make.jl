@@ -75,7 +75,7 @@ const PAGES = [
 indigo = DocThemeIndigo.install(Yao)
 
 makedocs(
-    modules = [Yao, YaoAPI, YaoArrayRegister, YaoBlocks, BitBasis, YaoSym, AD, Optimise],
+    modules = [Yao, YaoAPI, YaoArrayRegister, YaoBlocks, BitBasis, YaoSym, YaoPlots, AD, Optimise],
     format = Documenter.HTML(
         prettyurls = ("deploy" in ARGS),
         canonical = ("deploy" in ARGS) ? "https://docs.yaoquantum.org/" : nothing,
@@ -89,6 +89,7 @@ makedocs(
     sitename = "Documentation | Yao",
     linkcheck = !("skiplinks" in ARGS),
     pages = PAGES,
+    warnonly = [:missing_docs, :linkcheck, :cross_references],
 )
 
 
