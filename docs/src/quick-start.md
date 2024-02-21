@@ -24,7 +24,7 @@ the internal quantum state can be accessed via [`statevec`](@ref) method
 statevec(ghz_state(2))
 ```
 
-for more functionalities about registers please refer to the manual of [`registers`](@ref).
+for more functionalities about registers please refer to the manual of [Registers](@ref registers).
 
 ## Create quantum circuit with Yao blocks
 
@@ -80,15 +80,12 @@ Yao supports symbolic calculation of quantum circuit via `SymEngine`. We can sho
 
 ## Plot quantum circuits
 
-The [YaoPlots]() in Yao's ecosystem provides plotting for quantum circuits and ZX diagrams.
+The component package `YaoPlots` provides plotting for quantum circuits and ZX diagrams.
 
 ```@example quick-start
-using Yao.EasyBuild, YaoPlots
+using Yao.EasyBuild, Yao.YaoPlots
 using Compose
 
 # show a qft circuit
-Compose.SVG(plot(qft_circuit(5)))
+vizcircuit(qft_circuit(5))
 ```
-
-## Convert quantum circuits to tensor network
-## Simplify quantum circuit with ZX calculus

@@ -15,3 +15,8 @@ const CPhaseGate{T} = ControlBlock{<:ShiftGate{T},<:Any}
 The circuit block for initialzing a singlet state.
 """
 singlet_block() = chain(put(2, 1=>chain(X, H)), control(2, -1, 2=>X))
+
+YaoPlots.get_brush_texts(c, ::SqrtWGate) = (c.gatestyles.g, "√W")
+YaoPlots.get_brush_texts(c, ::SqrtXGate) = (c.gatestyles.g, "√X")
+YaoPlots.get_brush_texts(c, ::SqrtYGate) = (c.gatestyles.g, "√Y")
+

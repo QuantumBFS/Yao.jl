@@ -51,3 +51,5 @@ function fsim_block(θ::Real, ϕ::Real)
         return cphase(2,2,1,-ϕ)*rot(SWAP,2*θ)*rot(kron(Z,Z), -θ)*put(2,1=>phase(θ/2))
     end
 end
+
+YaoPlots.get_brush_texts(c, b::FSimGate) = (c.gatestyles.g, "FSim($(pretty_angle(b.theta)), $(pretty_angle(b.phi)))")

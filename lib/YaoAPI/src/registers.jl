@@ -609,8 +609,8 @@ julia> reg |> probs
 
 Return the fidelity between two states.
 Calcuate the fidelity between `r1` and `r2`, if `r1` or `r2` is not pure state
-(`nactive(r) != nqudits(r)`), the fidelity is calcuated by purification. See also
-[`pure_state_fidelity`](@ref), [`purification_fidelity`](@ref).
+(`nactive(r) != nqudits(r)`), the fidelity is calcuated by purification. See also:
+http://iopscience.iop.org/article/10.1088/1367-2630/aa6a4b/meta
 
 Obtain the gradient with respect to registers and circuit parameters.
 For pair input `ψ=>circuit`, the returned gradient is a pair of `gψ=>gparams`,

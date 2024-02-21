@@ -32,7 +32,7 @@ A(i, j) = control(i, j=>shift(2π/(1<<(i-j+1))))
 
 R4 = A(4, 1)
 
-# If you have read about [preparing GHZ state](@ref example-ghz),
+# If you have read about [preparing GHZ state](@ref tutorial-ghz),
 # you probably know that in Yao, we could just leave the number of qubits, and it
 # will be evaluated when possible.
 

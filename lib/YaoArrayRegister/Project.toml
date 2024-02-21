@@ -18,7 +18,7 @@ TupleTools = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
 YaoAPI = "0843a435-28de-4971-9e8b-a9641b2983a8"
 
 [compat]
-Adapt = "3"
+Adapt = "3, 4"
 BitBasis = "0.8, 0.9"
 DocStringExtensions = "0.8, 0.9"
 LegibleLambdas = "0.3"

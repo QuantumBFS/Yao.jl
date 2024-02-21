@@ -214,7 +214,7 @@ const __default_simplification_rules__ =
     simplify(block[; rules=__default_simplification_rules__])
 
 Simplify a block tree accroding to given rules, default to use
-[`__default_simplification_rules__`](@ref).
+`YaoBlocks.Optimise.__default_simplification_rules__`.
 """
 function simplify(ex::AbstractBlock; rules = __default_simplification_rules__)
     out1 = simplify_pass(rules, ex)

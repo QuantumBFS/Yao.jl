@@ -42,8 +42,8 @@ for i in 1:100
     push!(history, real.(expect(h, zero_state(n)=>circuit)))
 end
 
-plot(history, legend=false)
-plot!(1:100, [w[1] for i=1:100])
+Plots.plot(history, legend=false)
+Plots.plot!(1:100, [w[1] for i=1:100])
 xlabel!("steps")
 ylabel!("energy")
 
@@ -134,8 +134,8 @@ for i=1:100
     push!(history, cost)
 end
 
-plot(history, legend=false)
-plot!(1:100, [w[1] for i=1:100])
+Plots.plot(history, legend=false)
+Plots.plot!(1:100, [w[1] for i=1:100])
 xlabel!("steps")
 ylabel!("energy")
 

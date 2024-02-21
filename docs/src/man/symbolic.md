@@ -16,6 +16,5 @@ Symbolic Computation support for Yao
 ```@docs
 @ket_str
 @bra_str
-@vars
 szero_state
 ```
