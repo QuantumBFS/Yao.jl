@@ -1,5 +1,7 @@
 # YaoPlots
 
+**NOTE: This package has been moved to Yao.jl as a component package: https://github.com/QuantumBFS/Yao.jl/tree/master/lib/YaoPlots**
+
 [![CI](https://github.com/QuantumBFS/YaoPlots.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/QuantumBFS/YaoPlots.jl/actions/workflows/CI.yml)
 [![Coverage](https://codecov.io/gh/QuantumBFS/YaoPlots.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/QuantumBFS/YaoPlots.jl)
 
