@@ -1,4 +1,4 @@
-using CuYao
+using Yao
 using CUDA
 using Test
 using Yao.YaoBlocks

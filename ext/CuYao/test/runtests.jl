@@ -1,4 +1,4 @@
-using CUDA, CuYao, Test
+using CUDA, Yao, Test
 CUDA.allowscalar(false)
 
 @testset "CUDA patch" begin

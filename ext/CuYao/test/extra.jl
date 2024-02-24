@@ -1,4 +1,4 @@
-using CuYao, Test, CUDA
+using Yao, Test, CUDA
 CUDA.allowscalar(false)
 
 @testset "gradient" begin

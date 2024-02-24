@@ -1,6 +1,6 @@
 using Test
-using CuYao
-using CuYao: tri2ij
+using Yao
+const CuYao = Base.get_extension(Yao, :CuYao)
 using LinearAlgebra
 using Yao.YaoArrayRegister.BitBasis
 using Statistics: mean
@@ -17,7 +17,7 @@ CUDA.allowscalar(false)
     @test ca |> Matrix ≈ a
 
     for l = 1:100
-        i, j = tri2ij(l)
+        i, j = CuYao.tri2ij(l)
         @test (i-1)*(i-2)÷2+j == l
     end
 end
@@ -25,7 +25,7 @@ end
 @testset "constructor an measure" begin
     reg = rand_state(10)
     greg = reg |> cu
-    @test greg isa AbstractCuArrayReg
+    @test greg isa CuYao.AbstractCuArrayReg
     @test eltype(greg.state) == ComplexF64
     myvec(x) = Vector(x)
     myvec(x::Number) = [x]
@@ -125,15 +125,15 @@ end
 @testset "zero_state, et al" begin
     for b = [4, NoBatch()]
         reg = cuzero_state(3; nbatch=b)
-        @test cpu(reg) ≈ zero_state(3; nbatch=b) && reg isa AbstractCuArrayReg
+        @test cpu(reg) ≈ zero_state(3; nbatch=b) && reg isa CuYao.AbstractCuArrayReg
         reg = curand_state(3; nbatch=b)
-        @test reg isa AbstractCuArrayReg
+        @test reg isa CuYao.AbstractCuArrayReg
         reg = cuuniform_state(3; nbatch=b)
-        @test cpu(reg) ≈ uniform_state(3; nbatch=b) && reg isa AbstractCuArrayReg
+        @test cpu(reg) ≈ uniform_state(3; nbatch=b) && reg isa CuYao.AbstractCuArrayReg
         reg = cuproduct_state(bit"110"; nbatch=b)
-        @test cpu(reg) ≈ product_state(bit"110"; nbatch=b) && reg isa AbstractCuArrayReg
+        @test cpu(reg) ≈ product_state(bit"110"; nbatch=b) && reg isa CuYao.AbstractCuArrayReg
         reg = cughz_state(3; nbatch=b)
-        @test cpu(reg) ≈ ghz_state(3; nbatch=b) && reg isa AbstractCuArrayReg
+        @test cpu(reg) ≈ ghz_state(3; nbatch=b) && reg isa CuYao.AbstractCuArrayReg
     end
 end
 

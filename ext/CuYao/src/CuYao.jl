@@ -24,8 +24,7 @@ import Yao.YaoArrayRegister: u1rows!, unrows!, autostatic, instruct!, swaprows!,
 import Yao.YaoArrayRegister.LinearAlgebra: norm
 import Base: kron, getindex
 
-export cpu, cu, AbstractCuArrayReg, CuArrayReg, CuBatchedArrayReg, CuDensityMatrix,
-    cuzero_state, cuuniform_state, curand_state, cuproduct_state, cughz_state
+import Yao: cpu, cuzero_state, cuuniform_state, curand_state, cuproduct_state, cughz_state
 
 const Ints = NTuple{<:Any, Int}
 

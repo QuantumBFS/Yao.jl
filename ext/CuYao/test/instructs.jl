@@ -1,6 +1,6 @@
 using LinearAlgebra, Yao.ConstGate
 using Test, Random
-using CuYao
+using Yao
 using Yao.YaoArrayRegister.StaticArrays
 using Yao.ConstGate: SWAPGate
 using CUDA

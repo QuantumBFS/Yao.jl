@@ -16,7 +16,6 @@ const 幺 = Yao
 
 using Reexport
 @reexport using YaoArrayRegister, YaoBlocks, YaoSym, YaoPlots
-export EasyBuild
 using YaoArrayRegister.BitBasis, YaoAPI
 
 using YaoBlocks:
@@ -28,6 +27,12 @@ using YaoBlocks:
     print_title,
     print_block
 
+export EasyBuild
+# CUDA APIs
+for FT in [:cpu, :cuzero_state, :cuuniform_state, :curand_state, :cuproduct_state, :cughz_state]
+    @eval export $FT
+    @eval function $FT end
+end
 
 include("deprecations.jl")
 include("EasyBuild/easybuild.jl")

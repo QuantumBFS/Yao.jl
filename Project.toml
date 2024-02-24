@@ -4,7 +4,6 @@ version = "0.8.13"
 
 [deps]
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
-CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 LuxurySparse = "d05aeea4-b7d4-55ac-b691-9e7fabb07ba2"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
