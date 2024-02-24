@@ -32,5 +32,6 @@ servedocs:
 
 clean:
 	rm -rf docs/build
+	find . -name "*.cov" -type f -print0 | xargs -0 /bin/rm -f
 
 .PHONY: init test
