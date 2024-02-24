@@ -367,13 +367,13 @@ for B in [:LabelBlock, :GeneralMatrixBlock, :Add]
         _draw!(c, [controls..., (address, c.gatestyles.g, string(cb))])
     end
 end
-for GT in [:KronBlock, :RepeatedBlock, :CachedBlock, :Subroutine, :(YaoBlocks.AD.NoParams)]
-    @eval function draw!(c::CircuitGrid, p::$GT, address, controls)
-        barrier_style = CircuitStyles.barrier_for_chain[]
-        CircuitStyles.barrier_for_chain[] = false
-        draw!(c, YaoBlocks.Optimise.to_basictypes(p), address, controls)
-        CircuitStyles.barrier_for_chain[] = barrier_style
-    end
+
+# [:KronBlock, :RepeatedBlock, :CachedBlock, :Subroutine, :(YaoBlocks.AD.NoParams)]
+function draw!(c::CircuitGrid, p::CompositeBlock, address, controls)
+    barrier_style = CircuitStyles.barrier_for_chain[]
+    CircuitStyles.barrier_for_chain[] = false
+    draw!(c, YaoBlocks.Optimise.to_basictypes(p), address, controls)
+    CircuitStyles.barrier_for_chain[] = barrier_style
 end
 for (GATE, SYM) in [(:XGate, :Rx), (:YGate, :Ry), (:ZGate, :Rz)]
     @eval get_brush_texts(c, b::RotationGate{D,T,<:$GATE}) where {D,T} = (c.gatestyles.g, "$($(SYM))($(pretty_angle(b.theta)))")

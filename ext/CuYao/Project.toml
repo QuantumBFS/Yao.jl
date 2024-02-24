@@ -1,0 +1,27 @@
+name = "CuYao"
+uuid = "b48ca7a8-dd42-11e8-2b8e-1b7706800275"
+version = "0.3.9"
+
+[deps]
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+TupleTools = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
+Yao = "5872b779-8223-5990-8dd0-5abbb0748c8c"
+
+[compat]
+CUDA = "4, 5"
+Reexport = "0.2, 1"
+TupleTools = "1"
+Yao = "0.8"
+YaoBlocks = "0.13.10"
+julia = "1"
+
+[extras]
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+YaoBlocks = "418bc28f-b43b-5e0b-a6e7-61bbc1a2c1df"
+
+[targets]
+test = ["Test", "Statistics", "YaoBlocks"]
