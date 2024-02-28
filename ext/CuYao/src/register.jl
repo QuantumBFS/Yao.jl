@@ -189,11 +189,6 @@ function Yao.insert_qudits!(reg::AbstractCuArrayReg{D}, loc::Int; nqudits::Int=1
     return reg
 end
 
-"""
-    cuproduct_state([T=ComplexF64], total::Int, bit_config::Integer; nbatch=NoBatch())
-
-The GPU version of [`product_state`](@ref).
-"""
 cuproduct_state(bit_str::BitStr; nbatch::Union{NoBatch,Int} = NoBatch()) =
     cuproduct_state(ComplexF64, bit_str; nbatch = nbatch)
 cuproduct_state(bit_str::AbstractVector; nbatch::Union{NoBatch,Int} = NoBatch()) =
@@ -219,11 +214,6 @@ end
 cuzero_state(n::Int; kwargs...) = cuzero_state(ComplexF64, n; kwargs...)
 cuzero_state(::Type{T}, n::Int; kwargs...) where {T} = cuproduct_state(T, n, 0; kwargs...)
 
-"""
-    curand_state([T=ComplexF64], n::Int; nbatch=1)
-
-The GPU version of [`rand_state`](@ref).
-"""
 curand_state(n::Int; kwargs...) = curand_state(ComplexF64, n; kwargs...)
 
 function curand_state(
@@ -236,11 +226,6 @@ function curand_state(
     return normalize!(arrayreg(raw; nbatch=nbatch, nlevel=nlevel))
 end
 
-"""
-    cuuniform_state([T=ComplexF64], n::Int; nbatch=1)
-
-The GPU version of [`uniform_state`](@ref).
-"""
 cuuniform_state(n::Int; kwargs...) = cuuniform_state(ComplexF64, n; kwargs...)
 function cuuniform_state(::Type{T}, n::Int;
     nbatch::Union{Int,NoBatch} = NoBatch(),
@@ -250,11 +235,6 @@ function cuuniform_state(::Type{T}, n::Int;
     return normalize!(arrayreg(raw; nbatch=nbatch, nlevel=nlevel))
 end
 
-"""
-    cughz_state([T=ComplexF64], n::Int; nbatch=1)
-
-The GPU version of [`ghz_state`](@ref).
-"""
 cughz_state(n::Int; kwargs...) = cughz_state(ComplexF64, n; kwargs...)
 function cughz_state(::Type{T}, n::Int; kwargs...) where {T}
     reg = cuzero_state(T, n; kwargs...)

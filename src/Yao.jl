@@ -29,12 +29,10 @@ using YaoBlocks:
 
 export EasyBuild
 # CUDA APIs
-for FT in [:cpu, :cuzero_state, :cuuniform_state, :curand_state, :cuproduct_state, :cughz_state]
-    @eval export $FT
-    @eval function $FT end
-end
+export cpu, cuzero_state, cuuniform_state, curand_state, cuproduct_state, cughz_state
 
-include("deprecations.jl")
+include("cudainterfaces.jl")
 include("EasyBuild/easybuild.jl")
+include("deprecations.jl")
 
 end # module
