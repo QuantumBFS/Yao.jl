@@ -672,7 +672,7 @@ julia> reg1 = uniform_state(3);
 julia> reg2 = zero_state(3);
 
 julia> tracedist(reg1, reg2)
-1.8708286933869704
+0.9354143624774909
 ```
 
 ### References
