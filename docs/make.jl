@@ -55,20 +55,20 @@ end
 
 const PAGES = [
     "Home" => "index.md",
-    "Quick Start" => "quick-start.md",
+    # "Quick Start" => "quick-start.md",
     # TODO: fix the openfermion example, looks like
     # there is an API change in upstream
     # "Developer Guide" => build("developer-guide"),
     "Manual" => Any[
-        "man/registers.md",
+        # "man/registers.md",
         "man/blocks.md",
-        "man/symbolic.md",
-        "man/automatic_differentiation.md",
-        "man/simplification.md",
-        "man/bitbasis.md",
+        # "man/symbolic.md",
+        # "man/automatic_differentiation.md",
+        # "man/simplification.md",
+        # "man/bitbasis.md",
     ],
-    "Examples" => build("examples"),
-    "Performance Tips" => "performancetips.md",
+    # "Examples" => build("examples"),
+    # "Performance Tips" => "performancetips.md",
 ]
 
 indigo = DocThemeIndigo.install(Yao)

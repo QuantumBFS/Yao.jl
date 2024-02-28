@@ -54,6 +54,11 @@ Blocks are defined as a sub-type system inside Julia, you could extend it by def
 
 Constant blocks are used quite often and in numerical simulation we would expect it to be a real constant in the program, which means it won't allocate new memory when we try to get its matrix for several times, and it won't change with parameters.
 
+```@autodocs
+Modules = [YaoBlocks]
+Pages = ["primitive/const_gate_tools.jl"]
+```
+
 In Yao, you can simply define a constant block with [`@const_gate`](@ref), with the corresponding matrix:
 
 ```@setup const_block
