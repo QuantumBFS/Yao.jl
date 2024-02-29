@@ -58,6 +58,7 @@ const PAGES = [
         "man/registers.md",
         "man/blocks.md",
         "man/symbolic.md",
+        "man/cuda.md",
         "man/plot.md",
         "man/automatic_differentiation.md",
         "man/simplification.md",
