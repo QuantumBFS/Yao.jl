@@ -11,31 +11,27 @@ is the [`ArrayReg`](@ref), you can create it by feeding a state vector to it, e.
 
 ```@repl quick-start
 using Yao
-ArrayReg(randn(ComplexF64, 2^3))  # a random unnormalized 3-qubit state
 zero_state(5)  # |00000⟩
-rand_state(5)  # a random state
-product_state(bit"10100")  # |10100⟩
-ghz_state(5)  # (|00000⟩ + |11111⟩)/√2
 ```
-
-the internal quantum state can be accessed via [`statevec`](@ref) method
-
+The internal quantum state can be accessed via [`statevec`](@ref) method
 ```@repl quick-start
 statevec(ghz_state(2))
 ```
-
-for more functionalities about registers please refer to the manual of [Registers](@ref registers).
+Similarly, you can use [`rand_state`](@ref), [`uniform_state`](@ref), [`product_state`](@ref), [`ghz_state`](@ref) to create a random state, a uniform state, a product state, and a GHZ state, respectively. Not only qubit states, qudits and batch states are also supported.
+For more functionalities about registers please refer to the manual of [Registers](@ref registers).
 
 ## Create quantum circuit
 
-Yao introduces an abstract representation for linear maps, called "block"s, which can be used to represent quantum circuits, Hamiltonians, and other quantum operations. The following code creates a 2-qubit circuit
+Yao introduces an abstract representation for linear maps, called "block"s, which can be used to represent quantum circuits, Hamiltonians, and other quantum operations. To check the matrix representation of a quantum gate, you can define a symbolic variable and then use the [`mat`](@ref) function to get the matrix representation of the gate.
 
 ```@repl quick-start
-chain(2, put(1=>H), put(2=>X))
+@vars θ  # define a symbolic variable
+mat(Rx(θ))  # the matrix representation of Rx gate
+mat(shift(θ))  # the matrix representation of shift gate
+mat(Basic, H)  # the matrix representation of H gate, `Basic` is the symbol type
 ```
 
-where `H` gate is at 1st qubit, `X` gate is at 2nd qubit.
-A more advanced example is the quantum Fourier transform circuit
+By composing these blocks with composite blocks, such as [`chain`](@ref), [`control`](@ref) and [`put`](@ref), one can create a quantum circuit. For example, the following is the quantum Fourier transform circuit.
 
 ```@repl quick-start
 A(i, j) = control(i, j=>shift(2π/(1<<(i-j+1))))  # a cphase gate
@@ -43,24 +39,34 @@ B(n, k) = chain(n, j==k ? put(k=>H) : A(j, k) for j in k:n)
 qft(n) = chain(B(n, k) for k in 1:n)
 circuit = qft(3)  # a 3-qubit QFT circuit
 mat(circuit)  # the matrix representation of the circuit
-apply!(zero_state(3), circuit)  # apply the circuit to a zero state
+final_state = apply!(zero_state(3), circuit)  # apply the circuit to a zero state
+measure!(final_state)  # measure the final state, which will collapse the state
 ```
 
 More details about available blocks can be found in the manual of [Blocks](@ref blocks).
 
+To visualize the above quantum circuits in [`VSCode`](https://code.visualstudio.com/), [`Jupyter`](https://jupyter.org/) notebook or [`Pluto`](https://github.com/fonsp/Pluto.jl) notebook, you can use the [`vizcircuit`](@ref) function.
+```@example quick-start
+vizcircuit(qft(5))  # show a qft circuit
+```
+More details about the plotting can be found in the manual: [Quantum Circuit Visualization](@ref).
+
 ## Create Hamiltonian
 
-We can create a simple Ising Hamiltonian on 1D chain as following
+We can create a simple Heisenberg Hamiltonian on 1D chain as following
 
 ```@repl quick-start
-h = sum([kron(5, i=>Z, mod1(i+1, 5)=>Z) for i in 1:5])  # a 5-qubit Ising Hamiltonian
+h = sum([sum([kron(5, i=>G, mod1(i+1, 5)=>G) for G in [X, Y, Z]]) for i in 1:5])
 mat(h)  # the matrix representation of the Hamiltonian
+h[bit"01010", bit"01010"]  # a diagonal element of the Hamiltonian
+h[:, bit"01010"]  # a column of the Hamiltonian
+expect(h, apply!(zero_state(5), circuit))  # the expectation value of the Hamiltonian
 ```
 
 ## Differentiating a quantum circuit
 
-Yao has its own automatic differentiation rule implemented, this allows one obtain
-gradients of a loss function by simply putting a `'` mark following [`expect`](@ref)
+`Yao` has an efficient built-in automatic differentiation engine, which allows one obtain
+gradients of a loss function by attaching a `'` after [`expect`](@ref)
 or [`fidelity`](@ref), e.g
 
 To obtain the gradient of the quantum Fourier transform circuit with respect to its parameters, one can use the following code
@@ -81,18 +87,4 @@ To obtain the gradient of the fidelity between a state parameterized by a quantu
 ```
 where `zero_state(3)` is the initial state, `qft(3)` is the quantum Fourier transform circuit, `ghz_state(3)` is the target state.
 
-The automatic differentiation functionality can also be accessed by interfacing with the machine learning libraries [`Zygote`](https://github.com/FluxML/Zygote.jl).
-
-## Plot quantum circuits
-
-The component package `YaoPlots` provides plotting for quantum circuits and ZX diagrams. You can use it to visualize your quantum circuits in [`VSCode`](https://code.visualstudio.com/), [`Jupyter`](https://jupyter.org/) notebook or [`Pluto`](https://github.com/fonsp/Pluto.jl) notebook.
-
-```@example quick-start
-using Yao.EasyBuild, Yao.YaoPlots
-using Compose
-
-# show a qft circuit
-vizcircuit(qft_circuit(5))
-```
-
-More details about the plotting can be found in the manual: [Quantum Circuit Visualization](@ref).
+The automatic differentiation functionality can also be accessed by interfacing with the machine learning libraries [`Zygote`](https://github.com/FluxML/Zygote.jl). Please refer to the manual of [Automatic Differentiation](@ref) for more details.
