@@ -37,9 +37,9 @@ By composing these blocks with composite blocks, such as [`chain`](@ref), [`cont
 A(i, j) = control(i, j=>shift(2π/(1<<(i-j+1))))  # a cphase gate
 B(n, k) = chain(n, j==k ? put(k=>H) : A(j, k) for j in k:n)
 qft(n) = chain(B(n, k) for k in 1:n)
-circuit = qft(3)  # a 3-qubit QFT circuit
+circuit = qft(5)  # a 5-qubit QFT circuit
 mat(circuit)  # the matrix representation of the circuit
-final_state = apply!(zero_state(3), circuit)  # apply the circuit to a zero state
+final_state = apply!(zero_state(5), circuit)  # apply the circuit to a zero state
 measure!(final_state)  # measure the final state, which will collapse the state
 ```
 
@@ -47,7 +47,7 @@ More details about available blocks can be found in the manual of [Blocks](@ref 
 
 To visualize the above quantum circuits in [`VSCode`](https://code.visualstudio.com/), [`Jupyter`](https://jupyter.org/) notebook or [`Pluto`](https://github.com/fonsp/Pluto.jl) notebook, you can use the [`vizcircuit`](@ref) function.
 ```@example quick-start
-vizcircuit(qft(5))  # show a qft circuit
+vizcircuit(circuit)  # show a qft circuit
 ```
 More details about the plotting can be found in the manual: [Quantum Circuit Visualization](@ref).
 
@@ -71,20 +71,20 @@ or [`fidelity`](@ref), e.g
 
 To obtain the gradient of the quantum Fourier transform circuit with respect to its parameters, one can use the following code
 ```@repl quick-start
-grad_state, grad_circuit_params = expect'(kron(X, X, I2) + kron(I2, X, X), zero_state(3)=>qft(3))
+grad_state, grad_circuit_params = expect'(h, zero_state(5)=>circuit)
 ```
-where `kron(X, X, I2) + kron(I2, X, X)` is the target Hamiltonian, `zero_state(3)` is the initial state, `qft(3)` is the quantum Fourier transform circuit.
+where `h` is the target observable, `zero_state(5)` is the initial state, `circuit` is the quantum Fourier transform circuit to be differentiated.
 The return value is a vector, each corresponding to the gradient of the loss function with respect to a parameter in the circuit.
 The list of parameters can be obtained by [`parameters`](@ref) function.
 ```@repl quick-start
-parameters(qft(3))
+parameters(circuit)
 ```
 
 To obtain the gradient of the fidelity between a state parameterized by a quantum circuit and a target state, one can use the following code
 
 ```@repl quick-start
-((grad_state1, grad_circuit1), grad_state2) = fidelity'(zero_state(3)=>qft(3), ghz_state(3))
+((grad_state1, grad_circuit1), grad_state2) = fidelity'(zero_state(5)=>circuit, ghz_state(5))
 ```
-where `zero_state(3)` is the initial state, `qft(3)` is the quantum Fourier transform circuit, `ghz_state(3)` is the target state.
+where `zero_state(5)` is the initial state, `circuit` is the quantum Fourier transform circuit, `ghz_state(5)` is the target state.
 
 The automatic differentiation functionality can also be accessed by interfacing with the machine learning libraries [`Zygote`](https://github.com/FluxML/Zygote.jl). Please refer to the manual of [Automatic Differentiation](@ref) for more details.
