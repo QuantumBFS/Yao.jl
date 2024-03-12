@@ -125,20 +125,25 @@ end;
 # Finally, let's try it out.
 # We initialize the state ``|0\rangle`` and apply several optimization steps.
 
-circuit = chain(n)
-pauli_strings = generate_2local_pauli_strings(n)
-history = Float64[]
+# ```julia
+# circuit = chain(n)
+# pauli_strings = generate_2local_pauli_strings(n)
+# history = Float64[]
 
-for i=1:100
-    cost = step_and_cost!(n, circuit, h, 0.01, pauli_strings)
-    push!(history, cost)
-end
+# for i=1:100
+#     cost = step_and_cost!(n, circuit, h, 0.01, pauli_strings)
+#     push!(history, cost)
+# end
 
-Plots.plot(history, legend=false)
-Plots.plot!(1:100, [w[1] for i=1:100])
-xlabel!("steps")
-ylabel!("energy")
+# Plots.plot(history, legend=false)
+# Plots.plot!(1:100, [w[1] for i=1:100])
+# xlabel!("steps")
+# ylabel!("energy")
+# ```
 
+# ```@raw html
+# <img src="/assets/images/Riemannian.png" alt="Riemannian gradient flow" width="600"/>
+# ```
 # When we compare the final states achieved with the Riemannian gradient flow 
 # optimizer and with the standard VQE we can notice that the former has lower quality.
 # This is because the Riemannian gradient flow optimizer has only a local view of the cost landscape
