@@ -106,7 +106,7 @@ end
 function YaoAPI.purify(r::DensityMatrix{D}; num_env::Int = nactive(r)) where {D}
     Ne = D ^ num_env
     Ns = size(r.state, 1)
-    R, U = eigen!(r.state)
+    R, U = eigen(r.state)
     state = view(U, :, Ns-Ne+1:Ns) .* sqrt.(abs.(view(R, Ns-Ne+1:Ns)'))
     return ArrayReg{D}(state)
 end
