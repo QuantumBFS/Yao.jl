@@ -521,7 +521,7 @@ chain
 
 
 julia> expect(op, r)
-0.7071067811865474 + 0.0im
+0.7071067811865474
 ```
 """
 @interface expect

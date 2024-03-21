@@ -51,7 +51,7 @@ end
         @show op
         @test isapprox(
             sum(measure(op, reg2; nshots = 100000)) / 100000,
-            expect(op, reg),
+            sandwich(reg, op, reg),
             rtol = 0.1,
         )
         @test reg ≈ reg2
@@ -60,7 +60,7 @@ end
         reg2 = copy(reg)
         @test isapprox(
             dropdims(sum(measure(op, reg2; nshots = 100000), dims = 1), dims = 1) / 100000,
-            expect(op, reg),
+            sandwich(reg, op, reg),
             rtol = 0.1,
         )
         @test reg ≈ reg2
@@ -91,7 +91,7 @@ end
         @show op
         @test isapprox(
             sum(measure(op, reg2, locs; nshots = 100000)) / 100000,
-            expect(put(Nbit, locs => op), reg),
+            sandwich(reg, put(Nbit, locs => op), reg),
             rtol = 0.2,
         )
         @test reg ≈ reg2
