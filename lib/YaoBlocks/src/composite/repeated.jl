@@ -12,13 +12,13 @@ struct RepeatedBlock{D,C,GT<:AbstractBlock} <: AbstractContainer{GT,D}
 end
 
 function RepeatedBlock(n::Int, block::AbstractBlock{D}, locs::NTuple{C,Int}) where {D,C}
-    @assert_locs_safe n Tuple(i:i+nqudits(block)-1 for i in locs)
+    @assert_locs_safe n [i:i+nqudits(block)-1 for i in locs]
     nqudits(block) > 1 && throw(
         ArgumentError("RepeatedBlock does not support multi-qubit content for the moment."),
     )
     # sort the locations
-    locs = TupleTools.sort(locs)
-    return RepeatedBlock{D,C,typeof(block)}(n, block, locs)
+    slocs = sort([locs...])
+    return RepeatedBlock{D,C,typeof(block)}(n, block, (slocs...,))
 end
 
 function RepeatedBlock(n::Int, block::AbstractBlock{D}, locs::UnitRange{Int}) where {D}
@@ -105,7 +105,7 @@ julia> @time apply!(reg, chain([put(20, i=>X) for i=1:20]));
 Base.repeat(n::Int, x::AbstractBlock, locs::Int...) = repeat(n, x, locs)
 Base.repeat(n::Int, x::AbstractBlock, locs::NTuple{C,Int}) where {C} =
     RepeatedBlock(n, x, locs)
-Base.repeat(n::Int, x::AbstractBlock, locs) = repeat(n, x, locs...)
+Base.repeat(n::Int, x::AbstractBlock, locs) = repeat(n, x, (locs...,))
 Base.repeat(n::Int, x::AbstractBlock, locs::UnitRange) = RepeatedBlock(n, x, locs)
 Base.repeat(n::Int, x::AbstractBlock) = RepeatedBlock(n, x)
 Base.repeat(x::AbstractBlock) = @λ(n -> repeat(n, x))
