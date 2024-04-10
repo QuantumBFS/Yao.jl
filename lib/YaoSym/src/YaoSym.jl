@@ -1,11 +1,20 @@
 module YaoSym
 
-using Requires
+using SparseArrays, LuxurySparse, LinearAlgebra
+using BitBasis, YaoArrayRegister, YaoBlocks
+import YaoArrayRegister: parametric_mat
+using SymEngine
+using SymEngine: @vars, Basic, BasicType, BasicOp, BasicTrigFunction, BasicComplexNumber
+
+# SymEngine APIs
+export @vars, Basic, subs, expand, simplify_expi
+
+# Symbolic registers
+export @ket_str, @bra_str
+export SymReg, AdjointSymReg, SymRegOrAdjointSymReg
+export szero_state
 
 include("register.jl")
-
-function __init__()
-    @require SymEngine = "123dc426-2d89-5057-bbad-38513e3affd8" include("symengine/backend.jl")
-end
+include("symengine/symengine.jl")
 
 end # module

@@ -79,17 +79,18 @@ end
 function rrule(::typeof(apply), reg::AbstractArrayReg, block::AbstractBlock)
     out = apply(reg, block)
     out, function (outδ)
-        (in, inδ), paramsδ = apply_back((copy(out), outδ), block)
+        (in, inδ), paramsδ = apply_back((copy(out), tangent_to_reg(typeof(out), outδ)), block)
         return (NoTangent(), inδ, create_circuit_tangent(block, paramsδ))
     end
 end
 function rrule(::typeof(apply), reg::AbstractArrayReg, block::AbstractAdd)
     out = apply(reg, block)
     out, function (outδ)
-        (in, inδ), paramsδ = apply_back((copy(out), outδ), block; in = reg)
+        (in, inδ), paramsδ = apply_back((copy(out), tangent_to_reg(typeof(out), outδ)), block; in = reg)
         return (NoTangent(), inδ, create_circuit_tangent(block, paramsδ))
     end
 end
+tangent_to_reg(::Type{T}, reg) where T<:AbstractArrayReg = reg isa Tangent ? T(reg.state) : reg
 
 
 function rrule(::typeof(dispatch), block::AbstractBlock, params)
@@ -107,7 +108,7 @@ function rrule(::typeof(expect), op::AbstractBlock, reg::AbstractArrayReg)
     out, function (outδ)
         greg = expect_g(op, reg)
         for b = 1:B
-            viewbatch(greg, b).state .*= 2 * outδ[b]
+            viewbatch(greg, b).state .*= outδ[b]
         end
         return (NoTangent(), NoTangent(), greg)
     end
@@ -122,9 +123,9 @@ function rrule(
     function (outδ)
         reg, c = reg_and_circuit
         out = copy(reg) |> c
-        goutreg = copy(out) |> op
+        goutreg = 2copy(out) |> op
         for b = 1:YaoArrayRegister._asint(nbatch(goutreg))
-            viewbatch(goutreg, b).state .*= 2 * outδ[b]
+            viewbatch(goutreg, b).state .*= outδ[b]
         end
         # apply backward rule
         (in, greg), gcircuit = apply_back((out, goutreg), c)

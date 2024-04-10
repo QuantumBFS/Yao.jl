@@ -64,7 +64,6 @@ include("put_block.jl")
 include("repeated.jl")
 include("subroutine.jl")
 include("add.jl")
-include("unitary_channel.jl")
 
 # tag blocks
 include("tag/tag.jl")

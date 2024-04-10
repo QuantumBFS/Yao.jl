@@ -1,18 +1,22 @@
 export ReflectGate, reflect
 
-ReflectGate{D, T, Tt, AT<:AbstractArrayReg{D, T}} = TimeEvolution{D,Tt,Projector{D,T,AT}}
-
 """
-$(TYPEDSIGNATURES)
+    ReflectGate{D, T, Tt, AT<:AbstractArrayReg{D, T}} = TimeEvolution{D,Tt,Projector{D,T,AT}}
 
-Create a [`ReflectGate`](@ref) with respect to an quantum state vector `v`.
-It defines the following gate operation.
+Let `|v⟩` be a quantum state vector, a reflection gate is a unitary operator that defined as the following operation.
 
 ```math
 |v⟩ → 1 - (1-exp(-iθ)) |v⟩⟨v|
 ```
 
 When ``θ = π``, it defines a standard reflection gate ``1-2|v⟩⟨v|``.
+"""
+ReflectGate{D, T, Tt, AT<:AbstractArrayReg{D, T}} = TimeEvolution{D,Tt,Projector{D,T,AT}}
+
+"""
+$(TYPEDSIGNATURES)
+
+Create a [`ReflectGate`](@ref) with respect to an quantum state vector `v`.
 
 ### Example
 

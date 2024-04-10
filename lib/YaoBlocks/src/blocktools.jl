@@ -192,7 +192,7 @@ LinearAlgebra.Matrix(blk::AbstractBlock) = Matrix(mat(blk))
 Operator fidelity defined as
 
 ```math
-F^2 = \\frac{1}{d^2}\\left[{\\rm Tr}(b1^\\dagger b2)\\right]
+F^2 = \\frac{1}{d}\\left[{\\rm Tr}(b1^\\dagger b2)\\right]
 ```
 
 Here, `d` is the size of the Hilbert space. Note this quantity is independant to global phase.

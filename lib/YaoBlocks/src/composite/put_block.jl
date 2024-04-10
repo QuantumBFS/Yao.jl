@@ -119,7 +119,24 @@ function YaoAPI.iscommute(x::PutBlock{D}, y::PutBlock{D}) where {D}
     end
 end
 
+"""
+    Swap = PutBlock{2,2,G} where {G<:ConstGate.SWAPGate}
+    Swap(n::Int, locs::Tuple{Int,Int})
+
+Swap gate, which swaps two qubits.
+"""
 const Swap = PutBlock{2,2,G} where {G<:ConstGate.SWAPGate}
+
+"""
+    PSwap = PutBlock{2,2,RotationGate{2,T,G}} where {G<:ConstGate.SWAPGate}
+    PSwap(n::Int, locs::Tuple{Int,Int}, θ::Real)
+
+Parametrized swap gate that swaps two qubits with a phase, defined as
+
+```math
+{\\rm SWAP}(θ) = e^{-iθ{\\rm SWAP}/2}
+```
+"""
 const PSwap{T} = PutBlock{2,2,RotationGate{2,T,G}} where {G<:ConstGate.SWAPGate}
 Swap(n::Int, locs::Tuple{Int,Int}) = PutBlock(n, ConstGate.SWAPGate(), locs)
 PSwap(n::Int, locs::Tuple{Int,Int}, θ::Real) =

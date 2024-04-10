@@ -88,7 +88,7 @@ Matrix(bellcircuit) == Matrix(chain(2, put(1=>H), control(1,2=>X))) ? md"✅" : 
 # ╔═╡ a59c3f42-0667-11eb-34e2-c9ab7e9080f2
 begin
 	reversebellcircuit = chain(2) #complete the reverse bell circuit
-	plot(bellcircuit)
+	plot(reversebellcircuit)
 end
 
 # ╔═╡ c2a9bb30-067d-11eb-0594-5d416dc1e763
@@ -101,7 +101,7 @@ begin
 end
 
 # ╔═╡ 5d52aca4-067f-11eb-3174-a966da065d76
-Matrix(bell_and_reverse_bell_circuit) == Matrix(chain(2, put(1=>H), control(1, 2=>H), control(1, 2=>H), put(1=>H))) ? md"✅" : md"❌"
+Matrix(bell_and_reverse_bell_circuit) == Matrix(chain(2, put(1=>H), control(1, 2=>X), control(1, 2=>X), put(1=>H))) ? md"✅" : md"❌"
 
 # ╔═╡ d87106c6-067d-11eb-3beb-8bfea8d168a3
 begin
@@ -135,7 +135,7 @@ md"_**Note:**_ If you're using ` ArrayReg(bit\" \") ` to create the qubits, the 
 md"_**Assignment 3:**_"
 
 # ╔═╡ 131c831a-0681-11eb-2bab-3d4cf5b23006
-md"Suppose that Alice and Bob have 2 pairs of entangled qubits. Both the pairs are in the state $ \frac{|00> \;+\; |11>}{\sqrt2} $. Suppose Alice has an extra qubit, with completely random state." 
+md"Suppose that Alice and Bob have 2 pairs of entangled qubits. Both the pairs are in the state `` \frac{|00> \;+\; |11>}{\sqrt2} ``. Suppose Alice has an extra qubit, with completely random state." 
 
 # ╔═╡ c89d84b4-0681-11eb-3c22-4def72fc3477
 md"1. _Make the circuit for quantum teleportation_
@@ -170,7 +170,7 @@ end
 
 # ╔═╡ 88f1d456-06df-11eb-1827-912c481bb7a4
 input = 0
-#Remove the "0". Pass the above created qubit through the teleportation circuit, measuring the first two qubits using measure_remove!() function. Hint: qubit |> circuit |> r->measure_remove!(r, m:n)
+#Remove the "0". Pass the above created qubit through the teleportation circuit, measuring the first two qubits using RemoveMeasured() function. Hint: qubit |> circuit |> r->measure!(RemoveMeasured(), r, m:n)
 
 # ╔═╡ 79280796-06e3-11eb-1e5c-b5cea995a88a
 (input == bit"00" || input == bit"11" || input==bit"10" || input==bit"01") && (typeof(input) != Int64) ? md"✅" : md"❌"
@@ -180,13 +180,13 @@ md"The above measurement will act as the information for superdense coding circu
 
 # ╔═╡ 26cc4008-06e0-11eb-0cdf-51954af7254d
 begin
-	if(input==bit"00")
+	if input==bit"00"
 		superdense_coding_circuit = chain(2)
-	elseif(input==bit"01")
+	elseif input==bit"01"
 		superdense_coding_circuit = chain(2)
-	elseif(input==bit"10")
+	elseif input==bit"10"
 		superdense_coding_circuit = chain(2)
-	elseif(input==bit"11")
+	elseif input==bit"11"
 		superdense_coding_circuit = chain(2)
 	end
 	#Remember the bits are read from right to left
@@ -195,17 +195,15 @@ begin
 end
 
 # ╔═╡ dc0b86be-06e4-11eb-24db-4f56cb821e0f
-begin
-	if(input==bit"00")
-		Matrix(superdense_coding_circuit) == Matrix(chain(2))
-	elseif(input==bit"01")
-		Matrix(superdense_coding_circuit) == Matrix(chain(2, put(1=>Z)))
-	elseif(input==bit"10")
-		Matrix(superdense_coding_circuit) == Matrix(chain(2, put(1=>X)))
-	elseif(input==bit"11")
-		Matrix(superdense_coding_circuit) == Matrix(chain(2, put(1=>Y)))
-	end && typeof(input) != Int64 ? md"✅" : md"❌"
-end
+if input==bit"00"
+	Matrix(superdense_coding_circuit) == Matrix(chain(2))
+elseif input==bit"01"
+	Matrix(superdense_coding_circuit) == Matrix(chain(2, put(1=>Z)))
+elseif input==bit"10"
+	Matrix(superdense_coding_circuit) == Matrix(chain(2, put(1=>X)))
+elseif input==bit"11"
+	Matrix(superdense_coding_circuit) == Matrix(chain(2, put(1=>Y)))
+end && typeof(input) != Int64 ? md"✅" : md"❌"
 
 # ╔═╡ 28ccce76-06e1-11eb-1c70-b3d7779a062e
 Bobs_part = ((Alice_and_Bobs_second_entangled_qubit |> superdense_coding_circuit) |> reversebellcircuit) |> r->measure(r, nshots=1000)
@@ -213,29 +211,28 @@ Bobs_part = ((Alice_and_Bobs_second_entangled_qubit |> superdense_coding_circuit
 # ╔═╡ 2aaa0910-06e2-11eb-1d6c-0fae35763d48
 #Bobs_part now contains the information Alice wanted to convey to Bob regarding his qubits. Use this information to make Bob's qubit's state jump to Alice's random qubit's state
 begin
-	if(Bobs_part[1]==bit"00")
+	if Bobs_part[1]==bit"00"
 		Bobs_qubit = input_to_teleportation_circuit |> chain(1)
-	elseif(Bobs_part[1]==bit"01")
+	elseif Bobs_part[1]==bit"01"
 		Bobs_qubit = input_to_teleportation_circuit |> chain(1) #Complete the circuit
-	elseif(Bobs_part[1]==bit"10")
+	elseif Bobs_part[1]==bit"10"
 		Bobs_qubit = input_to_teleportation_circuit |> chain(1) #Complete the circuit
-	elseif(Bobs_part[1]==bit"11")
+	elseif Bobs_part[1]==bit"11"
 		Bobs_qubit = input_to_teleportation_circuit |> chain(1) #Complete the circuit
 	end
 	state(Bobs_qubit)
 end
 
 # ╔═╡ b1392da2-06e5-11eb-3632-7d96a1b81a24
-begin
-	log(2,length(state(input_to_teleportation_circuit))) == 2 && ((Bobs_part[1]==bit"00" && Bobs_qubit == (input_to_teleportation_circuit |> chain(1))) || (Bobs_part[1]==bit"01" && Bobs_qubit == (input_to_teleportation_circuit |> chain(1, put(1=>Z)))) || ( Bobs_part[1]==bit"10" && Bobs_qubit == (input_to_teleportation_circuit |> chain(1, put(1=>X))) ) || ( Bobs_part[1]==bit"11" && Bobs_qubit == (input_to_teleportation_circuit |> chain(1, put(1=>Y)))))  &&  (sum(Bobs_part .== Bobs_part[1]) == 1000) ? md"✅" : md"❌"
-	#=elseif()
-		Bobs_qubit == 
-	elseif()
-		Bobs_qubit == 
-	elseif()
-		Bobs_qubit == =#
-	
-end
+if Bobs_part[1]==bit"00"
+	Bobs_qubit == input_to_teleportation_circuit
+elseif Bobs_part[1]==bit"01"
+	Bobs_qubit == (input_to_teleportation_circuit |> ZGate())
+elseif Bobs_part[1]==bit"10"
+	Bobs_qubit == (input_to_teleportation_circuit |> XGate())
+elseif Bobs_part[1]==bit"11"
+	Bobs_qubit == (input_to_teleportation_circuit |> YGate())
+end && (length(state(input_to_teleportation_circuit)) == 2) && (sum(Bobs_part .== Bobs_part[1]) == 1000) ? md"✅" : md"❌"
 
 # ╔═╡ 83df1840-06e7-11eb-2502-173dac5d4963
 md"Seems to work... Although, wouldn't using the information from superdense coding make teleportation pointless."

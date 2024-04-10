@@ -283,7 +283,7 @@ ArrayReg{2, ComplexF64, Array...}
 @interface relax!
 
 """
-    partial_tr(ρ, locs) -> 
+    partial_tr(ρ, locs) -> DensityMatrix
 
 Return a density matrix which is the partial traced on `locs`.
 """
@@ -609,8 +609,8 @@ julia> reg |> probs
 
 Return the fidelity between two states.
 Calcuate the fidelity between `r1` and `r2`, if `r1` or `r2` is not pure state
-(`nactive(r) != nqudits(r)`), the fidelity is calcuated by purification. See also
-[`pure_state_fidelity`](@ref), [`purification_fidelity`](@ref).
+(`nactive(r) != nqudits(r)`), the fidelity is calcuated by purification. See also:
+http://iopscience.iop.org/article/10.1088/1367-2630/aa6a4b/meta
 
 Obtain the gradient with respect to registers and circuit parameters.
 For pair input `ψ=>circuit`, the returned gradient is a pair of `gψ=>gparams`,
@@ -664,6 +664,8 @@ Trace distance is defined as following:
 \\frac{1}{2} || A - B ||_{\\rm tr}
 ```
 
+It takes values between 0 and 1.
+
 ### Examples
 
 ```jldoctest; setup=:(using Yao)
@@ -672,7 +674,7 @@ julia> reg1 = uniform_state(3);
 julia> reg2 = zero_state(3);
 
 julia> tracedist(reg1, reg2)
-1.8708286933869704
+0.9354143466934852
 ```
 
 ### References
@@ -755,9 +757,9 @@ true
 @interface purify
 
 """
-    density_matrix(register, locations)
+    density_matrix(register_or_rho[, locations])
 
-Returns the density matrix for qubits on `locations`.
+Returns the reduced density matrix for qubits at `locations` (default: all qubits).
 
 ### Examples
 

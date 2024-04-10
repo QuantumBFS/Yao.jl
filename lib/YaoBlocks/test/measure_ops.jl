@@ -146,6 +146,7 @@ end
     reg = rand_state(8; nbatch=32)
     op = repeat(5, X, 1:5)
     @test_throws ArgumentError measure!(ResetTo(0), op, reg, 2:6)
+    relax!(reg)
     @test_throws ArgumentError measure!(RemoveMeasured(), op, reg, 2:6)
 end
 

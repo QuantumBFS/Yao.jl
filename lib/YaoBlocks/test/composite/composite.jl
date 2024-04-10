@@ -33,10 +33,6 @@ end
     include("cache.jl")
 end
 
-@testset "test unitary channel" begin
-    include("unitary_channel.jl")
-end
-
 @testset "test single block chsubblocks" begin
     @test chsubblocks(chain(X), Y) == chain(Y)
     @test chsubblocks(kron(X), Y) == kron(Y)

@@ -1,5 +1,3 @@
-export UnitaryChannel, unitary_channel
-
 # NOTE: this can have a better support in YaoIR directly with StatsBase
 # as an compiled instruction, but store the probabilities is the best solution
 # here
@@ -44,6 +42,14 @@ function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::UnitaryChannel) where {D
     end
     # last
     r.state .+= last(x.probs) .* unsafe_apply!(r0, last(x.operators)).state
+    return r
+end
+
+function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, 
+                              k::KronBlock{D,M,NTuple{M,U}}) where {D,M,T,U<:UnitaryChannel}
+    for (locs, block) in zip(k.locs, k.blocks)
+        YaoAPI.unsafe_apply!(r, put(k.n, locs => block))
+    end
     return r
 end
 

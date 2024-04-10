@@ -15,8 +15,7 @@ Extensible Framework for Quantum Algorithm Design for Humans.
 const 幺 = Yao
 
 using Reexport
-@reexport using YaoArrayRegister, YaoBlocks, YaoSym
-export EasyBuild
+@reexport using YaoArrayRegister, YaoBlocks, YaoSym, YaoPlots
 using YaoArrayRegister.BitBasis, YaoAPI
 
 using YaoBlocks:
@@ -28,8 +27,12 @@ using YaoBlocks:
     print_title,
     print_block
 
+export EasyBuild
+# CUDA APIs
+export cpu, cuzero_state, cuuniform_state, curand_state, cuproduct_state, cughz_state
 
-include("deprecations.jl")
+include("cudainterfaces.jl")
 include("EasyBuild/easybuild.jl")
+include("deprecations.jl")
 
 end # module

@@ -14,7 +14,8 @@ using StatsBase, TupleTools, InteractiveUtils
 using MLStyle: @match
 using LinearAlgebra: eigen!
 using SparseArrays, LuxurySparse
-using ExponentialUtilities, Random, CacheServers
+using Random, CacheServers
+import KrylovKit: exponentiate
 using DocStringExtensions
 import StaticArrays: SMatrix
 
@@ -50,7 +51,9 @@ import YaoAPI:
     subblocks,
     nparameters,
     measure!,
-    measure
+    measure,
+    apply_back!,
+    mat_back!
 
 export AbstractBlock,
     AbstractContainer,
@@ -104,7 +107,6 @@ export applymatrix, cache_key
 
 include("utils.jl")
 include("outerproduct_and_projection.jl")
-include("error.jl")
 # include("traits.jl")
 
 include("abstract_block.jl")
@@ -113,6 +115,8 @@ include("abstract_block.jl")
 include("routines.jl")
 include("primitive/primitive.jl")
 include("composite/composite.jl")
+include("channel/channel.jl")
+
 
 include("algebra.jl")
 include("blocktools.jl")

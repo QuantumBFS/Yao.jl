@@ -1,6 +1,3 @@
-using ..SymEngine: Basic
-export simplify_expi
-
 function Base.iszero(x::Basic)
     isempty(free_symbols(x)) && iszero(N(x))
 end

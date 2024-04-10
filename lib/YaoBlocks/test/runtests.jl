@@ -4,10 +4,6 @@ using Test, YaoBlocks
     include("utils.jl")
 end
 
-@testset "error" begin
-    include("error.jl")
-end
-
 @testset "test primitive block" begin
     include("primitive/primitive.jl")
 end
@@ -64,4 +60,9 @@ end
 
 @testset "autodiff" begin
     include("autodiff/autodiff.jl")
+end
+
+@testset "channel" begin
+    include("channel/error_channel.jl")
+    include("channel/unitary_channel.jl")
 end

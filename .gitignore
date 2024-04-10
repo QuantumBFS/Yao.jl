@@ -31,3 +31,5 @@ docs/src/assets/*.pdf
 *.synctex.gz
 *.fls
 *.log
+lib/YaoPlots/examples/*.png
+lib/YaoPlots/examples/*.svg
