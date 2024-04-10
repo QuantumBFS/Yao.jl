@@ -19,7 +19,7 @@ It transform a [`Yao`](https://github.com/QuantumBFS/Yao.jl) circuit to a genera
 
 * `initial_state` and `final_state` are for specifying the initial state and final state.
 If any of them is not specified, the function will return a tensor network with open legs.
-* `optimizer` is for optimizing the contraction order of the tensor network. The default value is `TreeSA()`. Please check the README of [OMEinsumContractors.jl](https://github.com/TensorBFS/OMEinsumContractionOrders.jl) for more information.
+* `optimizer` is for optimizing the YaoToEinsum.contraction order of the tensor network. The default value is `TreeSA()`. Please check the README of [OMEinsumYaoToEinsum.contractors.jl](https://github.com/TensorBFS/OMEinsumYaoToEinsum.contractionOrders.jl) for more information.
 
 ```julia
 julia> import Yao, YaoToEinsum
@@ -39,7 +39,7 @@ Time complexity: 2^20.03816881914695
 Space complexity: 2^20.0
 Read-write complexity: 2^20.07564105083201
 
-julia> reshape(contract(network), 1<<n, 1<<n) ≈ Yao.mat(circuit)
+julia> reshape(YaoToEinsum.contract(network), 1<<n, 1<<n) ≈ Yao.mat(circuit)
 true
 
 # convert circuit sandwiched by zero states
@@ -51,7 +51,7 @@ Time complexity: 2^12.224001674198101
 Space complexity: 2^5.0
 Read-write complexity: 2^13.036173612553485
 
-julia> contract(network)[] ≈ Yao.zero_state(n)' * (Yao.zero_state(n) |> circuit)
+julia> YaoToEinsum.contract(network)[] ≈ Yao.zero_state(n)' * (Yao.zero_state(n) |> circuit)
 true
 ```
 
