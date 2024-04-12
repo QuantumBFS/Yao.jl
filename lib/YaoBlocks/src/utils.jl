@@ -311,3 +311,12 @@ end
 
 SparseArrays.sparse(et::EntryTable) = SparseVector(et)
 Base.vec(et::EntryTable) = Vector(et)
+
+# convert a (maybe complex) number x to real number.
+function safe_real(x)
+    img = imag(x)
+    if !(iszero(img) || isapprox(x - im*img, x))
+        error("Can not convert number $x to real due to its large imaginary part.")
+    end
+    return real(x)
+end
