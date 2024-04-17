@@ -15,7 +15,7 @@ Extensible Framework for Quantum Algorithm Design for Humans.
 const 幺 = Yao
 
 using Reexport
-@reexport using YaoArrayRegister, YaoBlocks, YaoSym, YaoPlots
+@reexport using YaoArrayRegister, YaoBlocks, YaoSym, YaoPlots, YaoToEinsum
 using YaoArrayRegister.BitBasis, YaoAPI
 
 using YaoBlocks:
