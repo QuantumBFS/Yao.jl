@@ -3,9 +3,9 @@ JL = julia --project
 default: init test
 
 init:
-	$(JL) -e 'using Pkg; Pkg.develop([Pkg.PackageSpec(path = joinpath("lib", pkg)) for pkg in ["YaoArrayRegister", "YaoBlocks", "YaoSym", "YaoPlots", "YaoAPI"]]); Pkg.precompile()'
+	$(JL) -e 'using Pkg; Pkg.develop([Pkg.PackageSpec(path = joinpath("lib", pkg)) for pkg in ["YaoArrayRegister", "YaoBlocks", "YaoSym", "YaoPlots", "YaoAPI", "YaoToEinsum"]]); Pkg.precompile()'
 init-docs:
-	$(JL) -e 'using Pkg; Pkg.activate("docs"); Pkg.develop([Pkg.PackageSpec(path = joinpath("lib", pkg)) for pkg in ["YaoArrayRegister", "YaoBlocks", "YaoSym", "YaoPlots", "YaoAPI"]]); Pkg.precompile()'
+	$(JL) -e 'using Pkg; Pkg.activate("docs"); Pkg.develop([Pkg.PackageSpec(path = joinpath("lib", pkg)) for pkg in ["YaoArrayRegister", "YaoBlocks", "YaoSym", "YaoPlots", "YaoAPI", "YaoToEinsum"]]); Pkg.precompile()'
 
 update:
 	$(JL) -e 'using Pkg; Pkg.update(); Pkg.precompile()'
@@ -22,10 +22,10 @@ test-%:
 	$(JL) -e 'using Pkg; Pkg.test("$*")'
 
 test:
-	$(JL) -e 'using Pkg; Pkg.test(["YaoAPI", "YaoArrayRegister", "YaoBlocks", "YaoSym", "YaoPlots", "Yao"])'
+	$(JL) -e 'using Pkg; Pkg.test(["YaoAPI", "YaoArrayRegister", "YaoBlocks", "YaoSym", "YaoPlots", "Yao", "YaoToEinsum"])'
 
 coverage:
-	$(JL) -e 'using Pkg; Pkg.test(["YaoAPI", "YaoArrayRegister", "YaoBlocks", "YaoSym", "YaoPlots", "Yao"]; coverage=true)'
+	$(JL) -e 'using Pkg; Pkg.test(["YaoAPI", "YaoArrayRegister", "YaoBlocks", "YaoSym", "YaoPlots", "Yao", "YaoToEinsum"]; coverage=true)'
 
 servedocs:
 	$(JL) -e 'using Pkg; Pkg.activate("docs"); using LiveServer; servedocs(;skip_dirs=["docs/src/assets", "docs/src/generated"])'

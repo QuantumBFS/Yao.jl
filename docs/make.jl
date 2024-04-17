@@ -61,6 +61,7 @@ const PAGES = [
         "man/cuda.md",
         "man/plot.md",
         "man/automatic_differentiation.md",
+        "man/yao2einsum.md",
         "man/simplification.md",
         "man/bitbasis.md",
     ],
@@ -71,7 +72,7 @@ const PAGES = [
 indigo = DocThemeIndigo.install(Yao)
 
 makedocs(
-    modules = [Yao, YaoAPI, YaoArrayRegister, YaoBlocks, BitBasis, YaoSym, YaoPlots, AD, Optimise],
+    modules = [Yao, YaoAPI, YaoArrayRegister, YaoBlocks, BitBasis, YaoSym, YaoPlots, YaoToEinsum, AD, Optimise],
     format = Documenter.HTML(
         prettyurls = ("deploy" in ARGS),
         canonical = ("deploy" in ARGS) ? "https://docs.yaoquantum.org/" : nothing,
