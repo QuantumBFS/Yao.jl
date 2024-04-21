@@ -1,6 +1,34 @@
+"""
+    CircuitStyles
+
+A module to define the styles of the circuit visualization.
+To change the styles, please modify the variables in this module, e.g.
+```julia
+julia> using YaoPlots
+
+julia> YaoPlots.CircuitStyles.unit[] = 40
+40
+```
+
+### Style variables
+#### Sizes
+* `unit` is the number of pixels in a unit.
+* `r` is the size of nodes.
+* `lw` is the line width.
+
+#### Texts
+* `textsize` is the text size.
+* `paramtextsize` is the text size for longer texts.
+* `fontfamily` is the font family.
+
+#### Colors
+* `linecolor` is the line color.
+* `gate_bgcolor` is the gate background color.
+* `textcolor` is the text color.
+"""
 module CircuitStyles
     using Luxor
-    const unit = Ref(60)    # number of points in a unit
+    const unit = Ref(60)    # number of pixels in a unit
     const barrier_for_chain = Ref(false)
     const r = Ref(0.2)
     const lw = Ref(1.0)
@@ -339,21 +367,17 @@ for B in [:LabelBlock, :GeneralMatrixBlock, :Add]
         _draw!(c, [controls..., (address, c.gatestyles.g, string(cb))])
     end
 end
-for GT in [:KronBlock, :RepeatedBlock, :CachedBlock, :Subroutine, :(YaoBlocks.AD.NoParams)]
-    @eval function draw!(c::CircuitGrid, p::$GT, address, controls)
-        barrier_style = CircuitStyles.barrier_for_chain[]
-        CircuitStyles.barrier_for_chain[] = false
-        draw!(c, YaoBlocks.Optimise.to_basictypes(p), address, controls)
-        CircuitStyles.barrier_for_chain[] = barrier_style
-    end
+
+# [:KronBlock, :RepeatedBlock, :CachedBlock, :Subroutine, :(YaoBlocks.AD.NoParams)]
+function draw!(c::CircuitGrid, p::CompositeBlock, address, controls)
+    barrier_style = CircuitStyles.barrier_for_chain[]
+    CircuitStyles.barrier_for_chain[] = false
+    draw!(c, YaoBlocks.Optimise.to_basictypes(p), address, controls)
+    CircuitStyles.barrier_for_chain[] = barrier_style
 end
 for (GATE, SYM) in [(:XGate, :Rx), (:YGate, :Ry), (:ZGate, :Rz)]
     @eval get_brush_texts(c, b::RotationGate{D,T,<:$GATE}) where {D,T} = (c.gatestyles.g, "$($(SYM))($(pretty_angle(b.theta)))")
 end
-get_brush_texts(c, b::EasyBuild.FSimGate) = (c.gatestyles.g, "FSim($(pretty_angle(b.theta)), $(pretty_angle(b.phi)))")
-get_brush_texts(c, ::EasyBuild.SqrtWGate) = (c.gatestyles.g, "√W")
-get_brush_texts(c, ::EasyBuild.SqrtXGate) = (c.gatestyles.g, "√X")
-get_brush_texts(c, ::EasyBuild.SqrtYGate) = (c.gatestyles.g, "√Y")
 
 pretty_angle(theta) = string(theta)
 function pretty_angle(theta::AbstractFloat)
@@ -496,6 +520,11 @@ end
 
 vizcircuit(; kwargs...) = c->vizcircuit(c; kwargs...)
 
+"""
+    darktheme!()
+
+Change the default theme to dark.
+"""
 function darktheme!()
     const CircuitStyles.linecolor[] = "#FFFFFF"
     const CircuitStyles.textcolor[] = "#FFFFFF"
@@ -503,6 +532,11 @@ function darktheme!()
     BlochStyles.axes_colors .= ["#FFFFFF", "#FFFFFF", "#FFFFFF"]
 end
 
+"""
+    lighttheme!()
+
+Change the default theme to light.
+"""
 function lighttheme!()
     const CircuitStyles.linecolor[] = "#000000"
     const CircuitStyles.textcolor[] = "#000000"

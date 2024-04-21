@@ -1,4 +1,5 @@
-using YaoPlots, Yao, Luxor
+using YaoPlots, YaoBlocks, Luxor
+using YaoArrayRegister
 using Test
 
 @testset "LabelBlock" begin
