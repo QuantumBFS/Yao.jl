@@ -6,7 +6,7 @@ version = "0.2.2"
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 OMEinsum = "ebe7aa44-baf0-506c-a96f-8464559b3922"
-Yao = "5872b779-8223-5990-8dd0-5abbb0748c8c"
+YaoBlocks = "418bc28f-b43b-5e0b-a6e7-61bbc1a2c1df"
 
 [weakdeps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
@@ -17,12 +17,12 @@ YaoToEinsumCUDAExt = "CUDA"
 [compat]
 CUDA = "4, 5"
 OMEinsum = "0.8"
-Yao = "0.8"
+YaoBlocks = "0.13"
 julia = "1.9"
 
 [extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 SymEngine = "123dc426-2d89-5057-bbad-38513e3affd8"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test", "SymEngine"]

@@ -5,7 +5,7 @@ struct EinBuilder{T}
     maxlabel::Base.RefValue{Int}
 end
 
-Yao.nqubits(eb::EinBuilder) = length(eb.slots)
+YaoBlocks.nqubits(eb::EinBuilder) = length(eb.slots)
 function add_tensor!(eb::EinBuilder{T}, tensor::AbstractArray{T,N}, labels::Vector{Int}) where {N,T}
     @assert N == length(labels)
     push!(eb.tensors, tensor)
@@ -24,7 +24,7 @@ end
 function add_matrix!(eb::EinBuilder{T}, k::Int, m::AbstractMatrix, locs::Vector) where T
     if isdiag(m)
         add_tensor!(eb, reshape(Vector{T}(diag(m)), fill(2, k)...), eb.slots[locs])
-    elseif m isa Yao.OuterProduct  # low rank
+    elseif m isa YaoBlocks.OuterProduct  # low rank
         nlabels = [newlabel!(eb) for _=1:k]
         K = rank(m)
         if K == 1  # projector
@@ -54,13 +54,13 @@ end
 
 # projection gate, todo: generalize to arbitrary low rank gate
 function add_gate!(eb::EinBuilder{T}, b::PutBlock{2,1,ConstGate.P0Gate}) where {T}
-    add_matrix!(eb, 1, Yao.OuterProduct(T[1, 0], T[1, 0]), collect(b.locs))
+    add_matrix!(eb, 1, YaoBlocks.OuterProduct(T[1, 0], T[1, 0]), collect(b.locs))
     return eb
 end
 
 # projection gate, todo: generalize to arbitrary low rank gate
 function add_gate!(eb::EinBuilder{T}, b::PutBlock{2,1,ConstGate.P1Gate}) where {T}
-    add_matrix!(eb, 1, Yao.OuterProduct(T[0, 1], T[0, 1]), collect(b.locs))
+    add_matrix!(eb, 1, YaoBlocks.OuterProduct(T[0, 1], T[0, 1]), collect(b.locs))
     return eb
 end
 
@@ -147,7 +147,7 @@ Please check [OMEinsumContractors.jl](https://github.com/TensorBFS/OMEinsumContr
 
 
 ```jldoctest
-julia> using YaoToEinsum, Yao
+julia> using Yao
 
 julia> c = chain(3, put(3, 2=>X), put(3, 1=>Y), control(3, 1, 3=>Y))
 nqubits: 3
@@ -168,7 +168,7 @@ Read-write complexity: 2^6.0
 ```
 """
 function yao2einsum(circuit::AbstractBlock{D}; initial_state::Dict=Dict{Int,Int}(), final_state::Dict=Dict{Int,Int}(), optimizer=TreeSA()) where {D}
-    T = promote_type(ComplexF64, dict_regtype(initial_state), dict_regtype(final_state), Yao.parameters_eltype(circuit))
+    T = promote_type(ComplexF64, dict_regtype(initial_state), dict_regtype(final_state), YaoBlocks.parameters_eltype(circuit))
     vec_initial_state = Dict{Int,ArrayReg{D,T}}([k=>render_single_qubit_state(T, v) for (k, v) in initial_state])
     vec_final_state = Dict{Int,ArrayReg{D,T}}([k=>render_single_qubit_state(T, v) for (k, v) in final_state])
     yao2einsum(circuit, vec_initial_state, vec_final_state, optimizer)
