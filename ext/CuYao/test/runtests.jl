@@ -16,3 +16,7 @@ end
 @testset "extra" begin
     include("extra.jl")
 end
+
+@testset "yao2einsum" begin
+    include("yao2einsum.jl")
+end

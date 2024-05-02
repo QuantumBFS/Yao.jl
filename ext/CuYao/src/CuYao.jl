@@ -31,6 +31,7 @@ const Ints = NTuple{<:Any, Int}
 include("CUDApatch.jl")
 include("register.jl")
 include("instructs.jl")
+include("yao2einsum.jl")
 
 function __init__()
     CUDA.allowscalar(false)
