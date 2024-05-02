@@ -29,7 +29,9 @@ Reexport = "1"
 YaoAPI = "0.4"
 YaoArrayRegister = "0.9"
 YaoBlocks = "0.13"
+YaoPlots = "0.9"
 YaoSym = "0.6"
+YaoToEinsum = "0.2"
 julia = "1"
 
 [extras]
