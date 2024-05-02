@@ -1,9 +1,11 @@
-using Yao, CUDA
+using Yao, CUDA, Test
 using Yao.YaoToEinsum: uniformsize
 
 @testset "Yao Extensions" begin
     n = 5
     c = EasyBuild.qft_circuit(n)
-    optcode, xs = yao2einsum(c)
-    @test Matrix(reshape(optcode(xs...; size_info=uniformsize(optcode, 2)), 1<<n, 1<<n)) ≈ mat(c)
+    net = cu(yao2einsum(c))
+    m = reshape(net.code(net.tensors...; size_info=uniformsize(net.code, 2)), 1<<n, 1<<n)
+    @test m isa CuArray
+    @test Matrix(m) ≈ mat(c)
 end
