@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Variational Quantum Eigen Solver · Documentation | Yao</title><meta name="title" content="Variational Quantum Eigen Solver · Documentation | Yao"/><meta property="og:title" content="Variational Quantum Eigen Solver · Documentation | Yao"/><meta property="twitter:title" content="Variational Quantum Eigen Solver · Documentation | Yao"/><meta name="description" content="Documentation for Documentation | Yao."/><meta property="og:description" content="Documentation for Documentation | Yao."/><meta property="twitter:description" content="Documentation for Documentation | Yao."/><script data-outdated-warner src="../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../assets/documenter.js"></script><script src="../../../search_index.js"></script><script src="../../../siteinfo.js"></script><script src="../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../assets/themeswap.js"></script><link href="../../../assets/indigo.css" rel="stylesheet" type="text/css"/><link href="https://yaoquantum.org/assets/favicon-light.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../../index.html"><img src="../../../assets/logo.png" alt="Documentation | Yao logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../../index.html">Documentation | Yao</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../index.html">Home</a></li><li><a class="tocitem" href="../../../quick-start.html">Quick Start</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../../../man/registers.html">Quantum Registers</a></li><li><a class="tocitem" href="../../../man/blocks.html">Blocks</a></li><li><a class="tocitem" href="../../../man/symbolic.html">Symbolic Computation</a></li><li><a class="tocitem" href="../../../man/cuda.html">CUDA extension - CuYao</a></li><li><a class="tocitem" href="../../../man/plot.html">Quantum Circuit Visualization</a></li><li><a class="tocitem" href="../../../man/automatic_differentiation.html">Automatic Differentiation</a></li><li><a class="tocitem" href="../../../man/yao2einsum.html">Tensor network backend</a></li><li><a class="tocitem" href="../../../man/simplification.html">Simplification</a></li><li><a class="tocitem" href="../../../man/bitbasis.html">BitBasis</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../1.prepare-ghz-state/index.html">Prepare Greenberger–Horne–Zeilinger state with Quantum Circuit</a></li><li><a class="tocitem" href="../2.qft-phase-estimation/index.html">Quantum Fourier Transformation and Phase Estimation</a></li><li><a class="tocitem" href="../3.grover-search/index.html">Grover Search</a></li><li><a class="tocitem" href="../4.shor-algorithm/index.html">Shor&#39;s Algorithm</a></li><li><a class="tocitem" href="../5.shor-9-code/index.html">Shor&#39;s 9 qubit code</a></li><li><a class="tocitem" href="../6.quantum-circuit-born-machine/index.html">Quantum Circuit Born Machine</a></li><li class="is-active"><a class="tocitem" href="index.html">Variational Quantum Eigen Solver</a></li><li><a class="tocitem" href="../8.riemannian-gradient-flow/index.html">Riemannian gradient flow optimizer</a></li></ul></li><li><a class="tocitem" href="../../../performancetips.html">Performance Tips</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href="index.html">Variational Quantum Eigen Solver</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="index.html">Variational Quantum Eigen Solver</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/QuantumBFS/Yao.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/QuantumBFS/Yao.jl/blob/master/docs/src/examples/7.variation-quantum-eigen-solver/main.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><p><a href="/generated/examples/7.variation-quantum-eigen-solver/main.ipynb"><img src="https://mybinder.org/badge_logo.svg" alt/></a></p><h1 id="Variational-Quantum-Eigen-Solver"><a class="docs-heading-anchor" href="#Variational-Quantum-Eigen-Solver">Variational Quantum Eigen Solver</a><a id="Variational-Quantum-Eigen-Solver-1"></a><a class="docs-heading-anchor-permalink" href="#Variational-Quantum-Eigen-Solver" title="Permalink"></a></h1><pre><code class="language-julia hljs">using Yao, Yao.AD, Yao.EasyBuild</code></pre><p>number of qubits</p><pre><code class="language-julia hljs">n = 4</code></pre><pre><code class="nohighlight hljs">4</code></pre><p>depth</p><pre><code class="language-julia hljs">d = 5
+circuit = dispatch!(variational_circuit(n, d),:random)
+
+gatecount(circuit)
+
+nparameters(circuit)
+
+h = heisenberg(n)</code></pre><pre><code class="nohighlight hljs">nqubits: 4
++
+├─ +
+│  ├─ repeat on (1, 2)
+│  │  └─ X
+│  ├─ repeat on (1, 2)
+│  │  └─ Y
+│  └─ repeat on (1, 2)
+│     └─ Z
+├─ +
+│  ├─ repeat on (2, 3)
+│  │  └─ X
+│  ├─ repeat on (2, 3)
+│  │  └─ Y
+│  └─ repeat on (2, 3)
+│     └─ Z
+├─ +
+│  ├─ repeat on (3, 4)
+│  │  └─ X
+│  ├─ repeat on (3, 4)
+│  │  └─ Y
+│  └─ repeat on (3, 4)
+│     └─ Z
+└─ +
+   ├─ repeat on (1, 4)
+   │  └─ X
+   ├─ repeat on (1, 4)
+   │  └─ Y
+   └─ repeat on (1, 4)
+      └─ Z
+</code></pre><p>pick the one you like either reverse-mode or forward mode grad = faithful<em>grad(h, zero</em>state(n) =&gt; circuit; nshots=100)</p><pre><code class="language-julia hljs">for i in 1:1000
+      _, grad = expect&#39;(h, zero_state(n) =&gt; circuit)
+      dispatch!(-, circuit, 1e-2 * grad)
+      println(&quot;Step $i, energy = $(real.(expect(h, zero_state(n)=&gt;circuit)))&quot;)
+end
+
+using LinearAlgebra
+w, _ = eigen(Matrix(mat(h)))</code></pre><pre><code class="nohighlight hljs">LinearAlgebra.Eigen{ComplexF64, Float64, Matrix{ComplexF64}, Vector{Float64}}
+values:
+16-element Vector{Float64}:
+ -7.9999999999999964
+ -4.0
+ -3.9999999999999956
+ -3.999999999999994
+ -7.437659514860159e-32
+ -4.426399962566284e-32
+  0.0
+  2.7369110631344083e-48
+  2.003298162163793e-32
+  3.552713678800501e-15
+  4.440892098500626e-15
+  3.9999999999999987
+  3.9999999999999996
+  4.0
+  4.0
+  4.0
+vectors:
+16×16 Matrix{ComplexF64}:
+      0.0+0.0im          0.0+0.0im           0.0+0.0im   0.0+0.0im           0.0+0.0im          0.0+0.0im        0.0+0.0im           0.0+0.0im           0.0+0.0im           0.0+0.0im           0.0+0.0im           0.0+0.0im        0.0+0.0im  1.0+0.0im   0.0+0.0im  0.0+0.0im
+      0.0+0.0im          0.0+0.0im          -0.5+0.0im   0.0+0.0im      0.559869+0.0im      0.43191+0.0im        0.0+0.0im           0.0+0.0im           0.0+0.0im           0.0+0.0im           0.0+0.0im          -0.5+0.0im        0.0+0.0im  0.0+0.0im   0.0+0.0im  0.0+0.0im
+      0.0+0.0im          0.0+0.0im           0.5+0.0im   0.0+0.0im   2.22045e-16+0.0im          0.0+0.0im        0.0+0.0im           0.0+0.0im      0.707107+0.0im           0.0+0.0im           0.0+0.0im          -0.5+0.0im        0.0+0.0im  0.0+0.0im   0.0+0.0im  0.0+0.0im
+ 0.288675+0.0im  9.56933e-17+0.0im   6.41024e-18+0.0im   0.0+0.0im      0.481733+0.0im    -0.624453+0.0im        0.0+0.0im     -0.211325+0.0im   1.34897e-17+0.0im           0.0+0.0im     -0.288675+0.0im  -6.41024e-18+0.0im  -0.408248+0.0im  0.0+0.0im   0.0+0.0im  0.0+0.0im
+      0.0+0.0im          0.0+0.0im          -0.5+0.0im   0.0+0.0im     -0.559869+0.0im     -0.43191+0.0im        0.0+0.0im           0.0+0.0im   2.22045e-16+0.0im           0.0+0.0im           0.0+0.0im          -0.5+0.0im        0.0+0.0im  0.0+0.0im   0.0+0.0im  0.0+0.0im
+ -0.57735+0.0im     0.707107+0.0im  -1.30125e-33+0.0im   0.0+0.0im  -1.30736e-32+0.0im          0.0+0.0im        0.0+0.0im  -8.71576e-33+0.0im   3.06708e-33+0.0im           0.0+0.0im  -1.97795e-16+0.0im   1.30125e-33+0.0im  -0.408248+0.0im  0.0+0.0im   0.0+0.0im  0.0+0.0im
+ 0.288675+0.0im  9.56933e-17+0.0im  -2.39233e-17+0.0im   0.0+0.0im      -0.12908+0.0im     0.167322+0.0im        0.0+0.0im      0.788675+0.0im   2.77891e-17+0.0im           0.0+0.0im     -0.288675+0.0im   2.39233e-17+0.0im  -0.408248+0.0im  0.0+0.0im   0.0+0.0im  0.0+0.0im
+      0.0+0.0im          0.0+0.0im           0.0+0.0im  -0.5+0.0im           0.0+0.0im          0.0+0.0im   0.707107+0.0im           0.0+0.0im           0.0+0.0im  -4.71028e-16+0.0im           0.0+0.0im           0.0+0.0im        0.0+0.0im  0.0+0.0im  -0.5+0.0im  0.0+0.0im
+      0.0+0.0im          0.0+0.0im           0.5+0.0im   0.0+0.0im  -1.29477e-16+0.0im  6.29876e-17+0.0im        0.0+0.0im   6.06671e-17+0.0im     -0.707107+0.0im           0.0+0.0im           0.0+0.0im          -0.5+0.0im        0.0+0.0im  0.0+0.0im   0.0+0.0im  0.0+0.0im
+ 0.288675+0.0im  9.56933e-17+0.0im   1.75131e-17+0.0im   0.0+0.0im     -0.352653+0.0im     0.457131+0.0im        0.0+0.0im      -0.57735+0.0im  -4.12788e-17+0.0im           0.0+0.0im     -0.288675+0.0im  -1.75131e-17+0.0im  -0.408248+0.0im  0.0+0.0im   0.0+0.0im  0.0+0.0im
+ -0.57735+0.0im    -0.707107+0.0im   1.30125e-33+0.0im   0.0+0.0im   1.30736e-32+0.0im          0.0+0.0im        0.0+0.0im   8.71576e-33+0.0im  -3.06708e-33+0.0im           0.0+0.0im  -3.14995e-16+0.0im  -1.30125e-33+0.0im  -0.408248+0.0im  0.0+0.0im   0.0+0.0im  0.0+0.0im
+      0.0+0.0im          0.0+0.0im           0.0+0.0im   0.5+0.0im           0.0+0.0im          0.0+0.0im        0.0+0.0im           0.0+0.0im           0.0+0.0im     -0.707107+0.0im           0.0+0.0im           0.0+0.0im        0.0+0.0im  0.0+0.0im  -0.5+0.0im  0.0+0.0im
+ 0.288675+0.0im          0.0+0.0im           0.0+0.0im   0.0+0.0im           0.0+0.0im          0.0+0.0im        0.0+0.0im           0.0+0.0im           0.0+0.0im           0.0+0.0im      0.866025+0.0im           0.0+0.0im  -0.408248+0.0im  0.0+0.0im   0.0+0.0im  0.0+0.0im
+      0.0+0.0im          0.0+0.0im           0.0+0.0im  -0.5+0.0im           0.0+0.0im          0.0+0.0im  -0.707107+0.0im           0.0+0.0im           0.0+0.0im  -4.71028e-16+0.0im           0.0+0.0im           0.0+0.0im        0.0+0.0im  0.0+0.0im  -0.5+0.0im  0.0+0.0im
+      0.0+0.0im          0.0+0.0im           0.0+0.0im   0.5+0.0im           0.0+0.0im          0.0+0.0im        0.0+0.0im           0.0+0.0im           0.0+0.0im      0.707107+0.0im           0.0+0.0im           0.0+0.0im        0.0+0.0im  0.0+0.0im  -0.5-0.0im  0.0+0.0im
+      0.0+0.0im          0.0+0.0im           0.0+0.0im   0.0+0.0im           0.0+0.0im          0.0+0.0im        0.0+0.0im           0.0+0.0im           0.0+0.0im           0.0+0.0im           0.0+0.0im           0.0+0.0im        0.0+0.0im  0.0+0.0im   0.0+0.0im  1.0+0.0im</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../6.quantum-circuit-born-machine/index.html">« Quantum Circuit Born Machine</a><a class="docs-footer-nextpage" href="../8.riemannian-gradient-flow/index.html">Riemannian gradient flow optimizer »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Friday 3 May 2024 00:20">Friday 3 May 2024</span>. Using Julia version 1.10.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
