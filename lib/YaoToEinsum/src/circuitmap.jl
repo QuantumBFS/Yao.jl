@@ -138,7 +138,7 @@ The return value is a [`TensorNetwork`](@ref) instance.
 
 ### Arguments
 * `circuit` is a Yao block as the input.
-* `initial_state` and `final_state` are dictionaries to specify the initial state and final state as product states.
+* `initial_state` and `final_state` are dictionaries to specify the initial states and final states (taking conjugate).
     - In the first interface, a state is specified as an integer, e.g. `Dict(1=>1, 2=>1, 3=>0, 4=>1)` specifies a product state `|1⟩⊗|1⟩⊗|0⟩⊗|1⟩`.
     - In the second interface, a state is specified as an `ArrayReg`, e.g. `Dict(1=>rand_state(1), 2=>rand_state(1))`.
 If any qubit in initial state or final state is not specified, it will be treated as a free leg in the tensor network.
@@ -169,8 +169,8 @@ Read-write complexity: 2^6.0
 """
 function yao2einsum(circuit::AbstractBlock{D}; initial_state::Dict=Dict{Int,Int}(), final_state::Dict=Dict{Int,Int}(), optimizer=TreeSA()) where {D}
     T = promote_type(ComplexF64, dict_regtype(initial_state), dict_regtype(final_state), YaoBlocks.parameters_eltype(circuit))
-    vec_initial_state = Dict{Int,ArrayReg{D,T}}([k=>render_single_qubit_state(T, v) for (k, v) in initial_state])
-    vec_final_state = Dict{Int,ArrayReg{D,T}}([k=>render_single_qubit_state(T, v) for (k, v) in final_state])
+    vec_initial_state = Dict{keytype(initial_state),ArrayReg{D,T}}([k=>render_single_qubit_state(T, v) for (k, v) in initial_state])
+    vec_final_state = Dict{keytype(final_state),ArrayReg{D,T}}([k=>render_single_qubit_state(T, v) for (k, v) in final_state])
     yao2einsum(circuit, vec_initial_state, vec_final_state, optimizer)
 end
 dict_regtype(d::Dict) = promote_type(_regtype.(values(d))...)
@@ -180,27 +180,33 @@ render_single_qubit_state(::Type{T}, x::Int) where T = x == 0 ? zero_state(T, 1)
 render_single_qubit_state(::Type{T}, x::ArrayReg) where T = ArrayReg(collect(T, statevec(x)))
 
 function yao2einsum(circuit::AbstractBlock{D}, initial_state::Dict{Int,<:ArrayReg{D,T}}, final_state::Dict{Int,<:ArrayReg{D,T}}, optimizer) where {D,T}
+    v_initial_state = Dict{Vector{Int}, ArrayReg{D,T}}([[k]=>v for (k, v) in initial_state])
+    v_final_state = Dict{Vector{Int}, ArrayReg{D, T}}([[k]=>v for (k, v) in final_state])
+    yao2einsum(circuit, v_initial_state, v_final_state, optimizer)
+end
+function yao2einsum(circuit::AbstractBlock{D}, initial_state::Dict{Vector{Int},<:ArrayReg{D,T}}, final_state::Dict{Vector{Int},<:ArrayReg{D,T}}, optimizer) where {D,T}
     n = nqubits(circuit)
     eb = EinBuilder(T, n)
-    openindices = Int[]
-    for k=1:n
-        if haskey(initial_state, k)
-            add_tensor!(eb, statevec(initial_state[k]), [eb.slots[k]])
-        else
-            push!(openindices, eb.slots[k])
-        end
-    end
+    openindices = add_states!(eb, initial_state)
     add_gate!(eb, circuit)
-    openindices2 = Int[]
-    for k=1:n
-        if haskey(final_state, k)
-            add_tensor!(eb, statevec(final_state[k]), [eb.slots[k]])
-        else
-            push!(openindices2, eb.slots[k])
-        end
-    end
+    openindices2 = add_states!(eb, final_state; conjugate=true)
     network = build_einsum(eb, vcat(openindices2, openindices))
     return optimizer === nothing ? network : optimize_code(network, optimizer, MergeVectors())
+end
+function check_state_spec(state::Dict{Vector{Int},<:ArrayReg{D,T}}, n::Int) where {D,T}
+    iks = collect(Int, vcat(keys(state)...))
+    @assert length(unique(iks)) == length(iks) "state qubit indices must be unique"
+    @assert all(1 .<= iks .<= n) "state qubit indices must be in the range 1 to $n"
+    return iks
+end
+function add_states!(eb::EinBuilder{T}, states::Dict; conjugate=false) where {T}
+    n = nqubits(eb)
+    unique_indices = check_state_spec(states, n)
+    openindices = eb.slots[setdiff(1:n, unique_indices)]
+    for (k, state) in states
+        add_tensor!(eb, (conjugate ? conj : identity).(dropdims(hypercubic(state); dims=length(k)+1)), eb.slots[k])
+    end
+    return openindices
 end
 
 function build_einsum(eb::EinBuilder, openindices)
