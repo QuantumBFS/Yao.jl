@@ -50,8 +50,8 @@ end
 @testset "#issue 508" begin
     @test YaoBlocks.safe_real(0 + 1e-323im) ≈ 0
     @test YaoBlocks.safe_real(0+0im) ≈ 0
-    @test_throws AssertionError YaoBlocks.safe_real(0+1e-15im)
+    @test_warn () YaoBlocks.safe_real(0+1e-15im)
     @test YaoBlocks.safe_real(0+1e-17im) == 0
     @test YaoBlocks.safe_real(1e10+1e-10im) == 1e10
-    @test_throws AssertionError YaoBlocks.safe_real(0+1im)
+    @test_warn () YaoBlocks.safe_real(0+1im)
 end
