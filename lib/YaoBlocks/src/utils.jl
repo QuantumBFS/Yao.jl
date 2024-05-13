@@ -316,7 +316,7 @@ Base.vec(et::EntryTable) = Vector(et)
 function safe_real(x::Complex{T}) where T
     img = imag(x)
     if !iszero(img) && !(hasmethod(eps, Tuple{Type{T}}) && isapprox(x - im*img, x; rtol=10*eps(T), atol=10*eps(T)))
-        @warn "Fail to convert number $x to real due to the nonzero imaginary part: $img."
+        @warn "Convert number $x to real is unsafe due to the nonzero imaginary part: $img."
     end
     return real(x)
 end
