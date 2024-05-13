@@ -1,4 +1,4 @@
-export postwalk, prewalk, blockfilter!, blockfilter, collect_blocks, gatecount
+export postwalk, prewalk, blockfilter!, blockfilter, collect_blocks, gatecount, circuit_depth
 
 """
     parse_block(n, ex)
@@ -110,7 +110,7 @@ function expect(op::AbstractBlock, dm::DensityMatrix)
 end
 function expect(op::AbstractAdd, reg::DensityMatrix)
     # NOTE: this is faster in e.g. when the op is Heisenberg
-    invoke(expect, Tuple{AbstractBlock, DensityMatrix}, op, reg)
+    invoke(expect, Tuple{AbstractBlock,DensityMatrix}, op, reg)
 end
 function expect(op::Scale, reg::DensityMatrix)
     factor(op) * expect(content(op), reg)
@@ -148,7 +148,7 @@ end
 function conjsumprod1(A::AbstractArray, C::AbstractArray)
     Na, B = size(A)
     res = zeros(eltype(C), B)
-    @inbounds for b=1:B, i=1:Na
+    @inbounds for b = 1:B, i = 1:Na
         res[b] += conj(A[i, b]) * C[i, b]
     end
     res
@@ -158,7 +158,7 @@ end
 function conjsumprod2(A::AbstractArray, C::AbstractArray)
     B, Na = size(A)
     res = zeros(eltype(C), B)
-    @inbounds for i=1:Na, b=1:B
+    @inbounds for i = 1:Na, b = 1:B
         res[b] += conj(A[b, i]) * C[b, i]
     end
     res
@@ -168,7 +168,7 @@ end
 function conjsumprod13(A::AbstractArray, C::AbstractArray)
     Nr, B, Na = size(A)
     res = zeros(eltype(C), B)
-    @inbounds for i=1:Na, b=1:B, r=1:size(C, 1)
+    @inbounds for i = 1:Na, b = 1:B, r = 1:size(C, 1)
         res[b] += conj(A[r, b, i]) * C[r, b, i]
     end
     res
@@ -222,7 +222,7 @@ function gatecount!(c::RepeatedBlock, storage::AbstractDict)
 end
 
 # NOTE: static scale defines a gate, dynamic scale is parameter.
-function gatecount!(c::Scale{S}, storage::AbstractDict) where S
+function gatecount!(c::Scale{S}, storage::AbstractDict) where {S}
     if S <: Val
         k = typeof(c)
         storage[k] = get(storage, k, 0) + 1
@@ -237,4 +237,28 @@ function gatecount!(c::AbstractBlock, storage::AbstractDict)
     k = typeof(c)
     storage[k] = get(storage, k, 0) + 1
     storage
+end
+
+"""
+    circuit_depth(c::ChainBlock, count_measure::Bool=true) -> Int64
+
+The depth of a circuit is a metric that calculates the longest path between the data input and the output. 
+Each Block counts as taking the same depth (1 unit).
+
+If `count_measure` is true, `Measure` blocks are also counted.
+"""
+# TODO: define a TimedBlock that wraps around other blocks, and adds that much time to `currdepth`
+
+function circuit_depth(c::ChainBlock; count_measure::Bool=true)
+    deptharr = fill(0, c.n)
+    touches = collect ∘ occupied_locs
+    for g in c
+        if !count_measure && g isa Measure
+            continue
+        end
+        r = touches(g)
+        currdepth = maximum(getindex.(Ref(deptharr), r))
+        deptharr[r] .= currdepth + 1
+    end
+    return maximum(deptharr)
 end
