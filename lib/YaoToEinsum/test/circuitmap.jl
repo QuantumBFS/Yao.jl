@@ -320,7 +320,7 @@ end
         freg = join(YaoToEinsum.render_single_qubit_state(ComplexF64, final_state[3]), YaoToEinsum.render_single_qubit_state(ComplexF64, final_state[2]))
         net = yao2einsum(c; initial_state=initial_state, final_state=final_state, optimizer=TreeSA(nslices=3))
         println(net)
-        @test vec(contract(net)) ≈ vec(transpose(statevec(freg)) * state(reg))
+        @test vec(contract(net)) ≈ vec(statevec(freg)' * state(reg))
     end
 end
 
@@ -335,5 +335,16 @@ end
 @testset "fix to basic type" begin
     c = chain(kron(X,X))
     @test (yao2einsum(c) |> first) isa OMEinsum.SlicedEinsum
+end
+
+@testset "multiple qubit states" begin
+    n = 4
+    reg1 = rand_state(2)
+    reg2 = rand_state(2)
+    reg3 = rand_state(1)
+    reg4 = rand_state(3)
+    c = chain(4)
+    code, xs = yao2einsum(c; initial_state=Dict([1, 2]=>reg1, [3, 4]=>reg2), final_state=Dict([1]=>reg3, [2,3,4]=>reg4))
+    @test code(xs...; size_info=uniformsize(code, 2))[] ≈ join(reg4, reg3)' * join(reg2, reg1)
 end
 end
