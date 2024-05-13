@@ -313,10 +313,9 @@ SparseArrays.sparse(et::EntryTable) = SparseVector(et)
 Base.vec(et::EntryTable) = Vector(et)
 
 # convert a (maybe complex) number x to real number.
-function safe_real(x)
+function safe_real(x::Complex{T}) where T
     img = imag(x)
-    if !(iszero(img) || isapprox(x - im*img, x; atol=1e-15))
-        error("Can not convert number $x to real due to its large imaginary part.")
-    end
+    @assert iszero(img) || (hasmethod(eps, Tuple{Type{T}}) && isapprox(x - im*img, x; rtol=eps(T), atol=eps(T))) "Fail to convert number $x to real due to the nonzero imaginary part: $img."
     return real(x)
 end
+safe_real(x) = x

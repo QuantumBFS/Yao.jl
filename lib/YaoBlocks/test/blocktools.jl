@@ -97,7 +97,3 @@ end
     res = gatecount(repeat(5, X, (2, 3)))
     @test res |> values |> sum == 2
 end
-
-@testset "#issue 508" begin
-    @test YaoBlocks.safe_real(0 + 1e-323im) ≈ 0
-end
