@@ -364,7 +364,7 @@ end
 
 fidelity for pure states.
 """
-pure_state_fidelity(v1::Vector, v2::Vector) = abs(v1' * v2)
+pure_state_fidelity(v1::AbstractVector, v2::AbstractVector) = abs(v1' * v2)
 
 """
     purification_fidelity(m1::Matrix, m2::Matrix)
