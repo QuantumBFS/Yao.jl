@@ -1,10 +1,10 @@
 using YaoSym, YaoBlocks, YaoArrayRegister, SymEngine
-using YaoSym: simplify_expi
+using YaoSym: simplify_expi, BasicType
 using SymEngine
 using Test
 
 @testset "imag and conj" begin
-    @vars a b c x
+    @vars a b c d x
     @test imag(Basic(2 + im * a)) == a
     @test imag(Basic((2 + im) * (im * a + 1))) == 2 * a + 1
     @test real(sin(a)) == sin(a)
@@ -14,8 +14,9 @@ using Test
     @test real(exp(im * a)) == cos(a)
     @test imag(exp(im * a)) == sin(a)
     @test abs(exp(im * a)) == 1
-    @test abs(sin(a)) == sin(a)
-    @test abs(sin(a) + 2) == sin(a) + 2
+    @test BasicType(imag(cos(im * a + b))) isa BasicType{Val{:FunctionSymbol}}
+    @test BasicType(real((im*c + d)^(im * a + b))) isa BasicType{Val{:FunctionSymbol}}
+    @test BasicType(real(sin(im * a + b))) isa BasicType{Val{:FunctionSymbol}}
 end
 
 @testset "mat" begin
@@ -123,4 +124,13 @@ end
     @test test_check_dumpload(shift(θ))
     @test test_check_dumpload(time_evolve(X, θ))
     @test test_check_dumpload(rot(X, θ))
+end
+
+@testset "angle" begin
+    @vars x
+    @test_broken Float64(angle(Basic(1 + im))) ≈ π / 4
+    @test angle(x) == Basic(0)
+    @test BasicType(angle((1+x)^x)) isa BasicType{Val{:FunctionSymbol}}
+    @test angle(Basic(1)) == Basic(0)
+    @test angle(exp(Basic(1))) == Basic(0)
 end

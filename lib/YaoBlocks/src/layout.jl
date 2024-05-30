@@ -77,7 +77,7 @@ Print the block tree.
 # Keywords
 
 - `maxdepth`: max tree depth to print
-- `charset`: default is ('├','└','│','─'). See also [`BlockTreeCharSet`](@ref).
+- `charset`: default is ('├','└','│','─'). See also `YaoBlocks.BlockTreeCharSet`.
 - `title`: control whether to print the title, `true` or `false`, default is `true`
 """
 function print_tree(

@@ -50,6 +50,7 @@ function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T},
     for (locs, block) in zip(k.locs, k.blocks)
         YaoAPI.unsafe_apply!(r, put(k.n, locs => block))
     end
+    return r
 end
 
 function mat(::Type{T}, x::UnitaryChannel) where {T}

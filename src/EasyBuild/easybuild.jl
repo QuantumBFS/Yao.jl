@@ -1,6 +1,7 @@
 module EasyBuild
 using YaoBlocks, YaoBlocks.LuxurySparse, YaoBlocks.YaoAPI, YaoBlocks.YaoArrayRegister
 using YaoBlocks.LinearAlgebra
+import YaoPlots
 using YaoArrayRegister: sparse
 
 include("block_extension/blocks.jl")

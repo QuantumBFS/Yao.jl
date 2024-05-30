@@ -1,6 +1,6 @@
 name = "Yao"
 uuid = "5872b779-8223-5990-8dd0-5abbb0748c8c"
-version = "0.8.8"
+version = "0.9.0"
 
 [deps]
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
@@ -10,16 +10,28 @@ Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 YaoAPI = "0843a435-28de-4971-9e8b-a9641b2983a8"
 YaoArrayRegister = "e600142f-9330-5003-8abb-0ebd767abc51"
 YaoBlocks = "418bc28f-b43b-5e0b-a6e7-61bbc1a2c1df"
+YaoPlots = "32cfe2d9-419e-45f2-8191-2267705d8dbc"
 YaoSym = "3b27209a-d3d6-11e9-3c0f-41eb92b2cb9d"
+YaoToEinsum = "9b173c7b-dc24-4dc5-a0e1-adab2f7b6ba9"
+
+[weakdeps]
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+
+[extensions]
+CuYao = "CUDA"
 
 [compat]
-BitBasis = "0.8"
+BitBasis = "0.8, 0.9"
+CUDA = "4, 5"
+LinearAlgebra = "1"
 LuxurySparse = "0.7"
 Reexport = "1"
 YaoAPI = "0.4"
 YaoArrayRegister = "0.9"
 YaoBlocks = "0.13"
+YaoPlots = "0.9"
 YaoSym = "0.6"
+YaoToEinsum = "0.2"
 julia = "1"
 
 [extras]

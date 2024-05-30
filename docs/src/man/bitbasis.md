@@ -1,4 +1,5 @@
 ```@meta
+CurrentModule = BitBasis
 DocTestSetup = quote
     using Yao
     using Yao: YaoBlocks, YaoArrayRegister

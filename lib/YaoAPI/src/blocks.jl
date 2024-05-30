@@ -3,7 +3,7 @@ export AbstractBlock, PrimitiveBlock, CompositeBlock, AbstractContainer, TagBloc
 const COMMON_OPTIONAL_METHODS = """
 - [`nlevel`](@ref).
 - [`getiparams`](@ref).
-- [`setiparams`](@ref).
+- [`setiparams!`](@ref).
 - [`parameters`](@ref).
 - [`nparameters`](@ref).
 - [`iparams_eltype`](@ref).
@@ -63,7 +63,7 @@ block can be decomposed into several primitive blocks.
 
 - [`nlevel`](@ref).
 - [`getiparams`](@ref).
-- [`setiparams`](@ref).
+- [`setiparams!`](@ref).
 - [`parameters`](@ref).
 - [`nparameters`](@ref).
 - [`iparams_eltype`](@ref).
@@ -94,7 +94,7 @@ as well.
 
 - [`nlevel`](@ref).
 - [`getiparams`](@ref).
-- [`setiparams`](@ref).
+- [`setiparams!`](@ref).
 - [`parameters`](@ref).
 - [`nparameters`](@ref).
 - [`iparams_eltype`](@ref).
@@ -521,7 +521,7 @@ chain
 
 
 julia> expect(op, r)
-0.7071067811865474 + 0.0im
+0.7071067811865474
 ```
 """
 @interface expect

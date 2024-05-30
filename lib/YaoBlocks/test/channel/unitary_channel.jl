@@ -50,3 +50,13 @@ end
     channel2 = put(6, (2,3)=>ops)
     @test apply(r, channel1) ≈ apply(r, channel2)
 end
+
+@testset "kron and repeat" begin
+    dm = density_matrix(ghz_state(5), 1:3)
+    dpolarizing = single_qubit_depolarizing_channel(0.1)
+    dmkron = apply(dm, kron(3, 1=>dpolarizing, 2=>dpolarizing))
+    dmrepeat = apply(dm, repeat(3, dpolarizing, (1, 2)))
+    dmput = apply(apply(dm, put(3, 1=>dpolarizing)), put(3, 2=>dpolarizing))
+    @test dmkron ≈ dmrepeat
+    @test dmkron ≈ dmput
+end

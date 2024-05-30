@@ -27,7 +27,7 @@ pg = gaussian_pdf(1:1<<6, 1<<5-0.5, 1<<4);
 
 # We can plot the distribution, it looks like
 
-plot(pg)
+Plots.plot(pg)
 
 # ## Create the Circuit
 
@@ -225,12 +225,12 @@ trained_pg = probs(zero_state(nqubits(qcbm)) |> qcbm)
 
 title!("training history")
 xlabel!("steps"); ylabel!("loss")
-plot(history)
+Plots.plot(history)
 
 # And let's check what we got
 
-fig2 = plot(1:1<<6, trained_pg; label="trained")
-plot!(fig2, 1:1<<6, pg; label="target")
+fig2 = Plots.plot(1:1<<6, trained_pg; label="trained")
+Plots.plot!(fig2, 1:1<<6, pg; label="target")
 title!("distribution")
 xlabel!("x"); ylabel!("p")
 

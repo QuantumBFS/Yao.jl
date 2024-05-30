@@ -32,8 +32,8 @@ end
     U = put(nbit, 2=>Rx(0.2))
     reg = rand_state(nbit)
 
-    @test hadamard_test(U, reg, 0.0) ≈ real(expect(U, reg))
-    @test hadamard_test(U, reg, -π/2) ≈ imag(expect(U, reg))
+    @test hadamard_test(U, reg, 0.0) ≈ real(sandwich(reg, U, reg))
+    @test hadamard_test(U, reg, -π/2) ≈ imag(sandwich(reg, U, reg))
 
     reg = zero_state(2) |> EasyBuild.singlet_block()
     @test single_swap_test(reg, 0) ≈ -1

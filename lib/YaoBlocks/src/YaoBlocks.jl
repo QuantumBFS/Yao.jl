@@ -14,7 +14,8 @@ using StatsBase, TupleTools, InteractiveUtils
 using MLStyle: @match
 using LinearAlgebra: eigen!
 using SparseArrays, LuxurySparse
-using ExponentialUtilities, Random, CacheServers
+using Random, CacheServers
+import KrylovKit: exponentiate
 using DocStringExtensions
 import StaticArrays: SMatrix
 
@@ -50,7 +51,9 @@ import YaoAPI:
     subblocks,
     nparameters,
     measure!,
-    measure
+    measure,
+    apply_back!,
+    mat_back!
 
 export AbstractBlock,
     AbstractContainer,
@@ -69,6 +72,7 @@ export AbstractBlock,
     content,
     dispatch!,
     dispatch,
+    sandwich,
     expect,
     getiparams,
     iparams_eltype,

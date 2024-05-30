@@ -77,7 +77,7 @@ end
 YaoAPI.density_matrix(reg::ArrayReg{D}) where D = DensityMatrix{D}(reg.state * reg.state')
 YaoAPI.density_matrix(rho::DensityMatrix) = copy(rho)
 
-YaoAPI.tracedist(dm1::DensityMatrix{D}, dm2::DensityMatrix{D}) where {D} = trace_norm(dm1.state .- dm2.state)
+YaoAPI.tracedist(dm1::DensityMatrix{D}, dm2::DensityMatrix{D}) where {D} = trace_norm(dm1.state .- dm2.state) / 2.0
 
 """
     is_density_matrix(dm::AbstractMatrix; kw...)
@@ -106,7 +106,7 @@ end
 function YaoAPI.purify(r::DensityMatrix{D}; num_env::Int = nactive(r)) where {D}
     Ne = D ^ num_env
     Ns = size(r.state, 1)
-    R, U = eigen!(r.state)
+    R, U = eigen(r.state)
     state = view(U, :, Ns-Ne+1:Ns) .* sqrt.(abs.(view(R, Ns-Ne+1:Ns)'))
     return ArrayReg{D}(state)
 end

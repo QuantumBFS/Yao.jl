@@ -1,5 +1,16 @@
 export ControlBlock, control, cnot, cz
 
+"""
+    $(TYPEDSIGNATURES)
+
+A control block is a composite block that applies a block when the control qubits are all ones.
+
+!!! note
+    If control qubit index is negative, it means the inverse control, i.e., the block is applied when the control qubit is zero.
+
+### Fields
+$(TYPEDFIELDS)
+"""
 struct ControlBlock{BT<:AbstractBlock,C,M} <: AbstractContainer{BT,2}
     n::Int
     ctrl_locs::NTuple{C,Int}

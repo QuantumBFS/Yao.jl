@@ -218,7 +218,7 @@ Base.length(k::KronBlock) = length(k.blocks)
 Base.eachindex(k::KronBlock) = k.locs
 
 function Base.:(==)(lhs::KronBlock, rhs::KronBlock)
-    return nqudits(lhs) == nqudits(rhs) && all(lhs.locs .== rhs.locs) && all(lhs.blocks .== rhs.blocks)
+    return nqudits(lhs) == nqudits(rhs) && length(lhs.locs) == length(rhs.locs) && all(lhs.locs .== rhs.locs) && all(lhs.blocks .== rhs.blocks)
 end
 
 Base.adjoint(blk::KronBlock) = KronBlock(blk.n, blk.locs, map(adjoint, blk.blocks))
