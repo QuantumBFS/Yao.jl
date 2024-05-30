@@ -10,7 +10,7 @@ Yao = "5872b779-8223-5990-8dd0-5abbb0748c8c"
 CUDA = "4, 5"
 Reexport = "0.2, 1"
 TupleTools = "1"
-Yao = "0.8"
+Yao = "0.8,0.9"
 YaoBlocks = "0.13.10"
 julia = "1"
 

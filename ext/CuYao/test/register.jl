@@ -137,3 +137,9 @@ end
     end
 end
 
+@testset "fidelity" begin
+    reg1, reg2 = rand_state(3), rand_state(3)
+    cureg1, cureg2 = reg1 |> cu, reg2 |> cu
+
+    @test fidelity(reg1, reg2) ≈ fidelity(cureg1, cureg2)
+end
