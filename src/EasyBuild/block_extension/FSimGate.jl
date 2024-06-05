@@ -52,4 +52,4 @@ function fsim_block(θ::Real, ϕ::Real)
     end
 end
 
-YaoPlots.get_brush_texts(c, b::FSimGate) = (c.gatestyles.g, "FSim($(pretty_angle(b.theta)), $(pretty_angle(b.phi)))")
+YaoPlots.get_brush_texts(c, b::FSimGate) = (c.gatestyles.g, "FSim($(YaoPlots.pretty_angle(b.theta)), $(YaoPlots.pretty_angle(b.phi)))")
