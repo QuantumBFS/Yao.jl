@@ -125,7 +125,7 @@ function measure!(rst::ResetTo, ::ComputationalBasis, reg::AbstractCuArrayReg{D,
         @inbounds k,i,j = CI[state].I
         @inbounds rind = Int(res[j]) + 1
         @inbounds k==val+1 && (regm[k,i,j] = regm[rind,i,j]/CUDA.sqrt(pl[rind, j]))
-        CUDA.sync_threads()
+	CUDA.device_synchronize()
         @inbounds k!=val+1 && (regm[k,i,j] = 0)
         return
     end
