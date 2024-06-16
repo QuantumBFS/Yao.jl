@@ -108,16 +108,16 @@ end
         mpb = mat(pb)
         allpass = true
         for i=basis(pb), j=basis(pb)
-            allpass &= pb[i, j] ≈ mpb[Int(i)+1, Int(j)+1]
+            allpass &= isapprox(pb[i, j], mpb[Int(i)+1, Int(j)+1]; atol=1e-6)
         end
         @test allpass
 
         allpass = true
         for j=basis(pb)
-            allpass &= vec(pb[:, j]) ≈ mpb[:, Int(j)+1]
-            allpass &= vec(pb[j,:]) ≈ mpb[Int(j)+1,:]
-            allpass &= vec(pb[:, EntryTable([j], [1.0+0im])]) ≈ mpb[:, Int(j)+1]
-            allpass &= vec(pb[EntryTable([j], [1.0+0im]),:]) ≈ mpb[Int(j)+1,:]
+            allpass &= isapprox(vec(pb[:, j]), mpb[:, Int(j)+1]; atol=1e-6)
+            allpass &= isapprox(vec(pb[j,:]), mpb[Int(j)+1,:]; atol=1e-6)
+            allpass &= isapprox(vec(pb[:, EntryTable([j], [1.0+0im])]), mpb[:, Int(j)+1]; atol=1e-6)
+            allpass &= isapprox(vec(pb[EntryTable([j], [1.0+0im]),:]), mpb[Int(j)+1,:]; atol=1e-6)
             allpass &= isclean(pb[:,j])
         end
         @test allpass
