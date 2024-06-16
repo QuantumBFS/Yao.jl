@@ -9,7 +9,7 @@ using Luxor
     c = YaoPlots.CircuitGrid(1)
 	@test YaoPlots.get_brush_texts(c, X)[2] == "X"
 	@test YaoPlots.get_brush_texts(c, Rx(0.5))[2] == "Rx(0.5)"
-	@test YaoPlots.get_brush_texts(c, shift(0.5))[2] == "ϕ(0.5)"
+	@test YaoPlots.get_brush_texts(c, shift(0.5))[2] == "φ(0.5)"
 	@test YaoPlots.get_brush_texts(c, YaoBlocks.phase(0.5))[2] == ""
 end
 
