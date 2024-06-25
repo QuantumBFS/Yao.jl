@@ -9,11 +9,12 @@ A marker to mark a circuit applying on a continous block for better plotting.
 struct LabelBlock{BT<:AbstractBlock,D} <: TagBlock{BT,D}
     content::BT
     name::String
+    color::String
 end
 
 YaoBlocks.content(cb::LabelBlock) = cb.content
-function LabelBlock(x::BT, name::String) where {D,BT<:AbstractBlock{D}}
-    LabelBlock{BT,D}(x, name)
+function LabelBlock(x::BT, name::String, color::String) where {D,BT<:AbstractBlock{D}}
+    LabelBlock{BT,D}(x, name, color)
 end
 
 function is_continuous_chunk(x)
@@ -31,7 +32,7 @@ Base.copy(x::LabelBlock) = LabelBlock(copy(content(x)), x.name)
 YaoBlocks.Optimise.to_basictypes(block::LabelBlock) = block
 
 export addlabel
-addlabel(b::AbstractBlock, str::String) = LabelBlock(b, str)
+addlabel(b::AbstractBlock; name=string(b), color="transparent") = LabelBlock(b, name, color)
 
 # to fix issue 
 function YaoBlocks.print_tree(

@@ -360,12 +360,18 @@ function draw!(c::CircuitGrid, cb::ControlBlock{GT,C}, address, controls) where 
     draw!(c, cb.content, locs, [controls..., mycontrols...])
 end
 
-for B in [:LabelBlock, :GeneralMatrixBlock, :Add]
+for B in [:GeneralMatrixBlock, :Add]
     @eval function draw!(c::CircuitGrid, cb::$B, address, controls)
         length(address) == 0 && return
-        #is_continuous_chunk(address) || error("address not continuous in a block marked as continous.")
         _draw!(c, [controls..., (address, c.gatestyles.g, string(cb))])
     end
+end
+
+function draw!(c::CircuitGrid, cb::LabelBlock, address, controls)
+    length(address) == 0 && return
+    CircuitStyles.gate_bgcolor[], temp = cb.color, CircuitStyles.gate_bgcolor[]
+    _draw!(c, [controls..., (address, c.gatestyles.g, string(cb))])
+    CircuitStyles.gate_bgcolor[] = temp
 end
 
 # [:KronBlock, :RepeatedBlock, :CachedBlock, :Subroutine, :(YaoBlocks.AD.NoParams)]
