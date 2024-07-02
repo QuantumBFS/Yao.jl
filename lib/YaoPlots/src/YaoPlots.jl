@@ -4,9 +4,7 @@ using YaoBlocks
 using YaoBlocks.DocStringExtensions
 using YaoArrayRegister
 import Luxor
-import Thebes
 using Luxor: @layer, Point
-using Thebes: Point3D, project
 using LinearAlgebra: tr
 using YaoBlocks
 
@@ -21,6 +19,8 @@ plot(blk::AbstractBlock; kwargs...) = vizcircuit(blk; kwargs...)
 
 include("helperblock.jl")
 include("vizcircuit.jl")
+include("3d.jl")
+using .Thebes: Point3D, project
 include("bloch.jl")
 
 end
