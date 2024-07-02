@@ -374,6 +374,18 @@ function draw!(c::CircuitGrid, cb::LabelBlock, address, controls)
     CircuitStyles.gate_bgcolor[] = temp
 end
 
+function draw!(c::CircuitGrid, cb::LineAnnotation, address, controls)
+    @assert length(address) == 1 && isempty(controls) "LineAnnotation should be a single line, without control."
+    CircuitStyles.textcolor[], temp = cb.color, CircuitStyles.textcolor[]
+    _annotate!(c, address[1], cb.name)
+    CircuitStyles.textcolor[] = temp
+end
+function _annotate!(c::CircuitGrid, loc::Integer, name::AbstractString)
+    wspace, fontsize = text_width_and_size(name)
+    i = frontier(c, loc) + 0.1
+    CircuitStyles.render(CircuitStyles.Text(fontsize), (c[i, loc-0.2], name, wspace, fontsize))
+end
+
 # [:KronBlock, :RepeatedBlock, :CachedBlock, :Subroutine, :(YaoBlocks.AD.NoParams)]
 function draw!(c::CircuitGrid, p::CompositeBlock, address, controls)
     barrier_style = CircuitStyles.barrier_for_chain[]
