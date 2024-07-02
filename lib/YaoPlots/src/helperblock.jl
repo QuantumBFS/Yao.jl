@@ -1,6 +1,3 @@
-using YaoBlocks
-export LabelBlock
-
 """
     LabelBlock{BT,D} <: TagBlock{BT,D}
 
@@ -31,7 +28,6 @@ Base.adjoint(x::LabelBlock) = LabelBlock(adjoint(content(x)), endswith(x.name, "
 Base.copy(x::LabelBlock) = LabelBlock(copy(content(x)), x.name, x.color)
 YaoBlocks.Optimise.to_basictypes(block::LabelBlock) = block
 
-export addlabel
 addlabel(b::AbstractBlock; name=string(b), color="transparent") = LabelBlock(b, name, color)
 
 # to fix issue 
@@ -49,3 +45,17 @@ function YaoBlocks.print_tree(
 )
    print(io, node.name)
 end
+
+"""
+    LineAnnotation{D} <: TrivialGate{D}
+"""
+struct LineAnnotation{D} <: TrivialGate{D}
+    name::String
+    color::String
+end
+line_annotation(name::String; color="black", nlevel=2) = LineAnnotation{nlevel}(name, color)
+
+Base.copy(x::LineAnnotation) = LineAnnotation(x.name, x.color)
+YaoBlocks.Optimise.to_basictypes(block::LineAnnotation) = block
+YaoBlocks.nqudits(::LineAnnotation) = 1
+YaoBlocks.print_block(io::IO, blk::LineAnnotation) = YaoBlocks.printstyled(io, blk.name; color=Symbol(blk.color))

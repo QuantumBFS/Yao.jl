@@ -140,7 +140,7 @@ We also have some "cheating" version [`measure`](@ref) that does not collapse st
 ```@repl register
 measure!(reg0, 1)  # measure the qubit, the state collapses
 measure!(reg0)  # measure all qubits
-measure(reg0, 3)  # measure the qubit 3 times, the state does not collapse (hacky)
+measure(reg0, 3)  # measure the qubit at location 3, the state does not collapse (hacky)
 reorder!(reg0, 7:-1:1)  # reorder the qubits
 measure!(reg0)
 invorder!(reg0)  # reverse the order of qubits

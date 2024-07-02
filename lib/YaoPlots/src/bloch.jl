@@ -37,7 +37,7 @@ module BlochStyles
     # generic config
     const lw = Ref(1.0)
     const textsize = Ref(16.0)
-    const fontfamily = Ref("monospace")
+    const fontfamily = Ref("JuliaMono")
     const background_color = Ref("transparent")
     const color = Ref("#000000")
 
@@ -132,8 +132,6 @@ function bloch_sphere(states...;
     Luxor.fontsize(textsize)
     fontfamily !== nothing && Luxor.fontface(fontfamily)
     Luxor.setline(lw)
-    Thebes.eyepoint(eye_point...)
-
     draw_bloch_sphere(states...; eye_point, extra_kwargs...)
 
     # Save the drawing to a file
@@ -153,8 +151,10 @@ function draw_bloch_sphere(states::Pair{<:AbstractString}...;
         colors = fill(BlochStyles.color[], length(states)),
         extra_kwargs...
     )
+    proj = Thebes.eyepoint(Point3D(eye_point...))
+
     # get coordinate of a state
-    getcoo(x) = Point3D(ball_size .* state_to_cartesian(x))
+    getcoo(x) = Point3D((ball_size .* state_to_cartesian(x))...)
 
     # ball
     Luxor.circle(Point(0, 0), ball_size, :stroke)
@@ -162,12 +162,12 @@ function draw_bloch_sphere(states::Pair{<:AbstractString}...;
     # equator
     nstep = 100
     equator_points = map(LinRange(0, 2π*(1-1/nstep), nstep)) do ϕ
-        project(Point3D(ball_size .* polar_to_cartesian(1.0, π/2, ϕ)))
+        project(proj, Point3D((ball_size .* polar_to_cartesian(1.0, π/2, ϕ))...))
     end
     Luxor.line.(equator_points[1:2:end], equator_points[2:2:end], :stroke)
 
     # show axes
-    axes3D(ball_size*3 ÷ 2; extra_kwargs...)
+    axes3D(ball_size*3 ÷ 2; proj, extra_kwargs...)
 
     # show 01 states
     if show01
@@ -178,7 +178,7 @@ function draw_bloch_sphere(states::Pair{<:AbstractString}...;
                 if Thebes.distance(Point3D(0, 0, 0), Point3D(eye_point...)) < Thebes.distance(p, Point3D(eye_point...))
                     Luxor.setopacity(0.3)
                 end
-                show_point(txt, project(p); dot_size, text_offset=Point(10, 0), show_line=false)
+                show_point(txt, project(proj, p); dot_size, text_offset=Point(10, 0), show_line=false)
             end
         end
     end
@@ -191,32 +191,32 @@ function draw_bloch_sphere(states::Pair{<:AbstractString}...;
             if Thebes.distance(Point3D(0, 0, 0), Point3D(eye_point...)) < Thebes.distance(p, Point3D(eye_point...))
                 Luxor.setopacity(0.3)
             end
-            show_point(txt, project(p); dot_size, text_offset=Point(10, 0), show_line=show_line)
+            show_point(txt, project(proj, p); dot_size, text_offset=Point(10, 0), show_line=show_line)
         end
         if show_projection_lines
             # show θ
             ratio = 0.2
-            sz = project(Point3D(0, 0, ball_size*ratio))
+            sz = project(proj, Point3D(0, 0, ball_size*ratio))
             if show_angle_texts
                 Luxor.move(sz)
-                Luxor.arc2r(Point(0, 0), sz, project(p) * ratio, :stroke)
+                Luxor.arc2r(Point(0, 0), sz, project(proj, p) * ratio, :stroke)
                 Luxor.text("θ", sz - Point(0, ball_size*0.07))
             end
             # show equator projection and ϕ
-            equatorp = Point3D(p[1], p[2], 0)
-            sx = project(Point3D(ball_size*ratio, 0, 0))
+            equatorp = Point3D(p.x, p.y, 0)
+            sx = project(proj, Point3D(ball_size*ratio, 0, 0))
             
             if show_angle_texts
                 Luxor.move(sx)
-                Luxor.carc2r(Point(0, 0), sx, project(equatorp) * ratio, :stroke)
+                Luxor.carc2r(Point(0, 0), sx, project(proj, equatorp) * ratio, :stroke)
                 Luxor.text("ϕ", sx - Point(ball_size*0.12, 0))
             end
 
             @layer begin
                 Luxor.setdash("dot")
                 Luxor.setline(1)
-                Luxor.line(project(p), project(equatorp), :stroke)
-                Luxor.line(Point(0, 0), project(equatorp), :stroke)
+                Luxor.line(project(proj, p), project(proj, equatorp), :stroke)
+                Luxor.line(Point(0, 0), project(proj, equatorp), :stroke)
             end
         end
     end
@@ -253,6 +253,7 @@ state_to_cartesian(state) = polar_to_cartesian(state_to_polar(state)...)
 
 # Draw labelled 3D axes with length `n`.
 function axes3D(n::Int;
+        proj,
         axes_lw = BlochStyles.axes_lw[],
         axes_textsize = BlochStyles.textsize[],
         axes_colors = BlochStyles.axes_colors,
@@ -262,10 +263,10 @@ function axes3D(n::Int;
         Luxor.fontsize(axes_textsize)
         Luxor.setline(axes_lw)
         for i = 1:3
-            axis1 = project(Point3D(0.1, 0.1, 0.1))
+            axis1 = project(proj, Point3D(0.1, 0.1, 0.1))
             axis2 = [0.1, 0.1, 0.1]
             axis2[i] = n
-            axis2 = project(Point3D(axis2...))
+            axis2 = project(proj, Point3D(axis2...))
             Luxor.sethue(axes_colors[i])
             if (axis1 !== nothing) && (axis2 !== nothing) && !isapprox(axis1, axis2)
                 Luxor.arrow(axis1, axis2)

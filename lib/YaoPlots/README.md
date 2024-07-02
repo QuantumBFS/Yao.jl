@@ -23,7 +23,7 @@ using YaoPlots, Yao
 reg = zero_state(1) |> Rx(π/8) |> Rx(π/8)
 rho = density_matrix(ghz_state(2), 1)
 
-bloch_sphere("|ψ⟩"=>reg, "ρ"=>rho; show_projection_lines=true)
+bloch_sphere("|ψ>"=>reg, "ρ"=>rho; show_projection_lines=true)
 ```
 
 Similarly, you will see

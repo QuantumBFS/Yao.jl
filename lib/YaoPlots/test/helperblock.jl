@@ -27,3 +27,10 @@ using Test
     @test vizcircuit(c1) isa Drawing
     @test vizcircuit(c2) isa Drawing
 end
+
+@testset "annotate line" begin
+    ann = line_annotation("test"; color="red")
+    @test ann isa LineAnnotation
+    c = chain(put(5, 2=>X), put(5, 2=>ann),  put(5, 3=>Y))
+    @test vizcircuit(c) isa Drawing
+end
