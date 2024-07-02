@@ -315,8 +315,8 @@ end
 function draw!(c::CircuitGrid, p::ChainBlock, address, controls)
     for block in subblocks(p)
         draw!(c, block, address, controls)
-        CircuitStyles.barrier_for_chain[] && set_barrier!(c, Int[address..., controls...])
     end
+    CircuitStyles.barrier_for_chain[] && set_barrier!(c, Int[address..., controls...])
 end
 
 function set_barrier!(c::CircuitGrid, locs::AbstractVector{Int})
