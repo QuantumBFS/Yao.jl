@@ -9,11 +9,12 @@ A marker to mark a circuit applying on a continous block for better plotting.
 struct LabelBlock{BT<:AbstractBlock,D} <: TagBlock{BT,D}
     content::BT
     name::String
+    color::String
 end
 
 YaoBlocks.content(cb::LabelBlock) = cb.content
-function LabelBlock(x::BT, name::String) where {D,BT<:AbstractBlock{D}}
-    LabelBlock{BT,D}(x, name)
+function LabelBlock(x::BT, name::String, color::String) where {D,BT<:AbstractBlock{D}}
+    LabelBlock{BT,D}(x, name, color)
 end
 
 function is_continuous_chunk(x)
@@ -24,14 +25,14 @@ end
 YaoBlocks.PropertyTrait(::LabelBlock) = YaoBlocks.PreserveAll()
 YaoBlocks.mat(::Type{T}, blk::LabelBlock) where {T} = mat(T, content(blk))
 YaoBlocks.unsafe_apply!(reg::YaoBlocks.AbstractRegister, blk::LabelBlock) = YaoBlocks.unsafe_apply!(reg, content(blk))
-YaoBlocks.chsubblocks(blk::LabelBlock, target::AbstractBlock) = LabelBlock(target, blk.name)
+YaoBlocks.chsubblocks(blk::LabelBlock, target::AbstractBlock) = LabelBlock(target, blk.name, blk.color)
 
-Base.adjoint(x::LabelBlock) = LabelBlock(adjoint(content(x)), endswith(x.name, "†") ? x.name[1:end-1] : x.name*"†")
-Base.copy(x::LabelBlock) = LabelBlock(copy(content(x)), x.name)
+Base.adjoint(x::LabelBlock) = LabelBlock(adjoint(content(x)), endswith(x.name, "†") ? x.name[1:end-1] : x.name*"†", x.color)
+Base.copy(x::LabelBlock) = LabelBlock(copy(content(x)), x.name, x.color)
 YaoBlocks.Optimise.to_basictypes(block::LabelBlock) = block
 
 export addlabel
-addlabel(b::AbstractBlock, str::String) = LabelBlock(b, str)
+addlabel(b::AbstractBlock; name=string(b), color="transparent") = LabelBlock(b, name, color)
 
 # to fix issue 
 function YaoBlocks.print_tree(
