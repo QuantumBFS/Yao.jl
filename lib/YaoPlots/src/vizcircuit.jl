@@ -313,6 +313,7 @@ end
 
 # composite
 function draw!(c::CircuitGrid, p::ChainBlock, address, controls)
+    CircuitStyles.barrier_for_chain[] && set_barrier!(c, Int[address..., controls...])
     for block in subblocks(p)
         draw!(c, block, address, controls)
     end
