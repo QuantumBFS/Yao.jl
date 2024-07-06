@@ -34,7 +34,7 @@ module CircuitStyles
     const lw = Ref(1.0)
     const textsize = Ref(16.0)
     const paramtextsize = Ref(10.0)
-    const fontfamily = Ref("monospace")
+    const fontfamily = Ref("JuliaMono")
     #const fontfamily = Ref("Dejavu Sans")
     const linecolor = Ref("#000000")
     const gate_bgcolor = Ref("transparent")
@@ -313,10 +313,11 @@ end
 
 # composite
 function draw!(c::CircuitGrid, p::ChainBlock, address, controls)
+    CircuitStyles.barrier_for_chain[] && set_barrier!(c, Int[address..., controls...])
     for block in subblocks(p)
         draw!(c, block, address, controls)
-        CircuitStyles.barrier_for_chain[] && set_barrier!(c, Int[address..., controls...])
     end
+    CircuitStyles.barrier_for_chain[] && set_barrier!(c, Int[address..., controls...])
 end
 
 function set_barrier!(c::CircuitGrid, locs::AbstractVector{Int})
@@ -374,6 +375,18 @@ function draw!(c::CircuitGrid, cb::LabelBlock, address, controls)
     CircuitStyles.gate_bgcolor[] = temp
 end
 
+function draw!(c::CircuitGrid, cb::LineAnnotation, address, controls)
+    @assert length(address) == 1 && isempty(controls) "LineAnnotation should be a single line, without control."
+    CircuitStyles.textcolor[], temp = cb.color, CircuitStyles.textcolor[]
+    _annotate!(c, address[1], cb.name)
+    CircuitStyles.textcolor[] = temp
+end
+function _annotate!(c::CircuitGrid, loc::Integer, name::AbstractString)
+    wspace, fontsize = text_width_and_size(name)
+    i = frontier(c, loc) + 0.1
+    CircuitStyles.render(CircuitStyles.Text(fontsize), (c[i, loc-0.2], name, wspace, fontsize))
+end
+
 # [:KronBlock, :RepeatedBlock, :CachedBlock, :Subroutine, :(YaoBlocks.AD.NoParams)]
 function draw!(c::CircuitGrid, p::CompositeBlock, address, controls)
     barrier_style = CircuitStyles.barrier_for_chain[]
@@ -427,7 +440,7 @@ get_brush_texts(c, ::ConstGate.P0Gate) = (c.gatestyles.g, "P₀")
 get_brush_texts(c, ::ConstGate.P1Gate) = (c.gatestyles.g, "P₁")
 get_brush_texts(c, b::PrimitiveBlock) = (c.gatestyles.g, string(b))
 get_brush_texts(c, b::TimeEvolution) = (c.gatestyles.g, string(b))
-get_brush_texts(c, b::ShiftGate) = (c.gatestyles.g, "ϕ($(pretty_angle(b.theta)))")
+get_brush_texts(c, b::ShiftGate) = (c.gatestyles.g, "φ($(pretty_angle(b.theta)))")
 get_brush_texts(c, b::PhaseGate) = (CircuitStyles.Phase("$(pretty_angle(b.theta))"), "")
 function get_brush_texts(c, b::T) where T<:ConstantGate
     namestr = string(T.name.name)
@@ -468,7 +481,7 @@ They are defined as:
 * CircuitStyles.lw = Ref(1.0)                       # line width
 * CircuitStyles.textsize = Ref(16.0)                # text size
 * CircuitStyles.paramtextsize = Ref(10.0)           # text size (longer texts)
-* CircuitStyles.fontfamily = Ref("monospace")       # font family
+* CircuitStyles.fontfamily = Ref("JuliaMono")       # font family
 * CircuitStyles.linecolor = Ref("#000000")          # line color
 * CircuitStyles.gate_bgcolor = Ref("transparent")   # gate background color
 * CircuitStyles.textcolor = Ref("#000000")          # text color

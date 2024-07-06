@@ -5,14 +5,12 @@ version = "0.9.2"
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Luxor = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
-Thebes = "8b424ff8-82f5-59a4-86a6-de3761897198"
 YaoArrayRegister = "e600142f-9330-5003-8abb-0ebd767abc51"
 YaoBlocks = "418bc28f-b43b-5e0b-a6e7-61bbc1a2c1df"
 
 [compat]
 LinearAlgebra = "1"
-Luxor = "3"
-Thebes = "1"
+Luxor = "4"
 YaoArrayRegister = "0.9"
 YaoBlocks = "0.13"
 julia = "1"
