@@ -9,7 +9,7 @@ using BitBasis
 using Documenter
 using Random
 
-@testset "easybuld" begin
+@testset "easybuild" begin
     include("easybuild/easybuild.jl")
 end
 
