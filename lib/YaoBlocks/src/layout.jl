@@ -292,6 +292,8 @@ end
 print_annotation(io::IO, node::AbstractBlock) = nothing # skip
 print_annotation(io::IO, c::Daggered) =
     printstyled(io, " [†]"; bold = true, color = :yellow)
+print_annotation(io::IO, c::Transposed) =
+    printstyled(io, " [T]"; bold = true, color = :yellow)
 print_annotation(io::IO, c::CachedBlock) =
     printstyled(io, "[cached] "; bold = true, color = :yellow)
 
