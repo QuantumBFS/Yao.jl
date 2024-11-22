@@ -347,4 +347,25 @@ end
     code, xs = yao2einsum(c; initial_state=Dict([1, 2]=>reg1, [3, 4]=>reg2), final_state=Dict([1]=>reg3, [2,3,4]=>reg4))
     @test code(xs...; size_info=uniformsize(code, 2))[] ≈ join(reg4, reg3)' * join(reg2, reg1)
 end
+
+@testset "multi-level" begin
+    N2 = OnLevels{3}(ConstGate.P1, (2, 3))
+    X01 = OnLevels{3}(ConstGate.P1, (1, 2))
+    X12 = OnLevels{3}(ConstGate.P1, (2, 3))
+    function qaoa_circuit(nbits::Int, depth::Int)
+        n2 = chain([kron(nbits, i=>N2, i+1=>N2) for i=1:nbits-1])
+        x01 = chain([put(nbits, i=>X01) for i=1:nbits])
+        x12 = chain([put(nbits, i=>X12) for i=1:nbits])
+        return chain(repeat([n2, x01, x12], depth))
+    end
+
+    c = qaoa_circuit(5, 2)
+    op = repeat(5, X01)
+    extc = chain(c, op, c') 
+
+    res = yao2einsum(extc, initial_state=Dict(zip(1:5, zeros(Int, 5))), final_state=Dict(zip(1:5, zeros(Int, 5))))
+    @test res isa TensorNetwork
+    expected = expect(op, zero_state(ComplexF64, 5; nlevel=3) |> c)
+    @test res.code(res.tensors...; size_info=uniformsize(res.code, 3))[] ≈ expected
+end
 end

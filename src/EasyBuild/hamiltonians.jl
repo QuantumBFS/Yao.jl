@@ -30,17 +30,23 @@ function transverse_ising(nbit::Int, h::Number; periodic::Bool=true)
     ising_term + h*sum(map(i->put(nbit,i=>X), 1:nbit))
 end
 
-# a 3 level hamiltonian
+"""
+    rydberg_chain(nbits::Int; Ω::Number=0.0, Δ::Real=0.0, V::Real=0.0, r::Real=0.0)
+
+Rydberg chain hamiltonian defined as:
+```math
+\\sum_{i=1}^{n} \\Delta |r_i\\rangle\\langle r_i| + (\\Omega |1\\rangle\\langle r_i| + h.c.) + V n_i n_{i+1} + r (|0\\rangle\\langle 1| + h.c.)
+```
+where ``n`` is specified by `nbits`.
+"""
 function rydberg_chain(nbits::Int; Ω::Number=0.0, Δ::Real=0.0, V::Real=0.0, r::Real=0.0)
-    Pr = matblock(sparse([3], [3], [1.0+0im], 3, 3); nlevel=3, tag="|r⟩⟨r|")
-    Z1r = matblock(sparse([2, 3], [2, 3], [1.0+0im, -1.0], 3, 3); nlevel=3)
-    X1r = matblock(sparse([2, 3], [3, 2], [1.0+0im, 1.0], 3, 3); nlevel=3, tag="|1⟩⟨r| + |r⟩⟨1|")
-    X01 = matblock(sparse([1, 2], [2, 1], [1.0+0im, 1.0], 3, 3); nlevel=3, tag="|1⟩⟨0| + |0⟩⟨1|")
-    Y1r = matblock(sparse([3, 2], [2, 3], [1.0im, -1.0im], 3, 3); nlevel=3, tag="i|1⟩⟨0| - i|0⟩⟨1|")
+    Pr = OnLevels{3}(ConstGate.P1, (2, 3))
+    X1r = OnLevels{3}(X, (2, 3))
+    X01 = OnLevels{3}(X, (1, 2))
+    Y1r = OnLevels{3}(Y, (2, 3))
     # single site term in {|1>, |r>}.
     h = Add(nbits; nlevel=3)
     !isapprox(Δ, 0; atol=1e-12) && push!(h, (-Δ) * sum([put(nbits, i=>Pr) for i=1:nbits]))
-    #!iszero(Δ) && push!(h, (-Δ/2) * sum([put(nbits, i=>Z1r) for i=1:nbits]))
     !isapprox(real(Ω), 0; atol=1e-12) && push!(h, real(Ω)/2 * sum([put(nbits, i=>X1r) for i=1:nbits]))
     !isapprox(imag(Ω), 0; atol=1e-12) && push!(h, imag(Ω)/2 * sum([put(nbits, i=>Y1r) for i=1:nbits]))
     # interaction
@@ -49,3 +55,4 @@ function rydberg_chain(nbits::Int; Ω::Number=0.0, Δ::Real=0.0, V::Real=0.0, r:
     !isapprox(r, 0; atol=1e-12) && push!(h, r * sum([put(nbits, i=>X01) for i=1:nbits]))
     return h
 end
+

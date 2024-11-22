@@ -108,3 +108,20 @@ end
     @test gatecount(cache(Val(0.1) * X)) == Dict(typeof(Val(0.1)*X)=>1)
     @test gatecount(Daggered(X)) == Dict(typeof(Daggered(X))=>1)
 end
+
+@testset "OnLevels" begin
+    Z1r = OnLevels{3}(Z, (2, 3))
+    mz = mat(ComplexF64, Z1r)
+    @test YaoBlocks.SparseArrays.nnz(mz) == 2
+    g = OnLevels{3}(Rx(0.5), (2, 3))
+    g2 = copy(g)
+    g2.gate.theta = 0.6
+    @test !ishermitian(g)
+    @test isunitary(g)
+    @test g2.gate.theta == 0.6
+    @test g.gate.theta == 0.5
+    @test parameters(g) == [0.5]
+    @test g' == OnLevels{3}(Rx(-0.5), (2, 3))
+    println(g)
+end
+
