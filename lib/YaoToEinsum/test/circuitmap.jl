@@ -317,7 +317,7 @@ end
     inner = (2,3)
     focus!(reg, inner)
     for final_state in [Dict([i=>rand_state(1) for i in inner]), Dict([i=>1 for i in inner])]
-        freg = join(YaoToEinsum.render_single_qubit_state(ComplexF64, final_state[3]), YaoToEinsum.render_single_qubit_state(ComplexF64, final_state[2]))
+        freg = join(YaoToEinsum.render_single_qudit_state(ComplexF64, 2, final_state[3]), YaoToEinsum.render_single_qudit_state(ComplexF64, 2, final_state[2]))
         net = yao2einsum(c; initial_state=initial_state, final_state=final_state, optimizer=TreeSA(nslices=3))
         println(net)
         @test vec(contract(net)) ≈ vec(statevec(freg)' * state(reg))
