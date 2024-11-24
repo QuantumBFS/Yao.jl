@@ -295,6 +295,10 @@ print_annotation(io::IO, c::Daggered) =
 print_annotation(io::IO, c::CachedBlock) =
     printstyled(io, "[cached] "; bold = true, color = :yellow)
 
+function print_annotation(io::IO, x::OnLevels)
+    printstyled(io, "[on levels: ", x.levels, "] "; bold = true, color = :yellow)
+end
+
 function print_annotation(io::IO, x::Scale)
     if x.alpha == im
         printstyled(io, "[+im] "; bold = true, color = :yellow)

@@ -13,6 +13,11 @@ using YaoArrayRegister.SparseArrays
     @test vec(h[:,bit"01001000"] |> cleanup) ≈ mat(h)[:, buffer(bit"01001000")+1]
 end
 
+@testset "rydberg_chain" begin
+    h = rydberg_chain(3, Ω=1.0, Δ=1.0, V=1.0, r=1.0)
+    @test mat(ComplexF64, h) isa SparseMatrixCSC
+end
+
 # https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.123.170503
 # Acknology: Jonathan Wurtz and Madelyn Cain for extremely helpful discussion!
 @testset "Levine Pichler pulse" begin

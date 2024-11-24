@@ -1,4 +1,6 @@
-struct EinBuilder{T}
+# T is the element type of the tensor network
+# D is the dimension of the qudits
+struct EinBuilder{T, D}
     slots::Vector{Int}
     labels::Vector{Vector{Int}}
     tensors::Vector{AbstractArray{T}}
@@ -12,8 +14,8 @@ function add_tensor!(eb::EinBuilder{T}, tensor::AbstractArray{T,N}, labels::Vect
     push!(eb.labels, labels)
 end
 
-function EinBuilder(::Type{T}, n::Int) where T
-    EinBuilder(collect(1:n), Vector{Int}[], AbstractArray{T}[], Ref(n))
+function EinBuilder{T, D}(n::Int) where {T, D}
+    EinBuilder{T, D}(collect(1:n), Vector{Int}[], AbstractArray{T}[], Ref(n))
 end
 newlabel!(eb::EinBuilder) = (eb.maxlabel[] += 1; eb.maxlabel[])
 
@@ -21,20 +23,20 @@ function add_gate!(eb::EinBuilder{T}, b::PutBlock{D,C}) where {T,D,C}
     return add_matrix!(eb, C, mat(T, b.content), collect(b.locs))
 end
 # general and diagonal gates
-function add_matrix!(eb::EinBuilder{T}, k::Int, m::AbstractMatrix, locs::Vector) where T
+function add_matrix!(eb::EinBuilder{T, D}, k::Int, m::AbstractMatrix, locs::Vector) where {T, D}
     if isdiag(m)
-        add_tensor!(eb, reshape(Vector{T}(diag(m)), fill(2, k)...), eb.slots[locs])
+        add_tensor!(eb, reshape(Vector{T}(diag(m)), fill(D, k)...), eb.slots[locs])
     elseif m isa YaoBlocks.OuterProduct  # low rank
         nlabels = [newlabel!(eb) for _=1:k]
         K = rank(m)
         if K == 1  # projector
-            add_tensor!(eb, reshape(Vector{T}(m.right), fill(2, k)...), [eb.slots[locs]...])
-            add_tensor!(eb, reshape(Vector{T}(m.left), fill(2, k)...), [nlabels...])
+            add_tensor!(eb, reshape(Vector{T}(m.right), fill(D, k)...), [eb.slots[locs]...])
+            add_tensor!(eb, reshape(Vector{T}(m.left), fill(D, k)...), [nlabels...])
             eb.slots[locs] .= nlabels
         else
             midlabel = newlabel!(eb)
-            add_tensor!(eb, reshape(Matrix{T}(m.right), fill(2, k)..., K), [eb.slots[locs]..., midlabel])
-            add_tensor!(eb, reshape(Matrix{T}(m.left), fill(2, k)..., K), [nlabels..., midlabel])
+            add_tensor!(eb, reshape(Matrix{T}(m.right), fill(D, k)..., K), [eb.slots[locs]..., midlabel])
+            add_tensor!(eb, reshape(Matrix{T}(m.left), fill(D, k)..., K), [nlabels..., midlabel])
             eb.slots[locs] .= nlabels
         end
     else
@@ -45,7 +47,7 @@ function add_matrix!(eb::EinBuilder{T}, k::Int, m::AbstractMatrix, locs::Vector)
     return eb
 end
 # swap gate
-function add_gate!(eb::EinBuilder{T}, b::PutBlock{2,2,ConstGate.SWAPGate}) where {T}
+function add_gate!(eb::EinBuilder{T, 2}, b::PutBlock{2,2,ConstGate.SWAPGate}) where {T}
     lj = eb.slots[b.locs[2]]
     eb.slots[b.locs[2]] = eb.slots[b.locs[1]]
     eb.slots[b.locs[1]] = lj
@@ -53,23 +55,23 @@ function add_gate!(eb::EinBuilder{T}, b::PutBlock{2,2,ConstGate.SWAPGate}) where
 end
 
 # projection gate, todo: generalize to arbitrary low rank gate
-function add_gate!(eb::EinBuilder{T}, b::PutBlock{2,1,ConstGate.P0Gate}) where {T}
+function add_gate!(eb::EinBuilder{T, 2}, b::PutBlock{2,1,ConstGate.P0Gate}) where {T}
     add_matrix!(eb, 1, YaoBlocks.OuterProduct(T[1, 0], T[1, 0]), collect(b.locs))
     return eb
 end
 
 # projection gate, todo: generalize to arbitrary low rank gate
-function add_gate!(eb::EinBuilder{T}, b::PutBlock{2,1,ConstGate.P1Gate}) where {T}
+function add_gate!(eb::EinBuilder{T, 2}, b::PutBlock{2,1,ConstGate.P1Gate}) where {T}
     add_matrix!(eb, 1, YaoBlocks.OuterProduct(T[0, 1], T[0, 1]), collect(b.locs))
     return eb
 end
 
 
 # control gates
-function add_gate!(eb::EinBuilder{T}, b::ControlBlock{BT,C,M}) where {T, BT,C,M}
+function add_gate!(eb::EinBuilder{T, 2}, b::ControlBlock{BT,C,M}) where {T, BT,C,M}
     return add_controlled_matrix!(eb, M, mat(T, b.content), collect(b.locs), collect(b.ctrl_locs), collect(b.ctrl_config))
 end
-function add_controlled_matrix!(eb::EinBuilder{T}, k::Int, m::AbstractMatrix, locs::Vector, control_locs, control_vals) where T
+function add_controlled_matrix!(eb::EinBuilder{T, 2}, k::Int, m::AbstractMatrix, locs::Vector, control_locs, control_vals) where T
     if length(control_locs) == 0
         return add_matrix!(eb, k, m, locs)
     end
@@ -169,15 +171,15 @@ Read-write complexity: 2^6.0
 """
 function yao2einsum(circuit::AbstractBlock{D}; initial_state::Dict=Dict{Int,Int}(), final_state::Dict=Dict{Int,Int}(), optimizer=TreeSA()) where {D}
     T = promote_type(ComplexF64, dict_regtype(initial_state), dict_regtype(final_state), YaoBlocks.parameters_eltype(circuit))
-    vec_initial_state = Dict{keytype(initial_state),ArrayReg{D,T}}([k=>render_single_qubit_state(T, v) for (k, v) in initial_state])
-    vec_final_state = Dict{keytype(final_state),ArrayReg{D,T}}([k=>render_single_qubit_state(T, v) for (k, v) in final_state])
+    vec_initial_state = Dict{keytype(initial_state),ArrayReg{D,T}}([k=>render_single_qudit_state(T, D, v) for (k, v) in initial_state])
+    vec_final_state = Dict{keytype(final_state),ArrayReg{D,T}}([k=>render_single_qudit_state(T, D, v) for (k, v) in final_state])
     yao2einsum(circuit, vec_initial_state, vec_final_state, optimizer)
 end
 dict_regtype(d::Dict) = promote_type(_regtype.(values(d))...)
 _regtype(::ArrayReg{D,VT}) where {D,VT} = VT
 _regtype(::Int) = ComplexF64
-render_single_qubit_state(::Type{T}, x::Int) where T = x == 0 ? zero_state(T, 1) : product_state(T, bit"1")
-render_single_qubit_state(::Type{T}, x::ArrayReg) where T = ArrayReg(collect(T, statevec(x)))
+render_single_qudit_state(::Type{T}, D, x::Int) where T = product_state(T, DitStr{D}([x]))
+render_single_qudit_state(::Type{T}, D, x::ArrayReg) where T = ArrayReg{D}(collect(T, statevec(x)))
 
 function yao2einsum(circuit::AbstractBlock{D}, initial_state::Dict{Int,<:ArrayReg{D,T}}, final_state::Dict{Int,<:ArrayReg{D,T}}, optimizer) where {D,T}
     v_initial_state = Dict{Vector{Int}, ArrayReg{D,T}}([[k]=>v for (k, v) in initial_state])
@@ -185,8 +187,8 @@ function yao2einsum(circuit::AbstractBlock{D}, initial_state::Dict{Int,<:ArrayRe
     yao2einsum(circuit, v_initial_state, v_final_state, optimizer)
 end
 function yao2einsum(circuit::AbstractBlock{D}, initial_state::Dict{Vector{Int},<:ArrayReg{D,T}}, final_state::Dict{Vector{Int},<:ArrayReg{D,T}}, optimizer) where {D,T}
-    n = nqubits(circuit)
-    eb = EinBuilder(T, n)
+    n = nqudits(circuit)
+    eb = EinBuilder{T, D}(n)
     openindices = add_states!(eb, initial_state)
     add_gate!(eb, circuit)
     openindices2 = add_states!(eb, final_state; conjugate=true)
@@ -199,7 +201,7 @@ function check_state_spec(state::Dict{Vector{Int},<:ArrayReg{D,T}}, n::Int) wher
     @assert all(1 .<= iks .<= n) "state qubit indices must be in the range 1 to $n"
     return iks
 end
-function add_states!(eb::EinBuilder{T}, states::Dict; conjugate=false) where {T}
+function add_states!(eb::EinBuilder{T, D}, states::Dict; conjugate=false) where {T, D}
     n = nqubits(eb)
     unique_indices = check_state_spec(states, n)
     openindices = eb.slots[setdiff(1:n, unique_indices)]
