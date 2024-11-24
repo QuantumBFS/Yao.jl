@@ -87,3 +87,8 @@ end
     YaoPlots.CircuitStyles.barrier_for_chain[] = true
     @test vizcircuit(circuit) isa Drawing
 end
+
+@testset "rot igate" begin
+    @test plot(rot(igate(1), 1.)) isa Drawing
+    @test plot(rot(put(3, 1=>X), 1.)) isa Drawing
+end

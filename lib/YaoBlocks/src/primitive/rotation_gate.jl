@@ -137,7 +137,7 @@ cache_key(R::RotationGate) = R.theta
 
 iparams_range(::RotationGate{D,T,GT}) where {D,T,GT} = ((zero(T), T(2 * pi)),)
 
-occupied_locs(g::RotationGate) = occupied_locs(g.block)
+occupied_locs(g::RotationGate) = (1:nqudits(g)...,)
 
 function unsafe_getindex(::Type{T}, rg::RotationGate{D}, i::Integer, j::Integer) where {D,T}
     return (i==j ? cos(T(rg.theta)/2) : zero(T)) - im * sin(T(rg.theta)/2) * unsafe_getindex(T, rg.block, i, j)
