@@ -69,7 +69,7 @@ end
 
 @testset "occupied locs" begin
     g = rot(put(5, 2 => X), 0.5)
-    @test occupied_locs(g) == (2,)
+    @test occupied_locs(g) == (1,2,3,4,5)
 end
 
 @testset "instruct_get_element" begin

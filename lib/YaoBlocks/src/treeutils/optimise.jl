@@ -7,7 +7,7 @@ using YaoBlocks: NotImplementedError
 
 include("to_basictypes.jl")
 
-export replace_block
+export replace_block, flatten_basic, simplify
 """
     replace_block(actor, tree::AbstractBlock) -> AbstractBlock
     replace_block(pair::Pair{Type{ST}, TT}, tree::AbstractBlock) -> AbstractBlock
@@ -208,6 +208,9 @@ export simplify
 
 const __default_simplification_rules__ =
     Function[merge_pauli, eliminate_nested, merge_scale, combine_similar]
+const __flatten_basic__ = Function[eliminate_nested, to_basictypes]
+
+flatten_basic(ex::AbstractBlock) = simplify(ex; rules = __flatten_basic__)
 
 # Inspired by MasonPotter/Symbolics.jl
 """
