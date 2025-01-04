@@ -220,7 +220,7 @@ function Base.join(r0::DensityMatrix{D}, rs::DensityMatrix{D}...) where {D}
     return DensityMatrix{D}(st)
 end
 
-function collapseto!(rho::DensityMatrix, locsval::Pair)
+function YaoAPI.collapseto!(rho::DensityMatrix, locsval::Pair)
     locs = locsval.first isa AllLocs ? (1:nqudits(rho)) : locsval.first
     ic = itercontrol(nqudits(rho), collect(locs), locsval.second) .+ 1
     st = normalize!(rho.state[ic, ic])
