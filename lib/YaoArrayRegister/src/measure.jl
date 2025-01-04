@@ -64,14 +64,6 @@ YaoAPI.measure(
     rng::AbstractRNG = Random.GLOBAL_RNG,
 ) = _measure(rng, basis(reg), reg |> probs, nshots)
 
-YaoAPI.measure(
-    ::ComputationalBasis,
-    reg::DensityMatrix,
-    ::AllLocs;
-    nshots::Int = 1,
-    rng::AbstractRNG = Random.GLOBAL_RNG,
-) = _measure(rng, basis(reg), reg |> probs, nshots)
-
 function YaoAPI.measure(
     ::ComputationalBasis,
     reg::BatchedArrayReg,
@@ -138,6 +130,52 @@ function YaoAPI.measure!(
     res = measure!(YaoAPI.RemoveMeasured(), reg; rng = rng)
     nstate[Int(rst.x)+1, :, :] = reshape(reg.state, :, B)
     reg.state = reshape(nstate, M, N * B)
+    return res
+end
+
+## DensityMatrix
+YaoAPI.measure(
+    ::ComputationalBasis,
+    rho::DensityMatrix,
+    ::AllLocs;
+    nshots::Int = 1,
+    rng::AbstractRNG = Random.GLOBAL_RNG,
+) = _measure(rng, basis(rho), rho |> probs, nshots)
+
+
+function YaoAPI.measure(op, rho::DensityMatrix, locs; kwargs...)
+    rrho = density_matrix(rho, locs)
+    res = measure(op, rrho, AllLocs(); kwargs...)
+    return res
+end
+
+function YaoAPI.measure!(
+    postprocess::PostProcess,
+    op::ComputationalBasis,
+    rho::DensityMatrix,
+    locs;
+    rng::AbstractRNG = Random.GLOBAL_RNG,
+)
+    if !(locs isa AllLocs)
+        rrho = density_matrix(rho, locs)
+        bs = basis(rrho)
+        ps = rrho |> probs
+    else
+        bs = basis(rho)
+        ps = rho |> probs
+    end
+    res = _measure(rng, bs, ps, 1)[]
+    if postprocess isa RemoveMeasured
+        ic = itercontrol(nqudits(rho), collect(locs isa AllLocs ? (1:nqudits(rho)) : locs), res) .+ 1
+        rho.state = rho.state[ic, ic]
+        normalize!(rho)
+    elseif postprocess isa NoPostProcess
+        collapseto!(rho, locs => res)
+    elseif postprocess isa ResetTo
+        collapseto!(rho, locs => postprocess.x)
+    else
+        error("`$postprocess` is not yet supported for DensityMatrix")
+    end
     return res
 end
 

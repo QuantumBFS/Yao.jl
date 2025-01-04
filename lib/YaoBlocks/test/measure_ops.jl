@@ -160,3 +160,13 @@ end
                 0.5 * sum([put(3, i=>Z) for i=1:3]),
                 chain([put(3, i=>H) for i=1:3]))
 end
+
+@testset "measure on density matrix" begin
+    reg = uniform_state(4)
+    rho = density_matrix(reg, 1:3)
+    res = measure!(kron(Z, Z, Z), rho)
+    p = probs(rho)
+    @test count(!iszero, p) == 4
+    res2 = measure(kron(Z, Z, Z), rho; nshots=10)
+    @test all(==(res), res2)
+end

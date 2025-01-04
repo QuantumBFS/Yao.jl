@@ -219,3 +219,67 @@ end
     r = join(r2, r1)
     @test measure(r) == [bit"101110"]
 end
+
+@testset "collapseto!" begin
+    r = density_matrix(ghz_state(3))
+    collapseto!(r, (1, 2) => (0, 0))
+    res = measure(r; nshots=1000)
+    @test all(==(bit"000"), res)
+    @test isnormalized(r)
+end
+
+@testset "measure on subset of qubits" begin
+    r1 = density_matrix(arrayreg(bit"110"))
+    r2 = density_matrix(arrayreg(bit"101"))
+    r = join(r2, r1)
+    @test measure(r, (1, 2)) == [bit"10"]
+end
+
+@testset "measure on density matrix, collapse" begin
+    # AllLocs
+    reg = ghz_state(3)
+    rho = density_matrix(reg)
+    res = measure!(rho)
+    res2 = measure(rho; nshots=10)
+    @test all(==(res), res2)
+
+    # specific locs
+    reg = ghz_state(3)
+    rho = density_matrix(reg, (1, 2))
+    res = measure!(rho, (1, 2))
+    res2 = measure(rho, (1, 2); nshots=10)
+    @test all(==(res), res2)
+end
+
+
+@testset "measure on density matrix, reset" begin
+    # AllLocs
+    reg = uniform_state(3)
+    rho = density_matrix(reg)
+    res = measure!(ResetTo(bit"110"), rho)
+    res2 = measure(rho; nshots=10)
+    @test all(==(bit"110"), res2)
+
+    # specific locs
+    reg = uniform_state(5)
+    rho = density_matrix(reg, (1, 2, 3))
+    res = measure!(ResetTo(bit"10"), rho, (1, 2))
+    res2 = measure(rho, (1, 2); nshots=10)
+    @test all(==(bit"10"), res2)
+end
+
+@testset "measure on density matrix, remove" begin
+    # AllLocs
+    reg = uniform_state(3)
+    rho = density_matrix(reg, (1, 2))
+    res = measure!(RemoveMeasured(), rho)
+    @test nqubits(rho) == 0
+    @test isnormalized(rho)
+
+    # specific locs
+    reg = uniform_state(5)
+    rho = density_matrix(reg, (1, 2, 3))
+    res = measure!(RemoveMeasured(), rho, (1, 2))
+    @test nqubits(rho) == 1
+    @test isnormalized(rho)
+end

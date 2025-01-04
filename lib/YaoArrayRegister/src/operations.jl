@@ -8,6 +8,10 @@ isnormalized(r::AbstractArrayReg) =
     all(sum(copy(r) |> relax!(to_nactive = nqudits(r)) |> probs, dims = 1) .≈ 1)
 isnormalized(r::AdjointRegister) = isnormalized(parent(r))
 
+function isnormalized(r::DensityMatrix)
+    return tr(r.state) ≈ 1
+end
+
 """
     normalize!(r::AbstractArrayReg)
 
@@ -39,6 +43,11 @@ function LinearAlgebra.normalize!(r::AbstractArrayReg)
 end
 
 LinearAlgebra.normalize!(r::AdjointRegister) = (normalize!(parent(r)); r)
+
+function LinearAlgebra.normalize!(r::DensityMatrix)
+    r.state = r.state / tr(r.state)
+    return r
+end
 
 LinearAlgebra.norm(r::ArrayReg) = norm(statevec(r))
 LinearAlgebra.norm(r::BatchedArrayReg) =
