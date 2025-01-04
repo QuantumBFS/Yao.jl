@@ -1,7 +1,7 @@
 import Zygote, ForwardDiff
 using Random, Test
 using YaoBlocks, YaoArrayRegister
-using ChainRulesCore: Tangent
+using ChainRulesCore: Tangent, unthunk, AbstractThunk
 
 @testset "recursive_create_tangent" begin
     c = chain(put(5, 2 => chain(Rx(1.4), Rx(0.5))), cnot(5, 3, 1), put(5, 3 => Rx(-0.5)))
@@ -10,16 +10,13 @@ using ChainRulesCore: Tangent
 end
 
 @testset "construtors" begin
-    @test Zygote.gradient(x -> x.list[1].blocks[1].theta, sum([chain(1, Rz(0.3))]))[1] == (n=nothing,
-        list = NamedTuple{
-            (:n, :blocks,),
-            Tuple{Nothing, Vector{NamedTuple{(:block, :theta),Tuple{Nothing,Float64}}}},
-        }[(n=nothing, blocks = [(block = nothing, theta = 1.0)],)],
-    )
-    @test Zygote.gradient(
+    res = Zygote.gradient(x -> x.list[1].blocks[1].theta, sum([chain(1, Rz(0.3))]))[1]
+    @test res.list[].blocks[1].theta ≈ 1.0
+    res = Zygote.gradient(
         x -> getfield(getfield(x, :content), :theta),
         Daggered(Rx(0.5)),
-    )[1] == (content = (block = nothing, theta = 1.0),)
+    )[1]
+    @test res.content.theta ≈ 1.0
 end
 
 @testset "rules" begin

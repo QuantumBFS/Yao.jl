@@ -18,7 +18,7 @@ unsafe_primitive_tangent(x::Number) = x
 for GT in [:RotationGate, :ShiftGate, :PhaseGate, :(Scale{<:Number})]
     @eval function recursive_create_tangent(c::$GT)
         lst = map(fieldnames(typeof(c))) do fn
-            fn => unsafe_primitive_tangent(getfield(c, fn))
+            fn => unsafe_primitive_tangent(unthunk(getfield(c, fn)))
         end
         nt = NamedTuple(lst)
         Tangent{typeof(c),typeof(nt)}(nt)
@@ -46,7 +46,7 @@ for GT in [
 ]
     @eval function recursive_create_tangent(c::$GT)
         lst = map(fieldnames(typeof(c))) do fn
-            fn => unsafe_composite_tangent(getfield(c, fn))
+            fn => unsafe_composite_tangent(unthunk(getfield(c, fn)))
         end
         nt = NamedTuple(lst)
         Tangent{typeof(c),typeof(nt)}(nt)
@@ -209,6 +209,7 @@ rrule(::typeof(parent), reg::AdjointArrayReg) = parent(reg), adjy -> (NoTangent(
 rrule(::typeof(Base.adjoint), reg::AbstractArrayReg) =
     Base.adjoint(reg), adjy -> (NoTangent(), parent(adjy))
 
+_totype(::Type{T}, x::AbstractThunk) where {T} = _totype(T, unthunk(x))
 _totype(::Type{T}, x::AbstractArray{T}) where {T} = x
 _totype(::Type{T}, x::AbstractArray{T2}) where {T,T2} = convert.(T, x)
 _match_type(::ArrayReg{D}, mat) where D = ArrayReg{D}(mat)
