@@ -205,6 +205,35 @@ function YaoAPI.measure!(
 end
 
 function YaoAPI.measure!(
+    ::NoPostProcess,
+    bb::BlockedBasis,
+    rho::DensityMatrix{D, T},
+    ::AllLocs;
+    rng::AbstractRNG = Random.GLOBAL_RNG,
+) where {D,T}
+    state = @inbounds rho.state[bb.perm, bb.perm]  # permute to make eigen values sorted
+    pl = diag(state)
+    # cummulate probabilities in each block
+    pl_block = zeros(eltype(pl), nblocks(bb))
+    for i = 1:nblocks(bb)
+        for k in subblock(bb, i)
+            pl_block[i] += pl[k]
+        end
+    end
+    res = sample(rng, 1:nblocks(bb), Weights(real.(pl_block)))
+    # collapse to the selected block
+    range = subblock(bb, res)
+    mblock = state[range, range] ./ pl_block[res]
+    state .= zero(T)
+    state[range, range] .= mblock
+
+    # undo permute and assign back
+    rho.state[bb.perm, bb.perm] .= state
+    return bb.values[res]
+end
+
+
+function YaoAPI.measure!(
     p::ResetTo,
     op::AbstractBlock,
     reg::AbstractRegister,
@@ -229,6 +258,9 @@ function measure(op::AbstractBlock, reg::AbstractRegister, locs::AllLocs; kwargs
     E, V = eigenbasis(op)
     res = measure(ComputationalBasis(), copy(reg) |> V', locs; kwargs...)
     diag(mat(E))[Int64.(res).+1]
+end
+function measure(op::AbstractBlock, rho::DensityMatrix, locs::AllLocs; kwargs...)
+    Base.invoke(measure, Tuple{AbstractBlock,AbstractRegister,AllLocs}, op, rho, locs; kwargs...)
 end
 
 render_mlocs(alllocs::AllLocs, locs) = locs
