@@ -228,6 +228,13 @@ end
     @test isnormalized(r)
 end
 
+@testset "collapseto! with mixed states" begin
+    rho = rand_density_matrix(8)
+    collapseto!(rho, (5:8) => zeros(Int,4))  
+    @test tr(rho.state) ≈ 1
+end
+
+
 @testset "measure on subset of qubits" begin
     r1 = density_matrix(arrayreg(bit"110"))
     r2 = density_matrix(arrayreg(bit"101"))
