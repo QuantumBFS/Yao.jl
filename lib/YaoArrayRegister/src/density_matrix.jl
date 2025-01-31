@@ -223,7 +223,14 @@ end
 function YaoAPI.collapseto!(rho::DensityMatrix, locsval::Pair)
     locs = locsval.first isa AllLocs ? (1:nqudits(rho)) : locsval.first
     ic = itercontrol(nqudits(rho), collect(locs), locsval.second) .+ 1
-    st = normalize!(rho.state[ic, ic])
+    st = rho.state[ic, ic]
+    
+    trace_norm = tr(st)  
+    if real(trace_norm) > 1e-10
+        st ./= trace_norm  
+    else
+        @warn "Collapse resulted in a near-zero probability state. Normalization may be inaccurate."
+    end
     fill!(rho.state, 0)
     rho.state[ic, ic] .= st
     return rho
