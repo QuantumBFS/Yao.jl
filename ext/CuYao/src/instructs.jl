@@ -41,7 +41,7 @@ function instruct!(::Val{2}, state::DenseCuVecOrMat, U0::AbstractMatrix, locs::N
         k = findfirst(!isone, U.diag)
         loc = locs_raw[k]
         val = U.diag[k]
-        kernel(get_backend(state))(state, loc, val, configs, len; ndrange=(len, size(state,2)))
+        kernel_single_entry_diag(get_backend(state))(state, loc, val, configs, len; ndrange=(len, size(state,2)))
     else
         kernel(get_backend(state))(state, locs_raw, U, configs, len; ndrange=(len, size(state,2)))
     end
@@ -115,9 +115,9 @@ function _instruct!(state::DenseCuVecOrMat, ::Val{:X}, locs::NTuple{L,Int}, cloc
     mask = bmask(locs...)
     len = length(configs)
     @kernel function kernel(state, mask, len, configs)
-        i = @index(Global, Linear)
+        i, j = @index(Global, NTuple)
         b = @inbounds configs[i]
-        @inbounds swaprows!(view(state, :, i), b+1, flip(b, mask) + 1)
+        @inbounds swaprows!(view(state, :, j), b+1, flip(b, mask) + 1)
     end
     kernel(get_backend(state))(state, mask, len, configs; ndrange=(len, size(state,2)))
     return state
@@ -152,9 +152,9 @@ function _instruct!(state::DenseCuVecOrMat, ::Val{:Y}, locs::Tuple{Int}, clocs::
     mask = bmask(locs...)
     len = length(configs)
     @kernel function kernel(state, configs, mask, len)
-        i = @index(Global, Linear)
+        i, j = @index(Global, NTuple)
         b = @inbounds configs[i]
-        @inbounds swaprows!(view(state, :, i), b+1, flip(b, mask) + 1, im, -im)
+        @inbounds swaprows!(view(state, :, j), b+1, flip(b, mask) + 1, im, -im)
     end
     kernel(get_backend(state))(state, configs, mask, len; ndrange=(len, size(state,2)))
     return state
@@ -256,8 +256,8 @@ function instruct!(::Val{2}, state::DenseCuVecOrMat, ::Val{:PSWAP}, locs::Tuple{
     @kernel function kernel(state, mask2, mask12, configs, a, b_, c, d)
         i, j = @index(Global, NTuple)
         @inbounds x = configs[i]
-        state[j, x+1] *= e
-        state[j, x⊻mask12+1] *= e
+        state[x+1, j] *= e
+        state[x⊻mask12+1, j] *= e
         y = x ⊻ mask2
         @inbounds u1rows!(view(state, :, j), y+1, y⊻mask12+1, a, b_, c, d)
     end

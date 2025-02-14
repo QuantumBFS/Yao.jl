@@ -20,12 +20,13 @@ using CUDA
             mat(ComplexF32, put(2,2=>I2)),
             mat(ComplexF32, put(2,2=>P0))
             ]
-
+        @info "Testing $UN"
         @test instruct!(Val(2),v1 |> CuArray, UN, (3,1)) |> Vector ≈ instruct!(Val(2),v1 |> copy, UN, (3,1))
         @test instruct!(Val(2),vn |> CuArray, UN, (3,1)) |> Matrix ≈ instruct!(Val(2),vn |> copy, UN, (3,1))
     end
     # sparse matrix like P0, P1 et. al. are not implemented.
     for g in [mat(ComplexF32, ConstGate.T), mat(ComplexF32, ConstGate.H), mat(ComplexF32, rot(Z, 0.5))]
+        @info "Testing $g"
         @test instruct!(Val(2), v1 |> CuArray, g, (3,), (4,), (1,)) |> Vector ≈ instruct!(Val(2), v1 |> copy, g, (3,), (4,), (1,))
         @test instruct!(Val(2), vn |> CuArray, g, (3,), (4,), (1,)) |> Matrix ≈ instruct!(Val(2), vn |> copy, g, (3,), (4,), (1,))
         @test instruct!(Val(2), v1 |> CuArray, g, (3,), (4,), (1,)) |> Vector ≈ instruct!(Val(2), v1 |> copy, g, (3,), (4,), (1,))
@@ -66,6 +67,7 @@ end
     vn = randn(ComplexF32, N, 333)
 
     for G in [:X, :Y, :Z, :T, :H, :Tdag, :S, :Sdag]
+        @info "Testing $G"
         @test instruct!(Val(2),v1 |> CuArray, Val(G), (3,)) |> Vector ≈ instruct!(Val(2),v1 |> copy, Val(G), (3,))
         @test instruct!(Val(2),vn |> CuArray, Val(G), (3,)) |> Matrix ≈ instruct!(Val(2),vn |> copy, Val(G), (3,))
         if G != :H
@@ -83,6 +85,7 @@ end
     vn = randn(ComplexF32, N, 333)
 
     for G in [:X, :Y, :Z, :T, :Tdag, :S, :Sdag]
+        @info "Testing $G"
         @test instruct!(Val(2),v1 |> CuArray, Val(G), (3,), (4,5), (0, 1)) |> Vector ≈ instruct!(Val(2),v1 |> copy, Val(G), (3,), (4,5), (0, 1))
         @test instruct!(Val(2),vn |> CuArray, Val(G), (3,), (4,5), (0, 1)) |> Matrix ≈ instruct!(Val(2),vn |> copy, Val(G), (3,), (4,5), (0, 1))
         @test instruct!(Val(2),v1 |> CuArray, Val(G), (3,), (1,), (1,)) |> Vector ≈ instruct!(Val(2),v1 |> copy, Val(G),(3,), (1,), (1,))
