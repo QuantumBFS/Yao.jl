@@ -1,12 +1,3 @@
-# get index
-macro idx(shape, grididx=1, ctxsym=:ctx)
-    quote
-        x = $(esc(shape))
-        i = $linear_index($(esc(ctxsym)), $(esc(grididx)))
-        i > $prod2(x) && return
-        @inbounds Base.CartesianIndices(x)[i].I
-    end
-end
 replace_first(x::NTuple{2}, v) = (v, x[2])
 replace_first(x::NTuple{1}, v) = (v,)
 prod2(x::NTuple{2}) = x[1] * x[2]
@@ -27,35 +18,32 @@ function instruct!(::Val{2}, state::DenseCuVecOrMat, U0::AbstractMatrix, locs::N
     configs = itercontrol(nbit, locked_bits, locked_vals)
 
     len = length(configs)
-    @inline function kernel(ctx, state, locs_raw, U, configs, len)
+    @kernel function kernel(state, locs_raw, U, configs, len)
         CUDA.assume(len > 0)
         sz = size(state)
         CUDA.assume(length(sz) == 1 || length(sz) == 2)
-        inds = @idx replace_first(sz, len)
-        x = @inbounds configs[inds[1]]
-        @inbounds unrows!(piecewise(state, inds), x .+ locs_raw, U)
-        return
+        i, j = @index(Global, NTuple)
+        x = @inbounds configs[i]
+        @inbounds unrows!(view(state, :, j), x .+ locs_raw, U)
     end
 
-    @inline function kernel_single_entry_diag(ctx, state, loc, val, configs, len)
+    @kernel function kernel_single_entry_diag(state, loc, val, configs, len)
         CUDA.assume(len > 0)
         sz = size(state)
         CUDA.assume(length(sz) == 1 || length(sz) == 2)
-        inds = @idx replace_first(sz, len)
-        x = @inbounds configs[inds[1]]
-        @inbounds piecewise(state, inds)[x + loc] *= val
-        return
+        i, j = @index(Global, NTuple)
+        x = @inbounds configs[i]
+        @inbounds state[x + loc, j] *= val
     end
 
-    elements = len*size(state,2)
     if U isa Diagonal && count(!isone, U.diag) == 1
         @debug "The single entry diagonal matrix, on: GPU, locations: $(locs), controlled by: $(clocs) = $(cvals)."
         k = findfirst(!isone, U.diag)
         loc = locs_raw[k]
         val = U.diag[k]
-        gpu_call(kernel_single_entry_diag, state, loc, val, configs, len; elements)
+        kernel(get_backend(state))(state, loc, val, configs, len; ndrange=(len, size(state,2)))
     else
-        gpu_call(kernel, state, locs_raw, U, configs, len; elements)
+        kernel(get_backend(state))(state, locs_raw, U, configs, len; ndrange=(len, size(state,2)))
     end
     state
 end
@@ -74,13 +62,12 @@ function YaoArrayRegister.single_qubit_instruct!(state::DenseCuVecOrMat, U1::Abs
     configs = itercontrol(nbit, [loc], [0])
 
     len = length(configs)
-    @inline function kernel(ctx, state, a, b, c, d, len)
-        inds = @idx replace_first(size(state), len)
-        i = @inbounds configs[inds[1]]+1
-        @inbounds u1rows!(piecewise(state, inds), i, i+step, a, b, c, d)
-        return
+    @kernel function kernel(state, a, b, c, d, len)
+        i, j = @index(Global, NTuple)
+        i = @inbounds configs[i]+1
+        @inbounds u1rows!(view(state, :, j), i, i+step, a, b, c, d)
     end
-    gpu_call(kernel, state, a, b, c, d, len; elements=len*size(state,2))
+    kernel(get_backend(state))(state, a, b, c, d, len; ndrange=(len, size(state,2)))
     return state
 end
 
@@ -92,13 +79,12 @@ function YaoArrayRegister.single_qubit_instruct!(state::DenseCuVecOrMat, U1::SDP
     configs = itercontrol(nbit, [loc], [0])
 
     len = length(configs)
-    function kernel(ctx, state, b, c, step, len, configs)
-        inds = @idx replace_first(size(state), len)
-        x = @inbounds configs[inds[1]] + 1
-        @inbounds swaprows!(piecewise(state, inds), x, x+step, c, b)
-        return
+    @kernel function kernel(state, b, c, step, len, configs)
+        i, j = @index(Global, NTuple)
+        x = @inbounds configs[i] + 1
+        @inbounds swaprows!(view(state, :, j), x, x+step, c, b)
     end
-    gpu_call(kernel, state, b, c, step, len, configs; elements=len*size(state,2))
+    kernel(get_backend(state))(state, b, c, step, len, configs; ndrange=(len, size(state,2)))
     return state
 end
 
@@ -107,15 +93,14 @@ function YaoArrayRegister.single_qubit_instruct!(state::DenseCuVecOrMat, U1::SDD
     a, d = U1.diag
     nbit = log2dim1(state)
     mask = bmask(loc)
-    @inline function kernel(ctx, state, a, d, mask)
-        inds = @cartesianidx state
-        i = inds[1]
-        piecewise(state, inds)[i] *= anyone(i-1, mask) ? d : a
-        return
+    @kernel function kernel(state, a, d, mask)
+        i, j = @index(Global, NTuple)
+        state[i, j] *= anyone(i-1, mask) ? d : a
     end
-    gpu_call(kernel, state, a, d, mask; elements=length(state))
+    kernel(get_backend(state))(state, a, d, mask; ndrange=(size(state, 1), size(state, 2)))
     return state
 end
+
 
 YaoArrayRegister.single_qubit_instruct!(state::DenseCuVecOrMat, U::IMatrix, loc::Int) = state
 
@@ -129,13 +114,12 @@ function _instruct!(state::DenseCuVecOrMat, ::Val{:X}, locs::NTuple{L,Int}, cloc
     configs = itercontrol(nbit, [clocs..., locs[1]], [cvals..., 0])
     mask = bmask(locs...)
     len = length(configs)
-    @inline function kernel(ctx, state, mask, len, configs)
-        inds = @idx replace_first(size(state), len)
-        b = @inbounds configs[inds[1]]
-        @inbounds swaprows!(piecewise(state, inds), b+1, flip(b, mask) + 1)
-        return
+    @kernel function kernel(state, mask, len, configs)
+        i = @index(Global, Linear)
+        b = @inbounds configs[i]
+        @inbounds swaprows!(view(state, :, i), b+1, flip(b, mask) + 1)
     end
-    gpu_call(kernel, state, mask, len, configs; elements=len*size(state,2))
+    kernel(get_backend(state))(state, mask, len, configs; ndrange=(len, size(state,2)))
     return state
 end
 
@@ -148,16 +132,15 @@ function _instruct!(state::DenseCuVecOrMat, ::Val{:Y}, locs::NTuple{C,Int}) wher
     bit_parity = length(locs)%2 == 0 ? 1 : -1
     factor = (-im)^length(locs)
     len = length(configs)
-    @inline function kernel(ctx, state, mask, bit_parity, configs, len)
-        inds = @idx replace_first(size(state), len)
-        b = @inbounds configs[inds[1]]
+    @kernel function kernel(state, mask, bit_parity, configs, len)
+        i, j = @index(Global, NTuple)
+        b = @inbounds configs[i]
         i_ = flip(b, mask) + 1
         factor1 = count_ones(b&mask)%2 == 1 ? -factor : factor
         factor2 = factor1*bit_parity
-        @inbounds swaprows!(piecewise(state, inds), b+1, i_, factor2, factor1)
-        return
+        @inbounds swaprows!(view(state, :, j), b+1, i_, factor2, factor1)
     end
-    gpu_call(kernel, state, mask, bit_parity, configs, len; elements=len*size(state,2))
+    kernel(get_backend(state))(state, mask, bit_parity, configs, len; ndrange=(len, size(state,2)))
     return state
 end
 
@@ -168,13 +151,12 @@ function _instruct!(state::DenseCuVecOrMat, ::Val{:Y}, locs::Tuple{Int}, clocs::
     configs = itercontrol(nbit, [clocs..., locs...], [cvals..., 0])
     mask = bmask(locs...)
     len = length(configs)
-    @inline function kernel(ctx, state, configs, mask, len)
-        inds = @idx replace_first(size(state), len)
-        b = @inbounds configs[inds[1]]
-        @inbounds swaprows!(piecewise(state, inds), b+1, flip(b, mask) + 1, im, -im)
-        return
+    @kernel function kernel(state, configs, mask, len)
+        i = @index(Global, Linear)
+        b = @inbounds configs[i]
+        @inbounds swaprows!(view(state, :, i), b+1, flip(b, mask) + 1, im, -im)
     end
-    gpu_call(kernel, state, configs, mask, len; elements=len*size(state,2))
+    kernel(get_backend(state))(state, configs, mask, len; ndrange=(len, size(state,2)))
     return state
 end
 
@@ -183,13 +165,11 @@ function _instruct!(state::DenseCuVecOrMat, ::Val{:Z}, locs::NTuple{C,Int}) wher
     length(locs) == 0 && return state
     nbit = log2dim1(state)
     mask = bmask(locs...)
-    @inline function kernel(ctx, state, mask)
-        inds = @cartesianidx state
-        i = inds[1]
-        piecewise(state, inds)[i] *= count_ones((i-1)&mask)%2==1 ? -1 : 1
-        return
+    @kernel function kernel(state, mask)
+        i, j = @index(Global, NTuple)
+        state[i, j] *= count_ones((i-1)&mask)%2==1 ? -1 : 1
     end
-    gpu_call(kernel, state, mask; elements=length(state))
+    kernel(get_backend(state))(state, mask; ndrange=(size(state, 1), size(state, 2)))
     return state
 end
 
@@ -201,26 +181,22 @@ for (G, FACTOR) in zip([:Z, :S, :T, :Sdag, :Tdag], [:(-one(Int32)), :(1f0im), :(
             length(locs) == 0 && return state
             nbit = log2dim1(state)
             mask = bmask(Int32, locs...)
-            @inline function kernel(ctx, state, mask)
-                inds = @cartesianidx state
-                i = inds[1]
-                piecewise(state, inds)[i] *= $FACTOR ^ count_ones(Int32(i-1)&mask)
-                return
+            @kernel function kernel(state, mask)
+                i, j = @index(Global, NTuple)
+                state[i, j] *= $FACTOR ^ count_ones(Int32(i-1)&mask)
             end
-            gpu_call(kernel, state, mask; elements=length(state))
+            kernel(get_backend(state))(state, mask; ndrange=(size(state, 1), size(state, 2)))
             return state
         end
     end
     @eval function _instruct!(state::DenseCuVecOrMat, ::Val{$(QuoteNode(G))}, locs::Tuple{Int}, clocs::NTuple{C, Int}, cvals::NTuple{C, Int}) where C
         @debug "The $($(QuoteNode(G))) gate, on: GPU, locations: $(locs), controlled by: $(clocs) = $(cvals)."
         ctrl = controller((clocs..., locs...), (cvals..., 1))
-        @inline function kernel(ctx, state, ctrl)
-            inds = @cartesianidx state
-            i = inds[1]
-            piecewise(state, inds)[i] *= ctrl(i-1) ? $FACTOR : one($FACTOR)
-            return
+        @kernel function kernel(state, ctrl)
+            i, j = @index(Global, NTuple)
+            state[i, j] *= ctrl(i-1) ? $FACTOR : one($FACTOR)
         end
-        gpu_call(kernel, state, ctrl; elements=length(state))
+        kernel(get_backend(state))(state, ctrl; ndrange=(size(state, 1), size(state, 2)))
         return state
     end
 end
@@ -253,16 +229,14 @@ function instruct!(::Val{2}, state::DenseCuVecOrMat, ::Val{:SWAP}, locs::Tuple{I
     mask2 = bmask(b2)
 
     configs = itercontrol(log2dim1(state), [locs...], [1,0])
-    function kf(ctx, state, mask1, mask2)
-        inds = @idx replace_first(size(state), length(configs))
-
-        b = configs[inds[1]]
+    @kernel function kernel(state, mask1, mask2)
+        i, j = @index(Global, NTuple)
+        b = configs[i]
         i = b+1
         i_ = b ⊻ (mask1|mask2) + 1
-        swaprows!(piecewise(state, inds), i, i_)
-        nothing
+        swaprows!(view(state, :, j), i, i_)
     end
-    gpu_call(kf, state, mask1, mask2; elements=length(configs)*size(state,2))
+    kernel(get_backend(state))(state, mask1, mask2; ndrange=(length(configs), size(state,2)))
     state
 end
 
@@ -274,21 +248,20 @@ function instruct!(::Val{2}, state::DenseCuVecOrMat, ::Val{:PSWAP}, locs::Tuple{
     nbit = log2dim1(state)
     mask1 = bmask(locs[1])
     mask2 = bmask(locs[2])
-    mask12 = mask1|mask2
+    mask12 = mask1 | mask2
     a, c, b_, d = mat(Rx(θ))
     e = exp(-im/2*θ)
     configs = itercontrol(nbit, [locs...], [0,0])
     len = length(configs)
-    @inline function kernel(ctx, state, mask2, mask12, configs, a, b_, c, d)
-        inds = @idx replace_first(size(state), len)
-        @inbounds x = configs[inds[1]]
-        piecewise(state, inds)[x+1] *= e
-        piecewise(state, inds)[x⊻mask12+1] *= e
+    @kernel function kernel(state, mask2, mask12, configs, a, b_, c, d)
+        i, j = @index(Global, NTuple)
+        @inbounds x = configs[i]
+        state[j, x+1] *= e
+        state[j, x⊻mask12+1] *= e
         y = x ⊻ mask2
-        @inbounds u1rows!(piecewise(state, inds), y+1, y⊻mask12+1, a, b_, c, d)
-        return
+        @inbounds u1rows!(view(state, :, j), y+1, y⊻mask12+1, a, b_, c, d)
     end
-    gpu_call(kernel, state, mask2, mask12, configs, a, b_, c, d; elements=len*size(state,2))
+    kernel(get_backend(state))(state, mask2, mask12, configs, a, b_, c, d; ndrange=(len, size(state,2)))
     state
 end
 

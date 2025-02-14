@@ -8,7 +8,7 @@ using Yao.YaoArrayRegister.Random
 using Yao.YaoArrayRegister
 using Yao
 using CUDA
-using CUDA.GPUArrays: gpu_call, @linearidx, @cartesianidx, linear_index
+using CUDA.GPUArrays: @kernel, @index, get_backend
 using Yao.YaoArrayRegister
 using Yao.YaoBlocks
 using Yao.ConstGate: SWAPGate
