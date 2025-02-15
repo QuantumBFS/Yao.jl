@@ -42,14 +42,13 @@ function measure!(::RemoveMeasured, ::ComputationalBasis, reg::AbstractCuArrayRe
     res_cpu = map(ib->_measure(rng, basis(reg), view(pl_cpu, :, ib), 1)[], 1:B)
     res = CuArray(res_cpu)
     CI = Base.CartesianIndices(nregm)
-    @inline function kernel(ctx, nregm, regm, res, pl)
-        state = @linearidx nregm
+    @kernel function kernel(nregm, regm, res, pl)
+        state = @index(Global, Linear)
         @inbounds i,j = CI[state].I
         @inbounds r = Int(res[j])+1
         @inbounds nregm[i,j] = regm[r,i,j]/CUDA.sqrt(pl[r, j])
-        return
     end
-    gpu_call(kernel, nregm, regm, res, pl)
+    kernel(get_backend(nregm))(nregm, regm, res, pl; ndrange=size(nregm))
     reg.state = reshape(nregm,1,:)
     return reg isa ArrayReg ? Array(res)[] : res
 end
@@ -63,14 +62,13 @@ function measure!(::NoPostProcess, ::ComputationalBasis, reg::AbstractCuArrayReg
     res = CuArray(res_cpu)
     CI = Base.CartesianIndices(regm)
 
-    @inline function kernel(ctx, regm, res, pl)
-        state = @linearidx regm
+    @kernel function kernel(regm, res, pl)
+        state = @index(Global, Linear)
         @inbounds k,i,j = CI[state].I
         @inbounds rind = Int(res[j]) + 1
         @inbounds regm[k,i,j] = k==rind ? regm[k,i,j]/CUDA.sqrt(pl[k, j]) : T(0)
-        return
     end
-    gpu_call(kernel, regm, res, pl)
+    kernel(get_backend(regm))(regm, res, pl; ndrange=size(regm))
     return reg isa ArrayReg ? Array(res)[] : res
 end
 
@@ -120,33 +118,31 @@ function measure!(rst::ResetTo, ::ComputationalBasis, reg::AbstractCuArrayReg{D,
     res = CuArray(res_cpu)
     CI = Base.CartesianIndices(regm)
 
-    @inline function kernel(ctx, regm, res, pl, val)
-        state = @linearidx regm
+    @kernel function kernel(regm, res, pl, val)
+        state = @index(Global, Linear)
         @inbounds k,i,j = CI[state].I
         @inbounds rind = Int(res[j]) + 1
         @inbounds k==val+1 && (regm[k,i,j] = regm[rind,i,j]/CUDA.sqrt(pl[rind, j]))
-	CUDA.device_synchronize()
+	    CUDA.device_synchronize()
         @inbounds k!=val+1 && (regm[k,i,j] = 0)
-        return
     end
 
-    gpu_call(kernel, regm, res, pl, rst.x)
+    kernel(get_backend(regm))(regm, res, pl, rst.x; ndrange=size(regm))
     return reg isa ArrayReg ? Array(res)[] : res
 end
 
 function YaoArrayRegister.batched_kron(A::DenseCuArray{T1}, B::DenseCuArray{T2}) where {T1 ,T2}
     res = CUDA.zeros(promote_type(T1,T2), size(A,1)*size(B, 1), size(A,2)*size(B,2), size(A, 3))
     CI = Base.CartesianIndices(res)
-    @inline function kernel(ctx, res, A, B)
-        state = @linearidx res
+    @kernel function kernel(res, A, B)
+        state = @index(Global, Linear)
         @inbounds i,j,b = CI[state].I
         i_A, i_B = divrem((i-1), size(B,1))
         j_A, j_B = divrem((j-1), size(B,2))
         @inbounds res[state] = A[i_A+1, j_A+1, b]*B[i_B+1, j_B+1, b]
-        return
     end
 
-    gpu_call(kernel, res, A, B)
+    kernel(get_backend(res))(res, A, B; ndrange=size(res))
     return res
 end
 
@@ -160,16 +156,15 @@ function YaoArrayRegister.batched_kron!(C::CuArray{T3, 3}, A::DenseCuArray, B::D
     @boundscheck (size(C) == (size(A,1)*size(B,1), size(A,2)*size(B,2), size(A,3))) || throw(DimensionMismatch())
     @boundscheck (size(A,3) == size(B,3) == size(C,3)) || throw(DimensionMismatch())
     CI = Base.CartesianIndices(C)
-    @inline function kernel(ctx, C, A, B)
-        state = @linearidx C
+    @kernel function kernel(C, A, B)
+        state = @index(Global, Linear)
         @inbounds i,j,b = CI[state].I
         i_A, i_B = divrem((i-1), size(B,1))
         j_A, j_B = divrem((j-1), size(B,2))
         @inbounds C[state] = A[i_A+1, j_A+1, b]*B[i_B+1, j_B+1, b]
-        return
     end
 
-    gpu_call(kernel, C, A, B)
+    kernel(get_backend(C))(C, A, B; ndrange=size(C))
     return C
 end
 
