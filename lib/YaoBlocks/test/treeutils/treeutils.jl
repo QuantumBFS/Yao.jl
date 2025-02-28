@@ -150,6 +150,14 @@ end
     @test zero_state(6) |> c ≈ zero_state(6) |> simplify(c, rules = [to_basictypes])
 end
 
+@testset "simplify" begin
+    qc = chain(2)
+    m = matblock(rand(ComplexF64,2,2))
+    qc2 = chain(1,put(1,1=>H), matblock(m))
+    push!(qc, subroutine(2,qc2,1))
+    @test simplify(qc; rules=[to_basictypes, Optimise.eliminate_nested]) isa ChainBlock
+end
+
 @testset "replace block" begin
     @test eliminate_nested(chain(7, chain(7, control(7, 1, 2 => X)), put(7, 4 => X))) ==
           chain(7, [control(7, 1, 2 => X), put(7, 4 => X)])

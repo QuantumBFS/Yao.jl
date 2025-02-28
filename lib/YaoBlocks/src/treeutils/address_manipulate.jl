@@ -63,7 +63,15 @@ function map_address(blk::Measure{D}, info::AddressInfo) where D
     return m
 end
 
-map_address(blk::PrimitiveBlock, info::AddressInfo) = blk
+function map_address(blk::PrimitiveBlock, info::AddressInfo)
+    @assert length(info.addresses) == nqudits(blk) "expected $(nqudits(blk)) addresses, got $(length(info.addresses))"
+    if length(info.addresses) == info.nbits
+        return blk
+    else
+        # raise the number of qubits
+        return put(info.nbits, info.addresses => blk)
+    end
+end
 map_address(blk::PutBlock, info::AddressInfo) =
     put(info.nbits, blk.locs / info => content(blk))
 
