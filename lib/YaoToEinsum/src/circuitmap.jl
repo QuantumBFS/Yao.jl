@@ -24,7 +24,7 @@ function add_gate!(eb::EinBuilder{T}, b::PutBlock{D,C}) where {T,D,C}
 end
 # general and diagonal gates
 function add_matrix!(eb::EinBuilder{T, D}, k::Int, m::AbstractMatrix, locs::Vector) where {T, D}
-    if isdiag(m)
+    if m isa Diagonal
         add_tensor!(eb, reshape(Vector{T}(diag(m)), fill(D, k)...), eb.slots[locs])
     elseif m isa YaoBlocks.OuterProduct  # low rank
         nlabels = [newlabel!(eb) for _=1:k]
