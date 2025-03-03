@@ -549,9 +549,9 @@ vizcircuit(; kwargs...) = c->vizcircuit(c; kwargs...)
 Change the default theme to dark.
 """
 function darktheme!()
-    const CircuitStyles.linecolor[] = "#FFFFFF"
-    const CircuitStyles.textcolor[] = "#FFFFFF"
-    const BlochStyles.color[] = "#FFFFFF"
+    CircuitStyles.linecolor[] = "#FFFFFF"
+    CircuitStyles.textcolor[] = "#FFFFFF"
+    BlochStyles.color[] = "#FFFFFF"
     BlochStyles.axes_colors .= ["#FFFFFF", "#FFFFFF", "#FFFFFF"]
 end
 
@@ -561,8 +561,8 @@ end
 Change the default theme to light.
 """
 function lighttheme!()
-    const CircuitStyles.linecolor[] = "#000000"
-    const CircuitStyles.textcolor[] = "#000000"
-    const BlochStyles.color[] = "#000000"
+    CircuitStyles.linecolor[] = "#000000"
+    CircuitStyles.textcolor[] = "#000000"
+    BlochStyles.color[] = "#000000"
     BlochStyles.axes_colors .= ["#000000", "#000000", "#000000"]
 end
