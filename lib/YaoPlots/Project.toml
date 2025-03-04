@@ -1,6 +1,6 @@
 name = "YaoPlots"
 uuid = "32cfe2d9-419e-45f2-8191-2267705d8dbc"
-version = "0.9.3"
+version = "0.9.4"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
