@@ -26,7 +26,7 @@ using Yao
 
 A(i, j) = control(i, j=>shift(2π/(1<<(i-j+1))))
 
-# Once you construct the blockl you can inspect its matrix using `mat`
+# Once you construct the block you can inspect its matrix using `mat`
 # function. Let's construct the circuit in dash box A, and see the matrix of
 # ``R_4`` gate.
 
@@ -154,7 +154,7 @@ PE(n, m, U) =
 # back, after the context. This is equivalent to manually `focus!`
 # then `relax!`
 
-# fullly activated
+# fully activated
 
 r = rand_state(5)
 

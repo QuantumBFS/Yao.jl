@@ -50,7 +50,7 @@ for i = 1:num_grover_step(oracle, gen)
 end
 
 # ## Rejection Sampling
-# In practise, it is often not possible to determine the number of iterations before actual running.
+# In practice, it is often not possible to determine the number of iterations before actual running.
 # we can use rejection sampling technique to avoid estimating the number of grover steps.
 
 using Random; Random.seed!(2)  #src
@@ -73,8 +73,8 @@ end
 
 # After running the grover search, we have a checker program that flips the ancilla qubit
 # if the output is the desired value, we assume the checker program can be implemented in polynomial time.
-# to gaurante the output is correct.
-# We contruct a checker "program", if the result is correct, flip the ancilla qubit
+# to guarantee the output is correct.
+# We construct a checker "program", if the result is correct, flip the ancilla qubit
 ctrl = -collect(1:num_bit); ctrl[[3,6,7]] *= -1
 checker = control(num_bit+1,ctrl, num_bit+1=>X)
 

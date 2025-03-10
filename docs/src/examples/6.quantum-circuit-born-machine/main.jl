@@ -11,7 +11,7 @@ using Yao, LinearAlgebra, Plots
 # ## Training Target
 
 # In this tutorial, we will ask the variational circuit to learn the most basic
-# distribution: a guassian distribution. It is defined as follows:
+# distribution: a Gaussian distribution. It is defined as follows:
 
 # ```math
 # f(x \left| \mu, \sigma^2\right) = \frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}
@@ -33,7 +33,7 @@ Plots.plot(pg)
 
 # A quantum circuit born machine looks like the following:
 
-# ![differentiable ciruit](assets/differentiable.png)
+# ![differentiable circuit](assets/differentiable.png)
 
 # It is composited by two different layers: **rotation layer** and **entangler layer**.
 
@@ -53,7 +53,7 @@ Plots.plot(pg)
 # use ``Rz(\theta)\cdot Rx(\theta)``
 
 # In **幺**, every Hilbert operator is a **block** type, this
-# ncludes all **quantum gates** and **quantum oracles**.
+# includes all **quantum gates** and **quantum oracles**.
 # In general, operators appears in a quantum circuit
 # can be divided into **Composite Blocks** and **Primitive Blocks**.
 
@@ -84,8 +84,8 @@ layer(nbit::Int, x::Symbol) = layer(nbit, Val(x))
 layer(nbit::Int, ::Val{:first}) = chain(nbit, put(i=>chain(Rx(0), Rz(0))) for i = 1:nbit);
 
 # We do not need to feed the first `n` parameter into `put` here.
-# All factory methods can be **lazy** evaluate **the first arguements**, which is the number of qubits.
-# It will return a lambda function that requires a single interger input.
+# All factory methods can be **lazy** evaluate **the first arguments**, which is the number of qubits.
+# It will return a lambda function that requires a single integer input.
 # The instance of desired block will only be constructed until all the information is filled.
 # When you filled all the information in somewhere of the declaration, 幺 will be able to infer the others.
 # We will now define the rest of rotation layers

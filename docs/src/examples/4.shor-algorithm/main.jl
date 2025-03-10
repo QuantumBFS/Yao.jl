@@ -1,7 +1,7 @@
 # # [Shor's Algorithm](@id Shor)
 
 # ## References
-# * [Neilsen](https://aapt.scitation.org/doi/abs/10.1119/1.1463744?journalCode=ajp)
+# * [Nielsen](https://aapt.scitation.org/doi/abs/10.1119/1.1463744?journalCode=ajp)
 # * [An Insightful Blog](https://algassert.com/post/1718)
 
 # The main program of a Shor's algorithm can be summarized in several lines of code.
@@ -205,12 +205,12 @@ function shor(L::Int, ver=Val(:quantum); maxtry=100)
 end
 
 # Except some shortcuts, in each try, the main program can be summarized in several steps
-# 1. randomly pick a number that prime to the input numebr `L`, i.e. `gcd(x, L) = 1`.
+# 1. randomly pick a number that prime to the input number `L`, i.e. `gcd(x, L) = 1`.
 # The complexity of this algorithm is polynomial.
 # 2. get the order `x`, i.e. finding a number `r` that satisfies `mod(x^r, L) = 1`.
 # If `r` is even and `x^(r÷2)` is non-trivial, go on, otherwise start another try.
 # Here, trivial means equal to `L-1 (mod L)`.
-# 3. According to Theorem 5.2 in Neilsen book,
+# 3. According to Theorem 5.2 in Nielsen book,
 # one of `gcd(x^(r÷2)-1, L)` and `gcd(x^(r÷2)+1, L)` must be a non-trivial (`!=1`) factor of `L`.
 # Notice `powermod(x, r÷2, L)` must be `-1` rather than `1`,
 # otherwise the order should be `r/2` according to definition.
@@ -278,7 +278,7 @@ end
 # 2. `KMod` that computes a classical function `mod(a^k*x, L)`.
 # `k` is the integer stored in first `K` (or `ncbit`) qubits and the rest `N-K` qubits stores `a`.
 # Notice it is not a basic gate, it should have been compiled to multiple gates, which is not implemented in `Yao` for the moment.
-# To learn more about implementing arithmatics on a quantum circuit, please read [this paper](https://arxiv.org/abs/1805.12445).
+# To learn more about implementing arithmetics on a quantum circuit, please read [this paper](https://arxiv.org/abs/1805.12445).
 # 3. Inverse quantum fourier transformation.
 
 # ## Run
