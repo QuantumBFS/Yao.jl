@@ -57,6 +57,7 @@ end
 
 Return the contraction complexity of the tensor network.
 """
-function OMEinsum.contraction_complexity(c::TensorNetwork; size_info=uniformsize(c.code, 2))
+function OMEinsum.contraction_complexity(c::TensorNetwork)
+    size_info = OMEinsum.get_size_dict(getixsv(code), (A, B, C, D))
     return contraction_complexity(c.code, size_info)
 end
