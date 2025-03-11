@@ -41,7 +41,7 @@ function add_matrix!(eb::EinBuilder{T, D}, k::Int, m::AbstractMatrix, locs::Vect
         end
     else
         nlabels = [newlabel!(eb) for _=1:k]
-        add_tensor!(eb, reshape(Matrix{T}(m), fill(2, 2k)...), [nlabels..., eb.slots[locs]...])
+        add_tensor!(eb, reshape(Matrix{T}(m), fill(D, 2k)...), [nlabels..., eb.slots[locs]...])
         eb.slots[locs] .= nlabels
     end
     return eb
