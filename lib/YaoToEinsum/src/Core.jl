@@ -35,7 +35,7 @@ end
 Contract the tensor network, and return the result tensor.
 """
 function contract(c::TensorNetwork)
-    return c.code(c.tensors...; size_info=uniformsize(c.code, 2))
+    return c.code(c.tensors...)
 end
 
 """
@@ -48,7 +48,8 @@ Optimize the code of the tensor network.
 * `optimizer::Optimizer`: The optimizer to use, default is `TreeSA()`. Please check [OMEinsumContractors.jl](https://github.com/TensorBFS/OMEinsumContractionOrders.jl) for more information.
 """
 function OMEinsum.optimize_code(c::TensorNetwork, args...)
-    optcode = optimize_code(c.code, uniformsize(c.code, 2), args...)
+    size_info = OMEinsum.get_size_dict(getixsv(c.code), c.tensors)
+    optcode = optimize_code(c.code, size_info, args...)
     return TensorNetwork(optcode, c.tensors)
 end
 
@@ -58,5 +59,6 @@ end
 Return the contraction complexity of the tensor network.
 """
 function OMEinsum.contraction_complexity(c::TensorNetwork)
-    return contraction_complexity(c.code, uniformsize(c.code, 2))
+    size_info = OMEinsum.get_size_dict(getixsv(c.code), c.tensors)
+    return contraction_complexity(c.code, size_info)
 end
