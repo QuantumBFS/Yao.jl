@@ -47,7 +47,8 @@ Optimize the code of the tensor network.
 * `c::TensorNetwork`: The tensor network.
 * `optimizer::Optimizer`: The optimizer to use, default is `TreeSA()`. Please check [OMEinsumContractors.jl](https://github.com/TensorBFS/OMEinsumContractionOrders.jl) for more information.
 """
-function OMEinsum.optimize_code(c::TensorNetwork, args...; size_info=uniformsize(c.code, 2))
+function OMEinsum.optimize_code(c::TensorNetwork, args...)
+    size_info = OMEinsum.get_size_dict(getixsv(code), (A, B, C, D))
     optcode = optimize_code(c.code, size_info, args...)
     return TensorNetwork(optcode, c.tensors)
 end
