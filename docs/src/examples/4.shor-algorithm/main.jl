@@ -4,14 +4,14 @@
 # * [Neilsen](https://aapt.scitation.org/doi/abs/10.1119/1.1463744?journalCode=ajp)
 # * [An Insightful Blog](https://algassert.com/post/1718)
 
-# The main program of a Shor's algorithm can be summrized in several lines of code.
-# For the theory part, please refer the reference materials above.
-# It factorize an integer `L`, and returns one of the factors.
+# The main program of a Shor's algorithm can be summarized in several lines of code.
+# For the theory part, please refer to the reference materials above.
+# It factorizes an integer `L`, and returns one of the factors.
 using Yao, BitBasis
 using Yao.EasyBuild: qft_circuit
 
 # ## Number theory basic
-# Before entering the main program, let us defined some useful functions in number theory.
+# Before entering the main program, let us define some useful functions in number theory.
 
 module NumberTheory
 
