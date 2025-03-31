@@ -8,7 +8,7 @@
 
 Create a unitary channel, where `probs` is a real vector that sum up to 1.
 """
-struct UnitaryChannel{D, W<:AbstractVector} <: CompositeBlock{D}
+struct UnitaryChannel{D, W<:AbstractVector} <: AbstractQuantumChannel{D}
     n::Int
     operators::Vector{AbstractBlock{D}}
     probs::W
