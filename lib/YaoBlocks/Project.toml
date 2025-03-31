@@ -1,6 +1,6 @@
 name = "YaoBlocks"
 uuid = "418bc28f-b43b-5e0b-a6e7-61bbc1a2c1df"
-version = "0.13.14"
+version = "0.13.15"
 
 [deps]
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
@@ -27,7 +27,7 @@ CacheServers = "0.2"
 ChainRulesCore = "1.11"
 DocStringExtensions = "0.8, 0.9"
 InteractiveUtils = "1"
-KrylovKit = "0.5, 0.6, 0.7, 0.8"
+KrylovKit = "0.5, 0.6, 0.7, 0.8, 0.9"
 LegibleLambdas = "0.2, 0.3"
 LinearAlgebra = "1"
 LuxurySparse = "0.7"
