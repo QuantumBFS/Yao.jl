@@ -1,46 +1,3 @@
-"""
-    pauli_error_channel(; px::Real, py::Real=px, pz::Real=px)
-
-Create the Pauli error channel as a [`UnitaryChannel`](@ref)
-
-```math 
-    (1 - (p_x + p_y + p_z))⋅ρ + p_x⋅XρX + p_y⋅YρY  + p_z⋅ZρZ
-```
-"""
-function pauli_error_channel(; px::Real, py::Real=px, pz::Real=px)
-    pz + px + py ≤ 1 || throw(ArgumentError("sum of error probability is larger than 1"))
-    return UnitaryChannel(
-        [I2, X, Y, Z],
-        [1-(px+py+pz), px, py, pz],
-    )
-end
-
-"""
-    bit_flip_channel(p::Real)
-
-Create a bit flip channel as a [`UnitaryChannel`](@ref).
-
-```math
-(1-p)⋅ρ + p⋅XρX
-```
-"""
-function bit_flip_channel(p::Real)
-    return unitary_channel([I2, X], [1-p, p])
-end
-
-"""
-    phase_flip_channel(::Real)
-
-Create a phase flip channel as [`UnitaryChannel`](@ref).
-
-```math
-(1-p)⋅ρ + p⋅ZρZ
-```
-"""
-function phase_flip_channel(p::Real)
-    return UnitaryChannel([I2, Z], [1-p, p])
-end
-
 struct DepolarizingChannel{T} <: PrimitiveBlock{2}
     n::Int # n is not necessary but this is required by a block
     p::T
@@ -64,29 +21,9 @@ Create a global depolarizing channel.
 
 ### Keyword Arguments
 - `p`: probability of this error to occur.
-
-### See also
-[`single_qubit_depolarizing_channel`](@ref) and [`two_qubit_depolarizing_channel`](@ref)
-for depolarizing channels acting on only one or two qubits.
 """
 function depolarizing_channel(n::Int; p::Real)
     return DepolarizingChannel(n, p)
-end
-
-"""
-    single_qubit_depolarizing_channel(p::Real)
-
-Create a single-qubit depolarizing channel.
-
-The factor of 3/4 in front of p ensures that 
-`single_qubit_depolarizing_channel(p) == depolarizing_channel(1, p)`
-
-```math
-(1 - 3p/4 ⋅ρ) + p/4⋅(XρX + YρY + ZρZ)
-```
-"""
-function single_qubit_depolarizing_channel(p::Real)
-    return pauli_error_channel(px=p/4, py=p/4, pz=p/4)
 end
 
 """
@@ -108,34 +45,4 @@ function two_qubit_depolarizing_channel(p::Real)
          p/16, p/16, p/16, p/16,
         ],
     )
-end
-
-# https://docs.pennylane.ai/en/stable/code/api/pennylane.ResetError.html
-"""
-Single-qubit Reset error channel.
-
-This channel is modelled by the following Kraus matrices:
-```math
-\\begin{align}
-K_0 = \\sqrt{1 - p_0 - p_1} I\\\\
-K_1 = \\sqrt{p_0} P_0\\\\
-K_2 = \\sqrt{p_0} P_u\\\\
-K_3 = \\sqrt{p_1} P_1\\\\
-K_4 = \\sqrt{p_1} P_d
-\\end{align}
-```
-where ``p_0 \\in [0,1]`` is the probability of a reset to 0, and ``p_1 \\in [0,1]`` is the probability of a reset to 1 error.
-"""
-function reset_error(; p0::Real, p1::Real)
-    p0 + p1 ≤ 1 || throw(ArgumentError("sum of error probability is larger than 1"))
-    operators = AbstractBlock{2}[sqrt(1 - p0 - p1) * I2]
-    if !iszero(p0)
-        push!(operators, sqrt(p0) * ConstGate.P0)
-        push!(operators, sqrt(p0) * ConstGate.Pu)
-    end
-    if !iszero(p1)
-        push!(operators, sqrt(p1) * ConstGate.P1)
-        push!(operators, sqrt(p1) * ConstGate.Pd)
-    end
-    return KrausChannel(operators)
 end

@@ -3,17 +3,17 @@
 # here
 
 """
-    UnitaryChannel{D, W<:AbstractVector} <: CompositeBlock{D}
-    UnitaryChannel(operators, probs)
+    ProbabilisticUnitaryChannel{D, W<:AbstractVector} <: CompositeBlock{D}
+    ProbabilisticUnitaryChannel(operators, probs)
 
 Create a unitary channel, where `probs` is a real vector that sum up to 1.
 """
-struct UnitaryChannel{D, W<:AbstractVector} <: AbstractQuantumChannel{D}
+struct ProbabilisticUnitaryChannel{D, W<:AbstractVector} <: AbstractQuantumChannel{D}
     n::Int
     operators::Vector{AbstractBlock{D}}
     probs::W
 
-    function UnitaryChannel(operators::Vector{AbstractBlock{D}}, w::AbstractVector) where D
+    function ProbabilisticUnitaryChannel(operators::Vector{AbstractBlock{D}}, w::AbstractVector) where D
         @assert length(operators) == length(w) && length(w) != 0
         if !(all(x->x>=0, w) && sum(w) ≈ 1)
             error("The probabilities must be ⩾ 0 and its sum must be 1!")
@@ -23,17 +23,17 @@ struct UnitaryChannel{D, W<:AbstractVector} <: AbstractQuantumChannel{D}
     end
 end
 
-function UnitaryChannel(it, probs)
+function ProbabilisticUnitaryChannel(it, probs)
     length(it) == 0 && error("The input operator list size can not be 0!")
     D = nlevel(first(it))
-    UnitaryChannel(collect(AbstractBlock{D}, it), probs)
+    ProbabilisticUnitaryChannel(collect(AbstractBlock{D}, it), probs)
 end
-nqudits(uc::UnitaryChannel) = uc.n
+nqudits(uc::ProbabilisticUnitaryChannel) = uc.n
 
-function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::PutBlock{D,C,<:UnitaryChannel}) where {D,C,T}
-    unsafe_apply!(r, UnitaryChannel([PutBlock(x.n, operator, x.locs) for operator in x.content.operators], x.content.probs))
+function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::PutBlock{D,C,<:ProbabilisticUnitaryChannel}) where {D,C,T}
+    unsafe_apply!(r, ProbabilisticUnitaryChannel([PutBlock(x.n, operator, x.locs) for operator in x.content.operators], x.content.probs))
 end
-function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::UnitaryChannel) where {D,T}
+function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::ProbabilisticUnitaryChannel) where {D,T}
     r0 = copy(r)
     # first
     regscale!(unsafe_apply!(r, first(x.operators)), first(x.probs))
@@ -45,11 +45,11 @@ function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::UnitaryChannel) where {D
     return r
 end
 
-subblocks(x::UnitaryChannel) = x.operators
-chsubblocks(x::UnitaryChannel, it) = UnitaryChannel(collect(it), x.probs)
-occupied_locs(x::UnitaryChannel) = union(occupied_locs.(x.operators)...)
+subblocks(x::ProbabilisticUnitaryChannel) = x.operators
+chsubblocks(x::ProbabilisticUnitaryChannel, it) = ProbabilisticUnitaryChannel(collect(it), x.probs)
+occupied_locs(x::ProbabilisticUnitaryChannel) = union(occupied_locs.(x.operators)...)
 
-function cache_key(x::UnitaryChannel)
+function cache_key(x::ProbabilisticUnitaryChannel)
     key = hash(x.probs)
     for each in x.operators
         key = hash(each, key)
@@ -57,16 +57,16 @@ function cache_key(x::UnitaryChannel)
     return key
 end
 
-function Base.:(==)(lhs::UnitaryChannel, rhs::UnitaryChannel)
+function Base.:(==)(lhs::ProbabilisticUnitaryChannel, rhs::ProbabilisticUnitaryChannel)
     return (lhs.n == rhs.n) && (lhs.probs == rhs.probs) && (lhs.operators == rhs.operators)
 end
 
-Base.adjoint(x::UnitaryChannel) = UnitaryChannel(adjoint.(x.operators), x.probs)
+Base.adjoint(x::ProbabilisticUnitaryChannel) = ProbabilisticUnitaryChannel(adjoint.(x.operators), x.probs)
 
 """
-    unitary_channel(operators, probs) -> UnitaryChannel
+    unitary_channel(operators, probs) -> ProbabilisticUnitaryChannel
 
-Returns a [`UnitaryChannel`](@ref) instance, where ``operators` is a list of operators, `probs` is a real vector that sum up to 1.
+Returns a [`ProbabilisticUnitaryChannel`](@ref) instance, where ``operators` is a list of operators, `probs` is a real vector that sum up to 1.
 The unitary channel is defined as below
 
 ```math
@@ -86,10 +86,8 @@ unitary_channel
 └─ [0.7] Z
 ```
 """
-unitary_channel(operators, probs::AbstractVector) = UnitaryChannel(operators, probs)
+unitary_channel(operators, probs::AbstractVector) = ProbabilisticUnitaryChannel(operators, probs)
 
-function SuperOp(x::UnitaryChannel)
-    SuperOp()
-end
-
-KrausChannel(x::UnitaryChannel{D}) where D = KrausChannel(x.n, AbstractBlock{D}[sqrt(pi) * oi for (pi, oi) in zip(x.probs, x.operators)])
+# convert unitary channel to kraus channel and superop
+KrausChannel(x::ProbabilisticUnitaryChannel{D}) where D = KrausChannel(AbstractBlock{D}[sqrt(f) * oi for (f, oi) in zip(x.probs, x.operators)])
+SuperOp(x::ProbabilisticUnitaryChannel) = SuperOp(KrausChannel(x))

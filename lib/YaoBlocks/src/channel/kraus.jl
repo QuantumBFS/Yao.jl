@@ -73,11 +73,11 @@ kraus_channel
 """
 kraus_channel(operators, probs::AbstractVector) = KrausChannel(operators, probs)
 
-function SuperOp(x::KrausChannel)
-    n = x.n
-    D = nlevel(first(x.operators))
-    operators = AbstractBlock{D}[sqrt(pi) * oi for (pi, oi) in zip(x.probs, x.operators)]
-    return SuperOp(n, operators)
+# convert kraus channel to superop
+function SuperOp(::Type{T}, x::KrausChannel) where T
+    superop = sum(x.operators) do op
+        m = mat(T, op)
+        kron(conj(m), m)
+    end
+    return SuperOp(x.n, superop)
 end
-
-

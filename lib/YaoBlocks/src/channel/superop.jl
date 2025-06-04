@@ -16,7 +16,8 @@ end
     SuperOp{D}(n::Int, superop::AbstractMatrix)
     SuperOp(superop::AbstractMatrix; nlevel::Int=2)
 
-Create a superoperator from a matrix.
+Superoperator representation of a quantum channel. Its matrix size is `D^(2n) × D^(2n)`, where `D` is the dimension of the system and `n` is the number of qubits.
+A superoperator is a linear map from the space of density matrices to itself.
 
 ### Fields
 - `n::Int`: the number of qubits
@@ -64,8 +65,13 @@ function Base.:(==)(lhs::SuperOp, rhs::SuperOp)
 end
 Base.adjoint(x::SuperOp{D}) where D = SuperOp{D}(x.n, adjoint(x.superop))
 
+# convert block to superop
 function SuperOp(::Type{T}, x::AbstractBlock{D}) where {D,T}
     m = mat(T, x)
     SuperOp{D}(kron(conj(m), m))
 end
 SuperOp(x::AbstractBlock{D}) where D = SuperOp(Complex{Float64}, x)
+
+# convert error types to superop
+SuperOp(::Type{T}, x::AbstractErrorType) where T = SuperOp(T, KrausChannel(x))
+SuperOp(x::AbstractErrorType) = SuperOp(Complex{Float64}, x)
