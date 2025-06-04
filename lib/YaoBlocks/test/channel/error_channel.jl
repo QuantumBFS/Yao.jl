@@ -44,3 +44,25 @@ end
         0.1 * opY * dm.state * opY +
         0.2 * opZ * dm.state * opZ ≈ apply(dm, ch).state
 end
+
+@testset "super operators and kraus operators" begin
+    p_error = 0.05
+    bit_flip = pauli_error([('X', p_error), ('I', 1 - p_error)])
+    phase_flip = pauli_error([('Z', p_error), ('I', 1 - p_error)])
+    @test bit_flip.superop ≈ [0.95 0.0 0.0 0.05;
+        0.0 0.95 0.05 0.0;
+        0.0 0.05 0.95 0.0;
+        0.05 0.0 0.0 0.95]
+    @test phase_flip.superop ≈ [1.0 0.0 0.0 0.0;
+        0.0 0.9 0.0 0.0;
+        0.0 0.0 0.9 0.0;
+        0.0 0.0 0.0 1.0]
+
+    bit_flip_kraus = kraus(bit_flip)
+    @test bit_flip_kraus.kraus_matrices[1] ≈ [sqrt(0.95) 0.0; 0.0 sqrt(0.05)]
+    @test bit_flip_kraus.kraus_matrices[2] ≈ [0.0 sqrt(0.05); sqrt(0.05) 0.0]
+
+    phase_flip_kraus = Kraus(phase_flip)
+    @test phase_flip_kraus.kraus_matrices[1] ≈ [sqrt(0.95) 0.0; 0.0 -sqrt(0.95)]
+    @test phase_flip_kraus.kraus_matrices[2] ≈ [sqrt(0.05) 0.0; 0.0 sqrt(0.05)]
+end

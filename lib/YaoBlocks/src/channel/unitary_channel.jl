@@ -45,18 +45,6 @@ function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::UnitaryChannel) where {D
     return r
 end
 
-function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, 
-                              k::KronBlock{D,M,NTuple{M,U}}) where {D,M,T,U<:UnitaryChannel}
-    for (locs, block) in zip(k.locs, k.blocks)
-        YaoAPI.unsafe_apply!(r, put(k.n, locs => block))
-    end
-    return r
-end
-
-function mat(::Type{T}, x::UnitaryChannel) where {T}
-    error("`UnitaryChannel` does not have a matrix representation!")
-end
-
 subblocks(x::UnitaryChannel) = x.operators
 chsubblocks(x::UnitaryChannel, it) = UnitaryChannel(collect(it), x.probs)
 occupied_locs(x::UnitaryChannel) = union(occupied_locs.(x.operators)...)
@@ -99,3 +87,9 @@ unitary_channel
 ```
 """
 unitary_channel(operators, probs::AbstractVector) = UnitaryChannel(operators, probs)
+
+function SuperOp(x::UnitaryChannel)
+    SuperOp()
+end
+
+KrausChannel(x::UnitaryChannel{D}) where D = KrausChannel(x.n, AbstractBlock{D}[sqrt(pi) * oi for (pi, oi) in zip(x.probs, x.operators)])

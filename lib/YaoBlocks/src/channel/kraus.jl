@@ -1,5 +1,3 @@
-abstract type AbstractQuantumChannel{D} <: AbstractBlock{D} end
-
 """
     KrausChannel{D} <: AbstractQuantumChannel{D}
     KrausChannel(operators)
@@ -27,61 +25,45 @@ end
 function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::KrausChannel) where {D,T}
     r0 = copy(r)
     # first
-    regscale!(unsafe_apply!(r, first(x.operators)), first(x.probs))
-    for (w, o) in zip(x.probs[2:end-1], x.operators[2:end-1])
-        r.state .+= w .* unsafe_apply!(copy(r0), o).state
+    unsafe_apply!(r, first(x.operators))
+    for o in x.operators[2:end-1]
+        r.state .+= unsafe_apply!(copy(r0), o).state
     end
     # last
-    r.state .+= last(x.probs) .* unsafe_apply!(r0, last(x.operators)).state
+    r.state .+= unsafe_apply!(r0, last(x.operators)).state
     return r
-end
-
-function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, 
-                              k::KronBlock{D,M,NTuple{M,U}}) where {D,M,T,U<:KrausChannel}
-    for (locs, block) in zip(k.locs, k.blocks)
-        YaoAPI.unsafe_apply!(r, put(k.n, locs => block))
-    end
-    return r
-end
-
-function mat(::Type{T}, x::KrausChannel) where {T}
-    error("`KrausChannel` does not have a matrix representation!")
 end
 
 subblocks(x::KrausChannel) = x.operators
-chsubblocks(x::KrausChannel, it) = KrausChannel(collect(it), x.probs)
+chsubblocks(x::KrausChannel, it) = KrausChannel(collect(it))
 occupied_locs(x::KrausChannel) = union(occupied_locs.(x.operators)...)
 
 function cache_key(x::KrausChannel)
-    key = hash(x.probs)
-    for each in x.operators
-        key = hash(each, key)
-    end
-    return key
+    return hash(ntuple(i -> hash(x.operators[i]), length(x.operators)))
 end
 
 function Base.:(==)(lhs::KrausChannel, rhs::KrausChannel)
-    return (lhs.n == rhs.n) && (lhs.probs == rhs.probs) && (lhs.operators == rhs.operators)
+    return (lhs.n == rhs.n) && (lhs.operators == rhs.operators)
 end
 
-Base.adjoint(x::KrausChannel) = KrausChannel(adjoint.(x.operators), x.probs)
+Base.adjoint(x::KrausChannel) = KrausChannel(adjoint.(x.operators))
 
 """
-    kraus_channel(operators, probs) -> KrausChannel
+    kraus_channel(operators) -> KrausChannel
 
-Returns a [`KrausChannel`](@ref) instance, where ``operators` is a list of operators, `probs` is a real vector that sum up to 1.
+Returns a [`KrausChannel`](@ref) instance, where ``operators` is a list of operators.
 The kraus channel is defined as below
 
 ```math
-\\phi(\\rho) = \\sum_i p_i U_i ρ U_i^\\dagger,
+\\phi(\\rho) = \\sum_i K_i ρ K_i^\\dagger,
 ```
 
-where ``\\rho`` in a [`DensityMatrix`](@ref) as the register to apply on, ``p_i`` is the i-th element in `probs`, `U_i` is the i-th operator in `operators`.
+where ``\\rho`` in a [`DensityMatrix`](@ref) as the register to apply on, ``K_i`` is the i-th operator in `operators`.
 
 ### Examples
 
 ```jldoctest; setup=:(using Yao)
-julia> kraus_channel([X, Y, Z], [0.1, 0.2, 0.7])
+julia> kraus_channel([X, Y, Z])
 nqubits: 1
 kraus_channel
 ├─ [0.1] X
@@ -90,5 +72,12 @@ kraus_channel
 ```
 """
 kraus_channel(operators, probs::AbstractVector) = KrausChannel(operators, probs)
+
+function SuperOp(x::KrausChannel)
+    n = x.n
+    D = nlevel(first(x.operators))
+    operators = AbstractBlock{D}[sqrt(pi) * oi for (pi, oi) in zip(x.probs, x.operators)]
+    return SuperOp(n, operators)
+end
 
 
