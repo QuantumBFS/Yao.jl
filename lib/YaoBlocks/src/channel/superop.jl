@@ -71,7 +71,3 @@ function SuperOp(::Type{T}, x::AbstractBlock{D}) where {D,T}
     SuperOp{D}(kron(conj(m), m))
 end
 SuperOp(x::AbstractBlock{D}) where D = SuperOp(Complex{Float64}, x)
-
-# convert error types to superop
-SuperOp(::Type{T}, x::AbstractErrorType) where T = SuperOp(T, KrausChannel(x))
-SuperOp(x::AbstractErrorType) = SuperOp(Complex{Float64}, x)

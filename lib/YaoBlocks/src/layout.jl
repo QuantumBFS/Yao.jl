@@ -203,7 +203,8 @@ print_block(io::IO, x::KronBlock) =
     printstyled(io, "kron"; bold = true, color = color(KronBlock))
 print_block(io::IO, x::ChainBlock) =
     printstyled(io, "chain"; bold = true, color = color(ChainBlock))
-print_block(io::IO, x::UnitaryChannel) = printstyled(io, "unitary_channel"; bold = true)
+print_block(io::IO, x::MixedUnitaryChannel) = printstyled(io, "probabilistic_unitary_channel"; bold = true)
+print_block(io::IO, x::KrausChannel) = printstyled(io, "kraus_channel"; bold = true)
 print_block(io::IO, c::Subroutine) = print(io, "Subroutine: ", occupied_locs(c))
 print_block(io::IO, c::CachedBlock) = print_block(io, content(c))
 print_block(io::IO, c::Add) = printstyled(io, "+"; bold = true, color = color(Add))
@@ -351,7 +352,7 @@ end
 function print_annotation(
     io::IO,
     root::AbstractBlock,
-    node::UnitaryChannel,
+    node::MixedUnitaryChannel,
     child::AbstractBlock,
     k::Int,
 )

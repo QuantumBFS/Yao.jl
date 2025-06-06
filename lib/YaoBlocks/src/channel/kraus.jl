@@ -74,10 +74,10 @@ kraus_channel
 kraus_channel(operators, probs::AbstractVector) = KrausChannel(operators, probs)
 
 # convert kraus channel to superop
-function SuperOp(::Type{T}, x::KrausChannel) where T
+function SuperOp(::Type{T}, x::KrausChannel{D}) where {T,D}
     superop = sum(x.operators) do op
         m = mat(T, op)
         kron(conj(m), m)
     end
-    return SuperOp(x.n, superop)
+    return SuperOp{D}(x.n, superop)
 end

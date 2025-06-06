@@ -9,10 +9,10 @@
 @deprecate Concentrator Subroutine
 @deprecate concentrate subroutine
 
-@deprecate UnitaryChannel(args...) ProbabilisticUnitaryChannel(args...)
+@deprecate UnitaryChannel(args...) MixedUnitaryChannel(args...)
 @deprecate pauli_error_channel(; px::Real, py::Real=px, pz::Real=px) UnitaryChannel(PauliError(px, py, pz))
 @deprecate bit_flip_channel(p::Real) UnitaryChannel(BitFlipError(p))
 @deprecate phase_flip_channel(p::Real) UnitaryChannel(PhaseFlipError(p))
-@deprecate single_qubit_depolarizing_channel(p::Real) UnitaryChannel(DepolarizingError(p * 3/4))
-@deprecate unitary_channel ProbabilisticUnitaryChannel
+@deprecate single_qubit_depolarizing_channel(p::Real) UnitaryChannel(DepolarizingError(p))
+@deprecate unitary_channel MixedUnitaryChannel
 @deprecate reset_error(; p0::Real, p1::Real) KrausChannel(ResetError(p0, p1))

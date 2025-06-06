@@ -12,7 +12,9 @@ convert gates to basic types
 function to_basictypes end
 
 to_basictypes(block::PrimitiveBlock) = block
-to_basictypes(block::UnitaryChannel) = block
+to_basictypes(block::MixedUnitaryChannel) = block
+to_basictypes(block::KrausChannel) = block
+to_basictypes(block::SuperOp) = block
 function to_basictypes(block::AbstractBlock)
     throw(NotImplementedError(:to_basictypes, typeof(block)))
 end

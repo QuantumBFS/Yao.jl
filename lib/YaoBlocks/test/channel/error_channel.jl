@@ -46,23 +46,62 @@ end
 end
 
 @testset "super operators and kraus operators" begin
+    # bit flip
     p_error = 0.05
-    bit_flip = pauli_error([('X', p_error), ('I', 1 - p_error)])
-    phase_flip = pauli_error([('Z', p_error), ('I', 1 - p_error)])
-    @test bit_flip.superop ≈ [0.95 0.0 0.0 0.05;
+    bit_flip = BitFlipError(p_error)
+    @test SuperOp(bit_flip).superop ≈ [0.95 0.0 0.0 0.05;
         0.0 0.95 0.05 0.0;
         0.0 0.05 0.95 0.0;
         0.05 0.0 0.0 0.95]
-    @test phase_flip.superop ≈ [1.0 0.0 0.0 0.0;
+    bit_flip_kraus = KrausChannel(bit_flip)
+    # Note: the phase of the matrix can be arbitrary, so we only check the magnitude
+    @test mat(bit_flip_kraus.operators[1]) ≈ [sqrt(0.95) 0.0; 0.0 sqrt(0.95)]
+    @test mat(bit_flip_kraus.operators[2]) ≈ [0.0 sqrt(0.05); sqrt(0.05) 0.0]
+
+    # phase flip
+    p_error = 0.05
+    phase_flip = PhaseFlipError(p_error)
+    @test SuperOp(phase_flip).superop ≈ [1.0 0.0 0.0 0.0;
         0.0 0.9 0.0 0.0;
         0.0 0.0 0.9 0.0;
         0.0 0.0 0.0 1.0]
 
-    bit_flip_kraus = kraus(bit_flip)
-    @test bit_flip_kraus.kraus_matrices[1] ≈ [sqrt(0.95) 0.0; 0.0 sqrt(0.05)]
-    @test bit_flip_kraus.kraus_matrices[2] ≈ [0.0 sqrt(0.05); sqrt(0.05) 0.0]
+    phase_flip_kraus = KrausChannel(phase_flip)
+    @test mat(phase_flip_kraus.operators[1]) ≈ [sqrt(0.95) 0.0; 0.0 sqrt(0.95)]
+    @test mat(phase_flip_kraus.operators[2]) ≈ [sqrt(0.05) 0.0; 0.0 -sqrt(0.05)]
 
-    phase_flip_kraus = Kraus(phase_flip)
-    @test phase_flip_kraus.kraus_matrices[1] ≈ [sqrt(0.95) 0.0; 0.0 -sqrt(0.95)]
-    @test phase_flip_kraus.kraus_matrices[2] ≈ [sqrt(0.05) 0.0; 0.0 sqrt(0.05)]
+    # depolarizing
+    p_error = 0.1
+    depolarizing = DepolarizingError(p_error)
+    @test SuperOp(depolarizing).superop ≈ [0.95 0.0 0.0 0.05;
+        0.0 0.9 0.0 0.0;
+        0.0 0.0 0.9 0.0;
+        0.05 0.0 0.0 0.95]
+
+    depolarizing_kraus = KrausChannel(depolarizing)
+    function effectively_same(a, b)
+        res = a * a' ≈ b * b'
+        if !res
+            println("a: ", a)
+            println("b: ", b)
+        end
+        res
+    end
+    @test effectively_same(mat(depolarizing_kraus.operators[1]), [-sqrt(0.925) 0.0; 0.0 -sqrt(0.925)])
+    @test effectively_same(mat(depolarizing_kraus.operators[2]), [-sqrt(0.025) 0.0; 0.0 sqrt(0.025)])
+    @test effectively_same(mat(depolarizing_kraus.operators[3]), [0.0 -sqrt(0.025)*im; sqrt(0.025)*im 0.0])
+    @test effectively_same(mat(depolarizing_kraus.operators[4]), [0.0 sqrt(0.025); sqrt(0.025) 0.0])
+
+    # reset
+    p_error = 0.1
+    reset = ResetError(p_error, p_error)
+    reset_kraus = KrausChannel(reset)
+    @test SuperOp(reset_kraus).superop ≈ [0.9 0 0 0.1; 0 0.8 0 0; 0 0 0.8 0; 0.1 0 0 0.9]
+
+    # NOTE: this is not the simplest form of Kraus operators for reset channel!!
+    @test mat(reset_kraus.operators[1]) ≈ [sqrt(0.8) 0.0; 0.0 sqrt(0.8)]
+    @test mat(reset_kraus.operators[2]) ≈ [sqrt(0.1) 0.0; 0.0 0.0]
+    @test mat(reset_kraus.operators[3]) ≈ [0.0 0.0; sqrt(0.1) 0.0]
+    @test mat(reset_kraus.operators[4]) ≈ [0.0 0.0; 0.0 sqrt(0.1)]
+    @test mat(reset_kraus.operators[5]) ≈ [0.0 sqrt(0.1); 0.0 0.0]
 end

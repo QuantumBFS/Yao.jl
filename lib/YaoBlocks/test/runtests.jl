@@ -63,9 +63,5 @@ end
 end
 
 @testset "channel" begin
-    include("channel/errortypes.jl")
-    include("channel/superop.jl")
-    include("channel/kraus.jl")
-    include("channel/error_channel.jl")
-    include("channel/unitary_channel.jl")
+    include("channel/channel.jl")
 end
