@@ -101,8 +101,8 @@ export AbstractBlock,
     rand_hermitian,
     EntryTable,
     cleanup,
-    isclean
-
+    isclean,
+    standardize
 export applymatrix, cache_key
 
 include("utils.jl")
@@ -126,6 +126,7 @@ include("treeutils/treeutils.jl")
 
 include("autodiff/autodiff.jl")
 export AD, Optimise
+using .Optimise: standardize
 
 include("deprecations.jl")
 

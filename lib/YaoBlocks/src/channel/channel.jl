@@ -1,5 +1,5 @@
 export AbstractErrorType, BitFlipError, PhaseFlipError, DepolarizingError, PauliError, ResetError,
-    KrausChannel, MixedUnitaryChannel,
+    KrausChannel, MixedUnitaryChannel, kraus_channel, mixed_unitary_channel,
     depolarizing_channel,
     two_qubit_depolarizing_channel,
     SuperOp

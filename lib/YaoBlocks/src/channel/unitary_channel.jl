@@ -64,7 +64,7 @@ end
 Base.adjoint(x::MixedUnitaryChannel) = MixedUnitaryChannel(adjoint.(x.operators), x.probs)
 
 """
-    unitary_channel(operators, probs) -> MixedUnitaryChannel
+    mixed_unitary_channel(operators, probs) -> MixedUnitaryChannel
 
 Returns a [`MixedUnitaryChannel`](@ref) instance, where ``operators` is a list of operators, `probs` is a real vector that sum up to 1.
 The unitary channel is defined as below
@@ -78,15 +78,15 @@ where ``\\rho`` in a [`DensityMatrix`](@ref) as the register to apply on, ``p_i`
 ### Examples
 
 ```jldoctest; setup=:(using Yao)
-julia> unitary_channel([X, Y, Z], [0.1, 0.2, 0.7])
+julia> mixed_unitary_channel([X, Y, Z], [0.1, 0.2, 0.7])
 nqubits: 1
-unitary_channel
+mixed_unitary_channel
 ├─ [0.1] X
 ├─ [0.2] Y
 └─ [0.7] Z
 ```
 """
-unitary_channel(operators, probs::AbstractVector) = MixedUnitaryChannel(operators, probs)
+mixed_unitary_channel(operators, probs::AbstractVector) = MixedUnitaryChannel(operators, probs)
 
 # convert unitary channel to kraus channel and superop
 KrausChannel(x::MixedUnitaryChannel{D}) where D = KrausChannel(AbstractBlock{D}[sqrt(f) * oi for (f, oi) in zip(x.probs, x.operators)])

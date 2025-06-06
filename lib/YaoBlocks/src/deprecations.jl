@@ -14,5 +14,5 @@
 @deprecate bit_flip_channel(p::Real) UnitaryChannel(BitFlipError(p))
 @deprecate phase_flip_channel(p::Real) UnitaryChannel(PhaseFlipError(p))
 @deprecate single_qubit_depolarizing_channel(p::Real) UnitaryChannel(DepolarizingError(p))
-@deprecate unitary_channel MixedUnitaryChannel
+@deprecate unitary_channel mixed_unitary_channel
 @deprecate reset_error(; p0::Real, p1::Real) KrausChannel(ResetError(p0, p1))

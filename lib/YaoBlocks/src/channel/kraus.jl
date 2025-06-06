@@ -20,7 +20,7 @@ end
 nqudits(uc::KrausChannel) = uc.n
 
 function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::PutBlock{D,C,<:KrausChannel}) where {D,C,T}
-    unsafe_apply!(r, KrausChannel([PutBlock(x.n, operator, x.locs) for operator in x.content.operators], x.content.probs))
+    unsafe_apply!(r, KrausChannel([PutBlock(x.n, operator, x.locs) for operator in x.content.operators]))
 end
 function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::KrausChannel) where {D,T}
     r0 = copy(r)
@@ -66,12 +66,12 @@ where ``\\rho`` in a [`DensityMatrix`](@ref) as the register to apply on, ``K_i`
 julia> kraus_channel([X, Y, Z])
 nqubits: 1
 kraus_channel
-├─ [0.1] X
-├─ [0.2] Y
-└─ [0.7] Z
+├─ X
+├─ Y
+└─ Z
 ```
 """
-kraus_channel(operators, probs::AbstractVector) = KrausChannel(operators, probs)
+kraus_channel(operators) = KrausChannel(operators)
 
 # convert kraus channel to superop
 function SuperOp(::Type{T}, x::KrausChannel{D}) where {T,D}
