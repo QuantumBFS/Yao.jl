@@ -16,7 +16,7 @@ vizcircuit(circ)
 
 # The ideal simulation gives the following result:
 reg = zero_state(n_qubits) |> circ
-samples = measure(reg, nshots=1000)
+samples = measure(reg, nshots=1000);
 
 # Visualize the results
 hist(map(x -> x.buf, samples))
@@ -39,7 +39,7 @@ circ_noisy = standardize(circ_noisy)
 
 # simulate the noisy circuit
 rho = apply(density_matrix(reg), circ_noisy)
-samples = measure(rho, nshots=1000)
+samples = measure(rho, nshots=1000);
 
 # Visualize the results
 hist(map(x -> x.buf, samples))
