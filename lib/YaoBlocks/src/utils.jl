@@ -144,7 +144,7 @@ A table of ditstring-amplitude, which can be used for e.g. indexing and operator
 ### Examples
 ```jldoctest; setup=:(using Yao)
 julia> EntryTable([dit"121;3", dit"111;3"], [0.6, 0.8im])
-EntryTable{BitBasis.DitStr64{3, 3}, ComplexF64}:
+EntryTable{DitStr64{3, 3}, ComplexF64}:
   121 ₍₃₎   0.6 + 0.0im
   111 ₍₃₎   0.0 + 0.8im
 ```

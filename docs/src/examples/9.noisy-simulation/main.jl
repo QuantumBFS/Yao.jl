@@ -32,7 +32,7 @@ circ_noisy = Optimise.replace_block(circ) do x
     end
 end
 
-push!(circ_noisy, repeat(error_meas, n_qubits)) # add measurement noise
+push!(circ_noisy, repeat(quantum_channel(BitFlipError(0.05)), n_qubits)) # add measurement noise
 
 # Convert the circuit to a standard form
 circ_noisy = standardize(circ_noisy)

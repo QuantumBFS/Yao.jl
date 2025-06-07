@@ -63,7 +63,7 @@ chain
             └─ 2=>X
 
 julia> noisy_simulation(zero_state(2), circ)
-  DensityMatrix{2, ComplexF64, Array...}
+DensityMatrix{2, ComplexF64, Array...}
     active qubits: 2/2
     nlevel: 2
 ```
