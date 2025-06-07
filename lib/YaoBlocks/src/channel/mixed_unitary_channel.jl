@@ -18,7 +18,7 @@ where ``\\rho`` in a [`DensityMatrix`](@ref) as the register to apply on, ``p_i`
 ### Examples
 
 ```jldoctest; setup=:(using Yao)
-julia> mixed_unitary_channel([X, Y, Z], [0.1, 0.2, 0.7])
+julia> MixedUnitaryChannel([X, Y, Z], [0.1, 0.2, 0.7])
 nqubits: 1
 mixed_unitary_channel
 ├─ [0.1] X
