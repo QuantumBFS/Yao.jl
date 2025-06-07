@@ -63,6 +63,7 @@ end
 function Base.:(==)(lhs::SuperOp, rhs::SuperOp)
     return (lhs.n == rhs.n) && (lhs.superop == rhs.superop)
 end
+Base.isapprox(x::SuperOp, y::SuperOp; kwargs...) = isapprox(x.superop, y.superop; kwargs...)
 Base.adjoint(x::SuperOp{D}) where D = SuperOp{D}(x.n, adjoint(x.superop))
 
 # convert block to superop

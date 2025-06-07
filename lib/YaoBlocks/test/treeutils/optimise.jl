@@ -155,7 +155,7 @@ end
     circ_noisy = standardize(circ_noisy)
 
     @test circ_noisy isa ChainBlock
-    @test length(circ_noisy) == 12
+    @test length(circ_noisy) == 9
     println(circ_noisy)
     @test all(x -> x isa PutBlock && nqubits(x.content) <= 2 && (x.content in [ConstGate.CNOT, ConstGate.H] || x.content isa KrausChannel), circ_noisy)
 end

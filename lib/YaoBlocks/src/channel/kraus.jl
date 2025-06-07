@@ -3,6 +3,24 @@
     KrausChannel(operators)
 
 Create a Kraus representation of a quantum channel, where `operators` is a list of Kraus operators.
+The kraus channel is defined as below
+
+```math
+\\phi(\\rho) = \\sum_i K_i ρ K_i^\\dagger,
+```
+
+where ``\\rho`` in a [`DensityMatrix`](@ref) as the register to apply on, ``K_i`` is the i-th operator in `operators`.
+
+### Examples
+
+```jldoctest; setup=:(using Yao)
+julia> KrausChannel([X, Y, Z])
+nqubits: 1
+kraus_channel
+├─ X
+├─ Y
+└─ Z
+```
 """
 struct KrausChannel{D} <: AbstractQuantumChannel{D}
     n::Int
@@ -48,36 +66,17 @@ end
 
 Base.adjoint(x::KrausChannel) = KrausChannel(adjoint.(x.operators))
 
-"""
-    kraus_channel(operators) -> KrausChannel
-
-Returns a [`KrausChannel`](@ref) instance, where ``operators` is a list of operators.
-The kraus channel is defined as below
-
-```math
-\\phi(\\rho) = \\sum_i K_i ρ K_i^\\dagger,
-```
-
-where ``\\rho`` in a [`DensityMatrix`](@ref) as the register to apply on, ``K_i`` is the i-th operator in `operators`.
-
-### Examples
-
-```jldoctest; setup=:(using Yao)
-julia> kraus_channel([X, Y, Z])
-nqubits: 1
-kraus_channel
-├─ X
-├─ Y
-└─ Z
-```
-"""
-kraus_channel(operators) = KrausChannel(operators)
-
 # convert kraus channel to superop
+SuperOp(x::KrausChannel) = SuperOp(ComplexF64, x)
 function SuperOp(::Type{T}, x::KrausChannel{D}) where {T,D}
     superop = sum(x.operators) do op
         m = mat(T, op)
         kron(conj(m), m)
     end
     return SuperOp{D}(x.n, superop)
+end
+
+# Note: the kron of two kraus channels is kron of its components
+function LinearAlgebra.kron(x::KrausChannel, y::KrausChannel)
+    return KrausChannel([kron(op1, op2) for op1 in x.operators for op2 in y.operators])
 end

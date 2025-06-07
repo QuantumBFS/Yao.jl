@@ -26,12 +26,14 @@ MixedUnitaryChannel(p::PhaseFlipError) = MixedUnitaryChannel([I2, Z], [1-p.p, p.
     DepolarizingError(p)
 
 Depolarizing error channel with error probability `p`.
-It is equivalent to the [`PauliError`](@ref) channel with `px = py = pz = p/3`.
+It is equivalent to the [`PauliError`](@ref) channel with `px = py = pz = p/4`.
 """
 struct DepolarizingError{RT<:Real} <: AbstractErrorType
+    n::Int
     p::RT
 end
 MixedUnitaryChannel(p::DepolarizingError) = MixedUnitaryChannel(PauliError(p))
+quantum_channel(p::DepolarizingError) = DepolarizingChannel(p.n, p.p)
 
 """
     PauliError(px, py, pz)
@@ -50,12 +52,19 @@ end
 # convert error types to pauli error
 PauliError(err::BitFlipError{T}) where T = PauliError(err.p, zero(T), zero(T))
 PauliError(err::PhaseFlipError{T}) where T = PauliError(zero(T), zero(T), err.p)
-PauliError(err::DepolarizingError{T}) where T = PauliError(err.p/4, err.p/4, err.p/4)
+function PauliError(err::DepolarizingError{T}) where T
+    @assert err.n == 1 "only single-qubit depolarizing error is supported to convert to Pauli error"
+    p = err.p/4
+    return PauliError(p, p, p)
+end
 
 MixedUnitaryChannel(p::PauliError) = MixedUnitaryChannel([I2, X, Y, Z], [1-p.px-p.py-p.pz, p.px, p.py, p.pz])
 
 for T in [:BitFlipError, :PhaseFlipError, :DepolarizingError, :PauliError]
     @eval KrausChannel(err::$T) = KrausChannel(MixedUnitaryChannel(err))
+end
+for T in [:BitFlipError, :PhaseFlipError, :PauliError]
+    @eval quantum_channel(p::$T) = MixedUnitaryChannel(p)
 end
 
 """
@@ -72,6 +81,8 @@ struct ResetError{RT<:Real} <: AbstractErrorType
     p0::RT
     p1::RT
 end
+
+quantum_channel(p::ResetError) = KrausChannel(p)
 
 
 # https://docs.pennylane.ai/en/stable/code/api/pennylane.ResetError.html
@@ -109,5 +120,5 @@ function KrausChannel(err::ResetError)
 end
 
 # convert error types to superop
-SuperOp(::Type{T}, x::AbstractErrorType) where T = SuperOp(T, KrausChannel(x))
+SuperOp(::Type{T}, x::AbstractErrorType) where T = SuperOp(T, quantum_channel(x))
 SuperOp(x::AbstractErrorType) = SuperOp(Complex{Float64}, x)
