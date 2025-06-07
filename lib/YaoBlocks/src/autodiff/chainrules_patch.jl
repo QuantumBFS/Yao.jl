@@ -79,18 +79,19 @@ end
 function rrule(::typeof(apply), reg::AbstractArrayReg, block::AbstractBlock)
     out = apply(reg, block)
     out, function (outδ)
-        (in, inδ), paramsδ = apply_back((copy(out), tangent_to_reg(typeof(out), outδ)), block)
+        (in, inδ), paramsδ = apply_back((copy(out), tangent_to_reg(out, outδ)), block)
         return (NoTangent(), inδ, create_circuit_tangent(block, paramsδ))
     end
 end
 function rrule(::typeof(apply), reg::AbstractArrayReg, block::AbstractAdd)
     out = apply(reg, block)
     out, function (outδ)
-        (in, inδ), paramsδ = apply_back((copy(out), tangent_to_reg(typeof(out), outδ)), block; in = reg)
+        (in, inδ), paramsδ = apply_back((copy(out), tangent_to_reg(out, outδ)), block; in = reg)
         return (NoTangent(), inδ, create_circuit_tangent(block, paramsδ))
     end
 end
-tangent_to_reg(::Type{T}, reg) where T<:AbstractArrayReg = reg isa Tangent ? T(reg.state) : reg
+tangent_to_reg(reg::T, grad) where {D, T<:ArrayReg{D}} = grad isa Tangent ? ArrayReg{D}(grad.state) : grad
+tangent_to_reg(reg::T, grad) where {D, T<:BatchedArrayReg{D}} = grad isa Tangent ? BatchedArrayReg{D}(grad.state, reg.nbatch) : grad
 
 
 function rrule(::typeof(dispatch), block::AbstractBlock, params)
