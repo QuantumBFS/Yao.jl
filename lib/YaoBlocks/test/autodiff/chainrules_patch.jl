@@ -286,3 +286,37 @@ end
     zygote_grad = Zygote.gradient(θs->loss3(c, θs), rand(nparameters(c)))[1]
     @test zygote_grad isa Vector
 end
+
+@testset "issue #545" begin
+    function variational_circuit(q, nlayer)
+        circuit = chain(q)
+        for i = 1:nlayer
+            push!(circuit, put(q, i=>chain(Rx(0.0), Ry(0.0), Rz(0.0))))
+        end
+        circuit
+    end
+    function bug_mwe()    
+        q = 4
+        vqc = variational_circuit(q, 2)
+        param = 4pi*rand(nparameters(vqc))
+
+        # bstate = rand_state(q) # works OK    
+        bstate = rand_state(q, nbatch=2) # Zygote errors
+        
+        function loss(param)
+            vqc_p = dispatch(vqc, param)
+            bstate_p = apply(bstate, vqc_p)
+            pr = probs(bstate_p)
+            pr_s = sum(pr, dims = 2)
+            r = -sum(pr_s[1:2^(4-1)])
+            return r
+        end   
+
+        l = loss(param)
+        grad = Zygote.gradient(loss, param)[1]
+
+        return grad
+    end
+
+    @test bug_mwe() isa Vector
+end
