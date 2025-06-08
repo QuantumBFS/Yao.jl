@@ -334,9 +334,6 @@ render_params(r::AbstractBlock, params) = params
 render_params(r::AbstractBlock, params::Symbol) = render_params(r, Val(params))
 render_params(r::AbstractBlock, ::Val{:random}) = ntuple(i -> rand(iparams_eltype(r)), niparams(r))
 render_params(r::AbstractBlock, ::Val{:zero}) = ntuple(i -> zero(iparams_eltype(r)), niparams(r))
-for GT in [RotationGate, ShiftGate, PhaseGate]
-    @eval render_params(r::$(GT), ::Val{:random}) = (iparams_eltype(r)(rand()*2π),)
-end
 
 """
     cache_type(::Type) -> DataType
