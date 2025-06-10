@@ -33,9 +33,6 @@ B(n, k) = chain(n, j==k ? put(k=>H) : A(j, k) for j in k:n)
 qft(n) = chain(B(n, k) for k in 1:n)
 ```
 
-> [!warning]
-> Moved to Yao.jl: https://github.com/QuantumBFS/Yao.jl/tree/master/lib/YaoToEinsum
-
 ## Installation
 
 <p>
