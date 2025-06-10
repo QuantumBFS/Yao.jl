@@ -59,8 +59,8 @@ chain
 """
 chain(blocks::AbstractBlock{D}...) where {D} = ChainBlock(blocks...)
 function chain(blocks::Union{AbstractBlock{D},Function}...) where {D}
-    blocks = filter(x->x isa AbstractBlock, blocks)
-    return chain(map(x -> parse_block(_check_block_sizes(blocks...), x), blocks)...)
+    concrete_blocks = filter(x->x isa AbstractBlock, blocks)
+    return chain(map(x -> parse_block(_check_block_sizes(concrete_blocks...), x), blocks)...)
 end
 
 function chain(list::Vector{<:AbstractVector{D}}) where D

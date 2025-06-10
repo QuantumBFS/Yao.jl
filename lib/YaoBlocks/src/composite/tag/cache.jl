@@ -121,8 +121,10 @@ nqubits: 3
 julia> chain(cache(control(3, 1, 2=>X)), repeat(H))
 nqubits: 3
 chain
-└─ [cached] control(1)
-      └─ (2,) X
+├─ [cached] control(1)
+│     └─ (2,) X
+└─ repeat on (1, 2, 3)
+   └─ H
 
 ```
 """
