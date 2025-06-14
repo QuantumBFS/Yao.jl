@@ -69,7 +69,7 @@ DensityMatrix{2, ComplexF64, Array...}
 ```
 """
 function noisy_simulation(reg::ArrayReg, circuit::AbstractBlock)
-    return apply(density_matrix(reg), standardize(circuit))
+    return apply(density_matrix(reg), circuit)
 end
 
 include("superop.jl")

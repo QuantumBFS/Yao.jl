@@ -1,15 +1,3 @@
-abstract type AbstractQuantumChannel{D} <: AbstractBlock{D} end
-function mat(::Type{T}, x::AbstractQuantumChannel) where {T}
-    error("Quantum channel does not have a matrix representation!")
-end
-# this is for kron block
-function _instruct!(reg::DensityMatrix{D}, block::AbstractQuantumChannel{D}, locs) where {D}
-    unsafe_apply!(reg, put(nqudits(reg), locs => block))
-    return reg
-end
-
-#### SuperOp
-
 """
     SuperOp{D,T,MT<:AbstractMatrix{T}} <: AbstractQuantumChannel{D}
 
@@ -46,9 +34,9 @@ subblocks(::SuperOp) = ()
 
 print_block(io::IO, x::SuperOp) = print(io, "SuperOp{$(nqudits(x))}($(x.superop))")
 
-function YaoAPI.unsafe_apply!(rho::DensityMatrix{D,T}, x::PutBlock{D,C,<:SuperOp}) where {D,C,T}
+function noisy_instruct!(rho::DensityMatrix{D,T}, x::SuperOp, locs) where {D,T}
     reg = ArrayReg{D}(vec(rho.state))
-    unsafe_apply!(reg, put(2*x.n, (x.locs..., (x.locs .+ x.n)...) => GeneralMatrixBlock{D}(2*x.content.n, 2*x.content.n, x.content.superop)))
+    instruct!(reg, x.superop, (locs..., (locs .+ nqudits(rho))...))
     return rho
 end
 function YaoAPI.unsafe_apply!(rho::DensityMatrix{D,T}, x::SuperOp) where {D,T}

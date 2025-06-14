@@ -37,8 +37,14 @@ function KrausChannel(it)
 end
 nqudits(uc::KrausChannel) = uc.n
 
-function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::PutBlock{D,C,<:KrausChannel}) where {D,C,T}
-    unsafe_apply!(r, KrausChannel([PutBlock(x.n, operator, x.locs) for operator in x.content.operators]))
+function noisy_instruct!(r::DensityMatrix{D,T}, x::KrausChannel, locs) where {D,T}
+    r0 = copy(r)
+    instruct!(r, mat_matchreg(r, first(x.operators)), locs)
+    for o in x.operators[2:end-1]
+        r.state .+= instruct!(copy(r0), mat_matchreg(r0, o), locs).state
+    end
+    r.state .+= instruct!(r0, mat_matchreg(r0, last(x.operators)), locs).state
+    return r
 end
 function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::KrausChannel) where {D,T}
     r0 = copy(r)

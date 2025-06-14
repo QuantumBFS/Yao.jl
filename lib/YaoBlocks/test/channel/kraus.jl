@@ -40,3 +40,39 @@ end
     reg = rand_state(n_qubits)
     @test noisy_simulation(reg, circ1) ≈ noisy_simulation(reg, circ2)
 end
+
+@testset "direct apply" begin
+    n_qubits = 1
+    c = KrausChannel(PhaseFlipError(0.1))
+    mu = MixedUnitaryChannel([I2, X], [0.9, 0.1])
+    so = SuperOp(rand_unitary(4))
+    g = chain(1, c, mu, so)
+    reg = density_matrix(rand_state(n_qubits))
+    @test apply(reg, g) isa DensityMatrix
+end
+
+@testset "noisy_instruct!" begin
+    n_qubits = 3
+    c = KrausChannel(PhaseFlipError(0.1))
+    g1 = chain(3, put(3, 1=>c))
+    g1x = MixedUnitaryChannel([igate(3), put(3, 1=>Z)], [0.9, 0.1])
+    g2 = put(3, (2,1)=>put(2, 1=>c))  # nested put
+    g2x = MixedUnitaryChannel([igate(3), put(3, 2=>Z)], [0.9, 0.1])
+    g3 = put(3, (2,1)=>put(2, 1=>chain(X, c, X)))  # nested put and chain
+    g3x = chain(3, put(3, 2=>X), MixedUnitaryChannel([igate(3), put(3, 2=>Z)], [0.9, 0.1]), put(3, 2=>X))
+    g4 = chain(3, put(3, 1=>c), put(3, (2,1)=>kron(chain(X, c, X), X)))  # nested put and chain, and kron
+    g4x = chain(3, g1x, put(3, (2,1)=>kron(X, X)), g2x, put(3, 2=>X))
+    g5 = chain(3, put(3, 1=>c) + 2*put(3, (2,1)=>kron(chain(X, c, X), X)))  # nested put and chain, and kron, and add, and scale
+    g6 = chain(3, put(3, 1=>c), put(3, (2,1)=>kron(chain(X, c, X), X)))'  # nested put and chain, and kron, and adjoint
+    g6x = g4x
+    for g in [g1, g2, g3, g4, g5, g6]
+        reg = density_matrix(rand_state(n_qubits))
+        sg = standardize(g)
+        @test apply(reg, g) ≈ apply(reg, sg)
+    end
+    for (i, (g1, g2)) in enumerate(zip([g1x, g2x, g3x, g4x, g6x], [g1, g2, g3, g4, g6]))
+        @info "Testing $i: $g1 and $g2"
+        reg = density_matrix(rand_state(n_qubits))
+        @test apply(reg, g1) ≈ apply(reg, g2)
+    end
+end

@@ -1,5 +1,5 @@
 using Yao
-using YaoBlocks.Optimise: replace_block, standardize
+using YaoBlocks.Optimise: replace_block
 using CairoMakie
 
 # # Noisy Simulation
@@ -33,9 +33,6 @@ circ_noisy = Optimise.replace_block(circ) do x
 end
 
 push!(circ_noisy, repeat(quantum_channel(BitFlipError(0.05)), n_qubits)) # add measurement noise
-
-# Convert the circuit to a standard form
-circ_noisy = standardize(circ_noisy)
 
 # simulate the noisy circuit
 rho = apply(density_matrix(reg), circ_noisy)

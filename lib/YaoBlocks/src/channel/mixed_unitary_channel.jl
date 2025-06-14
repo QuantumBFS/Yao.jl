@@ -48,9 +48,18 @@ function MixedUnitaryChannel(it, probs)
 end
 nqudits(uc::MixedUnitaryChannel) = uc.n
 
-function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::PutBlock{D,C,<:MixedUnitaryChannel}) where {D,C,T}
-    unsafe_apply!(r, MixedUnitaryChannel([PutBlock(x.n, operator, x.locs) for operator in x.content.operators], x.content.probs))
+function noisy_instruct!(r::DensityMatrix{D,T}, x::MixedUnitaryChannel, locs) where {D,T}
+    r0 = copy(r)
+    # first
+    regscale!(instruct!(r, mat_matchreg(r, first(x.operators)), locs), first(x.probs))
+    for (w, o) in zip(x.probs[2:end-1], x.operators[2:end-1])
+        r.state .+= w .* instruct!(copy(r0), mat_matchreg(r0, o), locs).state
+    end
+    # last
+    r.state .+= last(x.probs) .* instruct!(r0, mat_matchreg(r0, last(x.operators)), locs).state
+    return r
 end
+
 function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::MixedUnitaryChannel) where {D,T}
     r0 = copy(r)
     # first
@@ -126,8 +135,8 @@ function YaoAPI.unsafe_apply!(dm::DensityMatrix{D,T}, ch::DepolarizingChannel{D}
     dm.state .+= ch.p/(D^nqubits(dm)) * IMatrix(size(dm.state, 1))
     return dm
 end
-function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::PutBlock{D,C,<:DepolarizingChannel}) where {D,C,T}
-    unsafe_apply!(r, MixedUnitaryChannel(x.content))
+function noisy_instruct!(r::DensityMatrix{D,T}, x::DepolarizingChannel, locs) where {D,T}
+    noisy_instruct!(r, MixedUnitaryChannel(x), locs)
 end
 subblocks(::DepolarizingChannel) = ()
 print_block(io::IO, x::DepolarizingChannel) = print(io, "DepolarizingChannel{$(nqudits(x))}($(x.p))")
