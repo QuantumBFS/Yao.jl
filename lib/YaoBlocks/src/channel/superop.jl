@@ -34,11 +34,13 @@ subblocks(::SuperOp) = ()
 
 print_block(io::IO, x::SuperOp) = print(io, "SuperOp{$(nqudits(x))}($(x.superop))")
 
+# applied on few qubits
 function noisy_instruct!(rho::DensityMatrix{D,T}, x::SuperOp, locs) where {D,T}
     reg = ArrayReg{D}(vec(rho.state))
     instruct!(reg, x.superop, (locs..., (locs .+ nqudits(rho))...))
     return rho
 end
+# applied on all qubits
 function YaoAPI.unsafe_apply!(rho::DensityMatrix{D,T}, x::SuperOp) where {D,T}
     reg = ArrayReg{D}(vec(rho.state))
     unsafe_apply!(reg, GeneralMatrixBlock{D}(2*x.n, 2*x.n, x.superop))
