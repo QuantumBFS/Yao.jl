@@ -122,7 +122,7 @@ end
     @test raise_chain(chain(put(2, 1 => chain(X, Y)))) == chain(chain(put(2, 1 => X), put(2, 1 => Y)))
 end
 
-@testset "standardize" begin
+@testset "canonicalize" begin
     n_qubits = 4
     circ = chain(
         put(n_qubits, 1 => H),
@@ -152,7 +152,7 @@ end
     # add measurement noise
     push!(circ_noisy, repeat(error_meas, n_qubits))
 
-    circ_noisy = standardize(circ_noisy)
+    circ_noisy = canonicalize(circ_noisy)
 
     @test circ_noisy isa ChainBlock
     @test length(circ_noisy) == 9

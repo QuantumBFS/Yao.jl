@@ -5,7 +5,7 @@ module Optimise
 using YaoBlocks, YaoBlocks.ConstGate
 using YaoBlocks: NotImplementedError
 
-export replace_block, flatten_basic, simplify, raise_chain, standardize, to_basictypes, is_pauli
+export replace_block, flatten_basic, simplify, raise_chain, canonicalize, to_basictypes, is_pauli
 export merge_pauli, eliminate_nested, merge_scale, combine_similar
 
 """
@@ -260,10 +260,10 @@ end
 const __default_simplification_rules__ =
     Function[merge_pauli, eliminate_nested, merge_scale, combine_similar]
 const __flatten_basic__ = Function[eliminate_nested, to_basictypes]
-const __standardize__ = Function[eliminate_nested, raise_chain, to_basictypes]
+const __canonicalize__ = Function[eliminate_nested, raise_chain, to_basictypes]
 
 flatten_basic(ex::AbstractBlock) = simplify(ex; rules = __flatten_basic__)
-standardize(ex::AbstractBlock) = simplify(ex; rules = __standardize__)
+canonicalize(ex::AbstractBlock) = simplify(ex; rules = __canonicalize__)
 
 # Inspired by MasonPotter/Symbolics.jl
 """

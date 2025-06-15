@@ -67,7 +67,7 @@ end
     g6x = g4x
     for g in [g1, g2, g3, g4, g5, g6]
         reg = density_matrix(rand_state(n_qubits))
-        sg = standardize(g)
+        sg = canonicalize(g)
         @test apply(reg, g) ≈ apply(reg, sg)
     end
     for (i, (g1, g2)) in enumerate(zip([g1x, g2x, g3x, g4x, g6x], [g1, g2, g3, g4, g6]))
