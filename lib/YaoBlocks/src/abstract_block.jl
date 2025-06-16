@@ -332,9 +332,8 @@ end
 
 render_params(r::AbstractBlock, params) = params
 render_params(r::AbstractBlock, params::Symbol) = render_params(r, Val(params))
-render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i = 1:niparams(r))
-render_params(r::AbstractBlock, ::Val{:zero}) =
-    (zero(iparams_eltype(r)) for i = 1:niparams(r))
+render_params(r::AbstractBlock, ::Val{:random}) = ntuple(i -> rand(iparams_eltype(r)), niparams(r))
+render_params(r::AbstractBlock, ::Val{:zero}) = ntuple(i -> zero(iparams_eltype(r)), niparams(r))
 
 """
     cache_type(::Type) -> DataType
