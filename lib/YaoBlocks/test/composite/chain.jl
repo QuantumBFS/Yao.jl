@@ -201,3 +201,8 @@ end
         @test allpass
     end
 end
+
+@testset "chain construction bug fix" begin
+    cz_phase = chain(cz(2, 2, 1), put(2 => shift(0.1)))
+    @test length(cz_phase) == 2
+end
