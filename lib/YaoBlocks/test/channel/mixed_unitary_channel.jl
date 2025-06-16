@@ -1,4 +1,4 @@
-using YaoBlocks, YaoArrayRegister
+using YaoBlocks, YaoArrayRegister, LinearAlgebra
 using Test
 
 @testset "check apply" begin
@@ -59,4 +59,51 @@ end
     dmput = apply(apply(dm, put(3, 1=>dpolarizing)), put(3, 2=>dpolarizing))
     @test dmkron ≈ dmrepeat
     @test dmkron ≈ dmput
+end
+
+@testset "kron" begin
+    n_qubits = 3
+    op1 = matblock(rand_unitary(2))
+    op2 = matblock(rand_unitary(2))
+    mixed_unitary_channel = MixedUnitaryChannel([op1, op2], [0.5, 0.5])
+    mixed_unitary_channel2 = MixedUnitaryChannel([op1, op2], [0.5, 0.5])
+    mixed_unitary_channel3 = kron(mixed_unitary_channel, mixed_unitary_channel2)
+
+    circ1 = chain(n_qubits, put(n_qubits, 1 => mixed_unitary_channel), put(n_qubits, 2 => mixed_unitary_channel2))
+    circ2 = chain(n_qubits, put(n_qubits, (1, 2) => mixed_unitary_channel3))
+
+    reg = rand_state(n_qubits)
+    @test noisy_simulation(reg, circ1) ≈ noisy_simulation(reg, circ2)
+end
+
+@testset "depolarizing channel - constructor" begin
+    n_qubits = 2
+    p = 0.1
+    depolarizing = DepolarizingChannel(n_qubits, p)
+    @test cache_key(depolarizing) isa UInt64
+    @test depolarizing == copy(depolarizing)
+    @test depolarizing' == depolarizing
+    @test subblocks(depolarizing) == ()
+    @test occupied_locs(depolarizing) == (1, 2)
+end
+
+@testset "depolarizing channel - representations" begin
+    for n_qubits in [1, 3]
+        p = 0.1
+        depolarizing = DepolarizingChannel(n_qubits, p)
+        mixed_unitary_channel = MixedUnitaryChannel(depolarizing)
+        @test SuperOp(depolarizing) ≈ SuperOp(mixed_unitary_channel)
+
+        # test apply
+        r = rand_state(n_qubits)
+        rho = density_matrix(r)
+        r1 = apply(rho, depolarizing)
+        r2 = apply(rho, mixed_unitary_channel)
+        expected_state = (1-p) * rho.state + p/(2^n_qubits) * IMatrix(size(rho.state, 1))
+        @test tr(expected_state) ≈ 1
+        @test tr(r1.state) ≈ 1
+        @test tr(r2.state) ≈ 1
+        @test r1.state ≈ expected_state
+        @test r2.state ≈ expected_state
+    end
 end

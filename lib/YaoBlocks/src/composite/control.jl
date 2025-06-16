@@ -26,6 +26,7 @@ struct ControlBlock{BT<:AbstractBlock,C,M} <: AbstractContainer{BT,2}
         @assert_locs_safe n (ctrl_locs..., locs...)
         @assert nqudits(block) == M "number of locations doesn't match the size of block"
         @assert block isa AbstractBlock "expect a block, got $(typeof(block))"
+        @assert !isnoisy(block) "controlled block can not contain noisy channel"
         new{BT,C,M}(n, ctrl_locs, ctrl_config, block, locs)
     end
 end
