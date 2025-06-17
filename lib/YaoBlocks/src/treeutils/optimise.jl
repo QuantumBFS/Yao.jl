@@ -5,9 +5,9 @@ module Optimise
 using YaoBlocks, YaoBlocks.ConstGate
 using YaoBlocks: NotImplementedError
 
-include("to_basictypes.jl")
+export replace_block, flatten_basic, simplify, raise_chain, canonicalize, to_basictypes, is_pauli
+export merge_pauli, eliminate_nested, merge_scale, combine_similar
 
-export replace_block, flatten_basic, simplify
 """
     replace_block(actor, tree::AbstractBlock) -> AbstractBlock
     replace_block(pair::Pair{Type{ST}, TT}, tree::AbstractBlock) -> AbstractBlock
@@ -33,7 +33,44 @@ function replace_block(
 end
 
 
-export is_pauli
+"""
+    to_basictypes(block::AbstractBlock)
+
+convert gates to basic types
+
+    * ChainBlock
+    * PutBlock
+    * PrimitiveBlock
+"""
+function to_basictypes end
+
+to_basictypes(block::PrimitiveBlock) = block
+to_basictypes(block::MixedUnitaryChannel) = block
+to_basictypes(block::KrausChannel) = block
+to_basictypes(block::SuperOp) = block
+function to_basictypes(block::AbstractBlock)
+    throw(NotImplementedError(:to_basictypes, typeof(block)))
+end
+
+function to_basictypes(block::RepeatedBlock)
+    chain(block.n, map(i -> put(block.n, i => content(block)), block.locs))
+end
+
+to_basictypes(block::CachedBlock) = content(block)
+function to_basictypes(block::Subroutine{D,<:PrimitiveBlock}) where {D}
+    put(nqudits(block), block.locs => content(block))
+end
+function to_basictypes(block::Subroutine)
+    to_basictypes(map_address(content(block), AddressInfo(block.n, [block.locs...])))
+end
+function to_basictypes(block::Subroutine{D,<:Measure}) where {D}
+    map_address(content(block), AddressInfo(nqudits(block), [block.locs...]))
+end
+to_basictypes(block::Daggered) = Daggered(block.content)
+to_basictypes(block::Scale) = Scale(block.alpha, block.content)
+to_basictypes(block::KronBlock) =
+    chain(block.n, [put(block.n, i => block[i]) for i in block.locs])
+to_basictypes(block::Union{Add,PutBlock,ChainBlock,ControlBlock}) = block
 
 """
     is_pauli(x)
@@ -61,7 +98,6 @@ for G in [:I2, :X, :Y, :Z]
     @eval const $nG = -$G
 end
 
-export merge_pauli
 merge_pauli(x) = x
 merge_pauli(x::AbstractBlock, y::AbstractBlock) = x * y
 
@@ -105,16 +141,35 @@ end
 
 merge_pauli(::I2Gate, ::I2Gate) = I2
 
-export eliminate_nested
 eliminate_nested(ex::AbstractBlock) = ex
 
-# TODO: eliminate nested expr e.g chain(X, chain(X, Y))
+# eliminate nested put blocks
+function eliminate_nested(ex::PutBlock)
+    content = eliminate_nested(ex.content)
+    if content isa PutBlock
+        return put(nqubits(ex), map(x -> ex.locs[x], content.locs) => content.content)
+    else
+        return ex
+    end
+end
+
 function eliminate_nested(ex::T) where {T<:Union{ChainBlock,Add}}
     _flatten(x) = (x,)
     _flatten(x::T) = subblocks(x)
 
     isone(length(ex)) && return first(subblocks(ex))
     return chsubblocks(ex, collect(AbstractBlock{nlevel(ex)}, Iterators.flatten(map(_flatten, subblocks(ex)))))
+end
+
+raise_chain(ex::AbstractBlock) = ex
+raise_chain(ex::ChainBlock) = chain([raise_chain(block) for block in ex])
+function raise_chain(ex::PutBlock)
+    content = raise_chain(ex.content)
+    if content isa ChainBlock
+        return chain([put(nqubits(ex), ex.locs => block) for block in content])
+    else
+        return ex
+    end
 end
 
 # temporary utils
@@ -137,7 +192,7 @@ _one(x) = one(x)
 _one(::Type{Val{S}}) where {S} = one(S)
 _one(::Val{S}) where {S} = one(S)
 
-export merge_scale
+
 
 function merge_scale(ex::Union{Scale{S,N},ChainBlock{N}}) where {S,N}
     alpha = nothing
@@ -151,8 +206,6 @@ function merge_scale(ex::Union{Scale{S,N},ChainBlock{N}}) where {S,N}
         return alpha * ex
     end
 end
-
-export combine_similar
 
 combine_similar(ex::AbstractBlock) = ex
 
@@ -204,13 +257,13 @@ function combine_similar(ex::Add{D}) where D
     end
 end
 
-export simplify
-
 const __default_simplification_rules__ =
     Function[merge_pauli, eliminate_nested, merge_scale, combine_similar]
 const __flatten_basic__ = Function[eliminate_nested, to_basictypes]
+const __canonicalize__ = Function[eliminate_nested, raise_chain, to_basictypes]
 
 flatten_basic(ex::AbstractBlock) = simplify(ex; rules = __flatten_basic__)
+canonicalize(ex::AbstractBlock) = simplify(ex; rules = __canonicalize__)
 
 # Inspired by MasonPotter/Symbolics.jl
 """

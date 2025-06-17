@@ -89,8 +89,13 @@ function mat(::Type{T}, pb::PutBlock{D,C}) where {T,D,C}
 end
 
 function YaoAPI.unsafe_apply!(r::AbstractRegister, pb::PutBlock{D}) where D
+    isnoisy(pb.content) && return noisy_instruct!(r, pb.content, pb.locs)
     instruct!(r, mat_matchreg(r, pb.content), pb.locs)
     return r
+end
+
+function noisy_instruct!(r::AbstractRegister, pb::PutBlock{D}, locs) where {D}
+    noisy_instruct!(r, pb.content, map(i -> locs[i], pb.locs))
 end
 
 # NOTE: Roger: these specialization should be removed after the new interpret

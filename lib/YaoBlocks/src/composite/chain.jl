@@ -138,6 +138,17 @@ function YaoAPI.unsafe_apply!(r::AbstractRegister, c::ChainBlock)
     return r
 end
 
+function noisy_instruct!(r::AbstractRegister, c::ChainBlock, locs)
+    for each in c.blocks
+        if isnoisy(each)
+            noisy_instruct!(r, each, locs)
+        else
+            YaoAPI.instruct!(r, mat_matchreg(r, each), locs)
+        end
+    end
+    return r
+end
+
 cache_key(c::ChainBlock) = Tuple(cache_key(each) for each in c.blocks)
 
 function Base.:(==)(lhs::ChainBlock{D}, rhs::ChainBlock{D}) where {D}
