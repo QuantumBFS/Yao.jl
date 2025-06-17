@@ -59,3 +59,31 @@ end
     @test length(h[:,bit"11000"]) == 2
     @test length(h[:,bit"10100"]) == 3
 end
+
+@testset "render params" begin
+    # rotation gate
+    params = [first(YaoBlocks.render_params(Rx(0.5), Val(:random))) for i=1:100]
+    @test any(>(1), params)  # in range [0, 2π]
+    @test all(x -> 0<=x<=2π, params)
+    @test YaoBlocks.render_params(Rx(0.5), Val(:zero)) == (0.0,)
+
+    # shift gate
+    sg = shift(0.5)
+    params = [first(YaoBlocks.render_params(sg, Val(:random))) for i=1:100]
+    @test any(>(1), params)  # in range [0, 2π]
+    @test all(x -> 0<=x<=2π, params)
+    @test YaoBlocks.render_params(sg, Val(:zero)) == (0.0,)
+
+    # phase gate
+    pg = phase(0.5)
+    params = [first(YaoBlocks.render_params(pg, Val(:random))) for i=1:100]
+    @test any(>(1), params)  # in range [0, 2π]
+    @test all(x -> 0<=x<=2π, params)
+    @test YaoBlocks.render_params(pg, Val(:zero)) == (0.0,)
+
+    # time evolve gate
+    sg = time_evolve(X, 0.5)
+    params = [first(YaoBlocks.render_params(sg, Val(:random))) for i=1:100]
+    @test all(x -> 0<=x<=1, params)
+    @test YaoBlocks.render_params(sg, Val(:zero)) == (0.0,)
+end

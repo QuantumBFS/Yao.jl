@@ -37,6 +37,7 @@ niparams(::Type{<:PhaseGate}) = 1
 getiparams(x::PhaseGate) = x.theta
 setiparams!(r::PhaseGate, param::Number) = (r.theta = param; r)
 setiparams(r::PhaseGate, param::Number) = PhaseGate(param)
+render_params(::PhaseGate{T}, ::Val{:random}) where {T} = (T(rand()*2π),)
 
 # fallback to matrix method if it is not real
 YaoAPI.isunitary(r::PhaseGate{<:Real}) = true

@@ -41,7 +41,7 @@ niparams(::Type{<:ShiftGate}) = 1
 getiparams(x::ShiftGate) = x.theta
 setiparams!(r::ShiftGate, param::Number) = (r.theta = param; r)
 setiparams(r::ShiftGate, param::Number) = ShiftGate(param)
-
+render_params(::ShiftGate{T}, ::Val{:random}) where {T} = (T(rand()*2π),)
 
 Base.adjoint(blk::ShiftGate) = ShiftGate(-blk.theta)
 Base.copy(block::ShiftGate{T}) where {T} = ShiftGate{T}(block.theta)
