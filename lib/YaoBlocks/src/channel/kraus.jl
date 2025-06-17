@@ -37,15 +37,11 @@ function KrausChannel(it)
 end
 nqudits(uc::KrausChannel) = uc.n
 
+# noisy_instruct! is used when the matrix representation of the kraus channel is available
 function noisy_instruct!(r::DensityMatrix{D,T}, x::KrausChannel, locs) where {D,T}
-    r0 = copy(r)
-    instruct!(r, mat_matchreg(r, first(x.operators)), locs)
-    for o in x.operators[2:end-1]
-        r.state .+= instruct!(copy(r0), mat_matchreg(r0, o), locs).state
-    end
-    r.state .+= instruct!(r0, mat_matchreg(r0, last(x.operators)), locs).state
-    return r
+    return unsafe_apply!(r, KrausChannel([put(nqudits(r), locs => op) for op in x.operators]))
 end
+# unsafe_apply! is used when the matrix representation of the kraus channel is not available
 function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::KrausChannel) where {D,T}
     r0 = copy(r)
     # first

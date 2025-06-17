@@ -49,15 +49,7 @@ end
 nqudits(uc::MixedUnitaryChannel) = uc.n
 
 function noisy_instruct!(r::DensityMatrix{D,T}, x::MixedUnitaryChannel, locs) where {D,T}
-    r0 = copy(r)
-    # first
-    regscale!(instruct!(r, mat_matchreg(r, first(x.operators)), locs), first(x.probs))
-    for (w, o) in zip(x.probs[2:end-1], x.operators[2:end-1])
-        r.state .+= w .* instruct!(copy(r0), mat_matchreg(r0, o), locs).state
-    end
-    # last
-    r.state .+= last(x.probs) .* instruct!(r0, mat_matchreg(r0, last(x.operators)), locs).state
-    return r
+    return unsafe_apply!(r, MixedUnitaryChannel([put(nqudits(r), locs => op) for op in x.operators], x.probs))
 end
 
 function YaoAPI.unsafe_apply!(r::DensityMatrix{D,T}, x::MixedUnitaryChannel) where {D,T}

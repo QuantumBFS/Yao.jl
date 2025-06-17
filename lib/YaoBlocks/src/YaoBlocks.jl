@@ -103,7 +103,7 @@ export AbstractBlock,
     EntryTable,
     cleanup,
     isclean,
-    standardize
+    canonicalize
 export applymatrix, cache_key
 
 include("utils.jl")
@@ -127,7 +127,7 @@ include("treeutils/treeutils.jl")
 
 include("autodiff/autodiff.jl")
 export AD, Optimise
-using .Optimise: standardize
+using .Optimise: canonicalize
 
 include("deprecations.jl")
 
