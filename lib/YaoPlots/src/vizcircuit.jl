@@ -278,7 +278,7 @@ function draw!(c::CircuitGrid, p::Daggered{<:PrimitiveBlock}, address, controls)
     bts = length(controls)>=1 ? get_cbrush_texts(c, content(p)) : get_brush_texts(c, content(p))
     _draw!(c, [controls..., (getindex.(Ref(address), occupied_locs(p)), bts[1], bts[2]*"'")])
 end
-function draw!(c::CircuitGrid, p::UnitaryChannel, address, controls)
+function draw!(c::CircuitGrid, p::AbstractChannel, address, controls)
     bts = (c.gatestyles.g, "*")
     _draw!(c, [controls..., (getindex.(Ref(address), occupied_locs(p)), bts[1], bts[2])])
 end

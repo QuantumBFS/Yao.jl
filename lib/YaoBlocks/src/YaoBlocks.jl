@@ -80,6 +80,7 @@ export AbstractBlock,
     isreflexive,
     isunitary,
     isdiagonal,
+    isnoisy,
     mat,
     mat_back!,
     niparams,
@@ -101,8 +102,8 @@ export AbstractBlock,
     rand_hermitian,
     EntryTable,
     cleanup,
-    isclean
-
+    isclean,
+    canonicalize
 export applymatrix, cache_key
 
 include("utils.jl")
@@ -126,6 +127,7 @@ include("treeutils/treeutils.jl")
 
 include("autodiff/autodiff.jl")
 export AD, Optimise
+using .Optimise: canonicalize
 
 include("deprecations.jl")
 

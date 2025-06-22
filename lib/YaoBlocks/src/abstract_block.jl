@@ -490,3 +490,18 @@ function _getindex(b::AbstractBlock{D}, i::EntryTable{DitStr{D,N,TI},T}, ::Colon
     conj!(res.amplitudes)
     return res
 end
+
+################## noisy simulation ###################
+abstract type AbstractQuantumChannel{D} <: AbstractBlock{D} end
+function mat(::Type{T}, x::AbstractQuantumChannel) where {T}
+    error("Quantum channel does not have a matrix representation!")
+end
+
+"""
+    isnoisy(block::AbstractBlock)
+
+Check if a circuit contains any noisy channel.
+"""
+function isnoisy(block::AbstractBlock)
+    return isa(block, AbstractQuantumChannel) || any(isnoisy, subblocks(block))
+end
