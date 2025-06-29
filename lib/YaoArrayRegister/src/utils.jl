@@ -441,12 +441,11 @@ function _wrap_identity(
     nlevel
 ) where {T<:AbstractMatrix}
     length(num_bit_list) == length(data_list) + 1 || throw(ArgumentError())
-    ⊗ = kron
     reduce(
         zip(data_list, num_bit_list[2:end]);
         init = IMatrix(nlevel ^ num_bit_list[1]),
     ) do x, y
-        x ⊗ y[1] ⊗ IMatrix(nlevel ^ y[2])
+        fastkron(fastkron(x, y[1]), IMatrix(nlevel ^ y[2]))
     end
 end
 

@@ -9,11 +9,11 @@ using YaoAPI
 using LinearAlgebra
 using YaoArrayRegister
 using YaoArrayRegister: @λ, matvec, diff, autostatic, rot_mat
-using BitBasis, LuxurySparse
+using BitBasis, LuxurySparse, SparseArrays
+using LuxurySparse: fastkron
 using StatsBase, TupleTools, InteractiveUtils
 using MLStyle: @match
 using LinearAlgebra: eigen!
-using SparseArrays, LuxurySparse
 using Random, CacheServers
 import KrylovKit: exponentiate
 using DocStringExtensions

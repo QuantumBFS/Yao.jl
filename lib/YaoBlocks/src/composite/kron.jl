@@ -172,7 +172,7 @@ function mat(::Type{T}, k::KronBlock{D,M}) where {T,D,M}
         Iterators.reverse(zip(subblocks(k), num_bit_list)),
         init = IMatrix{T}(D^ntrail),
     ) do x, y
-        kron(x, mat(T, y[1]), IMatrix(D^y[2]))
+        fastkron(fastkron(x, mat(T, y[1])), IMatrix(D^y[2]))
     end
 end
 

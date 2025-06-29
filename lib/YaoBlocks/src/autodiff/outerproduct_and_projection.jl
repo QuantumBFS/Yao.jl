@@ -80,8 +80,7 @@ unsafe_projection!(y::Diagonal, op::OuterProduct) = (y.diag .+= op.left .* op.ri
 unsafe_projection!(y::Matrix, adjy, v) = y .+= adjy .* v
 
 @inline function unsafe_projection!(y::AbstractSparseMatrix, m::AbstractMatrix)
-    is, js, vs = findnz(y)
-    for (k, (i, j)) in enumerate(zip(is, js))
+    for (k, (i, j, _)) in enumerate(IterNz(y))
         @inbounds y.nzval[k] += m[i, j]
     end
     y

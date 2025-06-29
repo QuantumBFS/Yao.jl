@@ -20,8 +20,15 @@ end
 content(g::OnLevels) = g.gate
 function mat(::Type{T}, g::OnLevels{D, Ds}) where {T, D, Ds}
     m = mat(T, g.gate)
-    I, J, V = LuxurySparse.findnz(m)
-    return sparse(collect(g.levels[I]), collect(g.levels[J]), V, D, D)
+    iter = IterNz(m)
+    nnz = length(iter)
+    is, js, vs = Vector{Int}(undef, nnz), Vector{Int}(undef, nnz), Vector{T}(undef, nnz)
+    for (k, (i, j, v)) in enumerate(iter)
+        is[k] = g.levels[i]
+        js[k] = g.levels[j]
+        vs[k] = v
+    end
+    return sparse(is, js, vs, D, D)
 end
 PropertyTrait(::OnLevels) = PreserveAll()
 Base.adjoint(x::OnLevels{D}) where D = OnLevels{D}(adjoint(x.gate), x.levels)

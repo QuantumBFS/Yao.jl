@@ -340,7 +340,7 @@ end
 function outerloop!(::Val{D}, ::Val{C}, nbits, mat, is, js, vs, CI, substrides, basestrides, basedim) where {D,C}
     offset = 0
     # does not support multi-threading
-    @inbounds for (i, j, v) in zip(findnz(mat)...)
+    @inbounds for (i, j, v) in IterNz(mat)
         # set indices
         I, J = CI[i].I, CI[j].I
         ioffset = sum(i->(I[i]-1) * substrides[i], 1:C)
