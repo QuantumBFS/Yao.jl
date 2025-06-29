@@ -12,7 +12,8 @@ using BitBasis
 using LinearAlgebra
 using LegibleLambdas
 using StatsBase, Random
-using LuxurySparse, StaticArrays
+using StaticArrays
+import LuxurySparse: fastkron, IMatrix, PermMatrix, Diagonal, SparseMatrixCSC
 using DocStringExtensions
 
 export AbstractArrayReg,
