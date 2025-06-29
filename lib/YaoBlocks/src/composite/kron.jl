@@ -183,8 +183,20 @@ function YaoAPI.unsafe_apply!(r::AbstractRegister, k::KronBlock)
     return r
 end
 
-_instruct!(reg::AbstractRegister, block::AbstractBlock, locs) =
+function _instruct!(reg::AbstractRegister, block::AbstractBlock, locs)
+    isnoisy(block) && return noisy_instruct!(reg, block, locs)
     instruct!(reg, mat_matchreg(reg, block), locs)
+end
+function noisy_instruct!(reg::AbstractRegister, k::KronBlock, locs)
+    for (loc, block) in zip(k.locs, k.blocks)
+        if isnoisy(block)
+            noisy_instruct!(reg, block, Tuple(map(i -> locs[i], loc)))
+        else
+            instruct!(reg, mat_matchreg(reg, block), Tuple(map(i -> locs[i], loc)))
+        end
+    end
+    return reg
+end
 
 # specialization
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]

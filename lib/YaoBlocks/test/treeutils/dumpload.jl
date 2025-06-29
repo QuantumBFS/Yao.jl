@@ -27,6 +27,11 @@ using YaoBlocks: check_dumpload
     @test check_dumpload(2 * X)
     @test check_dumpload(cache(2 * X))
     @test_throws ErrorException check_dumpload(kron(5, 2:3 => SWAP))
+
+    block_A(i, j) = control(i, j => shift(2π / (1 << (i - j + 1))))
+    block_B(n, i) = chain(n, i == j ? put(i => H) : block_A(j, i) for j = i:n)
+    qft(n) = chain(block_B(n, i) for i = 1:n)
+    @test check_dumpload(qft(5))
 end
 
 @testset "yao macro" begin

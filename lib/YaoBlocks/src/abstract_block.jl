@@ -332,9 +332,8 @@ end
 
 render_params(r::AbstractBlock, params) = params
 render_params(r::AbstractBlock, params::Symbol) = render_params(r, Val(params))
-render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i = 1:niparams(r))
-render_params(r::AbstractBlock, ::Val{:zero}) =
-    (zero(iparams_eltype(r)) for i = 1:niparams(r))
+render_params(r::AbstractBlock, ::Val{:random}) = ntuple(i -> rand(iparams_eltype(r)), niparams(r))
+render_params(r::AbstractBlock, ::Val{:zero}) = ntuple(i -> zero(iparams_eltype(r)), niparams(r))
 
 """
     cache_type(::Type) -> DataType
@@ -490,4 +489,19 @@ function _getindex(b::AbstractBlock{D}, i::EntryTable{DitStr{D,N,TI},T}, ::Colon
     res = _getindex(b',:,i)
     conj!(res.amplitudes)
     return res
+end
+
+################## noisy simulation ###################
+abstract type AbstractQuantumChannel{D} <: AbstractBlock{D} end
+function mat(::Type{T}, x::AbstractQuantumChannel) where {T}
+    error("Quantum channel does not have a matrix representation!")
+end
+
+"""
+    isnoisy(block::AbstractBlock)
+
+Check if a circuit contains any noisy channel.
+"""
+function isnoisy(block::AbstractBlock)
+    return isa(block, AbstractQuantumChannel) || any(isnoisy, subblocks(block))
 end
