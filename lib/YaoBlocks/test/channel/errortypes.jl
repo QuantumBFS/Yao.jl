@@ -118,3 +118,90 @@ end
     @test mat(reset_kraus.operators[4]) ≈ [0.0 0.0; 0.0 sqrt(0.1)]
     @test mat(reset_kraus.operators[5]) ≈ [0.0 sqrt(0.1); 0.0 0.0]
 end
+
+@testset "super operators" begin
+    # bit flip
+    p_error = 0.05
+    bit_flip = BitFlipError(p_error)
+    @test SuperOp(bit_flip).superop ≈ [0.95 0.0 0.0 0.05;
+        0.0 0.95 0.05 0.0;
+        0.0 0.05 0.95 0.0;
+        0.05 0.0 0.0 0.95]
+
+    # phase flip
+    p_error = 0.05
+    phase_flip = PhaseFlipError(p_error)
+    @test SuperOp(phase_flip).superop ≈ [1.0 0.0 0.0 0.0;
+        0.0 0.9 0.0 0.0;
+        0.0 0.0 0.9 0.0;
+        0.0 0.0 0.0 1.0]
+
+    # depolarizing
+    p_error = 0.1
+    depolarizing = DepolarizingError(1, p_error)
+    @test SuperOp(depolarizing).superop ≈ [0.95 0.0 0.0 0.05;
+        0.0 0.9 0.0 0.0;
+        0.0 0.0 0.9 0.0;
+        0.05 0.0 0.0 0.95]
+
+    # thermal relaxation
+    T1 = 100.0
+    T2 = 200.0
+    time = 1.0
+    excited_state_population = 0.0
+    thermal_relaxation = ThermalRelaxationError(T1, T2, time, excited_state_population)
+    @test SuperOp(thermal_relaxation).superop ≈ [1.0 0.0 0.0 0.00995017;
+        0.0 0.99501248 0.0 0.0;
+        0.0 0.0 0.99501248 0.0;
+        0.0 0.0 0.0 0.99004983]
+
+    # coherent error
+    block = X
+    coherent_error = CoherentError(block)
+    @test SuperOp(coherent_error).superop ≈ [0.0 0.0 0.0 1.0;
+        0.0 0.0 1.0 0.0;
+        0.0 1.0 0.0 0.0;
+        1.0 0.0 0.0 0.0]
+
+    # pauli error
+    px, py, pz = 0.1, 0.0, 0.0
+    pauli_error = PauliError(px, py, pz)
+    @test SuperOp(pauli_error).superop ≈ [0.9 0.0 0.0 0.1;
+        0.0 0.9 0.1 0.0;
+        0.0 0.1 0.9 0.0;
+        0.1 0.0 0.0 0.9]
+
+    # amplitude damping
+    param_amp = 0.1
+    amplitude_damping = AmplitudeDampingError(param_amp)
+    @test SuperOp(amplitude_damping).superop ≈ [1.0 0.0 0.0 0.1;
+        0.0 0.9486833 0.0 0.0;
+        0.0 0.0 0.9486833 0.0;
+        0.0 0.0 0.0 0.9]
+
+    # phase damping
+    param_phase = 0.1
+    phase_damping = PhaseDampingError(param_phase)
+    @test SuperOp(phase_damping).superop ≈ [1.0 0.0 0.0 0.0;
+        0.0 0.9486833 0.0 0.0;
+        0.0 0.0 0.9486833 0.0;
+        0.0 0.0 0.0 1.0]
+
+    # phase amplitude damping
+    param_amp = 0.1
+    param_phase = 0.05
+    excited_state_population = 0.0
+    phase_amplitude_damping = PhaseAmplitudeDampingError(param_amp, param_phase, excited_state_population)
+    @test SuperOp(phase_amplitude_damping).superop ≈ [1.0 0.0 0.0 0.1;
+        0.0 0.92195445 0.0 0.0;
+        0.0 0.0 0.92195445 0.0;
+        0.0 0.0 0.0 0.9]
+
+    # phase amplitude damping with excited state population
+    excited_state_population = 0.1
+    phase_amplitude_damping_excited = PhaseAmplitudeDampingError(param_amp, param_phase, excited_state_population)
+    @test SuperOp(phase_amplitude_damping_excited).superop ≈ [0.99 0.0 0.0 0.09;
+        0.0 0.92195445 0.0 0.0;
+        0.0 0.0 0.92195445 0.0;
+        0.01 0.0 0.0 0.91]
+end

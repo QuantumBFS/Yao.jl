@@ -1,5 +1,10 @@
+# error types
 export AbstractErrorType, BitFlipError, PhaseFlipError, DepolarizingError, PauliError, ResetError,
-    KrausChannel, MixedUnitaryChannel, DepolarizingChannel, quantum_channel, SuperOp,
+    ThermalRelaxationError, PhaseAmplitudeDampingError, PhaseDampingError, AmplitudeDampingError,
+    CoherentError
+
+# channels
+export KrausChannel, MixedUnitaryChannel, DepolarizingChannel, quantum_channel, SuperOp,
     add_noise, noisy_simulation
 
 """
