@@ -6,10 +6,10 @@ struct EinBuilder{MODE<:AbstractMappingMode, T, D}
     labels::Vector{Vector{Int}}        # tensor labels
     tensors::Vector{AbstractArray{T}}  # tensor data, the order is the same as the labels
     maxlabel::Base.RefValue{Int}       # the maximum label used
-    function EinBuilder{MODE, T, D}(mode::MODE, n::Int) where {MODE<:AbstractMappingMode, T, D}
-        mode isa PauliBasisMode && error("PauliBasisMode is not supported yet!")
-        new{MODE, T, D}(mode, collect(1:n), Vector{Int}[], AbstractArray{T}[], Ref(n))
-    end
+end
+function EinBuilder{MODE, T, D}(mode::MODE, n::Int) where {MODE<:AbstractMappingMode, T, D}
+    mode isa PauliBasisMode && error("PauliBasisMode is not supported yet!")
+    EinBuilder{MODE, T, D}(mode, collect(1:n), Vector{Int}[], AbstractArray{T}[], Ref(n))
 end
 YaoBlocks.nqubits(eb::EinBuilder) = length(eb.slots)
 
@@ -19,19 +19,35 @@ function add_tensor!(eb::EinBuilder{MODE, T, D}, tensor::AbstractArray{T,N}, lab
     @assert N == length(labels)
     push!(eb.tensors, tensor)
     push!(eb.labels, labels)
-    if MODE isa DensityMatrixMode || MODE isa PauliBasisMode
+    if eb.mode isa DensityMatrixMode || eb.mode isa PauliBasisMode
         push!(eb.tensors, conj(tensor))
         push!(eb.labels, (-).(labels))
     end
+end
+function trace!(eb::EinBuilder{MODE, T, D}) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
+    replacement = [-x => x for x in eb.slots]
+    for i = 1:length(eb.labels)
+        eb.labels[i] = replace(eb.labels[i], replacement...)
+    end
+    return eb
 end
 
 newlabel!(eb::EinBuilder) = (eb.maxlabel[] += 1; eb.maxlabel[])
 
 function add_gate!(eb::EinBuilder{MODE, T, D}, b::PutBlock{D,C}) where {MODE<:AbstractMappingMode, T,D,C}
-    return add_matrix!(eb, C, mat(T, b.content), collect(b.locs))
+    if isnoisy(b.content)
+        add_channel!(eb, SuperOp(b.content), collect(b.locs))
+    else
+        add_matrix!(eb, mat(T, b.content), collect(b.locs))
+    end
+    return eb
 end
 # general and diagonal gates
-function add_matrix!(eb::EinBuilder{MODE, T, D}, k::Int, m::AbstractMatrix, locs::Vector) where {MODE<:AbstractMappingMode, T, D}
+# - `k` is the number of qubits that the gate acts on
+# - `m` is the matrix of the gate
+# - `locs` is the location of the qubits that the gate acts on
+function add_matrix!(eb::EinBuilder{MODE, T, D}, m::AbstractMatrix, locs::Vector) where {MODE<:AbstractMappingMode, T, D}
+    k = length(locs)
     if m isa Diagonal
         add_tensor!(eb, reshape(Vector{T}(diag(m)), fill(D, k)...), eb.slots[locs])
     elseif m isa YaoBlocks.OuterProduct  # low rank
@@ -64,24 +80,25 @@ end
 
 # projection gate, todo: generalize to arbitrary low rank gate
 function add_gate!(eb::EinBuilder{MODE, T, 2}, b::PutBlock{2,1,ConstGate.P0Gate}) where {MODE<:AbstractMappingMode, T}
-    add_matrix!(eb, 1, YaoBlocks.OuterProduct(T[1, 0], T[1, 0]), collect(b.locs))
+    add_matrix!(eb, YaoBlocks.OuterProduct(T[1, 0], T[1, 0]), collect(b.locs))
     return eb
 end
 
 # projection gate, todo: generalize to arbitrary low rank gate
 function add_gate!(eb::EinBuilder{MODE, T, 2}, b::PutBlock{2,1,ConstGate.P1Gate}) where {MODE<:AbstractMappingMode, T}
-    add_matrix!(eb, 1, YaoBlocks.OuterProduct(T[0, 1], T[0, 1]), collect(b.locs))
+    add_matrix!(eb, YaoBlocks.OuterProduct(T[0, 1], T[0, 1]), collect(b.locs))
     return eb
 end
 
 
 # control gates
 function add_gate!(eb::EinBuilder{MODE, T, 2}, b::ControlBlock{BT,C,M}) where {MODE<:AbstractMappingMode, T, BT,C,M}
+    @assert !isnoisy(b.content) "Control gate is not supported for noisy channels! got: $b"
     return add_controlled_matrix!(eb, M, mat(T, b.content), collect(b.locs), collect(b.ctrl_locs), collect(b.ctrl_config))
 end
 function add_controlled_matrix!(eb::EinBuilder{MODE, T, 2}, k::Int, m::AbstractMatrix, locs::Vector, control_locs, control_vals) where {MODE<:AbstractMappingMode, T}
     if length(control_locs) == 0
-        return add_matrix!(eb, k, m, locs)
+        return add_matrix!(eb, m, locs)
     end
     sig = eb.slots[control_locs[1]]
     val = control_vals[1]
@@ -139,12 +156,49 @@ function add_gate!(eb::EinBuilder, b::AbstractBlock)
     return eb
 end
 
+# Channels
+function add_channel!(eb::EinBuilder{MODE, T, D}, b::SuperOp, locs::Vector{Int}) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
+    mat = Matrix{T}(b.superop)
+    k = length(locs)
+    nlabels = [newlabel!(eb) for _=1:k]
+    push!(eb.tensors, reshape(mat, fill(D, 4k)...))
+    push!(eb.labels, [nlabels..., (-).(nlabels)..., eb.slots[locs]..., (-).(eb.slots[locs])...])
+    eb.slots[locs] .= nlabels
+    return eb
+end
+
+function add_observable!(eb::EinBuilder{MODE, T, D}, b::AbstractBlock) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
+    # Note: the observable is only added once to the network, hence we need to use the vector mode to add it
+    eb_vec = EinBuilder{VectorMode, T, D}(VectorMode(), eb.slots, eb.labels, eb.tensors, eb.maxlabel)
+    add_gate!(eb_vec, b)
+    trace!(eb)
+    return eb
+end
+
 """
-    yao2einsum(circuit; initial_state=Dict(), final_state=Dict(), optimizer=TreeSA(), mode=VectorMode())
-    yao2einsum(mode::AbstractMappingMode, circuit, initial_state::Dict, final_state::Dict, optimizer)
+    yao2einsum(circuit; initial_state=Dict(), final_state=Dict(), optimizer=TreeSA(), mode=VectorMode(), observable=nothing)
 
 Transform a Yao `circuit` to a generalized tensor network (einsum) notation.
-The return value is a [`TensorNetwork`](@ref) instance.
+The return value is a [`TensorNetwork`](@ref) instance that corresponds to the following tensor network:
+
+1). If mode is `VectorMode()`, the tensor network will be like:
+```
+<initial_state| ─── circuit ─── |final_state>
+```
+
+2). If the mode is `DensityMatrixMode()`, the tensor network will be like:
+```
+<final_state| ─── circuit ─── |initial_state><initial_state| ─── circuit ─── |final_state>
+```
+where the `circuit` may contain noise channels.
+
+3). In the `DensityMatrixMode()`, if `observable` is specified, compute `tr(rho, observable)` instead.
+```
+┌── circuit ─── |initial_state><initial_state| ─── circuit ─── observable ──┐
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+4). `PauliBasisMode()` is not supported yet. It is similar to the `DensityMatrixMode()` mode, but the basis will be rotated to the Pauli basis.
 
 ### Arguments
 - `mode` is the mapping mode, which can be `DensityMatrixMode()`, `PauliBasisMode()`, or `VectorMode()`.
@@ -152,6 +206,7 @@ The return value is a [`TensorNetwork`](@ref) instance.
 - `initial_state` and `final_state` are dictionaries to specify the initial states and final states (taking conjugate).
     - In the first interface, a state is specified as an integer, e.g. `Dict(1=>1, 2=>1, 3=>0, 4=>1)` specifies a product state `|1⟩⊗|1⟩⊗|0⟩⊗|1⟩`.
     - In the second interface, a state is specified as an `ArrayReg`, e.g. `Dict(1=>rand_state(1), 2=>rand_state(1))`.
+- `observable` is a Yao block to specify the observable. If it is specified, the final state must be unspecified.
 If any qubit in initial state or final state is not specified, it will be treated as a free leg in the tensor network.
 - `optimizer` is the optimizer used to optimize the tensor network. The default is `TreeSA()`.
 Please check [OMEinsumContractors.jl](https://github.com/TensorBFS/OMEinsumContractionOrders.jl) for more information.
@@ -179,7 +234,8 @@ Read-write complexity: 2^6.0
 ```
 """
 function yao2einsum(circuit::AbstractBlock{D}; mode::AbstractMappingMode=VectorMode(), initial_state::Dict=Dict{Int,Int}(), final_state::Dict=Dict{Int,Int}(), observable=nothing, optimizer=TreeSA()) where {D}
-    @assert !isempty(final_state) || isnothing(observable) "Please do not specify both `final_state` and `observable`, got final_state=$final_state and observable=$observable"
+    @assert isempty(final_state) || isnothing(observable) "Please do not specify both `final_state` and `observable`, got final_state=$final_state and observable=$observable"
+    @assert (mode isa DensityMatrixMode || mode isa PauliBasisMode) || isnothing(observable) "If you want to compute the expectation value of an observable, please use `DensityMatrixMode()`"
     T = promote_type(ComplexF64, dict_regtype(initial_state), dict_regtype(final_state), YaoBlocks.parameters_eltype(circuit))
 
     n = nqudits(circuit)
