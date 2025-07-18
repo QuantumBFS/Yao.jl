@@ -1,29 +1,37 @@
 # T is the element type of the tensor network
 # D is the dimension of the qudits
-struct EinBuilder{T, D}
-    slots::Vector{Int}
-    labels::Vector{Vector{Int}}
-    tensors::Vector{AbstractArray{T}}
-    maxlabel::Base.RefValue{Int}
+struct EinBuilder{MODE<:AbstractMappingMode, T, D}
+    mode::MODE                         # the mapping mode, which can be `DensityMatrixMode()`, `PauliBasisMode()`, or `VectorMode()`
+    slots::Vector{Int}                 # the labels for the open indices
+    labels::Vector{Vector{Int}}        # tensor labels
+    tensors::Vector{AbstractArray{T}}  # tensor data, the order is the same as the labels
+    maxlabel::Base.RefValue{Int}       # the maximum label used
+    function EinBuilder{MODE, T, D}(mode::MODE, n::Int) where {MODE<:AbstractMappingMode, T, D}
+        mode isa PauliBasisMode && error("PauliBasisMode is not supported yet!")
+        new{MODE, T, D}(mode, collect(1:n), Vector{Int}[], AbstractArray{T}[], Ref(n))
+    end
 end
-
 YaoBlocks.nqubits(eb::EinBuilder) = length(eb.slots)
-function add_tensor!(eb::EinBuilder{T}, tensor::AbstractArray{T,N}, labels::Vector{Int}) where {N,T}
+
+# add a new tensor, if in density matrix mode or pauli basis mode, also add a dual tensor
+# the dual tensor has conjugate elements, and the labels are negated
+function add_tensor!(eb::EinBuilder{MODE, T, D}, tensor::AbstractArray{T,N}, labels::Vector{Int}) where {MODE<:AbstractMappingMode, T, D, N}
     @assert N == length(labels)
     push!(eb.tensors, tensor)
     push!(eb.labels, labels)
+    if MODE isa DensityMatrixMode || MODE isa PauliBasisMode
+        push!(eb.tensors, conj(tensor))
+        push!(eb.labels, (-).(labels))
+    end
 end
 
-function EinBuilder{T, D}(n::Int) where {T, D}
-    EinBuilder{T, D}(collect(1:n), Vector{Int}[], AbstractArray{T}[], Ref(n))
-end
 newlabel!(eb::EinBuilder) = (eb.maxlabel[] += 1; eb.maxlabel[])
 
-function add_gate!(eb::EinBuilder{T}, b::PutBlock{D,C}) where {T,D,C}
+function add_gate!(eb::EinBuilder{MODE, T, D}, b::PutBlock{D,C}) where {MODE<:AbstractMappingMode, T,D,C}
     return add_matrix!(eb, C, mat(T, b.content), collect(b.locs))
 end
 # general and diagonal gates
-function add_matrix!(eb::EinBuilder{T, D}, k::Int, m::AbstractMatrix, locs::Vector) where {T, D}
+function add_matrix!(eb::EinBuilder{MODE, T, D}, k::Int, m::AbstractMatrix, locs::Vector) where {MODE<:AbstractMappingMode, T, D}
     if m isa Diagonal
         add_tensor!(eb, reshape(Vector{T}(diag(m)), fill(D, k)...), eb.slots[locs])
     elseif m isa YaoBlocks.OuterProduct  # low rank
@@ -47,7 +55,7 @@ function add_matrix!(eb::EinBuilder{T, D}, k::Int, m::AbstractMatrix, locs::Vect
     return eb
 end
 # swap gate
-function add_gate!(eb::EinBuilder{T, 2}, b::PutBlock{2,2,ConstGate.SWAPGate}) where {T}
+function add_gate!(eb::EinBuilder{MODE, T, 2}, b::PutBlock{2,2,ConstGate.SWAPGate}) where {MODE<:AbstractMappingMode, T}
     lj = eb.slots[b.locs[2]]
     eb.slots[b.locs[2]] = eb.slots[b.locs[1]]
     eb.slots[b.locs[1]] = lj
@@ -55,23 +63,23 @@ function add_gate!(eb::EinBuilder{T, 2}, b::PutBlock{2,2,ConstGate.SWAPGate}) wh
 end
 
 # projection gate, todo: generalize to arbitrary low rank gate
-function add_gate!(eb::EinBuilder{T, 2}, b::PutBlock{2,1,ConstGate.P0Gate}) where {T}
+function add_gate!(eb::EinBuilder{MODE, T, 2}, b::PutBlock{2,1,ConstGate.P0Gate}) where {MODE<:AbstractMappingMode, T}
     add_matrix!(eb, 1, YaoBlocks.OuterProduct(T[1, 0], T[1, 0]), collect(b.locs))
     return eb
 end
 
 # projection gate, todo: generalize to arbitrary low rank gate
-function add_gate!(eb::EinBuilder{T, 2}, b::PutBlock{2,1,ConstGate.P1Gate}) where {T}
+function add_gate!(eb::EinBuilder{MODE, T, 2}, b::PutBlock{2,1,ConstGate.P1Gate}) where {MODE<:AbstractMappingMode, T}
     add_matrix!(eb, 1, YaoBlocks.OuterProduct(T[0, 1], T[0, 1]), collect(b.locs))
     return eb
 end
 
 
 # control gates
-function add_gate!(eb::EinBuilder{T, 2}, b::ControlBlock{BT,C,M}) where {T, BT,C,M}
+function add_gate!(eb::EinBuilder{MODE, T, 2}, b::ControlBlock{BT,C,M}) where {MODE<:AbstractMappingMode, T, BT,C,M}
     return add_controlled_matrix!(eb, M, mat(T, b.content), collect(b.locs), collect(b.ctrl_locs), collect(b.ctrl_config))
 end
-function add_controlled_matrix!(eb::EinBuilder{T, 2}, k::Int, m::AbstractMatrix, locs::Vector, control_locs, control_vals) where T
+function add_controlled_matrix!(eb::EinBuilder{MODE, T, 2}, k::Int, m::AbstractMatrix, locs::Vector, control_locs, control_vals) where {MODE<:AbstractMappingMode, T}
     if length(control_locs) == 0
         return add_matrix!(eb, k, m, locs)
     end
@@ -114,7 +122,7 @@ function and_gate(::Type{T}, a::Int, b::Int) where T
     return m
 end
 
-function add_gate!(eb::EinBuilder, b::ChainBlock)
+function add_gate!(eb::EinBuilder{MODE, T, D}, b::ChainBlock) where {MODE<:AbstractMappingMode, T, D}
     for ib in subblocks(b)
         add_gate!(eb, ib)
     end
@@ -132,19 +140,20 @@ function add_gate!(eb::EinBuilder, b::AbstractBlock)
 end
 
 """
-    yao2einsum(circuit; initial_state=Dict(), final_state=Dict(), optimizer=TreeSA())
-    yao2einsum(circuit, initial_state::Dict, final_state::Dict, optimizer)
+    yao2einsum(circuit; initial_state=Dict(), final_state=Dict(), optimizer=TreeSA(), mode=VectorMode())
+    yao2einsum(mode::AbstractMappingMode, circuit, initial_state::Dict, final_state::Dict, optimizer)
 
 Transform a Yao `circuit` to a generalized tensor network (einsum) notation.
 The return value is a [`TensorNetwork`](@ref) instance.
 
 ### Arguments
-* `circuit` is a Yao block as the input.
-* `initial_state` and `final_state` are dictionaries to specify the initial states and final states (taking conjugate).
+- `mode` is the mapping mode, which can be `DensityMatrixMode()`, `PauliBasisMode()`, or `VectorMode()`.
+- `circuit` is a Yao block as the input.
+- `initial_state` and `final_state` are dictionaries to specify the initial states and final states (taking conjugate).
     - In the first interface, a state is specified as an integer, e.g. `Dict(1=>1, 2=>1, 3=>0, 4=>1)` specifies a product state `|1⟩⊗|1⟩⊗|0⟩⊗|1⟩`.
     - In the second interface, a state is specified as an `ArrayReg`, e.g. `Dict(1=>rand_state(1), 2=>rand_state(1))`.
 If any qubit in initial state or final state is not specified, it will be treated as a free leg in the tensor network.
-* `optimizer` is the optimizer used to optimize the tensor network. The default is `TreeSA()`.
+- `optimizer` is the optimizer used to optimize the tensor network. The default is `TreeSA()`.
 Please check [OMEinsumContractors.jl](https://github.com/TensorBFS/OMEinsumContractionOrders.jl) for more information.
 
 
@@ -169,11 +178,32 @@ Space complexity: 2^2.0
 Read-write complexity: 2^6.0
 ```
 """
-function yao2einsum(circuit::AbstractBlock{D}; initial_state::Dict=Dict{Int,Int}(), final_state::Dict=Dict{Int,Int}(), optimizer=TreeSA()) where {D}
+function yao2einsum(circuit::AbstractBlock{D}; mode::AbstractMappingMode=VectorMode(), initial_state::Dict=Dict{Int,Int}(), final_state::Dict=Dict{Int,Int}(), observable=nothing, optimizer=TreeSA()) where {D}
+    @assert !isempty(final_state) || isnothing(observable) "Please do not specify both `final_state` and `observable`, got final_state=$final_state and observable=$observable"
     T = promote_type(ComplexF64, dict_regtype(initial_state), dict_regtype(final_state), YaoBlocks.parameters_eltype(circuit))
-    vec_initial_state = Dict{keytype(initial_state),ArrayReg{D,T}}([k=>render_single_qudit_state(T, D, v) for (k, v) in initial_state])
-    vec_final_state = Dict{keytype(final_state),ArrayReg{D,T}}([k=>render_single_qudit_state(T, D, v) for (k, v) in final_state])
-    yao2einsum(circuit, vec_initial_state, vec_final_state, optimizer)
+
+    n = nqudits(circuit)
+    eb = EinBuilder{typeof(mode), T, D}(mode, n)
+
+    # add the initial state
+    initial_state = Dict([[k...]=>render_single_qudit_state(T, D, v) for (k, v) in initial_state])
+    openindices = add_states!(eb, initial_state)
+    # add the circuit
+    add_gate!(eb, circuit)
+    # add the final state or observable
+    if !isnothing(observable)
+        add_observable!(eb, observable)
+    elseif !isempty(final_state)
+        final_state = Dict([[k...]=>render_single_qudit_state(T, D, v) for (k, v) in final_state])
+        openindices2 = add_states!(eb, final_state; conjugate=true)
+        openindices = vcat(openindices2, openindices)
+    else
+        openindices = vcat(eb.slots, openindices)
+    end
+
+    # construct the tensor network
+    network = build_einsum(eb, openindices)
+    return optimizer === nothing ? network : optimize_code(network, optimizer, MergeVectors())
 end
 dict_regtype(d::Dict) = promote_type(_regtype.(values(d))...)
 _regtype(::ArrayReg{D,VT}) where {D,VT} = VT
@@ -181,27 +211,13 @@ _regtype(::Int) = ComplexF64
 render_single_qudit_state(::Type{T}, D, x::Int) where T = product_state(T, DitStr{D}([x]))
 render_single_qudit_state(::Type{T}, D, x::ArrayReg) where T = ArrayReg{D}(collect(T, statevec(x)))
 
-function yao2einsum(circuit::AbstractBlock{D}, initial_state::Dict{Int,<:ArrayReg{D,T}}, final_state::Dict{Int,<:ArrayReg{D,T}}, optimizer) where {D,T}
-    v_initial_state = Dict{Vector{Int}, ArrayReg{D,T}}([[k]=>v for (k, v) in initial_state])
-    v_final_state = Dict{Vector{Int}, ArrayReg{D, T}}([[k]=>v for (k, v) in final_state])
-    yao2einsum(circuit, v_initial_state, v_final_state, optimizer)
-end
-function yao2einsum(circuit::AbstractBlock{D}, initial_state::Dict{Vector{Int},<:ArrayReg{D,T}}, final_state::Dict{Vector{Int},<:ArrayReg{D,T}}, optimizer) where {D,T}
-    n = nqudits(circuit)
-    eb = EinBuilder{T, D}(n)
-    openindices = add_states!(eb, initial_state)
-    add_gate!(eb, circuit)
-    openindices2 = add_states!(eb, final_state; conjugate=true)
-    network = build_einsum(eb, vcat(openindices2, openindices))
-    return optimizer === nothing ? network : optimize_code(network, optimizer, MergeVectors())
-end
-function check_state_spec(state::Dict{Vector{Int},<:ArrayReg{D,T}}, n::Int) where {D,T}
+function check_state_spec(state::Dict, n::Int)
     iks = collect(Int, vcat(keys(state)...))
     @assert length(unique(iks)) == length(iks) "state qubit indices must be unique"
     @assert all(1 .<= iks .<= n) "state qubit indices must be in the range 1 to $n"
     return iks
 end
-function add_states!(eb::EinBuilder{T, D}, states::Dict; conjugate=false) where {T, D}
+function add_states!(eb::EinBuilder{MODE, T, D}, states::Dict; conjugate=false) where {MODE, T, D}
     n = nqubits(eb)
     unique_indices = check_state_spec(states, n)
     openindices = eb.slots[setdiff(1:n, unique_indices)]

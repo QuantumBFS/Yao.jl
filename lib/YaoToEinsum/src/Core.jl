@@ -1,3 +1,8 @@
+abstract type AbstractMappingMode end
+struct DensityMatrixMode <: AbstractMappingMode end
+struct PauliBasisMode <: AbstractMappingMode end
+struct VectorMode <: AbstractMappingMode end
+
 """
     TensorNetwork
 
