@@ -7,7 +7,7 @@
 #
 # - `add_gate!(eb::EinBuilder, b::AbstractBlock)`
 # - `add_observable!(eb::EinBuilder, b::AbstractBlock)`
-# - `add_states!(eb::EinBuilder, states::Dict; conjugate=false)`
+# - `add_states!(eb::EinBuilder, states::Dict; conjugate::Bool)`
 struct EinBuilder{MODE<:AbstractMappingMode, T, D}
     mode::MODE                         # the mapping mode, which can be `DensityMatrixMode()`, `PauliBasisMode()`, or `VectorMode()`
     slots::Vector{Int}                 # the labels for the open indices
@@ -94,6 +94,7 @@ end
 
 # swap gate
 function add_gate!(eb::EinBuilder{MODE, T, 2}, b::PutBlock{2,2,ConstGate.SWAPGate}) where {MODE<:AbstractMappingMode, T}
+    MODE <: PauliBasisMode && error("Pauli basis mode does not support swap gate")
     lj = eb.slots[b.locs[2]]
     eb.slots[b.locs[2]] = eb.slots[b.locs[1]]
     eb.slots[b.locs[1]] = lj
@@ -116,8 +117,15 @@ end
 # control gates
 function add_gate!(eb::EinBuilder{MODE, T, 2}, b::ControlBlock{BT,C,M}) where {MODE<:AbstractMappingMode, T, BT,C,M}
     @assert !isnoisy(b.content) "Control gate is not supported for noisy channels! got: $b"
+    MODE <: PauliBasisMode && return add_gate!(eb, _putblock(b))
     return add_controlled_matrix!(eb, M, mat(T, b.content), collect(b.locs), collect(b.ctrl_locs), collect(b.ctrl_config))
 end
+function _putblock(b::ControlBlock)
+    nc, nt = length(b.ctrl_locs), length(b.locs)
+    gate = ControlBlock(nc+nt, ntuple(identity, nc), b.ctrl_config, b.content, ntuple(i->i+nc, nt))
+    return put(b.n, (b.ctrl_locs..., b.locs...)=>gate)
+end
+
 function add_controlled_matrix!(eb::EinBuilder{MODE, T, 2}, k::Int, m::AbstractMatrix, locs::Vector, control_locs, control_vals) where {MODE<:AbstractMappingMode, T}
     if length(control_locs) == 0
         return add_matrix!(eb, m, locs)
@@ -207,7 +215,7 @@ function add_channel!(eb::EinBuilder{MODE, T, D}, b::SuperOp, locs::Vector{Int})
 end
 
 # add a density matrix at location `locs`
-function add_density_matrix!(eb::EinBuilder{MODE, T, D}, density_matrix::DensityMatrix{D, T}, locs::Vector{Int}; conjugate=false) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
+function add_density_matrix!(eb::EinBuilder{MODE, T, D}, density_matrix::DensityMatrix{D, T}, locs::Vector{Int}; conjugate::Bool) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
     density_matrix = MODE <: PauliBasisMode ? to_pauli_basis(density_matrix) : density_matrix
     conjugate && (density_matrix = DensityMatrix{D}(conj.(density_matrix.state)))
     k = length(locs)
@@ -217,8 +225,7 @@ function add_density_matrix!(eb::EinBuilder{MODE, T, D}, density_matrix::Density
 end
 
 # Add observable: apply the observable to the final state, and trace with the dual indices, i.e. performing `tr(rho, operator)`
-function add_observable!(eb::EinBuilder{MODE, T, D}, b::AbstractBlock) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
-    MODE <: PauliBasisMode && error("Pauli basis mode does not support observable")
+function add_observable!(eb::EinBuilder{MODE, T, D}, b::AbstractBlock) where {MODE<:DensityMatrixMode, T, D}
     # Note: the observable is only added once to the network, hence we need to use the vector mode to add it
     eb_vec = EinBuilder{VectorMode, T, D}(VectorMode(), eb.slots, eb.labels, eb.tensors, eb.maxlabel)
     group1 = (-).(eb.slots)
@@ -227,8 +234,18 @@ function add_observable!(eb::EinBuilder{MODE, T, D}, b::AbstractBlock) where {MO
     return eb
 end
 
+function add_observable!(eb::EinBuilder{MODE, T, D}, b::AbstractBlock) where {MODE<:PauliBasisMode, T, D}
+    @assert b isa Union{KronBlock, PutBlock, RepeatedBlock} "Pauli basis mode only supports observable of the form `kron(2=>X, 3=>X)` or `put(2, 1=>X)` or `repeat(2, X)`, i.e. kron of operators on different qubits. Got: $b"
+    b = _to_kron(b)
+    add_states!(eb, Dict([collect(Int, locs)=>DensityMatrix{D}(Matrix{T}(op)) for (locs, op) in zip(b.locs, b.blocks)]); conjugate=true)
+    return eb
+end
+_to_kron(x::KronBlock) = x
+_to_kron(x::PutBlock) = kron(x.n, x.locs=>x.content)
+_to_kron(x::RepeatedBlock) = kron(x.n, [i=>x.content for i=x.locs]...)
+
 # TODO: support density matrix input
-function add_states!(eb::EinBuilder{MODE, T, D}, states::Dict; conjugate=false) where {MODE<:AbstractMappingMode, T, D}
+function add_states!(eb::EinBuilder{MODE, T, D}, states::Dict; conjugate::Bool) where {MODE<:AbstractMappingMode, T, D}
     # check the state specification
     n = nqubits(eb)
     iks = collect(Int, vcat(keys(states)...))
@@ -241,7 +258,7 @@ function add_states!(eb::EinBuilder{MODE, T, D}, states::Dict; conjugate=false) 
             state = density_matrix(state)
         end
         if state isa DensityMatrix
-            add_density_matrix!(eb, state, k; conjugate=conjugate)
+            add_density_matrix!(eb, state, k; conjugate)
         else
             add_tensor!(eb, (conjugate ? conj : identity).(dropdims(hypercubic(state); dims=length(k)+1)), eb.slots[k])
         end
@@ -317,7 +334,7 @@ function yao2einsum(circuit::AbstractBlock{D}; mode::AbstractMappingMode=VectorM
 
     # add the initial state
     initial_state = Dict([[k...]=>render_single_qudit_state(T, D, v) for (k, v) in initial_state])
-    openindices = add_states!(eb, initial_state)
+    openindices = add_states!(eb, initial_state; conjugate=false)
     # add the circuit
     add_gate!(eb, circuit)
     # add the final state or observable
