@@ -3,7 +3,7 @@
 # Key Interfaces:
 # - `add_matrix!(eb::EinBuilder, m::AbstractMatrix, locs::Vector)`
 # - `add_channel!(eb::EinBuilder, b::SuperOp, locs::Vector)`
-# - `trace!(eb::EinBuilder)`
+# - `trace!(eb::EinBuilder, group1::Vector{Int}, group2::Vector{Int})`
 #
 # - `add_gate!(eb::EinBuilder, b::AbstractBlock)`
 # - `add_observable!(eb::EinBuilder, b::AbstractBlock)`
@@ -16,7 +16,6 @@ struct EinBuilder{MODE<:AbstractMappingMode, T, D}
     maxlabel::Base.RefValue{Int}       # the maximum label used
 end
 function EinBuilder{MODE, T, D}(mode::MODE, n::Int) where {MODE<:AbstractMappingMode, T, D}
-    mode isa PauliBasisMode && error("PauliBasisMode is not supported yet!")
     EinBuilder{MODE, T, D}(mode, collect(1:n), Vector{Int}[], AbstractArray{T}[], Ref(n))
 end
 YaoBlocks.nqubits(eb::EinBuilder) = length(eb.slots)
@@ -34,8 +33,9 @@ function add_tensor!(eb::EinBuilder{MODE, T, D}, tensor::AbstractArray{T,N}, lab
 end
 
 # connect right most line with its dual, often used in density matrix mode.
-function trace!(eb::EinBuilder{MODE, T, D}) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
-    replacement = [-x => x for x in eb.slots]
+function trace!(eb::EinBuilder{MODE, T, D}, group1::Vector{Int}, group2::Vector{Int}) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
+    @assert length(group1) == length(group2) "group1 and group2 must have the same length"
+    replacement = [group2[i] => group1[i] for i = 1:length(group1)]
     for i = 1:length(eb.labels)
         eb.labels[i] = replace(eb.labels[i], replacement...)
     end
@@ -187,17 +187,17 @@ end
 
 # Channels
 for CT in [:KrausChannel, :DepolarizingChannel, :MixedUnitaryChannel, :SuperOp]
-    @eval function add_gate!(eb::EinBuilder{MODE, T, D}, b::$CT) where {MODE<:AbstractMappingMode, T, D}
+    @eval function add_gate!(eb::EinBuilder{MODE, T, D}, b::$CT) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
         add_channel!(eb, SuperOp(b), collect(1:nqubits(b)))
         return eb
     end
 end
 
+# add a quantum channel, which is a superoperator
 function add_channel!(eb::EinBuilder{MODE, T, D}, b::SuperOp, locs::Vector{Int}) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
+    MODE <: PauliBasisMode && (b = to_pauli_basis(b))
+
     mat = Matrix{T}(b.superop)
-    if MODE <: PauliBasisMode
-        mat = to_pauli_basis(mat)
-    end
     k = length(locs)
     nlabels = [newlabel!(eb) for _=1:k]
     push!(eb.tensors, reshape(mat, fill(D, 4k)...))
@@ -206,12 +206,47 @@ function add_channel!(eb::EinBuilder{MODE, T, D}, b::SuperOp, locs::Vector{Int})
     return eb
 end
 
+# add a density matrix at location `locs`
+function add_density_matrix!(eb::EinBuilder{MODE, T, D}, density_matrix::DensityMatrix{D, T}, locs::Vector{Int}; conjugate=false) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
+    density_matrix = MODE <: PauliBasisMode ? to_pauli_basis(density_matrix) : density_matrix
+    conjugate && (density_matrix = DensityMatrix{D}(conj.(density_matrix.state)))
+    k = length(locs)
+    push!(eb.tensors, reshape(density_matrix.state, fill(D, 2k)...))
+    push!(eb.labels, [eb.slots[locs]..., (-).(eb.slots[locs])...])
+    return eb
+end
+
+# Add observable: apply the observable to the final state, and trace with the dual indices, i.e. performing `tr(rho, operator)`
 function add_observable!(eb::EinBuilder{MODE, T, D}, b::AbstractBlock) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
+    MODE <: PauliBasisMode && error("Pauli basis mode does not support observable")
     # Note: the observable is only added once to the network, hence we need to use the vector mode to add it
     eb_vec = EinBuilder{VectorMode, T, D}(VectorMode(), eb.slots, eb.labels, eb.tensors, eb.maxlabel)
+    group1 = (-).(eb.slots)
     add_gate!(eb_vec, b)
-    trace!(eb)
+    trace!(eb, group1, eb.slots)
     return eb
+end
+
+# TODO: support density matrix input
+function add_states!(eb::EinBuilder{MODE, T, D}, states::Dict; conjugate=false) where {MODE<:AbstractMappingMode, T, D}
+    # check the state specification
+    n = nqubits(eb)
+    iks = collect(Int, vcat(keys(states)...))
+    @assert length(unique(iks)) == length(iks) "state qubit indices must be unique"
+    @assert all(1 .<= iks .<= n) "state qubit indices must be in the range 1 to $n"
+    openindices = eb.slots[setdiff(1:n, iks)]
+
+    for (k, state) in states
+        if MODE <: PauliBasisMode && state isa ArrayReg  # convert to density matrix
+            state = density_matrix(state)
+        end
+        if state isa DensityMatrix
+            add_density_matrix!(eb, state, k; conjugate=conjugate)
+        else
+            add_tensor!(eb, (conjugate ? conj : identity).(dropdims(hypercubic(state); dims=length(k)+1)), eb.slots[k])
+        end
+    end
+    return MODE <: Union{DensityMatrixMode, PauliBasisMode} ? Int[openindices..., (-).(openindices)...] : openindices
 end
 
 """
@@ -237,7 +272,7 @@ where the `circuit` may contain noise channels.
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
-4). `PauliBasisMode()` is not supported yet. It is similar to the `DensityMatrixMode()` mode, but the basis will be rotated to the Pauli basis.
+4). `PauliBasisMode()` is similar to the `DensityMatrixMode()` mode, but the basis will be rotated to the Pauli basis.
 
 ### Arguments
 - `mode` is the mapping mode, which can be `DensityMatrixMode()`, `PauliBasisMode()`, or `VectorMode()`.
@@ -293,7 +328,8 @@ function yao2einsum(circuit::AbstractBlock{D}; mode::AbstractMappingMode=VectorM
         openindices2 = add_states!(eb, final_state; conjugate=true)
         openindices = vcat(openindices2, openindices)
     else
-        openindices = vcat(eb.slots, openindices)
+        openindices2 = mode isa Union{DensityMatrixMode, PauliBasisMode} ? Int[eb.slots..., (-).(eb.slots)...] : eb.slots
+        openindices = vcat(openindices2, openindices)
     end
 
     # construct the tensor network
@@ -302,29 +338,13 @@ function yao2einsum(circuit::AbstractBlock{D}; mode::AbstractMappingMode=VectorM
 end
 dict_regtype(d::Dict) = promote_type(_regtype.(values(d))...)
 _regtype(::ArrayReg{D,VT}) where {D,VT} = VT
+_regtype(::DensityMatrix{D,VT}) where {D,VT} = VT
 _regtype(::Int) = ComplexF64
 render_single_qudit_state(::Type{T}, D, x::Int) where T = product_state(T, DitStr{D}([x]))
 render_single_qudit_state(::Type{T}, D, x::ArrayReg) where T = ArrayReg{D}(collect(T, statevec(x)))
+render_single_qudit_state(::Type{T}, D, x::DensityMatrix) where {T} = DensityMatrix{D}(Matrix{T}(x.state))
 
-function check_state_spec(state::Dict, n::Int)
-    iks = collect(Int, vcat(keys(state)...))
-    @assert length(unique(iks)) == length(iks) "state qubit indices must be unique"
-    @assert all(1 .<= iks .<= n) "state qubit indices must be in the range 1 to $n"
-    return iks
-end
-
-# TODO: support density matrix input
-function add_states!(eb::EinBuilder{MODE, T, D}, states::Dict; conjugate=false) where {MODE, T, D}
-    n = nqubits(eb)
-    unique_indices = check_state_spec(states, n)
-    openindices = eb.slots[setdiff(1:n, unique_indices)]
-    for (k, state) in states
-        add_tensor!(eb, (conjugate ? conj : identity).(dropdims(hypercubic(state); dims=length(k)+1)), eb.slots[k])
-    end
-    return openindices
-end
-
-function build_einsum(eb::EinBuilder, openindices)
+function build_einsum(eb::EinBuilder, openindices::Vector{Int})
     return TensorNetwork(EinCode(eb.labels, openindices), eb.tensors)
 end
 

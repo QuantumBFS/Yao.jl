@@ -1,6 +1,7 @@
 module YaoToEinsum
 
 using YaoBlocks, YaoBlocks.YaoArrayRegister, OMEinsum
+using YaoBlocks: sparse
 using LinearAlgebra
 
 export yao2einsum, DensityMatrixMode, PauliBasisMode, VectorMode
@@ -9,5 +10,6 @@ export TreeSA
 
 include("Core.jl")
 include("circuitmap.jl")
+include("densitymatrix.jl")
 
 end
