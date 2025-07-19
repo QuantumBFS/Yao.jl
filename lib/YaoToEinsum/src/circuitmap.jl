@@ -50,8 +50,13 @@ newlabel!(eb::EinBuilder) = (eb.maxlabel[] += 1; eb.maxlabel[])
 # - `m` is the matrix of the gate
 # - `locs` is the location of the qubits that the gate acts on
 function add_matrix!(eb::EinBuilder{MODE, T, D}, m::AbstractMatrix, locs::Vector) where {MODE<:AbstractMappingMode, T, D}
+    if MODE <: PauliBasisMode  # Pauli basis mode must go to the channel!
+        add_channel!(eb, SuperOp(matblock(m)), locs)
+        return eb
+    end
+
     k = length(locs)
-    if m isa Diagonal  # or use isdiag?
+    if isdiag(m)  # use isdiag, sometimes, the matrix is not a Diagonal, but isdiag(m) is true
         add_tensor!(eb, reshape(Vector{T}(diag(m)), fill(D, k)...), eb.slots[locs])
     elseif m isa YaoBlocks.OuterProduct  # low rank
         nlabels = [newlabel!(eb) for _=1:k]
@@ -190,6 +195,9 @@ end
 
 function add_channel!(eb::EinBuilder{MODE, T, D}, b::SuperOp, locs::Vector{Int}) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
     mat = Matrix{T}(b.superop)
+    if MODE <: PauliBasisMode
+        mat = to_pauli_basis(mat)
+    end
     k = length(locs)
     nlabels = [newlabel!(eb) for _=1:k]
     push!(eb.tensors, reshape(mat, fill(D, 4k)...))
@@ -304,6 +312,8 @@ function check_state_spec(state::Dict, n::Int)
     @assert all(1 .<= iks .<= n) "state qubit indices must be in the range 1 to $n"
     return iks
 end
+
+# TODO: support density matrix input
 function add_states!(eb::EinBuilder{MODE, T, D}, states::Dict; conjugate=false) where {MODE, T, D}
     n = nqubits(eb)
     unique_indices = check_state_spec(states, n)
