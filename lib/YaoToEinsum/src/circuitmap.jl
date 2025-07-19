@@ -33,11 +33,23 @@ function add_tensor!(eb::EinBuilder{MODE, T, D}, tensor::AbstractArray{T,N}, lab
 end
 
 # connect right most line with its dual, often used in density matrix mode.
-function trace!(eb::EinBuilder{MODE, T, D}, group1::Vector{Int}, group2::Vector{Int}) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
+function trace!(eb::EinBuilder{DensityMatrixMode, T, D}, group1::Vector{Int}, group2::Vector{Int}) where {T, D}
     @assert length(group1) == length(group2) "group1 and group2 must have the same length"
     replacement = [group2[i] => group1[i] for i = 1:length(group1)]
     for i = 1:length(eb.labels)
         eb.labels[i] = replace(eb.labels[i], replacement...)
+    end
+    return eb
+end
+function trace!(eb::EinBuilder{PauliBasisMode, T, D}, group1::Vector{Int}, group2::Vector{Int}) where {T, D}
+    @assert length(group1) == length(group2) "group1 and group2 must have the same length"
+    traced = group1 ∪ group2
+    # trace in pauli basis is equivalent to adding an identity operator, identity is equivalent to [sqrt(2), 0, 0, 0] in Pauli basis
+    for i = 1:length(eb.labels)
+        label = eb.labels[i]
+        indices = [li ∈ traced ? 1 : Colon() for li in label]
+        eb.labels[i] = filter(x->x ∉ traced, label)
+        eb.tensors[i] = eb.tensors[i][indices...] .* 2^((length(label) - length(eb.labels[i]))/4)
     end
     return eb
 end
@@ -237,7 +249,9 @@ end
 function add_observable!(eb::EinBuilder{MODE, T, D}, b::AbstractBlock) where {MODE<:PauliBasisMode, T, D}
     @assert b isa Union{KronBlock, PutBlock, RepeatedBlock} "Pauli basis mode only supports observable of the form `kron(2=>X, 3=>X)` or `put(2, 1=>X)` or `repeat(2, X)`, i.e. kron of operators on different qubits. Got: $b"
     b = _to_kron(b)
-    add_states!(eb, Dict([collect(Int, locs)=>DensityMatrix{D}(Matrix{T}(op)) for (locs, op) in zip(b.locs, b.blocks)]); conjugate=true)
+    openindices = add_states!(eb, Dict([collect(Int, locs)=>DensityMatrix{D}(conj.(Matrix{T}(op))) for (locs, op) in zip(b.locs, b.blocks)]); conjugate=true)
+    no = length(openindices) ÷ 2
+    !iszero(no) && trace!(eb, openindices[1:no], openindices[no+1:end])
     return eb
 end
 _to_kron(x::KronBlock) = x

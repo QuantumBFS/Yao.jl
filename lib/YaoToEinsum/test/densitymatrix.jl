@@ -79,43 +79,49 @@ end
 end
 
 @testset "pauli basis mode" begin
+    n = 3
     # random input and final state
-    circuit = chain(5, [put(5, i=>H) for i=1:5]..., [put(5, (1, i)=>control(2, 1, 2=>Z)) for i=2:5]..., repeat(5, H))
-    initial_state = Dict([i => rand_state(1) for i=1:5])
-    reg0 = join([initial_state[5-i+1] for i=1:5]...)
-    final_state = Dict([i => rand_state(1) for i=1:5])
-    reg1 = join([final_state[5-i+1] for i=1:5]...)
+    c1 = quantum_channel(DepolarizingError(1, 0.1))     # DepolarizingChannel
+    circuit = chain(n, [put(n, i=>H) for i=1:n]..., [put(n, (1, i)=>control(2, 1, 2=>Z)) for i=2:n]..., put(n, 3=>c1), repeat(n, H))
+    initial_state = Dict([i => rand_state(1) for i=1:n])
+    reg0 = join([initial_state[n-i+1] for i=1:n]...)
+    final_state = Dict([i => rand_state(1) for i=1:n])
+    reg1 = join([final_state[n-i+1] for i=1:n]...)
     network0 = yao2einsum(circuit, mode=DensityMatrixMode(), initial_state=initial_state, final_state=final_state)
     network = yao2einsum(circuit, mode=PauliBasisMode(), initial_state=initial_state, final_state=final_state)
     res1 = contract(network)[]
     res0 = contract(network0)[]
-    obs = kron(5, [i=>matblock(final_state[i].state * final_state[i].state') for i=1:5]...)
+    obs = kron(n, [i=>matblock(final_state[i].state * final_state[i].state') for i=1:n]...)
     @test mat(obs) ≈ density_matrix(reg1).state atol=1e-8
     res2 = expect(obs, density_matrix(reg0) |> circuit)
     @test res0 ≈ res2
     @test res1 ≈ res2
 
     # random noisy input and final state
-    circuit = chain(5)
-    initial_state = Dict([i => (density_matrix(rand_state(1)) |> YaoBlocks.DepolarizingChannel(1, 0.1)) for i=1:5])
-    reg0 = join([initial_state[5-i+1] for i=1:5]...)
+    initial_state = Dict([i => (density_matrix(rand_state(1)) |> YaoBlocks.DepolarizingChannel(1, 0.1)) for i=1:n])
+    reg0 = join([initial_state[n-i+1] for i=1:n]...)
     # TODO: with depolarizing channel, the final state is incorrect, fix it!
-    final_state = Dict([i => (density_matrix(rand_state(1)) |> YaoBlocks.DepolarizingChannel(1, 0.1)) for i=1:5])
-    reg1 = join([final_state[5-i+1] for i=1:5]...)
+    final_state = Dict([i => (density_matrix(rand_state(1)) |> YaoBlocks.DepolarizingChannel(1, 0.1)) for i=1:n])
+    reg1 = join([final_state[n-i+1] for i=1:n]...)
     network0 = yao2einsum(circuit, mode=DensityMatrixMode(), initial_state=initial_state, final_state=final_state)
     network = yao2einsum(circuit, mode=PauliBasisMode(), initial_state=initial_state, final_state=final_state)
     res1 = contract(network)[]
     res0 = contract(network0)[]
-    obs = kron(5, [i=>matblock(final_state[i].state * final_state[i].state') for i=1:5]...)
+    obs = kron(n, [i=>matblock(final_state[i].state) for i=1:n]...)
     @test mat(obs) ≈ density_matrix(reg1).state atol=1e-8
     res2 = expect(obs, density_matrix(reg0) |> circuit)
     @test res0 ≈ res2
     @test res1 ≈ res2
 
-
     # observables
-    network0 = yao2einsum(circuit, mode=DensityMatrixMode(), initial_state=initial_state, observable=kron(5, 1=>X))
-    network = yao2einsum(circuit, mode=PauliBasisMode(), initial_state=initial_state, observable=kron(5, 1=>X))
+    network0 = yao2einsum(circuit, mode=DensityMatrixMode(), initial_state=initial_state, observable=kron(n, 1=>X, 2=>Rx(0.3)))
+    network = yao2einsum(circuit, mode=PauliBasisMode(), initial_state=initial_state, observable=kron(n, 1=>X, 2=>Rx(0.3)))
+    res0 = contract(network0)[]
+    res1 = contract(network)[]
+    @test res0 ≈ res1
+
+    network0 = yao2einsum(circuit, mode=DensityMatrixMode(), initial_state=initial_state, observable=kron(n, 2=>Rx(0.3)))
+    network = yao2einsum(circuit, mode=PauliBasisMode(), initial_state=initial_state, observable=kron(n, 2=>Rx(0.3)))
     res0 = contract(network0)[]
     res1 = contract(network)[]
     @test res0 ≈ res1
