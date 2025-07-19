@@ -1,13 +1,18 @@
 # T is the element type of the tensor network
 # D is the dimension of the qudits
 # Key Interfaces:
-# - `add_matrix!(eb::EinBuilder, m::AbstractMatrix, locs::Vector)`
-# - `add_channel!(eb::EinBuilder, b::SuperOp, locs::Vector)`
-# - `trace!(eb::EinBuilder, group1::Vector{Int}, group2::Vector{Int})`
-#
-# - `add_gate!(eb::EinBuilder, b::AbstractBlock)`
-# - `add_observable!(eb::EinBuilder, b::AbstractBlock)`
-# - `add_states!(eb::EinBuilder, states::Dict; conjugate::Bool)`
+# - Lowest level:
+#   - `push_normal_tensor!(eb::EinBuilder, tensor::AbstractArray{T,N}, labels::Vector{Int})`, push a normal tensor data and its dual
+#   - `trace!(eb::EinBuilder, group1::Vector{Int}, group2::Vector{Int})`, trace out indices
+# - Middle level:
+#   - `add_gate_matrix!(eb::EinBuilder, m::AbstractMatrix, locs::Vector)`, add a normal gate
+#   - `add_controlled_matrix!(eb::EinBuilder, k::Int, m::AbstractMatrix, locs::Vector, control_locs, control_vals)`, add a controlled gate
+#   - `add_channel!(eb::EinBuilder, b::SuperOp, locs::Vector)`, add a quantum channel
+#   - `add_density_matrix!(eb::EinBuilder, density_matrix::DensityMatrix{D, T}, locs::Vector{Int}; conjugate::Bool)`, add a density matrix
+# - Highest level (Yao block as inputs):
+#   - `eat_observable!(eb::EinBuilder, b::AbstractBlock)`, add an observable
+#   - `eat_gate!(eb::EinBuilder, b::AbstractBlock)`, add a quantum gate, with Yao Block as input
+#   - `eat_states!(eb::EinBuilder, states::Dict; conjugate::Bool)`, add quantum states, ArrayReg or DensityMatrix as input
 struct EinBuilder{MODE<:AbstractMappingMode, T, D}
     mode::MODE                         # the mapping mode, which can be `DensityMatrixMode()`, `PauliBasisMode()`, or `VectorMode()`
     slots::Vector{Int}                 # the labels for the open indices
@@ -20,9 +25,9 @@ function EinBuilder{MODE, T, D}(mode::MODE, n::Int) where {MODE<:AbstractMapping
 end
 YaoBlocks.nqubits(eb::EinBuilder) = length(eb.slots)
 
-# add a new tensor, if in density matrix mode or pauli basis mode, also add a dual tensor
+# add a normal tensor (like a normal quantum gate), if in density matrix mode or pauli basis mode, also add a dual tensor
 # the dual tensor has conjugate elements, and the labels are negated
-function add_tensor!(eb::EinBuilder{MODE, T, D}, tensor::AbstractArray{T,N}, labels::Vector{Int}) where {MODE<:AbstractMappingMode, T, D, N}
+function push_normal_tensor!(eb::EinBuilder{MODE, T, D}, tensor::AbstractArray{T,N}, labels::Vector{Int}) where {MODE<:AbstractMappingMode, T, D, N}
     @assert N == length(labels)
     push!(eb.tensors, tensor)
     push!(eb.labels, labels)
@@ -61,7 +66,7 @@ newlabel!(eb::EinBuilder) = (eb.maxlabel[] += 1; eb.maxlabel[])
 # - `k` is the number of qubits that the gate acts on
 # - `m` is the matrix of the gate
 # - `locs` is the location of the qubits that the gate acts on
-function add_matrix!(eb::EinBuilder{MODE, T, D}, m::AbstractMatrix, locs::Vector) where {MODE<:AbstractMappingMode, T, D}
+function add_gate_matrix!(eb::EinBuilder{MODE, T, D}, m::AbstractMatrix, locs::Vector) where {MODE<:AbstractMappingMode, T, D}
     if MODE <: PauliBasisMode  # Pauli basis mode must go to the channel!
         add_channel!(eb, SuperOp(matblock(m)), locs)
         return eb
@@ -69,43 +74,43 @@ function add_matrix!(eb::EinBuilder{MODE, T, D}, m::AbstractMatrix, locs::Vector
 
     k = length(locs)
     if isdiag(m)  # use isdiag, sometimes, the matrix is not a Diagonal, but isdiag(m) is true
-        add_tensor!(eb, reshape(Vector{T}(diag(m)), fill(D, k)...), eb.slots[locs])
+        push_normal_tensor!(eb, reshape(Vector{T}(diag(m)), fill(D, k)...), eb.slots[locs])
     elseif m isa YaoBlocks.OuterProduct  # low rank
         nlabels = [newlabel!(eb) for _=1:k]
         K = rank(m)
         if K == 1  # projector
-            add_tensor!(eb, reshape(Vector{T}(m.right), fill(D, k)...), [eb.slots[locs]...])
-            add_tensor!(eb, reshape(Vector{T}(m.left), fill(D, k)...), [nlabels...])
+            push_normal_tensor!(eb, reshape(Vector{T}(m.right), fill(D, k)...), [eb.slots[locs]...])
+            push_normal_tensor!(eb, reshape(Vector{T}(m.left), fill(D, k)...), [nlabels...])
             eb.slots[locs] .= nlabels
         else
             midlabel = newlabel!(eb)
-            add_tensor!(eb, reshape(Matrix{T}(m.right), fill(D, k)..., K), [eb.slots[locs]..., midlabel])
-            add_tensor!(eb, reshape(Matrix{T}(m.left), fill(D, k)..., K), [nlabels..., midlabel])
+            push_normal_tensor!(eb, reshape(Matrix{T}(m.right), fill(D, k)..., K), [eb.slots[locs]..., midlabel])
+            push_normal_tensor!(eb, reshape(Matrix{T}(m.left), fill(D, k)..., K), [nlabels..., midlabel])
             eb.slots[locs] .= nlabels
         end
     else
         nlabels = [newlabel!(eb) for _=1:k]
-        add_tensor!(eb, reshape(Matrix{T}(m), fill(D, 2k)...), [nlabels..., eb.slots[locs]...])
+        push_normal_tensor!(eb, reshape(Matrix{T}(m), fill(D, 2k)...), [nlabels..., eb.slots[locs]...])
         eb.slots[locs] .= nlabels
     end
     return eb
 end
 
 # add a gate to the einbuilder
-function add_gate!(eb::EinBuilder{MODE, T, D}, b::PutBlock{D,C}) where {MODE<:AbstractMappingMode, T,D,C}
+function eat_gate!(eb::EinBuilder{MODE, T, D}, b::PutBlock{D,C}) where {MODE<:AbstractMappingMode, T,D,C}
     if isnoisy(b.content) || MODE isa PauliBasisMode
         # add the channel to the einbuilder, the mapping mode must be density matrix mode or pauli basis mode
         # since the Pauli basis mode mixes the label and its dual, we need to add the channel to the einbuilder instead of a normal gate.
         add_channel!(eb, SuperOp(b.content), collect(b.locs))
     else
         # add the matrix to the einbuilder
-        add_matrix!(eb, mat(T, b.content), collect(b.locs))
+        add_gate_matrix!(eb, mat(T, b.content), collect(b.locs))
     end
     return eb
 end
 
 # swap gate
-function add_gate!(eb::EinBuilder{MODE, T, 2}, b::PutBlock{2,2,ConstGate.SWAPGate}) where {MODE<:AbstractMappingMode, T}
+function eat_gate!(eb::EinBuilder{MODE, T, 2}, b::PutBlock{2,2,ConstGate.SWAPGate}) where {MODE<:AbstractMappingMode, T}
     MODE <: PauliBasisMode && error("Pauli basis mode does not support swap gate")
     lj = eb.slots[b.locs[2]]
     eb.slots[b.locs[2]] = eb.slots[b.locs[1]]
@@ -114,22 +119,22 @@ function add_gate!(eb::EinBuilder{MODE, T, 2}, b::PutBlock{2,2,ConstGate.SWAPGat
 end
 
 # projection gate, todo: generalize to arbitrary low rank gate
-function add_gate!(eb::EinBuilder{MODE, T, 2}, b::PutBlock{2,1,ConstGate.P0Gate}) where {MODE<:AbstractMappingMode, T}
-    add_matrix!(eb, YaoBlocks.OuterProduct(T[1, 0], T[1, 0]), collect(b.locs))
+function eat_gate!(eb::EinBuilder{MODE, T, 2}, b::PutBlock{2,1,ConstGate.P0Gate}) where {MODE<:AbstractMappingMode, T}
+    add_gate_matrix!(eb, YaoBlocks.OuterProduct(T[1, 0], T[1, 0]), collect(b.locs))
     return eb
 end
 
 # projection gate, todo: generalize to arbitrary low rank gate
-function add_gate!(eb::EinBuilder{MODE, T, 2}, b::PutBlock{2,1,ConstGate.P1Gate}) where {MODE<:AbstractMappingMode, T}
-    add_matrix!(eb, YaoBlocks.OuterProduct(T[0, 1], T[0, 1]), collect(b.locs))
+function eat_gate!(eb::EinBuilder{MODE, T, 2}, b::PutBlock{2,1,ConstGate.P1Gate}) where {MODE<:AbstractMappingMode, T}
+    add_gate_matrix!(eb, YaoBlocks.OuterProduct(T[0, 1], T[0, 1]), collect(b.locs))
     return eb
 end
 
 
 # control gates
-function add_gate!(eb::EinBuilder{MODE, T, 2}, b::ControlBlock{BT,C,M}) where {MODE<:AbstractMappingMode, T, BT,C,M}
+function eat_gate!(eb::EinBuilder{MODE, T, 2}, b::ControlBlock{BT,C,M}) where {MODE<:AbstractMappingMode, T, BT,C,M}
     @assert !isnoisy(b.content) "Control gate is not supported for noisy channels! got: $b"
-    MODE <: PauliBasisMode && return add_gate!(eb, _putblock(b))
+    MODE <: PauliBasisMode && return eat_gate!(eb, _putblock(b))
     return add_controlled_matrix!(eb, M, mat(T, b.content), collect(b.locs), collect(b.ctrl_locs), collect(b.ctrl_config))
 end
 function _putblock(b::ControlBlock)
@@ -140,13 +145,13 @@ end
 
 function add_controlled_matrix!(eb::EinBuilder{MODE, T, 2}, k::Int, m::AbstractMatrix, locs::Vector, control_locs, control_vals) where {MODE<:AbstractMappingMode, T}
     if length(control_locs) == 0
-        return add_matrix!(eb, m, locs)
+        return add_gate_matrix!(eb, m, locs)
     end
     sig = eb.slots[control_locs[1]]
     val = control_vals[1]
     for i=1:length(control_locs)-1
         newsig = newlabel!(eb)
-        add_tensor!(eb, and_gate(T, control_vals[i+1], val), [newsig,eb.slots[control_locs[i+1]],sig])
+        push_normal_tensor!(eb, and_gate(T, control_vals[i+1], val), [newsig,eb.slots[control_locs[i+1]],sig])
         sig = newsig
         val = 1
     end
@@ -157,7 +162,7 @@ function add_controlled_matrix!(eb::EinBuilder{MODE, T, 2}, k::Int, m::AbstractM
             t1, t2 = t2, t1
         end
         nlabels = [newlabel!(eb) for _=1:k]
-        add_tensor!(eb, cat(t1, t2; dims=2k+1), [nlabels..., eb.slots[locs]..., sig])
+        push_normal_tensor!(eb, cat(t1, t2; dims=2k+1), [nlabels..., eb.slots[locs]..., sig])
         eb.slots[locs] .= nlabels
     else
         t1 = reshape(Vector{T}(diag(m)), fill(2, k)...)
@@ -165,7 +170,7 @@ function add_controlled_matrix!(eb::EinBuilder{MODE, T, 2}, k::Int, m::AbstractM
         if val == 1
             t1, t2 = t2, t1
         end
-        add_tensor!(eb, cat(t1, t2; dims=k+1), [eb.slots[locs]..., sig])
+        push_normal_tensor!(eb, cat(t1, t2; dims=k+1), [eb.slots[locs]..., sig])
     end
     return eb
 end
@@ -181,33 +186,33 @@ function and_gate(::Type{T}, a::Int, b::Int) where T
     return m
 end
 
-function add_gate!(eb::EinBuilder{MODE, T, D}, b::ChainBlock) where {MODE<:AbstractMappingMode, T, D}
+function eat_gate!(eb::EinBuilder{MODE, T, D}, b::ChainBlock) where {MODE<:AbstractMappingMode, T, D}
     for ib in subblocks(b)
-        add_gate!(eb, ib)
+        eat_gate!(eb, ib)
     end
     return eb
 end
 
 # try simplify and convert
-function add_gate!(eb::EinBuilder, b::AbstractBlock)
+function eat_gate!(eb::EinBuilder, b::AbstractBlock)
     B = Optimise.to_basictypes(b)
     if typeof(B) == typeof(b)
         throw("block of type `$(typeof(b))` can not be converted to tensor network representation!")
     else
-        add_gate!(eb, B)
+        eat_gate!(eb, B)
     end
     return eb
 end
 
 # matblock
-function add_gate!(eb::EinBuilder{MODE, T, D}, b::GeneralMatrixBlock) where {MODE<:AbstractMappingMode, T, D}
-    add_matrix!(eb, mat(T, b), collect(1:nqubits(b)))
+function eat_gate!(eb::EinBuilder{MODE, T, D}, b::GeneralMatrixBlock) where {MODE<:AbstractMappingMode, T, D}
+    add_gate_matrix!(eb, mat(T, b), collect(1:nqubits(b)))
     return eb
 end
 
 # Channels
 for CT in [:KrausChannel, :DepolarizingChannel, :MixedUnitaryChannel, :SuperOp]
-    @eval function add_gate!(eb::EinBuilder{MODE, T, D}, b::$CT) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
+    @eval function eat_gate!(eb::EinBuilder{MODE, T, D}, b::$CT) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
         add_channel!(eb, SuperOp(b), collect(1:nqubits(b)))
         return eb
     end
@@ -237,19 +242,19 @@ function add_density_matrix!(eb::EinBuilder{MODE, T, D}, density_matrix::Density
 end
 
 # Add observable: apply the observable to the final state, and trace with the dual indices, i.e. performing `tr(rho, operator)`
-function add_observable!(eb::EinBuilder{MODE, T, D}, b::AbstractBlock) where {MODE<:DensityMatrixMode, T, D}
+function eat_observable!(eb::EinBuilder{MODE, T, D}, b::AbstractBlock) where {MODE<:DensityMatrixMode, T, D}
     # Note: the observable is only added once to the network, hence we need to use the vector mode to add it
     eb_vec = EinBuilder{VectorMode, T, D}(VectorMode(), eb.slots, eb.labels, eb.tensors, eb.maxlabel)
     group1 = (-).(eb.slots)
-    add_gate!(eb_vec, b)
+    eat_gate!(eb_vec, b)
     trace!(eb, group1, eb.slots)
     return eb
 end
 
-function add_observable!(eb::EinBuilder{MODE, T, D}, b::AbstractBlock) where {MODE<:PauliBasisMode, T, D}
+function eat_observable!(eb::EinBuilder{MODE, T, D}, b::AbstractBlock) where {MODE<:PauliBasisMode, T, D}
     @assert b isa Union{KronBlock, PutBlock, RepeatedBlock} "Pauli basis mode only supports observable of the form `kron(2=>X, 3=>X)` or `put(2, 1=>X)` or `repeat(2, X)`, i.e. kron of operators on different qubits. Got: $b"
     b = _to_kron(b)
-    openindices = add_states!(eb, Dict([collect(Int, locs)=>DensityMatrix{D}(conj.(Matrix{T}(op))) for (locs, op) in zip(b.locs, b.blocks)]); conjugate=true)
+    openindices = eat_states!(eb, Dict([collect(Int, locs)=>DensityMatrix{D}(conj.(Matrix{T}(op))) for (locs, op) in zip(b.locs, b.blocks)]); conjugate=true)
     no = length(openindices) ÷ 2
     !iszero(no) && trace!(eb, openindices[1:no], openindices[no+1:end])
     return eb
@@ -258,8 +263,7 @@ _to_kron(x::KronBlock) = x
 _to_kron(x::PutBlock) = kron(x.n, x.locs=>x.content)
 _to_kron(x::RepeatedBlock) = kron(x.n, [i=>x.content for i=x.locs]...)
 
-# TODO: support density matrix input
-function add_states!(eb::EinBuilder{MODE, T, D}, states::Dict; conjugate::Bool) where {MODE<:AbstractMappingMode, T, D}
+function eat_states!(eb::EinBuilder{MODE, T, D}, states::Dict; conjugate::Bool) where {MODE<:AbstractMappingMode, T, D}
     # check the state specification
     n = nqubits(eb)
     iks = collect(Int, vcat(keys(states)...))
@@ -274,7 +278,7 @@ function add_states!(eb::EinBuilder{MODE, T, D}, states::Dict; conjugate::Bool) 
         if state isa DensityMatrix
             add_density_matrix!(eb, state, k; conjugate)
         else
-            add_tensor!(eb, (conjugate ? conj : identity).(dropdims(hypercubic(state); dims=length(k)+1)), eb.slots[k])
+            push_normal_tensor!(eb, (conjugate ? conj : identity).(dropdims(hypercubic(state); dims=length(k)+1)), eb.slots[k])
         end
     end
     return MODE <: Union{DensityMatrixMode, PauliBasisMode} ? Int[openindices..., (-).(openindices)...] : openindices
@@ -348,15 +352,15 @@ function yao2einsum(circuit::AbstractBlock{D}; mode::AbstractMappingMode=VectorM
 
     # add the initial state
     initial_state = Dict([[k...]=>render_single_qudit_state(T, D, v) for (k, v) in initial_state])
-    openindices = add_states!(eb, initial_state; conjugate=false)
+    openindices = eat_states!(eb, initial_state; conjugate=false)
     # add the circuit
-    add_gate!(eb, circuit)
+    eat_gate!(eb, circuit)
     # add the final state or observable
     if !isnothing(observable)
-        add_observable!(eb, observable)
+        eat_observable!(eb, observable)
     elseif !isempty(final_state)
         final_state = Dict([[k...]=>render_single_qudit_state(T, D, v) for (k, v) in final_state])
-        openindices2 = add_states!(eb, final_state; conjugate=true)
+        openindices2 = eat_states!(eb, final_state; conjugate=true)
         openindices = vcat(openindices2, openindices)
     else
         openindices2 = mode isa Union{DensityMatrixMode, PauliBasisMode} ? Int[eb.slots..., (-).(eb.slots)...] : eb.slots
