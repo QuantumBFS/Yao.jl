@@ -1,5 +1,13 @@
 # T is the element type of the tensor network
 # D is the dimension of the qudits
+# Key Interfaces:
+# - `add_matrix!(eb::EinBuilder, m::AbstractMatrix, locs::Vector)`
+# - `add_channel!(eb::EinBuilder, b::SuperOp, locs::Vector)`
+# - `trace!(eb::EinBuilder)`
+#
+# - `add_gate!(eb::EinBuilder, b::AbstractBlock)`
+# - `add_observable!(eb::EinBuilder, b::AbstractBlock)`
+# - `add_states!(eb::EinBuilder, states::Dict; conjugate=false)`
 struct EinBuilder{MODE<:AbstractMappingMode, T, D}
     mode::MODE                         # the mapping mode, which can be `DensityMatrixMode()`, `PauliBasisMode()`, or `VectorMode()`
     slots::Vector{Int}                 # the labels for the open indices
@@ -24,6 +32,8 @@ function add_tensor!(eb::EinBuilder{MODE, T, D}, tensor::AbstractArray{T,N}, lab
         push!(eb.labels, (-).(labels))
     end
 end
+
+# connect right most line with its dual, often used in density matrix mode.
 function trace!(eb::EinBuilder{MODE, T, D}) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
     replacement = [-x => x for x in eb.slots]
     for i = 1:length(eb.labels)
@@ -32,23 +42,16 @@ function trace!(eb::EinBuilder{MODE, T, D}) where {MODE<:Union{DensityMatrixMode
     return eb
 end
 
+# request a new label, increment the maxlabel
 newlabel!(eb::EinBuilder) = (eb.maxlabel[] += 1; eb.maxlabel[])
 
-function add_gate!(eb::EinBuilder{MODE, T, D}, b::PutBlock{D,C}) where {MODE<:AbstractMappingMode, T,D,C}
-    if isnoisy(b.content)
-        add_channel!(eb, SuperOp(b.content), collect(b.locs))
-    else
-        add_matrix!(eb, mat(T, b.content), collect(b.locs))
-    end
-    return eb
-end
 # general and diagonal gates
 # - `k` is the number of qubits that the gate acts on
 # - `m` is the matrix of the gate
 # - `locs` is the location of the qubits that the gate acts on
 function add_matrix!(eb::EinBuilder{MODE, T, D}, m::AbstractMatrix, locs::Vector) where {MODE<:AbstractMappingMode, T, D}
     k = length(locs)
-    if m isa Diagonal
+    if m isa Diagonal  # or use isdiag?
         add_tensor!(eb, reshape(Vector{T}(diag(m)), fill(D, k)...), eb.slots[locs])
     elseif m isa YaoBlocks.OuterProduct  # low rank
         nlabels = [newlabel!(eb) for _=1:k]
@@ -70,6 +73,20 @@ function add_matrix!(eb::EinBuilder{MODE, T, D}, m::AbstractMatrix, locs::Vector
     end
     return eb
 end
+
+# add a gate to the einbuilder
+function add_gate!(eb::EinBuilder{MODE, T, D}, b::PutBlock{D,C}) where {MODE<:AbstractMappingMode, T,D,C}
+    if isnoisy(b.content) || MODE isa PauliBasisMode
+        # add the channel to the einbuilder, the mapping mode must be density matrix mode or pauli basis mode
+        # since the Pauli basis mode mixes the label and its dual, we need to add the channel to the einbuilder instead of a normal gate.
+        add_channel!(eb, SuperOp(b.content), collect(b.locs))
+    else
+        # add the matrix to the einbuilder
+        add_matrix!(eb, mat(T, b.content), collect(b.locs))
+    end
+    return eb
+end
+
 # swap gate
 function add_gate!(eb::EinBuilder{MODE, T, 2}, b::PutBlock{2,2,ConstGate.SWAPGate}) where {MODE<:AbstractMappingMode, T}
     lj = eb.slots[b.locs[2]]
@@ -146,6 +163,7 @@ function add_gate!(eb::EinBuilder{MODE, T, D}, b::ChainBlock) where {MODE<:Abstr
     return eb
 end
 
+# try simplify and convert
 function add_gate!(eb::EinBuilder, b::AbstractBlock)
     B = Optimise.to_basictypes(b)
     if typeof(B) == typeof(b)
@@ -156,7 +174,20 @@ function add_gate!(eb::EinBuilder, b::AbstractBlock)
     return eb
 end
 
+# matblock
+function add_gate!(eb::EinBuilder{MODE, T, D}, b::GeneralMatrixBlock) where {MODE<:AbstractMappingMode, T, D}
+    add_matrix!(eb, mat(T, b), collect(1:nqubits(b)))
+    return eb
+end
+
 # Channels
+for CT in [:KrausChannel, :DepolarizingChannel, :MixedUnitaryChannel, :SuperOp]
+    @eval function add_gate!(eb::EinBuilder{MODE, T, D}, b::$CT) where {MODE<:AbstractMappingMode, T, D}
+        add_channel!(eb, SuperOp(b), collect(1:nqubits(b)))
+        return eb
+    end
+end
+
 function add_channel!(eb::EinBuilder{MODE, T, D}, b::SuperOp, locs::Vector{Int}) where {MODE<:Union{DensityMatrixMode, PauliBasisMode}, T, D}
     mat = Matrix{T}(b.superop)
     k = length(locs)
