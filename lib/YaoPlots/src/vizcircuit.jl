@@ -347,7 +347,7 @@ function draw!(c::CircuitGrid, m::YaoBlocks.Measure, address, controls)
     if !(m.operator isa ComputationalBasis)
         error("can not visualize measure blocks for operators")
     end
-    locs = m.locations isa AllLocs ? collect(1:nqudits(m)) : [address[i] for i in m.locations]
+    locs = m.locations isa AllLocs ? address : [address[i] for i in m.locations]
     for (i, loc) in enumerate(locs)
         _draw!(c, [(loc, c.gatestyles.measure, "")])
         if m.postprocess isa ResetTo
