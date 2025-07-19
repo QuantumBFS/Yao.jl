@@ -68,6 +68,16 @@ end
     @test to_basictypes(put(5, 3 => X) |> cache) == put(5, 3 => X)
     @test to_basictypes(Daggered(X)) == Daggered(X)
 
+    # channels
+    c0 = DepolarizingChannel(5, 0.1)
+    c1 = MixedUnitaryChannel([X, Y], [0.1, 0.9])
+    c2 = KrausChannel([0.3*X, 0.1*Y])
+    c3 = SuperOp(X)
+    @test to_basictypes(c0) == c0
+    @test to_basictypes(c1) == c1
+    @test to_basictypes(c2) == c2
+    @test to_basictypes(c3) == c3
+
     # tobasic_recursive
     sub = chain(
         5,

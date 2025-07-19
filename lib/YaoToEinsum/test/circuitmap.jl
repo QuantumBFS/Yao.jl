@@ -370,4 +370,11 @@ end
     expected = expect(op, zero_state(ComplexF64, 5; nlevel=3) |> c)
     @test res.code(res.tensors...; size_info=uniformsize(res.code, 3))[] ≈ expected
 end
+
+@testset "matblock" begin
+    c = matblock(randn(ComplexF64, 4, 4))
+    @test yao2einsum(c) isa TensorNetwork
+    @test contract(yao2einsum(c)) ≈ reshape(mat(c), 2, 2, 2, 2)
+end
+
 end
