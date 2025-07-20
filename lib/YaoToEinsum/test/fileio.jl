@@ -1,6 +1,5 @@
 using Test
-using Yao
-using YaoToEinsum
+using YaoToEinsum, YaoToEinsum.YaoBlocks
 
 @testset "File I/O" begin
     # Create test tensor network

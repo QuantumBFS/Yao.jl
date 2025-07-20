@@ -369,7 +369,7 @@ function yao2einsum(circuit::AbstractBlock{D}; mode::AbstractMappingMode=VectorM
 
     # construct the tensor network
     network = build_einsum(eb, openindices)
-    return optimizer === nothing ? network : optimize_code(network, optimizer, MergeVectors())
+    return optimizer === nothing ? network : optimize_code(network, optimizer; simplifier=MergeVectors())
 end
 dict_regtype(d::Dict) = promote_type(_regtype.(values(d))...)
 _regtype(::ArrayReg{D,VT}) where {D,VT} = VT

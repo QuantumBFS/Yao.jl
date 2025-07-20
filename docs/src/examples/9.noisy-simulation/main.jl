@@ -151,7 +151,7 @@ error_types = [
 
 println("\nComparing different error types on a 2-qubit circuit:")
 for (name, error) in error_types
-    # Add error after each gate
+    ## Add error after each gate
     noisy_circ = replace_block(test_circ) do block
         if block isa PutBlock && length(block.locs) == 1
             chain(block, put(nqubits(block), block.locs => quantum_channel(error)))
@@ -163,7 +163,7 @@ for (name, error) in error_types
         end
     end
     
-    # Simulate
+    ## Simulate
     rho = noisy_simulation(zero_state(2), noisy_circ)
     fid = fidelity(rho, apply(density_matrix(zero_state(2)), test_circ))
     println("$name Error: Fidelity = $(round(fid, digits=3))")
