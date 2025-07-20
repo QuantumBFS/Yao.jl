@@ -7,3 +7,7 @@ end
 @testset "densitymatrix" begin
     include("densitymatrix.jl")
 end
+
+@testset "fileio" begin
+    include("fileio.jl")
+end
