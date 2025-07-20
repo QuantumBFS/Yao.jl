@@ -92,3 +92,10 @@ end
     @test plot(rot(igate(1), 1.)) isa Drawing
     @test plot(rot(put(3, 1=>X), 1.)) isa Drawing
 end
+
+@testset "issue 558" begin
+    qc = chain(2)
+    push!(qc,put(2,1 => Measure(1)))
+    push!(qc,put(2,2 => Measure(1)))
+    @test vizcircuit(qc) isa Drawing
+end
