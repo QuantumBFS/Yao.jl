@@ -318,7 +318,7 @@ end
 # noisy channel
 function draw!(c::CircuitGrid, p::YaoBlocks.AbstractQuantumChannel, address, controls)
     bts = get_brush_texts(c, p)
-    _draw!(c, [controls..., (getindex.(Ref(address), occupied_locs(p)), bts[1], bts[2])])
+    draw!(c, LabelBlock(p, bts[2], "brown1"), address, controls)
 end
 
 # composite
