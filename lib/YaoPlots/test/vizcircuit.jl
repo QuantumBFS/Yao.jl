@@ -99,3 +99,25 @@ end
     push!(qc,put(2,2 => Measure(1)))
     @test vizcircuit(qc) isa Drawing
 end
+
+
+@testset "noise channel" begin
+	c1 = quantum_channel(DepolarizingError(1, 0.1))
+	c2 = quantum_channel(PhaseFlipError(0.1))
+	c3 = quantum_channel(AmplitudeDampingError(0.1))
+	c4 = SuperOp(quantum_channel(ResetError(0.1, 0.0)))
+	grid = CircuitGrid(2)
+	@test YaoPlots.get_brush_texts(grid, c1) == (grid.gatestyles.g, "DEP(0.1)")
+	@test YaoPlots.get_brush_texts(grid, c2) == (grid.gatestyles.g, "MU(0.9*I2, 0.1*Z)")
+	@test YaoPlots.get_brush_texts(grid, c3) == (grid.gatestyles.g, "KR(A0, A1)")
+	@test YaoPlots.get_brush_texts(grid, c4) == (grid.gatestyles.g, "CHN")
+
+    circuit = chain(
+        2,
+		put(1=>c1),
+		put(2=>c2),
+		put(2=>c3),
+		put(2=>c4),
+	)
+	@test plot(circuit) isa Drawing
+end

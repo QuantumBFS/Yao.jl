@@ -315,6 +315,12 @@ function draw!(c::CircuitGrid, p::ConstGate.ToffoliGate, address, controls)
     _draw!(c, [controls..., [(address[l], bt...) for (l, bt) in zip(occupied_locs(p), bts)]...])
 end
 
+# noisy channel
+function draw!(c::CircuitGrid, p::YaoBlocks.AbstractQuantumChannel, address, controls)
+    bts = get_brush_texts(c, p)
+    _draw!(c, [controls..., (getindex.(Ref(address), occupied_locs(p)), bts[1], bts[2])])
+end
+
 # composite
 function draw!(c::CircuitGrid, p::ChainBlock, address, controls)
     CircuitStyles.barrier_for_chain[] && set_barrier!(c, Int[address..., controls...])
@@ -446,6 +452,11 @@ get_brush_texts(c, b::PrimitiveBlock) = (c.gatestyles.g, string(b))
 get_brush_texts(c, b::TimeEvolution) = (c.gatestyles.g, string(b))
 get_brush_texts(c, b::ShiftGate) = (c.gatestyles.g, "φ($(pretty_angle(b.theta)))")
 get_brush_texts(c, b::PhaseGate) = (CircuitStyles.Phase("$(pretty_angle(b.theta))"), "")
+get_brush_texts(c, b::DepolarizingChannel) = (c.gatestyles.g, "DEP($(b.p))")
+get_brush_texts(c, b::MixedUnitaryChannel) = (c.gatestyles.g, "MU($(join(["$p*$g" for (p, g) in zip(b.probs, b.operators)], ", ")))")
+get_brush_texts(c, b::KrausChannel) = (c.gatestyles.g, "KR$(Tuple(b.operators))")
+get_brush_texts(c, ::SuperOp) = (c.gatestyles.g, "CHN")
+
 function get_brush_texts(c, b::T) where T<:ConstantGate
     namestr = string(T.name.name)
     if endswith(namestr, "Gate")
