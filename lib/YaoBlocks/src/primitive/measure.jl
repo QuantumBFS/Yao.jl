@@ -37,9 +37,10 @@ function Measure{D}(n::Int,
     operator::OT,
     locations::LT,
     postprocess::PT,
+    error_prob::Float64,
 ) where {D,RNG,OT,LT<:Union{NTuple{K,Int} where K,AllLocs},PT<:PostProcess}
     k = locations isa AllLocs ? n : length(locations)
-    Measure{D,k,OT,LT,PT,RNG}(n, rng, operator, locations, postprocess)
+    Measure{D,k,OT,LT,PT,RNG}(n, rng, operator, locations, postprocess, error_prob)
 end
 
 const MeasureAndReset{D,K,OT,LT,RNG} = Measure{D,K,OT,LT,ResetTo{BitStr64{K}},RNG}
@@ -59,7 +60,7 @@ end
 change the measuring `operator`. It will also discard existing measuring results.
 """
 function chmeasureoperator(m::Measure{D}, op::AbstractBlock) where D
-    Measure{D}(m.n, m.rng, op, m.locations, m.postprocess)
+    Measure{D}(m.n, m.rng, op, m.locations, m.postprocess, m.error_prob)
 end
 
 function Base.:(==)(m1::Measure, m2::Measure)

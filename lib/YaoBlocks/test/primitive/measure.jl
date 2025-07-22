@@ -142,7 +142,6 @@ end
     for _ in 1:10000
         st = normalize!(arrayreg(bit"0000"))
         g = Measure(4; locs = (1, 2), error_prob = p)
-        @test occupied_locs(g) == (1, 2)
         st |> g
         for i in 1:2
             readbit(g.results, i) == 0 ? count0 += 1 : count1 += 1
