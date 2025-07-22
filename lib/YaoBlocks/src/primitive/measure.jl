@@ -3,7 +3,7 @@ export Measure,
 
 """
     Measure{D,K, OT, LT, PT, RNG} <: PrimitiveBlock{D}
-    Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=1:n, resetto=nothing, remove=false, nlevel=2)
+    Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=1:n, resetto=nothing, remove=false, nlevel=2, error_prob=0.0)
 
 Measure operator, currently only qudits are supported.
 """
@@ -14,18 +14,20 @@ mutable struct Measure{D,K,OT,LT<:Union{NTuple{K,Int},AllLocs},PT<:PostProcess,R
     operator::OT
     locations::LT
     postprocess::PT
+    error_prob::Float64
     results::Any
     function Measure{D,K,OT,LT,PT,RNG}(n::Int,
         rng::RNG,
         operator::OT,
         locations::LT,
         postprocess::PT,
+        error_prob::Float64,
     ) where {RNG,D,K,OT,LT<:Union{NTuple{K,Int},AllLocs},PT<:PostProcess}
         locations isa AllLocs || @assert_locs_safe n locations
         if !(operator isa ComputationalBasis)
             @assert nqudits(operator) == (locations isa AllLocs ? n : length(locations)) "operator size `$(nqudits(operator))` does not match measurement location `$locations`"
         end
-        new{D,K,OT,LT,PT,RNG}(n, rng, operator, locations, postprocess)
+        new{D,K,OT,LT,PT,RNG}(n, rng, operator, locations, postprocess, error_prob)
     end
 end
 nqudits(m::Measure) = m.n
@@ -73,7 +75,7 @@ end
 num_measured(::Measure{D,K}) where {D,K} = K
 
 """
-    Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=AllLocs(), resetto=nothing, remove=false)
+    Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=AllLocs(), resetto=nothing, remove=false, error_prob=0.0)
 
 Create a `Measure` block with number of qudits `n`.
 
@@ -146,6 +148,7 @@ function Measure(
     resetto = nothing,
     remove = false,
     nlevel = 2,
+    error_prob = 0.0,
 ) where {OT,RNG}
     if resetto !== nothing
         if remove
@@ -168,7 +171,7 @@ function Measure(
         locs = (locs...,)
         K = length(locs)
     end
-    Measure{nlevel,K,OT,typeof(locs),typeof(postprocess),RNG}(n,rng, operator, locs, postprocess)
+    Measure{nlevel,K,OT,typeof(locs),typeof(postprocess),RNG}(n,rng, operator, locs, postprocess, error_prob)
 end
 
 Measure(;
@@ -193,6 +196,13 @@ mat(x::Measure) = error("use BlockMap to get its matrix.")
 
 function YaoAPI.unsafe_apply!(r::AbstractRegister{D}, m::Measure{D}) where {D}
     m.results = measure!(m.postprocess, m.operator, r, m.locations; rng = m.rng)
+    if m.error_prob > 0.0 && D == 2
+        for i in 1:length(m.results)
+            if rand(m.rng) < m.error_prob
+                m.results ⊻= 1 << (i-1)
+            end
+        end
+    end
     return r
 end
 
