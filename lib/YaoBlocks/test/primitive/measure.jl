@@ -150,24 +150,10 @@ end
     @test count1 / (count0 + count1) ≈ p atol = 0.01
 end
 
-@testset "error_prob in Measure with measure operator" begin
-    count0 = 0
-    count1 = 0
-    p = 0.5
-
-    sum = 0
-    Random.seed!(1234)
-    num = 10000
-    for _ in 1:num
-        st = normalize!(arrayreg(bit"0000"))
-        g = g = Measure(4; locs = (1), error_prob = p, operator = 2*Z)
-        st |> g
-        sum += g.results
-    end
-    @test sum/num ≈ 0 atol = 0.05
-end
-
 @testset "Measure throw error when error_prob is not supported" begin
     m = Measure(1)
     @test_throws AssertionError Measure{3}(1, m.rng, m.operator, m.locations, m.postprocess, 0.2)
+    m = Measure(1; error_prob = 0.2, operator = X)
+    st = normalize!(arrayreg(bit"0"))
+    @test_throws ErrorException st |> m
 end

@@ -201,18 +201,14 @@ mat(x::Measure) = error("use BlockMap to get its matrix.")
 function YaoAPI.unsafe_apply!(r::AbstractRegister{D}, m::Measure{D}) where {D}
     m.results = measure!(m.postprocess, m.operator, r, m.locations; rng = m.rng)
     if m.error_prob > 0.0 && D == 2
-        if m.results isa ComplexF64
-            if rand(m.rng) < m.error_prob
-                m.results = - m.results
-            end
-        elseif m.results isa BitStr
+        if m.results isa BitStr
             for i in 1:length(m.results)
                 if rand(m.rng) < m.error_prob
                     m.results ⊻= 1 << (i-1)
                 end
             end
         else
-            error("Unsupported measurement result type with error probability: $(typeof(m.results))")
+            error("Unsupported measurement result type with error probability: $(typeof(m.results)). This typically occurs when adding error probability to a measurement operator that is not in the computational basis.")
         end
     end
     return r
