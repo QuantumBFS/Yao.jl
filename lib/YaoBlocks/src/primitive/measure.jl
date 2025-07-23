@@ -27,6 +27,9 @@ mutable struct Measure{D,K,OT,LT<:Union{NTuple{K,Int},AllLocs},PT<:PostProcess,R
         if !(operator isa ComputationalBasis)
             @assert nqudits(operator) == (locations isa AllLocs ? n : length(locations)) "operator size `$(nqudits(operator))` does not match measurement location `$locations`"
         end
+        if error_prob > 0.0
+            @assert D == 2 "error_prob is only supported for binary systems"
+        end
         new{D,K,OT,LT,PT,RNG}(n, rng, operator, locations, postprocess, error_prob)
     end
 end
@@ -198,10 +201,18 @@ mat(x::Measure) = error("use BlockMap to get its matrix.")
 function YaoAPI.unsafe_apply!(r::AbstractRegister{D}, m::Measure{D}) where {D}
     m.results = measure!(m.postprocess, m.operator, r, m.locations; rng = m.rng)
     if m.error_prob > 0.0 && D == 2
-        for i in 1:length(m.results)
+        if m.results isa ComplexF64
             if rand(m.rng) < m.error_prob
-                m.results ⊻= 1 << (i-1)
+                m.results = - m.results
             end
+        elseif m.results isa BitStr
+            for i in 1:length(m.results)
+                if rand(m.rng) < m.error_prob
+                    m.results ⊻= 1 << (i-1)
+                end
+            end
+        else
+            error("Unsupported measurement result type with error probability: $(typeof(m.results))")
         end
     end
     return r
