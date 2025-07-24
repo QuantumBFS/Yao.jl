@@ -208,7 +208,7 @@ function YaoAPI.unsafe_apply!(r::AbstractRegister{D}, m::Measure{D}) where {D}
                 end
             end
         else
-            error("Unsupported measurement result type with error probability: $(typeof(m.results)). This typically occurs when adding error probability to a measurement operator that is not in the computational basis.")
+            error("Unsupported measurement result type with non-zero error probability: $(typeof(m.results)). This typically occurs when trying to apply a non-zero error probability measurement operator that is not in the computational basis.")
         end
     end
     return r
