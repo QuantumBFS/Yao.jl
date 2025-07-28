@@ -56,6 +56,7 @@ function map_address(blk::Measure{D}, info::AddressInfo) where D
         blk.operator,
         (blk.locations / info...,),
         blk.postprocess,
+        blk.error_prob,
     )
     if isdefined(blk, :results)
         m.results = blk.results
