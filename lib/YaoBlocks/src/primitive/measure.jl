@@ -5,7 +5,16 @@ export Measure,
     Measure{D,K, OT, LT, PT, RNG} <: PrimitiveBlock{D}
     Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=1:n, resetto=nothing, remove=false, nlevel=2, error_prob=0.0)
 
-Measure operator, currently only qudits are supported.
+Measurement block.
+
+### Fields
+* `n::Int`: number of qubits.
+* `rng::RNG`: random number generator.
+* `operator::OT`: operator to measure, by default it is `ComputationalBasis()`.
+* `locations::LT`: locations to measure, by default it is `1:n`.
+* `postprocess::PT`: postprocess to apply to the measurement result, e.g. `ResetTo` to reset the measured qubits to a specific state.
+* `error_prob::Float64`: error probability, by default it is `0.0`. This is only supported for 2-level systems, and the operator must be `ComputationalBasis` or a single qubit operator.
+* `results::Any`: measurement results, by default it is `undef`.
 """
 mutable struct Measure{D,K,OT,LT<:Union{NTuple{K,Int},AllLocs},PT<:PostProcess,RNG} <:
                PrimitiveBlock{D}
@@ -28,7 +37,8 @@ mutable struct Measure{D,K,OT,LT<:Union{NTuple{K,Int},AllLocs},PT<:PostProcess,R
             @assert nqudits(operator) == (locations isa AllLocs ? n : length(locations)) "operator size `$(nqudits(operator))` does not match measurement location `$locations`"
         end
         if error_prob > 0.0
-            @assert D == 2 "error_prob is only supported for binary systems"
+            @assert D == 2 "`error_prob` argument is only supported for 2-level systems, got D=$D"
+            @assert operator isa ComputationalBasis || nqudits(operator) == 1 "`error_prob` argument is only supported for single qubit operators, got $(typeof(operator))"
         end
         new{D,K,OT,LT,PT,RNG}(n, rng, operator, locations, postprocess, error_prob)
     end
@@ -200,15 +210,18 @@ mat(x::Measure) = error("use BlockMap to get its matrix.")
 
 function YaoAPI.unsafe_apply!(r::AbstractRegister{D}, m::Measure{D}) where {D}
     m.results = measure!(m.postprocess, m.operator, r, m.locations; rng = m.rng)
-    if m.error_prob > 0.0 && D == 2
-        if m.results isa BitStr
-            for i in 1:length(m.results)
-                if rand(m.rng) < m.error_prob
-                    m.results ⊻= 1 << (i-1)
-                end
+    iszero(m.error_prob) && return r
+    if m.operator isa ComputationalBasis
+        for i in 1:length(m.results)  # try to flip each qubit
+            if rand(m.rng) < m.error_prob
+                m.results ⊻= 1 << (i-1)
             end
-        else
-            error("Unsupported measurement result type with non-zero error probability: $(typeof(m.results)). This typically occurs when trying to apply a non-zero error probability measurement operator that is not in the computational basis.")
+        end
+    else   # operators
+        E, V = eigenbasis(m.operator)
+        evals = diag(mat(E))  # must have exactly 2 eigenvalues
+        if rand(m.rng) < m.error_prob  # flip results
+            m.results = m.results == evals[1] ? evals[2] : evals[1]
         end
     end
     return r

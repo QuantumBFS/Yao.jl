@@ -153,7 +153,9 @@ end
 @testset "Measure throw error when error_prob is not supported" begin
     m = Measure(1)
     @test_throws AssertionError Measure{3}(1, m.rng, m.operator, m.locations, m.postprocess, 0.2)
-    m = Measure(1; error_prob = 0.2, operator = X)
-    st = normalize!(arrayreg(bit"0"))
-    @test_throws ErrorException st |> m
+    m = Measure(1; error_prob = 1.0, operator = Z)
+    st = product_state(bit"0")
+    apply!(st, m)
+    @test st ≈ product_state(bit"0")
+    @test m.results == -1
 end
