@@ -4,7 +4,7 @@ using Test
 
 @testset "LabelBlock" begin
     x = put(5, (2,3)=>matblock(rand_unitary(4)))
-    cb = LabelBlock(x, "x", "red", "")
+    cb = LabelBlock(x, "x", "red", "", "")
     @test mat(copy(cb)) == mat(cb)
     @test isunitary(cb)
     @test ishermitian(cb) == ishermitian(x)

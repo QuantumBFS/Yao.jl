@@ -7,18 +7,20 @@ A marker to mark a circuit applying on a continous block for better plotting.
 - `content`: the block to be labeled
 - `name`: the name of the block
 - `color`: the color of the block
+- `toptext`: the text to be displayed at the top of the block
 - `bottomtext`: the text to be displayed at the bottom of the block
 """
 struct LabelBlock{BT<:AbstractBlock,D} <: TagBlock{BT,D}
     content::BT
     name::String
     color::String
+    toptext::String
     bottomtext::String
 end
 
 YaoBlocks.content(cb::LabelBlock) = cb.content
-function LabelBlock(x::BT, name::String, color::String, bottomtext::String) where {D,BT<:AbstractBlock{D}}
-    LabelBlock{BT,D}(x, name, color, bottomtext)
+function LabelBlock(x::BT, name::String, color::String, toptext::String, bottomtext::String) where {D,BT<:AbstractBlock{D}}
+    LabelBlock{BT,D}(x, name, color, toptext, bottomtext)
 end
 
 function is_continuous_chunk(x)
@@ -29,13 +31,13 @@ end
 YaoBlocks.PropertyTrait(::LabelBlock) = YaoBlocks.PreserveAll()
 YaoBlocks.mat(::Type{T}, blk::LabelBlock) where {T} = mat(T, content(blk))
 YaoBlocks.unsafe_apply!(reg::YaoBlocks.AbstractRegister, blk::LabelBlock) = YaoBlocks.unsafe_apply!(reg, content(blk))
-YaoBlocks.chsubblocks(blk::LabelBlock, target::AbstractBlock) = LabelBlock(target, blk.name, blk.color, blk.bottomtext)
+YaoBlocks.chsubblocks(blk::LabelBlock, target::AbstractBlock) = LabelBlock(target, blk.name, blk.color, blk.toptext, blk.bottomtext)
 
-Base.adjoint(x::LabelBlock) = LabelBlock(adjoint(content(x)), endswith(x.name, "†") ? x.name[1:end-1] : x.name*"†", x.color, x.bottomtext)
-Base.copy(x::LabelBlock) = LabelBlock(copy(content(x)), x.name, x.color, x.bottomtext)
+Base.adjoint(x::LabelBlock) = LabelBlock(adjoint(content(x)), endswith(x.name, "†") ? x.name[1:end-1] : x.name*"†", x.color, x.bottomtext, x.toptext)
+Base.copy(x::LabelBlock) = LabelBlock(copy(content(x)), x.name, x.color, x.toptext, x.bottomtext)
 YaoBlocks.Optimise.to_basictypes(block::LabelBlock) = block
 
-addlabel(b::AbstractBlock; name=string(b), color="transparent", bottomtext="") = LabelBlock(b, name, color, bottomtext)
+addlabel(b::AbstractBlock; name=string(b), color="transparent", toptext="", bottomtext="") = LabelBlock(b, name, color, toptext, bottomtext)
 
 # to fix issue 
 function YaoBlocks.print_tree(

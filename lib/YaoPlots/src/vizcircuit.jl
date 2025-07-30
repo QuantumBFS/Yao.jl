@@ -314,7 +314,7 @@ end
 # noisy channel
 function draw!(c::CircuitGrid, p::YaoBlocks.AbstractQuantumChannel, address, controls)
     bts = get_brush_texts(c, p)
-    draw!(c, LabelBlock(p, bts[2], "pink", ""), address, controls)
+    draw!(c, LabelBlock(p, bts[2], "pink", "", ""), address, controls)
 end
 
 function draw!(c::CircuitGrid, p::YaoBlocks.DepolarizingChannel, address, controls)
@@ -385,6 +385,16 @@ function _textbottom!(c::CircuitGrid, loc::Integer, boxwidth, boxheight, dy, tex
     end
 end
 
+function _texttop!(c::CircuitGrid, loc::Integer, boxwidth, boxheight, dy, text::AbstractString)
+    i = frontier(c, loc) + 0.1
+    width = 2 * boxwidth
+    fontsize = CircuitStyles.paramtextsize[]
+    lines = split(text, "\n")
+    for (k, line) in enumerate(lines[end:-1:1])
+        CircuitStyles.render(CircuitStyles.Text(fontsize), (c[i-boxwidth/2-width/2, loc-boxheight/2-dy-0.25*(k-1)], line, width, fontsize))
+    end
+end
+
 function draw!(c::CircuitGrid, cb::ControlBlock{GT,C}, address, controls) where {GT,C}
     ctrl_locs = [address[i] for i in cb.ctrl_locs]
     locs = [address[i] for i in cb.locs]
@@ -405,6 +415,9 @@ function draw!(c::CircuitGrid, cb::LabelBlock, address, controls)
     _draw!(c, [controls..., (address, c.gatestyles.g, string(cb.name))])
     if !isempty(cb.bottomtext)
         _textbottom!(c, address[1], CircuitStyles.boxsize(c.gatestyles.g)..., 0.25, cb.bottomtext)
+    end
+    if !isempty(cb.toptext)
+        _texttop!(c, address[1], CircuitStyles.boxsize(c.gatestyles.g)..., 0.25, cb.toptext)
     end
     CircuitStyles.gate_bgcolor[] = temp
 end
@@ -541,7 +554,7 @@ addblock!(c::CircuitGrid, blk::Function) = addblock!(c, blk(nline(c)))
 
 function circuit_canvas(f, nline::Int; format=:svg, filename=nothing, w_depth=0.85, w_line=0.75,
         show_ending_bar=false, starting_texts=nothing, starting_offset=-0.3, ending_texts=nothing,
-        ending_offset=0.3, padding=0, gatestyles=CircuitStyles.GateStyles())
+        ending_offset=0.3, padding=10, gatestyles=CircuitStyles.GateStyles())
     # the first time to estimate the canvas size
     Luxor.Drawing(50, 50, :png)
     c = CircuitGrid(nline; w_depth, w_line, gatestyles)
@@ -570,8 +583,8 @@ function _luxor(f, Dx, Dy, offsetx, offsety; format, filename, padding)
     else
         _format = filename
     end
-    Luxor.Drawing(round(Int,Dx+padding), round(Int,Dy+padding), _format)
-    Luxor.origin(offsetx, offsety)
+    Luxor.Drawing(round(Int,Dx+2*padding), round(Int,Dy+2*padding), _format)
+    Luxor.origin(offsetx+padding, offsety+padding)
     f()
     Luxor.finish()
     Luxor.preview()

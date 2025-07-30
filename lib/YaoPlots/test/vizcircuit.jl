@@ -127,4 +127,10 @@ end
     res = vizcircuit(c)
     @test res isa Drawing
     display(res)
+    res = vizcircuit(depolarizing_channel(2, p=0.2))
+    @test res isa Drawing
+    display(res)
+    res = vizcircuit(put(2, 1=>addlabel(X; name="X", toptext="rec[1]\n3", bottomtext="p = 0.01")))
+    @test res isa Drawing
+    display(res)
 end
