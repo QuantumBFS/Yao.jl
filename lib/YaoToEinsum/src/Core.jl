@@ -1,3 +1,8 @@
+abstract type AbstractMappingMode end
+struct DensityMatrixMode <: AbstractMappingMode end
+struct PauliBasisMode <: AbstractMappingMode end
+struct VectorMode <: AbstractMappingMode end
+
 """
     TensorNetwork
 
@@ -39,17 +44,22 @@ function contract(c::TensorNetwork)
 end
 
 """
-    optimize_code(c::TensorNetwork, optimizer=TreeSA())
+    optimize_code(c::TensorNetwork, optimizer=TreeSA(); slicer=nothing)
 
 Optimize the code of the tensor network.
 
 ### Arguments
-* `c::TensorNetwork`: The tensor network.
-* `optimizer::Optimizer`: The optimizer to use, default is `TreeSA()`. Please check [OMEinsumContractors.jl](https://github.com/TensorBFS/OMEinsumContractionOrders.jl) for more information.
+- `c::TensorNetwork`: The tensor network.
+- `optimizer::Optimizer`: The optimizer to use, default is `OMEinsum.TreeSA()`.
+
+### Keyword Arguments
+- `slicer`: The slicer to use, default is `nothing`. It can be e.g. `OMEinsum.TreeSASlicer(score=OMEinsum.ScoreFunction(sc_target=30))`.
+
+For more, please check [OMEinsumContractionOrders documentation](https://tensorbfs.github.io/OMEinsumContractionOrders.jl/dev/).
 """
-function OMEinsum.optimize_code(c::TensorNetwork, args...)
+function OMEinsum.optimize_code(c::TensorNetwork, args...; kwargs...)
     size_info = OMEinsum.get_size_dict(getixsv(c.code), c.tensors)
-    optcode = optimize_code(c.code, size_info, args...)
+    optcode = optimize_code(c.code, size_info, args...; kwargs...)
     return TensorNetwork(optcode, c.tensors)
 end
 

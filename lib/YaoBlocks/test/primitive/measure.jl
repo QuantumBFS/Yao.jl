@@ -132,3 +132,30 @@ end
     @test res ≈ 3.0
     @test reg == zero_state(0)
 end
+
+@testset "error_prob in Measure" begin
+    count0 = 0
+    count1 = 0
+    p = 0.2
+
+    Random.seed!(1234)
+    for _ in 1:10000
+        st = normalize!(arrayreg(bit"0000"))
+        g = Measure(4; locs = (1, 2), error_prob = p)
+        st |> g
+        for i in 1:2
+            readbit(g.results, i) == 0 ? count0 += 1 : count1 += 1
+        end
+    end
+    @test count1 / (count0 + count1) ≈ p atol = 0.01
+end
+
+@testset "Measure throw error when error_prob is not supported" begin
+    m = Measure(1)
+    @test_throws AssertionError Measure{3}(1, m.rng, m.operator, m.locations, m.postprocess, 0.2)
+    m = Measure(1; error_prob = 1.0, operator = Z)
+    st = product_state(bit"0")
+    apply!(st, m)
+    @test st ≈ product_state(bit"0")
+    @test m.results == -1
+end
