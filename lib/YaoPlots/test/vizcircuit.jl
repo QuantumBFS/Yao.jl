@@ -121,3 +121,10 @@ end
     )
     @test plot(circuit) isa Drawing
 end
+
+@testset "fix #563 - measure" begin
+    c = chain(5, Measure(5; locs=(2,), error_prob=0.1, operator=X))
+    res = vizcircuit(c)
+    @test res isa Drawing
+    display(res)
+end

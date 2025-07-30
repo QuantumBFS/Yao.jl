@@ -2,16 +2,23 @@
     LabelBlock{BT,D} <: TagBlock{BT,D}
 
 A marker to mark a circuit applying on a continous block for better plotting.
+
+# Fields:
+- `content`: the block to be labeled
+- `name`: the name of the block
+- `color`: the color of the block
+- `bottomtext`: the text to be displayed at the bottom of the block
 """
 struct LabelBlock{BT<:AbstractBlock,D} <: TagBlock{BT,D}
     content::BT
     name::String
     color::String
+    bottomtext::String
 end
 
 YaoBlocks.content(cb::LabelBlock) = cb.content
-function LabelBlock(x::BT, name::String, color::String) where {D,BT<:AbstractBlock{D}}
-    LabelBlock{BT,D}(x, name, color)
+function LabelBlock(x::BT, name::String, color::String, bottomtext::String) where {D,BT<:AbstractBlock{D}}
+    LabelBlock{BT,D}(x, name, color, bottomtext)
 end
 
 function is_continuous_chunk(x)
@@ -22,13 +29,13 @@ end
 YaoBlocks.PropertyTrait(::LabelBlock) = YaoBlocks.PreserveAll()
 YaoBlocks.mat(::Type{T}, blk::LabelBlock) where {T} = mat(T, content(blk))
 YaoBlocks.unsafe_apply!(reg::YaoBlocks.AbstractRegister, blk::LabelBlock) = YaoBlocks.unsafe_apply!(reg, content(blk))
-YaoBlocks.chsubblocks(blk::LabelBlock, target::AbstractBlock) = LabelBlock(target, blk.name, blk.color)
+YaoBlocks.chsubblocks(blk::LabelBlock, target::AbstractBlock) = LabelBlock(target, blk.name, blk.color, blk.bottomtext)
 
-Base.adjoint(x::LabelBlock) = LabelBlock(adjoint(content(x)), endswith(x.name, "†") ? x.name[1:end-1] : x.name*"†", x.color)
-Base.copy(x::LabelBlock) = LabelBlock(copy(content(x)), x.name, x.color)
+Base.adjoint(x::LabelBlock) = LabelBlock(adjoint(content(x)), endswith(x.name, "†") ? x.name[1:end-1] : x.name*"†", x.color, x.bottomtext)
+Base.copy(x::LabelBlock) = LabelBlock(copy(content(x)), x.name, x.color, x.bottomtext)
 YaoBlocks.Optimise.to_basictypes(block::LabelBlock) = block
 
-addlabel(b::AbstractBlock; name=string(b), color="transparent") = LabelBlock(b, name, color)
+addlabel(b::AbstractBlock; name=string(b), color="transparent", bottomtext="") = LabelBlock(b, name, color, bottomtext)
 
 # to fix issue 
 function YaoBlocks.print_tree(
