@@ -321,7 +321,7 @@ function draw!(c::CircuitGrid, p::YaoBlocks.DepolarizingChannel, address, contro
     CircuitStyles.gate_bgcolor[], temp = "pink", CircuitStyles.gate_bgcolor[]
     bts = [(c.gatestyles.g, "DEP") for _ in 1:nqudits(p)]
     _draw!(c, [controls..., [(address[l], bt...) for (l, bt) in zip(occupied_locs(p), bts)]...])
-    _textbottom!(c, address[end], CircuitStyles.boxsize(c.gatestyles.g)..., 0.25, "err = $(p.p)")
+    _textbottom!(c, address[end], CircuitStyles.boxsize(c.gatestyles.g)..., 0.2, "err = $(p.p)")
     CircuitStyles.gate_bgcolor[] = temp
 end
 
@@ -359,13 +359,13 @@ function draw!(c::CircuitGrid, m::YaoBlocks.Measure, address, controls)
         _draw!(c, [(loc, c.gatestyles.measure, "")])
         # annotate texts
         boxwidth, boxheight = CircuitStyles.boxsize(c.gatestyles.measure)
-        dy = 0.0
+        dy = -0.05
         if !(m.operator isa ComputationalBasis)
-            dy += 0.25
+            dy += 0.2
             _textbottom!(c, loc, boxwidth, boxheight, dy, "op = $(m.operator)")
         end
         if m.error_prob > 0.0
-            dy += 0.25
+            dy += 0.2
             _textbottom!(c, loc, boxwidth, boxheight, dy, "err = $(m.error_prob)")
         end
         if m.postprocess isa ResetTo
@@ -376,22 +376,22 @@ function draw!(c::CircuitGrid, m::YaoBlocks.Measure, address, controls)
     end
 end
 function _textbottom!(c::CircuitGrid, loc::Integer, boxwidth, boxheight, dy, text::AbstractString)
-    i = frontier(c, loc) + 0.1
+    i = frontier(c, loc)
     width = 2 * boxwidth
     fontsize = CircuitStyles.paramtextsize[]
     lines = split(text, "\n")
     for (k, line) in enumerate(lines)
-        CircuitStyles.render(CircuitStyles.Text(fontsize), (c[i-boxwidth/2-width/2, loc+boxheight/2+dy+0.25*(k-1)], line, width, fontsize))
+        CircuitStyles.render(CircuitStyles.Text(fontsize), (c[i-0.5, loc] .+ (0, boxheight/2+dy+0.2*(k-1)), line, width, fontsize))
     end
 end
 
 function _texttop!(c::CircuitGrid, loc::Integer, boxwidth, boxheight, dy, text::AbstractString)
-    i = frontier(c, loc) + 0.1
+    i = frontier(c, loc)
     width = 2 * boxwidth
     fontsize = CircuitStyles.paramtextsize[]
     lines = split(text, "\n")
     for (k, line) in enumerate(lines[end:-1:1])
-        CircuitStyles.render(CircuitStyles.Text(fontsize), (c[i-boxwidth/2-width/2, loc-boxheight/2-dy-0.25*(k-1)], line, width, fontsize))
+        CircuitStyles.render(CircuitStyles.Text(fontsize), (c[i-0.5, loc] .+ (0, -boxheight/2-dy-0.2*(k-1)), line, width, fontsize))
     end
 end
 
@@ -414,10 +414,10 @@ function draw!(c::CircuitGrid, cb::LabelBlock, address, controls)
     CircuitStyles.gate_bgcolor[], temp = cb.color, CircuitStyles.gate_bgcolor[]
     _draw!(c, [controls..., (address, c.gatestyles.g, string(cb.name))])
     if !isempty(cb.bottomtext)
-        _textbottom!(c, address[1], CircuitStyles.boxsize(c.gatestyles.g)..., 0.25, cb.bottomtext)
+        _textbottom!(c, address[1], CircuitStyles.boxsize(c.gatestyles.g)..., 0.2, cb.bottomtext)
     end
     if !isempty(cb.toptext)
-        _texttop!(c, address[1], CircuitStyles.boxsize(c.gatestyles.g)..., 0.25, cb.toptext)
+        _texttop!(c, address[1], CircuitStyles.boxsize(c.gatestyles.g)..., 0.2, cb.toptext)
     end
     CircuitStyles.gate_bgcolor[] = temp
 end
