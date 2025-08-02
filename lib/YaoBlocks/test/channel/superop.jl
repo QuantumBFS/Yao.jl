@@ -48,3 +48,14 @@ end
     @test density_matrix(res_reg) ≈ res_rho2
     @test density_matrix(res_reg) ≈ res_rho
 end
+
+@testset "noisy superop" begin
+    n = 3
+    c_noisy = chain(n, put(n, 1=>chain(Z, quantum_channel(BitFlipError(0.1)))))
+    sp = chain(n, put(n, 1=>SuperOp(chain(Z, quantum_channel(BitFlipError(0.1))))))
+    reg = rand_state(n)
+    rho = density_matrix(reg)
+    res_rho = apply(rho, c_noisy)
+    res_rho2 = apply(rho, sp)
+    @test res_rho ≈ res_rho2
+end
