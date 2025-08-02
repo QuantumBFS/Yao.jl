@@ -5,7 +5,7 @@ export AbstractErrorType, BitFlipError, PhaseFlipError, DepolarizingError, Pauli
 
 # channels
 export KrausChannel, MixedUnitaryChannel, DepolarizingChannel, quantum_channel, SuperOp,
-    add_noise, noisy_simulation
+    noisy_simulation
 
 """
     quantum_channel(error::AbstractErrorType)

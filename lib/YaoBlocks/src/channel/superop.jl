@@ -28,6 +28,10 @@ function SuperOp{D}(superop::AbstractMatrix) where D
     SuperOp{D}(n, superop)
 end
 SuperOp(superop::AbstractMatrix) = SuperOp{2}(superop)
+function Base.:(*)(x::SuperOp{D}, y::SuperOp{D}) where D
+    @assert x.n == y.n "The number of qubits of the two superoperators must be the same, but got $(x.n) and $(y.n)"
+    SuperOp{D}(x.n, x.superop * y.superop)
+end
 
 nqudits(uc::SuperOp) = uc.n
 subblocks(::SuperOp) = ()
@@ -58,7 +62,11 @@ Base.adjoint(x::SuperOp{D}) where D = SuperOp{D}(x.n, adjoint(x.superop))
 
 # convert block to superop
 function SuperOp(::Type{T}, x::AbstractBlock{D}) where {D,T}
+    isnoisy(x) && return noisy_superop(T, x)
     m = mat(T, x)
     SuperOp{D}(kron(conj(m), m))
+end
+function noisy_superop(::Type{T}, x::ChainBlock{D}) where {D,T}
+    return prod(SuperOp(T, b) for b in x.blocks[end:-1:1])
 end
 SuperOp(x::AbstractBlock{D}) where D = SuperOp(Complex{Float64}, x)
