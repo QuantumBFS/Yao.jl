@@ -285,7 +285,7 @@ function eat_states!(eb::EinBuilder{MODE, T, D}, states::Dict; conjugate::Bool) 
 end
 
 """
-    yao2einsum(circuit; initial_state=Dict(), final_state=Dict(), optimizer=TreeSA(), mode=VectorMode(), observable=nothing)
+    yao2einsum(circuit; initial_state=Dict(), final_state=Dict(), optimizer=TreeSA(), mode=VectorMode(), observable=nothing, slicer=nothing)
 
 Transform a Yao `circuit` to a generalized tensor network (einsum) notation.
 The return value is a [`TensorNetwork`](@ref) instance that corresponds to the following tensor network:
@@ -318,6 +318,7 @@ where the `circuit` may contain noise channels.
 - `observable` is a Yao block to specify the observable. If it is specified, the final state must be unspecified.
 If any qubit in initial state or final state is not specified, it will be treated as a free leg in the tensor network.
 - `optimizer` is the optimizer used to optimize the tensor network. The default is `TreeSA()`.
+- `slicer` is the slicer used to slice the tensor network and reduce the memory usage, e.g. to reduce the largest tensor rank to 30, use `TreeSASlicer(score=OMEinsum.ScoreFunction(sc_target=30))`.
 Please check [OMEinsumContractors.jl](https://github.com/TensorBFS/OMEinsumContractionOrders.jl) for more information.
 
 
@@ -342,7 +343,7 @@ Space complexity: 2^2.0
 Read-write complexity: 2^6.0
 ```
 """
-function yao2einsum(circuit::AbstractBlock{D}; mode::AbstractMappingMode=VectorMode(), initial_state::Dict=Dict{Int,Int}(), final_state::Dict=Dict{Int,Int}(), observable=nothing, optimizer=TreeSA()) where {D}
+function yao2einsum(circuit::AbstractBlock{D}; mode::AbstractMappingMode=VectorMode(), initial_state::Dict=Dict{Int,Int}(), final_state::Dict=Dict{Int,Int}(), observable=nothing, optimizer=TreeSA(), slicer=nothing) where {D}
     @assert isempty(final_state) || isnothing(observable) "Please do not specify both `final_state` and `observable`, got final_state=$final_state and observable=$observable"
     @assert (mode isa DensityMatrixMode || mode isa PauliBasisMode) || isnothing(observable) "If you want to compute the expectation value of an observable, please use `DensityMatrixMode()`"
     T = promote_type(ComplexF64, dict_regtype(initial_state), dict_regtype(final_state), YaoBlocks.parameters_eltype(circuit))
@@ -369,7 +370,7 @@ function yao2einsum(circuit::AbstractBlock{D}; mode::AbstractMappingMode=VectorM
 
     # construct the tensor network
     network = build_einsum(eb, openindices)
-    return optimizer === nothing ? network : optimize_code(network, optimizer; simplifier=MergeVectors())
+    return optimizer === nothing ? network : optimize_code(network, optimizer; simplifier=MergeVectors(), slicer)
 end
 dict_regtype(d::Dict) = promote_type(_regtype.(values(d))...)
 _regtype(::ArrayReg{D,VT}) where {D,VT} = VT

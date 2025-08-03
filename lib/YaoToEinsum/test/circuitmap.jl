@@ -377,4 +377,16 @@ end
     @test contract(yao2einsum(c)) ≈ reshape(mat(c), 2, 2, 2, 2)
 end
 
+@testset "slicer" begin
+    c = qft_circuit(10)
+    initial_state=Dict(zip(1:10, zeros(Int, 10)))
+    final_state=Dict(zip(1:10, zeros(Int, 10)))
+    net = yao2einsum(c; initial_state=initial_state, final_state=final_state)
+    cc = contraction_complexity(net)
+    snet = yao2einsum(c; initial_state=initial_state, final_state=final_state, slicer=TreeSASlicer(score=OMEinsum.ScoreFunction(sc_target=cc.sc - 2)))
+    ccs = contraction_complexity(snet)
+    @test ccs.sc == cc.sc - 2
+    @test contract(snet) ≈ contract(net)
+end
+
 end
