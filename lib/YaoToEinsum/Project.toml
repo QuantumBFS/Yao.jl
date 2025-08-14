@@ -1,7 +1,7 @@
 name = "YaoToEinsum"
 uuid = "9b173c7b-dc24-4dc5-a0e1-adab2f7b6ba9"
 authors = ["GiggleLiu <cacate0129@gmail.com> and contributors"]
-version = "0.2.6"
+version = "0.2.7"
 
 [deps]
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
