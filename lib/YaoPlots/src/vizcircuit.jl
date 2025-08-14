@@ -278,10 +278,6 @@ function draw!(c::CircuitGrid, p::Daggered{<:PrimitiveBlock}, address, controls)
     bts = length(controls)>=1 ? get_cbrush_texts(c, content(p)) : get_brush_texts(c, content(p))
     _draw!(c, [controls..., (getindex.(Ref(address), occupied_locs(p)), bts[1], bts[2]*"'")])
 end
-function draw!(c::CircuitGrid, p::AbstractChannel, address, controls)
-    bts = (c.gatestyles.g, "*")
-    _draw!(c, [controls..., (getindex.(Ref(address), occupied_locs(p)), bts[1], bts[2])])
-end
 
 function draw!(c::CircuitGrid, p::Scale, address, controls)
     fp = YaoBlocks.factor(p)
@@ -315,6 +311,20 @@ function draw!(c::CircuitGrid, p::ConstGate.ToffoliGate, address, controls)
     _draw!(c, [controls..., [(address[l], bt...) for (l, bt) in zip(occupied_locs(p), bts)]...])
 end
 
+# noisy channel
+function draw!(c::CircuitGrid, p::YaoBlocks.AbstractQuantumChannel, address, controls)
+    bts = get_brush_texts(c, p)
+    draw!(c, LabelBlock(p, bts[2], "pink", "", ""), address, controls)
+end
+
+function draw!(c::CircuitGrid, p::YaoBlocks.DepolarizingChannel, address, controls)
+    CircuitStyles.gate_bgcolor[], temp = "pink", CircuitStyles.gate_bgcolor[]
+    bts = [(c.gatestyles.g, "DEP") for _ in 1:nqudits(p)]
+    _draw!(c, [controls..., [(address[l], bt...) for (l, bt) in zip(occupied_locs(p), bts)]...])
+    _textbottom!(c, address[end], CircuitStyles.boxsize(c.gatestyles.g)..., 0.2, "err = $(p.p)")
+    CircuitStyles.gate_bgcolor[] = temp
+end
+
 # composite
 function draw!(c::CircuitGrid, p::ChainBlock, address, controls)
     CircuitStyles.barrier_for_chain[] && set_barrier!(c, Int[address..., controls...])
@@ -344,17 +354,44 @@ function draw!(c::CircuitGrid, m::YaoBlocks.Measure, address, controls)
     if m.postprocess isa RemoveMeasured
         error("can not visualize post-processing: `RemoveMeasured`.")
     end
-    if !(m.operator isa ComputationalBasis)
-        error("can not visualize measure blocks for operators")
-    end
     locs = m.locations isa AllLocs ? address : [address[i] for i in m.locations]
     for (i, loc) in enumerate(locs)
         _draw!(c, [(loc, c.gatestyles.measure, "")])
+        # annotate texts
+        boxwidth, boxheight = CircuitStyles.boxsize(c.gatestyles.measure)
+        dy = -0.05
+        if !(m.operator isa ComputationalBasis)
+            dy += 0.2
+            _textbottom!(c, loc, boxwidth, boxheight, dy, "op = $(m.operator)")
+        end
+        if m.error_prob > 0.0
+            dy += 0.2
+            _textbottom!(c, loc, boxwidth, boxheight, dy, "err = $(m.error_prob)")
+        end
         if m.postprocess isa ResetTo
             # read i-th bit value
             val = Int(m.postprocess.x)>>(i-1) & 1
             _draw!(c, [(loc, c.gatestyles.g, val == 1 ? "P₁" : "P₀")])
         end
+    end
+end
+function _textbottom!(c::CircuitGrid, loc::Integer, boxwidth, boxheight, dy, text::AbstractString)
+    i = frontier(c, loc)
+    width = 2 * boxwidth
+    fontsize = CircuitStyles.paramtextsize[]
+    lines = split(text, "\n")
+    for (k, line) in enumerate(lines)
+        CircuitStyles.render(CircuitStyles.Text(fontsize), (c[i-0.5, loc] .+ (0, boxheight/2+dy+0.2*(k-1)), line, width, fontsize))
+    end
+end
+
+function _texttop!(c::CircuitGrid, loc::Integer, boxwidth, boxheight, dy, text::AbstractString)
+    i = frontier(c, loc)
+    width = 2 * boxwidth
+    fontsize = CircuitStyles.paramtextsize[]
+    lines = split(text, "\n")
+    for (k, line) in enumerate(lines[end:-1:1])
+        CircuitStyles.render(CircuitStyles.Text(fontsize), (c[i-0.5, loc] .+ (0, -boxheight/2-dy-0.2*(k-1)), line, width, fontsize))
     end
 end
 
@@ -375,7 +412,13 @@ end
 function draw!(c::CircuitGrid, cb::LabelBlock, address, controls)
     length(address) == 0 && return
     CircuitStyles.gate_bgcolor[], temp = cb.color, CircuitStyles.gate_bgcolor[]
-    _draw!(c, [controls..., (address, c.gatestyles.g, string(cb))])
+    _draw!(c, [controls..., (address, c.gatestyles.g, string(cb.name))])
+    if !isempty(cb.bottomtext)
+        _textbottom!(c, address[1], CircuitStyles.boxsize(c.gatestyles.g)..., 0.2, cb.bottomtext)
+    end
+    if !isempty(cb.toptext)
+        _texttop!(c, address[1], CircuitStyles.boxsize(c.gatestyles.g)..., 0.2, cb.toptext)
+    end
     CircuitStyles.gate_bgcolor[] = temp
 end
 
@@ -446,6 +489,11 @@ get_brush_texts(c, b::PrimitiveBlock) = (c.gatestyles.g, string(b))
 get_brush_texts(c, b::TimeEvolution) = (c.gatestyles.g, string(b))
 get_brush_texts(c, b::ShiftGate) = (c.gatestyles.g, "φ($(pretty_angle(b.theta)))")
 get_brush_texts(c, b::PhaseGate) = (CircuitStyles.Phase("$(pretty_angle(b.theta))"), "")
+get_brush_texts(c, b::DepolarizingChannel) = (c.gatestyles.g, "DEP($(b.p))")
+get_brush_texts(c, b::MixedUnitaryChannel) = (c.gatestyles.g, "MU($(join(["$p*$g" for (p, g) in zip(b.probs, b.operators)], ", ")))")
+get_brush_texts(c, b::KrausChannel) = (c.gatestyles.g, "KR$(Tuple(b.operators))")
+get_brush_texts(c, ::SuperOp) = (c.gatestyles.g, "CHN")
+
 function get_brush_texts(c, b::T) where T<:ConstantGate
     namestr = string(T.name.name)
     if endswith(namestr, "Gate")
@@ -463,7 +511,7 @@ get_cbrush_texts(c, ::ZGate) = (c.gatestyles.c, "")
 """
     vizcircuit(circuit; w_depth=0.85, w_line=0.75, format=:svg, filename=nothing,
         show_ending_bar=false, starting_texts=nothing, starting_offset=-0.3,
-        ending_texts=nothing, ending_offset=0.3)
+        ending_texts=nothing, ending_offset=0.3, padding=10)
 
 Visualize a `Yao` quantum circuit.
 
@@ -475,6 +523,7 @@ Visualize a `Yao` quantum circuit.
 * `starting_texts` and `ending_texts` are texts shown before and after the circuit.
 * `starting_offset` and `end_offset` are offsets (real values) for starting and ending texts.
 * `show_ending_bar` is a boolean switch to show ending bar.
+* `padding` is the padding between the circuit and the canvas, in pixels.
 
 ### Styles
 To change the gates styles like colors and lines, please modify the constants in submodule `CircuitStyles`.
@@ -492,9 +541,9 @@ They are defined as:
 """
 function vizcircuit(blk::AbstractBlock; w_depth=0.85, w_line=0.75, format=:svg, filename=nothing,
         show_ending_bar=false, starting_texts=nothing, starting_offset=-0.3,
-        ending_texts=nothing, ending_offset=0.3, gatestyles=CircuitStyles.GateStyles())
+        ending_texts=nothing, ending_offset=0.3, padding=10, gatestyles=CircuitStyles.GateStyles())
     img = circuit_canvas(nqudits(blk); w_depth, w_line, show_ending_bar, starting_texts, starting_offset,
-            ending_texts, ending_offset, gatestyles, format, filename) do c
+            ending_texts, ending_offset, padding, gatestyles, format, filename) do c
         addblock!(c, blk)
     end
     return img
@@ -505,7 +554,7 @@ addblock!(c::CircuitGrid, blk::Function) = addblock!(c, blk(nline(c)))
 
 function circuit_canvas(f, nline::Int; format=:svg, filename=nothing, w_depth=0.85, w_line=0.75,
         show_ending_bar=false, starting_texts=nothing, starting_offset=-0.3, ending_texts=nothing,
-        ending_offset=0.3, gatestyles=CircuitStyles.GateStyles())
+        ending_offset=0.3, padding=10, gatestyles=CircuitStyles.GateStyles())
     # the first time to estimate the canvas size
     Luxor.Drawing(50, 50, :png)
     c = CircuitGrid(nline; w_depth, w_line, gatestyles)
@@ -516,7 +565,7 @@ function circuit_canvas(f, nline::Int; format=:svg, filename=nothing, w_depth=0.
     # the second time draw
     u = CircuitStyles.unit[]
     a, b = ceil(Int, (depth(c)+1)*w_depth*u), ceil(Int, nline*w_line*u)
-    _luxor(a, b, w_depth/2*u, -w_line/2*u; format, filename) do
+    _luxor(a, b, w_depth/2*u, -w_line/2*u; format, filename, padding) do
         c = CircuitGrid(nline; w_depth, w_line, gatestyles)
         initialize!(c; starting_texts, starting_offset)
         f(c)
@@ -524,7 +573,7 @@ function circuit_canvas(f, nline::Int; format=:svg, filename=nothing, w_depth=0.
     end
 end
 
-function _luxor(f, Dx, Dy, offsetx, offsety; format, filename)
+function _luxor(f, Dx, Dy, offsetx, offsety; format, filename, padding)
     if filename === nothing
         if format == :pdf
             _format = tempname()*".pdf"
@@ -534,8 +583,8 @@ function _luxor(f, Dx, Dy, offsetx, offsety; format, filename)
     else
         _format = filename
     end
-    Luxor.Drawing(round(Int,Dx), round(Int,Dy), _format)
-    Luxor.origin(offsetx, offsety)
+    Luxor.Drawing(round(Int,Dx+2*padding), round(Int,Dy+2*padding), _format)
+    Luxor.origin(offsetx+padding, offsety+padding)
     f()
     Luxor.finish()
     Luxor.preview()
