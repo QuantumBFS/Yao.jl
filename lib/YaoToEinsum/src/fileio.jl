@@ -77,7 +77,7 @@ function load_tensor_network(folder::String)
     # Load label to qubit mapping if available (backward compatibility)
     label_to_qubit = if isfile(mapping_path)
         mapping_data = JSON.parsefile(mapping_path)
-        Dict{Int, Int}(parse(Int, k) => v for (k, v) in mapping_data["label_to_qubit"])
+        Dict{Int, Int}(parse(Int, k) => v for (k, v) in mapping_data)
     else
         # Default mapping if not saved (for backward compatibility)
         Dict{Int, Int}()

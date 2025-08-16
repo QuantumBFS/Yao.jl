@@ -19,63 +19,25 @@ struct EinBuilder{MODE<:AbstractMappingMode, T, D}
     labels::Vector{Vector{Int}}        # tensor labels
     tensors::Vector{AbstractArray{T}}  # tensor data, the order is the same as the labels
     maxlabel::Base.RefValue{Int}       # the maximum label used
-    label_to_qubit::Dict{Int, Int}     # map from variable label to qubit index (negative for dual, 0 for non-qubit)
+    label_to_qubit::Dict{Int, Int}     # map from variable label to qubit index (negative for dual, absent for non-qubit)
 end
 function EinBuilder{MODE, T, D}(mode::MODE, n::Int) where {MODE<:AbstractMappingMode, T, D}
-    # Initialize label_to_qubit mapping for initial slots
-    label_to_qubit = Dict{Int, Int}()
-    for (qubit_idx, label) in enumerate(1:n)
-        label_to_qubit[label] = qubit_idx
-    end
-    EinBuilder{MODE, T, D}(mode, collect(1:n), Vector{Int}[], AbstractArray{T}[], Ref(n), label_to_qubit)
+    EinBuilder{MODE, T, D}(mode, collect(1:n), Vector{Int}[], AbstractArray{T}[], Ref(n), Dict(zip(1:n, 1:n)))
 end
 YaoBlocks.nqubits(eb::EinBuilder) = length(eb.slots)
-
-"""
-    update_label_mapping!(eb::EinBuilder, labels::Vector{Int}, locs::Vector{Int})
-
-Update the label-to-qubit mapping for new tensor labels.
-Maps labels to qubit indices, with 0 for non-qubit variables.
-"""
-function update_label_mapping!(eb::EinBuilder, labels::Vector{Int}, locs::Vector{Int})
-    # Map each label to its corresponding qubit
-    for (i, label) in enumerate(labels)
-        if i <= length(locs)
-            # This label corresponds to a qubit
-            eb.label_to_qubit[label] = locs[i]
-        else
-            # This is an auxiliary label (e.g., from controlled gates)
-            eb.label_to_qubit[label] = 0
-        end
+function update_slots!(eb::EinBuilder, indices::Vector{Int}, labels::Vector{Int})
+    for (l, i) in zip(labels, indices)
+        eb.slots[i] = l
+        eb.label_to_qubit[l] = i
     end
-    
-    # Handle dual labels in density matrix mode
-    if eb.mode isa DensityMatrixMode || eb.mode isa PauliBasisMode
-        for (i, label) in enumerate(labels)
-            dual_label = -label
-            if i <= length(locs)
-                # Dual qubit gets negative index
-                eb.label_to_qubit[dual_label] = -locs[i]
-            else
-                # Dual auxiliary label
-                eb.label_to_qubit[dual_label] = 0
-            end
-        end
-    end
-    
-    return eb
 end
 
 # add a normal tensor (like a normal quantum gate), if in density matrix mode or pauli basis mode, also add a dual tensor
 # the dual tensor has conjugate elements, and the labels are negated
-function push_normal_tensor!(eb::EinBuilder{MODE, T, D}, tensor::AbstractArray{T,N}, labels::Vector{Int}, locs::Vector{Int}=Int[]) where {MODE<:AbstractMappingMode, T, D, N}
+function push_normal_tensor!(eb::EinBuilder{MODE, T, D}, tensor::AbstractArray{T,N}, labels::Vector{Int}) where {MODE<:AbstractMappingMode, T, D, N}
     @assert N == length(labels)
     push!(eb.tensors, tensor)
     push!(eb.labels, labels)
-    
-    # Update label-to-qubit mapping
-    update_label_mapping!(eb, labels, locs)
-    
     if eb.mode isa DensityMatrixMode || eb.mode isa PauliBasisMode
         push!(eb.tensors, conj(tensor))
         push!(eb.labels, (-).(labels))
@@ -105,13 +67,7 @@ function trace!(eb::EinBuilder{PauliBasisMode, T, D}, group1::Vector{Int}, group
 end
 
 # request a new label, increment the maxlabel
-function newlabel!(eb::EinBuilder)
-    eb.maxlabel[] += 1
-    new_label = eb.maxlabel[]
-    # New labels default to non-qubit (0) until explicitly mapped
-    eb.label_to_qubit[new_label] = 0
-    return new_label
-end
+newlabel!(eb::EinBuilder) = (eb.maxlabel[] += 1; eb.maxlabel[])
 
 # general and diagonal gates
 # - `k` is the number of qubits that the gate acts on
@@ -125,24 +81,24 @@ function add_gate_matrix!(eb::EinBuilder{MODE, T, D}, m::AbstractMatrix, locs::V
 
     k = length(locs)
     if isdiag(m)  # use isdiag, sometimes, the matrix is not a Diagonal, but isdiag(m) is true
-        push_normal_tensor!(eb, reshape(Vector{T}(diag(m)), fill(D, k)...), eb.slots[locs], collect(locs))
+        push_normal_tensor!(eb, reshape(Vector{T}(diag(m)), fill(D, k)...), eb.slots[locs])
     elseif m isa YaoBlocks.OuterProduct  # low rank
         nlabels = [newlabel!(eb) for _=1:k]
         K = rank(m)
         if K == 1  # projector
-            push_normal_tensor!(eb, reshape(Vector{T}(m.right), fill(D, k)...), [eb.slots[locs]...], collect(locs))
-            push_normal_tensor!(eb, reshape(Vector{T}(m.left), fill(D, k)...), [nlabels...], collect(locs))
-            eb.slots[locs] .= nlabels
+            push_normal_tensor!(eb, reshape(Vector{T}(m.right), fill(D, k)...), [eb.slots[locs]...])
+            push_normal_tensor!(eb, reshape(Vector{T}(m.left), fill(D, k)...), [nlabels...])
+            update_slots!(eb, locs, nlabels)
         else
             midlabel = newlabel!(eb)
-            push_normal_tensor!(eb, reshape(Matrix{T}(m.right), fill(D, k)..., K), [eb.slots[locs]..., midlabel], collect(locs))
-            push_normal_tensor!(eb, reshape(Matrix{T}(m.left), fill(D, k)..., K), [nlabels..., midlabel], collect(locs))
-            eb.slots[locs] .= nlabels
+            push_normal_tensor!(eb, reshape(Matrix{T}(m.right), fill(D, k)..., K), [eb.slots[locs]..., midlabel])
+            push_normal_tensor!(eb, reshape(Matrix{T}(m.left), fill(D, k)..., K), [nlabels..., midlabel])
+            update_slots!(eb, locs, nlabels)
         end
     else
         nlabels = [newlabel!(eb) for _=1:k]
-        push_normal_tensor!(eb, reshape(Matrix{T}(m), fill(D, 2k)...), [nlabels..., eb.slots[locs]...], collect(locs))
-        eb.slots[locs] .= nlabels
+        push_normal_tensor!(eb, reshape(Matrix{T}(m), fill(D, 2k)...), [nlabels..., eb.slots[locs]...])
+        update_slots!(eb, locs, nlabels)
     end
     return eb
 end
@@ -202,7 +158,7 @@ function add_controlled_matrix!(eb::EinBuilder{MODE, T, 2}, k::Int, m::AbstractM
     val = control_vals[1]
     for i=1:length(control_locs)-1
         newsig = newlabel!(eb)
-        push_normal_tensor!(eb, and_gate(T, control_vals[i+1], val), [newsig,eb.slots[control_locs[i+1]],sig], [control_locs[i+1]])
+        push_normal_tensor!(eb, and_gate(T, control_vals[i+1], val), [newsig,eb.slots[control_locs[i+1]],sig])
         sig = newsig
         val = 1
     end
@@ -213,15 +169,15 @@ function add_controlled_matrix!(eb::EinBuilder{MODE, T, 2}, k::Int, m::AbstractM
             t1, t2 = t2, t1
         end
         nlabels = [newlabel!(eb) for _=1:k]
-        push_normal_tensor!(eb, cat(t1, t2; dims=2k+1), [nlabels..., eb.slots[locs]..., sig], vcat(locs, control_locs))
-        eb.slots[locs] .= nlabels
+        push_normal_tensor!(eb, cat(t1, t2; dims=2k+1), [nlabels..., eb.slots[locs]..., sig])
+        update_slots!(eb, locs, nlabels)
     else
         t1 = reshape(Vector{T}(diag(m)), fill(2, k)...)
         t2 = reshape(ones(T, 1<<k), fill(2, k)...)
         if val == 1
             t1, t2 = t2, t1
         end
-        push_normal_tensor!(eb, cat(t1, t2; dims=k+1), [eb.slots[locs]..., sig], vcat(locs, control_locs))
+        push_normal_tensor!(eb, cat(t1, t2; dims=k+1), [eb.slots[locs]..., sig])
     end
     return eb
 end
@@ -278,7 +234,7 @@ function add_channel!(eb::EinBuilder{MODE, T, D}, b::SuperOp, locs::Vector{Int})
     nlabels = [newlabel!(eb) for _=1:k]
     push!(eb.tensors, reshape(mat, fill(D, 4k)...))
     push!(eb.labels, [nlabels..., (-).(nlabels)..., eb.slots[locs]..., (-).(eb.slots[locs])...])
-    eb.slots[locs] .= nlabels
+    update_slots!(eb, locs, nlabels)
     return eb
 end
 
@@ -295,7 +251,7 @@ end
 # Add observable: apply the observable to the final state, and trace with the dual indices, i.e. performing `tr(rho, operator)`
 function eat_observable!(eb::EinBuilder{MODE, T, D}, b::AbstractBlock) where {MODE<:DensityMatrixMode, T, D}
     # Note: the observable is only added once to the network, hence we need to use the vector mode to add it
-    eb_vec = EinBuilder{VectorMode, T, D}(VectorMode(), eb.slots, eb.labels, eb.tensors, eb.maxlabel)
+    eb_vec = EinBuilder{VectorMode, T, D}(VectorMode(), eb.slots, eb.labels, eb.tensors, eb.maxlabel, eb.label_to_qubit)
     group1 = (-).(eb.slots)
     eat_gate!(eb_vec, b)
     trace!(eb, group1, eb.slots)

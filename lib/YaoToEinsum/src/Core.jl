@@ -11,7 +11,7 @@ A (generalized) tensor network representation of a quantum circuit.
 ### Fields
 - `code::AbstractEinsum`: The einsum code.
 - `tensors::Vector`: The tensors in the network.
-- `label_to_qubit::Dict{Int, Int}`: Map from variable label to qubit index (negative for dual, 0 for non-qubit)
+- `label_to_qubit::Dict{Int, Int}`: Map from variable label to qubit index (negative for dual, absent for non-qubit)
 """
 struct TensorNetwork
     code::AbstractEinsum

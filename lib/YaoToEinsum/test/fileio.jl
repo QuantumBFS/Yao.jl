@@ -1,5 +1,5 @@
 using Test
-using YaoToEinsum, YaoToEinsum.YaoBlocks
+using YaoToEinsum, YaoToEinsum.YaoBlocks, YaoToEinsum.OMEinsum
 
 @testset "File I/O" begin
     # Create test tensor network
@@ -35,21 +35,30 @@ using YaoToEinsum, YaoToEinsum.YaoBlocks
     
     @testset "Label to qubit mapping" begin
         # Test that label to qubit mapping is tracked during circuit mapping
-        simple_circuit = chain(2, put(1=>X), put(2=>Y))
+        simple_circuit = chain(3, put(3, 1=>X), control(3, 3, 2=>Y))
         simple_network = yao2einsum(simple_circuit)
         
         @test isa(simple_network.label_to_qubit, Dict{Int, Int})
         
         # Test that initial qubits are mapped correctly
-        @test simple_network.label_to_qubit[1] == 1  # label 1 -> qubit 1
-        @test simple_network.label_to_qubit[2] == 2  # label 2 -> qubit 2
+        @test length(OMEinsum.uniquelabels(simple_network.code)) == 5
+        @test simple_network.label_to_qubit[1] == 1  # Q1
+        @test simple_network.label_to_qubit[2] == 2  # Q2
+        @test simple_network.label_to_qubit[3] == 3  # Q3
+        @test simple_network.label_to_qubit[4] == 1  # Pauli X
+        @test simple_network.label_to_qubit[5] == 2  # XOR
         
         # Test density matrix mode with dual labels
-        dm_network = yao2einsum(simple_circuit; mode=:density_matrix)
-        @test haskey(dm_network.label_to_qubit, -1)  # dual label exists
-        @test haskey(dm_network.label_to_qubit, -2)  # dual label exists
-        @test dm_network.label_to_qubit[-1] == -1    # dual qubit 1
-        @test dm_network.label_to_qubit[-2] == -2    # dual qubit 2
+        dm_network = yao2einsum(simple_circuit; mode=DensityMatrixMode())
+        @test length(OMEinsum.uniquelabels(dm_network.code)) == 10
+        @test dm_network.label_to_qubit[1] == 1    # Q1
+        @test dm_network.label_to_qubit[2] == 2    # Q2
+        @test dm_network.label_to_qubit[3] == 3    # Q3
+        @test dm_network.label_to_qubit[4] == 1    # Pauli X
+        @test dm_network.label_to_qubit[5] == 2    # XOR
+
+        # we do not store the dual
+        @test !haskey(dm_network.label_to_qubit, -1)
     end
     
     @testset "Error handling" begin
