@@ -11,3 +11,7 @@ end
 @testset "fileio" begin
     include("fileio.jl")
 end
+
+@testset "LuxorExt" begin
+    include("LuxorExt.jl")
+end

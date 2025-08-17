@@ -9,12 +9,14 @@ struct VectorMode <: AbstractMappingMode end
 A (generalized) tensor network representation of a quantum circuit.
 
 ### Fields
-* `code::AbstractEinsum`: The einsum code.
-* `tensors::Vector`: The tensors in the network.
+- `code::AbstractEinsum`: The einsum code.
+- `tensors::Vector`: The tensors in the network.
+- `label_to_qubit::Dict{Int, Int}`: Map from variable label to qubit index (negative for dual, absent for non-qubit)
 """
 struct TensorNetwork
     code::AbstractEinsum
     tensors::Vector
+    label_to_qubit::Dict{Int, Int}
 end
 function Base.show(io::IO, c::TensorNetwork)
     print(io, "TensorNetwork")
@@ -60,7 +62,7 @@ For more, please check [OMEinsumContractionOrders documentation](https://tensorb
 function OMEinsum.optimize_code(c::TensorNetwork, args...; kwargs...)
     size_info = OMEinsum.get_size_dict(getixsv(c.code), c.tensors)
     optcode = optimize_code(c.code, size_info, args...; kwargs...)
-    return TensorNetwork(optcode, c.tensors)
+    return TensorNetwork(optcode, c.tensors, c.label_to_qubit)
 end
 
 """

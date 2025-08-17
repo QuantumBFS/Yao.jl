@@ -15,6 +15,7 @@ The code is saved using `OMEinsum.writejson` and tensors are saved as JSON.
 # Files Created
 - `code.json`: Contains the einsum code using OMEinsum format
 - `tensors.json`: Contains the tensor data as JSON
+- `label_to_qubit.json`: Contains the mapping from variable labels to qubit indices
 
 # Example
 ```julia
@@ -31,6 +32,11 @@ function save_tensor_network(tn::TensorNetwork; folder::String)
     # save tensors
     open(joinpath(folder, "tensors.json"), "w") do io
         JSON.print(io, [tensor_to_dict(tensor) for tensor in tn.tensors], 2)
+    end
+    
+    # save label to qubit mapping
+    open(joinpath(folder, "label_to_qubit.json"), "w") do io
+        JSON.print(io, tn.label_to_qubit, 2)
     end
     return nothing
 end
@@ -49,6 +55,7 @@ Load a tensor network from a folder containing separate files for code and tenso
 # Required Files
 - `code.json`: Contains the einsum code using OMEinsum format
 - `tensors.json`: Contains the tensor data as JSON
+- `label_to_qubit.json`: Contains the label to qubit mapping (optional for backward compatibility)
 
 # Example
 ```julia
@@ -60,13 +67,23 @@ function load_tensor_network(folder::String)
     
     code_path = joinpath(folder, "code.json")
     tensors_path = joinpath(folder, "tensors.json")
+    mapping_path = joinpath(folder, "label_to_qubit.json")
     !isfile(code_path) && throw(SystemError("Code file not found: $code_path"))
     !isfile(tensors_path) && throw(SystemError("Tensors file not found: $tensors_path"))
     
     code = OMEinsum.readjson(code_path)
-    
     tensors = [tensor_from_dict(t) for t in JSON.parsefile(tensors_path)]
-    return TensorNetwork(code, tensors)
+    
+    # Load label to qubit mapping if available (backward compatibility)
+    label_to_qubit = if isfile(mapping_path)
+        mapping_data = JSON.parsefile(mapping_path)
+        Dict{Int, Int}(parse(Int, k) => v for (k, v) in mapping_data)
+    else
+        # Default mapping if not saved (for backward compatibility)
+        Dict{Int, Int}()
+    end
+    
+    return TensorNetwork(code, tensors, label_to_qubit)
 end
 
 """
