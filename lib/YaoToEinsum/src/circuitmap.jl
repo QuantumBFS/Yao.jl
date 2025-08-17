@@ -47,7 +47,7 @@ end
 # connect right most line with its dual, often used in density matrix mode.
 function trace!(eb::EinBuilder{DensityMatrixMode, T, D}, group1::Vector{Int}, group2::Vector{Int}) where {T, D}
     @assert length(group1) == length(group2) "group1 and group2 must have the same length"
-    replacement = [group2[i] => group1[i] for i = 1:length(group1)]
+    replacement = [group1[i] => group2[i] for i = 1:length(group1)]
     for i = 1:length(eb.labels)
         eb.labels[i] = replace(eb.labels[i], replacement...)
     end
