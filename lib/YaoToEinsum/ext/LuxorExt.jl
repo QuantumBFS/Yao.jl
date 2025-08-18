@@ -75,6 +75,7 @@ function YaoToEinsum.viznet(tn::TensorNetwork; scale=100, filename=nothing, dual
     graph = SimpleGraph(length(label_coos) + length(tensor_coos))  # the first batch of vertices are for labels
     label2idx = Dict(zip(labels, 1:length(labels)))
     ixs = OMEinsum.getixsv(tn.code)
+    iy = OMEinsum.getiyv(tn.code)
     for (i, ix) in enumerate(ixs)
         for label in ix
             add_edge!(graph, label2idx[label], i + length(labels))
@@ -83,7 +84,7 @@ function YaoToEinsum.viznet(tn::TensorNetwork; scale=100, filename=nothing, dual
 
     locs = [Tuple(coo .* scale) for coo in vcat(label_coos, tensor_coos)]  # flip x-y axis
     vertex_shapes = [i <= length(labels) ? :circle : :circle for i in 1:length(locs)]  # box for variables
-    vertex_colors = [i <= length(labels) ? (labels[i] > 0 ? "hotpink" : "lawngreen") : "transparent" for i in 1:length(locs)]
+    vertex_colors = [i <= length(labels) ? (labels[i] > 0 ? (labels[i] ∈ iy ? "lightgray" : "hotpink") : (labels[i] ∈ iy ? "lightgray" : "lawngreen")) : "transparent" for i in 1:length(locs)]
     vertex_stroke_colors = [i <= length(labels) ? "transparent" : "black" for i in 1:length(locs)]
     vertex_sizes = [i <= length(labels) ? 8 : (length(ixs[i-length(labels)]) == 1 ? 6 : node_size) for i in 1:length(locs)]
     texts = [i <= length(labels) ? string(labels[i]) : special_tensor_detection(tn.tensors[i-length(labels)]) for i in 1:length(locs)]
@@ -139,7 +140,7 @@ function special_tensor_detection(t::AbstractArray)
     elseif isdelta(t)
         return "δ"
     elseif isxor(t)
-        return "⊻"
+        return "+"
     end
     return ""
 end
