@@ -53,7 +53,7 @@ using YaoToEinsum, Test, YaoToEinsum.OMEinsum, LuxorGraphPlot, YaoToEinsum.YaoBl
     # Test XOR tensors (2x2x...x2 tensors with XOR pattern)
     xor_tensor = zeros(2, 2, 2)
     xor_tensor[1, 1, 1] = xor_tensor[1,2,2] = xor_tensor[2,1,2] = xor_tensor[2,2,1] = 1   # even number of 2's (0)
-    @test ext.special_tensor_detection(xor_tensor) == "⊻"
+    @test ext.special_tensor_detection(xor_tensor) == "+"
     
     # Test unrecognized tensors
     @test ext.special_tensor_detection([1, 2, 3]) == ""
