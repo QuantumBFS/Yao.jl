@@ -103,7 +103,10 @@ export AbstractBlock,
     EntryTable,
     cleanup,
     isclean,
-    canonicalize
+    canonicalize,
+    AbstractYaoBackend,
+    YaoBackend,
+    PauliPropagationBackend
 export applymatrix, cache_key
 
 include("utils.jl")
@@ -130,5 +133,7 @@ export AD, Optimise
 using .Optimise: canonicalize
 
 include("deprecations.jl")
+
+include("backends.jl")
 
 end # YaoBlocks

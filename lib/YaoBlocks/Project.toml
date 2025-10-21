@@ -21,6 +21,12 @@ TupleTools = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
 YaoAPI = "0843a435-28de-4971-9e8b-a9641b2983a8"
 YaoArrayRegister = "e600142f-9330-5003-8abb-0ebd767abc51"
 
+[weakdeps]
+PauliPropagation  = "293282d5-3c99-4fb6-92d0-fd3280a19750"
+
+[extensions]
+PauliPropagationExt = "PauliPropagation"
+
 [compat]
 BitBasis = "0.8, 0.9"
 CacheServers = "0.2"
@@ -32,6 +38,7 @@ LegibleLambdas = "0.2, 0.3"
 LinearAlgebra = "1"
 LuxurySparse = "0.8"
 MLStyle = "0.3, 0.4"
+PauliPropagation = "0.4"
 Random = "1"
 SparseArrays = "1"
 StaticArrays = "0.12, 1.0"
@@ -47,4 +54,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [targets]
-test = ["Test", "ForwardDiff", "Zygote"]
+test = ["Test", "ForwardDiff", "Zygote", "PauliPropagation"]
