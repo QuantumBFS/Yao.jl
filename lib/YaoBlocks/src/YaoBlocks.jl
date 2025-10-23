@@ -104,9 +104,8 @@ export AbstractBlock,
     cleanup,
     isclean,
     canonicalize,
-    AbstractYaoBackend,
-    YaoBackend,
-    PauliPropagationBackend
+    paulipropagation2yao,
+    yao2paulipropagation
 export applymatrix, cache_key
 
 include("utils.jl")
@@ -134,6 +133,6 @@ using .Optimise: canonicalize
 
 include("deprecations.jl")
 
-include("backends.jl")
+include("pauli_propagation.jl")
 
 end # YaoBlocks

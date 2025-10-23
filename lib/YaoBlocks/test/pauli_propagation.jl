@@ -1,18 +1,23 @@
 using YaoBlocks, PauliPropagation, YaoArrayRegister, Test
 using Random
 
-isequal(a::GA, b::GB) where {GA<:Gate, GB<:Gate} =  all([getproperty(a, pn) == getproperty(b, pn) for pn in fieldnames(GA)])
-isequal(a::Vector{GA}, b::Vector{GB}) where {GA<:Gate, GB<:Gate} = all(isequal.(a, b))
+_isequal(a::GA, b::GB) where {GA<:Gate, GB<:Gate} =  all([getproperty(a, pn) == getproperty(b, pn) for pn in fieldnames(GA)])
+_isequal(a::Vector{GA}, b::Vector{GB}) where {GA<:Gate, GB<:Gate} = all(_isequal.(a, b))
 
 @testset "test PauliPropagationExt" begin
     nq = 3
     nl = 2
     circuit = tfitrottercircuit(nq, nl)
-    yaocirc = YaoBlocks.pauli_to_yao_circuit(nq, circuit, randn(countparameters(circuit)))
-    n, circ, thetas = YaoBlocks.yao_to_pauli_circuit(yaocirc; frozen_rots=false)
-    @test n == nq
-    @test isequal(circ, circuit)
-    @test thetas == thetas
+    yaocirc = YaoBlocks.paulipropagation2yao(nq, circuit, randn(countparameters(circuit)))
+    obs = put(nq, 1=>Z)
+    pc = YaoBlocks.yao2paulipropagation(yaocirc; observable=obs)
+    @test pc.n == nq
+    @test _isequal(getfield.(pc.gates, :gate), circuit)
+    # Test that observable is a PauliSum
+    @test pc.observable isa PauliSum
+    # Test round-trip conversion
+    yaocirc2 = paulipropagation2yao(pc)
+    @test nqubits(yaocirc) == nqubits(yaocirc2)
 end
 
 @testset "expectation value" begin
@@ -57,7 +62,8 @@ end
     pauli_z_expectations = Float64[]
     yao_z_expectations = Float64[]
     for i in 1:min(10, n_qubits)
-        exp_pauli = real(expect(circuit, put(n_qubits, i => Z); backend=PauliPropagationBackend()))
+        pc = yao2paulipropagation(circuit; observable=put(n_qubits, i => Z))
+        exp_pauli = real(overlapwithzero(propagate(pc)))
         push!(pauli_z_expectations, exp_pauli)
         exp_yao = real(expect(put(n_qubits, i => Z), reg_final))
         push!(yao_z_expectations, exp_yao)
@@ -76,7 +82,7 @@ end
     nparams = countparameters(circuit)
     thetas = randn(nparams) * 0.5
 
-    yao_circ = YaoBlocks.pauli_to_yao_circuit(nq, circuit, thetas)
+    yao_circ = YaoBlocks.paulipropagation2yao(nq, circuit, thetas)
     psum_exact = propagate(circuit, pstr, thetas; min_abs_coeff=0)
     psum_yao = apply!(zero_state(nq), yao_circ)
 
@@ -128,8 +134,8 @@ end
     @test exp1 ≈ exp2
 
     # convert to Yao blocks
-    yao_depolarizing_circ = YaoBlocks.pauli_to_yao_circuit(nq, depolarizing_circ, thetas1)
-    yao_pauli_circ = YaoBlocks.pauli_to_yao_circuit(nq, pauli_circ, thetas2)
+    yao_depolarizing_circ = YaoBlocks.paulipropagation2yao(nq, depolarizing_circ, thetas1)
+    yao_pauli_circ = YaoBlocks.paulipropagation2yao(nq, pauli_circ, thetas2)
     exp_yao1 = expect(put(nq, opind => Z), zero_state(nq) |> density_matrix |> yao_depolarizing_circ)
     exp_yao2 = expect(put(nq, opind => Z), zero_state(nq) |> density_matrix |> yao_pauli_circ)
 
@@ -137,10 +143,10 @@ end
     @test exp2 ≈ exp_yao2
 
     # convert back
-    n, circ, thetas = YaoBlocks.yao_to_pauli_circuit(yao_depolarizing_circ; frozen_rots=false)
-    @test isequal(circ, depolarizing_circ)
-    @test thetas == thetas1
-    n, circ, thetas = YaoBlocks.yao_to_pauli_circuit(yao_pauli_circ; frozen_rots=false)
-    @test isequal(circ, pauli_circ)
-    @test thetas == thetas2
+    pc1 = YaoBlocks.yao2paulipropagation(yao_depolarizing_circ; observable=put(nq, opind => Z))
+    @test _isequal(pc1.gates, depolarizing_circ)
+    @test isempty(pc1.thetas)  # since we freeze the parameters
+    pc2 = YaoBlocks.yao2paulipropagation(yao_pauli_circ; observable=put(nq, opind => Z))
+    @test _isequal(getfield.(pc2.gates, :gate), pauli_circ)
+    @test isempty(pc2.thetas)  # since we freeze the parameters
 end
