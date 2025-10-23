@@ -3,6 +3,7 @@ using YaoBlocks
 using PauliPropagation
 using YaoBlocks.ConstGate
 using MLStyle
+using LinearAlgebra: Diagonal
 
 export yao2paulipropagation, paulipropagation2yao, PauliPropagationCircuit
 export yao2pauli  # Backward compatibility alias
@@ -38,6 +39,25 @@ end
 
 function pauli_to_yao_gate!(c::ChainBlock, g::Gate, parameter)
     @match g begin
+        ::CliffordGate => begin
+            # Check if it's a controlled gate
+            if g.symbol ∈ [:CNOT, :CZ]
+                @assert length(g.qinds) == 2 "Controlled gates should have exactly 2 qubits"
+                ctrl_loc, target_loc = g.qinds
+                if g.symbol == :CNOT
+                    push!(c, control(c.n, ctrl_loc, target_loc=>X))
+                elseif g.symbol == :CZ
+                    push!(c, control(c.n, ctrl_loc, target_loc=>Z))
+                end
+            elseif g.symbol == :ZZpihalf
+                # Special handling for ZZpihalf two-qubit gate
+                @assert length(g.qinds) == 2 "ZZpihalf gate should have exactly 2 qubits"
+                push!(c, put(c.n, (g.qinds...,) => rot(kron(Z,Z), π/2)))
+            else
+                # Single qubit Clifford gate
+                push!(c, put(c.n, (g.qinds...,) => symbol_to_yao(g.symbol)))
+            end
+        end
         ::PauliRotation => push!(c, put(c.n, (g.qinds...,) => rot(kron(symbol_to_yao.(g.symbols)...), parameter)))
         ::DepolarizingNoise =>
             begin
@@ -91,6 +111,7 @@ function YaoBlocks.yao2paulipropagation(circuit::ChainBlock; observable)
     for g in circ
         @match g begin
             ::PutBlock => yao_to_pauli_gates!(gates, g)
+            ::ControlBlock => yao_to_pauli_control!(gates, g, n)
             _ => error("Unsupported gate type: $(typeof(g))")
         end
     end
@@ -149,8 +170,12 @@ function YaoBlocks.paulipropagation2yao(n::Int, circ::AbstractVector{<:Gate}, th
     for g in circ
         if g isa FrozenGate
             pauli_to_yao_gate!(c, g.gate, g.parameter)
-        else
+        elseif g isa CliffordGate
+            pauli_to_yao_gate!(c, g, nothing)
+        elseif g isa ParametrizedGate
             pauli_to_yao_gate!(c, g, popfirst!(thetas))
+        else
+            error("Unsupported gate type: $(typeof(g))")
         end
     end
     return c
@@ -193,6 +218,20 @@ function yao_to_pauli_gates!(gates::Vector{StaticGate}, g)
     end
 end
 
+function yao_to_pauli_control!(gates::Vector{StaticGate}, g::ControlBlock, n::Int)
+    # Handle controlled gates
+    # For now, support single-control single-target gates (CNOT, CZ, CY)
+    @assert length(g.ctrl_locs) == 1 && length(g.locs) == 1 "Only single-control single-target gates are currently supported"
+    @assert all(g.ctrl_config .== 1) "Only positive controls (ctrl_config=1) are supported"
+    
+    ctrl_loc = g.ctrl_locs[1]
+    @match g.content begin
+        ::XGate => push!(gates, CliffordGate(:CNOT, [ctrl_loc, g.locs[1]]))
+        ::ZGate => push!(gates, CliffordGate(:CZ, [ctrl_loc, g.locs[1]]))
+        _ => error("Unsupported controlled gate: control($(ctrl_loc), $(g.locs[1])=>$(typeof(g.content)))")
+    end
+end
+
 function cast_observable(observable::Add)
     return PauliSum([cast_observable(b) for b in subblocks(observable)])
 end
@@ -218,7 +257,11 @@ const symbol_yao_map = Dict(
     :H => H,
     :S => S,
     :T => T,
-    :CNOT => CNOT,
+    :SX => Rx(π/2),
+    :SY => Ry(π/2),
+    :CNOT => control(2, 1, 2=>X),
+    :CZ => control(2, 1, 2=>Z),
+    :CY => control(2, 1, 2=>Y),
 )
 const yao_symbol_map = Dict(values(symbol_yao_map) .=> keys(symbol_yao_map))
 

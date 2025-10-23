@@ -175,14 +175,16 @@ end
     pc_scale = yao2paulipropagation(circ; observable=obs_scale)
     @test pc_scale.observable isa PauliSum
     @test length(pc_scale.observable) == 1
-    # Check coefficient
-    @test abs(pc_scale.observable[1].coeff) ≈ 2.5
+    # Check coefficient (access via terms dict)
+    coeffs = collect(values(pc_scale.observable.terms))
+    @test abs(coeffs[1]) ≈ 2.5
     
     # Test Scale with KronBlock
     obs_scale_kron = 3.0 * kron(n, 1=>X, 2=>Z)
     pc_scale_kron = yao2paulipropagation(circ; observable=obs_scale_kron)
     @test pc_scale_kron.observable isa PauliSum
-    @test abs(pc_scale_kron.observable[1].coeff) ≈ 3.0
+    coeffs_kron = collect(values(pc_scale_kron.observable.terms))
+    @test abs(coeffs_kron[1]) ≈ 3.0
     
     # Test Add (sum of observables)
     obs_add = put(n, 1=>X) + put(n, 2=>Z)
@@ -296,4 +298,179 @@ end
         exp_val = overlapwithzero(psum)
         @test exp_val isa Number
     end
+end
+
+@testset "control blocks" begin
+    n = 4
+    
+    # Test CNOT gate
+    circ_cnot = chain(n, 
+        put(n, 1=>H),
+        control(n, 1, 2=>X),
+        put(n, 2=>X)
+    )
+    obs = put(n, 1=>Z)
+    pc_cnot = yao2paulipropagation(circ_cnot; observable=obs)
+    
+    @test pc_cnot.n == n
+    @test length(pc_cnot.gates) == 3
+    @test pc_cnot.gates[2] isa CliffordGate
+    @test getfield(pc_cnot.gates[2], :symbol) == :CNOT
+    
+    # Test CZ gate
+    circ_cz = chain(n,
+        put(n, 1=>H),
+        control(n, 1, 2=>Z),
+        put(n, 2=>Z)
+    )
+    pc_cz = yao2paulipropagation(circ_cz; observable=obs)
+    
+    @test pc_cz.n == n
+    @test length(pc_cz.gates) == 3
+    @test pc_cz.gates[2] isa CliffordGate
+    @test getfield(pc_cz.gates[2], :symbol) == :CZ
+    
+    # Test round-trip for controlled gates
+    circ_back = paulipropagation2yao(pc_cnot)
+    @test nqubits(circ_back) == n
+    @test length(circ_back) == 3
+    
+    # Test propagation with control gates
+    psum = propagate(pc_cnot)
+    @test psum isa PauliSum
+    exp_val = real(overlapwithzero(psum))
+    @test exp_val isa Real
+end
+
+@testset "square root gates (SX, SY)" begin
+    n = 3
+    
+    # Test SX gate (Rx(π/2))
+    circ_sx = chain(n,
+        put(n, 1=>Rx(π/2)),
+        put(n, 2=>X)
+    )
+    obs = put(n, 1=>Z)
+    pc_sx = yao2paulipropagation(circ_sx; observable=obs)
+    
+    @test pc_sx.n == n
+    @test length(pc_sx.gates) == 2
+    # First gate should be a frozen rotation (SX is stored as frozen rotation)
+    @test pc_sx.gates[1] isa FrozenGate
+    @test getfield(pc_sx.gates[1], :gate) isa PauliRotation
+    
+    # Test SY gate (Ry(π/2))
+    circ_sy = chain(n,
+        put(n, 1=>Ry(π/2)),
+        put(n, 2=>Y)
+    )
+    pc_sy = yao2paulipropagation(circ_sy; observable=obs)
+    
+    @test pc_sy.n == n
+    @test length(pc_sy.gates) == 2
+    @test pc_sy.gates[1] isa FrozenGate
+    @test getfield(pc_sy.gates[1], :gate) isa PauliRotation
+    
+    # Test propagation with square root gates
+    psum_sx = propagate(pc_sx)
+    @test psum_sx isa PauliSum
+    exp_val_sx = real(overlapwithzero(psum_sx))
+    @test exp_val_sx isa Real
+    
+    psum_sy = propagate(pc_sy)
+    @test psum_sy isa PauliSum
+    exp_val_sy = real(overlapwithzero(psum_sy))
+    @test exp_val_sy isa Real
+end
+
+@testset "ZZpihalf gate" begin
+    n = 4
+    
+    # Test ZZ(π/2) gate (two-qubit rotation)
+    circ_zz = chain(n,
+        put(n, 1=>H),
+        put(n, (1,2)=>rot(kron(Z, Z), π/2)),
+        put(n, 2=>X)
+    )
+    obs = kron(n, 1=>Z, 2=>Z)
+    pc_zz = yao2paulipropagation(circ_zz; observable=obs)
+    
+    @test pc_zz.n == n
+    @test length(pc_zz.gates) == 3
+    # ZZ gate should be stored as a frozen rotation
+    @test pc_zz.gates[2] isa FrozenGate
+    inner_gate = getfield(pc_zz.gates[2], :gate)
+    @test inner_gate isa PauliRotation
+    @test length(getfield(inner_gate, :qinds)) == 2
+    
+    # Test propagation with ZZ gate
+    psum = propagate(pc_zz)
+    @test psum isa PauliSum
+    exp_val = real(overlapwithzero(psum))
+    @test exp_val isa Real
+    
+    # Test round-trip conversion
+    circ_back = paulipropagation2yao(pc_zz)
+    @test nqubits(circ_back) == n
+    @test length(circ_back) == 3
+end
+
+@testset "combined gates and control blocks" begin
+    n = 5
+    
+    # Test circuit with multiple gate types
+    circ = chain(n,
+        put(n, 1=>H),
+        put(n, 2=>Rx(π/2)),  # SX
+        control(n, 1, 2=>X),  # CNOT
+        put(n, (2,3)=>rot(kron(Z, Z), π/2)),  # ZZ
+        control(n, 3, 4=>Z),  # CZ
+        put(n, 5=>Ry(π/2)),  # SY
+        put(n, 1=>quantum_channel(DepolarizingError(1, 0.01)))
+    )
+    
+    obs = put(n, 1=>Z) + kron(n, 2=>X, 3=>X)
+    pc = yao2paulipropagation(circ; observable=obs)
+    
+    @test pc.n == n
+    @test length(pc.gates) == 7
+    @test pc.observable isa PauliSum
+    
+    # Test propagation
+    psum = propagate(pc)
+    @test psum isa PauliSum
+    exp_val = real(overlapwithzero(psum))
+    @test exp_val isa Real
+    
+    # Test round-trip
+    circ_back = paulipropagation2yao(pc)
+    @test nqubits(circ_back) == n
+    @test length(circ_back) == 7
+end
+
+@testset "expectation values with control blocks" begin
+    n = 4
+    
+    # Build a simple entangling circuit
+    circ = chain(n,
+        put(n, 1=>H),
+        control(n, 1, 2=>X),
+        control(n, 2, 3=>X),
+        put(n, 1=>quantum_channel(DepolarizingError(1, 0.02)))
+    )
+    
+    obs = put(n, 1=>Z)
+    pc = yao2paulipropagation(circ; observable=obs)
+    
+    # Pauli propagation result
+    psum = propagate(pc)
+    exp_pauli = real(overlapwithzero(psum))
+    
+    # Compare with exact simulation
+    reg = zero_state(n) |> density_matrix
+    reg_final = apply!(reg, circ)
+    exp_exact = real(expect(obs, reg_final))
+    
+    # Should be close (within numerical tolerance)
+    @test isapprox(exp_pauli, exp_exact, atol=1e-10)
 end

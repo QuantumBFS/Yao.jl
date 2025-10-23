@@ -62,6 +62,7 @@ const PAGES = [
         "man/plot.md",
         "man/automatic_differentiation.md",
         "man/yao2einsum.md",
+        "man/paulipropagation.md",
         "man/simplification.md",
         "man/bitbasis.md",
     ],
