@@ -15,7 +15,6 @@ An intermediate representation of a quantum circuit in the Pauli propagation fra
 ### Fields
 - `n::Int`: Number of qubits
 - `gates::Vector{Gate}`: Vector of PauliPropagation gates
-- `thetas::Vector{Float64}`: Gate parameters
 - `observable::PauliSum`: Observable to measure (sum of Pauli strings)
 
 ### Usage
@@ -27,7 +26,6 @@ result = propagate(pc)
 struct PauliPropagationCircuit{IT<:Integer}
     n::Int
     gates::Vector{StaticGate}
-    thetas::Vector{Float64}
     observable::PauliSum{IT, Float64}
 end
 
@@ -35,7 +33,6 @@ function Base.show(io::IO, pc::PauliPropagationCircuit)
     print(io, "PauliPropagationCircuit")
     print(io, "\n  Qubits: ", pc.n)
     print(io, "\n  Gates: ", length(pc.gates))
-    print(io, "\n  Parameters: ", length(pc.thetas))
     print(io, "\n  Observable: ", pc.observable)
 end
 
@@ -58,8 +55,8 @@ end
 const AllowedObservableTypes = Union{
     KronBlock{<:Any, <:Any, <:NTuple{<:Any, ConstGate.PauliGate}},
     Scale{<:Any, <:Any, <:KronBlock{<:Any, <:Any, <:NTuple{<:Any, ConstGate.PauliGate}}},
-    PutBlock{<:Any, <:Any, <:ConstGate.PauliGate}}
-    Scale{<:Any, <:Any, <:PutBlock{<:Any, <:Any, <:ConstGate.PauliGate}},
+    PutBlock{<:Any, <:Any, <:ConstGate.PauliGate},
+    Scale{<:Any, <:Any, <:PutBlock{<:Any, <:Any, <:ConstGate.PauliGate}}}
 
 """
     yao2paulipropagation(circuit::ChainBlock; observable)
@@ -89,12 +86,11 @@ function YaoBlocks.yao2paulipropagation(circuit::ChainBlock; observable)
     circ = YaoBlocks.Optimise.to_basictypes(circuit)
     n = nqubits(circ)
     gates = StaticGate[]
-    thetas = Float64[]
     
     # Convert circuit gates
     for g in circ
         @match g begin
-            ::PutBlock => yao_to_pauli_gates!(gates, thetas, g)
+            ::PutBlock => yao_to_pauli_gates!(gates, g)
             _ => error("Unsupported gate type: $(typeof(g))")
         end
     end
@@ -102,7 +98,8 @@ function YaoBlocks.yao2paulipropagation(circuit::ChainBlock; observable)
     # Convert observable
     obs = Optimise.eliminate_nested(observable)
     @assert obs isa AllowedObservableTypes || obs isa Add && all(b isa AllowedObservableTypes for b in subblocks(obs)) "Observable must be a sum of Pauli strings, e.g. kron(5, 2=>X, 3=>X) + 2.0 * kron(5, 1=>Z), got: $obs"
-    return PauliPropagationCircuit(n, gates, thetas, PauliSum(cast_observable(observable)))
+    psum = cast_observable(observable)
+    return PauliPropagationCircuit(n, gates, psum isa PauliSum ? psum : PauliSum([psum]))
 end
 
 """
@@ -125,7 +122,7 @@ result = overlapwithzero(psum)  # Get expectation value
 ```
 """
 function PauliPropagation.propagate(pc::PauliPropagationCircuit; kwargs...)
-    return propagate(pc.gates, pc.observable, pc.thetas; kwargs...)
+    return propagate(pc.gates, pc.observable, Float64[]; kwargs...)
 end
 
 """
@@ -159,9 +156,9 @@ function YaoBlocks.paulipropagation2yao(n::Int, circ::AbstractVector{<:Gate}, th
     return c
 end
 
-YaoBlocks.paulipropagation2yao(pc::PauliPropagationCircuit) = paulipropagation2yao(pc.n, pc.gates, pc.thetas)
+YaoBlocks.paulipropagation2yao(pc::PauliPropagationCircuit) = paulipropagation2yao(pc.n, pc.gates, Float64[])
 
-function yao_to_pauli_gates!(gates::Vector{StaticGate}, thetas, g)
+function yao_to_pauli_gates!(gates::Vector{StaticGate}, g)
     @match g.content begin
         ::ConstantGate => push!(gates, CliffordGate(yao_to_symbols(g.content)[], collect(g.locs)))
         ::RotationGate => push!(gates, PauliRotation(yao_to_symbols(g.content.block), collect(g.locs), g.content.theta))

@@ -17,6 +17,7 @@ _isequal(a::Vector{GA}, b::Vector{GB}) where {GA<:Gate, GB<:Gate} = all(_isequal
     @test pc.observable isa PauliSum
     # Test round-trip conversion
     yaocirc2 = paulipropagation2yao(pc)
+    println(pc)
     @test nqubits(yaocirc) == nqubits(yaocirc2)
 end
 
@@ -144,9 +145,155 @@ end
 
     # convert back
     pc1 = YaoBlocks.yao2paulipropagation(yao_depolarizing_circ; observable=put(nq, opind => Z))
-    @test _isequal(pc1.gates, depolarizing_circ)
-    @test isempty(pc1.thetas)  # since we freeze the parameters
+    @test _isequal(getfield.(pc1.gates, :gate), depolarizing_circ)
     pc2 = YaoBlocks.yao2paulipropagation(yao_pauli_circ; observable=put(nq, opind => Z))
     @test _isequal(getfield.(pc2.gates, :gate), pauli_circ)
-    @test isempty(pc2.thetas)  # since we freeze the parameters
+end
+
+@testset "observable types" begin
+    n = 5
+    circ = chain(n, put(n, 1=>X), put(n, 2=>Rx(0.5)))
+    
+    # Test PutBlock with different Pauli gates
+    for (pauli_gate, pauli_sym) in [(X, :X), (Y, :Y), (Z, :Z)]
+        obs = put(n, 1=>pauli_gate)
+        pc = yao2paulipropagation(circ; observable=obs)
+        @test pc.observable isa PauliSum
+        @test length(pc.observable) == 1
+    end
+    
+    # Test KronBlock (multi-qubit Pauli product)
+    obs_kron = kron(n, 1=>X, 2=>Z, 3=>Y)
+    pc_kron = yao2paulipropagation(circ; observable=obs_kron)
+    @test pc_kron.observable isa PauliSum
+    @test length(pc_kron.observable) == 1
+    psum_kron = propagate(pc_kron)
+    @test psum_kron isa PauliSum
+    
+    # Test Scale (scaled observable)
+    obs_scale = 2.5 * put(n, 2=>Y)
+    pc_scale = yao2paulipropagation(circ; observable=obs_scale)
+    @test pc_scale.observable isa PauliSum
+    @test length(pc_scale.observable) == 1
+    # Check coefficient
+    @test abs(pc_scale.observable[1].coeff) ≈ 2.5
+    
+    # Test Scale with KronBlock
+    obs_scale_kron = 3.0 * kron(n, 1=>X, 2=>Z)
+    pc_scale_kron = yao2paulipropagation(circ; observable=obs_scale_kron)
+    @test pc_scale_kron.observable isa PauliSum
+    @test abs(pc_scale_kron.observable[1].coeff) ≈ 3.0
+    
+    # Test Add (sum of observables)
+    obs_add = put(n, 1=>X) + put(n, 2=>Z)
+    pc_add = yao2paulipropagation(circ; observable=obs_add)
+    @test pc_add.observable isa PauliSum
+    @test length(pc_add.observable) == 2
+    psum_add = propagate(pc_add)
+    @test psum_add isa PauliSum
+    
+    # Test complex expression (sum with scaled terms)
+    obs_complex = kron(n, 1=>X, 2=>Z) + 2.0 * put(n, 3=>Y) + 0.5 * kron(n, 4=>X, 5=>X)
+    pc_complex = yao2paulipropagation(circ; observable=obs_complex)
+    @test pc_complex.observable isa PauliSum
+    @test length(pc_complex.observable) == 3
+    psum_complex = propagate(pc_complex)
+    @test psum_complex isa PauliSum
+end
+
+@testset "propagate with kwargs" begin
+    n = 6
+    circuit = chain(n, 
+        put(n, 1=>Rx(0.5)), 
+        put(n, 2=>X),
+        put(n, (1,2)=>YaoBlocks.ConstGate.CNOT))
+    obs = put(n, 1=>Z)
+    
+    pc = yao2paulipropagation(circuit; observable=obs)
+    
+    # Test propagate without kwargs
+    psum1 = propagate(pc)
+    @test psum1 isa PauliSum
+    
+    # Test propagate with max_weight
+    psum2 = propagate(pc; max_weight=10)
+    @test psum2 isa PauliSum
+    
+    # Test propagate with min_abs_coeff
+    psum3 = propagate(pc; min_abs_coeff=1e-10)
+    @test psum3 isa PauliSum
+    
+    # Test propagate with both kwargs
+    psum4 = propagate(pc; max_weight=10, min_abs_coeff=1e-10)
+    @test psum4 isa PauliSum
+    
+    # Verify expectation values are similar
+    exp1 = real(overlapwithzero(psum1))
+    exp2 = real(overlapwithzero(psum2))
+    @test exp1 ≈ exp2 atol=1e-6
+end
+
+@testset "error cases" begin
+    n = 3
+    circ = chain(n, put(n, 1=>X))
+    
+    # Test invalid observable (non-Pauli gate)
+    @test_throws AssertionError yao2paulipropagation(circ; observable=put(n, 1=>H))
+    
+    # Test invalid observable (Hadamard in kron)
+    @test_throws Exception yao2paulipropagation(circ; observable=kron(n, 1=>H, 2=>X))
+    
+    # Test invalid observable (rotation gate)
+    @test_throws AssertionError yao2paulipropagation(circ; observable=put(n, 1=>Rx(0.5)))
+end
+
+@testset "Base.show" begin
+    n = 3
+    circ = chain(n, put(n, 1=>X), put(n, 2=>Rx(0.5)))
+    obs = put(n, 1=>Z)
+    pc = yao2paulipropagation(circ; observable=obs)
+    
+    # Test that show produces output without error
+    io = IOBuffer()
+    show(io, pc)
+    output = String(take!(io))
+    
+    @test contains(output, "PauliPropagationCircuit")
+    @test contains(output, "Qubits: 3")
+    @test contains(output, "Gates: 2")
+    @test contains(output, "Observable:")
+end
+
+@testset "round-trip with different observables" begin
+    nq = 4
+    nl = 2
+    circuit = tfitrottercircuit(nq, nl)
+    thetas = randn(countparameters(circuit))
+    
+    # Test round-trip with different observable types
+    observables = [
+        put(nq, 1=>Z),
+        kron(nq, 1=>X, 2=>Z),
+        2.0 * put(nq, 2=>Y),
+        put(nq, 1=>X) + put(nq, 2=>Z)
+    ]
+    
+    for obs in observables
+        yaocirc = YaoBlocks.paulipropagation2yao(nq, circuit, thetas)
+        pc = yao2paulipropagation(yaocirc; observable=obs)
+        
+        # Verify structure
+        @test pc.n == nq
+        @test pc.observable isa PauliSum
+        
+        # Test back conversion
+        yaocirc2 = paulipropagation2yao(pc)
+        @test nqubits(yaocirc) == nqubits(yaocirc2)
+        
+        # Test propagation works
+        psum = propagate(pc)
+        @test psum isa PauliSum
+        exp_val = overlapwithzero(psum)
+        @test exp_val isa Number
+    end
 end
