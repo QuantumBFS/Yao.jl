@@ -263,8 +263,21 @@ const symbol_yao_map = Dict(
     :CZ => control(2, 1, 2=>Z),
     :CY => control(2, 1, 2=>Y),
 )
-const yao_symbol_map = Dict(values(symbol_yao_map) .=> keys(symbol_yao_map))
 
+# Create the reverse mapping with proper type handling
+const yao_symbol_map = Dict{Any, Symbol}(
+    I2 => :I,
+    X => :X,
+    Y => :Y,
+    Z => :Z,
+    H => :H,
+    S => :S,
+    T => :T,
+    ConstGate.CNOT => :CNOT,
+    ConstGate.CZ => :CZ,
+    Rx(π/2) => :SX,
+    Ry(π/2) => :SY,
+)
 function symbol_to_yao(sym::Symbol)
     return symbol_yao_map[sym]
 end
