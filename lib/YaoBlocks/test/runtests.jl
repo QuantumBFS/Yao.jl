@@ -65,3 +65,7 @@ end
 @testset "channel" begin
     include("channel/channel.jl")
 end
+
+@testset "pauli propagation" begin
+    include("pauli_propagation.jl")
+end
