@@ -65,6 +65,23 @@ YaoPlots.CircuitStyles.paramtextsize[] = 8
 vizcircuit(chain(3, put(1=>X), repeat(3, H), put(2=>Y), repeat(3, Rx(π/2))))
 ```
 
+## JSON Export
+
+YaoPlots supports exporting circuit visualizations to JSON format for use with external rendering tools like Typst.
+
+```@example plot
+using Yao, YaoPlots
+
+# Create a circuit
+circuit = chain(3, put(1=>X), put(2=>H), control(3, 1, 2=>X))
+
+# Export to JSON
+backend = YaoPlots.CircuitStyles.JSONBackend("circuit.json")
+vizcircuit(circuit; backend=backend)
+```
+
+The JSON output contains high-level gate commands with semantic information (gate types, qubit positions, labels) that can be rendered by custom visualization tools. A Typst template (`Yao/lib/YaoPlots/examples/render_circuit.typ`) is provided in the examples directory.
+
 ## Circuit Visualization
 ```@docs
 vizcircuit

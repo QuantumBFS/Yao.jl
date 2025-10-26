@@ -134,3 +134,193 @@ end
     @test res isa Drawing
     display(res)
 end
+
+@testset "color_to_hex" begin
+    # Test transparent
+    @test YaoPlots.CircuitStyles.color_to_hex("transparent") == "#00000000"
+    
+    # Test hex codes stay as-is
+    @test YaoPlots.CircuitStyles.color_to_hex("#FF0000") == "#FF0000"
+    @test YaoPlots.CircuitStyles.color_to_hex("#000000") == "#000000"
+    @test YaoPlots.CircuitStyles.color_to_hex("#FFFFFF") == "#FFFFFF"
+    
+    # Test color names get converted to hex
+    @test YaoPlots.CircuitStyles.color_to_hex("red") == "#FF0000"
+    @test YaoPlots.CircuitStyles.color_to_hex("black") == "#000000"
+    @test YaoPlots.CircuitStyles.color_to_hex("white") == "#FFFFFF"
+    @test YaoPlots.CircuitStyles.color_to_hex("pink") == "#FFC0CB"
+    @test YaoPlots.CircuitStyles.color_to_hex("yellow") == "#FFFF00"
+    @test YaoPlots.CircuitStyles.color_to_hex("blue") == "#0000FF"
+    @test YaoPlots.CircuitStyles.color_to_hex("green") == "#008000"
+    
+    # Test case insensitivity
+    @test YaoPlots.CircuitStyles.color_to_hex("Red") == "#FF0000"
+    @test YaoPlots.CircuitStyles.color_to_hex("RED") == "#FF0000"
+end
+
+@testset "JSON backend" begin
+    # Helper function to check if text exists in loc_brush_texts
+    function has_text_in_gate(cmd, text)
+        if get(cmd, "type", "") != "gate"
+            return false
+        end
+        loc_brush_texts = get(cmd, "loc_brush_texts", [])
+        return any(lbt -> contains(get(lbt, "text", ""), text), loc_brush_texts)
+    end
+    
+    # Test basic single qubit gate
+    temp_file = tempname() * ".json"
+    backend = YaoPlots.CircuitStyles.JSONBackend(temp_file)
+    circuit = chain(3, put(2=>X))
+    result = vizcircuit(circuit; backend=backend)
+    @test result isa Vector{Dict}
+    @test length(result) > 0
+    @test isfile(temp_file)  # Should be automatically saved
+    rm(temp_file)
+    
+    # Check for gate commands with X gate
+    gate_found = any(d -> get(d, "type", "") == "gate", result)
+    x_found = any(d -> has_text_in_gate(d, "X"), result)
+    @test gate_found
+    @test x_found
+    
+    # Test with rotation gates
+    temp_file = tempname() * ".json"
+    backend = YaoPlots.CircuitStyles.JSONBackend(temp_file)
+    circuit = chain(3, put(1=>Rx(π/2)), put(2=>Ry(π/4)))
+    result = vizcircuit(circuit; backend=backend)
+    @test result isa Vector{Dict}
+    @test any(d -> has_text_in_gate(d, "Rx"), result)
+    @test any(d -> has_text_in_gate(d, "Ry"), result)
+    rm(temp_file)
+    
+    # Test with control gates
+    temp_file = tempname() * ".json"
+    backend = YaoPlots.CircuitStyles.JSONBackend(temp_file)
+    circuit = control(3, 1, 2=>X)
+    result = vizcircuit(circuit; backend=backend)
+    @test result isa Vector{Dict}
+    # Check for gate command
+    @test any(d -> get(d, "type", "") == "gate", result)
+    rm(temp_file)
+    
+    # Test with SWAP gate
+    temp_file = tempname() * ".json"
+    backend = YaoPlots.CircuitStyles.JSONBackend(temp_file)
+    circuit = put(3, (1,2)=>SWAP)
+    result = vizcircuit(circuit; backend=backend)
+    @test result isa Vector{Dict}
+    @test any(d -> get(d, "type", "") == "gate", result)
+    rm(temp_file)
+    
+    # Test with phase gate
+    temp_file = tempname() * ".json"
+    backend = YaoPlots.CircuitStyles.JSONBackend(temp_file)
+    circuit = chain(2, put(1=>YaoBlocks.phase(π/4)))
+    result = vizcircuit(circuit; backend=backend)
+    @test result isa Vector{Dict}
+    @test any(d -> get(d, "type", "") == "gate", result)
+    rm(temp_file)
+    
+    # Test with measure
+    temp_file = tempname() * ".json"
+    backend = YaoPlots.CircuitStyles.JSONBackend(temp_file)
+    circuit = chain(3, put(1=>Measure(1)))
+    result = vizcircuit(circuit; backend=backend)
+    @test result isa Vector{Dict}
+    @test any(d -> get(d, "type", "") == "gate", result)
+    rm(temp_file)
+    
+    # Test with noise channel (depolarizing)
+    temp_file = tempname() * ".json"
+    backend = YaoPlots.CircuitStyles.JSONBackend(temp_file)
+    circuit = chain(2, put(1=>quantum_channel(DepolarizingError(1, 0.1))))
+    result = vizcircuit(circuit; backend=backend)
+    @test result isa Vector{Dict}
+    @test any(d -> has_text_in_gate(d, "DEP"), result)
+    rm(temp_file)
+    
+    # Test with control block and negative control
+    temp_file = tempname() * ".json"
+    backend = YaoPlots.CircuitStyles.JSONBackend(temp_file)
+    circuit = control(4, (1, -2), 3=>X)
+    result = vizcircuit(circuit; backend=backend)
+    @test result isa Vector{Dict}
+    # Should have gate commands
+    @test any(d -> get(d, "type", "") == "gate", result)
+    rm(temp_file)
+    
+    # Test complex circuit
+    temp_file = tempname() * ".json"
+    backend = YaoPlots.CircuitStyles.JSONBackend(temp_file)
+    circuit = chain(
+        4,
+        kron(X, H, H, H),
+        control(4, 1, 2=>X),
+        put(4, 2=>Rx(π/2)),
+        put(4, (2,3)=>SWAP),
+        put(4, 1=>Measure(1))
+    )
+    result = vizcircuit(circuit; backend=backend)
+    @test result isa Vector{Dict}
+    @test length(result) > 0  # Should have gate commands
+    
+    # Verify JSON structure for gate commands
+    gate_cmd = findfirst(d -> get(d, "type", "") == "gate", result)
+    @test gate_cmd !== nothing
+    cmd = result[gate_cmd]
+    @test haskey(cmd, "type")
+    @test haskey(cmd, "loc_brush_texts")
+    @test cmd["loc_brush_texts"] isa Vector
+    
+    # Check structure of loc_brush_texts
+    if !isempty(cmd["loc_brush_texts"])
+        lbt = cmd["loc_brush_texts"][1]
+        @test haskey(lbt, "qubits")
+        @test haskey(lbt, "brush")
+        @test haskey(lbt, "text")
+        @test lbt["qubits"] isa Vector
+        @test lbt["text"] isa String
+    end
+    rm(temp_file)
+    
+    # Test with labeled blocks
+    temp_file = tempname() * ".json"
+    backend = YaoPlots.CircuitStyles.JSONBackend(temp_file)
+    circuit = put(2, 1=>addlabel(X; name="MyGate", toptext="top", bottomtext="bottom"))
+    result = vizcircuit(circuit; backend=backend)
+    @test result isa Vector{Dict}
+    @test any(d -> has_text_in_gate(d, "MyGate"), result)
+    rm(temp_file)
+    
+    # Test save functionality and read back
+    temp_file = tempname() * ".json"
+    backend = YaoPlots.CircuitStyles.JSONBackend(temp_file)
+    circuit = chain(2, put(1=>X), put(2=>H))
+    vizcircuit(circuit; backend=backend)
+    
+    # File should be automatically saved
+    @test isfile(temp_file)
+    
+    # Read back and verify
+    using JSON3
+    read_back = JSON3.read(read(temp_file, String))
+    @test length(read_back) == length(backend.draw_commands)
+    @test read_back[1]["type"] == backend.draw_commands[1]["type"]
+    
+    # Clean up
+    rm(temp_file)
+    
+    # Test automatic save with pretty=false
+    temp_file = tempname() * ".json"
+    backend = YaoPlots.CircuitStyles.JSONBackend(temp_file, pretty=false)
+    vizcircuit(chain(2, put(1=>H)); backend=backend)
+    @test isfile(temp_file)
+    
+    # Verify compact format (no newlines except at end)
+    content = read(temp_file, String)
+    @test count('\n', content) <= 1
+    
+    # Clean up
+    rm(temp_file)
+end

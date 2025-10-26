@@ -16,7 +16,7 @@ parse_block(n::Int, ex) =
     throw(Meta.ParseError("cannot parse expression $ex, expect a pair or quantum block"))
 
 function parse_block(n::Int, x::AbstractBlock{D}) where {D}
-    n == nqudits(x) || throw(ArgumentError("number of qubits does not match: $x"))
+    n == nqudits(x) || throw(ArgumentError("number of qubits does not match: $x, expected $n"))
     return x
 end
 

@@ -3,12 +3,14 @@ uuid = "32cfe2d9-419e-45f2-8191-2267705d8dbc"
 version = "0.9.6"
 
 [deps]
+JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Luxor = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
 YaoArrayRegister = "e600142f-9330-5003-8abb-0ebd767abc51"
 YaoBlocks = "418bc28f-b43b-5e0b-a6e7-61bbc1a2c1df"
 
 [compat]
+JSON3 = "1"
 LinearAlgebra = "1"
 Luxor = "4"
 YaoArrayRegister = "0.9"

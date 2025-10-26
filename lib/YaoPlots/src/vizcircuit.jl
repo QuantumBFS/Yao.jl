@@ -28,6 +28,8 @@ julia> YaoPlots.CircuitStyles.unit[] = 40
 """
 module CircuitStyles
     using Luxor
+    using JSON3
+    
     const unit = Ref(60)    # number of pixels in a unit
     const barrier_for_chain = Ref(false)
     const r = Ref(0.2)
@@ -40,6 +42,52 @@ module CircuitStyles
     const gate_bgcolor = Ref("transparent")
     const textcolor = Ref("#000000")
 
+    # Backend types
+    abstract type Backend end
+    struct LuxorBackend <: Backend end
+    
+    """
+        JSONBackend(filename::String; pretty=true)
+    
+    A backend that generates JSON instructions for circuit visualization.
+    
+    # Arguments
+    - `filename::String`: If provided, automatically saves to this file after rendering. Cannot be empty.
+    - `pretty::Bool`: If true, format the JSON output with indentation (default: true)
+    
+    # Fields
+    - `draw_commands::Vector{Dict}`: Vector of high-level drawing commands from _draw!
+    - `filename::String`: Output filename for automatic saving
+    - `pretty::Bool`: Whether to use pretty printing
+    """
+    struct JSONBackend <: Backend
+        draw_commands::Vector{Dict}
+        filename::String
+        pretty::Bool
+    end
+    
+    function JSONBackend(filename::String; pretty=true)
+        JSONBackend(Dict[], filename, pretty)
+    end
+    
+    # Helper function to convert color names to hex codes using Luxor.Colors
+    function color_to_hex(color_str::String)
+        color = Luxor.Colors.parse(Luxor.Colors.Colorant, color_str)
+        # Use the built-in hex() function - it returns uppercase without #
+        return string("#", Luxor.Colors.hex(color))
+    end
+    
+    function save_json(backend::JSONBackend)
+        open(backend.filename, "w") do io
+            if backend.pretty
+                @show backend.pretty
+                JSON3.pretty(io, backend.draw_commands)
+            else
+                JSON3.write(io, backend.draw_commands)
+            end
+        end
+    end
+    
     abstract type Gadget end
     struct Box{FT} <: Gadget
         height::FT
@@ -57,6 +105,7 @@ module CircuitStyles
         fontsize::FT
     end
     struct Line <: Gadget end
+
     get_width(::Cross) = 0.0
     get_width(::Phase) = r[]/2.5
     get_width(::Dot) = r[]/2.5
@@ -70,7 +119,8 @@ module CircuitStyles
         return 2 * r[], 2 * r[]
     end
 
-    function render(b::Box, loc)
+    # Luxor backend implementations
+    function render(::LuxorBackend, b::Box, loc)
         setcolor(gate_bgcolor[])
         Luxor.box(Point(loc)*unit[], b.width*unit[], b.height*unit[], :fill)
         setcolor(linecolor[])
@@ -78,11 +128,12 @@ module CircuitStyles
         Luxor.box(Point(loc)*unit[], b.width*unit[], b.height*unit[], :stroke)
     end
 
-    function render(d::Dot, loc)
+    function render(::LuxorBackend, d::Dot, loc)
         setcolor(linecolor[])
         circle(Point(loc)*unit[], get_width(d)*unit[]/2, :fill)
     end
-    function render(d::Phase, loc)
+
+    function render(::LuxorBackend, d::Phase, loc)
         x0 = Point(loc)*unit[]
         setcolor(linecolor[])
         circle(x0, get_width(d)*unit[]/2, :fill)
@@ -91,20 +142,23 @@ module CircuitStyles
         fontface(fontfamily[])
         text(d.text, x0+Point(8,8); valign=:middle, halign=:center)
     end
-    function render(d::NDot, loc)
+
+    function render(::LuxorBackend, d::NDot, loc)
         setcolor(gate_bgcolor[])
         circle(Point(loc)*unit[], get_width(d)*unit[]/2, :fill)
         setcolor(linecolor[])
         setline(lw[])
         circle(Point(loc)*unit[], get_width(d)*unit[]/2, :stroke)
     end
-    function render(::Cross, loc)
+
+    function render(::LuxorBackend, ::Cross, loc)
         setline(lw[])
         setcolor(linecolor[])
         line(Point(loc[1]-r[]/sqrt(2), loc[2]-r[]/sqrt(2))*unit[], Point(loc[1]+r[]/sqrt(2), loc[2]+r[]/sqrt(2))*unit[], :stroke)
         line(Point(loc[1]-r[]/sqrt(2), loc[2]+r[]/sqrt(2))*unit[], Point(loc[1]+r[]/sqrt(2), loc[2]-r[]/sqrt(2))*unit[], :stroke)
     end
-    function render(d::OPlus, loc)
+
+    function render(::LuxorBackend, d::OPlus, loc)
         w = get_width(d) / 2
         setcolor(gate_bgcolor[])
         circle(Point(loc)*unit[], w*unit[], :fill)
@@ -115,7 +169,8 @@ module CircuitStyles
         line(x0+Point(-w*unit[], 0.0), x0+Point(w*unit[], 0.0*unit[]), :stroke)
         line(x0+Point(0.0, -w*unit[]), x0+Point(0.0*unit[], w*unit[]), :stroke)
     end
-    function render(::MeasureBox, loc)
+
+    function render(::LuxorBackend, ::MeasureBox, loc)
         x0 = Point(loc)*unit[]
         setcolor(gate_bgcolor[])
         box(x0, 2*r[]*unit[], 2*r[]*unit[], :fill)
@@ -131,16 +186,16 @@ module CircuitStyles
         line(x0+Point(0.0, 0.5*r[])*unit[], x0+Point(0.7*r[], -0.4*r[])*unit[], :stroke)
     end
 
-    function render(::Line, locs)
+    function render(::LuxorBackend, ::Line, locs)
         setcolor(linecolor[])
         setline(lw[])
         line(Point(locs[1])*unit[], Point(locs[2])*unit[], :stroke)
     end
-    function render(t::Text, loctxt)
+
+    function render(::LuxorBackend, t::Text, loctxt)
         loc, txt, width, height = loctxt
         fontsize(t.fontsize)
         fontface(fontfamily[])
-        #fontface("Dejavu Sans")
         setcolor(textcolor[])
         if contains(txt, '\n')
             for (i, txt) in enumerate(split(loctxt[2], "\n"))
@@ -150,6 +205,10 @@ module CircuitStyles
             text(txt, Point(loc)*unit[]; halign=:center, valign=:middle)
         end
     end
+
+    # Convenience functions that dispatch to the appropriate backend
+    render(b::Gadget, args...) = render(LuxorBackend(), b, args...)
+    render(t::Text, args...) = render(LuxorBackend(), t, args...)
 
     Base.@kwdef struct GateStyles
         g = Box(2*r[], 2*r[])
@@ -166,11 +225,12 @@ module CircuitStyles
     end
 end
 
-struct CircuitGrid
+struct CircuitGrid{T<:CircuitStyles.Backend}
     frontier::Vector{Int}
     w_depth::Float64
     w_line::Float64
     gatestyles::CircuitStyles.GateStyles
+    backend::T
 end
 
 nline(c::CircuitGrid) = length(c.frontier)
@@ -178,15 +238,34 @@ depth(c::CircuitGrid) = frontier(c, 1, nline(c))
 Base.getindex(c::CircuitGrid, i, j) = (c.w_depth*i, c.w_line*j)
 Base.typed_vcat(c::CircuitGrid, ij1, ij2) = (c[ij1...], c[ij2...])
 
-function CircuitGrid(nline::Int; w_depth=1.0, w_line=1.0, gatestyles=CircuitStyles.GateStyles())
-    CircuitGrid(zeros(Int, nline), w_depth, w_line, gatestyles)
+function CircuitGrid(nline::Int; w_depth=1.0, w_line=1.0, gatestyles=CircuitStyles.GateStyles(), backend=CircuitStyles.LuxorBackend())
+    CircuitGrid(zeros(Int, nline), w_depth, w_line, gatestyles, backend)
 end
 
 function frontier(c::CircuitGrid, args...)
     maximum(i->c.frontier[i], min(args..., nline(c)):max(args..., 1))
 end
 
-function _draw!(c::CircuitGrid, loc_brush_texts)
+# Specialized _draw! for JSONBackend that records commands
+function _draw!(c::CircuitGrid{T}, loc_brush_texts) where T <: CircuitStyles.JSONBackend
+    isempty(loc_brush_texts) && return
+    
+    # Record the draw command
+    command = Dict(
+        "type" => "gate",
+        "loc_brush_texts" => map(loc_brush_texts) do (j, b, txt)
+            Dict(
+                "qubits" => collect(j),
+                "brush" => string(typeof(b)),
+                "text" => txt
+            )
+        end
+    )
+    push!(c.backend.draw_commands, command)
+end
+
+# Standard _draw! for other backends
+function _draw!(c::CircuitGrid{T}, loc_brush_texts) where T <: CircuitStyles.LuxorBackend
     isempty(loc_brush_texts) && return
     # a loc can be a integer, or a range
     loc_brush_texts = sort(loc_brush_texts, by=x->maximum(x[1]))
@@ -196,7 +275,7 @@ function _draw!(c::CircuitGrid, loc_brush_texts)
     boxwidths, boxheights = Float64[], Float64[]
     loc_brush_texts = map(loc_brush_texts) do (j, b, txt)
         if length(j) != 0
-            wspace, _ = text_width_and_size(txt)
+            wspace, _ = text_width_and_size(txt, c.backend)
             hspace = (maximum(j)-minimum(j)) * c.w_line
             # make box larger
             b = b isa CircuitStyles.Box ? CircuitStyles.Box(b.height + hspace, b.width + wspace) : b
@@ -214,13 +293,13 @@ function _draw!(c::CircuitGrid, loc_brush_texts)
     local jpre
     for (k, ((j, b, txt), boxheight)) in enumerate(zip(loc_brush_texts, boxheights))
         length(j) == 0 && continue
-        _, fontsize = text_width_and_size(txt)
+        _, fontsize = text_width_and_size(txt, c.backend)
         jmid = (minimum(j)+maximum(j))/2
-        CircuitStyles.render(b, c[i, jmid])
-        CircuitStyles.render(CircuitStyles.Text(fontsize), (c[i,jmid], txt, CircuitStyles.boxsize(b)...))
+        CircuitStyles.render(c.backend, b, c[i, jmid])
+        CircuitStyles.render(c.backend, CircuitStyles.Text(fontsize), (c[i,jmid], txt, CircuitStyles.boxsize(b)...))
         # use line to connect blocks in the same gate
         if k!=1
-            CircuitStyles.render(c.gatestyles.line, c[(i, jmid-boxheight/2/c.w_line); (i, jpre)])
+            CircuitStyles.render(c.backend, c.gatestyles.line, c[(i, jmid-boxheight/2/c.w_line); (i, jpre)])
         end
         jpre = jmid + boxheight/2/c.w_line
     end
@@ -229,43 +308,61 @@ function _draw!(c::CircuitGrid, loc_brush_texts)
     # connect horizontal lines
     for (width, (j, b, txt)) in zip(boxwidths, loc_brush_texts)
         for jj in j
-            CircuitStyles.render(c.gatestyles.line, c[(c.frontier[jj], jj); (i-width/2/c.w_depth, jj)])
-            CircuitStyles.render(c.gatestyles.line, c[(i+width/2/c.w_depth, jj); (ipre+ncolumn, jj)])
+            CircuitStyles.render(c.backend, c.gatestyles.line, c[(c.frontier[jj], jj); (i-width/2/c.w_depth, jj)])
+            CircuitStyles.render(c.backend, c.gatestyles.line, c[(i+width/2/c.w_depth, jj); (ipre+ncolumn, jj)])
             c.frontier[jj] = ipre + ncolumn
         end
     end
     for j in setdiff(minimum(locs):maximum(locs), locs)
-        CircuitStyles.render(c.gatestyles.line, c[(c.frontier[j], j); (ipre+ncolumn, j)])
+        CircuitStyles.render(c.backend, c.gatestyles.line, c[(c.frontier[j], j); (ipre+ncolumn, j)])
         c.frontier[j] = ipre + ncolumn
     end
 end
 
-function text_width_and_size(text)
+function text_width_and_size(text, backend::CircuitStyles.Backend)
     lines = split(text, "\n")
     widths = map(x->textwidth(x), lines)
     (mw, loc) = findmax(widths)
     fontsize = mw > 3 ? CircuitStyles.paramtextsize[] : CircuitStyles.textsize[]
-    # -2 because the gate has a default size
-    #width = max(W - 4, 0) * fontsize * 0.016  # mm to cm
-    Luxor.fontsize(fontsize)
-    Luxor.fontface(CircuitStyles.fontfamily[])
-    width, height = Luxor.textextents(lines[loc])[3:4]
-    w = max(width / CircuitStyles.unit[] - CircuitStyles.r[]*2 + 0.2, 0.0)
-    return w, fontsize
-end
-
-function initialize!(c::CircuitGrid; starting_texts, starting_offset)
-    starting_texts !== nothing && for j=1:nline(c)
-        CircuitStyles.render(c.gatestyles.text, (c[starting_offset, j], string(starting_texts[j]), c.w_depth, c.w_line))
+    
+    if backend isa CircuitStyles.JSONBackend
+        # For JSON backend, estimate width without Luxor
+        # Approximate: 0.6 * fontsize * num_chars / unit
+        width = maximum(length.(lines)) * fontsize * 0.6
+        w = max(width / CircuitStyles.unit[] - CircuitStyles.r[]*2 + 0.2, 0.0)
+        return w, fontsize
+    else
+        # For Luxor backend, use accurate text measurement
+        Luxor.fontsize(fontsize)
+        Luxor.fontface(CircuitStyles.fontfamily[])
+        width, height = Luxor.textextents(lines[loc])[3:4]
+        w = max(width / CircuitStyles.unit[] - CircuitStyles.r[]*2 + 0.2, 0.0)
+        return w, fontsize
     end
 end
 
-function finalize!(c::CircuitGrid; show_ending_bar, ending_offset, ending_texts)
+# For JSONBackend, skip initialize/finalize rendering (we record at _draw! level)
+function initialize!(c::CircuitGrid{<:CircuitStyles.JSONBackend}; starting_texts, starting_offset)
+    # No-op for JSON backend
+end
+
+function finalize!(c::CircuitGrid{<:CircuitStyles.JSONBackend}; show_ending_bar, ending_offset, ending_texts)
+    # No-op for JSON backend
+end
+
+# For other backends, render initialization and finalization
+function initialize!(c::CircuitGrid{<:CircuitStyles.LuxorBackend}; starting_texts, starting_offset)
+    starting_texts !== nothing && for j=1:nline(c)
+        CircuitStyles.render(c.backend, c.gatestyles.text, (c[starting_offset, j], string(starting_texts[j]), c.w_depth, c.w_line))
+    end
+end
+
+function finalize!(c::CircuitGrid{<:CircuitStyles.LuxorBackend}; show_ending_bar, ending_offset, ending_texts)
     i = frontier(c, 1, nline(c))
     for j=1:nline(c)
-        show_ending_bar && CircuitStyles.render(c.gatestyles.line, c[(i, j-0.2); (i, j+0.2)])
-        CircuitStyles.render(c.gatestyles.line, c[(i, j); (c.frontier[j], j)])
-        ending_texts !== nothing && CircuitStyles.render(c.gatestyles.text, (c[i+ending_offset, j], string(ending_texts[j]), c.w_depth, c.w_line))
+        show_ending_bar && CircuitStyles.render(c.backend, c.gatestyles.line, c[(i, j-0.2); (i, j+0.2)])
+        CircuitStyles.render(c.backend, c.gatestyles.line, c[(i, j); (c.frontier[j], j)])
+        ending_texts !== nothing && CircuitStyles.render(c.backend, c.gatestyles.text, (c[i+ending_offset, j], string(ending_texts[j]), c.w_depth, c.w_line))
     end
 end
 
@@ -375,13 +472,31 @@ function draw!(c::CircuitGrid, m::YaoBlocks.Measure, address, controls)
         end
     end
 end
+# For JSONBackend, record text annotations
+function _textbottom!(c::CircuitGrid{<:CircuitStyles.JSONBackend}, loc::Integer, boxwidth, boxheight, dy, text::AbstractString)
+    push!(c.backend.draw_commands, Dict(
+        "type" => "textbottom",
+        "qubit" => loc,
+        "text" => text
+    ))
+end
+
+function _texttop!(c::CircuitGrid{<:CircuitStyles.JSONBackend}, loc::Integer, boxwidth, boxheight, dy, text::AbstractString)
+    push!(c.backend.draw_commands, Dict(
+        "type" => "texttop",
+        "qubit" => loc,
+        "text" => text
+    ))
+end
+
+# For other backends, render text
 function _textbottom!(c::CircuitGrid, loc::Integer, boxwidth, boxheight, dy, text::AbstractString)
     i = frontier(c, loc)
     width = 2 * boxwidth
     fontsize = CircuitStyles.paramtextsize[]
     lines = split(text, "\n")
     for (k, line) in enumerate(lines)
-        CircuitStyles.render(CircuitStyles.Text(fontsize), (c[i-0.5, loc] .+ (0, boxheight/2+dy+0.2*(k-1)), line, width, fontsize))
+        CircuitStyles.render(c.backend, CircuitStyles.Text(fontsize), (c[i-0.5, loc] .+ (0, boxheight/2+dy+0.2*(k-1)), line, width, fontsize))
     end
 end
 
@@ -391,7 +506,7 @@ function _texttop!(c::CircuitGrid, loc::Integer, boxwidth, boxheight, dy, text::
     fontsize = CircuitStyles.paramtextsize[]
     lines = split(text, "\n")
     for (k, line) in enumerate(lines[end:-1:1])
-        CircuitStyles.render(CircuitStyles.Text(fontsize), (c[i-0.5, loc] .+ (0, -boxheight/2-dy-0.2*(k-1)), line, width, fontsize))
+        CircuitStyles.render(c.backend, CircuitStyles.Text(fontsize), (c[i-0.5, loc] .+ (0, -boxheight/2-dy-0.2*(k-1)), line, width, fontsize))
     end
 end
 
@@ -429,9 +544,9 @@ function draw!(c::CircuitGrid, cb::LineAnnotation, address, controls)
     CircuitStyles.textcolor[] = temp
 end
 function _annotate!(c::CircuitGrid, loc::Integer, name::AbstractString)
-    wspace, fontsize = text_width_and_size(name)
+    wspace, fontsize = text_width_and_size(name, c.backend)
     i = frontier(c, loc) + 0.1
-    CircuitStyles.render(CircuitStyles.Text(fontsize), (c[i, loc-0.2], name, wspace, fontsize))
+    CircuitStyles.render(c.backend, CircuitStyles.Text(fontsize), (c[i, loc-0.2], name, wspace, fontsize))
 end
 
 # [:KronBlock, :RepeatedBlock, :CachedBlock, :Subroutine, :(YaoBlocks.AD.NoParams)]
@@ -541,12 +656,27 @@ They are defined as:
 """
 function vizcircuit(blk::AbstractBlock; w_depth=0.85, w_line=0.75, format=:svg, filename=nothing,
         show_ending_bar=false, starting_texts=nothing, starting_offset=-0.3,
-        ending_texts=nothing, ending_offset=0.3, padding=10, gatestyles=CircuitStyles.GateStyles())
-    img = circuit_canvas(nqudits(blk); w_depth, w_line, show_ending_bar, starting_texts, starting_offset,
-            ending_texts, ending_offset, padding, gatestyles, format, filename) do c
+        ending_texts=nothing, ending_offset=0.3, padding=10, gatestyles=CircuitStyles.GateStyles(),
+        backend=CircuitStyles.LuxorBackend())
+    if backend isa CircuitStyles.JSONBackend
+        # For JSON backend, return the draw commands directly
+        c = CircuitGrid(nqudits(blk); w_depth, w_line, gatestyles, backend)
+        initialize!(c; starting_texts, starting_offset)
         addblock!(c, blk)
+        finalize!(c; show_ending_bar, ending_texts, ending_offset)
+        
+        # Automatically save to the specified filename
+        CircuitStyles.save_json(backend)
+        
+        return backend.draw_commands
+    else
+        # For Luxor backend, use the existing canvas approach
+        img = circuit_canvas(nqudits(blk); w_depth, w_line, show_ending_bar, starting_texts, starting_offset,
+                ending_texts, ending_offset, padding, gatestyles, format, filename, backend) do c
+            addblock!(c, blk)
+        end
+        return img
     end
-    return img
 end
 
 addblock!(c::CircuitGrid, blk::AbstractBlock) = draw!(c, blk, collect(1:nqudits(blk)), [])
@@ -554,10 +684,10 @@ addblock!(c::CircuitGrid, blk::Function) = addblock!(c, blk(nline(c)))
 
 function circuit_canvas(f, nline::Int; format=:svg, filename=nothing, w_depth=0.85, w_line=0.75,
         show_ending_bar=false, starting_texts=nothing, starting_offset=-0.3, ending_texts=nothing,
-        ending_offset=0.3, padding=10, gatestyles=CircuitStyles.GateStyles())
+        ending_offset=0.3, padding=10, gatestyles=CircuitStyles.GateStyles(), backend=CircuitStyles.LuxorBackend())
     # the first time to estimate the canvas size
     Luxor.Drawing(50, 50, :png)
-    c = CircuitGrid(nline; w_depth, w_line, gatestyles)
+    c = CircuitGrid(nline; w_depth, w_line, gatestyles, backend)
     initialize!(c; starting_texts, starting_offset)
     f(c)
     finalize!(c; show_ending_bar, ending_texts, ending_offset)
@@ -566,7 +696,7 @@ function circuit_canvas(f, nline::Int; format=:svg, filename=nothing, w_depth=0.
     u = CircuitStyles.unit[]
     a, b = ceil(Int, (depth(c)+1)*w_depth*u), ceil(Int, nline*w_line*u)
     _luxor(a, b, w_depth/2*u, -w_line/2*u; format, filename, padding) do
-        c = CircuitGrid(nline; w_depth, w_line, gatestyles)
+        c = CircuitGrid(nline; w_depth, w_line, gatestyles, backend)
         initialize!(c; starting_texts, starting_offset)
         f(c)
         finalize!(c; show_ending_bar, ending_texts, ending_offset)

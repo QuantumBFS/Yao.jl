@@ -33,3 +33,4 @@ docs/src/assets/*.pdf
 *.log
 lib/YaoPlots/examples/*.png
 lib/YaoPlots/examples/*.svg
+*.json

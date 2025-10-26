@@ -103,7 +103,7 @@ result = overlapwithzero(psum)  # Get expectation value
 ```
 """
 function YaoBlocks.yao2paulipropagation(circuit::ChainBlock; observable)
-    circ = YaoBlocks.Optimise.to_basictypes(circuit)
+    circ = YaoBlocks.Optimise.eliminate_nested(YaoBlocks.Optimise.to_basictypes(circuit))
     n = nqubits(circ)
     gates = StaticGate[]
     
@@ -117,7 +117,7 @@ function YaoBlocks.yao2paulipropagation(circuit::ChainBlock; observable)
     end
     
     # Convert observable
-    obs = Optimise.eliminate_nested(observable)
+    obs = YaoBlocks.Optimise.eliminate_nested(observable)
     @assert obs isa AllowedObservableTypes || obs isa Add && all(b isa AllowedObservableTypes for b in subblocks(obs)) "Observable must be a sum of Pauli strings, e.g. kron(5, 2=>X, 3=>X) + 2.0 * kron(5, 1=>Z), got: $obs"
     psum = cast_observable(observable)
     return PauliPropagationCircuit(n, gates, psum isa PauliSum ? psum : PauliSum([psum]))
