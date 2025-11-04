@@ -61,9 +61,9 @@ please file an issue if you really need this feature.",
     overlap = out1' * out2
 
     out1δ = copy(out2)
-    regscale!.(viewbatch.(Ref(out1δ), 1:length(overlap)), conj.(overlap) ./ abs.(overlap))
+    regscale!.(viewbatch.(Ref(out1δ), 1:length(overlap)), 2.0*conj.(overlap))
     out2δ = copy(out1)
-    regscale!.(viewbatch.(Ref(out2δ), 1:length(overlap)), overlap ./ abs.(overlap))
+    regscale!.(viewbatch.(Ref(out2δ), 1:length(overlap)), 2.0*overlap)
 
     if reg1 isa Pair
         (_, in1δ), params1δ = apply_back((out1, out1δ), c1)

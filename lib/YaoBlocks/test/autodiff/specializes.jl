@@ -121,3 +121,35 @@ end
     greg, (greg2, gcirc) = fidelity'(rand_state(10), rand_state(10)=>put(10, 1=>X))
     @test gcirc isa Vector
 end
+
+
+
+@testset "autodiff textbook fidelity" begin
+    cost1(θ, β, Ψ_0, circuit) = fidelity(β, Ψ_0 => dispatch(circuit, θ))^2
+    cost2(θ, β, Ψ_0, circuit) = fidelity(β => dispatch(circuit, θ), Ψ_0)^2
+
+    function finite_diff(f, θ, h=1e-5)
+        G = Vector{Float64}(undef, length(θ))
+        indices = eachindex(θ)
+        for i in indices
+            left    = f(θ + (i .== indices) * h)
+            right   = f(θ - (i .== indices) * h)
+            G[i]    = (left - right)/(2.0*h)
+        end 
+        return G
+    end 
+
+    N =4
+    θ = [0.25 * i for i in 1:N]
+    β = zero_state(N)
+    Ψ_0 = zero_state(N)
+    circuit = chain(put(N, i=> Rx(θ[i])) for i in 1:N)
+
+    G_fd1 = finite_diff(θ->cost1(θ, β, Ψ_0, circuit), θ)
+    G_ad1 = fidelity'(β, Ψ_0 => dispatch(circuit, θ))[2][2]
+    @test isapprox(G_fd1, G_ad1, atol = 1e-10)
+
+    G_fd2 = finite_diff(θ->cost2(θ, β, Ψ_0, circuit), θ)
+    G_ad2 = fidelity'(β => dispatch(circuit, θ), Ψ_0)[1][2]
+    @test isapprox(G_fd2, G_ad2, atol = 1e-10)
+end 
