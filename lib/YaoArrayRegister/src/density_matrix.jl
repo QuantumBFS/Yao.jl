@@ -103,6 +103,9 @@ function YaoAPI.fidelity(m::DensityMatrix, n::DensityMatrix)
     return density_matrix_fidelity(m.state, n.state)
 end
 
+YaoAPI.fidelity2(m::DensityMatrix, n::DensityMatrix) = density_matrix_fidelity(m.state, n.state)^2
+
+
 function YaoAPI.purify(r::DensityMatrix{D}; num_env::Int = nactive(r)) where {D}
     Ne = D ^ num_env
     Ns = size(r.state, 1)

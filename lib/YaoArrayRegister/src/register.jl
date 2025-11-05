@@ -370,6 +370,51 @@ function YaoAPI.fidelity(r1::ArrayReg, r2::ArrayReg)
     end
 end
 
+
+function YaoAPI.fidelity2(r1::BatchedArrayReg{D}, r2::BatchedArrayReg{D}) where {D}
+    B1, B2 = nbatch(r1), nbatch(r2)
+    B1 == B2 || throw(DimensionMismatch("Register batch not match!"))
+    B = nbatch(r1)
+
+    state1 = rank3(r1)
+    state2 = rank3(r2)
+    size(state1) == size(state2) || throw(DimensionMismatch("Register size not match!"))
+    if size(state1, 2) == 1
+        res = map(b -> pure_state_fidelity2(state1[:, 1, b], state2[:, 1, b]), 1:B)
+    else
+        res = map(b -> purification_fidelity(state1[:, :, b], state2[:, :, b])^2, 1:B)
+    end
+    return res
+end
+
+function YaoAPI.fidelity2(r1::BatchedArrayReg, r2::ArrayReg)
+    B = nbatch(r1)
+    state1 = rank3(r1)
+    state2 = rank3(r2)
+    nqudits(r1) == nqudits(r2) || throw(DimensionMismatch("Register size not match!"))
+    if size(state1, 2) == 1
+        res = map(b -> pure_state_fidelity2(state1[:, 1, b], state2[:, 1, 1]), 1:B)
+    else
+        res = map(b -> purification_fidelity(state1[:, :, b], state2[:, :, 1])^2, 1:B)
+    end
+    return res
+end
+
+YaoAPI.fidelity2(r1::ArrayReg, r2::BatchedArrayReg) = YaoAPI.fidelity2(r2, r1)
+
+function YaoAPI.fidelity2(r1::ArrayReg, r2::ArrayReg)
+    state1 = state(r1)
+    state2 = state(r2)
+    nactive(r1) == nactive(r2) || throw(DimensionMismatch("Register size not match!"))
+
+    if size(state1, 2) == 1 && size(state2, 2) == 1
+        return pure_state_fidelity2(state1[:, 1], state2[:, 1])
+    else
+        return purification_fidelity(state1, state2)^2
+    end
+end
+
+
 YaoAPI.tracedist(r1::ArrayReg, r2::ArrayReg) = tracedist(density_matrix(r1), density_matrix(r2))
 YaoAPI.tracedist(r1::BatchedArrayReg, r2::BatchedArrayReg) = tracedist.(r1, r2)
 

@@ -37,6 +37,49 @@ using LinearAlgebra
     ) |> all
 end
 
+@testset "test fidelity2" begin
+    reg = rand_state(3)
+    reg_ = rand_state(3)
+    reg2 = clone(reg, 3)
+    @test fidelity2(reg, reg) ≈ 1
+    @test fidelity2(reg, reg_) < 1
+    @test fidelity2(reg2, reg2) ≈ [1, 1, 1]
+    @test isapprox(fidelity2(reg, reg_), fidelity(reg, reg_)^2)
+    # mix
+    reg4 = join(reg, reg)
+    reg5 = join(reg_, reg_)
+    focus!(reg4, 1:3)
+    focus!(reg5, 1:3)
+    @test isapprox(fidelity2(reg, reg_), fidelity2(reg4, reg5), atol = 1e-5)
+    @test isapprox(fidelity2(reg4, reg5), fidelity(reg4, reg5)^2)
+
+    @test isapprox.(
+        fidelity2(reg, reg_),
+        fidelity2(clone(reg4, 3), clone(reg5, 3)),
+        atol = 1e-5,
+    ) |> all
+
+    @test isapprox.(
+        fidelity2(clone(reg4, 3), clone(reg5, 3)),
+        fidelity(clone(reg4, 3), clone(reg5, 3)).^2,
+    ) |> all
+
+    # batch
+    st = rand(ComplexF64, 8, 2)
+    reg1 = BatchedArrayReg(st)
+    reg2 = rand_state(3)
+
+    @test fidelity2(reg1, reg2) ≈
+          [fidelity2(ArrayReg(st[:, 1]), reg2), fidelity2(ArrayReg(st[:, 2]), reg2)]
+    @test isapprox(fidelity2(reg1, reg2), fidelity(reg1, reg2).^2)
+
+    @test isapprox.(
+        fidelity2(reg, reg_),
+        fidelity2(clone(reg4, 3), clone(reg5, 3)),
+        atol = 1e-5,
+    ) |> all
+end
+
 @testset "test trace distance" begin
     reg = rand_state(3)
     reg_ = rand_state(3)
@@ -162,15 +205,18 @@ end
     r2 = density_matrix(reg2, (2, 1))
     expected = abs(tr(sqrt(sqrt(r1.state) * r2.state * sqrt(r1.state))))
     @test expected ≈ fidelity(r1, r2) atol=1e-5
-
+    @test expected^2 ≈ fidelity2(r1, r2) atol=1e-5
     # focused state is viewed as mixed state
     f1 = focus!(copy(reg1), (2, 1))
     f2 = focus!(copy(reg2), (2, 1))
     @test fidelity(r1, r2) ≈ fidelity(f1, f2) atol=1e-6
-
+    @test fidelity2(r1, r2) ≈ fidelity2(f1, f2) atol=1e-6
+    @test fidelity2(r1, r2) ≈ fidelity(f1, f2)^2 atol=1e-6
     # fidelity between focused and pure state
     f1 = rand_state(2)
     @test fidelity(density_matrix(f1, (1, 2)), r2) ≈ fidelity(f1, f2) atol=1e-6
+    @test fidelity2(density_matrix(f1, (1, 2)), r2) ≈ fidelity2(f1, f2) atol=1e-6
+    @test fidelity2(density_matrix(f1, (1, 2)), r2) ≈ fidelity(f1, f2)^2 atol=1e-6
 
     dm = rand_density_matrix(2)
     @test is_density_matrix(dm.state)

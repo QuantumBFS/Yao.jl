@@ -53,34 +53,98 @@ end
         g1, g2 = fidelity'(reg1, reg2)
         @test isapprox(
             vec(g1.state),
-            state_numgrad(reg1 -> sum(fidelity(reg1, reg2).^2), reg1),
+            state_numgrad(reg1 -> sum(fidelity(reg1, reg2)), reg1),
             atol = 1e-4,
         )
         @test isapprox(
             vec(g2.state),
-            state_numgrad(reg2 -> sum(fidelity(reg1, reg2).^2), reg2),
+            state_numgrad(reg2 -> sum(fidelity(reg1, reg2)), reg2),
             atol = 1e-4,
         )
 
         (g1, pg1), (g2, pg2) = fidelity'(reg1 => c1, reg2 => c2)
         npg1 = YaoBlocks.AD.ng(
-            x -> sum(fidelity(reg1 => dispatch!(c1, x), reg2 => c2).^2),
+            x -> sum(fidelity(reg1 => dispatch!(c1, x), reg2 => c2)),
             parameters(c1),
         )
         npg2 = YaoBlocks.AD.ng(
-            x -> sum(fidelity(reg1 => c1, reg2 => dispatch!(c2, x)).^2),
+            x -> sum(fidelity(reg1 => c1, reg2 => dispatch!(c2, x))),
             parameters(c2),
         )
         @test isapprox(pg1, vec(npg1), atol = 1e-5)
         @test isapprox(pg2, vec(npg2), atol = 1e-5)
         @test isapprox(
             vec(g1.state),
-            state_numgrad(reg1 -> sum(fidelity(reg1 => c1, reg2 => c2).^2), reg1),
+            state_numgrad(reg1 -> sum(fidelity(reg1 => c1, reg2 => c2)), reg1),
             atol = 1e-4,
         )
         @test isapprox(
             vec(g2.state),
-            state_numgrad(reg2 -> sum(fidelity(reg1 => c1, reg2 => c2).^2), reg2),
+            state_numgrad(reg2 -> sum(fidelity(reg1 => c1, reg2 => c2)), reg2),
+            atol = 1e-4,
+        )
+    end
+
+    nbatch = NoBatch()
+    reg1 = rand_state(nbit; nbatch = nbatch) |> focus!(2, 1, 4)
+    reg2 = rand_state(nbit; nbatch = nbatch) |> focus!(2, 1, 4)
+    c1 = qftcirc(3)
+    c2 = chain(put(3, 2 => Rx(0.5)), control(3, 1, 3 => Ry(0.5)))
+
+    @test_throws ArgumentError fidelity'(reg1, reg2)
+    #g1, g2 = fidelity'(reg1, reg2)
+    #@test isapprox(vec(g1.state), state_numgrad(reg1->sum(fidelity(reg1, reg2)), reg1), atol=1e-5)
+    #@test isapprox(vec(g2.state), state_numgrad(reg2->sum(fidelity(reg1, reg2)), reg2), atol=1e-5)
+
+    #(g1,pg1), (g2,pg2) = fidelity'(reg1 => c1, reg2 => c2)
+    #npg1 = YaoBlocks.AD.ng(x -> sum(fidelity(reg1 => dispatch!(c1, x), reg2=>c2)), parameters(c1))
+    #npg2 = YaoBlocks.AD.ng(x -> sum(fidelity(reg1 => c1, reg2 => dispatch!(c2, x))), parameters(c2))
+    #@test isapprox(pg1, vec(npg1),atol=1e-5)
+    #@test isapprox(pg2, vec(npg2),atol=1e-5)
+    #@test isapprox(vec(g1.state), state_numgrad(reg1->sum(fidelity(reg1=>c1, reg2=>c2)), reg1), atol=1e-5)
+    #@test isapprox(vec(g2.state), state_numgrad(reg2->sum(fidelity(reg1=>c1, reg2=>c2)), reg2), atol=1e-5)
+end
+
+@testset "fidelity2 grad" begin
+    nbit = 4
+    Random.seed!(2)
+    for nbatch in [NoBatch(), 10]
+        reg1 = rand_state(nbit; nbatch = nbatch)
+        reg2 = rand_state(nbit; nbatch = nbatch)
+        c1 = qftcirc(nbit)
+        c2 = chain(put(nbit, 2 => Rx(0.5)), control(nbit, 1, 3 => Ry(0.5)))
+
+        g1, g2 = fidelity2'(reg1, reg2)
+        @test isapprox(
+            vec(g1.state),
+            state_numgrad(reg1 -> sum(fidelity2(reg1, reg2)), reg1),
+            atol = 1e-4,
+        )
+        @test isapprox(
+            vec(g2.state),
+            state_numgrad(reg2 -> sum(fidelity2(reg1, reg2)), reg2),
+            atol = 1e-4,
+        )
+
+        (g1, pg1), (g2, pg2) = fidelity2'(reg1 => c1, reg2 => c2)
+        npg1 = YaoBlocks.AD.ng(
+            x -> sum(fidelity2(reg1 => dispatch!(c1, x), reg2 => c2)),
+            parameters(c1),
+        )
+        npg2 = YaoBlocks.AD.ng(
+            x -> sum(fidelity2(reg1 => c1, reg2 => dispatch!(c2, x))),
+            parameters(c2),
+        )
+        @test isapprox(pg1, vec(npg1), atol = 1e-5)
+        @test isapprox(pg2, vec(npg2), atol = 1e-5)
+        @test isapprox(
+            vec(g1.state),
+            state_numgrad(reg1 -> sum(fidelity2(reg1 => c1, reg2 => c2)), reg1),
+            atol = 1e-4,
+        )
+        @test isapprox(
+            vec(g2.state),
+            state_numgrad(reg2 -> sum(fidelity2(reg1 => c1, reg2 => c2)), reg2),
             atol = 1e-4,
         )
     end
@@ -121,35 +185,3 @@ end
     greg, (greg2, gcirc) = fidelity'(rand_state(10), rand_state(10)=>put(10, 1=>X))
     @test gcirc isa Vector
 end
-
-
-
-@testset "autodiff textbook fidelity" begin
-    cost1(θ, β, Ψ_0, circuit) = fidelity(β, Ψ_0 => dispatch(circuit, θ))^2
-    cost2(θ, β, Ψ_0, circuit) = fidelity(β => dispatch(circuit, θ), Ψ_0)^2
-
-    function finite_diff(f, θ, h=1e-5)
-        G = Vector{Float64}(undef, length(θ))
-        indices = eachindex(θ)
-        for i in indices
-            left    = f(θ + (i .== indices) * h)
-            right   = f(θ - (i .== indices) * h)
-            G[i]    = (left - right)/(2.0*h)
-        end 
-        return G
-    end 
-
-    N =4
-    θ = [0.25 * i for i in 1:N]
-    β = zero_state(N)
-    Ψ_0 = zero_state(N)
-    circuit = chain(put(N, i=> Rx(θ[i])) for i in 1:N)
-
-    G_fd1 = finite_diff(θ->cost1(θ, β, Ψ_0, circuit), θ)
-    G_ad1 = fidelity'(β, Ψ_0 => dispatch(circuit, θ))[2][2]
-    @test isapprox(G_fd1, G_ad1, atol = 1e-10)
-
-    G_fd2 = finite_diff(θ->cost2(θ, β, Ψ_0, circuit), θ)
-    G_ad2 = fidelity'(β => dispatch(circuit, θ), Ψ_0)[1][2]
-    @test isapprox(G_fd2, G_ad2, atol = 1e-10)
-end 
