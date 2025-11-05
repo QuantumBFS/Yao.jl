@@ -53,34 +53,34 @@ end
         g1, g2 = fidelity'(reg1, reg2)
         @test isapprox(
             vec(g1.state),
-            state_numgrad(reg1 -> sum(fidelity(reg1, reg2)), reg1),
+            state_numgrad(reg1 -> sum(fidelity(reg1, reg2).^2), reg1),
             atol = 1e-4,
         )
         @test isapprox(
             vec(g2.state),
-            state_numgrad(reg2 -> sum(fidelity(reg1, reg2)), reg2),
+            state_numgrad(reg2 -> sum(fidelity(reg1, reg2).^2), reg2),
             atol = 1e-4,
         )
 
         (g1, pg1), (g2, pg2) = fidelity'(reg1 => c1, reg2 => c2)
         npg1 = YaoBlocks.AD.ng(
-            x -> sum(fidelity(reg1 => dispatch!(c1, x), reg2 => c2)),
+            x -> sum(fidelity(reg1 => dispatch!(c1, x), reg2 => c2).^2),
             parameters(c1),
         )
         npg2 = YaoBlocks.AD.ng(
-            x -> sum(fidelity(reg1 => c1, reg2 => dispatch!(c2, x))),
+            x -> sum(fidelity(reg1 => c1, reg2 => dispatch!(c2, x)).^2),
             parameters(c2),
         )
         @test isapprox(pg1, vec(npg1), atol = 1e-5)
         @test isapprox(pg2, vec(npg2), atol = 1e-5)
         @test isapprox(
             vec(g1.state),
-            state_numgrad(reg1 -> sum(fidelity(reg1 => c1, reg2 => c2)), reg1),
+            state_numgrad(reg1 -> sum(fidelity(reg1 => c1, reg2 => c2).^2), reg1),
             atol = 1e-4,
         )
         @test isapprox(
             vec(g2.state),
-            state_numgrad(reg2 -> sum(fidelity(reg1 => c1, reg2 => c2)), reg2),
+            state_numgrad(reg2 -> sum(fidelity(reg1 => c1, reg2 => c2).^2), reg2),
             atol = 1e-4,
         )
     end
