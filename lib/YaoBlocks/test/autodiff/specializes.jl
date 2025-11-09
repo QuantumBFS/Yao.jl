@@ -152,8 +152,6 @@ end
     nbatch = NoBatch()
     reg1 = rand_state(nbit; nbatch = nbatch) |> focus!(2, 1, 4)
     reg2 = rand_state(nbit; nbatch = nbatch) |> focus!(2, 1, 4)
-    c1 = qftcirc(3)
-    c2 = chain(put(3, 2 => Rx(0.5)), control(3, 1, 3 => Ry(0.5)))
 
     @test_throws ArgumentError fidelity2'(reg1, reg2)
 end
