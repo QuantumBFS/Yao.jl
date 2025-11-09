@@ -155,18 +155,7 @@ end
     c1 = qftcirc(3)
     c2 = chain(put(3, 2 => Rx(0.5)), control(3, 1, 3 => Ry(0.5)))
 
-    @test_throws ArgumentError fidelity'(reg1, reg2)
-    #g1, g2 = fidelity'(reg1, reg2)
-    #@test isapprox(vec(g1.state), state_numgrad(reg1->sum(fidelity(reg1, reg2)), reg1), atol=1e-5)
-    #@test isapprox(vec(g2.state), state_numgrad(reg2->sum(fidelity(reg1, reg2)), reg2), atol=1e-5)
-
-    #(g1,pg1), (g2,pg2) = fidelity'(reg1 => c1, reg2 => c2)
-    #npg1 = YaoBlocks.AD.ng(x -> sum(fidelity(reg1 => dispatch!(c1, x), reg2=>c2)), parameters(c1))
-    #npg2 = YaoBlocks.AD.ng(x -> sum(fidelity(reg1 => c1, reg2 => dispatch!(c2, x))), parameters(c2))
-    #@test isapprox(pg1, vec(npg1),atol=1e-5)
-    #@test isapprox(pg2, vec(npg2),atol=1e-5)
-    #@test isapprox(vec(g1.state), state_numgrad(reg1->sum(fidelity(reg1=>c1, reg2=>c2)), reg1), atol=1e-5)
-    #@test isapprox(vec(g2.state), state_numgrad(reg2->sum(fidelity(reg1=>c1, reg2=>c2)), reg2), atol=1e-5)
+    @test_throws ArgumentError fidelity2'(reg1, reg2)
 end
 
 @testset "operator fideliy" begin
