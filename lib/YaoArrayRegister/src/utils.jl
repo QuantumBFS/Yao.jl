@@ -367,13 +367,6 @@ fidelity for pure states.
 pure_state_fidelity(v1::AbstractVector, v2::AbstractVector) = abs(v1' * v2)
 
 """
-    pure_state_fidelity2(v1::Vector, v2::Vector)
-
-fidelity for pure states squared.
-"""
-pure_state_fidelity2(v1::AbstractVector, v2::AbstractVector) = abs2(v1' * v2)
-
-"""
     purification_fidelity(m1::Matrix, m2::Matrix)
 
 Fidelity for mixed states via purification.
