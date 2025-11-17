@@ -134,18 +134,27 @@ reg = zero_state(num_bit) |&gt; gen</code></pre><pre><code class="nohighlight hl
 for i = 1:num_grover_step(oracle, gen)
     grover_step!(reg, oracle, gen)
     println(&quot;step $(i-1), overlap = $(abs(reg&#39;*solution))&quot;)
-end</code></pre><pre><code class="nohighlight hljs">step 0, overlap = 0.15825831715634642
-step 1, overlap = 0.26179102708334984
-step 2, overlap = 0.3623877203289581
-step 3, overlap = 0.4589201933303797
-step 4, overlap = 0.5503058232254557
-step 5, overlap = 0.6355197095934152
-step 6, overlap = 0.7136061688317672
-step 7, overlap = 0.7836894522585605
-step 8, overlap = 0.8449835677352543
-step 9, overlap = 0.8968010946595619
-step 10, overlap = 0.9385608934671011
-step 11, overlap = 0.9697946231788982
-step 12, overlap = 0.9901519938996974
-step 13, overlap = 0.9994046953596947
-</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../2.qft-phase-estimation/index.html">« Quantum Fourier Transformation and Phase Estimation</a><a class="docs-footer-nextpage" href="../4.shor-algorithm/index.html">Shor&#39;s Algorithm »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.15.0 on <span class="colophon-date" title="Friday 24 October 2025 01:59">Friday 24 October 2025</span>. Using Julia version 1.12.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+end</code></pre><pre><code class="nohighlight hljs">step 0, overlap = 0.09670872428606875
+step 1, overlap = 0.1607332463181111
+step 2, overlap = 0.22408778781462324
+step 3, overlap = 0.28650826955980896
+step 4, overlap = 0.3477345057567305
+step 5, overlap = 0.40751128855352525
+step 6, overlap = 0.46558945182017464
+step 7, overlap = 0.5217269097417068
+step 8, overlap = 0.575689665898693
+step 9, overlap = 0.627252788628911
+step 10, overlap = 0.6762013486045975
+step 11, overlap = 0.7223313147172097
+step 12, overlap = 0.7654504045354019
+step 13, overlap = 0.8053788857912727
+step 14, overlap = 0.8419503255540655
+step 15, overlap = 0.8750122839685632
+step 16, overlap = 0.9044269496664792
+step 17, overlap = 0.9300717142022787
+step 18, overlap = 0.9518396831190234
+step 19, overlap = 0.96964012151397
+step 20, overlap = 0.9833988322466906
+step 21, overlap = 0.9930584652132325
+step 22, overlap = 0.9985787563971831
+</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../2.qft-phase-estimation/index.html">« Quantum Fourier Transformation and Phase Estimation</a><a class="docs-footer-nextpage" href="../4.shor-algorithm/index.html">Shor&#39;s Algorithm »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.0 on <span class="colophon-date" title="Monday 17 November 2025 03:07">Monday 17 November 2025</span>. Using Julia version 1.12.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
