@@ -28,6 +28,7 @@ import YaoAPI:
     dispatch!,
     expect,
     fidelity,
+    fidelity2,
     focus!,
     getiparams,
     iparams_eltype,

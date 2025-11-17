@@ -652,6 +652,17 @@ julia> fidelity(reg1, reg2)
 """
 @interface fidelity
 
+
+"""
+    fidelity2(register1, register2) -> Real/Vector{<:Real}
+    fidelity2'(pair_or_reg1, pair_or_reg2) -> (g1, g2)
+
+Return the [`fidelity`](@ref) squared.
+
+`fidelity2'` returns the corresponding gradient of `fidelity2` with respect to registers and circuit parameters, similar to `fidelity'`.
+"""
+@interface fidelity2
+
 """
     tracedist(register1, register2)
 

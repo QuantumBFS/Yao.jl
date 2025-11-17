@@ -370,6 +370,8 @@ function YaoAPI.fidelity(r1::ArrayReg, r2::ArrayReg)
     end
 end
 
+YaoAPI.fidelity2(r1::AbstractArrayReg, r2::AbstractArrayReg) = YaoAPI.fidelity(r2, r1).^2
+
 YaoAPI.tracedist(r1::ArrayReg, r2::ArrayReg) = tracedist(density_matrix(r1), density_matrix(r2))
 YaoAPI.tracedist(r1::BatchedArrayReg, r2::BatchedArrayReg) = tracedist.(r1, r2)
 

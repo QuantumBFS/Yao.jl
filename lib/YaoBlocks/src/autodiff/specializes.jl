@@ -1,4 +1,4 @@
-for F in [:expect, :fidelity, :operator_fidelity]
+for F in [:expect, :fidelity, :fidelity2, :operator_fidelity]
     @eval Base.adjoint(::typeof($F)) = Adjoint($F)
     @eval Base.show(io::IO, ::Adjoint{Any,typeof($F)}) = print(io, "$($F)'")
     @eval Base.show(io::IO, ::MIME"text/plain", ::Adjoint{Any,typeof($F)}) =
@@ -24,12 +24,20 @@ end
 _eval(p::Pair{<:AbstractRegister,<:AbstractBlock}) = copy(p.first) |> p.second
 _eval(reg::AbstractRegister) = reg
 YaoAPI.fidelity(p1, p2) = fidelity(_eval(p1), _eval(p2))
+YaoAPI.fidelity2(p1, p2) = fidelity2(_eval(p1), _eval(p2))
 
 function (::Adjoint{Any,typeof(fidelity)})(
     reg1::Union{AbstractArrayReg,Pair{<:AbstractArrayReg,<:AbstractBlock}},
     reg2::Union{AbstractArrayReg,Pair{<:AbstractArrayReg,<:AbstractBlock}},
 )
     fidelity_g(reg1, reg2)
+end
+
+function (::Adjoint{Any,typeof(fidelity2)})(
+    reg1::Union{AbstractArrayReg,Pair{<:AbstractArrayReg,<:AbstractBlock}},
+    reg2::Union{AbstractArrayReg,Pair{<:AbstractArrayReg,<:AbstractBlock}},
+)
+    fidelity2_g(reg1, reg2)
 end
 
 function fidelity_g(
@@ -64,6 +72,56 @@ please file an issue if you really need this feature.",
     regscale!.(viewbatch.(Ref(out1δ), 1:length(overlap)), conj.(overlap) ./ abs.(overlap))
     out2δ = copy(out1)
     regscale!.(viewbatch.(Ref(out2δ), 1:length(overlap)), overlap ./ abs.(overlap))
+
+    if reg1 isa Pair
+        (_, in1δ), params1δ = apply_back((out1, out1δ), c1)
+        res1 = in1δ => params1δ
+    else
+        res1 = out1δ
+    end
+
+    if reg2 isa Pair
+        (_, in2δ), params2δ = apply_back((out2, out2δ), c2)
+        res2 = in2δ => params2δ
+    else
+        res2 = out2δ
+    end
+
+    return res1, res2
+end
+
+function fidelity2_g(
+    reg1::Union{AbstractArrayReg,Pair{<:AbstractArrayReg,<:AbstractBlock}},
+    reg2::Union{AbstractArrayReg,Pair{<:AbstractArrayReg,<:AbstractBlock}},
+)
+    if reg1 isa Pair
+        in1, c1 = reg1
+        out1 = copy(in1) |> c1
+    else
+        out1 = reg1
+    end
+
+    if reg2 isa Pair
+        in2, c2 = reg2
+        out2 = copy(in2) |> c2
+    else
+        out2 = reg2
+    end
+    if nremain(out1) != 0
+        throw(
+            ArgumentError(
+                "The gradient of registers with environment is not implemented yet.
+However, back propagating over a focused register is possible,
+please file an issue if you really need this feature.",
+            ),
+        )
+    end
+    overlap = out1' * out2
+
+    out1δ = copy(out2)
+    regscale!.(viewbatch.(Ref(out1δ), 1:length(overlap)), 2.0.*conj.(overlap))
+    out2δ = copy(out1)
+    regscale!.(viewbatch.(Ref(out2δ), 1:length(overlap)), 2.0.*overlap)
 
     if reg1 isa Pair
         (_, in1δ), params1δ = apply_back((out1, out1δ), c1)
