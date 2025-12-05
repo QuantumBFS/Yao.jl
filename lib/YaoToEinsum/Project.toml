@@ -1,7 +1,7 @@
 name = "YaoToEinsum"
 uuid = "9b173c7b-dc24-4dc5-a0e1-adab2f7b6ba9"
+version = "0.2.9"
 authors = ["GiggleLiu <cacate0129@gmail.com> and contributors"]
-version = "0.2.8"
 
 [deps]
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
@@ -16,7 +16,7 @@ LuxorGraphPlot = "1f49bdf2-22a7-4bc4-978b-948dc219fbbc"
 LuxorExt = "LuxorGraphPlot"
 
 [compat]
-JSON = "0.21"
+JSON = "0.21 - 1"
 LuxorGraphPlot = "0.5"
 OMEinsum = "0.9.1"
 YaoBlocks = "0.14"
