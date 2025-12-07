@@ -126,11 +126,11 @@ Convert a dictionary back to a tensor.
 - `"complex"`: Boolean indicating if the tensor contains complex numbers
 - `"data"`: The tensor data as a flat array of real numbers
 """
-function tensor_from_dict(dict::Dict)
+function tensor_from_dict(dict::AbstractDict)
     size_vec = dict["size"]
     is_complex = dict["complex"]
     data = collect(Float64, dict["data"])
-    
+
     if is_complex
         complex_data = reinterpret(ComplexF64, data)
         return reshape(complex_data, size_vec...)
