@@ -16,7 +16,7 @@ LuxorGraphPlot = "1f49bdf2-22a7-4bc4-978b-948dc219fbbc"
 LuxorExt = "LuxorGraphPlot"
 
 [compat]
-JSON = "0.21 - 1"
+JSON = "0.21, 1"
 LuxorGraphPlot = "0.5"
 OMEinsum = "0.9.1"
 YaoBlocks = "0.14"
