@@ -1,7 +1,3 @@
-function Base.iszero(x::Basic)
-    isempty(free_symbols(x)) && iszero(N(x))
-end
-
 SymEngine.free_symbols(syms::Union{Real,Complex}) = Basic[]
 SymEngine.free_symbols(syms::AbstractArray{T}) where {T<:Union{Real,Complex}} = Basic[]
 SymEngine.free_symbols(syms::AbstractArray{T}) where {T<:Union{Basic,SymEngine.BasicType}} =
