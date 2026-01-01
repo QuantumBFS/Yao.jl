@@ -84,13 +84,19 @@ end
 
 tokenize_param(param::Number) = param
 
-yaotoscript(block::AbstractBlock) =
+function yaotoscript(block::AbstractBlock)
+    Base.depwarn("`yaotoscript` is deprecated, use `circuit_to_json_dict` instead.", :yaotoscript)
     Expr(:block, :(nqubits = $(nqudits(block))), dump_gate(block)) |> rmlines
+end
 function yaotoscript(block::ChainBlock)
+    Base.depwarn("`yaotoscript` is deprecated, use `circuit_to_json_dict` instead.", :yaotoscript)
     ex = dump_gate(block)
     Expr(:let, Expr(:block, :(nqubits = $(nqudits(block))), :(version = "0.6")), ex)
 end
-yaotofile(filename::String, block) = write(filename, string(yaotoscript(block)))
+function yaotofile(filename::String, block)
+    Base.depwarn("`yaotofile` is deprecated, use `json_to_file` instead.", :yaotofile)
+    write(filename, string(yaotoscript(block)))
+end
 
 macro dumpload_fallback(blocktype, fname)
     quote

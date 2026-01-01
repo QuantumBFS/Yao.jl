@@ -72,9 +72,11 @@ end
     @test d["instructions"][1]["name"] == "h"
     @test d["instructions"][1]["qubits"] == [0]
     
-    # Check CNOT
-    @test d["instructions"][2]["name"] == "cx"
-    @test d["instructions"][2]["qubits"] == [0, 1]
+    # Check CNOT (generic controlled format)
+    @test d["instructions"][2]["name"] == "x"
+    @test d["instructions"][2]["qubits"] == [1]
+    @test d["instructions"][2]["ctrl"] == [0]
+    @test d["instructions"][2]["ctrl_state"] == [1]
 end
 
 @testset "JSON instruction format - shift and phase gates" begin

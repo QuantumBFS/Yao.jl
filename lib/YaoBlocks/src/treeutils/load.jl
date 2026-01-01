@@ -9,6 +9,7 @@ macro yao_str(str::String)
 end
 
 function yaofromstring(x::String)
+    Base.depwarn("`yaofromstring` is deprecated, use `circuit_from_json` instead.", :yaofromstring)
     ex = Meta.parse(x)
     parse_yaoscript(ex)
 end
@@ -41,7 +42,10 @@ function parse_yaoscript(ex)
     end
 end
 
-yaofromfile(x::String) = yaofromstring(read(x, String))
+function yaofromfile(x::String)
+    Base.depwarn("`yaofromfile` is deprecated, use `json_from_file` instead.", :yaofromfile)
+    yaofromstring(read(x, String))
+end
 parse_ex(ex, nbit::Int) = parse_ex(ex, ParseInfo(nbit, ""))
 
 mutable struct ParseInfo
@@ -147,6 +151,7 @@ function parse_ex(ex, info::ParseInfo)
 end
 
 function check_dumpload(gate::AbstractBlock)
+    Base.depwarn("`check_dumpload` is deprecated, use `check_json_roundtrip` instead.", :check_dumpload)
     gate2 = eval(parse_ex(dump_gate(gate), nqudits(gate)))
     gate2 == gate || mat(gate2) ≈ mat(gate)
 end
