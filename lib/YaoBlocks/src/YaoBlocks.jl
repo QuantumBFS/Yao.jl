@@ -18,6 +18,7 @@ using Random, CacheServers
 import KrylovKit: exponentiate
 using DocStringExtensions
 import StaticArrays: SMatrix
+using JSON
 
 import YaoAPI:
     apply!,
