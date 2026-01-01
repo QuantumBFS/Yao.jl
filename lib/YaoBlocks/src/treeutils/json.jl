@@ -312,6 +312,10 @@ end
 function _deserialize_matrix(params::Vector, nqubits::Int)
     # Reconstruct complex matrix from [re1, im1, re2, im2, ...]
     dim = 2^nqubits
+    expected_len = 2 * dim * dim
+    if length(params) != expected_len
+        error("Invalid matrix parameters: expected $expected_len values for $nqubits qubit(s), got $(length(params))")
+    end
     m = Matrix{ComplexF64}(undef, dim, dim)
     for i in 1:dim*dim
         re = params[2*i - 1]
