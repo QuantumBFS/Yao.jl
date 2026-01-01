@@ -1,0 +1,152 @@
+"""
+    QASMIOContext{IOT} <: IO
+
+An IO context for QASM output.
+
+# Fields
+- `io::IOT`: the underlying IO object
+- `current_qubits::Vector{Int}`: the current qubit indices
+"""
+mutable struct QASMIOContext{IOT} <: IO
+    const io::IOT
+    current_qubits::Vector{Int}
+end
+
+for T in [SubString{String}, String, Symbol, Any]
+    @eval Base.print(io::QASMIOContext, str::$T) = print(io.io, str)
+end
+
+function Base.show(io::QASMIOContext, ::MIME"qasm/open", blk::AbstractBlock)
+    println(io, blk)
+end
+
+"""
+    qasm(block::AbstractBlock; include_header::Bool=false) -> String
+
+Convert a YaoBlocks circuit to an OpenQASM 3.0 string.
+
+# Arguments
+- `block::AbstractBlock`: The quantum circuit block to convert
+- `include_header::Bool=false`: Whether to include the QASM header with version, 
+  include statement, and qubit register declaration
+
+# Returns
+- `String`: The OpenQASM representation of the circuit
+
+# Supported Blocks
+- **Primitive gates**: `I2`, `X`, `Y`, `Z`, `H`, `S`, `Sdag`, `T`, `Tdag`
+- **Rotation gates**: `Rx`, `Ry`, `Rz` (→ `rx`, `ry`, `rz`)
+- **Phase gate**: `shift` (→ `p`)
+- **Composite blocks**: `PutBlock`, `ControlBlock`, `ChainBlock`
+- **Modifiers**: `Daggered` (→ `inv @`)
+- **Custom gates**: `GeneralMatrixBlock` with tag (outputs the tag name)
+
+# Notes
+- Qubit indices in QASM are 0-based, while YaoBlocks uses 1-based indexing
+- For unsupported blocks, consider using `Optimise.to_basictypes` first
+
+# Examples
+
+```jldoctest; setup=:(using Yao)
+julia> qasm(put(2, 1=>X))
+"x reg[0]"
+
+julia> qasm(control(2, 1, 2=>X))
+"ctrl @ x reg[0], reg[1]"
+
+julia> qasm(chain(put(2, 1=>H), control(1, 2=>X)); include_header=true)
+"OPENQASM 3.0;\\ninclude \\"qelib1.inc\\";\\nqreg q[2];\\nh reg[0];\\nctrl @ x reg[0], reg[1]"
+```
+
+See also: [`parseblock`](@ref)
+"""
+function qasm(block::AbstractBlock; include_header::Bool=false)
+    io = QASMIOContext(IOBuffer(), [1:nqudits(block)...])
+    include_header && println(io, """OPENQASM 3.0;
+include "qelib1.inc";
+qreg q[$(nqubits(block))];""")
+    print_qasm(io, block)
+    String(take!(io.io))
+end
+
+######################## Basic Buiding Blocks ########################
+
+# -> composite blocks
+function print_qasm(io::QASMIOContext, blk::PutBlock{D,M,GT}) where {D, M, GT <: PrimitiveBlock}
+    print_qasm(io, content(blk))
+    print(io, " ")
+    print_addrs(io, blk.locs)
+end
+
+function print_qasm(io::QASMIOContext, blk::ControlBlock{GT}) where GT <: PrimitiveBlock
+    for c in blk.ctrl_config
+        print(io, c == 1 ? "ctrl @ " : "negctrl @ ")
+    end
+    print_qasm(io, content(blk))
+    print(io, " ")
+    print_addrs(io, (blk.ctrl_locs..., blk.locs...))
+end
+
+function print_qasm(io::QASMIOContext, blk::ChainBlock)
+    for (k, b) in enumerate(subblocks(blk))
+        @assert b isa CompositeBlock "primitive gate in chain block should be a composite block."
+        print_qasm(io, b)
+        k != length(blk) && println(io, ";")
+    end
+end
+
+function print_qasm(io::QASMIOContext, blk::Daggered)
+    print(io, "inv @ ")
+    print_qasm(io, content(blk))
+end
+
+# -> Primitive blocks
+function print_qasm(io::QASMIOContext, blk::GeneralMatrixBlock)
+    print(io, blk.tag)
+end
+
+# x, y, z, h, s, sdag, t, tdag
+print_qasm(io::QASMIOContext, ::I2Gate) = print(io, "id")
+print_qasm(io::QASMIOContext, ::XGate) = print(io, "x")
+print_qasm(io::QASMIOContext, ::YGate) = print(io, "y")
+print_qasm(io::QASMIOContext, ::ZGate) = print(io, "z")
+print_qasm(io::QASMIOContext, ::HGate) = print(io, "h")
+print_qasm(io::QASMIOContext, ::ConstGate.SGate) = print(io, "s")
+print_qasm(io::QASMIOContext, ::TGate) = print(io, "t")
+print_qasm(io::QASMIOContext, ::ConstGate.SdagGate) = print(io, "inv @ s")
+print_qasm(io::QASMIOContext, ::ConstGate.TdagGate) = print(io, "inv @ t")
+
+# rx, ry, rz
+function print_qasm(io::QASMIOContext, blk::RotationGate{2, T, <:PrimitiveBlock}) where T
+    print(io, "r")
+    print_qasm(io, content(blk))
+    print_params(io, getiparams(blk))
+end
+
+# p (phase gate)
+function print_qasm(io::QASMIOContext, blk::ShiftGate) 
+    print(io, "p")
+    print_params(io, getiparams(blk))
+end
+
+# Fallback for unsupported blocks
+function print_qasm(io::QASMIOContext, blk::AbstractBlock)
+    error("block type not supported for QASM output, got: $blk. Try simplifying the circuit with the `Optimise.to_basictypes` function.")
+end
+
+# HELPERS
+function print_addrs(io::QASMIOContext, locs)
+    for (k, i) in enumerate(locs)
+        print(io, "reg[$(i-1)]")
+        k != length(locs) && print(io, ", ")
+    end
+end
+
+function print_params(io::QASMIOContext, params)
+    print(io, "(")
+    for (k, p) in enumerate(params)
+        print(io, p)
+        k != length(params) && print(io, ", ")
+    end
+    print(io, ")")
+end

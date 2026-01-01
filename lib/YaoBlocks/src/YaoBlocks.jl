@@ -136,4 +136,8 @@ include("deprecations.jl")
 
 include("pauli_propagation.jl")
 
+# OpenQASM support
+include("openqasm/openqasm.jl")
+export qasm, parseblock
+
 end # YaoBlocks
