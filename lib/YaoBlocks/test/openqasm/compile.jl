@@ -50,7 +50,8 @@ end
 end
 
 @testset "chain block" begin
-    @test qasm(chain(put(6, 5=>X))) == "x q[4];\n"
+    # Single-element chain is simplified to the inner block by canonicalize
+    @test qasm(chain(put(6, 5=>X))) == "x q[4]"
     @test qasm(chain(put(6, 5=>X), put(6, 3=>X))) == "x q[4];\nx q[2];\n"
     expected = "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[6];\ncreg c[6];\nx q[4];\nx q[2];\n"
     @test qasm(chain(put(6, 5=>X), put(6, 3=>X)); include_header=true) == expected

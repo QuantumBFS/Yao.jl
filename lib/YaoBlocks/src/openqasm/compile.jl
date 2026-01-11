@@ -64,6 +64,9 @@ julia> qasm(chain(put(2, 1=>H), control(1, 2=>X)); include_header=true)
 See also: [`parseblock`](@ref)
 """
 function qasm(block::AbstractBlock; include_header::Bool=false)
+    # Recursively simplify circuit before compiling: eliminate nested blocks and convert to basic types
+    block = Optimise.canonicalize(block)
+
     io = QASMIOContext(IOBuffer(), [1:nqudits(block)...])
     include_header && println(io, """OPENQASM 2.0;
 include "qelib1.inc";
