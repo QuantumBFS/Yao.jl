@@ -31,3 +31,7 @@ end
 @testset "hadamardtest" begin
     include("hadamardtest.jl")
 end
+
+@testset "openqasm" begin
+    include("openqasm.jl")
+end
