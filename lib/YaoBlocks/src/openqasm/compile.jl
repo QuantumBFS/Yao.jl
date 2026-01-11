@@ -52,22 +52,23 @@ common OpenQASM 2.0 gate definitions through `qelib1.inc`.
 
 ```jldoctest; setup=:(using Yao)
 julia> qasm(put(2, 1=>X))
-"x reg[0]"
+"x q[0]"
 
 julia> qasm(control(2, 1, 2=>X))
-"ctrl @ x reg[0], reg[1]"
+"cx q[0], q[1]"
 
 julia> qasm(chain(put(2, 1=>H), control(1, 2=>X)); include_header=true)
-"OPENQASM 3.0;\\ninclude \\"qelib1.inc\\";\\nqreg q[2];\\nh reg[0];\\nctrl @ x reg[0], reg[1]"
+"OPENQASM 2.0;\\ninclude \\"qelib1.inc\\";\\nqreg q[2];\\ncreg c[2];\\nh q[0];\\ncx q[0], q[1];\\n"
 ```
 
 See also: [`parseblock`](@ref)
 """
 function qasm(block::AbstractBlock; include_header::Bool=false)
     io = QASMIOContext(IOBuffer(), [1:nqudits(block)...])
-    include_header && println(io, """OPENQASM 3.0;
+    include_header && println(io, """OPENQASM 2.0;
 include "qelib1.inc";
-qreg q[$(nqubits(block))];""")
+qreg q[$(nqubits(block))];
+creg c[$(nqubits(block))];""")
     print_qasm(io, block)
     String(take!(io.io))
 end
@@ -82,19 +83,60 @@ function print_qasm(io::QASMIOContext, blk::PutBlock{D,M,GT}) where {D, M, GT <:
 end
 
 function print_qasm(io::QASMIOContext, blk::ControlBlock{GT}) where GT <: PrimitiveBlock
-    for c in blk.ctrl_config
-        print(io, c == 1 ? "ctrl @ " : "negctrl @ ")
+    # Use QASM 2.0 compatible syntax for common controlled gates
+    ctrl_locs = blk.ctrl_locs
+    target_locs = blk.locs
+    ctrl_config = blk.ctrl_config
+    gate = content(blk)
+
+    # Single positive control - use QASM 2.0 gates
+    if length(ctrl_locs) == 1 && ctrl_config[1] == 1
+        if gate isa XGate
+            print(io, "cx ")
+        elseif gate isa YGate
+            print(io, "cy ")
+        elseif gate isa ZGate
+            print(io, "cz ")
+        elseif gate isa HGate
+            print(io, "ch ")
+        elseif gate isa ShiftGate
+            print(io, "cu1")
+            print_params(io, getiparams(gate))
+            print(io, " ")
+        elseif gate isa RotationGate{2, T, ZGate} where T
+            print(io, "crz")
+            print_params(io, getiparams(gate))
+            print(io, " ")
+        else
+            # Fallback to QASM 3.0 syntax
+            print(io, "ctrl @ ")
+            print_qasm(io, gate)
+            print(io, " ")
+        end
+        print_addrs(io, (ctrl_locs..., target_locs...))
+    # Double positive control for X gate (Toffoli)
+    elseif length(ctrl_locs) == 2 && all(==(1), ctrl_config) && gate isa XGate
+        print(io, "ccx ")
+        print_addrs(io, (ctrl_locs..., target_locs...))
+    else
+        # Fallback to QASM 3.0 syntax for complex cases
+        for c in ctrl_config
+            print(io, c == 1 ? "ctrl @ " : "negctrl @ ")
+        end
+        print_qasm(io, gate)
+        print(io, " ")
+        print_addrs(io, (ctrl_locs..., target_locs...))
     end
-    print_qasm(io, content(blk))
-    print(io, " ")
-    print_addrs(io, (blk.ctrl_locs..., blk.locs...))
 end
 
 function print_qasm(io::QASMIOContext, blk::ChainBlock)
     for (k, b) in enumerate(subblocks(blk))
         @assert b isa CompositeBlock "primitive gate in chain block should be a composite block."
         print_qasm(io, b)
-        k != length(blk) && println(io, ";")
+        # Don't add semicolon after nested ChainBlocks (they handle their own semicolons)
+        if !(b isa ChainBlock)
+            println(io, ";")
+        end
     end
 end
 
@@ -144,7 +186,7 @@ end
 # HELPERS
 function print_addrs(io::QASMIOContext, locs)
     for (k, i) in enumerate(locs)
-        print(io, "reg[$(i-1)]")
+        print(io, "q[$(i-1)]")
         k != length(locs) && print(io, ", ")
     end
 end

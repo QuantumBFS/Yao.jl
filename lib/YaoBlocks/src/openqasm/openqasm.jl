@@ -16,10 +16,10 @@ This module provides bidirectional conversion between YaoBlocks and OpenQASM 2.0
 using Yao
 
 # Simple gate
-qasm(put(2, 1=>X))  # "x reg[0]"
+qasm(put(2, 1=>X))  # "x q[0]"
 
 # Control gate
-qasm(control(2, 1, 2=>X))  # "ctrl @ x reg[0], reg[1]"
+qasm(control(2, 1, 2=>X))  # "cx q[0], q[1]"
 
 # Full circuit with header
 circuit = chain(2, put(1=>H), control(1, 2=>X))
