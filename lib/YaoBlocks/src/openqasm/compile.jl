@@ -23,7 +23,9 @@ end
 """
     qasm(block::AbstractBlock; include_header::Bool=false) -> String
 
-Convert a YaoBlocks circuit to an OpenQASM 3.0 string.
+Convert a YaoBlocks circuit to an OpenQASM string. The output uses OpenQASM 3.0 syntax
+(e.g., `ctrl @`, `negctrl @`, `inv @` modifiers) while maintaining compatibility with
+common OpenQASM 2.0 gate definitions through `qelib1.inc`.
 
 # Arguments
 - `block::AbstractBlock`: The quantum circuit block to convert
@@ -43,7 +45,8 @@ Convert a YaoBlocks circuit to an OpenQASM 3.0 string.
 
 # Notes
 - Qubit indices in QASM are 0-based, while YaoBlocks uses 1-based indexing
-- For unsupported blocks, consider using `Optimise.to_basictypes` first
+- For unsupported blocks, consider using `YaoBlocks.Optimise.to_basictypes` first
+- Parsing via `parseblock` supports both OpenQASM 2.0 and 3.0 inputs
 
 # Examples
 
@@ -102,7 +105,11 @@ end
 
 # -> Primitive blocks
 function print_qasm(io::QASMIOContext, blk::GeneralMatrixBlock)
-    print(io, blk.tag)
+    tag_str = string(blk.tag)
+    if isempty(tag_str)
+        error("GeneralMatrixBlock has empty tag; cannot emit valid OpenQASM output. Set a tag with `matblock(matrix; tag=\"name\")`.")
+    end
+    print(io, tag_str)
 end
 
 # x, y, z, h, s, sdag, t, tdag
@@ -131,7 +138,7 @@ end
 
 # Fallback for unsupported blocks
 function print_qasm(io::QASMIOContext, blk::AbstractBlock)
-    error("block type not supported for QASM output, got: $blk. Try simplifying the circuit with the `Optimise.to_basictypes` function.")
+    error("block type not supported for QASM output, got: $blk. Try simplifying the circuit with the `YaoBlocks.Optimise.to_basictypes` function.")
 end
 
 # HELPERS

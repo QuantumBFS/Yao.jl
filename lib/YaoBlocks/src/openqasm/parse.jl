@@ -423,7 +423,7 @@ function parse_noise_model(data)
             ro_error = ReadOutError(_render_locs(noise["qubits"]), probability_matrix)
             push!(ro_errors, ro_error)
         else
-            Base.error("unknown noise type: $(noise_type)")
+            error("unknown noise type: $(noise_type)")
         end
     end
     
