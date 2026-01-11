@@ -92,56 +92,15 @@ function print_qasm(io::QASMIOContext, blk::PutBlock{D,M,GT}) where {D, M, GT <:
     # Map the control and target locations from the inner system to the outer system
     ctrl_locs = Tuple(locs[i] for i in ctrl_blk.ctrl_locs)
     target_locs = Tuple(locs[i] for i in ctrl_blk.locs)
-    ctrl_config = ctrl_blk.ctrl_config
-    gate = content(ctrl_blk)
-
-    # Single positive control - use QASM 2.0 gates
-    if length(ctrl_locs) == 1 && ctrl_config[1] == 1
-        if gate isa XGate
-            print(io, "cx ")
-        elseif gate isa YGate
-            print(io, "cy ")
-        elseif gate isa ZGate
-            print(io, "cz ")
-        elseif gate isa HGate
-            print(io, "ch ")
-        elseif gate isa ShiftGate
-            print(io, "cu1")
-            print_params(io, getiparams(gate))
-            print(io, " ")
-        elseif gate isa RotationGate{2, T, ZGate} where T
-            print(io, "crz")
-            print_params(io, getiparams(gate))
-            print(io, " ")
-        else
-            # Fallback to QASM 3.0 syntax
-            print(io, "ctrl @ ")
-            print_qasm(io, gate)
-            print(io, " ")
-        end
-        print_addrs(io, (ctrl_locs..., target_locs...))
-    # Double positive control for X gate (Toffoli)
-    elseif length(ctrl_locs) == 2 && all(==(1), ctrl_config) && gate isa XGate
-        print(io, "ccx ")
-        print_addrs(io, (ctrl_locs..., target_locs...))
-    else
-        # Fallback to QASM 3.0 syntax for complex cases
-        for c in ctrl_config
-            print(io, c == 1 ? "ctrl @ " : "negctrl @ ")
-        end
-        print_qasm(io, gate)
-        print(io, " ")
-        print_addrs(io, (ctrl_locs..., target_locs...))
-    end
+    print_control_gate(io, content(ctrl_blk), ctrl_locs, target_locs, ctrl_blk.ctrl_config)
 end
 
 function print_qasm(io::QASMIOContext, blk::ControlBlock{GT}) where GT <: PrimitiveBlock
-    # Use QASM 2.0 compatible syntax for common controlled gates
-    ctrl_locs = blk.ctrl_locs
-    target_locs = blk.locs
-    ctrl_config = blk.ctrl_config
-    gate = content(blk)
+    print_control_gate(io, content(blk), blk.ctrl_locs, blk.locs, blk.ctrl_config)
+end
 
+# Helper to print controlled gates - shared logic for ControlBlock and PutBlock{ControlBlock}
+function print_control_gate(io::QASMIOContext, gate, ctrl_locs, target_locs, ctrl_config)
     # Single positive control - use QASM 2.0 gates
     if length(ctrl_locs) == 1 && ctrl_config[1] == 1
         if gate isa XGate
