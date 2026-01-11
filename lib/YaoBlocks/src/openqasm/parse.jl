@@ -364,58 +364,58 @@ function parse_noise_model(data)
         
         if noise_type == "depolarizing"
             # Single-qubit depolarizing noise
-            error = DepolarizingError(1, noise["probability"])
-            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), error))
-            
+            err = DepolarizingError(1, noise["probability"])
+            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), err))
+
         elseif noise_type == "depolarizing2"
-            # Two-qubit depolarizing noise  
-            error = DepolarizingError(2, noise["probability"])
-            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), error))
-            
+            # Two-qubit depolarizing noise
+            err = DepolarizingError(2, noise["probability"])
+            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), err))
+
         elseif noise_type == "thermal_relaxation"
             # Thermal relaxation noise
-            error = ThermalRelaxationError(noise["T1"], noise["T2"], noise["time"])
-            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), error))
-            
+            err = ThermalRelaxationError(noise["T1"], noise["T2"], noise["time"])
+            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), err))
+
         elseif noise_type == "coherent_unitary"
             # Coherent unitary error
             unitary_matrix = reduce(hcat, noise["unitary"])  # Convert to matrix
             unitary_block = matblock(unitary_matrix)
-            error = CoherentError(unitary_block)
-            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), error))
-            
+            err = CoherentError(unitary_block)
+            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), err))
+
         elseif noise_type == "pauli"
             # Pauli error with probability vector [X, Y, Z]
             probs = noise["probability"]  # [prob_X, prob_Y, prob_Z]
-            error = PauliError(probs[1], probs[2], probs[3])
-            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), error))
-            
+            err = PauliError(probs[1], probs[2], probs[3])
+            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), err))
+
         elseif noise_type == "amplitude_damping"
             # Amplitude damping error
             gamma = noise["gamma_amplitude"]
             excited_state_pop = noise["excited_state_population"]
-            error = AmplitudeDampingError(gamma, excited_state_pop)
-            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), error))
-            
+            err = AmplitudeDampingError(gamma, excited_state_pop)
+            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), err))
+
         elseif noise_type == "phase_damping"
             # Phase damping error
             gamma = noise["gamma_phase"]
-            error = PhaseDampingError(gamma)
-            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), error))
-            
+            err = PhaseDampingError(gamma)
+            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), err))
+
         elseif noise_type == "phase_amplitude_damping"
             # Combined phase and amplitude damping
             gamma_amp = noise["gamma_amplitude"]
             gamma_phase = noise["gamma_phase"]
             excited_state_pop = noise["excited_state_population"]
-            error = PhaseAmplitudeDampingError(gamma_amp, gamma_phase, excited_state_pop)
-            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), error))
-            
+            err = PhaseAmplitudeDampingError(gamma_amp, gamma_phase, excited_state_pop)
+            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), err))
+
         elseif noise_type == "kraus"
             # Kraus operators error
             kraus_ops = [reduce(hcat, op) for op in noise["kraus_ops"]]  # Convert to matrices
-            error = CustomKrausError(kraus_ops)
-            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), error))
+            err = CustomKrausError(kraus_ops)
+            push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), err))
             
         elseif noise_type == "roerror"
             # Readout error
