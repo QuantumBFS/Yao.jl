@@ -5,11 +5,9 @@ An IO context for QASM output.
 
 # Fields
 - `io::IOT`: the underlying IO object
-- `current_qubits::Vector{Int}`: the current qubit indices
 """
-mutable struct QASMIOContext{IOT} <: IO
-    const io::IOT
-    current_qubits::Vector{Int}
+struct QASMIOContext{IOT} <: IO
+    io::IOT
 end
 
 for T in [SubString{String}, String, Symbol, Any]
@@ -67,7 +65,7 @@ function qasm(block::AbstractBlock; include_header::Bool=false)
     # Recursively simplify circuit before compiling: eliminate nested blocks and convert to basic types
     block = Optimise.canonicalize(block)
 
-    io = QASMIOContext(IOBuffer(), [1:nqudits(block)...])
+    io = QASMIOContext(IOBuffer())
     include_header && println(io, """OPENQASM 2.0;
 include "qelib1.inc";
 qreg q[$(nqubits(block))];
@@ -76,7 +74,7 @@ creg c[$(nqubits(block))];""")
     String(take!(io.io))
 end
 
-######################## Basic Buiding Blocks ########################
+######################## Basic Building Blocks ########################
 
 # -> composite blocks
 function print_qasm(io::QASMIOContext, blk::PutBlock{D,M,GT}) where {D, M, GT <: PrimitiveBlock}

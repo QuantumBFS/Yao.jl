@@ -94,7 +94,7 @@ chain
 │  └─ H
 ├─ control(1)
 │  └─ (2,) X
-└─ Measure(2;locs=1:2, operator=ComputationalBasis())
+└─ Measure(2)
 ```
 
 See also: [`qasm`](@ref)
@@ -119,10 +119,10 @@ function parseblock(ast::OpenQASM.Types.MainProgram, gate_error::Vector{ErrorPat
             @assert convert(String, stmt.file) == "qelib1.inc" "Only `qelib1.inc` is supported to be included. Got: $(convert(String, stmt.file))"
         elseif stmt isa OpenQASM.Types.RegDecl
             if convert(String, stmt.type) == "qreg"
-                @assert c === nothing "The `qreg` can not be declared multiple times."
+                @assert c === nothing "The `qreg` register has already been declared. Only one quantum register declaration is allowed per QASM program."
                 c = chain(convert(Int, stmt.size))
             elseif convert(String, stmt.type) == "creg"
-                @assert outcomes === nothing "The `creg` can not be declared multiple times."
+                @assert outcomes === nothing "The `creg` register has already been declared. Only one classical register declaration is allowed per QASM program."
                 outcomes = Vector{Any}(undef, convert(Int, stmt.size))
             else
                 error("Unsupported register type: $(stmt.type)")
