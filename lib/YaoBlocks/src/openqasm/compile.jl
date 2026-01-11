@@ -78,9 +78,61 @@ end
 
 # -> composite blocks
 function print_qasm(io::QASMIOContext, blk::PutBlock{D,M,GT}) where {D, M, GT <: PrimitiveBlock}
+    # Skip global phase gates as they don't affect measurement outcomes
+    content(blk) isa PhaseGate && return nothing
     print_qasm(io, content(blk))
     print(io, " ")
     print_addrs(io, blk.locs)
+end
+
+# Handle PutBlock with ControlBlock content - need to remap qubit locations
+function print_qasm(io::QASMIOContext, blk::PutBlock{D,M,GT}) where {D, M, GT <: ControlBlock}
+    ctrl_blk = content(blk)
+    locs = blk.locs
+    # Map the control and target locations from the inner system to the outer system
+    ctrl_locs = Tuple(locs[i] for i in ctrl_blk.ctrl_locs)
+    target_locs = Tuple(locs[i] for i in ctrl_blk.locs)
+    ctrl_config = ctrl_blk.ctrl_config
+    gate = content(ctrl_blk)
+
+    # Single positive control - use QASM 2.0 gates
+    if length(ctrl_locs) == 1 && ctrl_config[1] == 1
+        if gate isa XGate
+            print(io, "cx ")
+        elseif gate isa YGate
+            print(io, "cy ")
+        elseif gate isa ZGate
+            print(io, "cz ")
+        elseif gate isa HGate
+            print(io, "ch ")
+        elseif gate isa ShiftGate
+            print(io, "cu1")
+            print_params(io, getiparams(gate))
+            print(io, " ")
+        elseif gate isa RotationGate{2, T, ZGate} where T
+            print(io, "crz")
+            print_params(io, getiparams(gate))
+            print(io, " ")
+        else
+            # Fallback to QASM 3.0 syntax
+            print(io, "ctrl @ ")
+            print_qasm(io, gate)
+            print(io, " ")
+        end
+        print_addrs(io, (ctrl_locs..., target_locs...))
+    # Double positive control for X gate (Toffoli)
+    elseif length(ctrl_locs) == 2 && all(==(1), ctrl_config) && gate isa XGate
+        print(io, "ccx ")
+        print_addrs(io, (ctrl_locs..., target_locs...))
+    else
+        # Fallback to QASM 3.0 syntax for complex cases
+        for c in ctrl_config
+            print(io, c == 1 ? "ctrl @ " : "negctrl @ ")
+        end
+        print_qasm(io, gate)
+        print(io, " ")
+        print_addrs(io, (ctrl_locs..., target_locs...))
+    end
 end
 
 function print_qasm(io::QASMIOContext, blk::ControlBlock{GT}) where GT <: PrimitiveBlock
@@ -133,10 +185,16 @@ end
 function print_qasm(io::QASMIOContext, blk::ChainBlock)
     for b in subblocks(blk)
         @assert b isa CompositeBlock "primitive gate in chain block should be a composite block."
+        # Skip global phase gates as they don't produce QASM output
+        _is_global_phase(b) && continue
         print_qasm(io, b)
         println(io, ";")
     end
 end
+
+# Check if a block is a global phase (doesn't affect measurement outcomes)
+_is_global_phase(::AbstractBlock) = false
+_is_global_phase(blk::PutBlock) = content(blk) isa PhaseGate
 
 function print_qasm(io::QASMIOContext, blk::Daggered)
     print(io, "inv @ ")
@@ -171,10 +229,29 @@ function print_qasm(io::QASMIOContext, blk::RotationGate{2, T, <:PrimitiveBlock}
 end
 
 # p (phase gate)
-function print_qasm(io::QASMIOContext, blk::ShiftGate) 
+function print_qasm(io::QASMIOContext, blk::ShiftGate)
     print(io, "p")
     print_params(io, getiparams(blk))
 end
+
+# swap gate
+print_qasm(io::QASMIOContext, ::SWAPGate) = print(io, "swap")
+
+# rzz gate - rotation around ZZ
+function print_qasm(io::QASMIOContext, blk::RotationGate{2, T, <:KronBlock}) where T
+    kb = content(blk)
+    # Check if this is a ZZ rotation (kron(Z, Z))
+    subs = subblocks(kb)
+    if length(subs) == 2 && subs[1] isa ZGate && subs[2] isa ZGate
+        print(io, "rzz")
+        print_params(io, getiparams(blk))
+    else
+        error("Only ZZ rotation (rzz) is supported for KronBlock rotation, got: $blk")
+    end
+end
+
+# PhaseGate (global phase) - ignore in QASM output as it doesn't affect measurement outcomes
+print_qasm(io::QASMIOContext, ::PhaseGate) = nothing
 
 # Fallback for unsupported blocks
 function print_qasm(io::QASMIOContext, blk::AbstractBlock)

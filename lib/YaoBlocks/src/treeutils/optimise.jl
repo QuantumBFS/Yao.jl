@@ -163,11 +163,11 @@ function eliminate_nested(ex::T) where {T<:Union{ChainBlock,Add}}
 end
 
 raise_chain(ex::AbstractBlock) = ex
-raise_chain(ex::ChainBlock) = chain([raise_chain(block) for block in ex])
+raise_chain(ex::ChainBlock) = chain(nqubits(ex), [raise_chain(block) for block in ex])
 function raise_chain(ex::PutBlock)
     content = raise_chain(ex.content)
     if content isa ChainBlock
-        return chain([put(nqubits(ex), ex.locs => block) for block in content])
+        return chain(nqubits(ex), [put(nqubits(ex), ex.locs => block) for block in content])
     else
         return ex
     end
