@@ -45,7 +45,7 @@ common OpenQASM 2.0 gate definitions through `qelib1.inc`.
 
 # Notes
 - Qubit indices in QASM are 0-based, while YaoBlocks uses 1-based indexing
-- For unsupported blocks, consider using `YaoBlocks.Optimise.to_basictypes` first
+- Circuits are automatically simplified using `Optimise.canonicalize` before compilation
 - Parsing via `parseblock` supports both OpenQASM 2.0 and 3.0 inputs
 
 # Examples
@@ -133,13 +133,10 @@ function print_qasm(io::QASMIOContext, blk::ControlBlock{GT}) where GT <: Primit
 end
 
 function print_qasm(io::QASMIOContext, blk::ChainBlock)
-    for (k, b) in enumerate(subblocks(blk))
+    for b in subblocks(blk)
         @assert b isa CompositeBlock "primitive gate in chain block should be a composite block."
         print_qasm(io, b)
-        # Don't add semicolon after nested ChainBlocks (they handle their own semicolons)
-        if !(b isa ChainBlock)
-            println(io, ";")
-        end
+        println(io, ";")
     end
 end
 
@@ -183,7 +180,7 @@ end
 
 # Fallback for unsupported blocks
 function print_qasm(io::QASMIOContext, blk::AbstractBlock)
-    error("block type not supported for QASM output, got: $blk. Try simplifying the circuit with the `YaoBlocks.Optimise.to_basictypes` function.")
+    error("block type not supported for QASM output, got: $blk")
 end
 
 # HELPERS

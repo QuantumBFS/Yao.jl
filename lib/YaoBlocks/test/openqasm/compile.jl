@@ -57,7 +57,7 @@ end
     @test qasm(chain(put(6, 5=>X), put(6, 3=>X)); include_header=true) == expected
     @test_throws AssertionError qasm(chain(X, Y))
 
-    # nested chain blocks (no extra semicolons)
+    # nested chain blocks are flattened by canonicalize
     nested = chain(2, chain(put(2, 1=>X), put(2, 2=>Y)), chain(put(2, 1=>Z)))
     @test qasm(nested) == "x q[0];\ny q[1];\nz q[0];\n"
 end
