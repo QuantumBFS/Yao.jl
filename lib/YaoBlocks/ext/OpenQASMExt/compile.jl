@@ -27,7 +27,7 @@ common OpenQASM 2.0 gate definitions through `qelib1.inc`.
 
 # Arguments
 - `block::AbstractBlock`: The quantum circuit block to convert
-- `include_header::Bool=false`: Whether to include the QASM header with version, 
+- `include_header::Bool=false`: Whether to include the QASM header with version,
   include statement, and qubit register declaration
 
 # Returns
@@ -61,7 +61,7 @@ julia> qasm(chain(put(2, 1=>H), control(1, 2=>X)); include_header=true)
 
 See also: [`parseblock`](@ref)
 """
-function qasm(block::AbstractBlock; include_header::Bool=false)
+function YaoBlocks.qasm(block::AbstractBlock; include_header::Bool=false)
     # Recursively simplify circuit before compiling: eliminate nested blocks and convert to basic types
     block = Optimise.canonicalize(block)
 

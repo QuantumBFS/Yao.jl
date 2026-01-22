@@ -136,8 +136,35 @@ include("deprecations.jl")
 
 include("pauli_propagation.jl")
 
-# OpenQASM support
-include("openqasm/openqasm.jl")
+# OpenQASM support (requires OpenQASM package to be loaded)
+"""
+    qasm(block::AbstractBlock; include_header::Bool=false) -> String
+
+Convert a YaoBlocks circuit to an OpenQASM string.
+
+This function requires the OpenQASM package to be loaded. Load it with:
+```julia
+using OpenQASM
+```
+
+See the OpenQASM extension documentation for more details.
+"""
+function qasm end
+
+"""
+    parseblock(qasm::String) -> SimulationTask
+
+Parse an OpenQASM string into a YaoBlocks circuit.
+
+This function requires the OpenQASM package to be loaded. Load it with:
+```julia
+using OpenQASM
+```
+
+See the OpenQASM extension documentation for more details.
+"""
+function parseblock end
+
 export qasm, parseblock
 
 end # YaoBlocks

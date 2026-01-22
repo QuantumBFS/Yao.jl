@@ -71,5 +71,6 @@ end
 end
 
 @testset "openqasm" begin
+    using OpenQASM
     include("openqasm/openqasm.jl")
 end

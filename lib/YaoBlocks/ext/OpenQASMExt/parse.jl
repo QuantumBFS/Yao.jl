@@ -99,13 +99,13 @@ chain
 
 See also: [`qasm`](@ref)
 """
-function parseblock(qasm::String, gate_error::Vector{ErrorPattern}=ErrorPattern[])
+function YaoBlocks.parseblock(qasm::String, gate_error::Vector{ErrorPattern}=ErrorPattern[])
     ast = OpenQASM.parse(qasm)
     parseblock(ast, gate_error)
 end
 
 # parse block from AST
-function parseblock(ast::OpenQASM.Types.MainProgram, gate_error::Vector{ErrorPattern})
+function YaoBlocks.parseblock(ast::OpenQASM.Types.MainProgram, gate_error::Vector{ErrorPattern})
     c = nothing
     outcomes = nothing
     for stmt in ast.prog
@@ -241,7 +241,7 @@ function parse_instruction!(c::ChainBlock, name, qargs, cargs, gate_error::Vecto
     else
         error("Unsupported instruction: $name")
     end
-    
+
     # Add noise after each gate
     add_noise!(c, name, qargs, gate_error)
     return c
@@ -358,10 +358,10 @@ function parse_noise_model(data)
     gate_errors = ErrorPattern[]
     ro_errors = ReadOutError[]
     _render_locs(locs) = [collect(Int, loc) .+ 1 for loc in locs]
-    
+
     for noise in data
         noise_type = noise["type"]
-        
+
         if noise_type == "depolarizing"
             # Single-qubit depolarizing noise
             err = DepolarizingError(1, noise["probability"])
@@ -416,7 +416,7 @@ function parse_noise_model(data)
             kraus_ops = [reduce(hcat, op) for op in noise["kraus_ops"]]  # Convert to matrices
             err = CustomKrausError(kraus_ops)
             push!(gate_errors, ErrorPattern(_render_locs(noise["qubits"]), collect(String, noise["operations"]), err))
-            
+
         elseif noise_type == "roerror"
             # Readout error
             probability_matrix = noise["probability"]
@@ -426,6 +426,6 @@ function parse_noise_model(data)
             error("unknown noise type: $(noise_type)")
         end
     end
-    
+
     return gate_errors, ro_errors
 end

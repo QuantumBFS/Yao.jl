@@ -1,51 +1,58 @@
 using Test, YaoBlocks, YaoBlocks.ConstGate
-using YaoBlocks: ErrorPattern, SimulationTask, AtLoc, parse_noise_model, CustomKrausError, ReadOutError
+using OpenQASM
+
+# Get the OpenQASM extension module
+const OpenQASMExt = Base.get_extension(YaoBlocks, :OpenQASMExt)
+using .OpenQASMExt: ErrorPattern, SimulationTask, AtLoc, parse_noise_model, CustomKrausError, ReadOutError
+using .OpenQASMExt: parse_instruction!
+# Note: parseblock is extended on YaoBlocks.parseblock, so use it from YaoBlocks
+using YaoBlocks: parseblock
 
 @testset "parse instruction" begin
     c1 = chain(1)
     pattern = ErrorPattern[]
     # single qubits gates
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "id", [1], [], pattern)[end]) ≈ [1 0; 0 1]
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "x", [1], [], pattern)[end]) ≈ [0 1; 1 0]
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "y", [1], [], pattern)[end]) ≈ [0 -im; im 0]
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "z", [1], [], pattern)[end]) ≈ [1 0; 0 -1]
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "h", [1], [], pattern)[end]) ≈ [1 1; 1 -1] / sqrt(2)
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "s", [1], [], pattern)[end]) ≈ [1 0; 0 im]
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "sdg", [1], [], pattern)[end]) ≈ [1 0; 0 -im]
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "t", [1], [], pattern)[end]) ≈ [1 0; 0 exp(im*pi/4)]
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "tdg", [1], [], pattern)[end]) ≈ [1 0; 0 exp(-im*pi/4)]
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "rx", [1], [0.5], pattern)[end]) ≈ [cos(0.5/2) -im*sin(0.5/2); -im*sin(0.5/2) cos(0.5/2)]
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "ry", [1], [0.5], pattern)[end]) ≈ [cos(0.5/2) -sin(0.5/2); sin(0.5/2) cos(0.5/2)]
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "rz", [1], [0.5], pattern)[end]) ≈ [exp(-im*0.5/2) 0; 0 exp(im*0.5/2)]
+    @test Matrix(parse_instruction!(c1, "id", [1], [], pattern)[end]) ≈ [1 0; 0 1]
+    @test Matrix(parse_instruction!(c1, "x", [1], [], pattern)[end]) ≈ [0 1; 1 0]
+    @test Matrix(parse_instruction!(c1, "y", [1], [], pattern)[end]) ≈ [0 -im; im 0]
+    @test Matrix(parse_instruction!(c1, "z", [1], [], pattern)[end]) ≈ [1 0; 0 -1]
+    @test Matrix(parse_instruction!(c1, "h", [1], [], pattern)[end]) ≈ [1 1; 1 -1] / sqrt(2)
+    @test Matrix(parse_instruction!(c1, "s", [1], [], pattern)[end]) ≈ [1 0; 0 im]
+    @test Matrix(parse_instruction!(c1, "sdg", [1], [], pattern)[end]) ≈ [1 0; 0 -im]
+    @test Matrix(parse_instruction!(c1, "t", [1], [], pattern)[end]) ≈ [1 0; 0 exp(im*pi/4)]
+    @test Matrix(parse_instruction!(c1, "tdg", [1], [], pattern)[end]) ≈ [1 0; 0 exp(-im*pi/4)]
+    @test Matrix(parse_instruction!(c1, "rx", [1], [0.5], pattern)[end]) ≈ [cos(0.5/2) -im*sin(0.5/2); -im*sin(0.5/2) cos(0.5/2)]
+    @test Matrix(parse_instruction!(c1, "ry", [1], [0.5], pattern)[end]) ≈ [cos(0.5/2) -sin(0.5/2); sin(0.5/2) cos(0.5/2)]
+    @test Matrix(parse_instruction!(c1, "rz", [1], [0.5], pattern)[end]) ≈ [exp(-im*0.5/2) 0; 0 exp(im*0.5/2)]
     # u1, u2, u3
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "u1", [1], [0.5], pattern)[end]) ≈ [1 0; 0 exp(im*0.5)]
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "u2", [1], [0.5, 0.6], pattern)[end]) ≈ [1 -exp(im*0.6); exp(im*0.5) exp(im*1.1)] ./ sqrt(2)
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "u3", [1], [0.3, 0.5, 0.6], pattern)[end]) ≈ [cos(0.3/2) -exp(im*0.6)*sin(0.3/2); exp(im*0.5)*sin(0.3/2) exp(im*1.1)*cos(0.3/2)]
+    @test Matrix(parse_instruction!(c1, "u1", [1], [0.5], pattern)[end]) ≈ [1 0; 0 exp(im*0.5)]
+    @test Matrix(parse_instruction!(c1, "u2", [1], [0.5, 0.6], pattern)[end]) ≈ [1 -exp(im*0.6); exp(im*0.5) exp(im*1.1)] ./ sqrt(2)
+    @test Matrix(parse_instruction!(c1, "u3", [1], [0.3, 0.5, 0.6], pattern)[end]) ≈ [cos(0.3/2) -exp(im*0.6)*sin(0.3/2); exp(im*0.5)*sin(0.3/2) exp(im*1.1)*cos(0.3/2)]
     # sx and sxdg
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "sx", [1], [], pattern)[end]) ≈ [1+im 1-im; 1-im 1+im]/2
+    @test Matrix(parse_instruction!(c1, "sx", [1], [], pattern)[end]) ≈ [1+im 1-im; 1-im 1+im]/2
     # r
-    @test Matrix(YaoBlocks.parse_instruction!(c1, "r", [1], [0.5, 0.6], pattern)[end]) ≈ [cos(0.5/2) -im*exp(-im*0.6)*sin(0.5/2); -im*exp(im*0.6)*sin(0.5/2) cos(0.5/2)]
+    @test Matrix(parse_instruction!(c1, "r", [1], [0.5, 0.6], pattern)[end]) ≈ [cos(0.5/2) -im*exp(-im*0.6)*sin(0.5/2); -im*exp(im*0.6)*sin(0.5/2) cos(0.5/2)]
     # two qubits gates
     c2 = chain(2)
     reorder(x) = reshape(permutedims(reshape(x, 2, 2, 2, 2), (2, 1, 4, 3)), 4, 4)
-    @test Matrix(YaoBlocks.parse_instruction!(c2, "cx", [1, 2], [], pattern)[end]) ≈ reorder([1 0 0 0; 0 1 0 0; 0 0 0 1; 0 0 1 0])
-    @test Matrix(YaoBlocks.parse_instruction!(c2, "cy", [1, 2], [], pattern)[end]) ≈ reorder([1 0 0 0; 0 1 0 0; 0 0 0 -im; 0 0 im 0])
-    @test Matrix(YaoBlocks.parse_instruction!(c2, "cz", [1, 2], [], pattern)[end]) ≈ reorder([1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 -1])
-    @test Matrix(YaoBlocks.parse_instruction!(c2, "ch", [1, 2], [], pattern)[end]) ≈ reorder([1 0 0 0; 0 1 0 0; 0 0 1/sqrt(2) 1/sqrt(2); 0 0 1/sqrt(2) -1/sqrt(2)])
-    @test Matrix(YaoBlocks.parse_instruction!(c2, "crz", [1, 2], [0.5], pattern)[end]) ≈ reorder([1 0 0 0; 0 1 0 0; 0 0 exp(-im*0.5/2) 0; 0 0 0 exp(im*0.5/2)])
+    @test Matrix(parse_instruction!(c2, "cx", [1, 2], [], pattern)[end]) ≈ reorder([1 0 0 0; 0 1 0 0; 0 0 0 1; 0 0 1 0])
+    @test Matrix(parse_instruction!(c2, "cy", [1, 2], [], pattern)[end]) ≈ reorder([1 0 0 0; 0 1 0 0; 0 0 0 -im; 0 0 im 0])
+    @test Matrix(parse_instruction!(c2, "cz", [1, 2], [], pattern)[end]) ≈ reorder([1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 -1])
+    @test Matrix(parse_instruction!(c2, "ch", [1, 2], [], pattern)[end]) ≈ reorder([1 0 0 0; 0 1 0 0; 0 0 1/sqrt(2) 1/sqrt(2); 0 0 1/sqrt(2) -1/sqrt(2)])
+    @test Matrix(parse_instruction!(c2, "crz", [1, 2], [0.5], pattern)[end]) ≈ reorder([1 0 0 0; 0 1 0 0; 0 0 exp(-im*0.5/2) 0; 0 0 0 exp(im*0.5/2)])
     # cu1 and cu3
-    @test Matrix(YaoBlocks.parse_instruction!(c2, "cu1", [1, 2], [0.5], pattern)[end]) ≈ reorder([1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 exp(im*0.5)])
-    @test Matrix(YaoBlocks.parse_instruction!(c2, "cu3", [1, 2], [0.3, 0.5, 0.6], pattern)[end]) ≈ reorder([1 0 0 0; 0 1 0 0; 0 0 cos(0.3/2) -exp(im*0.6)*sin(0.3/2); 0 0 exp(im*0.5)*sin(0.3/2) exp(im*1.1)*cos(0.3/2)])
+    @test Matrix(parse_instruction!(c2, "cu1", [1, 2], [0.5], pattern)[end]) ≈ reorder([1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 exp(im*0.5)])
+    @test Matrix(parse_instruction!(c2, "cu3", [1, 2], [0.3, 0.5, 0.6], pattern)[end]) ≈ reorder([1 0 0 0; 0 1 0 0; 0 0 cos(0.3/2) -exp(im*0.6)*sin(0.3/2); 0 0 exp(im*0.5)*sin(0.3/2) exp(im*1.1)*cos(0.3/2)])
     # rxx and rzz
-    @test Matrix(YaoBlocks.parse_instruction!(c2, "rxx", [1, 2], [0.5], pattern)[end]) ≈ [cos(0.25) 0 0 -im*sin(0.25); 0 cos(0.25) -im*sin(0.25) 0; 0 -im*sin(0.25) cos(0.25) 0; -im*sin(0.25) 0 0 cos(0.25)]
-    @test Matrix(YaoBlocks.parse_instruction!(c2, "rzz", [1, 2], [0.5], pattern)[end]) ≈ [exp(-im*0.25) 0 0 0; 0 exp(im*0.25) 0 0; 0 0 exp(im*0.25) 0; 0 0 0 exp(-im*0.25)]
+    @test Matrix(parse_instruction!(c2, "rxx", [1, 2], [0.5], pattern)[end]) ≈ [cos(0.25) 0 0 -im*sin(0.25); 0 cos(0.25) -im*sin(0.25) 0; 0 -im*sin(0.25) cos(0.25) 0; -im*sin(0.25) 0 0 cos(0.25)]
+    @test Matrix(parse_instruction!(c2, "rzz", [1, 2], [0.5], pattern)[end]) ≈ [exp(-im*0.25) 0 0 0; 0 exp(im*0.25) 0 0; 0 0 exp(im*0.25) 0; 0 0 0 exp(-im*0.25)]
     # swap
-    @test Matrix(YaoBlocks.parse_instruction!(c2, "swap", [1, 2], [], pattern)[end]) ≈ [1 0 0 0; 0 0 1 0; 0 1 0 0; 0 0 0 1]
+    @test Matrix(parse_instruction!(c2, "swap", [1, 2], [], pattern)[end]) ≈ [1 0 0 0; 0 0 1 0; 0 1 0 0; 0 0 0 1]
 
     # ccx
     c3 = chain(3)
     reorder3(x) = reshape(permutedims(reshape(x, 2, 2, 2, 2, 2, 2), (3, 2, 1, 6, 5, 4)), 8, 8)
-    @test Matrix(YaoBlocks.parse_instruction!(c3, "ccx", [1, 2, 3], [], pattern)[end]) ≈ reorder3([1 0 0 0 0 0 0 0; 0 1 0 0 0 0 0 0; 0 0 1 0 0 0 0 0; 0 0 0 1 0 0 0 0; 0 0 0 0 1 0 0 0; 0 0 0 0 0 1 0 0; 0 0 0 0 0 0 0 1; 0 0 0 0 0 0 1 0])
+    @test Matrix(parse_instruction!(c3, "ccx", [1, 2, 3], [], pattern)[end]) ≈ reorder3([1 0 0 0 0 0 0 0; 0 1 0 0 0 0 0 0; 0 0 1 0 0 0 0 0; 0 0 0 1 0 0 0 0; 0 0 0 0 1 0 0 0; 0 0 0 0 0 1 0 0; 0 0 0 0 0 0 0 1; 0 0 0 0 0 0 1 0])
 end
 
 @testset "parse instruction with noise" begin
@@ -107,8 +114,8 @@ end
         measure q[1] -> c1[1];
         measure q[2] -> c1[2];    
     """
-    ast = YaoBlocks.OpenQASM.parse(qasm_str)
-    @test ast isa YaoBlocks.OpenQASM.Types.MainProgram
+    ast = OpenQASM.parse(qasm_str)
+    @test ast isa OpenQASM.Types.MainProgram
     task = parseblock(ast, pattern)
     @test length(task.circuit) == 49
 
@@ -135,7 +142,7 @@ end
         measure q[1] -> c1[1];
         measure q[2] -> c1[2];    
     """
-    ast = YaoBlocks.OpenQASM.parse(qasm_str)
+    ast = OpenQASM.parse(qasm_str)
     task = parseblock(ast, pattern)
     @test task.circuit == chain(3,
         put(3, 1=>X),   # rule 4 match
@@ -182,8 +189,8 @@ end
         measure q[1] -> c1[1];
         measure q[2] -> c1[2];    
     """
-    ast = YaoBlocks.OpenQASM.parse(qasm_str)
-    @test ast isa YaoBlocks.OpenQASM.Types.MainProgram
+    ast = OpenQASM.parse(qasm_str)
+    @test ast isa OpenQASM.Types.MainProgram
 end
 
 @testset "parse block" begin
@@ -239,8 +246,8 @@ cu1(pi/2) q[3],q[2];
 h q[3];
 measure q -> c;
 """
-    ast = YaoBlocks.OpenQASM.parse(qasm_str)
-    @test ast isa YaoBlocks.OpenQASM.Types.MainProgram
+    ast = OpenQASM.parse(qasm_str)
+    @test ast isa OpenQASM.Types.MainProgram
     task = parseblock(ast, ErrorPattern[])
     @test length(task.circuit) == 13
     @test length(task.outcomes) == 4
@@ -439,8 +446,8 @@ end
     creg c[1];
     measure q[2] -> c[0];
     """
-    ast = YaoBlocks.OpenQASM.parse(qasm_str)
-    @test ast isa YaoBlocks.OpenQASM.Types.MainProgram
+    ast = OpenQASM.parse(qasm_str)
+    @test ast isa OpenQASM.Types.MainProgram
     task = parseblock(ast, ErrorPattern[])
     @test task.outcomes[1] == Measure(3; locs=3)
 end
@@ -457,8 +464,8 @@ end
     creg c[1];
     measure q -> c;
     """
-    ast = YaoBlocks.OpenQASM.parse(qasm_str)
-    @test ast isa YaoBlocks.OpenQASM.Types.MainProgram
+    ast = OpenQASM.parse(qasm_str)
+    @test ast isa OpenQASM.Types.MainProgram
     task = parseblock(ast, ErrorPattern[])
     @test task isa SimulationTask
 end
