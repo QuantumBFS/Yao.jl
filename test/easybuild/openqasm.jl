@@ -1,4 +1,4 @@
-using Test, Yao, Yao.EasyBuild
+using Test, Yao, Yao.EasyBuild, OpenQASM
 
 @testset "qft_circuit roundtrip" begin
     for n in 2:5
