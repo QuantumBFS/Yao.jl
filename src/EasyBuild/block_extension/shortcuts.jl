@@ -20,3 +20,12 @@ YaoPlots.get_brush_texts(c, ::SqrtWGate) = (c.gatestyles.g, "√W")
 YaoPlots.get_brush_texts(c, ::SqrtXGate) = (c.gatestyles.g, "√X")
 YaoPlots.get_brush_texts(c, ::SqrtYGate) = (c.gatestyles.g, "√Y")
 
+# Decompose to basic rotation gates for QASM compatibility.
+# These are equivalent up to a global phase:
+#   SqrtX = exp(iπ/4) * Rx(π/2)
+#   SqrtY = exp(iπ/4) * Ry(π/2)
+# Global phase doesn't affect measurement outcomes or fidelity.
+YaoBlocks.Optimise.to_basictypes(::SqrtXGate) = Rx(Float64(π)/2)
+YaoBlocks.Optimise.to_basictypes(::SqrtYGate) = Ry(Float64(π)/2)
+YaoBlocks.Optimise.to_basictypes(::SqrtWGate) = chain(Rz(-Float64(π)/4), Rx(Float64(π)/2), Rz(Float64(π)/4))
+

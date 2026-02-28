@@ -69,3 +69,8 @@ end
 @testset "pauli propagation" begin
     include("pauli_propagation.jl")
 end
+
+@testset "openqasm" begin
+    using OpenQASM
+    include("openqasm/openqasm.jl")
+end

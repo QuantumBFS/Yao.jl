@@ -25,6 +25,7 @@ BitBasis = "0.8, 0.9"
 CUDA = "4, 5"
 LinearAlgebra = "1"
 LuxurySparse = "0.8"
+OpenQASM = "2"
 Reexport = "1"
 YaoAPI = "0.4"
 YaoArrayRegister = "0.9"
@@ -37,9 +38,10 @@ julia = "1"
 [extras]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+OpenQASM = "a8821629-a4c0-4df7-9e00-12969ff383a7"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 SymEngine = "123dc426-2d89-5057-bbad-38513e3affd8"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "LinearAlgebra", "Documenter", "Random", "SymEngine"]
+test = ["Test", "LinearAlgebra", "Documenter", "Random", "SymEngine", "OpenQASM"]

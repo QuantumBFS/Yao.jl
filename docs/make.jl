@@ -61,6 +61,7 @@ const PAGES = [
         "man/cuda.md",
         "man/plot.md",
         "man/automatic_differentiation.md",
+        "man/openqasm.md",
         "man/yao2einsum.md",
         "man/paulipropagation.md",
         "man/simplification.md",

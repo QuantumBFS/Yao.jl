@@ -22,9 +22,11 @@ YaoAPI = "0843a435-28de-4971-9e8b-a9641b2983a8"
 YaoArrayRegister = "e600142f-9330-5003-8abb-0ebd767abc51"
 
 [weakdeps]
+OpenQASM = "a8821629-a4c0-4df7-9e00-12969ff383a7"
 PauliPropagation  = "293282d5-3c99-4fb6-92d0-fd3280a19750"
 
 [extensions]
+OpenQASMExt = "OpenQASM"
 PauliPropagationExt = "PauliPropagation"
 
 [compat]
@@ -38,6 +40,7 @@ LegibleLambdas = "0.2, 0.3"
 LinearAlgebra = "1"
 LuxurySparse = "0.8"
 MLStyle = "0.3, 0.4"
+OpenQASM = "2"
 PauliPropagation = "0.4"
 Random = "1"
 SparseArrays = "1"
@@ -50,8 +53,9 @@ julia = "1"
 
 [extras]
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+OpenQASM = "a8821629-a4c0-4df7-9e00-12969ff383a7"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [targets]
-test = ["Test", "ForwardDiff", "Zygote", "PauliPropagation"]
+test = ["Test", "ForwardDiff", "Zygote", "PauliPropagation", "OpenQASM"]
