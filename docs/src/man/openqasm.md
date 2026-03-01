@@ -348,7 +348,4 @@ Supported noise types:
 
 ## API Reference
 
-```@docs
-qasm
-parseblock
-```
+See [`qasm`](@ref) and [`parseblock`](@ref) in the [Blocks](@ref) manual for full API documentation.

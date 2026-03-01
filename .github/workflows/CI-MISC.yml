@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1' # LTS
+          - '1' # latest stable
           - 'nightly'
         os:
           - ubuntu-latest
@@ -23,9 +23,10 @@ jobs:
         package: # only test Yao and YaoBlocks on LTS
           - Yao
           - YaoBlocks
+    continue-on-error: ${{ matrix.version == 'nightly' }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@v1
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
