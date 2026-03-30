@@ -27,6 +27,15 @@ end
 
 
 _sort(x::Vector; by = identity) = sort(x, by = by)
+# TupleTools.sort recurses on sub-tuples, generating O(N²) distinct _merge
+# specialisations for a length-N tuple.  collect+sort! compiles once per (N,T)
+# with O(N) LLVM instructions and zero recursive sub-specialisations.
+function _sort(x::NTuple{N,T}; by = identity) where {N,T}
+    v = collect(x)
+    sort!(v, by = by)
+    return return NTuple{N}(v)
+end
+# Heterogeneous Tuple (e.g. Tuple{Int, UnitRange{Int}}): always small in practice.
 _sort(x::Tuple; by = identity) = TupleTools.sort(x, by = by)
 
 # NOTE: this method assumes its input is not empty, it gets rid of errors
@@ -45,10 +54,7 @@ const AddressList{T} = Union{AddressVector{T},AddressNTuple{N,T} where N}
 Check if the input locations are inside given bounds `n`.
 """
 function islocs_inbounds(n::Int, locs::AddressList)
-    length(locs) == 0 && return true
-    locs = _sort(locs, by = x -> nonempty_minimum(x))
-    (minimum(first(locs)) > 0 && maximum(last(locs)) <= n) || return false
-    return true
+    all(loc -> nonempty_minimum(loc) > 0 && nonempty_maximum(loc) <= n, locs)
 end
 
 """
@@ -63,6 +69,18 @@ function islocs_conflict(locs::AddressList)
     end
     return false
 end
+
+function islocs_conflict(locs::NTuple{N,Int}) where {N}
+    # Use a BitVector keyed by location index; avoids any tuple recursion.
+    isempty(locs) && return false
+    seen = falses(maximum(locs))
+    for l in locs
+        @inbounds seen[l] && return true
+        @inbounds seen[l] = true
+    end
+    return false
+end
+
 
 function process_msgs(msgs...; default = "")
     msg = isempty(msgs) ? default : msgs[1]
