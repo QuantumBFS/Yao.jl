@@ -70,7 +70,7 @@ function islocs_conflict(locs::AddressList)
     return false
 end
 
-function islocs_conflict(locs::NTuple{N,Int}) where {N}
+function islocs_conflict(locs::NTuple{N,T}) where {N, T<:Integer}
     # Use a BitVector keyed by location index; avoids any tuple recursion.
     isempty(locs) && return false
     seen = falses(maximum(locs))
