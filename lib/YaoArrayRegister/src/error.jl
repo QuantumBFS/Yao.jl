@@ -71,14 +71,7 @@ function islocs_conflict(locs::AddressList)
 end
 
 function islocs_conflict(locs::NTuple{N,T}) where {N, T<:Integer}
-    # Use a BitVector keyed by location index; avoids any tuple recursion.
-    isempty(locs) && return false
-    seen = falses(maximum(locs))
-    for l in locs
-        @inbounds seen[l] && return true
-        @inbounds seen[l] = true
-    end
-    return false
+    return !allunique(locs)
 end
 
 
