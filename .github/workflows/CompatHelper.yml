@@ -7,6 +7,7 @@ jobs:
   CompatHelper:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: "Add the General registry via Git"
         run: |
           import Pkg
