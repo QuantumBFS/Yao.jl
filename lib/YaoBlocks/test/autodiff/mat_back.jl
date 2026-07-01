@@ -153,7 +153,7 @@ end
 
 @testset "mat pow" begin
     use_outeradj = false
-    for n in [-3, -1, 1, 2, 3]
+    for n in [-3, -1, 0, 1, 2, 3]
         @test test_mat_back(
             ComplexF64,
             Power(kron(Rx(0.5), Ry(0.5)), n),
@@ -162,6 +162,4 @@ end
             use_outeradj = use_outeradj,
         )
     end
-    # pow=0 has no params and should just return last arg
-    @test mat_back!(Float64,  Power(put(3, 1=>Rx(0.5)), 0), [], [1,2,3]) == [1,2,3]
 end

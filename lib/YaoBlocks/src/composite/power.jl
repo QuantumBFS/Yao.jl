@@ -27,8 +27,7 @@ chsubblocks(pb::Power, blk::AbstractBlock) = Power(blk, pb.pow)
 occupied_locs(pb::Power) = occupied_locs(pb.content)
 
 function mat(::Type{T}, pb::Power{D}) where {T, D}
-    pb.pow == 0 && return IMatrix{T}(D^nqudits(pb.content))
-    pb.pow  > 0 && return mat(T, pb.content)^pb.pow
+    pb.pow  >= 0 && return mat(T, pb.content)^pb.pow
     return mat(T, adjoint(pb.content))^(-pb.pow)  # unitary: U^(-n) = (U†)^n
 end
 
@@ -40,9 +39,7 @@ function YaoAPI.unsafe_apply!(r::AbstractRegister, pb::Power{D}) where {D}
     return r
 end
 
-function nparameters(pb::Power)
-    return iszero(pb.pow) ? 0 : nparameters(pb.content)
-end
+nparameters(pb::Power) = nparameters(pb.content)
 Base.adjoint(pb::Power) = Power(adjoint(pb.content), pb.pow)
 Base.:(==)(a::Power, b::Power) = a.pow == b.pow && a.content == b.content
 Base.copy(pb::Power) = Power(pb.content, pb.pow)

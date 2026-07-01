@@ -56,13 +56,8 @@ function eigenbasis(op::ChainBlock)
 end
 
 function eigenbasis(op::Power)
-    b = op.pow >= 0 ? content(op) : adjoint(content(op))
-    E = chain(b.n)
-    blks = chain(b.n)
-    Ei, Vi = eigenbasis(b)
-    push!(E, fill(Ei, abs(op.pow))...)
-    push!(blks, fill(Vi, abs(op.pow))...)
-    return E, blks
+    E, V = eigenbasis(content(op))
+    return E^op.pow, V
 end
 
 function eigenbasis(op::Add)
