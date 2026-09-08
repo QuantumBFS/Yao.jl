@@ -22,7 +22,7 @@ CuYao = "CUDA"
 
 [compat]
 BitBasis = "0.8, 0.9"
-CUDA = "4, 5"
+CUDA = "4, 5, 6"
 LinearAlgebra = "1"
 LuxurySparse = "0.8"
 OpenQASM = "2"
