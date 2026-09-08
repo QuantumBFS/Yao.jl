@@ -6,6 +6,11 @@ using YaoPlots: vizcircuit, Luxor
 @testset "gates" begin
     @test isunitary(FSimGate(0.5, 0.6))
     fs = FSimGate(π/2, π/6)
+    fsparams = FSimGate(0.1, 0.2)
+    @test setiparams!(fsparams, 0.2, 0.3) === fsparams
+    @test getiparams(fsparams) == (0.2, 0.3)
+    @test setiparams!(fsparams, (0.4, 0.5)) === fsparams
+    @test getiparams(fsparams) == (0.4, 0.5)
     @test eval(parse_ex(dump_gate(fs), 1)) == fs
     cphase(nbits, i::Int, j::Int, θ::T) where T = control(nbits, i, j=>shift(θ))
     ic = ISWAP*cphase(2, 2, 1, π/6)
