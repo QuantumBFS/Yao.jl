@@ -16,15 +16,20 @@ LuxorGraphPlot = "1f49bdf2-22a7-4bc4-978b-948dc219fbbc"
 LuxorExt = "LuxorGraphPlot"
 
 [compat]
+Aqua = "0.8"
 JSON = "0.21, 1"
+LinearAlgebra = "1"
 LuxorGraphPlot = "0.5"
 OMEinsum = "0.9.1"
+SymEngine = "0.13"
+Test = "1"
 YaoBlocks = "0.14"
 julia = "1.9"
 
 [extras]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 SymEngine = "123dc426-2d89-5057-bbad-38513e3affd8"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "SymEngine", "LuxorGraphPlot"]
+test = ["Aqua", "Test", "SymEngine", "LuxorGraphPlot"]

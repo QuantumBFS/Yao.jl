@@ -1,4 +1,7 @@
 using YaoToEinsum, Test
+using Aqua
+
+Aqua.test_all(YaoToEinsum)
 
 @testset "circuitmap" begin
     include("circuitmap.jl")
