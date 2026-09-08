@@ -104,7 +104,7 @@ result = overlapwithzero(psum)  # Get expectation value
 """
 function YaoBlocks.yao2paulipropagation(circuit::ChainBlock; observable)
     circ = YaoBlocks.Optimise.to_basictypes(circuit)
-    n = nqubits(circ)
+    n = YaoBlocks.nqubits(circ)
     gates = StaticGate[]
     
     # Convert circuit gates
