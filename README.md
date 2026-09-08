@@ -10,6 +10,7 @@ alt="Yao Logo" width="210"></img>
 [![][docs-dev-img]][docs-dev-url]
 [![Unitary Fund][unitary-fund-img]](http://unitary.fund)
 [![ColPrac: Contributor's Guide on Collaborative Practices for Community Packages](https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet)](https://github.com/SciML/ColPrac)
+![Agent maintained](https://img.shields.io/badge/maintenance-agent%20maintained-blue)
 
 **Yao** Extensible, Efficient Quantum Algorithm Design for Humans.
 
