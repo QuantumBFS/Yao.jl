@@ -292,6 +292,14 @@ Dispatch parameters in collection to block tree `x`.
 !!! note
 
     it will try to dispatch the parameters in collection first.
+
+!!! warning
+
+    The operation mutates parameterized blocks in place. If the same block object
+    occurs more than once in the block tree, those occurrences share their final
+    parameter values and cannot receive distinct slices of `collection`. Construct
+    each occurrence independently (or use `deepcopy`) before calling `dispatch!`,
+    or use the non-mutating [`dispatch`](@ref), which rebuilds the block tree.
 """
 function dispatch!(f::Union{Function,Nothing}, x::AbstractBlock, it)
     dp = Dispatcher(it)
