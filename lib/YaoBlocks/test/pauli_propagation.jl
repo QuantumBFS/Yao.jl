@@ -1,4 +1,5 @@
 using YaoBlocks, PauliPropagation, YaoArrayRegister, Test
+import YaoBlocks: nqubits, paulipropagation2yao
 using Random
 
 _isequal(a::GA, b::GB) where {GA<:Gate, GB<:Gate} =  all([getproperty(a, pn) == getproperty(b, pn) for pn in fieldnames(GA)])
