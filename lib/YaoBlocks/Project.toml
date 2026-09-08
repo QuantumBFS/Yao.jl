@@ -23,7 +23,7 @@ YaoArrayRegister = "e600142f-9330-5003-8abb-0ebd767abc51"
 
 [weakdeps]
 OpenQASM = "a8821629-a4c0-4df7-9e00-12969ff383a7"
-PauliPropagation  = "293282d5-3c99-4fb6-92d0-fd3280a19750"
+PauliPropagation = "293282d5-3c99-4fb6-92d0-fd3280a19750"
 
 [extensions]
 OpenQASMExt = "OpenQASM"
@@ -41,7 +41,7 @@ LinearAlgebra = "1"
 LuxurySparse = "0.8"
 MLStyle = "0.3, 0.4"
 OpenQASM = "2"
-PauliPropagation = "0.4"
+PauliPropagation = "0.4, 0.8"
 Random = "1"
 SparseArrays = "1"
 StaticArrays = "0.12, 1.0"

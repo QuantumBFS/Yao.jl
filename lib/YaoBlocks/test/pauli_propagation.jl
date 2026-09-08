@@ -1,4 +1,5 @@
 using YaoBlocks, PauliPropagation, YaoArrayRegister, Test
+import YaoBlocks: nqubits, paulipropagation2yao
 using Random
 
 _isequal(a::GA, b::GB) where {GA<:Gate, GB<:Gate} =  all([getproperty(a, pn) == getproperty(b, pn) for pn in fieldnames(GA)])
@@ -16,9 +17,9 @@ _isequal(a::Vector{GA}, b::Vector{GB}) where {GA<:Gate, GB<:Gate} = all(_isequal
     # Test that observable is a PauliSum
     @test pc.observable isa PauliSum
     # Test round-trip conversion
-    yaocirc2 = paulipropagation2yao(pc)
+    yaocirc2 = YaoBlocks.paulipropagation2yao(pc)
     println(pc)
-    @test nqubits(yaocirc) == nqubits(yaocirc2)
+    @test YaoBlocks.nqubits(yaocirc) == YaoBlocks.nqubits(yaocirc2)
 end
 
 @testset "expectation value" begin
@@ -289,8 +290,8 @@ end
         @test pc.observable isa PauliSum
         
         # Test back conversion
-        yaocirc2 = paulipropagation2yao(pc)
-        @test nqubits(yaocirc) == nqubits(yaocirc2)
+        yaocirc2 = YaoBlocks.paulipropagation2yao(pc)
+        @test YaoBlocks.nqubits(yaocirc) == YaoBlocks.nqubits(yaocirc2)
         
         # Test propagation works
         psum = propagate(pc)
@@ -331,8 +332,8 @@ end
     @test getfield(pc_cz.gates[2], :symbol) == :CZ
     
     # Test round-trip for controlled gates
-    circ_back = paulipropagation2yao(pc_cnot)
-    @test nqubits(circ_back) == n
+    circ_back = YaoBlocks.paulipropagation2yao(pc_cnot)
+    @test YaoBlocks.nqubits(circ_back) == n
     @test length(circ_back) == 3
     
     # Test propagation with control gates
@@ -410,8 +411,8 @@ end
     @test exp_val isa Real
     
     # Test round-trip conversion
-    circ_back = paulipropagation2yao(pc_zz)
-    @test nqubits(circ_back) == n
+    circ_back = YaoBlocks.paulipropagation2yao(pc_zz)
+    @test YaoBlocks.nqubits(circ_back) == n
     @test length(circ_back) == 3
 end
 
@@ -443,8 +444,8 @@ end
     @test exp_val isa Real
     
     # Test round-trip
-    circ_back = paulipropagation2yao(pc)
-    @test nqubits(circ_back) == n
+    circ_back = YaoBlocks.paulipropagation2yao(pc)
+    @test YaoBlocks.nqubits(circ_back) == n
     @test length(circ_back) == 7
 end
 

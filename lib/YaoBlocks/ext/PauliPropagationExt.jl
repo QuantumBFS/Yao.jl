@@ -104,7 +104,7 @@ result = overlapwithzero(psum)  # Get expectation value
 """
 function YaoBlocks.yao2paulipropagation(circuit::ChainBlock; observable)
     circ = YaoBlocks.Optimise.to_basictypes(circuit)
-    n = nqubits(circ)
+    n = YaoBlocks.nqubits(circ)
     gates = StaticGate[]
     
     # Convert circuit gates
@@ -181,7 +181,8 @@ function YaoBlocks.paulipropagation2yao(n::Int, circ::AbstractVector{<:Gate}, th
     return c
 end
 
-YaoBlocks.paulipropagation2yao(pc::PauliPropagationCircuit) = paulipropagation2yao(pc.n, pc.gates, Float64[])
+YaoBlocks.paulipropagation2yao(pc::PauliPropagationCircuit) =
+    YaoBlocks.paulipropagation2yao(pc.n, pc.gates, Float64[])
 
 function yao_to_pauli_gates!(gates::Vector{StaticGate}, g)
     @match g.content begin
@@ -239,11 +240,11 @@ function cast_observable(observable::Scale)
     return cast_observable(observable.content) * observable.alpha
 end
 function cast_observable(observable::KronBlock)
-    n = nqubits(observable)
+    n = YaoBlocks.nqubits(observable)
     return PauliString(n, [yao_to_symbol(block) for block in observable.blocks], [loc[1] for loc in observable.locs])
 end
 function cast_observable(observable::PutBlock)
-    n = nqubits(observable)
+    n = YaoBlocks.nqubits(observable)
     pauli = yao_to_symbol(observable.content)
     locs = observable.locs[1]
     return PauliString(n, pauli, locs)
