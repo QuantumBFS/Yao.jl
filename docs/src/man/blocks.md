@@ -97,6 +97,14 @@ and it will also bind a Julia constant for the given matrix, so when you call `m
 @allocated mat(Rand)
 ```
 
+For a constant block acting on qudits, provide the local dimension with
+`nlevel`. This defines a constant gate acting on one qutrit:
+
+```@repl
+@const_gate RandQutrit = rand(ComplexF64, 3, 3) nlevel=3
+nlevel(RandQutrit)
+```
+
 If you want to use other data type like `ComplexF32`, you could directly call `Rand(ComplexF32)`, which will create a new instance with data type `ComplexF32`.
 
 ```@repl
