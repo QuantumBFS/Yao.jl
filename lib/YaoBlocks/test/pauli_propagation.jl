@@ -16,7 +16,7 @@ _isequal(a::Vector{GA}, b::Vector{GB}) where {GA<:Gate, GB<:Gate} = all(_isequal
     # Test that observable is a PauliSum
     @test pc.observable isa PauliSum
     # Test round-trip conversion
-    yaocirc2 = paulipropagation2yao(pc)
+    yaocirc2 = YaoBlocks.paulipropagation2yao(pc)
     println(pc)
     @test nqubits(yaocirc) == nqubits(yaocirc2)
 end
@@ -289,7 +289,7 @@ end
         @test pc.observable isa PauliSum
         
         # Test back conversion
-        yaocirc2 = paulipropagation2yao(pc)
+        yaocirc2 = YaoBlocks.paulipropagation2yao(pc)
         @test nqubits(yaocirc) == nqubits(yaocirc2)
         
         # Test propagation works
@@ -331,7 +331,7 @@ end
     @test getfield(pc_cz.gates[2], :symbol) == :CZ
     
     # Test round-trip for controlled gates
-    circ_back = paulipropagation2yao(pc_cnot)
+    circ_back = YaoBlocks.paulipropagation2yao(pc_cnot)
     @test nqubits(circ_back) == n
     @test length(circ_back) == 3
     
@@ -410,7 +410,7 @@ end
     @test exp_val isa Real
     
     # Test round-trip conversion
-    circ_back = paulipropagation2yao(pc_zz)
+    circ_back = YaoBlocks.paulipropagation2yao(pc_zz)
     @test nqubits(circ_back) == n
     @test length(circ_back) == 3
 end
@@ -443,7 +443,7 @@ end
     @test exp_val isa Real
     
     # Test round-trip
-    circ_back = paulipropagation2yao(pc)
+    circ_back = YaoBlocks.paulipropagation2yao(pc)
     @test nqubits(circ_back) == n
     @test length(circ_back) == 7
 end

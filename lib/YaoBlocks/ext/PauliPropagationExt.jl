@@ -181,7 +181,8 @@ function YaoBlocks.paulipropagation2yao(n::Int, circ::AbstractVector{<:Gate}, th
     return c
 end
 
-YaoBlocks.paulipropagation2yao(pc::PauliPropagationCircuit) = paulipropagation2yao(pc.n, pc.gates, Float64[])
+YaoBlocks.paulipropagation2yao(pc::PauliPropagationCircuit) =
+    YaoBlocks.paulipropagation2yao(pc.n, pc.gates, Float64[])
 
 function yao_to_pauli_gates!(gates::Vector{StaticGate}, g)
     @match g.content begin
