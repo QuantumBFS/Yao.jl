@@ -18,7 +18,7 @@ _isequal(a::Vector{GA}, b::Vector{GB}) where {GA<:Gate, GB<:Gate} = all(_isequal
     # Test round-trip conversion
     yaocirc2 = YaoBlocks.paulipropagation2yao(pc)
     println(pc)
-    @test nqubits(yaocirc) == nqubits(yaocirc2)
+    @test YaoBlocks.nqubits(yaocirc) == YaoBlocks.nqubits(yaocirc2)
 end
 
 @testset "expectation value" begin
@@ -290,7 +290,7 @@ end
         
         # Test back conversion
         yaocirc2 = YaoBlocks.paulipropagation2yao(pc)
-        @test nqubits(yaocirc) == nqubits(yaocirc2)
+        @test YaoBlocks.nqubits(yaocirc) == YaoBlocks.nqubits(yaocirc2)
         
         # Test propagation works
         psum = propagate(pc)
@@ -332,7 +332,7 @@ end
     
     # Test round-trip for controlled gates
     circ_back = YaoBlocks.paulipropagation2yao(pc_cnot)
-    @test nqubits(circ_back) == n
+    @test YaoBlocks.nqubits(circ_back) == n
     @test length(circ_back) == 3
     
     # Test propagation with control gates
@@ -411,7 +411,7 @@ end
     
     # Test round-trip conversion
     circ_back = YaoBlocks.paulipropagation2yao(pc_zz)
-    @test nqubits(circ_back) == n
+    @test YaoBlocks.nqubits(circ_back) == n
     @test length(circ_back) == 3
 end
 
@@ -444,7 +444,7 @@ end
     
     # Test round-trip
     circ_back = YaoBlocks.paulipropagation2yao(pc)
-    @test nqubits(circ_back) == n
+    @test YaoBlocks.nqubits(circ_back) == n
     @test length(circ_back) == 7
 end
 
