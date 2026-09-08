@@ -9,6 +9,7 @@ using LuxurySparse
     blks = [X, Y, Rx(0.3)]
     @test_throws QubitMismatchError chsubblocks(g, blks) |> subblocks |> collect == blks
     @test chsubblocks(chain(X, Y, Z), X for _ = 1:3) |> subblocks |> collect == [X, X, X]
+    @test chsubblocks(chain(3), Any[]) == chain(3)
 
     c1 = ChainBlock(put(5, 1 => X), put(5, 3 => Y))
     c2 = ChainBlock(put(5, 4 => X), put(5, 5 => Y))
