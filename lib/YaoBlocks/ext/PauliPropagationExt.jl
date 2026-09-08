@@ -239,11 +239,11 @@ function cast_observable(observable::Scale)
     return cast_observable(observable.content) * observable.alpha
 end
 function cast_observable(observable::KronBlock)
-    n = nqubits(observable)
+    n = YaoBlocks.nqubits(observable)
     return PauliString(n, [yao_to_symbol(block) for block in observable.blocks], [loc[1] for loc in observable.locs])
 end
 function cast_observable(observable::PutBlock)
-    n = nqubits(observable)
+    n = YaoBlocks.nqubits(observable)
     pauli = yao_to_symbol(observable.content)
     locs = observable.locs[1]
     return PauliString(n, pauli, locs)
