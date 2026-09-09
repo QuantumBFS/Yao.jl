@@ -9,6 +9,7 @@ using LuxurySparse
     blks = [X, Y, Rx(0.3)]
     @test_throws QubitMismatchError chsubblocks(g, blks) |> subblocks |> collect == blks
     @test chsubblocks(chain(X, Y, Z), X for _ = 1:3) |> subblocks |> collect == [X, X, X]
+    @test chsubblocks(chain(3), Any[]) == chain(3)
 
     c1 = ChainBlock(put(5, 1 => X), put(5, 3 => Y))
     c2 = ChainBlock(put(5, 4 => X), put(5, 5 => Y))
@@ -23,6 +24,17 @@ using LuxurySparse
     c[1] = put(1, 1 => X)
     @test c[1] == put(1, 1 => X)
     @test occupied_locs(chain(put(5, 2 => X), put(5, 3 => I2))) == (2,)
+end
+
+@testset "empty subblocks preserve qudit dimensions" begin
+    for D in (2, 3, 4), n in (0, 1, 2), it in (Any[], (), (x for x in Any[]))
+        original = chain(n; nlevel = D)
+        rebuilt = chsubblocks(original, it)
+        @test nlevel(rebuilt) == D
+        @test nqudits(rebuilt) == n
+        @test isempty(subblocks(rebuilt))
+        @test mat(rebuilt) == mat(original)
+    end
 end
 
 @testset "test chain" begin
