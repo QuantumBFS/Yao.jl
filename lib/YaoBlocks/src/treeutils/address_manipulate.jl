@@ -116,3 +116,7 @@ end
 function map_address(blk::AbstractAdd, info::AddressInfo)
     chsubblocks(blk, map(b -> map_address(b, info), subblocks(blk)))
 end
+
+function map_address(blk::Power, info::AddressInfo)
+    Power(map_address(content(blk), info), blk.pow)
+end

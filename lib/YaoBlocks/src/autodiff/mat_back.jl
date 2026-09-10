@@ -104,6 +104,23 @@ function mat_back!(::Type{T}, rb::KronBlock, adjy, collector) where {T}
     return collector
 end
 
+function mat_back!(::Type{T}, rb::Power{D, BT, PT}, adjy, collector) where {T, D, BT<:AbstractBlock, PT<:Integer}
+    nparameters(rb) == 0 && return collector
+    blk = content(rb)
+    adjy = rb.pow > 0 ? adjy : adjy'
+    U = mat(T, blk)
+    U_adj = U'
+    n = abs(rb.pow)
+    adjb = adjy * (U_adj)^(n-1)
+    adjc = adjb
+    for _ in 1:n-1
+        adjb = U_adj * adjb * U
+        adjc += adjb
+    end
+    mat_back!(T, blk, adjc, collector)
+    return collector
+end
+
 function mat_back!(::Type{T}, rb::AbstractAdd, adjy, collector) where {T}
     nparameters(rb) == 0 && return collector
     for b in subblocks(rb)[end:-1:1]

@@ -40,6 +40,13 @@ qft(n) = chain(block_B(n, i) for i = 1:n)
     )
     @test c5 == 2 * put(10, 1 => X) + Daggered(Scale(Val(2), put(10, 4 => X) |> cache))
 
+    # power
+    c6 = map_address(
+        put(5, 1:2=>kron(X, Y)) ^ 3,
+        AddressInfo(10, [8, 5, 4, 6, 3]),
+    )
+    @test c6 == put(10, [8,5]=>kron(X,Y)) ^ 3
+
     # qft
     c = qft(4)
     @test mat(subroutine(10, c, (6, 2, 3, 7))) ≈

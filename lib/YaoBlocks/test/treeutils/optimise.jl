@@ -56,8 +56,10 @@ end
     @test to_basictypes(control(5, 2, 1 => Rx(0.3))) == control(5, 2, 1 => Rx(0.3))
     @test to_basictypes(kron(5, 2 => Y, 3 => X)) == chain(put(5, 2 => Y), put(5, 3 => X))
 
-    # repeat, measure
+    # repeat, power, measure
     @test to_basictypes(repeat(5, Y, (2, 3))) == chain(put(5, 2 => Y), put(5, 3 => Y))
+    @test to_basictypes(put(1, 1=>X)^3) == chain(put(1, 1=>X), put(1, 1=>X), put(1, 1=>X))
+    @test to_basictypes(put(1, 1=>S)^(-2)) == chain(put(1, 1=>S'), put(1, 1=>S'))
     @test to_basictypes(Measure(5)) == Measure(5)
     @test to_basictypes(Measure(5; locs = (3, 2, 1))) == Measure(5; locs = (3, 2, 1))
     @test to_basictypes(Measure(5; operator = repeat(3, X, 1:3), locs = (3, 2, 1))) ==

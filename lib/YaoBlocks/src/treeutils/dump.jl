@@ -62,6 +62,10 @@ function dump_gate(blk::Scale)
     :($(factor(blk)) * $(dump_gate(blk.content)))
 end
 
+function dump_gate(blk::Power)
+    :($(dump_gate(blk.content)) ^ $(blk.pow))
+end
+
 function dump_gate(blk::Measure)
     if blk.operator == ComputationalBasis()
         MOP = :(Measure)

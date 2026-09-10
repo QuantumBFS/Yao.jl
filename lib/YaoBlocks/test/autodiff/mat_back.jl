@@ -150,3 +150,16 @@ end
         use_outeradj = use_outeradj,
     )
 end
+
+@testset "mat pow" begin
+    use_outeradj = false
+    for n in [-3, -1, 0, 1, 2, 3]
+        @test test_mat_back(
+            ComplexF64,
+            Power(kron(Rx(0.5), Ry(0.5)), n),
+            [0.5, 0.5];
+            δ = 1e-5,
+            use_outeradj = use_outeradj,
+        )
+    end
+end

@@ -33,6 +33,7 @@ end
         addblock!(c, control(2, 3=>X))
         addblock!(c, control(2, 3=>shift(0.5)))
         addblock!(c, chain(5, control(2, 3=>X), put(1=>X)))
+        addblock!(c, Power(control(2, 3=>X), 5))
         @test YaoPlots.depth(c) >= 6
     end
     @test gg isa Drawing

@@ -64,6 +64,7 @@ function parse_ex(ex, info::ParseInfo)
         ::Nothing => nothing
         :($g') => :($(parse_ex(g, info))')
         :($a * $b) => :($(Number(a)) * $(parse_ex(b, info)))
+        :($a ^ $b) => :($(parse_ex(a, info)) ^ $(Integer(b)))
         :(kron($(args...))) =>
             :(kron($(parse_ex.(args, Ref(ParseInfo(1, info.version)))...)))
         :(repeat($(exloc...)) => $g) => begin

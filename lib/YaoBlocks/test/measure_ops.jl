@@ -25,6 +25,7 @@ end
         3 * put(3, 2 => X),
         chain(10, put(2 => X), chain(put(4 => Y))),
         chain(10, put(2 => X), chain(put(2 => Y))),
+        put(3, 2 => X)^4,
     ]
         @show op
         @test check_eigenbasis(op)
