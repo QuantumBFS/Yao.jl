@@ -139,3 +139,15 @@ end
         )
     end
 end
+
+@testset "apply pow" begin
+    Random.seed!(5)
+    for reg0 in [rand_state(3), rand_state(3, nbatch = 10)]
+        for n in [-3,-2,-1,0,1,2,3]
+            @test test_apply_back(reg0, Power(put(3, 1=>Rx(0.5)), n), 0.5, δ = 1e-5)
+            @test test_apply_back(
+                reg0, Power(put(3, 1:2=>kron(Rx(0.5), Ry(0.4))), n), [0.5, 0.4], δ = 1e-5
+            )
+        end
+    end
+end

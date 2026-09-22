@@ -67,6 +67,11 @@ end
 function to_basictypes(block::Subroutine{D,<:Measure}) where {D}
     map_address(content(block), AddressInfo(nqudits(block), [block.locs...]))
 end
+function to_basictypes(block::Power)
+    @assert block.pow isa Integer
+    blk = block.pow >= 0 ? content(block) : adjoint(content(block))
+    chain(nqudits(block.content), [blk for _ in 1:abs(block.pow)])
+end
 to_basictypes(block::Daggered) = Daggered(block.content)
 to_basictypes(block::Scale) = Scale(block.alpha, block.content)
 to_basictypes(block::KronBlock) =

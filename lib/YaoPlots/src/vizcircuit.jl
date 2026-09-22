@@ -422,6 +422,81 @@ function draw!(c::CircuitGrid, cb::LabelBlock, address, controls)
     CircuitStyles.gate_bgcolor[] = temp
 end
 
+function draw!(c::CircuitGrid, pb::YaoBlocks.Power, address, controls)
+    length(address) == 0 && return
+    # Box span/geometry comes from content's own occupied locations (translated
+    # through address), not the full address range, mirroring PrimitiveBlock's
+    # draw! (`getindex.(Ref(address), occupied_locs(p))`).
+    locs = getindex.(Ref(address), YaoBlocks.occupied_locs(pb.content))
+    isempty(locs) && return
+    lo, hi = minimum(locs), maximum(locs)
+    addr_range = lo:hi
+    i_start = frontier(c, addr_range...)
+
+    # Draw content WITHOUT passing controls.
+    # we will draw a single control wire for the whole box below.
+    draw!(c, pb.content, address, [])
+
+    i_end = frontier(c, addr_range...)
+    i_start == i_end && return
+
+    # Any wire inside the box's span that content didn't itself touch (a gap
+    # between the min/max occupied locations) still needs a pass-through line
+    # and its frontier synced, so a later gate on it can't overlap the box.
+    for j in setdiff(addr_range, locs)
+        CircuitStyles.render(c.gatestyles.line, c[(c.frontier[j], j); (i_end, j)])
+        c.frontier[j] = i_end
+    end
+
+    # Shrink slightly from the full frontier span so adjacent boxes don't touch
+    hpad = 0.2   # depth-units of gap on each horizontal side
+    vpad = 0.08  # fraction of a line-height on each vertical side
+    x_mid = (i_start + i_end) / 2
+    y_mid = (lo + hi) / 2
+    box_w = (i_end - i_start - 2 * hpad) * c.w_depth
+    box_h = (hi - lo + 1 - 2 * vpad) * c.w_line
+
+    u = CircuitStyles.unit[]
+    cx = x_mid * c.w_depth * u
+    cy = y_mid * c.w_line  * u
+    box_top_px   = cy - box_h * u / 2
+    box_bot_px   = cy + box_h * u / 2
+    box_right_px = cx + box_w * u / 2
+
+    Luxor.@layer begin
+        Luxor.setcolor(CircuitStyles.linecolor[])
+        Luxor.setline(CircuitStyles.lw[] * 1.5)
+        Luxor.box(Luxor.Point(cx, cy), box_w * u, box_h * u, :stroke)
+    end
+
+    Luxor.@layer begin
+        Luxor.fontsize(CircuitStyles.paramtextsize[])
+        Luxor.fontface(CircuitStyles.fontfamily[])
+        Luxor.setcolor(CircuitStyles.textcolor[])
+        # halign=:left + x slightly past the right edge → superscript extending rightward
+        # valign=:bottom + y above box_top → floats above the box like an exponent
+        Luxor.text(string(pb.pow), Luxor.Point(box_right_px + 2, box_top_px - 4);
+                   halign=:left, valign=:bottom)
+    end
+
+    isempty(controls) && return
+
+    Luxor.@layer begin
+        Luxor.setcolor(CircuitStyles.linecolor[])
+        Luxor.setline(CircuitStyles.lw[])
+        for (ctrl_loc, ctrl_style, _) in controls
+            y_ctrl_px = c.w_line * ctrl_loc * u
+            Luxor.line(Luxor.Point(c.frontier[ctrl_loc] * c.w_depth * u, y_ctrl_px),
+                       Luxor.Point(i_end * c.w_depth * u, y_ctrl_px), :stroke)
+            y_connect_px = ctrl_loc < y_mid ? box_top_px : box_bot_px
+            Luxor.line(Luxor.Point(cx, y_ctrl_px),
+                       Luxor.Point(cx, y_connect_px), :stroke)
+            CircuitStyles.render(ctrl_style, c[x_mid, ctrl_loc])
+            c.frontier[ctrl_loc] = i_end
+        end
+    end
+end
+
 function draw!(c::CircuitGrid, cb::LineAnnotation, address, controls)
     @assert length(address) == 1 && isempty(controls) "LineAnnotation should be a single line, without control."
     CircuitStyles.textcolor[], temp = cb.color, CircuitStyles.textcolor[]

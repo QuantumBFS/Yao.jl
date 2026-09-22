@@ -150,3 +150,32 @@ end
         use_outeradj = use_outeradj,
     )
 end
+
+@testset "mat pow" begin
+    use_outeradj = false
+    for n in [-3, -1, 0, 1, 2, 3]
+        @test test_mat_back(
+            ComplexF64,
+            Power(kron(Rx(0.5), Ry(0.5)), n),
+            [0.5, 0.5];
+            δ = 1e-5,
+            use_outeradj = use_outeradj,
+        )
+    end
+
+    # non-unitary content: negative powers are rejected by the constructor,
+    # so only test n >= 0 here.
+    @test test_mat_back(ComplexF64, Power(2.0 * Rx(0.3), 2), [2.0, 0.3]; δ = 1e-6)
+    for n in [0, 1, 2, 3]
+        @test test_mat_back(
+            ComplexF64,
+            Power(2.0 * Rx(0.3), n),
+            [2.0, 0.3];
+            δ = 1e-6,
+        )
+    end
+
+    # pow == 0 with singular content: mat(pb) is the constant identity, so the
+    # gradient must be exactly zero and no SingularException should be thrown.
+    @test test_mat_back(ComplexF64, Power(0.0 * Rx(0.3), 0), [0.0, 0.3]; δ = 1e-6)
+end

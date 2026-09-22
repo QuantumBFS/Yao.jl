@@ -55,6 +55,11 @@ function eigenbasis(op::ChainBlock)
     end
 end
 
+function eigenbasis(op::Power)
+    E, V = eigenbasis(content(op))
+    return E^op.pow, V
+end
+
 function eigenbasis(op::Add)
     # detect commute operators
     if simple_commute_eachother(subblocks(op))

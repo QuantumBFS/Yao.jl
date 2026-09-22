@@ -195,6 +195,7 @@ color(::Type{<:Add}) = :red
 color(::Type{<:PutBlock}) = :cyan
 color(::Type{<:RepeatedBlock}) = :cyan
 color(::Type{<:GeneralMatrixBlock}) = :red
+color(::Type{<:Power}) = :yellow
 
 print_block(io::IO, g::PhaseGate) = print(io, "phase(", g.theta, ")")
 print_block(io::IO, S::ShiftGate) = print(io, "shift(", S.theta, ")")
@@ -211,6 +212,8 @@ print_block(io::IO, c::Add) = printstyled(io, "+"; bold = true, color = color(Ad
 print_block(io::IO, c::TagBlock) = nothing
 print_block(io::IO, c::GeneralMatrixBlock) =
     printstyled(io, c.tag; color = color(GeneralMatrixBlock))
+print_block(io::IO, pb::Power) = 
+    printstyled(io, "pow(", pb.pow, ")"; bold = true, color = color(Power))
 
 function print_block(io::IO, c::Measure{D,K,OT}) where {D,K,OT}
     strs = String[]
