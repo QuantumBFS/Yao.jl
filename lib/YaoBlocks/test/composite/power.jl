@@ -21,6 +21,32 @@ circ3 = chain(3, put(1 => H), kron(3, 1 => Rx(0.2), 2 => Ry(0.4)), put(3 => T))
     @test occupied_locs(pb) == (1,)
 end
 
+@testset "indexing" begin
+    pb = X^2
+    @test pb[bit"0", bit"0"] == mat(pb)[1, 1]
+    @test pb[bit"1", bit"0"] == mat(pb)[2, 1]
+    @test Vector(pb[:, bit"0"]) ≈ Matrix(mat(pb))[:, 1]
+end
+
+@testset "PropertyTrait for pow == 0" begin
+    # content itself is deliberately NOT unitary/reflexive/hermitian, so that
+    # the assertions below actually exercise the pow==0 special case: the old
+    # `PreserveAll()` forwarding would incorrectly inherit these `false`s.
+    @test !isunitary(2.0 * X)
+    @test !isreflexive(2.0 * X)
+    @test !ishermitian(im * X)
+
+    zpow = (2.0 * X)^0
+    @test YaoBlocks.PropertyTrait(zpow) == YaoBlocks.PreserveNothing()
+    @test isunitary(zpow)
+    @test isreflexive(zpow)
+    @test ishermitian((im * X)^0)
+
+    # a negative power of an (actually unitary) zero-power block should not
+    # be rejected just because content itself isn't unitary.
+    @test_nowarn zpow^(-1)
+end
+
 @testset "mat correctness" begin
     for (gate, nq_gate) in [(X, 1), (Rx(0.3), 1), (circ2, 2), (circ3, 3)]
         for n in -2:3

@@ -44,4 +44,11 @@ Base.adjoint(pb::Power) = Power(adjoint(pb.content), pb.pow)
 Base.:(==)(a::Power, b::Power) = a.pow == b.pow && a.content == b.content
 Base.copy(pb::Power) = Power(pb.content, pb.pow)
 cache_key(pb::Power) = (pb.pow, cache_key(pb.content))
-PropertyTrait(::Power) = PreserveAll()
+PropertyTrait(pb::Power) = pb.pow == 0 ? PreserveNothing() : PreserveAll()
+
+function unsafe_getindex(::Type{T}, pb::Power, i::Integer, j::Integer) where {T}
+    @inbounds mat(T, pb)[i+1, j+1]
+end
+function unsafe_getcol(::Type{T}, pb::Power, j::DitStr) where {T}
+    @inbounds getcol(mat(T, pb), j)
+end

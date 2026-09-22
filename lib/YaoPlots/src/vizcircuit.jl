@@ -424,23 +424,37 @@ end
 
 function draw!(c::CircuitGrid, pb::YaoBlocks.Power, address, controls)
     length(address) == 0 && return
-    addr_range = minimum(address):maximum(address)
+    # Box span/geometry comes from content's own occupied locations (translated
+    # through address), not the full address range, mirroring PrimitiveBlock's
+    # draw! (`getindex.(Ref(address), occupied_locs(p))`).
+    locs = getindex.(Ref(address), YaoBlocks.occupied_locs(pb.content))
+    isempty(locs) && return
+    lo, hi = minimum(locs), maximum(locs)
+    addr_range = lo:hi
     i_start = frontier(c, addr_range...)
 
-    # Draw content WITHOUT passing controls. 
+    # Draw content WITHOUT passing controls.
     # we will draw a single control wire for the whole box below.
     draw!(c, pb.content, address, [])
 
     i_end = frontier(c, addr_range...)
     i_start == i_end && return
 
+    # Any wire inside the box's span that content didn't itself touch (a gap
+    # between the min/max occupied locations) still needs a pass-through line
+    # and its frontier synced, so a later gate on it can't overlap the box.
+    for j in setdiff(addr_range, locs)
+        CircuitStyles.render(c.gatestyles.line, c[(c.frontier[j], j); (i_end, j)])
+        c.frontier[j] = i_end
+    end
+
     # Shrink slightly from the full frontier span so adjacent boxes don't touch
     hpad = 0.2   # depth-units of gap on each horizontal side
     vpad = 0.08  # fraction of a line-height on each vertical side
     x_mid = (i_start + i_end) / 2
-    y_mid = (minimum(address) + maximum(address)) / 2
+    y_mid = (lo + hi) / 2
     box_w = (i_end - i_start - 2 * hpad) * c.w_depth
-    box_h = (maximum(address) - minimum(address) + 1 - 2 * vpad) * c.w_line
+    box_h = (hi - lo + 1 - 2 * vpad) * c.w_line
 
     u = CircuitStyles.unit[]
     cx = x_mid * c.w_depth * u

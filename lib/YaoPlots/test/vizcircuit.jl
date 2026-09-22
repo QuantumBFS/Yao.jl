@@ -38,6 +38,24 @@ end
     end
     @test gg isa Drawing
 
+    circuit_canvas(3) do c
+        # content (put(2,1=>X)) only occupies wire 1 out of the 2 wires it
+        # reserves; the box must not span or advance the frontier of wire 2.
+        YaoPlots.draw!(c, Power(put(2, 1=>X), 2), 1:2, [])
+        @test YaoPlots.frontier(c, 2) == 0
+        @test YaoPlots.frontier(c, 1) > 0
+        YaoPlots.draw!(c, X, [2], [])
+        @test YaoPlots.frontier(c, 2) == 1
+    end
+
+    circuit_canvas(3) do c
+        # content (control(3,1,3=>X)) occupies wires 1 and 3, with a genuine
+        # gap at wire 2; the box spans the gap, so wire 2's frontier must be
+        # synced too, or a later gate there would land inside the box.
+        YaoPlots.draw!(c, Power(control(3, 1, 3=>X), 2), 1:3, [])
+        @test YaoPlots.frontier(c, 1) == YaoPlots.frontier(c, 2) == YaoPlots.frontier(c, 3)
+    end
+
     g = put(5, (3, 4)=>SWAP) |> vizcircuit(; w_line=0.8, w_depth=0.9)
     @test g isa Drawing
     @test vizcircuit(put(5, (3,4)=>kron(X, Y)); w_line=0.8, w_depth=0.9) isa Drawing
