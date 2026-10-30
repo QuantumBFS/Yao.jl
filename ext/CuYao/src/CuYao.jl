@@ -8,7 +8,10 @@ using Yao.YaoArrayRegister.Random
 using Yao.YaoArrayRegister
 using Yao
 using CUDA
-using CUDA.GPUArrays: @kernel, @index, get_backend
+# CUDA 6 split internals into CUDACore, maintain compatibility with CUDA 4-5
+const _CUDACore = isdefined(CUDA, :CUDACore) ? CUDA.CUDACore : CUDA
+const GPUArrays = _CUDACore.GPUArrays
+using .GPUArrays: @kernel, @index, get_backend
 using Yao.YaoArrayRegister
 using Yao.YaoBlocks
 using Yao.ConstGate: SWAPGate

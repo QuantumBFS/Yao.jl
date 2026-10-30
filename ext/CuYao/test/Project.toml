@@ -7,7 +7,7 @@ TupleTools = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
 Yao = "5872b779-8223-5990-8dd0-5abbb0748c8c"
 
 [compat]
-CUDA = "4, 5"
+CUDA = "4, 5, 6"
 Reexport = "0.2, 1"
 TupleTools = "1"
 Yao = "0.8,0.9"
