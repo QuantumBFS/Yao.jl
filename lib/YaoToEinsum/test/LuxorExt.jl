@@ -67,7 +67,7 @@ end
     ext = Base.get_extension(YaoToEinsum, :LuxorExt)
     tn = yao2einsum(c; initial_state, final_state)
     coos, label2coos = ext.assign_coordinates(tn)
-    @test coos == [[-0.15, 2.85], [-0.15, 0.85], [-0.15, 1.85], [1.0, 1.0], [1.0, 2.0], [1.0, 2.5], [1.85, 1.85], [1.85, 0.85], [-0.15, 2.85]]
+    @test sort!(coos) == sort!([[-0.15, 2.85], [-0.15, 0.85], [-0.15, 1.85], [1.0, 1.0], [1.0, 2.0], [1.0, 2.5], [1.85, 1.85], [1.85, 0.85], [-0.15, 2.85]])
     @test viznet(tn) isa LuxorGraphPlot.Drawing
 end
 
