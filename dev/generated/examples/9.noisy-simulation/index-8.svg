@@ -3,13 +3,13 @@
 <defs>
 <g>
 <g id="glyph-723632-0-0">
-<path d="M 1.578125 -11.671875 L 3.15625 -11.671875 L 3.15625 -6.890625 L 8.890625 -6.890625 L 8.890625 -11.671875 L 10.46875 -11.671875 L 10.46875 0 L 8.890625 0 L 8.890625 -5.5625 L 3.15625 -5.5625 L 3.15625 0 L 1.578125 0 Z M 1.578125 -11.671875 "/>
+<path d="M 1.078125 -11.671875 L 2.65625 -11.671875 L 2.65625 -6.890625 L 6.984375 -6.890625 L 6.984375 -11.671875 L 8.5625 -11.671875 L 8.5625 0 L 6.984375 0 L 6.984375 -5.5625 L 2.65625 -5.5625 L 2.65625 0 L 1.078125 0 Z M 1.078125 -11.671875 "/>
 </g>
 </g>
 </defs>
 <path fill="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 49 44.5 L 49 20.5 L 73 20.5 L 73 44.5 Z M 49 44.5 "/>
 <g fill="rgb(0%, 0%, 0%)" fill-opacity="1">
-<use xlink:href="#glyph-723632-0-0" x="54.984375" y="38.332031"/>
+<use xlink:href="#glyph-723632-0-0" x="56.183594" y="38.332031"/>
 </g>
 <path fill="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 35.5 32.5 L 49 32.5 "/>
 <path fill="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 73 32.5 L 86.5 32.5 "/>
