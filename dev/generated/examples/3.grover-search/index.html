@@ -122,10 +122,7 @@ number of iter = 9
 number of iter = 10
 number of iter = 11
 number of iter = 12
-number of iter = 13
-number of iter = 14
-number of iter = 15
-success, overlap = -1.0 + 0.0im
+success, overlap = 1.0 + 0.0im
 </code></pre><p>The final state has an overlap of <code>1</code> with the target state.</p><h2 id="Amplitude-Amplification"><a class="docs-heading-anchor" href="#Amplitude-Amplification">Amplitude Amplification</a><a id="Amplitude-Amplification-1"></a><a class="docs-heading-anchor-permalink" href="#Amplitude-Amplification" title="Permalink"></a></h2><p>Given a circuit to generate a state, now we want to project out the subspace with [1,3,5,8,9,11,12] fixed to 1 and [4,6] fixed to 0. We can construct an oracle</p><pre><code class="language-julia hljs">evidense = [1, 3, -4, 5, -6, 8, 9, 11, 12]
 function inference_oracle(nbit::Int, locs::Vector{Int})
     control(nbit, locs[1:end-1], abs(locs[end]) =&gt; (locs[end]&gt;0 ? Z : -Z))
@@ -139,29 +136,16 @@ reg = zero_state(num_bit) |&gt; gen</code></pre><pre><code class="nohighlight hl
 for i = 1:num_grover_step(oracle, gen)
     grover_step!(reg, oracle, gen)
     println(&quot;step $(i-1), overlap = $(abs(reg&#39;*solution))&quot;)
-end</code></pre><pre><code class="nohighlight hljs">step 0, overlap = 0.09147987565562421
-step 1, overlap = 0.15208741865243774
-step 2, overlap = 0.21212788453435852
-step 3, overlap = 0.27137740485473383
-step 4, overlap = 0.3296150603071557
-step 5, overlap = 0.3866237044509476
-step 6, overlap = 0.4421907733690449
-step 7, overlap = 0.4961090782393588
-step 8, overlap = 0.5481775778644207
-step 9, overlap = 0.5982021282788337
-step 10, overlap = 0.6459962066395242
-step 11, overlap = 0.6913816066996772
-step 12, overlap = 0.734189103273197
-step 13, overlap = 0.7742590832121463
-step 14, overlap = 0.8114421405444935
-step 15, overlap = 0.8455996335531146
-step 16, overlap = 0.8766042017189152
-step 17, overlap = 0.9043402406005826
-step 18, overlap = 0.9287043328803213
-step 19, overlap = 0.9496056339683588
-step 20, overlap = 0.9669662107284533
-step 21, overlap = 0.9807213320614172
-step 22, overlap = 0.9908197102631813
-step 23, overlap = 0.9972236922574653
-step 24, overlap = 0.9999093999900207
-</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../2.qft-phase-estimation/index.html">« Quantum Fourier Transformation and Phase Estimation</a><a class="docs-footer-nextpage" href="../4.shor-algorithm/index.html">Shor&#39;s Algorithm »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.20.0 on <span class="colophon-date" title="Wednesday 18 November 2026 17:06">Wednesday 18 November 2026</span>. Using Julia version 1.13.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+end</code></pre><pre><code class="nohighlight hljs">step 0, overlap = 0.1783950117486234
+step 1, overlap = 0.29449313792384796
+step 2, overlap = 0.406385911451646
+step 3, overlap = 0.5124755070831837
+step 4, overlap = 0.6112469687654988
+step 5, overlap = 0.7012898431657761
+step 6, overlap = 0.7813183209001004
+step 7, overlap = 0.8501895978505826
+step 8, overlap = 0.9069201943718312
+step 9, overlap = 0.9506999993490253
+step 10, overlap = 0.9809038385588784
+step 11, overlap = 0.9971004021376736
+</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../2.qft-phase-estimation/index.html">« Quantum Fourier Transformation and Phase Estimation</a><a class="docs-footer-nextpage" href="../4.shor-algorithm/index.html">Shor&#39;s Algorithm »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.20.0 on <span class="colophon-date" title="Thursday 19 November 2026 11:17">Thursday 19 November 2026</span>. Using Julia version 1.13.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
