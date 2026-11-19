@@ -267,7 +267,7 @@ end
 
 function YaoBlocks._apply_fallback!(r::AbstractCuArrayReg{B,T}, b::AbstractBlock) where {B,T}
     YaoBlocks._check_size(r, b)
-    r.state .= CUDA.adapt(CuArray{T}, mat(T, b)) * r.state
+    r.state .= _CUDACore.adapt(CuArray{T}, mat(T, b)) * r.state
     return r
 end
 
