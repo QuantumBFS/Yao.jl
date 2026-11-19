@@ -58,7 +58,7 @@ For current master
 pkg> add Yao#master
 ```
 
-If you have problem to install the package, please [file us an issue](https://github.com/QuantumBFS/Yao.jl/issues/new).
+If you have trouble installing the package, please [file an issue](https://github.com/QuantumBFS/Yao.jl/issues/new).
 
 For CUDA support, see [CuYao.jl](https://github.com/QuantumBFS/CuYao.jl).
 
