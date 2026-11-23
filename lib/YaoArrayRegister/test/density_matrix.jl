@@ -321,6 +321,19 @@ end
     @test all(==(bit"10"), res2)
 end
 
+@testset "measure on density matrix, reset sampled state" begin
+    rho = DensityMatrix(ComplexF64[0 0; 0 1])
+    @test measure!(ResetTo(bit"0"), rho) == bit"1"
+    @test state(rho) ≈ [1 0; 0 0]
+    @test tr(state(rho)) ≈ 1
+
+    unmeasured = DensityMatrix(ComplexF64[0.25 0.1im; -0.1im 0.75])
+    rho = join(unmeasured, density_matrix(product_state(bit"1")))
+    @test measure!(ResetTo(bit"0"), rho, (1,)) == bit"1"
+    @test rho ≈ join(unmeasured, density_matrix(zero_state(1)))
+    @test tr(state(rho)) ≈ 1
+end
+
 @testset "measure on density matrix, remove" begin
     # AllLocs
     reg = uniform_state(3)
