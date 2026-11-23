@@ -126,11 +126,12 @@ function BitBasis.unsafe_reorder(A::PermMatrix, orders::NTuple{N,<:Integer}; nle
 end
 
 function logdi(x::Integer, d::Integer)
-    @assert x > 0 && d > 0
-    res = log(x) / log(d)
-    r = round(Int, res)
-    if !(res ≈ r)
-        throw(ArgumentError("`$x` is not an integer power of `$d`."))
+    @assert x > 0 && d > 1
+    r, y = 0, x
+    while y > 1
+        y, rem = divrem(y, d)
+        iszero(rem) || throw(ArgumentError("`$x` is not an integer power of `$d`."))
+        r += 1
     end
     return r
 end
