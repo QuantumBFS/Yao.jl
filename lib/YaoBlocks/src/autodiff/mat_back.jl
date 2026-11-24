@@ -104,6 +104,33 @@ function mat_back!(::Type{T}, rb::KronBlock, adjy, collector) where {T}
     return collector
 end
 
+function mat_back!(::Type{T}, rb::Power{D, BT, PT}, adjy, collector) where {T, D, BT<:AbstractBlock, PT<:Integer}
+    nparameters(rb) == 0 && return collector
+    blk = content(rb)
+    n = abs(rb.pow)
+    U = mat(T, blk)
+    if n == 0  # mat(rb) is just the identity in this case
+        mat_back!(T, blk, zeros(T, size(U)), collector)
+        return collector
+    end
+    U_adj = U'
+    adjy = rb.pow > 0 ? adjy : adjy'
+
+    # cache[k] == U_adj^(k-1) for k = 1, ..., n
+    cache = Vector{AbstractMatrix{T}}(undef, n)
+    cache[1] = IMatrix(size(U_adj, 1))
+    for k in 2:n
+        cache[k] = cache[k-1] * U_adj
+    end
+
+    adjc = cache[1] * adjy * cache[n]
+    for j in 1:n-1
+        adjc += cache[j+1] * adjy * cache[n-j]
+    end
+    mat_back!(T, blk, adjc, collector)
+    return collector
+end
+
 function mat_back!(::Type{T}, rb::AbstractAdd, adjy, collector) where {T}
     nparameters(rb) == 0 && return collector
     for b in subblocks(rb)[end:-1:1]

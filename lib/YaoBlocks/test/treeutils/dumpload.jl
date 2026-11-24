@@ -17,6 +17,7 @@ using YaoBlocks: check_dumpload
     @test check_dumpload(control(5, (1, -4), 2 => rot(X, 0.5)))
     @test check_dumpload(subroutine(5, rot(SWAP, 0.5), (2, 5)))
     @test check_dumpload(repeat(5, put(1, 1 => X), (2, 5)))
+    @test check_dumpload(put(5, 2=>X)^7)
     @test check_dumpload(Measure(5))
     @test check_dumpload(Measure(5, operator = put(5, 2 => X)))
     @test check_dumpload(Measure(5, locs = (3, 1), resetto = bit"01"))

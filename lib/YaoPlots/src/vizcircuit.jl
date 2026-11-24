@@ -422,6 +422,48 @@ function draw!(c::CircuitGrid, cb::LabelBlock, address, controls)
     CircuitStyles.gate_bgcolor[] = temp
 end
 
+function draw!(c::CircuitGrid, pb::YaoBlocks.Power, address, controls)
+    locs = getindex.(Ref(address), YaoBlocks.occupied_locs(pb.content))
+    isempty(locs) && return
+    lo, hi = extrema(locs)
+    # Every wire from the topmost to the bottommost box or control wire starts
+    # at the box's left edge and ends at its right edge, so no other gate
+    # overlaps the box or the control lines.
+    wires = collect(range(extrema(Int[lo, hi, first.(controls)...])...))
+    set_barrier!(c, wires)
+    i_start = c.frontier[lo]
+    # Controls are drawn once for the whole box, not for each content gate.
+    draw!(c, pb.content, address, [])
+    i_end = frontier(c, lo, hi)
+    i_start == i_end && return
+    set_barrier!(c, wires)
+
+    # The box is inset by a small padding so adjacent boxes do not touch.
+    left, right = i_start + 0.2, i_end - 0.2
+    top, bottom = lo - 0.42, hi + 0.42
+    u = CircuitStyles.unit[]
+    Luxor.@layer begin
+        Luxor.setcolor(CircuitStyles.linecolor[])
+        Luxor.setline(CircuitStyles.lw[] * 1.5)
+        Luxor.box(Luxor.Point(c[left, top]) * u, Luxor.Point(c[right, bottom]) * u, :stroke)
+    end
+    # The exponent sits just above the box's top-right corner.
+    Luxor.@layer begin
+        Luxor.fontsize(CircuitStyles.paramtextsize[])
+        Luxor.fontface(CircuitStyles.fontfamily[])
+        Luxor.setcolor(CircuitStyles.textcolor[])
+        Luxor.text(string(pb.pow), Luxor.Point(c[right, top]) * u + Luxor.Point(2, -4);
+                   halign=:left, valign=:bottom)
+    end
+
+    x_mid = (i_start + i_end) / 2
+    for (loc, style, _) in controls
+        edge = loc < lo ? top : bottom
+        CircuitStyles.render(c.gatestyles.line, c[(x_mid, loc); (x_mid, edge)])
+        CircuitStyles.render(style, c[x_mid, loc])
+    end
+end
+
 function draw!(c::CircuitGrid, cb::LineAnnotation, address, controls)
     @assert length(address) == 1 && isempty(controls) "LineAnnotation should be a single line, without control."
     CircuitStyles.textcolor[], temp = cb.color, CircuitStyles.textcolor[]
