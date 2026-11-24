@@ -172,7 +172,10 @@ function YaoAPI.measure!(
     elseif postprocess isa NoPostProcess
         collapseto!(rho, locs => res)
     elseif postprocess isa ResetTo
-        collapseto!(rho, locs => postprocess.x)
+        collapseto!(rho, locs => res)
+        locs = locs isa AllLocs ? (1:nqudits(rho)) : locs
+        flipped_addrs = baddrs(res ⊻ postprocess.x)
+        instruct!(rho, Val(:X), Tuple(locs[flipped_addrs]))
     else
         error("`$postprocess` is not yet supported for DensityMatrix")
     end
