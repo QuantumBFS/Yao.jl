@@ -56,6 +56,43 @@ end
         @test YaoPlots.frontier(c, 1) == YaoPlots.frontier(c, 2) == YaoPlots.frontier(c, 3)
     end
 
+    circuit_canvas(3) do c
+        # content advances wire 1 further than wire 3; every wire in the box
+        # must end at the box's right edge, so a later gate on wire 3 is drawn
+        # after the box rather than inside it.
+        content = chain(3, put(1=>X), put(1=>X), put(3=>X))
+        YaoPlots.draw!(c, Power(content, 2), 1:3, [])
+        i_end = c.frontier[1]
+        @test c.frontier == [i_end, i_end, i_end]
+        YaoPlots.draw!(c, Y, [3], [])
+        @test c.frontier[3] > i_end
+    end
+
+    circuit_canvas(3) do c
+        # wire 1 is ahead of wire 3 before the box; content on wire 3 must be
+        # drawn inside the box, which starts at wire 1's frontier.
+        for _ in 1:3
+            YaoPlots.draw!(c, X, [1], [])
+        end
+        i_start = c.frontier[1]
+        YaoPlots.draw!(c, Power(chain(3, put(1=>X), put(3=>X)), 2), 1:3, [])
+        @test c.frontier[3] > i_start
+        @test c.frontier[1] == c.frontier[2] == c.frontier[3]
+    end
+
+    circuit_canvas(3) do c
+        # the control wire is ahead of the box's wires; the box must start
+        # after the control wire's frontier so the control dot does not land
+        # on earlier gates.
+        for _ in 1:3
+            YaoPlots.draw!(c, X, [1], [])
+        end
+        i_ctrl = c.frontier[1]
+        YaoPlots.draw!(c, control(3, 1, 3=>Power(X, 2)), 1:3, [])
+        @test c.frontier[3] > i_ctrl
+        @test c.frontier[1] == c.frontier[2] == c.frontier[3]
+    end
+
     g = put(5, (3, 4)=>SWAP) |> vizcircuit(; w_line=0.8, w_depth=0.9)
     @test g isa Drawing
     @test vizcircuit(put(5, (3,4)=>kron(X, Y)); w_line=0.8, w_depth=0.9) isa Drawing
