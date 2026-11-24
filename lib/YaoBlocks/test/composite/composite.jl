@@ -20,6 +20,10 @@ end
     include("put.jl")
 end
 
+@testset "test pow" begin
+    include("power.jl")
+end
+
 @testset "test repeated" begin
     include("repeated.jl")
 end
