@@ -156,6 +156,9 @@ end
 @testset "logdi" begin
     @test logdi(9, 3) == 2
     @test_throws ArgumentError logdi(9, 5)
+    @test logdi(BigInt(2^24), 2) == 24
+    @test logdi(big(3)^100, 3) == 100
+    @test_throws ArgumentError logdi(2^60 + 1, 2)
 end
 
 @testset "matchtype" begin
