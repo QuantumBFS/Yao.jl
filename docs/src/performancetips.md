@@ -37,6 +37,27 @@ julia> @time apply!(reg, chain([put(20, i=>X) for i=1:20]));
 
 Other gates accelerated by `repeat` include: `X`, `Y`, `Z`, `S`, `T`, `Sdag`, and `Tdag`.
 
+### Flatten nested circuit blocks
+
+Nested `put` and `chain` blocks can substantially increase compilation time for
+automatic differentiation. Use [`Optimise.canonicalize`](@ref) to flatten the
+circuit while preserving its operation:
+
+```julia
+julia> circuit = chain(4, put(4, (1, 2) => chain(2, put(1 => Rx(0.1)), put(2 => Ry(0.2)))));
+
+julia> flat = Optimise.canonicalize(circuit)
+nqubits: 4
+chain
+├─ put on (1)
+│  └─ rot(X, 0.1)
+└─ put on (2)
+   └─ rot(Y, 0.2)
+
+julia> mat(flat) ≈ mat(circuit)
+true
+```
+
 ### Diagonal matrix in `time_evole`
 
 ## Register storage
