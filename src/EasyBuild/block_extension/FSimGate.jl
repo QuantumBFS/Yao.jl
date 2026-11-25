@@ -30,7 +30,7 @@ end
 
 YaoAPI.iparams_eltype(::FSimGate{T}) where T = T
 YaoAPI.getiparams(fs::FSimGate{T}) where T = (fs.theta, fs.phi)
-function YaoAPI.setiparams!(fs::FSimGate{T}, θ, ϕ) where T
+function YaoAPI.setiparams!(fs::FSimGate{T}, θ::Number, ϕ::Number) where T
     fs.theta = θ
     fs.phi = ϕ
     return fs
