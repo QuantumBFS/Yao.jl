@@ -1,5 +1,8 @@
 using YaoPlots
 using Test
+using Aqua
+
+Aqua.test_all(YaoPlots)
 
 @testset "helperblock" begin
     include("helperblock.jl")
